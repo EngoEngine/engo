@@ -287,6 +287,10 @@ func SetKeyRepeat(repeat bool) {
 	}
 }
 
+func SetBgColor(c *Color) {
+	gl.ClearColor(gl.Float(c.R), gl.Float(c.G), gl.Float(c.B), gl.Float(c.A))
+}
+
 func SetColor(c *Color) {
 	batch.SetColor(c.R, c.G, c.B, c.A)
 }

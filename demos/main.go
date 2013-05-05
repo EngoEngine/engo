@@ -27,6 +27,7 @@ func (d *Demo) MouseDown(x, y, b int) {
 	if d.index >= len(d.regions) {
 		d.index = 0
 	}
+	eng.SetBgColor(eng.NewColorRand())
 }
 
 func (d *Demo) Draw() {
