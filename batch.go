@@ -23,7 +23,7 @@ type Batch struct {
 	combined    *Matrix
 	projection  *Matrix
 	transform   *Matrix
-	r, g, b, a  gl.Float
+	color       *Color
 }
 
 func NewBatch() *Batch {
@@ -49,10 +49,7 @@ func NewBatch() *Batch {
 	batch.combined = NewMatrix()
 	batch.transform = NewMatrix()
 	batch.projection = NewMatrix().SetOrtho(0, 0, float32(Width()), float32(Height()))
-	batch.r = 1
-	batch.g = 1
-	batch.b = 1
-	batch.a = 1
+	batch.color = NewColor(1, 1, 1, 1)
 
 	return batch
 }
@@ -65,7 +62,7 @@ func (b *Batch) Begin() {
 	b.drawing = true
 }
 
-func (b *Batch) Draw(r *Region, x, y, originX, originY, width, height, scaleX, scaleY, rotation float32) {
+func (b *Batch) Draw(r *Region, x, y, originX, originY, width, height, scaleX, scaleY, rotation float32, color *Color) {
 	if r.texture != b.lastTexture {
 		b.flush()
 		b.lastTexture = r.texture
@@ -143,6 +140,11 @@ func (b *Batch) Draw(r *Region, x, y, originX, originY, width, height, scaleX, s
 	x4 += worldOriginX
 	y4 += worldOriginY
 
+	c := b.color
+	if color != nil {
+		c = color
+	}
+
 	b.vertices[b.index+0][0] = gl.Float(x1)
 	b.vertices[b.index+0][1] = gl.Float(y1)
 	b.vertices[b.index+1][0] = gl.Float(x2)
@@ -152,22 +154,22 @@ func (b *Batch) Draw(r *Region, x, y, originX, originY, width, height, scaleX, s
 	b.vertices[b.index+3][0] = gl.Float(x4)
 	b.vertices[b.index+3][1] = gl.Float(y4)
 
-	b.colors[b.index+0][0] = b.r
-	b.colors[b.index+0][1] = b.g
-	b.colors[b.index+0][2] = b.b
-	b.colors[b.index+0][3] = b.a
-	b.colors[b.index+1][0] = b.r
-	b.colors[b.index+1][1] = b.g
-	b.colors[b.index+1][2] = b.b
-	b.colors[b.index+1][3] = b.a
-	b.colors[b.index+2][0] = b.r
-	b.colors[b.index+2][1] = b.g
-	b.colors[b.index+2][2] = b.b
-	b.colors[b.index+2][3] = b.a
-	b.colors[b.index+3][0] = b.r
-	b.colors[b.index+3][1] = b.g
-	b.colors[b.index+3][2] = b.b
-	b.colors[b.index+3][3] = b.a
+	b.colors[b.index+0][0] = gl.Float(c.R)
+	b.colors[b.index+0][1] = gl.Float(c.G)
+	b.colors[b.index+0][2] = gl.Float(c.B)
+	b.colors[b.index+0][3] = gl.Float(c.A)
+	b.colors[b.index+1][0] = gl.Float(c.R)
+	b.colors[b.index+1][1] = gl.Float(c.G)
+	b.colors[b.index+1][2] = gl.Float(c.B)
+	b.colors[b.index+1][3] = gl.Float(c.A)
+	b.colors[b.index+2][0] = gl.Float(c.R)
+	b.colors[b.index+2][1] = gl.Float(c.G)
+	b.colors[b.index+2][2] = gl.Float(c.B)
+	b.colors[b.index+2][3] = gl.Float(c.A)
+	b.colors[b.index+3][0] = gl.Float(c.R)
+	b.colors[b.index+3][1] = gl.Float(c.G)
+	b.colors[b.index+3][2] = gl.Float(c.B)
+	b.colors[b.index+3][3] = gl.Float(c.A)
 
 	b.coords[b.index+0][0] = r.u
 	b.coords[b.index+0][1] = r.v
@@ -195,11 +197,11 @@ func (b *Batch) End() {
 	b.drawing = false
 }
 
-func (bt *Batch) SetColor(r, g, b, a float32) {
-	bt.r = gl.Float(r)
-	bt.g = gl.Float(g)
-	bt.b = gl.Float(b)
-	bt.a = gl.Float(a)
+func (b *Batch) SetColor(color *Color) {
+	b.color.R = color.R
+	b.color.G = color.G
+	b.color.B = color.B
+	b.color.A = color.A
 }
 
 func (b *Batch) Resize() {

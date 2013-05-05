@@ -42,7 +42,7 @@ func (f *Font) Print(batch *Batch, text string, x, y float32) {
 		i, ok := f.mapRune(v)
 		if ok {
 			region := f.regions[i]
-			batch.Draw(region, xx, y, xx, y, float32(region.width), float32(region.height), 1, 1, 0)
+			batch.Draw(region, xx, y, xx, y, float32(region.width), float32(region.height), 1, 1, 0, nil)
 			xx += float32(region.width)
 		}
 	}
