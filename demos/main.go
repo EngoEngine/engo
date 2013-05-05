@@ -32,8 +32,8 @@ func (d *Demo) MouseDown(x, y, b int) {
 
 func (d *Demo) Draw() {
 	eng.SetColor(eng.White)
-	eng.Draw(d.regions[d.index], float32(eng.MouseX()), float32(eng.MouseY()))
-	eng.SetColor(eng.DesaturatedSky)
+	eng.Draw(d.regions[d.index], float32(eng.MouseX()), float32(eng.MouseY()), 16, 16, 32, 32, 1, 1, float32(d.index*90))
+	eng.SetColor(eng.LightSky)
 	eng.Print("Hello, world!", float32(eng.Width())/2-6.5*16, float32(eng.Height())/2)
 }
 

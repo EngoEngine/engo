@@ -2,10 +2,12 @@ package eng
 
 import (
 	gl "github.com/chsc/gogl/gl21"
+	"math"
 	"unsafe"
 )
 
 const size = 1000
+const degToRad = math.Pi / 180
 
 type Batch struct {
 	drawing     bool
@@ -63,25 +65,92 @@ func (b *Batch) Begin() {
 	b.drawing = true
 }
 
-func (b *Batch) Draw(r *Region, x, y float32) {
+func (b *Batch) Draw(r *Region, x, y, originX, originY, width, height, scaleX, scaleY, rotation float32) {
 	if r.texture != b.lastTexture {
 		b.flush()
 		b.lastTexture = r.texture
 	}
 
-	x1 := gl.Float(x)
-	y1 := gl.Float(y)
-	x2 := x1 + gl.Float(r.width)
-	y2 := y1 + gl.Float(r.height)
+	worldOriginX := x + originX
+	worldOriginY := y + originY
+	fx := -originX
+	fy := -originY
+	fx2 := width - originX
+	fy2 := height - originY
 
-	b.vertices[b.index+0][0] = x1
-	b.vertices[b.index+0][1] = y1
-	b.vertices[b.index+1][0] = x1
-	b.vertices[b.index+1][1] = y2
-	b.vertices[b.index+2][0] = x2
-	b.vertices[b.index+2][1] = y2
-	b.vertices[b.index+3][0] = x2
-	b.vertices[b.index+3][1] = y1
+	if scaleX != 1 || scaleY != 1 {
+		fx *= scaleX
+		fy *= scaleY
+		fx2 *= scaleX
+		fy2 *= scaleY
+	}
+
+	p1x := fx
+	p1y := fy
+	p2x := fx
+	p2y := fy2
+	p3x := fx2
+	p3y := fy2
+	p4x := fx2
+	p4y := fy
+
+	var x1 float32
+	var y1 float32
+	var x2 float32
+	var y2 float32
+	var x3 float32
+	var y3 float32
+	var x4 float32
+	var y4 float32
+
+	if rotation != 0 {
+		rot := float64(rotation * degToRad)
+
+		cos := float32(math.Cos(rot))
+		sin := float32(math.Sin(rot))
+
+		x1 = cos*p1x - sin*p1y
+		y1 = sin*p1x + cos*p1y
+
+		x2 = cos*p2x - sin*p2y
+		y2 = sin*p2x + cos*p2y
+
+		x3 = cos*p3x - sin*p3y
+		y3 = sin*p3x + cos*p3y
+
+		x4 = x1 + (x3 - x2)
+		y4 = y3 - (y2 - y1)
+	} else {
+		x1 = p1x
+		y1 = p1y
+
+		x2 = p2x
+		y2 = p2y
+
+		x3 = p3x
+		y3 = p3y
+
+		x4 = p4x
+		y4 = p4y
+	}
+
+	x1 += worldOriginX
+	y1 += worldOriginY
+	x2 += worldOriginX
+	y2 += worldOriginY
+	x3 += worldOriginX
+	y3 += worldOriginY
+	x4 += worldOriginX
+	y4 += worldOriginY
+
+	b.vertices[b.index+0][0] = gl.Float(x1)
+	b.vertices[b.index+0][1] = gl.Float(y1)
+	b.vertices[b.index+1][0] = gl.Float(x2)
+	b.vertices[b.index+1][1] = gl.Float(y2)
+	b.vertices[b.index+2][0] = gl.Float(x3)
+	b.vertices[b.index+2][1] = gl.Float(y3)
+	b.vertices[b.index+3][0] = gl.Float(x4)
+	b.vertices[b.index+3][1] = gl.Float(y4)
 
 	b.colors[b.index+0][0] = b.r
 	b.colors[b.index+0][1] = b.g

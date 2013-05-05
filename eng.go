@@ -299,6 +299,6 @@ func Print(text string, x, y float32) {
 	font.Print(batch, text, x, y)
 }
 
-func Draw(r *Region, x, y float32) {
-	batch.Draw(r, x, y)
+func Draw(r *Region, x, y, originX, originY, width, height, scaleX, scaleY, rotation float32) {
+	batch.Draw(r, x, y, originX, originY, width, height, scaleX, scaleY, rotation)
 }
