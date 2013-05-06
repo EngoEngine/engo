@@ -21,6 +21,15 @@ func NewColorBytes(r, g, b, a byte) *Color {
 	return color
 }
 
+func NewColorBytesA(r, g, b byte) *Color {
+	color := new(Color)
+	color.R = float32(r) / 255.0
+	color.G = float32(g) / 255.0
+	color.B = float32(b) / 255.0
+	color.A = float32(1)
+	return color
+}
+
 func NewColorRand() *Color {
 	return &Color{rand.Float32(), rand.Float32(), rand.Float32(), 1}
 }

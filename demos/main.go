@@ -4,16 +4,26 @@ import (
 	"github.com/ajhager/eng"
 )
 
+var img = [][]byte{
+	{8, 8, 8, 8, 8, 8, 8, 8},
+	{8, 6, 6, 6, 6, 6, 6, 8},
+	{8, 1, 1, 1, 1, 1, 1, 8},
+	{8, 1, 1, 1, 1, 1, 1, 8},
+	{8, 1, 1, 1, 1, 1, 1, 8},
+	{8, 1, 1, 8, 8, 1, 1, 8},
+	{8, 1, 1, 8, 8, 1, 1, 8},
+	{8, 8, 8, 8, 8, 8, 8, 8},
+}
+
 type Demo struct {
 	*eng.Game
 	regions []*eng.Region
-	index   int
 }
 
 func (d *Demo) Open() {
-	texture := eng.NewTexture("test.png")
-	d.regions = texture.Split(32, 32)
-	d.index = 0
+	eng.SetBgColor(eng.NewColorBytesA(153, 119, 119))
+	texture := eng.NewTexture("pal.png")
+	d.regions = texture.Split(1, 1)
 }
 
 func (d *Demo) Update(dt float64) {
@@ -22,19 +32,13 @@ func (d *Demo) Update(dt float64) {
 	}
 }
 
-func (d *Demo) MouseDown(x, y, b int) {
-	d.index += 1
-	if d.index >= len(d.regions) {
-		d.index = 0
-	}
-	eng.SetBgColor(eng.NewColorRand())
-}
-
 func (d *Demo) Draw() {
-	eng.SetColor(eng.White)
-	eng.Draw(d.regions[d.index], float32(eng.MouseX()), float32(eng.MouseY()), 16, 16, 32, 32, 1, 1, float32(d.index*90), eng.White)
-	eng.SetColor(eng.Sky)
-	eng.Print("Hello, world!", float32(eng.Width())/2-6.5*16, float32(eng.Height())/2)
+	s := float32(8)
+	for x := 0; x < 8; x++ {
+		for y := 0; y < 8; y++ {
+			eng.Draw(d.regions[img[7-y][x]], float32(10+x)*s, float32(10+y)*s, 0, 0, s, s, 0, nil)
+		}
+	}
 }
 
 func main() {
