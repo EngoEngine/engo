@@ -12,24 +12,13 @@ Install
 -------
 `go get github.com/ajhager/eng`
 
-Try it!
--------
-```go
-package main
+TODO
+----
 
-import (
-    "github.com/ajhager/eng"
-)
-
-type Demo struct {
-    *eng.Game
-}
-
-func (d *Demo) Draw() {
-    eng.Print("Hello, world!", 500, 300)
-}
-
-func main() {
-    eng.Run(&Demo{})
-}
-```
+* Wrap up framebuffers
+* Port over 2d shaders and effect composer
+* Port over particle system
+* Create Cache, a static Batch
+* Add true bmfont support
+* Add Orthographic camera support
+* Add simple 2d scenegraph that wraps a camera and batch
