@@ -20,7 +20,7 @@ func (d *Demo) Open() {
 	texture := eng.NewTexture("test.png")
 	regions = texture.Split(32, 32)
 	batch = eng.NewBatch()
-	font = eng.DefaultFont
+	font = eng.DefaultFont()
 }
 
 func (d *Demo) Update(dt float32) {
@@ -38,6 +38,10 @@ func (d *Demo) Draw() {
 	batch.Draw(regions[2], time*100-100, 300, 4, 30, 3, 3, -time*50, nil)
 	font.Print(batch, "I'M AN APPLE!!!", 400, 150, eng.LightChartreuse)
 	batch.End()
+}
+
+func (d *Demo) Resize(w, h int) {
+	batch.Resize(w, h)
 }
 
 func main() {

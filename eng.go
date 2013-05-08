@@ -87,8 +87,7 @@ var (
 	responder   Responder
 	config      *Config
 	timing      *stats
-	batch       *Batch
-	DefaultFont *Font
+	defaultFont *Font
 )
 
 type Config struct {
@@ -156,10 +155,6 @@ func Run(r Responder) {
 		log.Fatal(err)
 	}
 
-	batch = NewBatch()
-
-	DefaultFont = NewFont(NewTexture(bytes.NewBuffer(Terminal())), 16, 16, "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ✵웃世界¢¥¤§©¨«¬£ª±²³´¶·¸¹º»¼½¾¿☐☑═║╔╗╚╝╠╣╦╩╬░▒▓☺☻☼♀♂▀▁▂▃▄▅▆▇█ÐÑÒÓÔÕÖÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏØÙÚÛÜÝàáâãäåèéêëìíîïðñòóôõö÷ùúûüýÿ♥♦♣♠♪♬æçø←↑→↓↔↕®‼ꀥ")
-
 	responder.Open()
 
 	if !config.Fullscreen {
@@ -174,7 +169,6 @@ func Run(r Responder) {
 
 	glfw.SetWindowSizeCallback(func(w, h int) {
 		config.Width, config.Height = glfw.WindowSize()
-		batch.Resize()
 		responder.Resize(w, h)
 	})
 
@@ -291,6 +285,9 @@ func SetBgColor(c *Color) {
 	gl.ClearColor(gl.Float(c.R), gl.Float(c.G), gl.Float(c.B), gl.Float(c.A))
 }
 
-func SetColor(c *Color) {
-	batch.SetColor(c)
+func DefaultFont() *Font {
+	if defaultFont == nil {
+		defaultFont = NewFont(NewTexture(bytes.NewBuffer(Terminal())), 16, 16, "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ✵웃世界¢¥¤§©¨«¬£ª±²³´¶·¸¹º»¼½¾¿☐☑═║╔╗╚╝╠╣╦╩╬░▒▓☺☻☼♀♂▀▁▂▃▄▅▆▇█ÐÑÒÓÔÕÖÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏØÙÚÛÜÝàáâãäåèéêëìíîïðñòóôõö÷ùúûüýÿ♥♦♣♠♪♬æçø←↑→↓↔↕®‼ꀥ")
+	}
+	return defaultFont
 }

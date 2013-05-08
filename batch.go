@@ -10,20 +10,21 @@ const size = 1000
 const degToRad = math.Pi / 180
 
 type Batch struct {
-	drawing     bool
-	lastTexture *Texture
-	vertices    [size][2]gl.Float
-	vertexVBO   gl.Uint
-	colors      [size][4]gl.Float
-	colorVBO    gl.Uint
-	coords      [size][2]gl.Float
-	coordVBO    gl.Uint
-	index       gl.Sizei
-	shader      *Shader
-	combined    *Matrix
-	projection  *Matrix
-	transform   *Matrix
-	color       *Color
+	drawing      bool
+	lastTexture  *Texture
+	vertices     [size][2]gl.Float
+	vertexVBO    gl.Uint
+	colors       [size][4]gl.Float
+	colorVBO     gl.Uint
+	coords       [size][2]gl.Float
+	coordVBO     gl.Uint
+	index        gl.Sizei
+	shader       *Shader
+	customShader *Shader
+	combined     *Matrix
+	projection   *Matrix
+	transform    *Matrix
+	color        *Color
 }
 
 func NewBatch() *Batch {
@@ -202,8 +203,12 @@ func (b *Batch) SetColor(color *Color) {
 	b.color.A = color.A
 }
 
-func (b *Batch) Resize() {
-	b.projection.SetOrtho(0, 0, float32(Width()), float32(Height()))
+func (b *Batch) Resize(w, h int) {
+	b.projection.SetOrtho(0, 0, float32(w), float32(h))
+}
+
+func (b *Batch) SetShader(shader *Shader) {
+	b.customShader = shader
 }
 
 func (b *Batch) flush() {
@@ -217,28 +222,34 @@ func (b *Batch) flush() {
 	gl.ActiveTexture(gl.TEXTURE0)
 	b.lastTexture.Bind()
 
-	b.shader.Bind()
+	shader := b.shader
+	if b.customShader != nil {
+		shader = b.customShader
+	}
 
-	gl.UniformMatrix4fv(b.shader.UfMatrix, 1, gl.FALSE, &b.combined[0])
-	gl.UniformMatrix4fv(b.shader.UfMatrix, 1, gl.FALSE, &b.combined[0])
+	shader.Bind()
+
+	gl.UniformMatrix4fv(shader.UfMatrix, 1, gl.FALSE, &b.combined[0])
+	gl.UniformMatrix4fv(shader.UfMatrix, 1, gl.FALSE, &b.combined[0])
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, b.vertexVBO)
 	gl.BufferSubData(gl.ARRAY_BUFFER, gl.Intptr(0), gl.Sizeiptr(int(unsafe.Sizeof([2]gl.Float{}))*int(b.index)), gl.Pointer(&b.vertices[0]))
-	gl.EnableVertexAttribArray(b.shader.InPosition)
-	gl.VertexAttribPointer(b.shader.InPosition, 2, gl.FLOAT, gl.FALSE, 0, nil)
+	gl.EnableVertexAttribArray(shader.InPosition)
+	gl.VertexAttribPointer(shader.InPosition, 2, gl.FLOAT, gl.FALSE, 0, nil)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, b.colorVBO)
 	gl.BufferSubData(gl.ARRAY_BUFFER, gl.Intptr(0), gl.Sizeiptr(int(unsafe.Sizeof([4]gl.Float{}))*int(b.index)), gl.Pointer(&b.colors[0]))
-	gl.EnableVertexAttribArray(b.shader.InColor)
-	gl.VertexAttribPointer(b.shader.InColor, 4, gl.FLOAT, gl.FALSE, 0, nil)
+	gl.EnableVertexAttribArray(shader.InColor)
+	gl.VertexAttribPointer(shader.InColor, 4, gl.FLOAT, gl.FALSE, 0, nil)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, b.coordVBO)
 	gl.BufferSubData(gl.ARRAY_BUFFER, gl.Intptr(0), gl.Sizeiptr(int(unsafe.Sizeof([2]gl.Float{}))*int(b.index)), gl.Pointer(&b.coords[0]))
-	gl.EnableVertexAttribArray(b.shader.InTexCoords)
-	gl.VertexAttribPointer(b.shader.InTexCoords, 2, gl.FLOAT, gl.FALSE, 0, nil)
+	gl.EnableVertexAttribArray(shader.InTexCoords)
+	gl.VertexAttribPointer(shader.InTexCoords, 2, gl.FLOAT, gl.FALSE, 0, nil)
 
 	gl.DrawArrays(gl.QUADS, 0, b.index)
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	gl.UseProgram(0)
 
 	b.index = 0
 }
