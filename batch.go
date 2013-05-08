@@ -30,8 +30,6 @@ func NewBatch() *Batch {
 	batch := new(Batch)
 	batch.shader = NewShader(vert, frag)
 
-	batch.lastTexture = NewTexture("test.png")
-
 	gl.GenBuffers(1, &batch.vertexVBO)
 	gl.BindBuffer(gl.ARRAY_BUFFER, batch.vertexVBO)
 	gl.BufferData(gl.ARRAY_BUFFER, gl.Sizeiptr(int(unsafe.Sizeof([2]gl.Float{}))*size), gl.Pointer(&batch.vertices[0]), gl.DYNAMIC_DRAW)
@@ -62,7 +60,7 @@ func (b *Batch) Begin() {
 	b.drawing = true
 }
 
-func (b *Batch) Draw(r *Region, x, y, originX, originY, width, height, scaleX, scaleY, rotation float32, color *Color) {
+func (b *Batch) Draw(r *Region, x, y, originX, originY, scaleX, scaleY, rotation float32, color *Color) {
 	if r.texture != b.lastTexture {
 		b.flush()
 		b.lastTexture = r.texture
@@ -72,8 +70,8 @@ func (b *Batch) Draw(r *Region, x, y, originX, originY, width, height, scaleX, s
 	worldOriginY := y + originY
 	fx := -originX
 	fy := -originY
-	fx2 := width - originX
-	fy2 := height - originY
+	fx2 := float32(r.width) - originX
+	fy2 := float32(r.height) - originY
 
 	if scaleX != 1 || scaleY != 1 {
 		fx *= scaleX
@@ -209,6 +207,9 @@ func (b *Batch) Resize() {
 }
 
 func (b *Batch) flush() {
+	if b.lastTexture == nil {
+		return
+	}
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 

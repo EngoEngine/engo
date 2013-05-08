@@ -17,9 +17,9 @@ func NewRegion(texture *Texture, x, y, w, h int) *Region {
 	invTexHeight := 1.0 / float32(texture.Height())
 
 	u := float32(x) * invTexWidth
-	v := float32(y+h) * invTexHeight
-	v2 := float32(y) * invTexHeight
+	v := float32(y) * invTexHeight
 	u2 := float32(x+w) * invTexWidth
+	v2 := float32(y+h) * invTexHeight
 	width := int(math.Abs(float64(w)))
 	height := int(math.Abs(float64(h)))
 

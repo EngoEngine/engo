@@ -84,27 +84,28 @@ const (
 )
 
 var (
-	responder Responder
-	config    *Settings
-	timing    *stats
-	batch     *Batch
-	font      *Font
+	responder   Responder
+	config      *Config
+	timing      *stats
+	batch       *Batch
+	DefaultFont *Font
 )
 
-type Settings struct {
+type Config struct {
 	Title      string
 	Width      int
 	Height     int
 	Fullscreen bool
 	Vsync      bool
 	Resizable  bool
+	Fssa       int
 }
 
 type Responder interface {
-	Init(s *Settings)
+	Init(s *Config)
 	Open()
 	Close()
-	Update(dt float64)
+	Update(dt float32)
 	Draw()
 	MouseMove(x, y int)
 	MouseDown(x, y, b int)
@@ -123,7 +124,7 @@ func Run(r Responder) {
 	}
 	defer glfw.Terminate()
 
-	config = &Settings{"Untitled", 1024, 640, false, true, false}
+	config = &Config{"Untitled", 1024, 640, false, true, false, 1}
 	responder.Init(config)
 
 	glfw.OpenWindowHint(glfw.OpenGLVersionMajor, 2)
@@ -131,6 +132,7 @@ func Run(r Responder) {
 	if !config.Resizable {
 		glfw.OpenWindowHint(glfw.WindowNoResize, 1)
 	}
+	glfw.OpenWindowHint(glfw.FsaaSamples, config.Fssa)
 
 	width := config.Width
 	height := config.Height
@@ -156,7 +158,7 @@ func Run(r Responder) {
 
 	batch = NewBatch()
 
-	font = NewFont(NewTexture(bytes.NewBuffer(Terminal())), 16, 16, "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ✵웃世界¢¥¤§©¨«¬£ª±²³´¶·¸¹º»¼½¾¿☐☑═║╔╗╚╝╠╣╦╩╬░▒▓☺☻☼♀♂▀▁▂▃▄▅▆▇█ÐÑÒÓÔÕÖÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏØÙÚÛÜÝàáâãäåèéêëìíîïðñòóôõö÷ùúûüýÿ♥♦♣♠♪♬æçø←↑→↓↔↕®‼ꀥ")
+	DefaultFont = NewFont(NewTexture(bytes.NewBuffer(Terminal())), 16, 16, "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ✵웃世界¢¥¤§©¨«¬£ª±²³´¶·¸¹º»¼½¾¿☐☑═║╔╗╚╝╠╣╦╩╬░▒▓☺☻☼♀♂▀▁▂▃▄▅▆▇█ÐÑÒÓÔÕÖÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏØÙÚÛÜÝàáâãäåèéêëìíîïðñòóôõö÷ùúûüýÿ♥♦♣♠♪♬æçø←↑→↓↔↕®‼ꀥ")
 
 	responder.Open()
 
@@ -172,7 +174,6 @@ func Run(r Responder) {
 
 	glfw.SetWindowSizeCallback(func(w, h int) {
 		config.Width, config.Height = glfw.WindowSize()
-		gl.Viewport(0, 0, gl.Sizei(w), gl.Sizei(h))
 		batch.Resize()
 		responder.Resize(w, h)
 	})
@@ -205,12 +206,11 @@ func Run(r Responder) {
 	})
 
 	timing = NewStats(true)
+	timing.Update()
 	for glfw.WindowParam(glfw.Opened) == 1 {
-		responder.Update(1)
+		responder.Update(float32(timing.Dt))
 		gl.Clear(gl.COLOR_BUFFER_BIT)
-		batch.Begin()
 		responder.Draw()
-		batch.End()
 		glfw.SwapBuffers()
 		timing.Update()
 	}
@@ -293,12 +293,4 @@ func SetBgColor(c *Color) {
 
 func SetColor(c *Color) {
 	batch.SetColor(c)
-}
-
-func Print(text string, x, y float32) {
-	font.Print(batch, text, x, y)
-}
-
-func Draw(r *Region, x, y, originX, originY, scaleX, scaleY, rotation float32, color *Color) {
-	batch.Draw(r, x, y, originX, originY, float32(r.width), float32(r.height), scaleX, scaleY, rotation, color)
 }

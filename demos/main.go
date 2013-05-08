@@ -4,41 +4,40 @@ import (
 	"github.com/ajhager/eng"
 )
 
-var img = [][]byte{
-	{8, 8, 8, 8, 8, 8, 8, 8},
-	{8, 6, 6, 6, 6, 6, 6, 8},
-	{8, 1, 1, 1, 1, 1, 1, 8},
-	{8, 1, 1, 1, 1, 1, 1, 8},
-	{8, 1, 1, 1, 1, 1, 1, 8},
-	{8, 1, 1, 8, 8, 1, 1, 8},
-	{8, 1, 1, 8, 8, 1, 1, 8},
-	{8, 8, 8, 8, 8, 8, 8, 8},
-}
+var (
+	batch   *eng.Batch
+	regions []*eng.Region
+	time    float32
+	font    *eng.Font
+)
 
 type Demo struct {
 	*eng.Game
-	regions []*eng.Region
 }
 
 func (d *Demo) Open() {
-	eng.SetBgColor(eng.NewColorBytesA(153, 119, 119))
-	texture := eng.NewTexture("pal.png")
-	d.regions = texture.Split(1, 1)
+	eng.SetBgColor(eng.NewColorBytesA(20, 19, 22))
+	texture := eng.NewTexture("test.png")
+	regions = texture.Split(32, 32)
+	batch = eng.NewBatch()
+	font = eng.DefaultFont
 }
 
-func (d *Demo) Update(dt float64) {
+func (d *Demo) Update(dt float32) {
 	if eng.KeyPressed(eng.Esc) {
 		eng.Exit()
+	}
+	time += dt * 4
+	if time > 12 {
+		time = 0
 	}
 }
 
 func (d *Demo) Draw() {
-	s := float32(8)
-	for x := 0; x < 8; x++ {
-		for y := 0; y < 8; y++ {
-			eng.Draw(d.regions[img[7-y][x]], float32(10+x)*s, float32(10+y)*s, 0, 0, s, s, 0, nil)
-		}
-	}
+	batch.Begin()
+	batch.Draw(regions[2], time*100-100, 300, 4, 30, 3, 3, -time*50, nil)
+	font.Print(batch, "I'M AN APPLE!!!", 400, 150, eng.LightChartreuse)
+	batch.End()
 }
 
 func main() {

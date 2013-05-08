@@ -3,7 +3,7 @@ package eng
 type Game struct {
 }
 
-func (g *Game) Init(s *Settings) {
+func (g *Game) Init(s *Config) {
 }
 
 func (g *Game) Open() {
@@ -12,7 +12,7 @@ func (g *Game) Open() {
 func (g *Game) Close() {
 }
 
-func (g *Game) Update(dt float64) {
+func (g *Game) Update(dt float32) {
 }
 
 func (g *Game) Draw() {

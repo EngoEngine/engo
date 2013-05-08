@@ -40,7 +40,8 @@ func (m *Matrix) Set(o *Matrix) *Matrix {
 }
 
 func (m *Matrix) SetOrtho(x, y, width, height float32) *Matrix {
-	m.setToOrtho(x, x+width, y, y+height, 0, 1)
+	//m.setToOrtho(x, x+width, y, y+height, 0, 1)
+	m.setToOrtho(x, x+width, y+height, y, -1, 1)
 	return m
 }
 

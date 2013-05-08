@@ -36,13 +36,13 @@ func (f *Font) mapRune(ch rune) (int, bool) {
 	return position, ok
 }
 
-func (f *Font) Print(batch *Batch, text string, x, y float32) {
+func (f *Font) Print(batch *Batch, text string, x, y float32, color *Color) {
 	xx := x
 	for _, v := range text {
 		i, ok := f.mapRune(v)
 		if ok {
 			region := f.regions[i]
-			batch.Draw(region, xx, y, xx, y, float32(region.width), float32(region.height), 1, 1, 0, nil)
+			batch.Draw(region, xx, y, xx, y, 1, 1, 0, color)
 			xx += float32(region.width)
 		}
 	}
