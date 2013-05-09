@@ -47,7 +47,7 @@ func NewBatch() *Batch {
 
 	batch.combined = NewMatrix()
 	batch.transform = NewMatrix()
-	batch.projection = NewMatrix().SetOrtho(0, 0, float32(Width()), float32(Height()))
+	batch.projection = NewMatrix().SetToOrtho(0, float32(Width()), float32(Height()), 0, 0, 1)
 	batch.color = NewColor(1, 1, 1, 1)
 
 	return batch
@@ -204,11 +204,15 @@ func (b *Batch) SetColor(color *Color) {
 }
 
 func (b *Batch) Resize(w, h int) {
-	b.projection.SetOrtho(0, 0, float32(w), float32(h))
+	//	b.projection.SetOrtho(0, 0, float32(w), float32(h))
 }
 
 func (b *Batch) SetShader(shader *Shader) {
 	b.customShader = shader
+}
+
+func (b *Batch) SetProjection(m *Matrix) {
+	b.projection.Set(m)
 }
 
 func (b *Batch) flush() {
@@ -229,7 +233,6 @@ func (b *Batch) flush() {
 
 	shader.Bind()
 
-	gl.UniformMatrix4fv(shader.UfMatrix, 1, gl.FALSE, &b.combined[0])
 	gl.UniformMatrix4fv(shader.UfMatrix, 1, gl.FALSE, &b.combined[0])
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, b.vertexVBO)
