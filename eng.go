@@ -115,6 +115,10 @@ type Responder interface {
 	Resize(w, h int)
 }
 
+func R() Responder {
+	return responder
+}
+
 func Run(r Responder) {
 	responder = r
 
