@@ -10,21 +10,24 @@ const size = 1000
 const degToRad = math.Pi / 180
 
 type Batch struct {
-	drawing      bool
-	lastTexture  *Texture
-	vertices     [size][2]gl.Float
-	vertexVBO    gl.Uint
-	colors       [size][4]gl.Float
-	colorVBO     gl.Uint
-	coords       [size][2]gl.Float
-	coordVBO     gl.Uint
-	index        gl.Sizei
-	shader       *Shader
-	customShader *Shader
-	combined     *Matrix
-	projection   *Matrix
-	transform    *Matrix
-	color        *Color
+	drawing          bool
+	lastTexture      *Texture
+	vertices         [size][2]gl.Float
+	vertexVBO        gl.Uint
+	colors           [size][4]gl.Float
+	colorVBO         gl.Uint
+	coords           [size][2]gl.Float
+	coordVBO         gl.Uint
+	index            gl.Sizei
+	shader           *Shader
+	customShader     *Shader
+	combined         *Matrix
+	projection       *Matrix
+	transform        *Matrix
+	color            *Color
+	blendingDisabled bool
+	blendSrcFunc     gl.Enum
+	blendDstFunc     gl.Enum
 }
 
 func NewBatch() *Batch {
@@ -49,6 +52,9 @@ func NewBatch() *Batch {
 	batch.transform = NewMatrix()
 	batch.projection = NewMatrix().SetToOrtho(0, float32(Width()), float32(Height()), 0, 0, 1)
 	batch.color = NewColor(1, 1, 1, 1)
+	batch.blendingDisabled = false
+	batch.blendSrcFunc = gl.SRC_ALPHA
+	batch.blendDstFunc = gl.ONE_MINUS_SRC_ALPHA
 
 	return batch
 }
@@ -197,7 +203,23 @@ func (b *Batch) End() {
 	if b.index > 0 {
 		b.flush()
 	}
+	if !b.blendingDisabled {
+		gl.Disable(gl.BLEND)
+	}
 	b.drawing = false
+}
+
+func (b *Batch) SetBlending(v bool) {
+	if v != b.blendingDisabled {
+		b.flush()
+		b.blendingDisabled = !b.blendingDisabled
+	}
+}
+
+func (b *Batch) SetBlendFunc(src, dst gl.Enum) {
+	b.flush()
+	b.blendSrcFunc = src
+	b.blendDstFunc = dst
 }
 
 func (b *Batch) SetColor(color *Color) {
@@ -219,8 +241,13 @@ func (b *Batch) flush() {
 	if b.lastTexture == nil {
 		return
 	}
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+	if b.blendingDisabled {
+		gl.Disable(gl.BLEND)
+	} else {
+		gl.Enable(gl.BLEND)
+		gl.BlendFunc(b.blendSrcFunc, b.blendDstFunc)
+	}
 
 	gl.Enable(gl.TEXTURE_2D)
 	gl.ActiveTexture(gl.TEXTURE0)
