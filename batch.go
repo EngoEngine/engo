@@ -62,6 +62,10 @@ func (b *Batch) Begin() {
 }
 
 func (b *Batch) Draw(r *Region, x, y, originX, originY, scaleX, scaleY, rotation float32, color *Color) {
+	if !b.drawing {
+		panic("Batch.Begin() must be called first")
+	}
+
 	if r.texture != b.lastTexture {
 		b.flush()
 		b.lastTexture = r.texture
@@ -201,10 +205,6 @@ func (b *Batch) SetColor(color *Color) {
 	b.color.G = color.G
 	b.color.B = color.B
 	b.color.A = color.A
-}
-
-func (b *Batch) Resize(w, h int) {
-	//	b.projection.SetOrtho(0, 0, float32(w), float32(h))
 }
 
 func (b *Batch) SetShader(shader *Shader) {

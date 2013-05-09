@@ -20,5 +20,7 @@ TODO
 * Port over particle system
 * Create Cache, a static Batch
 * Add true bmfont support
-* Add Orthographic camera support
 * Add simple 2d scenegraph that wraps a camera and batch
+* Shape renderer
+* Investigate audio solutions
+* Add texture packer support

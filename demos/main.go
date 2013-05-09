@@ -15,12 +15,16 @@ type Demo struct {
 	*eng.Game
 }
 
+func (d *Demo) Init(c *eng.Config) {
+	c.Title = "Jack"
+}
+
 func (d *Demo) Open() {
 	eng.SetBgColor(eng.NewColorBytesA(20, 19, 22))
 	texture := eng.NewTexture("data/test.png")
 	regions = texture.Split(32, 32)
 	batch = eng.NewBatch()
-	camera = eng.NewCamera(480, 320)
+	camera = eng.NewCamera(640, 320)
 }
 
 func (d *Demo) Update(dt float32) {
@@ -40,10 +44,6 @@ func (d *Demo) Draw() {
 	batch.Draw(regions[3], time*100-camera.ViewportWidth/100, camera.Position.Y, 4, 30, 2, 2, -time*100, nil)
 	batch.Draw(regions[2], camera.Position.X-16, camera.Position.Y-16, 16, 16, 1, 1, 0, nil)
 	batch.End()
-}
-
-func (d *Demo) Resize(w, h int) {
-	batch.Resize(w, h)
 }
 
 func main() {
