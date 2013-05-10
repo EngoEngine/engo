@@ -23,6 +23,14 @@ func (v *Vector) Add(o *Vector) *Vector {
 	return v
 }
 
+func (v *Vector) Prj(m *Matrix) *Vector {
+	w := 1 / (v.X*float32(m[3]) + v.Y*float32(m[7]) + v.Z*float32(m[11]) + float32(m[15]))
+	v.X = w * (v.X*float32(m[0]) + v.Y*float32(m[4]) + v.Z*float32(m[8]) + float32(m[12]))
+	v.Y = w * (v.X*float32(m[1]) + v.Y*float32(m[5]) + v.Z*float32(m[9]) + float32(m[13]))
+	v.Z = w * (v.X*float32(m[2]) + v.Y*float32(m[6]) + v.Z*float32(m[10]) + float32(m[14]))
+	return v
+}
+
 type Matrix [16]gl.Float
 
 func NewMatrix() *Matrix {
@@ -127,6 +135,62 @@ func (m *Matrix) Mul(o *Matrix) *Matrix {
 	m[13] = b30*a01 + b31*a11 + b32*a21 + b33*a31
 	m[14] = b30*a02 + b31*a12 + b32*a22 + b33*a32
 	m[15] = b30*a03 + b31*a13 + b32*a23 + b33*a33
+
+	return m
+}
+
+func cofactor(m0, m1, m2, m3, m4, m5, m6, m7, m8 gl.Float) gl.Float {
+	return m0*(m4*m8-m5*m7) -
+		m1*(m3*m8-m5*m6) +
+		m2*(m3*m7-m4*m6)
+}
+
+func (m *Matrix) Inv() *Matrix {
+	cf0 := cofactor(m[5], m[6], m[7], m[9], m[10], m[11], m[13], m[14], m[15])
+	cf1 := cofactor(m[4], m[6], m[7], m[8], m[10], m[11], m[12], m[14], m[15])
+	cf2 := cofactor(m[4], m[5], m[7], m[8], m[9], m[11], m[12], m[13], m[15])
+	cf3 := cofactor(m[4], m[5], m[6], m[8], m[9], m[10], m[12], m[13], m[14])
+
+	determinant := m[0]*cf0 - m[1]*cf1 + m[2]*cf2 - m[3]*cf3
+	if math.Abs(float64(determinant)) <= 0.00001 {
+		return m.Identity()
+	}
+
+	cf4 := cofactor(m[1], m[2], m[3], m[9], m[10], m[11], m[13], m[14], m[15])
+	cf5 := cofactor(m[0], m[2], m[3], m[8], m[10], m[11], m[12], m[14], m[15])
+	cf6 := cofactor(m[0], m[1], m[3], m[8], m[9], m[11], m[12], m[13], m[15])
+	cf7 := cofactor(m[0], m[1], m[2], m[8], m[9], m[10], m[12], m[13], m[14])
+
+	cf8 := cofactor(m[1], m[2], m[3], m[5], m[6], m[7], m[13], m[14], m[15])
+	cf9 := cofactor(m[0], m[2], m[3], m[4], m[6], m[7], m[12], m[14], m[15])
+	cf10 := cofactor(m[0], m[1], m[3], m[4], m[5], m[7], m[12], m[13], m[15])
+	cf11 := cofactor(m[0], m[1], m[2], m[4], m[5], m[6], m[12], m[13], m[14])
+
+	cf12 := cofactor(m[1], m[2], m[3], m[5], m[6], m[7], m[9], m[10], m[11])
+	cf13 := cofactor(m[0], m[2], m[3], m[4], m[6], m[7], m[8], m[10], m[11])
+	cf14 := cofactor(m[0], m[1], m[3], m[4], m[5], m[7], m[8], m[9], m[11])
+	cf15 := cofactor(m[0], m[1], m[2], m[4], m[5], m[6], m[8], m[9], m[10])
+
+	invDeterminant := 1.0 / determinant
+	m[0] = invDeterminant * cf0
+	m[1] = -invDeterminant * cf4
+	m[2] = invDeterminant * cf8
+	m[3] = -invDeterminant * cf12
+
+	m[4] = -invDeterminant * cf1
+	m[5] = invDeterminant * cf5
+	m[6] = -invDeterminant * cf9
+	m[7] = invDeterminant * cf13
+
+	m[8] = invDeterminant * cf2
+	m[9] = -invDeterminant * cf6
+	m[10] = invDeterminant * cf10
+	m[11] = -invDeterminant * cf14
+
+	m[12] = -invDeterminant * cf3
+	m[13] = invDeterminant * cf7
+	m[14] = -invDeterminant * cf11
+	m[15] = invDeterminant * cf15
 
 	return m
 }

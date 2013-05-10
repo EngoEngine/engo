@@ -98,6 +98,7 @@ type Config struct {
 	Vsync      bool
 	Resizable  bool
 	Fssa       int
+	PrintFPS   bool
 }
 
 type Responder interface {
@@ -127,7 +128,7 @@ func Run(r Responder) {
 	}
 	defer glfw.Terminate()
 
-	config = &Config{"Untitled", 1024, 640, false, true, false, 1}
+	config = &Config{"Untitled", 1024, 640, false, true, false, 1, false}
 	responder.Init(config)
 
 	glfw.OpenWindowHint(glfw.OpenGLVersionMajor, 2)
@@ -177,15 +178,15 @@ func Run(r Responder) {
 	})
 
 	glfw.SetMousePosCallback(func(x, y int) {
-		responder.MouseMove(x, config.Height-y)
+		responder.MouseMove(x, y)
 	})
 
 	glfw.SetMouseButtonCallback(func(b, s int) {
 		x, y := glfw.MousePos()
 		if s == glfw.KeyPress {
-			responder.MouseDown(x, config.Height-y, b)
+			responder.MouseDown(x, y, b)
 		} else {
-			responder.MouseUp(x, config.Height-y, b)
+			responder.MouseUp(x, y, b)
 		}
 	})
 
@@ -203,7 +204,7 @@ func Run(r Responder) {
 		}
 	})
 
-	timing = NewStats(true)
+	timing = NewStats(config.PrintFPS)
 	timing.Update()
 	for glfw.WindowParam(glfw.Opened) == 1 {
 		responder.Update(float32(timing.Dt))
@@ -215,8 +216,8 @@ func Run(r Responder) {
 	responder.Close()
 }
 
-func Log(l interface{}) {
-	log.Println(l)
+func Log(l ...interface{}) {
+	log.Println(l...)
 }
 
 func Width() int {
@@ -250,7 +251,7 @@ func MouseX() int {
 
 func MouseY() int {
 	_, y := glfw.MousePos()
-	return config.Height - y
+	return y
 }
 
 func MousePos() (int, int) {
