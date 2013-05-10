@@ -27,6 +27,9 @@ func (g *Game) MouseDown(x, y, b int) {
 func (g *Game) MouseUp(x, y, b int) {
 }
 
+func (g *Game) MouseScroll(x, y, p int) {
+}
+
 func (g *Game) KeyType(k int) {
 }
 
@@ -37,7 +40,4 @@ func (g *Game) KeyUp(k int) {
 }
 
 func (g *Game) Resize(w, h int) {
-}
-
-func (g *Game) Scroll(p int) {
 }

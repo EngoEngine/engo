@@ -114,7 +114,7 @@ type Responder interface {
 	KeyDown(k int)
 	KeyUp(k int)
 	Resize(w, h int)
-	Scroll(p int)
+	MouseScroll(x, y, p int)
 }
 
 func R() Responder {
@@ -194,7 +194,8 @@ func Run(r Responder) {
 	var lastWheel int
 	glfw.SetMouseWheelCallback(func(pos int) {
 		if lastWheel-pos != 0 {
-			responder.Scroll(lastWheel - pos)
+			x, y := glfw.MousePos()
+			responder.MouseScroll(x, y, lastWheel-pos)
 			lastWheel = pos
 		}
 	})
