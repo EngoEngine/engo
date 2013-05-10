@@ -10,10 +10,22 @@ import (
 	"os"
 )
 
+const (
+	FilterNearest      = gl.NEAREST
+	FilterLinear       = gl.LINEAR
+	WrapClampToEdge    = gl.CLAMP_TO_EDGE
+	WrapRepeat         = gl.REPEAT
+	WrapMirroredRepeat = gl.MIRRORED_REPEAT
+)
+
 type Texture struct {
-	id     gl.Uint
-	width  int
-	height int
+	id        gl.Uint
+	width     int
+	height    int
+	minFilter gl.Int
+	maxFilter gl.Int
+	uWrap     gl.Int
+	vWrap     gl.Int
 }
 
 func NewTexture(data interface{}) *Texture {
@@ -55,12 +67,13 @@ func NewTexture(data interface{}) *Texture {
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+
 	gl.PixelStorei(gl.UNPACK_ALIGNMENT, 1)
 	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.Sizei(width), gl.Sizei(height), 0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Pointer(&newm.Pix[0]))
 
 	gl.Disable(gl.TEXTURE_2D)
 
-	return &Texture{id, width, height}
+	return &Texture{id, width, height, gl.NEAREST, gl.NEAREST, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE}
 }
 
 func (t *Texture) Split(w, h int) []*Region {
@@ -104,4 +117,28 @@ func (t *Texture) Width() int {
 
 func (t *Texture) Height() int {
 	return t.height
+}
+
+func (t *Texture) SetFilter(min, max gl.Int) {
+	t.minFilter = min
+	t.maxFilter = max
+	t.Bind()
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, min)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, max)
+}
+
+func (t *Texture) Filter() (gl.Int, gl.Int) {
+	return t.minFilter, t.maxFilter
+}
+
+func (t *Texture) SetWrap(u, v gl.Int) {
+	t.uWrap = u
+	t.vWrap = v
+	t.Bind()
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, u)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, v)
+}
+
+func (t *Texture) Wrap() (gl.Int, gl.Int) {
+	return t.uWrap, t.vWrap
 }
