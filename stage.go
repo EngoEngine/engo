@@ -64,6 +64,10 @@ func (s *Stage) Batch() *Batch {
 	return s.batch
 }
 
+func (s *Stage) Camera() *Camera {
+	return s.camera
+}
+
 func (s *Stage) ScreenToStage(x, y float32) (float32, float32) {
 	tmp.X = x
 	tmp.Y = y

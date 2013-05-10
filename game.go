@@ -38,3 +38,6 @@ func (g *Game) KeyUp(k int) {
 
 func (g *Game) Resize(w, h int) {
 }
+
+func (g *Game) Scroll(p int) {
+}
