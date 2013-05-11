@@ -299,11 +299,13 @@ func SetBgColor(c *Color) {
 	gl.ClearColor(gl.Float(c.R), gl.Float(c.G), gl.Float(c.B), gl.Float(c.A))
 }
 
-/*
+func Fps() float32 {
+	return float32(timing.Fps)
+}
+
 func DefaultFont() *Font {
 	if defaultFont == nil {
-		defaultFont = NewFont(NewTexture(bytes.NewBuffer(Terminal())), 16, 16, "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ✵웃世界¢¥¤§©¨«¬£ª±²³´¶·¸¹º»¼½¾¿☐☑═║╔╗╚╝╠╣╦╩╬░▒▓☺☻☼♀♂▀▁▂▃▄▅▆▇█ÐÑÒÓÔÕÖÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏØÙÚÛÜÝàáâãäåèéêëìíîïðñòóôõö÷ùúûüýÿ♥♦♣♠♪♬æçø←↑→↓↔↕®‼ꀥ")
+		defaultFont = NewFont(dfonttxt, dfontimg())
 	}
 	return defaultFont
 }
-*/
