@@ -1,7 +1,6 @@
 package eng
 
 import (
-	"bytes"
 	gl "github.com/chsc/gogl/gl21"
 	"github.com/go-gl/glfw"
 	"log"
@@ -300,9 +299,11 @@ func SetBgColor(c *Color) {
 	gl.ClearColor(gl.Float(c.R), gl.Float(c.G), gl.Float(c.B), gl.Float(c.A))
 }
 
+/*
 func DefaultFont() *Font {
 	if defaultFont == nil {
 		defaultFont = NewFont(NewTexture(bytes.NewBuffer(Terminal())), 16, 16, "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ✵웃世界¢¥¤§©¨«¬£ª±²³´¶·¸¹º»¼½¾¿☐☑═║╔╗╚╝╠╣╦╩╬░▒▓☺☻☼♀♂▀▁▂▃▄▅▆▇█ÐÑÒÓÔÕÖÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏØÙÚÛÜÝàáâãäåèéêëìíîïðñòóôõö÷ùúûüýÿ♥♦♣♠♪♬æçø←↑→↓↔↕®‼ꀥ")
 	}
 	return defaultFont
 }
+*/

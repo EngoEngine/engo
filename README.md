@@ -19,7 +19,8 @@ TODO
 * Port over 2d shaders and effect composer
 * Port over particle system
 * Create Cache, a static Batch
-* Add true bmfont support
 * Shape renderer
 * Investigate audio solutions
 * Add texture packer support
+* Tiled map support
+* Documentation and website
