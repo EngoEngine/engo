@@ -18,7 +18,14 @@ func NewStage(width, height float32, keepAspect bool) *Stage {
 	}
 
 	stage.batch = NewBatch()
+	stage.camera = NewCamera(stage.width, stage.height)
 
+	stage.SetViewport(width, height, keepAspect)
+
+	return stage
+}
+
+func (stage *Stage) SetViewport(width, height float32, keepAspect bool) {
 	if keepAspect {
 		screenWidth := float32(Width())
 		screenHeight := float32(Height())
@@ -47,12 +54,10 @@ func NewStage(width, height float32, keepAspect bool) *Stage {
 		stage.gutterWidth = 0
 		stage.gutterHeight = 0
 	}
-
-	stage.camera = NewCamera(stage.width, stage.height)
 	stage.camera.Position.X = stage.width / 2
 	stage.camera.Position.Y = stage.height / 2
-
-	return stage
+	stage.camera.ViewportWidth = stage.width
+	stage.camera.ViewportHeight = stage.height
 }
 
 func (s *Stage) Update() {
