@@ -42,15 +42,6 @@ func NewFont(fnt interface{}, img interface{}) *Font {
 		reader = bufio.NewReader(data)
 	}
 
-	/*
-		file, err := os.Open(fnt)
-		if err != nil {
-			log.Fatal(err)
-		}
-		reader := bufio.NewReader(file)
-		defer file.Close()
-	*/
-
 	texture := NewTexture(img)
 	texture.SetFilter(FilterLinear, FilterLinear)
 
