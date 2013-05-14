@@ -62,11 +62,19 @@ type Batch struct {
 	blendingDisabled bool
 	blendSrcFunc     gl.Enum
 	blendDstFunc     gl.Enum
+	inPosition       gl.Uint
+	inColor          gl.Uint
+	inTexCoords      gl.Uint
+	ufMatrix         gl.Int
 }
 
 func NewBatch() *Batch {
 	batch := new(Batch)
 	batch.shader = NewShader(batchVert, batchFrag)
+	batch.inPosition = batch.shader.GetAttrib("in_Position")
+	batch.inColor = batch.shader.GetAttrib("in_Color")
+	batch.inTexCoords = batch.shader.GetAttrib("in_TexCoords")
+	batch.ufMatrix = batch.shader.GetUniform("uf_Matrix")
 
 	gl.GenBuffers(1, &batch.vertexVBO)
 	gl.BindBuffer(gl.ARRAY_BUFFER, batch.vertexVBO)
@@ -320,22 +328,22 @@ func (b *Batch) flush() {
 
 	shader.Bind()
 
-	gl.UniformMatrix4fv(shader.UfMatrix, 1, gl.FALSE, &b.combined[0])
+	gl.UniformMatrix4fv(b.ufMatrix, 1, gl.FALSE, &b.combined[0])
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, b.vertexVBO)
 	gl.BufferSubData(gl.ARRAY_BUFFER, gl.Intptr(0), gl.Sizeiptr(int(unsafe.Sizeof([2]gl.Float{}))*int(b.index)), gl.Pointer(&b.vertices[0]))
-	gl.EnableVertexAttribArray(shader.InPosition)
-	gl.VertexAttribPointer(shader.InPosition, 2, gl.FLOAT, gl.FALSE, 0, nil)
+	gl.EnableVertexAttribArray(b.inPosition)
+	gl.VertexAttribPointer(b.inPosition, 2, gl.FLOAT, gl.FALSE, 0, nil)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, b.colorVBO)
 	gl.BufferSubData(gl.ARRAY_BUFFER, gl.Intptr(0), gl.Sizeiptr(int(unsafe.Sizeof([4]gl.Float{}))*int(b.index)), gl.Pointer(&b.colors[0]))
-	gl.EnableVertexAttribArray(shader.InColor)
-	gl.VertexAttribPointer(shader.InColor, 4, gl.FLOAT, gl.FALSE, 0, nil)
+	gl.EnableVertexAttribArray(b.inColor)
+	gl.VertexAttribPointer(b.inColor, 4, gl.FLOAT, gl.FALSE, 0, nil)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, b.coordVBO)
 	gl.BufferSubData(gl.ARRAY_BUFFER, gl.Intptr(0), gl.Sizeiptr(int(unsafe.Sizeof([2]gl.Float{}))*int(b.index)), gl.Pointer(&b.coords[0]))
-	gl.EnableVertexAttribArray(shader.InTexCoords)
-	gl.VertexAttribPointer(shader.InTexCoords, 2, gl.FLOAT, gl.FALSE, 0, nil)
+	gl.EnableVertexAttribArray(b.inTexCoords)
+	gl.VertexAttribPointer(b.inTexCoords, 2, gl.FLOAT, gl.FALSE, 0, nil)
 
 	gl.DrawArrays(gl.QUADS, 0, b.index)
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)

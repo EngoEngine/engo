@@ -6,16 +6,17 @@ package eng
 
 import (
 	gl "github.com/chsc/gogl/gl33"
+	"log"
 )
 
+// A Shader abstracts the loading, compiling, and linking of shader
+// programs, which can directly modify the rendering of vertices and pixels.
 type Shader struct {
-	id          gl.Uint
-	InPosition  gl.Uint
-	InColor     gl.Uint
-	InTexCoords gl.Uint
-	UfMatrix    gl.Int
+	id gl.Uint
 }
 
+// NewShader takes the source of a vertex and fragment shader and
+// returns a compiled and linked shader program.
 func NewShader(vertSrc, fragSrc string) *Shader {
 	glVertSrc := gl.GLString(vertSrc)
 	defer gl.GLStringFree(glVertSrc)
@@ -35,37 +36,32 @@ func NewShader(vertSrc, fragSrc string) *Shader {
 	gl.AttachShader(program, vertShader)
 	gl.AttachShader(program, fragShader)
 
-	inPosition := gl.GLString("in_Position")
-	defer gl.GLStringFree(inPosition)
-	gl.BindAttribLocation(program, 0, inPosition)
-
-	inColor := gl.GLString("in_Color")
-	defer gl.GLStringFree(inColor)
-	gl.BindAttribLocation(program, 1, inColor)
-
-	inTexCoords := gl.GLString("in_TexCoords")
-	defer gl.GLStringFree(inTexCoords)
-	gl.BindAttribLocation(program, 2, inTexCoords)
-
 	gl.LinkProgram(program)
 
 	var link_status gl.Int
 	gl.GetProgramiv(program, gl.LINK_STATUS, &link_status)
 	if link_status == 0 {
-		panic("Unable to link shader program.\n")
+		log.Fatal("Unable to link shader program.")
 	}
 
-	matrix := gl.GLString("uf_Matrix")
-	defer gl.GLStringFree(matrix)
-	ufMatrix := gl.GetUniformLocation(program, matrix)
-
-	return &Shader{program, 0, 1, 2, ufMatrix}
+	return &Shader{program}
 }
 
+// Bind turns the shader on to be used during rendering.
 func (s *Shader) Bind() {
 	gl.UseProgram(s.id)
 }
 
-func (s *Shader) Get(attrib string) gl.Int {
-	return gl.GetUniformLocation(s.id, gl.GLString(attrib))
+// GetUniform returns the location of the named uniform.
+func (s *Shader) GetUniform(uniform string) gl.Int {
+	glUniform := gl.GLString(uniform)
+	defer gl.GLStringFree(glUniform)
+	return gl.GetUniformLocation(s.id, glUniform)
+}
+
+// GetAttrib returns the location of the named attribute.
+func (s *Shader) GetAttrib(attrib string) gl.Uint {
+	glAttrib := gl.GLString(attrib)
+	defer gl.GLStringFree(glAttrib)
+	return gl.Uint(gl.GetAttribLocation(s.id, glAttrib))
 }
