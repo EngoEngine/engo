@@ -14,14 +14,6 @@ import (
 	"os"
 )
 
-const (
-	FilterNearest      = gl.NEAREST
-	FilterLinear       = gl.LINEAR
-	WrapClampToEdge    = gl.CLAMP_TO_EDGE
-	WrapRepeat         = gl.REPEAT
-	WrapMirroredRepeat = gl.MIRRORED_REPEAT
-)
-
 // A Texture wraps an opengl texture and is mostly used for loading
 // images and constructing Regions.
 type Texture struct {

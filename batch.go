@@ -255,7 +255,7 @@ func (b *Batch) End() {
 
 // SetBlending will toggle blending for rendering on the batch.
 // Blending is a relatively expensive operation and should be disabled
-// if your goemtry is opaque.
+// if your goemetry is opaque.
 func (b *Batch) SetBlending(v bool) {
 	if v != b.blendingDisabled {
 		b.flush()
