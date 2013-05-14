@@ -12,14 +12,19 @@ Install
 -------
 `go get github.com/ajhager/eng`
 
+Documentation
+-------------
+
+[godoc.org](http://godoc.org/github.com/ajhager/eng)
+
 TODO
 ----
 
-* Port over 2d shaders and effect composer
-* Port over particle system
-* Create Cache, a static Batch
+* Effect composer and default shaders
+* Particle system
 * Shape renderer
-* Investigate audio solutions
-* Add texture packer support
-* Tiled map support
+* Audio module
+* TexturePacker loading
+* Tiled Map loading and rendering
+* Static Batch cache
 * Website and more demos
