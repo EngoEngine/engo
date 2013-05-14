@@ -39,7 +39,9 @@ func (g *Game) Draw() {
 	canvas.End()
 
 	batch.Begin()
-	batch.Draw(region, 0, 0, 512, 320, .5, .5, 0, nil)
+	batch.Draw(region, -200, 0, 512, 320, .5, .5, 0, nil)
+	batch.Draw(region, 100, 200, 512, 320, .5, .5, 0, nil)
+	batch.Draw(region, 200, -100, 512, 320, .5, .5, 0, nil)
 	batch.End()
 }
 
