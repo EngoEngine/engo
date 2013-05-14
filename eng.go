@@ -1,7 +1,7 @@
 package eng
 
 import (
-	gl "github.com/chsc/gogl/gl21"
+	gl "github.com/chsc/gogl/gl33"
 	"github.com/go-gl/glfw"
 	"log"
 )
@@ -87,6 +87,7 @@ var (
 	config      *Config
 	timing      *stats
 	defaultFont *Font
+	bgColor     *Color
 )
 
 type Config struct {
@@ -131,8 +132,6 @@ func Run(r Responder) {
 	config = &Config{"Untitled", 1024, 640, false, true, false, 1, false}
 	responder.Init(config)
 
-	glfw.OpenWindowHint(glfw.OpenGLVersionMajor, 2)
-	glfw.OpenWindowHint(glfw.OpenGLVersionMinor, 1)
 	if !config.Resizable {
 		glfw.OpenWindowHint(glfw.WindowNoResize, 1)
 	}
@@ -213,10 +212,12 @@ func Run(r Responder) {
 		}
 	})
 
+	bgColor = NewColor(0, 0, 0, 0)
 	timing = NewStats(config.PrintFPS)
 	timing.Update()
 	for glfw.WindowParam(glfw.Opened) == 1 {
 		responder.Update(float32(timing.Dt))
+		gl.ClearColor(gl.Float(bgColor.R), gl.Float(bgColor.G), gl.Float(bgColor.B), gl.Float(bgColor.A))
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 		responder.Draw()
 		glfw.SwapBuffers()
@@ -296,7 +297,10 @@ func SetKeyRepeat(repeat bool) {
 }
 
 func SetBgColor(c *Color) {
-	gl.ClearColor(gl.Float(c.R), gl.Float(c.G), gl.Float(c.B), gl.Float(c.A))
+	bgColor.R = c.R
+	bgColor.G = c.G
+	bgColor.B = c.B
+	bgColor.A = c.A
 }
 
 func Fps() float32 {

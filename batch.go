@@ -1,7 +1,7 @@
 package eng
 
 import (
-	gl "github.com/chsc/gogl/gl21"
+	gl "github.com/chsc/gogl/gl33"
 	"math"
 	"unsafe"
 )

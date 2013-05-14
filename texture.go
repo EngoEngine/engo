@@ -1,7 +1,7 @@
 package eng
 
 import (
-	gl "github.com/chsc/gogl/gl21"
+	gl "github.com/chsc/gogl/gl33"
 	"image"
 	"image/draw"
 	_ "image/png"
@@ -29,7 +29,7 @@ type Texture struct {
 }
 
 func NewTexture(data interface{}) *Texture {
-	var reader io.Reader
+	var m image.Image
 
 	switch data := data.(type) {
 	default:
@@ -40,14 +40,19 @@ func NewTexture(data interface{}) *Texture {
 			log.Fatal(err)
 		}
 		defer file.Close()
-		reader = file
+		img, _, err := image.Decode(file)
+		if err != nil {
+			panic(err)
+		}
+		m = img
 	case io.Reader:
-		reader = data
-	}
-
-	m, _, err := image.Decode(reader)
-	if err != nil {
-		panic(err)
+		img, _, err := image.Decode(data)
+		if err != nil {
+			panic(err)
+		}
+		m = img
+	case image.Image:
+		m = data
 	}
 
 	b := m.Bounds()
