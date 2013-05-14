@@ -15,7 +15,6 @@ Install
 TODO
 ----
 
-* Wrap up framebuffers
 * Port over 2d shaders and effect composer
 * Port over particle system
 * Create Cache, a static Batch

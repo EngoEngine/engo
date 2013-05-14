@@ -1,3 +1,8 @@
+// Copyright 2013 Joseph Hager. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// Package eng provides functionality for creating 2d games.
 package eng
 
 import (
@@ -6,6 +11,7 @@ import (
 	"log"
 )
 
+// Key and button constants.
 const (
 	NOKEY       = -1
 	Esc         = glfw.KeyEsc
@@ -90,37 +96,75 @@ var (
 	bgColor     *Color
 )
 
+// A Config holds settings for your game's window and application.
 type Config struct {
-	Title      string
-	Width      int
-	Height     int
+	// Title is the name of the created window.
+	// Default: Untitled
+	Title string
+
+	// Width and Height are hints about the size of the window. You
+	// may not end up with the indicated size, so you should always
+	// query eng for the true width and height after initialization.
+	// Default: 1024 x 640
+	Width  int
+	Height int
+
+	// Fullscreen tells eng whether to open windowed or fullscreen.
+	// Default: false
 	Fullscreen bool
-	Vsync      bool
-	Resizable  bool
-	Fssa       int
-	PrintFPS   bool
+
+	// Vsync enables or disables vertical sync which will limit the
+	// number of frames rendered per second to your monitor's refresh
+	// rate. This may or may not be supported on certain platforms.
+	// Default: true
+	Vsync bool
+
+	// Resizable tells eng if it should request a window that can be
+	// resized by the user of your game.
+	// Default: false
+	Resizable bool
+
+	// Fsaa indicates how many samples to use for the multisampling
+	// buffer. Generally it will be 1, 2, 4, 8, or 16.
+	// Default: 1
+	Fsaa int
+
+	// PrintFPS turns on a logging of the frames per second to the
+	// console every second.
+	// Default: false
+	PrintFPS bool
 }
 
+// A Responder describes an interface for application events.
+//
+// Init is called with the default Config which can be modified.
+//
+// Open is called after the opengl context and window have been
+// created. You should load assets and create eng objects in this method.
 type Responder interface {
-	Init(s *Config)
+	Init(config *Config)
 	Open()
 	Close()
-	Update(dt float32)
+	Update(delta float32)
 	Draw()
 	MouseMove(x, y int)
-	MouseDown(x, y, b int)
-	MouseUp(x, y, b int)
-	KeyType(k int)
-	KeyDown(k int)
-	KeyUp(k int)
-	Resize(w, h int)
-	MouseScroll(x, y, p int)
+	MouseDown(x, y, button int)
+	MouseUp(x, y, button int)
+	KeyType(key int)
+	KeyDown(key int)
+	KeyUp(key int)
+	Resize(width, height int)
+	MouseScroll(x, y, amount int)
 }
 
 func R() Responder {
 	return responder
 }
 
+// Run should be called with a type that satisfies the Responder
+// interface. Windows will be setup using your Config and a runloop
+// will start, blocking the main thread and calling methods on the
+// given responder.
 func Run(r Responder) {
 	responder = r
 
@@ -135,7 +179,7 @@ func Run(r Responder) {
 	if !config.Resizable {
 		glfw.OpenWindowHint(glfw.WindowNoResize, 1)
 	}
-	glfw.OpenWindowHint(glfw.FsaaSamples, config.Fssa)
+	glfw.OpenWindowHint(glfw.FsaaSamples, config.Fsaa)
 
 	width := config.Width
 	height := config.Height
@@ -230,48 +274,59 @@ func Log(l ...interface{}) {
 	log.Println(l...)
 }
 
+// Width returns the current window width.
 func Width() int {
 	return config.Width
 }
 
+// Height returns the current window height.
 func Height() int {
 	return config.Height
 }
 
+// Size returns the current window width and height.
 func Size() (int, int) {
 	return config.Width, config.Height
 }
 
+// SetSize sets the window width and height.
 func SetSize(w, h int) {
 	glfw.SetWindowSize(w, h)
 }
 
+// Focused indicates if the game window is currently focused.
 func Focused() bool {
 	return glfw.WindowParam(glfw.Active) == gl.TRUE
 }
 
+// Exit closes the window and breaks out of the game loop.
 func Exit() {
 	glfw.CloseWindow()
 }
 
+// MouseX returns the cursor's horizontal position within the window.
 func MouseX() int {
 	x, _ := glfw.MousePos()
 	return x
 }
 
+// MouseY returns the cursor's vetical position within the window.
 func MouseY() int {
 	_, y := glfw.MousePos()
 	return y
 }
 
+// MousePos returns the cursor's X and Y position within the window.
 func MousePos() (int, int) {
 	return glfw.MousePos()
 }
 
+// SetMousePos sets the cursor's X and Y position within the window.
 func SetMousePos(x, y int) {
 	glfw.SetMousePos(x, y)
 }
 
+// SetMouseCursor shows or hides the cursor.
 func SetMouseCursor(on bool) {
 	if on {
 		glfw.Enable(glfw.MouseCursor)
@@ -280,14 +335,18 @@ func SetMouseCursor(on bool) {
 	}
 }
 
+// MousePressed takes a mouse button constant and indicates if it is
+// currently pressed.
 func MousePressed(b int) bool {
 	return glfw.MouseButton(b) == glfw.KeyPress
 }
 
+// KeyPressed takes a key constant and indicates if it is currently pressed.
 func KeyPressed(k int) bool {
 	return glfw.Key(k) == glfw.KeyPress
 }
 
+// SetKeyRepeat toggles key repeat either on or off.
 func SetKeyRepeat(repeat bool) {
 	if repeat {
 		glfw.Enable(glfw.KeyRepeat)
@@ -296,6 +355,7 @@ func SetKeyRepeat(repeat bool) {
 	}
 }
 
+// SetBgColor sets the default opengl clear color.
 func SetBgColor(c *Color) {
 	bgColor.R = c.R
 	bgColor.G = c.G
@@ -303,10 +363,12 @@ func SetBgColor(c *Color) {
 	bgColor.A = c.A
 }
 
+// Fps returns the number of frames being rendered each second.
 func Fps() float32 {
 	return float32(timing.Fps)
 }
 
+// DefaultFont returns eng's built in font, creating it on first use.
 func DefaultFont() *Font {
 	if defaultFont == nil {
 		defaultFont = NewFont(dfonttxt, dfontimg())

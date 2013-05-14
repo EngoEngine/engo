@@ -1,3 +1,7 @@
+// Copyright 2013 Joseph Hager. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package eng
 
 import (
@@ -19,6 +23,7 @@ type offset struct {
 	xadvance float32
 }
 
+// A Font is bitmap font that can be rendered with a Batch.
 type Font struct {
 	texture *Texture
 	regions []*Region
@@ -26,6 +31,9 @@ type Font struct {
 	mapping map[rune]int
 }
 
+// NewFont constructs a new bitmap font from the bmfont format. fnt
+// and img should either be string paths to the font and image files
+// respectively or io.Reader's of the same.
 func NewFont(fnt interface{}, img interface{}) *Font {
 	var reader *bufio.Reader
 	switch data := fnt.(type) {
@@ -99,6 +107,10 @@ func (f *Font) mapRune(ch rune) (int, bool) {
 	return position, ok
 }
 
+// Print renders some text with the first letter's top left corner at
+// x, y using the given color. If color == nil, the given batch's
+// current color will be used. If the string contains a rune that is
+// not in the font, that rune will be skipped.
 func (f *Font) Print(batch *Batch, text string, x, y float32, color *Color) {
 	xx := x
 	for _, v := range text {
@@ -112,6 +124,9 @@ func (f *Font) Print(batch *Batch, text string, x, y float32, color *Color) {
 	}
 }
 
+// Texture returns the backing texture of the font. This can be useful
+// for setting the filter or wrap modes which default to linear and
+// wrap to edge respectively.
 func (f *Font) Texture() *Texture {
 	return f.texture
 }

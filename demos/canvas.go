@@ -11,23 +11,30 @@ var (
 	region *eng.Region
 )
 
-type Hello struct {
+type Game struct {
 	*eng.Game
 }
 
-func (g *Hello) Open() {
+func (g *Game) Init(config *eng.Config) {
+	config.Title = "Canvas"
+}
+
+func (g *Game) Open() {
 	batch = eng.NewBatch()
 	canvas = eng.NewCanvas(eng.Width(), eng.Height())
 	region = eng.NewRegion(canvas.Texture(), 0, 0, eng.Width(), eng.Height())
 	region.Flip(false, true)
 }
 
-func (g *Hello) Draw() {
+func (g *Game) Draw() {
+	x := float32(canvas.Width()/2 - 50)
+	y := float32(canvas.Height() / 2)
+
 	canvas.Begin()
 	batch.Begin()
 	gl.ClearColor(.8, .1, .3, 1)
 	gl.Clear(gl.COLOR_BUFFER_BIT)
-	eng.DefaultFont().Print(batch, "Hello, world!", 430, 280, nil)
+	eng.DefaultFont().Print(batch, "canvas", x, y, nil)
 	batch.End()
 	canvas.End()
 
@@ -37,5 +44,5 @@ func (g *Hello) Draw() {
 }
 
 func main() {
-	eng.Run(new(Hello))
+	eng.Run(new(Game))
 }

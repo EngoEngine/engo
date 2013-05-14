@@ -1,3 +1,7 @@
+// Copyright 2013 Joseph Hager. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package eng
 
 import (
@@ -9,6 +13,36 @@ import (
 const size = 1000
 const degToRad = math.Pi / 180
 
+var batchVert = ` 
+attribute vec4 in_Position;
+attribute vec4 in_Color;
+attribute vec2 in_TexCoords;
+
+uniform mat4 uf_Matrix;
+
+varying vec4 var_Color;
+varying vec2 var_TexCoords;
+
+void main() {
+  var_Color = in_Color;
+  var_TexCoords = in_TexCoords;
+  gl_Position = uf_Matrix * in_Position;
+}
+`
+
+var batchFrag = `
+varying vec4 var_Color;
+varying vec2 var_TexCoords;
+
+uniform sampler2D uf_Texture;
+
+void main (void) {
+  gl_FragColor = var_Color * texture2D (uf_Texture, var_TexCoords);
+}
+`
+
+// A Batch allows geometry to be efficiently rendered by buffering
+// render calls and sending them all at once.
 type Batch struct {
 	drawing          bool
 	lastTexture      *Texture
@@ -32,7 +66,7 @@ type Batch struct {
 
 func NewBatch() *Batch {
 	batch := new(Batch)
-	batch.shader = NewShader(vert, frag)
+	batch.shader = NewShader(batchVert, batchFrag)
 
 	gl.GenBuffers(1, &batch.vertexVBO)
 	gl.BindBuffer(gl.ARRAY_BUFFER, batch.vertexVBO)
@@ -59,6 +93,8 @@ func NewBatch() *Batch {
 	return batch
 }
 
+// Begin calculates the combined matrix and sets up rendering. This
+// must be called before calling Draw.
 func (b *Batch) Begin() {
 	if b.drawing {
 		panic("Batch.End() must be called first")
@@ -67,6 +103,12 @@ func (b *Batch) Begin() {
 	b.drawing = true
 }
 
+// Draw renders a Region with its top left corner at x, y. Scaling and
+// rotation will be with respect to the origin. If color is nil, the
+// current batch color will be used. If the backing texture in the
+// region is different than the last rendered region, any pending
+// geometry will be flushed. Switching textures is a relatively
+// expensive operation.
 func (b *Batch) Draw(r *Region, x, y, originX, originY, scaleX, scaleY, rotation float32, color *Color) {
 	if !b.drawing {
 		panic("Batch.Begin() must be called first")
@@ -196,6 +238,8 @@ func (b *Batch) Draw(r *Region, x, y, originX, originY, scaleX, scaleY, rotation
 	}
 }
 
+// End finishes up rendering and flushes any remaining geometry to the
+// gpu. This must be called after a called to Begin.
 func (b *Batch) End() {
 	if !b.drawing {
 		panic("Batch.Begin() must be called first")
@@ -209,6 +253,9 @@ func (b *Batch) End() {
 	b.drawing = false
 }
 
+// SetBlending will toggle blending for rendering on the batch.
+// Blending is a relatively expensive operation and should be disabled
+// if your goemtry is opaque.
 func (b *Batch) SetBlending(v bool) {
 	if v != b.blendingDisabled {
 		b.flush()
@@ -216,12 +263,17 @@ func (b *Batch) SetBlending(v bool) {
 	}
 }
 
+// SetBlendFunc sets the opengl src and dst blending functions. The
+// default is gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA which will render
+// any alpha channel in your textures as blank. Calling this will
+// flush any pending geometry to the gpu.
 func (b *Batch) SetBlendFunc(src, dst gl.Enum) {
 	b.flush()
 	b.blendSrcFunc = src
 	b.blendDstFunc = dst
 }
 
+// SetColor changes the current batch rendering tint. This defaults to white.
 func (b *Batch) SetColor(color *Color) {
 	b.color.R = color.R
 	b.color.G = color.G
@@ -229,10 +281,18 @@ func (b *Batch) SetColor(color *Color) {
 	b.color.A = color.A
 }
 
+// SetShader changes the shader used to rendering geometry. If the
+// passed in shader == nil, the batch will go back to using its
+// default shader. The shader should name the incoming vertex
+// position, color, and texture coordinates to 'in_Position',
+// 'in_Color', and 'in_TexCoords' respectively. The transform projection
+// matrix will be passed in as 'uf_Matrix'.
 func (b *Batch) SetShader(shader *Shader) {
 	b.customShader = shader
 }
 
+// SetProjection allows for setting the projection matrix manually.
+// This is often used with a Camera.
 func (b *Batch) SetProjection(m *Matrix) {
 	b.projection.Set(m)
 }
