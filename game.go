@@ -36,7 +36,7 @@ func (g *Game) MouseUp(x, y, b int) {
 func (g *Game) MouseScroll(x, y, p int) {
 }
 
-func (g *Game) KeyType(k int) {
+func (g *Game) KeyType(k rune) {
 }
 
 func (g *Game) KeyDown(k int) {

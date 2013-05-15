@@ -170,7 +170,7 @@ type Responder interface {
 	MouseMove(x, y int)
 	MouseDown(x, y, button int)
 	MouseUp(x, y, button int)
-	KeyType(key int)
+	KeyType(key rune)
 	KeyDown(key int)
 	KeyUp(key int)
 	Resize(width, height int)
@@ -274,7 +274,7 @@ func Run(r Responder) {
 
 	glfw.SetCharCallback(func(k, s int) {
 		if s == glfw.KeyPress {
-			responder.KeyType(k)
+			responder.KeyType(rune(k))
 		}
 	})
 

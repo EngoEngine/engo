@@ -69,8 +69,8 @@ func (g *Game) MouseScroll(x, y, amount int) {
 	mz += float32(amount) * 3
 }
 
-func (g *Game) KeyType(k int) {
-	letters = letters + string(rune(k))
+func (g *Game) KeyType(k rune) {
+	letters = letters + string(k)
 }
 
 func (g *Game) KeyDown(k int) {
