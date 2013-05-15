@@ -95,7 +95,8 @@ func NewBatch() *Batch {
 	batch.projection = NewMatrix().SetToOrtho(0, float32(Width()), float32(Height()), 0, 0, 1)
 	batch.color = NewColor(1, 1, 1, 1)
 	batch.blendingDisabled = false
-	batch.blendSrcFunc = gl.SRC_ALPHA
+	//	batch.blendSrcFunc = gl.SRC_ALPHA
+	batch.blendSrcFunc = gl.ONE
 	batch.blendDstFunc = gl.ONE_MINUS_SRC_ALPHA
 
 	return batch
@@ -109,6 +110,12 @@ func (b *Batch) Begin() {
 	}
 	b.combined.Set(b.projection).Mul(b.transform)
 	b.drawing = true
+	shader := b.shader
+	if b.customShader != nil {
+		shader = b.customShader
+	}
+
+	shader.Bind()
 }
 
 // Draw renders a Region with its top left corner at x, y. Scaling and
@@ -320,13 +327,6 @@ func (b *Batch) flush() {
 	gl.Enable(gl.TEXTURE_2D)
 	gl.ActiveTexture(gl.TEXTURE0)
 	b.lastTexture.Bind()
-
-	shader := b.shader
-	if b.customShader != nil {
-		shader = b.customShader
-	}
-
-	shader.Bind()
 
 	gl.UniformMatrix4fv(b.ufMatrix, 1, gl.FALSE, &b.combined[0])
 

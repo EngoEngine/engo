@@ -222,6 +222,8 @@ func Run(r Responder) {
 		log.Fatal(err)
 	}
 
+	bgColor = NewColor(0, 0, 0, 0)
+
 	responder.Open()
 
 	if !config.Fullscreen {
@@ -275,7 +277,6 @@ func Run(r Responder) {
 		}
 	})
 
-	bgColor = NewColor(0, 0, 0, 0)
 	timing = NewStats(config.PrintFPS)
 	timing.Update()
 	for glfw.WindowParam(glfw.Opened) == 1 {
@@ -380,6 +381,11 @@ func SetBgColor(c *Color) {
 	bgColor.G = c.G
 	bgColor.B = c.B
 	bgColor.A = c.A
+}
+
+// Dt returns the time since the last frame.
+func Dt() float32 {
+	return float32(timing.Dt)
 }
 
 // Fps returns the number of frames being rendered each second.
