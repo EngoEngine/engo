@@ -1,3 +1,7 @@
+// Copyright 2013 Joseph Hager. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package fx
 
 import (
@@ -84,6 +88,12 @@ func DefaultFilm() *Film {
 	return NewFilm(.5, .05, 1024, false)
 }
 
+// NewFilm returns an effect that produces noise and scanlines when
+// rendering. nIntensity is the intensity of the noise and should be a
+// number between 0 and 1. sIntensity is the intensity of the
+// scanlines and should be a number between 0 and 1. sCount is the
+// number of scanlines. grayscale is whether or not to turn everything
+// rendered black and white.
 func NewFilm(nIntensity, sIntensity, sCount float32, grayscale bool) *Film {
 	film := new(Film)
 	film.nIntensity = nIntensity
@@ -101,10 +111,12 @@ func NewFilm(nIntensity, sIntensity, sCount float32, grayscale bool) *Film {
 	return film
 }
 
+// Shader returns the underlying shader of the effect.
 func (f *Film) Shader() *eng.Shader {
 	return f.shader
 }
 
+// Setup binds the uniform values need to run the effect.
 func (f *Film) Setup() {
 	f.time += eng.Dt()
 	gl.Uniform1f(f.ufTime, gl.Float(f.time))

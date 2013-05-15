@@ -20,7 +20,7 @@ Documentation
 TODO
 ----
 
-* Effect composer and default shaders
+* Effect composer and more default effects
 * Particle system
 * Shape renderer
 * Audio module
@@ -28,3 +28,4 @@ TODO
 * Tiled Map loading and rendering
 * Static Batch cache
 * Website and more demos
+* Spine sub module
