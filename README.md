@@ -28,4 +28,3 @@ TODO
 * Tiled Map loading and rendering
 * Static Batch cache
 * Website and more demos
-* Spine sub module
