@@ -10,6 +10,7 @@ var (
 	walk     *spine.Animation
 	batch    *eng.Batch
 	animTime float32
+	dir      float32
 )
 
 type Game struct {
@@ -23,14 +24,24 @@ func (g *Game) Init(config *eng.Config) {
 func (g *Game) Open() {
 	batch = eng.NewBatch()
 	skeleton = spine.NewSkeleton("data/spine", "spineboy.json")
-	skeleton.X = 512
+	skeleton.X = 100
 	skeleton.Y = 512
 	skeleton.SetToSetupPose()
 	walk = skeleton.Animation("walk")
+	dir = 1
 }
 
 func (g *Game) Update(dt float32) {
 	animTime += dt
+	skeleton.X += dir * 200 * dt
+	if skeleton.X < 100 {
+		skeleton.FlipX = false
+		dir = -dir
+	}
+	if skeleton.X > 924 {
+		skeleton.FlipX = true
+		dir = -dir
+	}
 	skeleton.Apply(walk, animTime, true)
 	skeleton.UpdateWorldTransform()
 }
