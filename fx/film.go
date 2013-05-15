@@ -99,6 +99,7 @@ func NewFilm(nIntensity, sIntensity, sCount float32, grayscale bool) *Film {
 	film.nIntensity = nIntensity
 	film.sIntensity = sIntensity
 	film.sCount = sCount
+	film.time = 1000
 	if grayscale {
 		film.grayscale = 1
 	}
