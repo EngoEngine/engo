@@ -70,6 +70,7 @@ const (
 	Lalt        = glfw.KeyLalt
 	Ralt        = glfw.KeyRalt
 	Tab         = glfw.KeyTab
+	Space       = glfw.KeySpace
 	Enter       = glfw.KeyEnter
 	Backspace   = glfw.KeyBackspace
 	Insert      = glfw.KeyInsert
