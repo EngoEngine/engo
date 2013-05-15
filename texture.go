@@ -56,7 +56,7 @@ func NewTexture(data interface{}) *Texture {
 	}
 
 	b := m.Bounds()
-	newm := image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+	newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
 	draw.Draw(newm, newm.Bounds(), m, b.Min, draw.Src)
 
 	width := m.Bounds().Max.X
