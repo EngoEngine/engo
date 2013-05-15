@@ -47,3 +47,11 @@ func (r *Region) Flip(x, y bool) {
 		r.v2 = tmp
 	}
 }
+
+func (r *Region) Width() float32 {
+	return float32(r.width)
+}
+
+func (r *Region) Height() float32 {
+	return float32(r.height)
+}
