@@ -12,34 +12,27 @@ func init() {
 	skeletons = make(map[string]*spine.SkeletonData)
 }
 
-type Image struct {
-	*eng.Region
-	Width      int
-	Height     int
-	attachment *spine.Attachment
-}
-
-func NewImage(path string) *Image {
-	texture := eng.NewTexture(path)
-	width := texture.Width()
-	height := texture.Height()
-	region := eng.NewRegion(texture, 0, 0, width, height)
-	return &Image{region, width, height, nil}
+type Animation struct {
+	*spine.Animation
 }
 
 func NewImageRA(path string, a *spine.Attachment) *RegionAttachment {
 	texture := eng.NewTexture(path)
+	texture.SetFilter(eng.FilterLinear, eng.FilterLinear)
 	width := texture.Width()
 	height := texture.Height()
 	region := eng.NewRegion(texture, 0, 0, width, height)
 	return NewRegionAttachment(region, a)
-	//	return &Image{region, width, height, nil}
 }
 
 type Skeleton struct {
 	*spine.Skeleton
 	base   string
 	images map[*spine.Attachment]*RegionAttachment
+}
+
+func (s *Skeleton) Apply(a *Animation, time float32, loop bool) {
+	a.Apply(s.Skeleton, time, loop)
 }
 
 var color *eng.Color
@@ -79,36 +72,15 @@ func (s *Skeleton) Draw(batch *eng.Batch) {
 			s.images[attachment] = image
 		}
 		if image != nil {
-			/*
-				x := slot.Bone.WorldX + attachment.X*slot.Bone.M00 + attachment.Y*slot.Bone.M01
-				y := slot.Bone.WorldY + attachment.X*slot.Bone.M10 + attachment.Y*slot.Bone.M11
-				rotation := slot.Bone.WorldRotation + attachment.Rotation
-				xScale := slot.Bone.WorldScaleX + attachment.ScaleX - 1
-				yScale := slot.Bone.WorldScaleY + attachment.ScaleY - 1
-				if s.FlipX {
-					xScale = -xScale
-					rotation = -rotation
-				}
-				if s.FlipY {
-					yScale = -yScale
-					rotation = -rotation
-				}
-
-				color.R = slot.R
-				color.G = slot.G
-				color.B = slot.B
-				color.A = slot.A
-			*/
 			image.Update(slot)
-			//			batch.Draw(image.region, s.X+x, s.Y-y, attachment.OriginX,
-			//			attachment.OriginY,
-			//			xScale*attachment.WidthRatio,
-			//			yScale*attachment.HeightRatio, rotation,
-			//			color)
 			batch.DrawVerts(image.region, image.Vertices(), nil)
 		}
 	}
 	//}
+}
+
+func (s *Skeleton) Animation(name string) *Animation {
+	return &Animation{s.FindAnimation(name)}
 }
 
 func NewSkeleton(base, file string) *Skeleton {
@@ -121,5 +93,7 @@ func NewSkeleton(base, file string) *Skeleton {
 
 	skeletonData := spine.Load(path)
 	skeletons[path] = skeletonData
-	return &Skeleton{spine.NewSkeleton(skeletonData), base, nil}
+	s := &Skeleton{spine.NewSkeleton(skeletonData), base, nil}
+	s.FlipY = true
+	return s
 }
