@@ -95,8 +95,8 @@ func NewBatch() *Batch {
 	batch.projection = NewMatrix().SetToOrtho(0, float32(Width()), float32(Height()), 0, 0, 1)
 	batch.color = NewColor(1, 1, 1, 1)
 	batch.blendingDisabled = false
-	//	batch.blendSrcFunc = gl.SRC_ALPHA
-	batch.blendSrcFunc = gl.ONE
+	batch.blendSrcFunc = gl.SRC_ALPHA
+	//batch.blendSrcFunc = gl.ONE
 	batch.blendDstFunc = gl.ONE_MINUS_SRC_ALPHA
 
 	return batch
@@ -266,6 +266,11 @@ func (b *Batch) End() {
 		gl.Disable(gl.BLEND)
 	}
 	b.drawing = false
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	gl.UseProgram(0)
+
+	b.lastTexture = nil
 }
 
 // SetBlending will toggle blending for rendering on the batch.
@@ -346,8 +351,6 @@ func (b *Batch) flush() {
 	gl.VertexAttribPointer(b.inTexCoords, 2, gl.FLOAT, gl.FALSE, 0, nil)
 
 	gl.DrawArrays(gl.QUADS, 0, b.index)
-	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	gl.UseProgram(0)
 
 	b.index = 0
 }
