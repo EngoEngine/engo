@@ -95,8 +95,8 @@ func NewBatch() *Batch {
 	batch.projection = NewMatrix().SetToOrtho(0, float32(Width()), float32(Height()), 0, 0, 1)
 	batch.color = NewColor(1, 1, 1, 1)
 	batch.blendingDisabled = false
-	batch.blendSrcFunc = gl.SRC_ALPHA
-	//batch.blendSrcFunc = gl.ONE
+	//batch.blendSrcFunc = gl.SRC_ALPHA
+	batch.blendSrcFunc = gl.ONE
 	batch.blendDstFunc = gl.ONE_MINUS_SRC_ALPHA
 
 	return batch
@@ -116,6 +116,63 @@ func (b *Batch) Begin() {
 	}
 
 	shader.Bind()
+}
+
+func (b *Batch) DrawVerts(r *Region, verts [8]float32, color *Color) {
+	if !b.drawing {
+		panic("Batch.Begin() must be called first")
+	}
+
+	if r.texture != b.lastTexture {
+		b.flush()
+		b.lastTexture = r.texture
+	}
+
+	c := b.color
+	if color != nil {
+		c = color
+	}
+
+	b.vertices[b.index+0][0] = gl.Float(verts[0])
+	b.vertices[b.index+0][1] = gl.Float(verts[1])
+	b.vertices[b.index+1][0] = gl.Float(verts[2])
+	b.vertices[b.index+1][1] = gl.Float(verts[3])
+	b.vertices[b.index+2][0] = gl.Float(verts[4])
+	b.vertices[b.index+2][1] = gl.Float(verts[5])
+	b.vertices[b.index+3][0] = gl.Float(verts[6])
+	b.vertices[b.index+3][1] = gl.Float(verts[7])
+
+	b.colors[b.index+0][0] = gl.Float(c.R)
+	b.colors[b.index+0][1] = gl.Float(c.G)
+	b.colors[b.index+0][2] = gl.Float(c.B)
+	b.colors[b.index+0][3] = gl.Float(c.A)
+	b.colors[b.index+1][0] = gl.Float(c.R)
+	b.colors[b.index+1][1] = gl.Float(c.G)
+	b.colors[b.index+1][2] = gl.Float(c.B)
+	b.colors[b.index+1][3] = gl.Float(c.A)
+	b.colors[b.index+2][0] = gl.Float(c.R)
+	b.colors[b.index+2][1] = gl.Float(c.G)
+	b.colors[b.index+2][2] = gl.Float(c.B)
+	b.colors[b.index+2][3] = gl.Float(c.A)
+	b.colors[b.index+3][0] = gl.Float(c.R)
+	b.colors[b.index+3][1] = gl.Float(c.G)
+	b.colors[b.index+3][2] = gl.Float(c.B)
+	b.colors[b.index+3][3] = gl.Float(c.A)
+
+	b.coords[b.index+0][0] = r.u
+	b.coords[b.index+0][1] = r.v
+	b.coords[b.index+1][0] = r.u
+	b.coords[b.index+1][1] = r.v2
+	b.coords[b.index+2][0] = r.u2
+	b.coords[b.index+2][1] = r.v2
+	b.coords[b.index+3][0] = r.u2
+	b.coords[b.index+3][1] = r.v
+
+	b.index += 4
+
+	if b.index >= size {
+		b.flush()
+	}
 }
 
 // Draw renders a Region with its top left corner at x, y. Scaling and
