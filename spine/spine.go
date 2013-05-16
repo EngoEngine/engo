@@ -35,6 +35,10 @@ func (s *Skeleton) Apply(a *Animation, time float32, loop bool) {
 	a.Apply(s.Skeleton, time, loop)
 }
 
+func (s *Skeleton) Mix(a *Animation, time float32, loop bool, alpha float32) {
+	a.Mix(s.Skeleton, time, loop, alpha)
+}
+
 var color *eng.Color
 
 func init() {
