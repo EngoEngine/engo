@@ -280,13 +280,13 @@ func SetMouseCursor(on bool) {
 
 // MousePressed takes a mouse button constant and indicates if it is
 // currently pressed.
-func MousePressed(b int) bool {
-	return glfw.MouseButton(b) == glfw.KeyPress
+func MousePressed(b Button) bool {
+	return glfw.MouseButton(int(b)) == glfw.KeyPress
 }
 
 // KeyPressed takes a key constant and indicates if it is currently pressed.
-func KeyPressed(k int) bool {
-	return glfw.Key(k) == glfw.KeyPress
+func KeyPressed(k Key) bool {
+	return glfw.Key(int(k)) == glfw.KeyPress
 }
 
 // SetKeyRepeat toggles key repeat either on or off.
