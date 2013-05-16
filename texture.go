@@ -5,13 +5,16 @@
 package eng
 
 import (
+	"encoding/json"
 	gl "github.com/chsc/gogl/gl33"
 	"image"
 	"image/draw"
 	_ "image/png"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 )
 
 // A Texture wraps an opengl texture and is mostly used for loading
@@ -104,6 +107,36 @@ func (t *Texture) Split(w, h int) []*Region {
 	}
 
 	return tiles
+}
+
+func (t *Texture) Unpack(path string) map[string]*Region {
+	regions := make(map[string]*Region)
+
+	file, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var data interface{}
+	err = json.Unmarshal(file, &data)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	root := data.(map[string]interface{})
+	frames := root["frames"].([]interface{})
+	for _, frameData := range frames {
+		frame := frameData.(map[string]interface{})
+		name := strings.Split(frame["filename"].(string), ".")[0]
+		rect := frame["frame"].(map[string]interface{})
+		x := int(rect["x"].(float64))
+		y := int(rect["y"].(float64))
+		w := int(rect["w"].(float64))
+		h := int(rect["h"].(float64))
+		regions[name] = NewRegion(t, x, y, w, h)
+	}
+
+	return regions
 }
 
 // Delete will dispose of the texture.
