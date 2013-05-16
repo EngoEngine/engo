@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/ajhager/eng"
 	"github.com/ajhager/eng/spine"
+	"math"
 )
 
 var (
@@ -47,9 +48,10 @@ func (g *Game) Update(dt float32) {
 	}
 	skeleton.Apply(walk, animTime, true)
 	if eng.KeyPressed(eng.Space) && jump.Duration() > animTime {
+		dir = float32(math.Copysign(2, float64(dir)))
 		ramp += dt
-		skeleton.Mix(jump, animTime, false, ramp)
 	} else {
+		dir = float32(math.Copysign(1, float64(dir)))
 		ramp -= dt
 	}
 	if ramp > 1 {
@@ -58,6 +60,7 @@ func (g *Game) Update(dt float32) {
 	if ramp < 0 {
 		ramp = 0
 	}
+	skeleton.Mix(jump, animTime, false, ramp)
 	skeleton.UpdateWorldTransform()
 }
 
