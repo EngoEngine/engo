@@ -74,17 +74,14 @@ type Config struct {
 	// PrintFPS turns on a logging of the frames per second to the
 	// console every second.
 	// Default: false
-	PrintFPS bool
+	LogFPS bool
 }
 
 // A Responder describes an interface for application events.
 //
-// Init is called with the default Config which can be modified.
-//
 // Open is called after the opengl context and window have been
 // created. You should load assets and create eng objects in this method.
 type Responder interface {
-	Init(config *Config)
 	Open()
 	Close()
 	Update(delta float32)
@@ -99,24 +96,22 @@ type Responder interface {
 	MouseScroll(x, y, amount int)
 }
 
-func R() Responder {
-	return responder
+func Run(title string, width, height int, fullscreen bool, r Responder) {
+	config = &Config{title, width, height, fullscreen, true, false, 1, false}
+	RunConfig(config, r)
 }
 
 // Run should be called with a type that satisfies the Responder
 // interface. Windows will be setup using your Config and a runloop
 // will start, blocking the main thread and calling methods on the
 // given responder.
-func Run(r Responder) {
+func RunConfig(config *Config, r Responder) {
 	responder = r
 
 	if err := glfw.Init(); err != nil {
 		log.Fatal(err)
 	}
 	defer glfw.Terminate()
-
-	config = &Config{"Untitled", 1024, 640, false, true, false, 1, false}
-	responder.Init(config)
 
 	if !config.Resizable {
 		glfw.OpenWindowHint(glfw.WindowNoResize, 1)
@@ -200,7 +195,7 @@ func Run(r Responder) {
 		}
 	})
 
-	timing = NewStats(config.PrintFPS)
+	timing = NewStats(config.LogFPS)
 	timing.Update()
 	for glfw.WindowParam(glfw.Opened) == 1 {
 		responder.Update(float32(timing.Dt))

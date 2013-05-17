@@ -19,10 +19,6 @@ type Game struct {
 	*eng.Game
 }
 
-func (g *Game) Init(config *eng.Config) {
-	config.Title = "Hello"
-}
-
 func (g *Game) Open() {
 	batch = eng.NewBatch()
 	color = eng.NewColor(1, 1, 1, 1)
@@ -86,5 +82,5 @@ func (g *Game) KeyUp(k eng.Key) {
 }
 
 func main() {
-	eng.Run(new(Game))
+	eng.Run("Input", 1024, 640, false, new(Game))
 }

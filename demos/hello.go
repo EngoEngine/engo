@@ -10,10 +10,6 @@ type Game struct {
 	*eng.Game
 }
 
-func (g *Game) Init(config *eng.Config) {
-	config.Title = "Hello"
-}
-
 func (g *Game) Open() {
 	batch = eng.NewBatch()
 }
@@ -25,5 +21,5 @@ func (g *Game) Draw() {
 }
 
 func main() {
-	eng.Run(new(Game))
+	eng.Run("Hello", 1024, 640, false, new(Game))
 }

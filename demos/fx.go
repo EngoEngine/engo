@@ -13,10 +13,6 @@ type Game struct {
 	*eng.Game
 }
 
-func (g *Game) Init(config *eng.Config) {
-	config.Title = "Fx"
-}
-
 func (g *Game) Open() {
 	batch = eng.NewBatch()
 	effect = fx.NewFilm(.3, .2, 4096, false)
@@ -33,5 +29,5 @@ func (g *Game) Draw() {
 }
 
 func main() {
-	eng.Run(new(Game))
+	eng.Run("Fx", 1024, 640, false, new(Game))
 }

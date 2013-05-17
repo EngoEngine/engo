@@ -20,10 +20,6 @@ type Game struct {
 	*eng.Game
 }
 
-func (g *Game) Init(config *eng.Config) {
-	config.Title = "Spine"
-}
-
 func (g *Game) Open() {
 	batch = eng.NewBatch()
 	skeleton = spine.NewSkeleton("data/spine", "spineboy.json")
@@ -78,5 +74,5 @@ func (g *Game) KeyDown(k eng.Key) {
 }
 
 func main() {
-	eng.Run(new(Game))
+	eng.Run("Spine", 1024, 640, false, new(Game))
 }

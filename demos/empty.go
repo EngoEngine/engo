@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	eng.Run(new(eng.Game))
+	eng.Run("Empty", 1024, 640, false, new(eng.Game))
 }

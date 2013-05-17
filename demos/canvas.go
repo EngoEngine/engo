@@ -15,10 +15,6 @@ type Game struct {
 	*eng.Game
 }
 
-func (g *Game) Init(config *eng.Config) {
-	config.Title = "Canvas"
-}
-
 func (g *Game) Open() {
 	batch = eng.NewBatch()
 	canvas = eng.NewCanvas(eng.Width(), eng.Height())
@@ -46,5 +42,5 @@ func (g *Game) Draw() {
 }
 
 func main() {
-	eng.Run(new(Game))
+	eng.Run("Canvas", 1024, 640, false, new(Game))
 }

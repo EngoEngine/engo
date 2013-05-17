@@ -9,9 +9,6 @@ package eng
 type Game struct {
 }
 
-func (g *Game) Init(s *Config) {
-}
-
 func (g *Game) Open() {
 }
 

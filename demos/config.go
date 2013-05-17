@@ -4,11 +4,8 @@ import (
 	"github.com/ajhager/eng"
 )
 
-type Config struct {
-	*eng.Game
-}
-
-func (c *Config) Init(config *eng.Config) {
+func main() {
+	config := eng.NewConfig()
 	config.Title = "Config"
 	config.Width = 800
 	config.Height = 600
@@ -17,8 +14,5 @@ func (c *Config) Init(config *eng.Config) {
 	config.Resizable = true
 	config.Fsaa = 4
 	config.PrintFPS = true
-}
-
-func main() {
-	eng.Run(new(Config))
+	eng.RunConfig(config, new(eng.Game))
 }

@@ -13,10 +13,6 @@ type Game struct {
 	*eng.Game
 }
 
-func (g *Game) Init(config *eng.Config) {
-	config.Title = "Atlas"
-}
-
 func (g *Game) Open() {
 	batch = eng.NewBatch()
 	texture := eng.NewTexture("data/spineboy.png")
@@ -30,5 +26,5 @@ func (g *Game) Draw() {
 }
 
 func main() {
-	eng.Run(new(Game))
+	eng.Run("Atlas", 1024, 640, false, new(Game))
 }
