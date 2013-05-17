@@ -77,6 +77,10 @@ type Config struct {
 	LogFPS bool
 }
 
+func NewConfig() *Config {
+	return &Config{"Untitled", 800, 600, false, true, false, 1, false}
+}
+
 // A Responder describes an interface for application events.
 //
 // Open is called after the opengl context and window have been

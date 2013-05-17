@@ -13,6 +13,6 @@ func main() {
 	config.Vsync = true
 	config.Resizable = true
 	config.Fsaa = 4
-	config.PrintFPS = true
+	config.LogFPS = true
 	eng.RunConfig(config, new(eng.Game))
 }
