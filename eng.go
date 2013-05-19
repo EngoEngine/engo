@@ -109,7 +109,8 @@ func Run(title string, width, height int, fullscreen bool, r Responder) {
 // interface. Windows will be setup using your Config and a runloop
 // will start, blocking the main thread and calling methods on the
 // given responder.
-func RunConfig(config *Config, r Responder) {
+func RunConfig(c *Config, r Responder) {
+	config = c
 	responder = r
 
 	if err := glfw.Init(); err != nil {
