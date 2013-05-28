@@ -13,21 +13,26 @@ import (
 
 // Common OpenGL constants
 const (
-	BlendZero             = gl.ZERO
-	BlendOne              = gl.ONE
-	BlendSrcColor         = gl.SRC_COLOR
-	BlendOneMinusSrcColor = gl.ONE_MINUS_SRC_COLOR
-	BlendDstColor         = gl.DST_COLOR
-	BlendOneMinusDstColor = gl.ONE_MINUS_DST_COLOR
-	BlendSrcAlpha         = gl.SRC_ALPHA
-	BlendOneMinusSrcAlpha = gl.ONE_MINUS_SRC_ALPHA
-	BlendDstAlpha         = gl.DST_ALPHA
-	BlendOneMinusDstAlpha = gl.ONE_MINUS_DST_ALPHA
-	FilterNearest         = gl.NEAREST
-	FilterLinear          = gl.LINEAR
-	WrapClampToEdge       = gl.CLAMP_TO_EDGE
-	WrapRepeat            = gl.REPEAT
-	WrapMirroredRepeat    = gl.MIRRORED_REPEAT
+	BlendZero                  = gl.ZERO
+	BlendOne                   = gl.ONE
+	BlendSrcColor              = gl.SRC_COLOR
+	BlendOneMinusSrcColor      = gl.ONE_MINUS_SRC_COLOR
+	BlendDstColor              = gl.DST_COLOR
+	BlendOneMinusDstColor      = gl.ONE_MINUS_DST_COLOR
+	BlendSrcAlpha              = gl.SRC_ALPHA
+	BlendOneMinusSrcAlpha      = gl.ONE_MINUS_SRC_ALPHA
+	BlendDstAlpha              = gl.DST_ALPHA
+	BlendOneMinusDstAlpha      = gl.ONE_MINUS_DST_ALPHA
+	FilterNearest              = gl.NEAREST
+	FilterLinear               = gl.LINEAR
+	FilterMipMap               = gl.LINEAR_MIPMAP_LINEAR
+	FilterLinearMipMapLinear   = gl.LINEAR_MIPMAP_LINEAR
+	FilterNearestMipMapLinear  = gl.NEAREST_MIPMAP_LINEAR
+	FilterLinearMipMapNearest  = gl.LINEAR_MIPMAP_NEAREST
+	FilterNearestMipMapNearest = gl.NEAREST_MIPMAP_NEAREST
+	WrapClampToEdge            = gl.CLAMP_TO_EDGE
+	WrapRepeat                 = gl.REPEAT
+	WrapMirroredRepeat         = gl.MIRRORED_REPEAT
 )
 
 var (
