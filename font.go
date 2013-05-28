@@ -8,6 +8,7 @@ import (
 	"bufio"
 	"bytes"
 	"compress/gzip"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -51,7 +52,7 @@ func NewFont(fnt interface{}, img interface{}) *Font {
 	}
 
 	texture := NewTexture(img)
-	texture.SetFilter(FilterLinear, FilterLinear)
+	texture.SetFilter(FilterMipMap, FilterLinear)
 
 	font := new(Font)
 	font.regions = make([]*Region, 0)
@@ -111,7 +112,15 @@ func (f *Font) mapRune(ch rune) (int, bool) {
 // x, y using the given color. If color == nil, the given batch's
 // current color will be used. If the string contains a rune that is
 // not in the font, that rune will be skipped.
-func (f *Font) Print(batch *Batch, text string, x, y float32, color *Color) {
+func (f *Font) Print(batch *Batch, t interface{}, x, y float32, color *Color) {
+	text := ""
+	switch t := t.(type) {
+	default:
+		text = fmt.Sprintf("%v", t)
+	case string:
+		text = t
+	}
+
 	xx := x
 	for _, v := range text {
 		i, ok := f.mapRune(v)
