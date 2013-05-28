@@ -142,7 +142,7 @@ func RunConfig(c *Config, r Responder) {
 	config.Width, config.Height = glfw.WindowSize()
 
 	if err := gl.Init(); err != nil {
-		log.Fatal(err)
+		//		log.Println(err)
 	}
 
 	bgColor = NewColor(0, 0, 0, 0)
