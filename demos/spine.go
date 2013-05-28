@@ -66,7 +66,7 @@ func (g *Game) Draw() {
 	batch.End()
 }
 
-func (g *Game) KeyDown(k eng.Key) {
+func (g *Game) KeyDown(k int) {
 	if k == eng.Space {
 		animTime = 0
 		ramp = 0

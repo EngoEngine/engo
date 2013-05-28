@@ -42,7 +42,7 @@ func (g *Game) MouseMove(x, y int) {
 	my = y
 }
 
-func (g *Game) MouseDown(x, y int, b eng.Button) {
+func (g *Game) MouseDown(x, y int, b int) {
 	switch b {
 	default:
 	case eng.MouseLeft:
@@ -54,7 +54,7 @@ func (g *Game) MouseDown(x, y int, b eng.Button) {
 	}
 }
 
-func (g *Game) MouseUp(x, y int, b eng.Button) {
+func (g *Game) MouseUp(x, y int, b int) {
 	color.R = 1
 	color.G = 1
 	color.B = 1
@@ -69,13 +69,13 @@ func (g *Game) KeyType(k rune) {
 	letters = letters + string(k)
 }
 
-func (g *Game) KeyDown(k eng.Key) {
+func (g *Game) KeyDown(k int) {
 	if k == eng.Space {
 		eng.SetBgColor(eng.NewColor(rand.Float32(), rand.Float32(), rand.Float32(), 1))
 	}
 }
 
-func (g *Game) KeyUp(k eng.Key) {
+func (g *Game) KeyUp(k int) {
 	if k == eng.Escape {
 		eng.Exit()
 	}

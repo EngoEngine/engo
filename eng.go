@@ -91,11 +91,11 @@ type Responder interface {
 	Update(delta float32)
 	Draw()
 	MouseMove(x, y int)
-	MouseDown(x, y int, button Button)
-	MouseUp(x, y int, button Button)
+	MouseDown(x, y int, button int)
+	MouseUp(x, y int, button int)
 	KeyType(key rune)
-	KeyDown(key Key)
-	KeyUp(key Key)
+	KeyDown(key int)
+	KeyUp(key int)
 	Resize(width, height int)
 	MouseScroll(x, y, amount int)
 }
@@ -171,9 +171,9 @@ func RunConfig(c *Config, r Responder) {
 	glfw.SetMouseButtonCallback(func(b, s int) {
 		x, y := glfw.MousePos()
 		if s == glfw.KeyPress {
-			responder.MouseDown(x, y, Button(b))
+			responder.MouseDown(x, y, b)
 		} else {
-			responder.MouseUp(x, y, Button(b))
+			responder.MouseUp(x, y, b)
 		}
 	})
 
@@ -188,9 +188,9 @@ func RunConfig(c *Config, r Responder) {
 
 	glfw.SetKeyCallback(func(k, s int) {
 		if s == glfw.KeyPress {
-			responder.KeyDown(Key(k))
+			responder.KeyDown(k)
 		} else {
-			responder.KeyUp(Key(k))
+			responder.KeyUp(k)
 		}
 	})
 
@@ -280,13 +280,13 @@ func SetMouseCursor(on bool) {
 
 // MousePressed takes a mouse button constant and indicates if it is
 // currently pressed.
-func MousePressed(b Button) bool {
-	return glfw.MouseButton(int(b)) == glfw.KeyPress
+func MousePressed(b int) bool {
+	return glfw.MouseButton(b) == glfw.KeyPress
 }
 
 // KeyPressed takes a key constant and indicates if it is currently pressed.
-func KeyPressed(k Key) bool {
-	return glfw.Key(int(k)) == glfw.KeyPress
+func KeyPressed(k int) bool {
+	return glfw.Key(k) == glfw.KeyPress
 }
 
 // SetKeyRepeat toggles key repeat either on or off.

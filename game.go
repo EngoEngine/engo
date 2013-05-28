@@ -24,10 +24,10 @@ func (g *Game) Draw() {
 func (g *Game) MouseMove(x, y int) {
 }
 
-func (g *Game) MouseDown(x, y int, b Button) {
+func (g *Game) MouseDown(x, y int, b int) {
 }
 
-func (g *Game) MouseUp(x, y int, b Button) {
+func (g *Game) MouseUp(x, y int, b int) {
 }
 
 func (g *Game) MouseScroll(x, y, a int) {
@@ -36,10 +36,10 @@ func (g *Game) MouseScroll(x, y, a int) {
 func (g *Game) KeyType(k rune) {
 }
 
-func (g *Game) KeyDown(k Key) {
+func (g *Game) KeyDown(k int) {
 }
 
-func (g *Game) KeyUp(k Key) {
+func (g *Game) KeyUp(k int) {
 }
 
 func (g *Game) Resize(w, h int) {
