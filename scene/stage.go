@@ -2,13 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package eng
+package scene
+
+import (
+	"github.com/ajhager/eng"
+)
 
 // A Stage wraps Batch and a Camera to provide a simple way of
 // managing a viewport. This will eventually provide a 2d scenegraph.
 type Stage struct {
-	batch                     *Batch
-	camera                    *Camera
+	batch                     *eng.Batch
+	camera                    *eng.Camera
 	width, height             float32
 	gutterWidth, gutterHeight float32
 }
@@ -19,14 +23,14 @@ func NewStage(width, height float32, keepAspect bool) *Stage {
 	stage := new(Stage)
 
 	if width == 0 {
-		width = float32(Width())
+		width = float32(eng.Width())
 	}
 	if height == 0 {
-		height = float32(Height())
+		height = float32(eng.Height())
 	}
 
-	stage.batch = NewBatch()
-	stage.camera = NewCamera(stage.width, stage.height)
+	stage.batch = eng.NewBatch()
+	stage.camera = eng.NewCamera(stage.width, stage.height)
 
 	stage.SetViewport(width, height, keepAspect)
 
@@ -37,8 +41,8 @@ func NewStage(width, height float32, keepAspect bool) *Stage {
 // want to just resize the stage's view.
 func (stage *Stage) SetViewport(width, height float32, keepAspect bool) {
 	if keepAspect {
-		screenWidth := float32(Width())
-		screenHeight := float32(Height())
+		screenWidth := float32(eng.Width())
+		screenHeight := float32(eng.Height())
 		if screenHeight/screenWidth < height/width {
 			toScreenSpace := screenHeight / height
 			toViewportSpace := height / screenHeight
@@ -77,14 +81,16 @@ func (s *Stage) Update() {
 }
 
 // Batch returns the stage's batch.
-func (s *Stage) Batch() *Batch {
+func (s *Stage) Batch() *eng.Batch {
 	return s.batch
 }
 
 // Camera returns the stage's camera.
-func (s *Stage) Camera() *Camera {
+func (s *Stage) Camera() *eng.Camera {
 	return s.camera
 }
+
+var tmp = new(eng.Vector)
 
 // ScreenToStage takes a point on the screen and returns the point in
 // the position of that point with respect to the stage's view. The is
