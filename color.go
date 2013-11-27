@@ -18,8 +18,8 @@ func NewColor(r, g, b, a float32) *Color {
 	return &Color{r, g, b, a}
 }
 
-// NewColorBytes constructs a color using 8bit integers in the the
-// range 0 - 255.
+// NewColorBytes constructs a color using 8bit integers in the range
+// 0 to 255.
 func NewColorBytes(r, g, b, a byte) *Color {
 	color := new(Color)
 	color.R = float32(r) / 255.0
@@ -29,20 +29,12 @@ func NewColorBytes(r, g, b, a byte) *Color {
 	return color
 }
 
-func NewColorBytesA(r, g, b byte) *Color {
-	color := new(Color)
-	color.R = float32(r) / 255.0
-	color.G = float32(g) / 255.0
-	color.B = float32(b) / 255.0
-	color.A = float32(1)
-	return color
+// NewColorHex contructs a color from a uint32, ie. 0xFFFFFF.
+func NewColorHex(n uint32) *Color {
+	return NewColorBytes(uint8((n>>16)&0xFF), uint8((n>>8)&0xFF), uint8(n&0xFF), 255)
 }
 
 // NewColorRand constructs a random color.
 func NewColorRand() *Color {
 	return &Color{rand.Float32(), rand.Float32(), rand.Float32(), 1}
-}
-
-func NewColorRandA() *Color {
-	return &Color{rand.Float32(), rand.Float32(), rand.Float32(), rand.Float32()}
 }
