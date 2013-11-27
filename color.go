@@ -5,9 +5,18 @@
 package eng
 
 import (
+	"math"
 	"math/rand"
 )
 
+// A type that satisfies the Blender interface takes a color,
+// an index into a range of values, a maximum of the range,
+// and returns a new interpolated color.
+type Blender interface {
+	Blend(*Color, int, int) *Color
+}
+
+// Color struct
 type Color struct {
 	R, G, B, A float32
 }
@@ -37,4 +46,68 @@ func NewColorHex(n uint32) *Color {
 // NewColorRand constructs a random color.
 func NewColorRand() *Color {
 	return &Color{rand.Float32(), rand.Float32(), rand.Float32(), 1}
+}
+
+// Copy returns a new color with the same components.
+func (c *Color) Copy() *Color {
+	return &Color{c.R, c.G, c.B, c.A}
+}
+
+// Blend satisfies the Blender interface by returning a constant copy.
+func (c *Color) Blend(o *Color, i, t int) *Color {
+	return c.Copy()
+}
+
+// BlendFunc is a function that takes a color and returns a new color.
+type BlendFunc func(*Color) *Color
+
+// BlendFunc satisfies the Blender interface by calling itself with
+// the passed in color.
+func (bf BlendFunc) Blend(o *Color, i, t int) *Color {
+	return bf(o)
+}
+
+// ScaleFunc is a function that takes a color, an index into a range
+// of values, a maximum of that range, and returns an interpolated
+// new color.
+type ScaleFunc func(*Color, int, int) *Color
+
+// ScaleFunc satisfies the Blender interface by calling itself
+// with the provided values.
+func (sf ScaleFunc) Blend(c *Color, i, t int) *Color {
+	return sf(c, i, t)
+}
+
+// DiscreteGradient
+func DiscreteGradient(blenders ...Blender) ScaleFunc {
+	return func(bot *Color, i, t int) *Color {
+		return blenders[i%len(blenders)].Blend(bot, i, t)
+	}
+}
+
+// LinearGradient
+func LinearGradient(blenders ...Blender) ScaleFunc {
+	return func(bot *Color, i, t int) *Color {
+		if i == 0 {
+			return blenders[0].Blend(bot, i, t)
+		}
+
+		if i == (t - 1) {
+			return blenders[len(blenders)-1].Blend(bot, i, t)
+		}
+
+		a := (float32(i) / float32(t-1)) * float32(len(blenders)-1)
+		b := int(math.Floor(float64(a)))
+		return alpha(blenders[b+1].Blend(bot, i, t), blenders[b].Blend(bot, i, t), a-float32(b))
+	}
+}
+
+// Color blending functions
+func alpha(top, bot *Color, a float32) *Color {
+	a = clampF(0, 1, a)
+	return NewColor(bot.R+(top.R-bot.R)*a, bot.G+(top.G-bot.G)*a, bot.B+(top.B-bot.B)*a, 1)
+}
+
+func clampF(low, high, value float32) float32 {
+	return float32(math.Min(float64(high), math.Max(float64(low), float64(value))))
 }
