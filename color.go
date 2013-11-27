@@ -58,6 +58,11 @@ func (c *Color) Blend(o *Color, i, t int) *Color {
 	return c.Copy()
 }
 
+// Multiply = old * new
+func (c *Color) Multiply(o *Color) *Color {
+	return multiply(o, c)
+}
+
 // BlendFunc is a function that takes a color and returns a new color.
 type BlendFunc func(*Color) *Color
 
@@ -65,6 +70,14 @@ type BlendFunc func(*Color) *Color
 // the passed in color.
 func (bf BlendFunc) Blend(o *Color, i, t int) *Color {
 	return bf(o)
+}
+
+// BlendMultiply creates a BlendFunc that multiply the given color
+// with a blending color.
+func BlendMultiply(top *Color) BlendFunc {
+	return func(bot *Color) *Color {
+		return multiply(top, bot)
+	}
 }
 
 // ScaleFunc is a function that takes a color, an index into a range
@@ -105,9 +118,13 @@ func LinearGradient(blenders ...Blender) ScaleFunc {
 // Color blending functions
 func alpha(top, bot *Color, a float32) *Color {
 	a = clampF(0, 1, a)
-	return NewColor(bot.R+(top.R-bot.R)*a, bot.G+(top.G-bot.G)*a, bot.B+(top.B-bot.B)*a, 1)
+	return NewColor(bot.R+(top.R-bot.R)*a, bot.G+(top.G-bot.G)*a, bot.B+(top.B-bot.B)*a, bot.A+(top.A-bot.A)*a)
 }
 
 func clampF(low, high, value float32) float32 {
 	return float32(math.Min(float64(high), math.Max(float64(low), float64(value))))
+}
+
+func multiply(top, bot *Color) *Color {
+	return NewColor(top.R*bot.R, top.G*bot.G, top.B*bot.B, top.A*bot.A)
 }
