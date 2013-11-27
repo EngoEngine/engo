@@ -68,6 +68,16 @@ func (c *Color) Multiply(o *Color) *Color {
 	return multiply(o, c)
 }
 
+// Overlay = new.x <= 0.5 ? 2*new*old : white - 2*(white-new)*(white-old)
+func (c *Color) Overlay(o *Color) *Color {
+	return overlay(o, c)
+}
+
+// Screen = white - (white - old) * (white - new)
+func (c *Color) Screen(o *Color) *Color {
+	return screen(o, c)
+}
+
 // BlendFunc is a function that takes a color and returns a new color.
 type BlendFunc func(*Color) *Color
 
@@ -88,6 +98,20 @@ func BlendMultiply(top *Color) BlendFunc {
 func BlendDodge(top *Color) BlendFunc {
 	return func(bot *Color) *Color {
 		return dodge(top, bot)
+	}
+}
+
+// BlendOverlay
+func BlendOverlay(top *Color) BlendFunc {
+	return func(bot *Color) *Color {
+		return overlay(top, bot)
+	}
+}
+
+// BlendScreen
+func BlendScreen(top *Color) BlendFunc {
+	return func(bot *Color) *Color {
+		return screen(top, bot)
 	}
 }
 
@@ -138,6 +162,14 @@ func dodgeF(top, bot float32) float32 {
 	return 1
 }
 
+func overlayF(top, bot float32) float32 {
+	if bot < 0.5 {
+		return 2 * top * bot
+	} else {
+		return 1 - 2*(1-top)*(1-bot)
+	}
+}
+
 // Color blending functions
 func alpha(top, bot *Color, a float32) *Color {
 	a = clampF(0, 1, a)
@@ -150,4 +182,12 @@ func dodge(top, bot *Color) *Color {
 
 func multiply(top, bot *Color) *Color {
 	return NewColor(top.R*bot.R, top.G*bot.G, top.B*bot.B, top.A*bot.A)
+}
+
+func overlay(top, bot *Color) *Color {
+	return NewColor(overlayF(top.R, bot.R), overlayF(top.G, bot.G), overlayF(top.B, bot.B), overlayF(top.A, bot.A))
+}
+
+func screen(top, bot *Color) *Color {
+	return NewColor(1-(1-top.R)*(1-bot.R), 1-(1-top.G)*(1-bot.G), 1-(1-top.B)*(1-bot.B), 1-(1-top.A)*(1-bot.A))
 }
