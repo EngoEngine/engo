@@ -12,17 +12,4 @@ Install
 
 Documentation
 -------------
-
 [godoc.org](http://godoc.org/github.com/ajhager/eng)
-
-TODO
-----
-
-* Effect composer and more default effects
-* Particle system
-* Shape renderer
-* Audio module
-* TexturePacker loading
-* Tiled Map loading and rendering
-* Static Batch cache
-* Website and more demos
