@@ -1,25 +1,53 @@
 package rog
 
+// The Actor interface represents an entity that can take actions
+// of a certain duration.
+type Actor interface {
+	// The return value determines how long the action will take.
+	// Returning a value less than 0 removes the actor.
+	Act() float32
+}
+
 type Queue struct {
+	lock       int
 	time       float32
 	actors     []Actor
 	actorTimes []float32
 }
 
 func NewQueue() *Queue {
-	return &Queue{0, make([]Actor, 0, 1), make([]float32, 0, 1)}
+	return &Queue{0, 0, make([]Actor, 0, 1), make([]float32, 0, 1)}
+}
+
+func (q *Queue) Lock() {
+	q.lock++
+}
+
+func (q *Queue) Unlock() {
+	if q.lock == 0 {
+		panic("Cannot unlock unlocked Queue")
+	}
+	q.lock--
+}
+
+func (q *Queue) Update() {
+	if q.lock == 0 {
+		actor := q.Next()
+		if actor != nil {
+			q.Add(actor, actor.Act())
+		}
+	}
 }
 
 func (q *Queue) Time() float32 {
 	return q.time
 }
 
-func (q *Queue) Clear() {
-	q.actors = make([]Actor, 0)
-	q.actorTimes = make([]float32, 0)
-}
-
 func (q *Queue) Add(actor Actor, time float32) {
+	if time < 0 {
+		return
+	}
+
 	index := len(q.actorTimes)
 	for i, t := range q.actorTimes {
 		if t > time {
@@ -37,23 +65,10 @@ func (q *Queue) Add(actor Actor, time float32) {
 	q.actorTimes[index] = time
 }
 
-func (q *Queue) Get() Actor {
-	if len(q.actors) == 0 {
-		return nil
-	}
-
-	var time float32
-	time, q.actorTimes = q.actorTimes[0], q.actorTimes[1:]
-	if time > 0 {
-		q.time += time
-		for i := 0; i < len(q.actorTimes); i++ {
-			q.actorTimes[i] -= time
-		}
-	}
-
-	var actor Actor
-	actor, q.actors = q.actors[0], q.actors[1:]
-	return actor
+func (q *Queue) Clear() {
+	q.actors = make([]Actor, 0, 1)
+	q.actorTimes = make([]float32, 0, 1)
+	q.lock = 0
 }
 
 func (q *Queue) Remove(actor Actor) bool {
@@ -70,4 +85,23 @@ func (q *Queue) Remove(actor Actor) bool {
 		}
 	}
 	return false
+}
+
+func (q *Queue) Next() Actor {
+	if len(q.actors) == 0 {
+		return nil
+	}
+
+	var time float32
+	time, q.actorTimes = q.actorTimes[0], q.actorTimes[1:]
+	if time > 0 {
+		q.time += time
+		for i := 0; i < len(q.actorTimes); i++ {
+			q.actorTimes[i] -= time
+		}
+	}
+
+	var actor Actor
+	actor, q.actors = q.actors[0], q.actors[1:]
+	return actor
 }
