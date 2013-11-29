@@ -8,6 +8,9 @@ type Actor interface {
 	Act() float32
 }
 
+// Queue schedules actors by how long their actions take.
+// The Queue can be recursively locked in order to, for example,
+// listen for user input or show a menu.
 type Queue struct {
 	lock       int
 	time       float32
@@ -19,10 +22,12 @@ func NewQueue() *Queue {
 	return &Queue{0, 0, make([]Actor, 0, 1), make([]float32, 0, 1)}
 }
 
+// Lock the queue.
 func (q *Queue) Lock() {
 	q.lock++
 }
 
+// Unlock one lock of the queue.
 func (q *Queue) Unlock() {
 	if q.lock == 0 {
 		panic("Cannot unlock unlocked Queue")
@@ -30,6 +35,8 @@ func (q *Queue) Unlock() {
 	q.lock--
 }
 
+// Update the queue. If it isn't locked, grab the next actor,
+// run it, and possibly requeue it.
 func (q *Queue) Update() {
 	if q.lock == 0 {
 		actor := q.Next()
@@ -39,10 +46,12 @@ func (q *Queue) Update() {
 	}
 }
 
+// Return the current time of the queue.
 func (q *Queue) Time() float32 {
 	return q.time
 }
 
+// Add an actor to the queue with a delta time.
 func (q *Queue) Add(actor Actor, time float32) {
 	if time < 0 {
 		return
@@ -65,12 +74,14 @@ func (q *Queue) Add(actor Actor, time float32) {
 	q.actorTimes[index] = time
 }
 
+// Clear and unlock the queue.
 func (q *Queue) Clear() {
 	q.actors = make([]Actor, 0, 1)
 	q.actorTimes = make([]float32, 0, 1)
 	q.lock = 0
 }
 
+// Remove an actor from the queue.
 func (q *Queue) Remove(actor Actor) bool {
 	for i, v := range q.actors {
 		if v == actor {
@@ -87,6 +98,7 @@ func (q *Queue) Remove(actor Actor) bool {
 	return false
 }
 
+// Return the next actor in the queue.
 func (q *Queue) Next() Actor {
 	if len(q.actors) == 0 {
 		return nil
