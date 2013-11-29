@@ -32,10 +32,10 @@ type Font struct {
 	mapping map[rune]int
 }
 
-// NewFont constructs a new bitmap font from the bmfont format. fnt
-// and img should either be string paths to the font and image files
-// respectively or io.Reader's of the same.
-func NewFont(fnt interface{}, img interface{}) *Font {
+// NewBitmapFont constructs a new bitmap font from the bmfont format.
+// fnt and img should either be string paths to the font and image
+// files respectively or io.Reader's of the same.
+func NewBitmapFont(img interface{}, fnt interface{}) *Font {
 	var reader *bufio.Reader
 	switch data := fnt.(type) {
 	default:
@@ -52,7 +52,6 @@ func NewFont(fnt interface{}, img interface{}) *Font {
 	}
 
 	texture := NewTexture(img)
-	texture.SetFilter(FilterMipMap, FilterLinear)
 
 	font := new(Font)
 	font.regions = make([]*Region, 0)
@@ -100,12 +99,48 @@ func split(s string) (string, string) {
 	return strs[0], strs[1]
 }
 
+func NewGridFont(img interface{}, cellWidth, cellHeight int, maps string) *Font {
+	texture := NewTexture(img)
+
+	font := new(Font)
+	font.regions = make([]*Region, 0)
+	font.offsets = make([]*offset, 0)
+	font.mapping = make(map[rune]int)
+	font.texture = texture
+
+	i := 0
+	for _, v := range maps {
+		font.mapping[v] = i
+		i++
+	}
+
+	os := &offset{0, 0, float32(cellWidth)}
+	for y := 0; y < texture.Height()/cellHeight; y++ {
+		for x := 0; x < texture.Width()/cellWidth; x++ {
+			font.offsets = append(font.offsets, os)
+			r := NewRegion(texture, x*cellWidth, y*cellHeight, cellWidth, cellHeight)
+			font.regions = append(font.regions, r)
+		}
+	}
+
+	return font
+}
+
 func (f *Font) mapRune(ch rune) (int, bool) {
 	if f.mapping == nil {
 		return int(ch), true
 	}
 	position, ok := f.mapping[ch]
 	return position, ok
+}
+
+func (f *Font) Put(batch *Batch, r rune, x, y float32, color *Color) {
+	i, ok := f.mapRune(r)
+	if ok {
+		region := f.regions[i]
+		offset := f.offsets[i]
+		batch.Draw(region, x+offset.xoffset, y+offset.yoffset, 0, 0, 1, 1, 0, color)
+	}
 }
 
 // Print renders some text with the first letter's top left corner at

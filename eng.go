@@ -324,7 +324,7 @@ func Fps() float32 {
 // DefaultFont returns eng's built in font, creating it on first use.
 func DefaultFont() *Font {
 	if defaultFont == nil {
-		defaultFont = NewFont(dfonttxt, dfontimg())
+		defaultFont = NewBitmapFont(dfontimg(), dfonttxt)
 	}
 	return defaultFont
 }

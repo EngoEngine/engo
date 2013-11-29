@@ -128,8 +128,8 @@ func (con *Console) Render(batch *eng.Batch, font *eng.Font, w, h int) {
 	for x := 0; x < con.Width(); x++ {
 		for y := 0; y < con.Height(); y++ {
 			fg, bg, ch := con.Get(x, y)
-			font.Print(batch, "█", float32(x*w), float32(y*h), bg)
-			font.Print(batch, fmt.Sprintf("%c", ch), float32(x*w), float32(y*h), fg)
+			font.Put(batch, '█', float32(x*w), float32(y*h), bg)
+			font.Put(batch, ch, float32(x*w), float32(y*h), fg)
 		}
 	}
 }
