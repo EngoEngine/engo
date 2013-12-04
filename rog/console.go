@@ -9,6 +9,8 @@ import (
 	"github.com/ajhager/eng"
 )
 
+var bgRegion *eng.Region
+
 type Console struct {
 	bg, fg [][]*eng.Color
 	ch     [][]rune
@@ -24,6 +26,10 @@ func NewConsole(width, height int) *Console {
 		bg[y] = make([]*eng.Color, width)
 		fg[y] = make([]*eng.Color, width)
 		ch[y] = make([]rune, width)
+	}
+
+	if bgRegion == nil {
+		bgRegion = eng.NewRegion(eng.BlankTexture(), 0, 0, 1, 1)
 	}
 
 	con := &Console{bg, fg, ch, width, height}
@@ -131,8 +137,13 @@ func (con *Console) SetRect(x, y, w, h int, fg, bg eng.Blender, data string, res
 func (con *Console) Render(batch *eng.Batch, font *eng.Font, w, h int) {
 	for x := 0; x < con.Width(); x++ {
 		for y := 0; y < con.Height(); y++ {
-			fg, bg, ch := con.Get(x, y)
-			font.Put(batch, '█', float32(x*w), float32(y*h), bg)
+			_, bg, _ := con.Get(x, y)
+			batch.Draw(bgRegion, float32(x*w), float32(y*h), 0, 0, float32(w), float32(h), 0, bg)
+		}
+	}
+	for x := 0; x < con.Width(); x++ {
+		for y := 0; y < con.Height(); y++ {
+			fg, _, ch := con.Get(x, y)
 			font.Put(batch, ch, float32(x*w), float32(y*h), fg)
 		}
 	}

@@ -48,6 +48,15 @@ func NewColorRand() *Color {
 	return &Color{rand.Float32(), rand.Float32(), rand.Float32(), 1}
 }
 
+// Color satisfies the Go color.Color interface.
+func (c *Color) RGBA() (r, g, b, a uint32) {
+	r = uint32(c.R * 65535.0)
+	g = uint32(c.G * 65535.0)
+	b = uint32(c.B * 65535.0)
+	a = uint32(c.A * 65535.0)
+	return
+}
+
 // Copy returns a new color with the same components.
 func (c *Color) Copy() *Color {
 	return &Color{c.R, c.G, c.B, c.A}
