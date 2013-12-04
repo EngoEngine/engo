@@ -6,6 +6,7 @@ import (
 
 var (
 	batch *eng.Batch
+	ttf   *eng.Font
 )
 
 type Game struct {
@@ -14,11 +15,12 @@ type Game struct {
 
 func (g *Game) Open() {
 	batch = eng.NewBatch()
+	ttf = eng.NewTrueTypeFont("data/DroidSansMono.ttf", 75, " !\"#$%&'()*+,-./0123456789:;█<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~")
 }
 
 func (g *Game) Draw() {
 	batch.Begin()
-	eng.DefaultFont().Print(batch, "Hello, world!", 0, 0, nil)
+	ttf.Print(batch, "Hello, True Type Fonts!", 0, float32(eng.Height()-75)/2, eng.DarkSky)
 	batch.End()
 }
 

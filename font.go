@@ -7,9 +7,13 @@ package eng
 import (
 	"bufio"
 	"bytes"
+	"code.google.com/p/freetype-go/freetype"
+	"code.google.com/p/freetype-go/freetype/truetype"
 	"compress/gzip"
 	"fmt"
+	"image"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"reflect"
@@ -39,7 +43,7 @@ func NewBitmapFont(img interface{}, fnt interface{}) *Font {
 	var reader *bufio.Reader
 	switch data := fnt.(type) {
 	default:
-		log.Fatal("NewTexture needs a string or io.Reader")
+		log.Fatal("NewBitmapTexture needs a string or io.Reader")
 	case string:
 		file, err := os.Open(data)
 		if err != nil {
@@ -99,6 +103,10 @@ func split(s string) (string, string) {
 	return strs[0], strs[1]
 }
 
+// NewGridFont constructs a new bitmap font from an image of equally
+// spaced glyphs (cellWidth x cellHeight) which are laid out from
+// left to right, top to bottom, using the runes in maps. img should
+// either be a string path the image or an io.Reader.
 func NewGridFont(img interface{}, cellWidth, cellHeight int, maps string) *Font {
 	texture := NewTexture(img)
 
@@ -121,6 +129,97 @@ func NewGridFont(img interface{}, cellWidth, cellHeight int, maps string) *Font 
 			r := NewRegion(texture, x*cellWidth, y*cellHeight, cellWidth, cellHeight)
 			font.regions = append(font.regions, r)
 		}
+	}
+
+	return font
+}
+
+// NewTrueTypeFont constructs a bitmap font from a .ttf file using
+// only the runes specified in maps, at the size indicated by scale.
+// fnt can either be a string path or an io.Reader.
+func NewTrueTypeFont(fnt interface{}, scale int, maps string) *Font {
+	var reader io.Reader
+	switch data := fnt.(type) {
+	default:
+		log.Fatal("NewTTFont needs a string or io.Reader")
+	case string:
+		file, err := os.Open(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+		reader = file
+	case io.Reader:
+		reader = data
+	}
+
+	font := new(Font)
+	font.regions = make([]*Region, 0)
+	font.offsets = make([]*offset, 0)
+	font.mapping = make(map[rune]int)
+
+	raw, err := ioutil.ReadAll(reader)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ttf, err := truetype.Parse(raw)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	gc := int32(len(maps))
+	glyphsPerRow := int32(16)
+	glyphsPerCol := (gc / glyphsPerRow) + 1
+
+	gb := ttf.Bounds(int32(scale))
+	gw := (gb.XMax - gb.XMin)
+	gh := (gb.YMax - gb.YMin) + 5
+	iw := pow2(uint32(gw * glyphsPerRow))
+	ih := pow2(uint32(gh * glyphsPerCol))
+
+	rect := image.Rect(0, 0, int(iw), int(ih))
+	img := image.NewRGBA(rect)
+
+	c := freetype.NewContext()
+	c.SetDPI(72)
+	c.SetFont(ttf)
+	c.SetFontSize(float64(scale))
+	c.SetClip(img.Bounds())
+	c.SetDst(img)
+	c.SetSrc(image.White)
+
+	texture := NewTexture(img)
+
+	var gx, gy int32
+	i := 0
+	for _, v := range maps {
+		font.mapping[v] = i
+
+		index := ttf.Index(v)
+		metric := ttf.HMetric(int32(scale), index)
+
+		os := &offset{float32(0), float32(-5), float32(metric.AdvanceWidth)}
+		font.offsets = append(font.offsets, os)
+		r := NewRegion(texture, int(gx), int(gy), int(gw), int(gh))
+		font.regions = append(font.regions, r)
+
+		pt := freetype.Pt(int(gx), int(gy)+int(scale))
+		c.DrawString(string(v), pt)
+
+		i++
+
+		if i%16 == 0 {
+			gx = 0
+			gy += gh
+		} else {
+			gx += gw
+		}
+	}
+
+	font.texture = NewTexture(img)
+	for _, r := range font.regions {
+		r.texture = font.texture
 	}
 
 	return font
@@ -173,6 +272,16 @@ func (f *Font) Print(batch *Batch, t interface{}, x, y float32, color *Color) {
 // wrap to edge respectively.
 func (f *Font) Texture() *Texture {
 	return f.texture
+}
+
+func pow2(x uint32) uint32 {
+	x--
+	x |= x >> 1
+	x |= x >> 2
+	x |= x >> 4
+	x |= x >> 8
+	x |= x >> 16
+	return x + 1
 }
 
 var _TeDefault = "" +
