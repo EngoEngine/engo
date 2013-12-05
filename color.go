@@ -79,7 +79,8 @@ func (c *Color) Alpha(o *Color, a float32) *Color {
 
 // Blend satisfies the Blender interface by returning a constant copy.
 func (c *Color) Blend(o *Color, i, t int) *Color {
-	return c.Copy()
+	//return c.Copy()
+	return c
 }
 
 // Burn = old + new - white

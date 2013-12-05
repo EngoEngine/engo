@@ -7,9 +7,8 @@ package rog
 // State constants are arbitrary, but mapper functions in this
 // module use the following by convention.
 var (
-	EMPTY = 0
-	WALL  = 1
-	FLOOR = 2
+	EMPTY  = 0
+	FILLED = 1
 )
 
 // Types that implement the Mapper interface can have the state
@@ -62,9 +61,9 @@ func MapArena(x, y, width, height int, m Mapper) {
 	for i := x; i < x+width; i++ {
 		for j := y; j < y+height; j++ {
 			if i != x && j != y && i != x+width-1 && j != y+height-1 {
-				m.Map(i, j, FLOOR)
+				m.Map(i, j, EMPTY)
 			} else {
-				m.Map(i, j, WALL)
+				m.Map(i, j, FILLED)
 			}
 		}
 	}

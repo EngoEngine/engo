@@ -174,8 +174,8 @@ func NewTrueTypeFont(fnt interface{}, scale int, maps string) *Font {
 	glyphsPerCol := (gc / glyphsPerRow) + 1
 
 	gb := ttf.Bounds(int32(scale))
-	gw := (gb.XMax - gb.XMin)
-	gh := (gb.YMax - gb.YMin) + 5
+	gw := (gb.XMax - gb.XMin) + 2
+	gh := (gb.YMax - gb.YMin) + 2
 	iw := pow2(uint32(gw * glyphsPerRow))
 	ih := pow2(uint32(gh * glyphsPerCol))
 
