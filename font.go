@@ -15,6 +15,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math"
 	"os"
 	"reflect"
 	"strconv"
@@ -168,8 +169,8 @@ func NewTrueTypeFont(fnt interface{}, scale int, maps string) *Font {
 		log.Fatal(err)
 	}
 
-	gc := int32(len(maps))
-	glyphsPerRow := int32(16)
+	gc := int32(strings.Count(maps, "") - 1)
+	glyphsPerRow := int32(math.Sqrt(float64(gc)))
 	glyphsPerCol := (gc / glyphsPerRow) + 1
 
 	gb := ttf.Bounds(int32(scale))
@@ -197,19 +198,20 @@ func NewTrueTypeFont(fnt interface{}, scale int, maps string) *Font {
 		font.mapping[v] = i
 
 		index := ttf.Index(v)
-		metric := ttf.HMetric(int32(scale), index)
+		hmetric := ttf.HMetric(int32(scale), index)
+		vmetric := ttf.VMetric(int32(scale), index)
 
-		os := &offset{float32(0), float32(-5), float32(metric.AdvanceWidth)}
+		os := &offset{float32(0), float32(0), float32(hmetric.AdvanceWidth)}
 		font.offsets = append(font.offsets, os)
 		r := NewRegion(texture, int(gx), int(gy), int(gw), int(gh))
 		font.regions = append(font.regions, r)
 
-		pt := freetype.Pt(int(gx), int(gy)+int(scale))
+		pt := freetype.Pt(int(gx), int(gy)+int(vmetric.AdvanceHeight))
 		c.DrawString(string(v), pt)
 
 		i++
 
-		if i%16 == 0 {
+		if i%int(glyphsPerRow) == 0 {
 			gx = 0
 			gy += gh
 		} else {
