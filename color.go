@@ -340,7 +340,7 @@ func overlay(top, bot *Color) *Color {
 }
 
 func scale(bot *Color, s float32) *Color {
-	return NewColor(bot.R*s, bot.G*s, bot.B*s, bot.A*s)
+	return NewColor(bot.R*s, bot.G*s, bot.B*s, bot.A)
 }
 
 func screen(top, bot *Color) *Color {

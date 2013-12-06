@@ -7,6 +7,7 @@ package rog
 import (
 	"fmt"
 	"github.com/ajhager/eng"
+	"strings"
 )
 
 var bgRegion *eng.Region
@@ -67,12 +68,13 @@ func (con *Console) set(i, j, x, y, w, h int, fg, bg eng.Blender, data string, r
 	if len(rest) > 0 {
 		data = fmt.Sprintf(data, rest...)
 	}
-	t := len(data)
+	t := strings.Count(data, "") - 1
 	if t > 0 {
 		if h == 0 {
 			h = con.h - y
 		}
-		for k, r := range data {
+		k := 0
+		for _, r := range data {
 			if i == x+w {
 				j += 1
 				i = x
@@ -82,6 +84,7 @@ func (con *Console) set(i, j, x, y, w, h int, fg, bg eng.Blender, data string, r
 			}
 			con.put(i, j, k, t, fg, bg, r)
 			i += 1
+			k += 1
 		}
 	} else {
 		con.put(i, j, 0, 0, fg, bg, -1)
