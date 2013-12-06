@@ -153,7 +153,7 @@ func RunConfig(c *Config, r Responder) {
 		//		log.Println(err)
 	}
 
-	bgColor = NewColor(0, 0, 0, 0)
+	bgColor = NewColor(0, 0, 0)
 
 	responder.Open()
 

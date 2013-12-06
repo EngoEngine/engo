@@ -37,8 +37,8 @@ func NewConsole(width, height int) *Console {
 
 	for x := 0; x < con.w; x++ {
 		for y := 0; y < con.h; y++ {
-			con.bg[y][x] = eng.NewColor(0, 0, 0, 1)
-			con.fg[y][x] = eng.NewColor(1, 1, 1, 1)
+			con.bg[y][x] = eng.NewColor(0, 0, 0)
+			con.fg[y][x] = eng.NewColor(1, 1, 1)
 			con.ch[y][x] = ' '
 		}
 	}
