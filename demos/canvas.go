@@ -8,7 +8,6 @@ import (
 var (
 	batch  *eng.Batch
 	canvas *eng.Canvas
-	region *eng.Region
 )
 
 type Game struct {
@@ -18,8 +17,6 @@ type Game struct {
 func (g *Game) Open() {
 	batch = eng.NewBatch()
 	canvas = eng.NewCanvas(eng.Width(), eng.Height())
-	region = eng.NewRegion(canvas.Texture(), 0, 0, eng.Width(), eng.Height())
-	region.Flip(false, true)
 }
 
 func (g *Game) Draw() {
@@ -33,6 +30,8 @@ func (g *Game) Draw() {
 	eng.DefaultFont().Print(batch, "canvas", x, y, nil)
 	batch.End()
 	canvas.End()
+
+	region := canvas.Region()
 
 	batch.Begin()
 	batch.Draw(region, -200, 0, 512, 320, .5, .5, 0, nil)

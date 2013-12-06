@@ -13,10 +13,10 @@ import (
 // A Canvas technically wraps an opengl framebuffer. It is used to
 // render to a texture that can then be rendered multiple times with a batch.
 type Canvas struct {
-	id      gl.Uint
-	texture *Texture
-	width   int
-	height  int
+	id     gl.Uint
+	region *Region
+	width  int
+	height int
 }
 
 // NewCanvas constructs a canvas and backing texture with the given
@@ -26,19 +26,19 @@ func NewCanvas(width, height int) *Canvas {
 	canvas.width = width
 	canvas.height = height
 
-	canvas.texture = NewTexture(image.NewRGBA(image.Rect(0, 0, width, height)))
-	canvas.texture.SetFilter(FilterLinear, FilterLinear)
-	canvas.texture.SetWrap(WrapClampToEdge, WrapClampToEdge)
+	texture := NewTexture(image.NewRGBA(image.Rect(0, 0, width, height)))
+	texture.SetFilter(FilterLinear, FilterLinear)
+	texture.SetWrap(WrapClampToEdge, WrapClampToEdge)
 
 	gl.GenFramebuffers(1, &canvas.id)
 
-	canvas.texture.Bind()
+	texture.Bind()
 	gl.BindFramebuffer(gl.FRAMEBUFFER, canvas.id)
-	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, canvas.texture.id, 0)
+	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture.id, 0)
 
 	result := gl.CheckFramebufferStatus(gl.FRAMEBUFFER)
 
-	canvas.texture.Unbind()
+	texture.Unbind()
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 
 	if result != gl.FRAMEBUFFER_COMPLETE {
@@ -46,12 +46,15 @@ func NewCanvas(width, height int) *Canvas {
 		log.Fatal("canvas couldn't be constructed")
 	}
 
+	canvas.region = NewRegion(texture, 0, 0, canvas.width, canvas.height)
+	canvas.region.Flip(false, true)
+
 	return canvas
 }
 
 // Begin should be called before doing any rendering to the canvas.
 func (c *Canvas) Begin() {
-	gl.Viewport(0, 0, gl.Sizei(c.texture.Width()), gl.Sizei(c.texture.Height()))
+	gl.Viewport(0, 0, gl.Sizei(c.Width()), gl.Sizei(c.Height()))
 	gl.BindFramebuffer(gl.FRAMEBUFFER, c.id)
 }
 
@@ -61,20 +64,18 @@ func (c *Canvas) End() {
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 }
 
-// Texture returns the backing texture that will be rendered to. This
-// can be wrapped in a Region for rendering with a batch. The texture
-// will most likely be flipped upside down. Region.Flip(false, true)
-// can be used when the region is made to deal with that.
-func (c *Canvas) Texture() *Texture {
-	return c.texture
-}
-
 // Width is the width of the canvas.
 func (c *Canvas) Width() int {
-	return c.texture.Width()
+	return int(c.region.Width())
 }
 
 // Height is the height of the canvas.
 func (c *Canvas) Height() int {
-	return c.texture.Height()
+	return int(c.region.Height())
+}
+
+// Region returns the backing texture wrapped in a Region for
+// rendering with a batch.
+func (c *Canvas) Region() *Region {
+	return c.region
 }
