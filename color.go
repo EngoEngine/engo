@@ -27,10 +27,18 @@ func NewColor(r, g, b float32) *Color {
 	return &Color{r, g, b, 1}
 }
 
+func NewColorA(r, g, b, a float32) *Color {
+	return &Color{r, g, b, a}
+}
+
 // NewColorBytes constructs a color using 8bit integers in the range
 // 0 to 255.
 func NewColorBytes(r, g, b byte) *Color {
 	return NewColor(float32(r)/255.0, float32(g)/255.0, float32(b)/255.0)
+}
+
+func NewColorBytesA(r, g, b, a byte) *Color {
+	return NewColorA(float32(r)/255.0, float32(g)/255.0, float32(b)/255.0, float32(a)/255.0)
 }
 
 // NewColorHex contructs a color from a uint32, ie. 0xFFFFFF.
@@ -38,9 +46,17 @@ func NewColorHex(n uint32) *Color {
 	return NewColor(float32((n>>16)&0xFF)/255.0, float32((n>>8)&0xFF)/255.0, float32(n&0xFF)/255.0)
 }
 
+func NewColorHexA(n uint32, a float32) *Color {
+	return NewColorA(float32((n>>16)&0xFF)/255.0, float32((n>>8)&0xFF)/255.0, float32(n&0xFF)/255.0, a)
+}
+
 // NewColorRand constructs a random color.
 func NewColorRand() *Color {
 	return NewColor(rand.Float32(), rand.Float32(), rand.Float32())
+}
+
+func NewColorRandA(a float32) *Color {
+	return NewColorA(rand.Float32(), rand.Float32(), rand.Float32(), a)
 }
 
 // Color satisfies the Go color.Color interface.
@@ -272,68 +288,73 @@ func overlayF(top, bot float32) float32 {
 
 // Color blending functions
 func add(top, bot *Color) *Color {
-	return NewColor(
+	return NewColorA(
 		clampF(0, 1, bot.R+top.R),
 		clampF(0, 1, bot.G+top.G),
 		clampF(0, 1, bot.B+top.B),
+		top.A,
 	)
 }
 
 func addAlpha(top, bot *Color, a float32) *Color {
-	return NewColor(
+	return NewColorA(
 		clampF(0, 1, bot.R*a+top.R),
 		clampF(0, 1, bot.G*a+top.G),
 		clampF(0, 1, bot.B*a+top.B),
+		top.A,
 	)
 }
 
 func alpha(top, bot *Color, a float32) *Color {
 	a = clampF(0, 1, a)
-	return NewColor(bot.R+(top.R-bot.R)*a, bot.G+(top.G-bot.G)*a, bot.B+(top.B-bot.B)*a)
+	return NewColorA(bot.R+(top.R-bot.R)*a, bot.G+(top.G-bot.G)*a, bot.B+(top.B-bot.B)*a, top.A)
 }
 
 func burn(top, bot *Color) *Color {
-	return NewColor(
+	return NewColorA(
 		clampF(0, 1, bot.R+top.R-1),
 		clampF(0, 1, bot.G+top.G-1),
 		clampF(0, 1, bot.B+top.B-1),
+		top.A,
 	)
 }
 
 func darken(top, bot *Color) *Color {
-	return NewColor(
+	return NewColorA(
 		float32(math.Min(float64(top.R), float64(bot.R))),
 		float32(math.Min(float64(top.G), float64(bot.G))),
 		float32(math.Min(float64(top.B), float64(bot.B))),
+		top.A,
 	)
 }
 
 func dodge(top, bot *Color) *Color {
-	return NewColor(dodgeF(top.R, bot.R), dodgeF(top.G, bot.G), dodgeF(top.B, bot.B))
+	return NewColorA(dodgeF(top.R, bot.R), dodgeF(top.G, bot.G), dodgeF(top.B, bot.B), top.A)
 }
 
 func lighten(top, bot *Color) *Color {
-	return NewColor(
+	return NewColorA(
 		float32(math.Max(float64(top.R), float64(bot.R))),
 		float32(math.Max(float64(top.G), float64(bot.G))),
 		float32(math.Max(float64(top.B), float64(bot.B))),
+		top.A,
 	)
 }
 
 func multiply(top, bot *Color) *Color {
-	return NewColor(top.R*bot.R, top.G*bot.G, top.B*bot.B)
+	return NewColorA(top.R*bot.R, top.G*bot.G, top.B*bot.B, top.A)
 }
 
 func overlay(top, bot *Color) *Color {
-	return NewColor(overlayF(top.R, bot.R), overlayF(top.G, bot.G), overlayF(top.B, bot.B))
+	return NewColorA(overlayF(top.R, bot.R), overlayF(top.G, bot.G), overlayF(top.B, bot.B), top.A)
 }
 
-func scale(bot *Color, s float32) *Color {
-	return NewColor(bot.R*s, bot.G*s, bot.B*s)
+func scale(top *Color, s float32) *Color {
+	return NewColorA(top.R*s, top.G*s, top.B*s, top.A)
 }
 
 func screen(top, bot *Color) *Color {
-	return NewColor(1-(1-top.R)*(1-bot.R), 1-(1-top.G)*(1-bot.G), 1-(1-top.B)*(1-bot.B))
+	return NewColorA(1-(1-top.R)*(1-bot.R), 1-(1-top.G)*(1-bot.G), 1-(1-top.B)*(1-bot.B), top.A)
 }
 
 // Predefined Colors
