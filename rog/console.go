@@ -137,17 +137,19 @@ func (con *Console) SetRect(x, y, w, h int, fg, bg eng.Blender, data string, res
 }
 
 // Render takes a batch and font data, and renders the console using them.
-func (con *Console) Render(batch *eng.Batch, font *eng.Font, w, h int) {
+func (con *Console) Render(batch *eng.Batch, offsetX, offsetY int, font *eng.Font, cellWidth, cellHeight int) {
+	w := cellWidth
+	h := cellHeight
 	for x := 0; x < con.Width(); x++ {
 		for y := 0; y < con.Height(); y++ {
 			_, bg, _ := con.Get(x, y)
-			batch.Draw(bgRegion, float32(x*w), float32(y*h), 0, 0, float32(w), float32(h), 0, bg)
+			batch.Draw(bgRegion, float32(offsetX+x*w), float32(offsetY+y*h), 0, 0, float32(w), float32(h), 0, bg)
 		}
 	}
 	for x := 0; x < con.Width(); x++ {
 		for y := 0; y < con.Height(); y++ {
 			fg, _, ch := con.Get(x, y)
-			font.Put(batch, ch, float32(x*w), float32(y*h), fg)
+			font.Put(batch, ch, float32(offsetX+x*w), float32(offsetY+y*h), fg)
 		}
 	}
 }
