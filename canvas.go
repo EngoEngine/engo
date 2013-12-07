@@ -5,7 +5,7 @@
 package eng
 
 import (
-	gl "github.com/chsc/gogl/gl33"
+	gl "github.com/chsc/gogl/gl32"
 	"image"
 	"log"
 )

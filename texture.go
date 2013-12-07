@@ -6,7 +6,7 @@ package eng
 
 import (
 	"encoding/json"
-	gl "github.com/chsc/gogl/gl33"
+	gl "github.com/chsc/gogl/gl32"
 	"image"
 	"image/draw"
 	_ "image/png"

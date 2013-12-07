@@ -6,7 +6,7 @@ package fx
 
 import (
 	"github.com/ajhager/eng"
-	gl "github.com/chsc/gogl/gl33"
+	gl "github.com/chsc/gogl/gl32"
 )
 
 const filmVert = `

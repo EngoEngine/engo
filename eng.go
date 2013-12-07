@@ -6,7 +6,7 @@
 package eng
 
 import (
-	gl "github.com/chsc/gogl/gl33"
+	gl "github.com/chsc/gogl/gl32"
 	"github.com/go-gl/glfw"
 	"image"
 	"image/draw"
@@ -109,8 +109,7 @@ type Responder interface {
 }
 
 func Run(title string, width, height int, fullscreen bool, r Responder) {
-	config = &Config{title, width, height, fullscreen, true, false, 1, false}
-	RunConfig(config, r)
+	RunConfig(&Config{title, width, height, fullscreen, true, false, 1, false}, r)
 }
 
 // Run should be called with a type that satisfies the Responder
@@ -150,7 +149,7 @@ func RunConfig(c *Config, r Responder) {
 	config.Width, config.Height = glfw.WindowSize()
 
 	if err := gl.Init(); err != nil {
-		//		log.Println(err)
+		log.Fatal(err)
 	}
 
 	bgColor = NewColor(0, 0, 0)
