@@ -225,6 +225,12 @@ func Log(l ...interface{}) {
 	log.Println(l...)
 }
 
+// Clear manually clears with a given color. Mostly used with a Canvas.
+func Clear(color *Color) {
+	gl.ClearColor(gl.Float(color.R), gl.Float(color.G), gl.Float(color.B), gl.Float(color.A))
+	gl.Clear(gl.COLOR_BUFFER_BIT)
+}
+
 // Width returns the current window width.
 func Width() int {
 	return config.Width
