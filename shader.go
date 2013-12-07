@@ -38,10 +38,18 @@ func NewShader(vertSrc, fragSrc string) *Shader {
 
 	gl.LinkProgram(program)
 
-	var link_status gl.Int
-	gl.GetProgramiv(program, gl.LINK_STATUS, &link_status)
-	if link_status == 0 {
+	var linkStatus gl.Int
+	gl.GetProgramiv(program, gl.LINK_STATUS, &linkStatus)
+	if linkStatus == 0 {
 		log.Fatal("Unable to link shader program.")
+	}
+
+	gl.ValidateProgram(program)
+
+	var validateStatus gl.Int
+	gl.GetProgramiv(program, gl.VALIDATE_STATUS, &validateStatus)
+	if validateStatus == 0 {
+		log.Fatal("Unable to validate shader program.")
 	}
 
 	return &Shader{program}
