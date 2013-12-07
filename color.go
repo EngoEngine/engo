@@ -360,13 +360,13 @@ func screen(top, bot *Color) *Color {
 // Predefined Colors
 var (
 	Black        = NewColorBytes(0, 0, 0)
-	DarkestGrey  = NewColorBytes(31, 31, 31)
-	DarkerGrey   = NewColorBytes(63, 63, 63)
+	DarkestGray  = NewColorBytes(31, 31, 31)
+	DarkerGray   = NewColorBytes(63, 63, 63)
 	DarkGrey     = NewColorBytes(95, 95, 95)
 	Grey         = NewColorBytes(127, 127, 127)
-	LightGrey    = NewColorBytes(159, 159, 159)
-	LighterGrey  = NewColorBytes(191, 191, 191)
-	LightestGrey = NewColorBytes(223, 223, 223)
+	LightGray    = NewColorBytes(159, 159, 159)
+	LighterGray  = NewColorBytes(191, 191, 191)
+	LightestGray = NewColorBytes(223, 223, 223)
 	White        = NewColorBytes(255, 255, 255)
 
 	DarkestSepia  = NewColorBytes(31, 24, 15)
