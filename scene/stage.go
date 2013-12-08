@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Inspiration from libgdx's scene2d.
+
 package scene
 
 import (
@@ -29,6 +31,9 @@ func NewStage(width, height float32, keepAspect bool) *Stage {
 		height = float32(eng.Height())
 	}
 
+	stage.width = width
+	stage.height = height
+
 	stage.batch = eng.NewBatch()
 	stage.camera = eng.NewCamera(stage.width, stage.height)
 
@@ -40,31 +45,34 @@ func NewStage(width, height float32, keepAspect bool) *Stage {
 // SetViewport should be called when the window is resized or if you
 // want to just resize the stage's view.
 func (stage *Stage) SetViewport(width, height float32, keepAspect bool) {
+	stageWidth := width
+	stageHeight := height
+	viewportWidth := float32(eng.Width())
+	viewportHeight := float32(eng.Height())
+
 	if keepAspect {
-		screenWidth := float32(eng.Width())
-		screenHeight := float32(eng.Height())
-		if screenHeight/screenWidth < height/width {
-			toScreenSpace := screenHeight / height
-			toViewportSpace := height / screenHeight
-			deviceWidth := width * toScreenSpace
-			lengthen := (screenWidth - deviceWidth) * toViewportSpace
-			stage.width = width + lengthen
-			stage.height = height
-			stage.gutterWidth = lengthen / 2
+		if viewportHeight/viewportWidth < stageHeight/stageWidth {
+			toViewportSpace := viewportHeight / stageHeight
+			toStageSpace := stageHeight / viewportHeight
+			deviceWidth := stageWidth * toViewportSpace
+			lengthen := (viewportWidth - deviceWidth) * toStageSpace
+			stage.width = stageWidth + lengthen
+			stage.height = stageHeight
+			stage.gutterWidth = -lengthen / 2
 			stage.gutterHeight = 0
 		} else {
-			toScreenSpace := screenWidth / width
-			toViewportSpace := width / screenWidth
-			deviceHeight := height * toScreenSpace
-			lengthen := (screenHeight - deviceHeight) * toViewportSpace
-			stage.height = height + lengthen
-			stage.width = width
+			toViewportSpace := viewportWidth / stageWidth
+			toStageSpace := stageWidth / viewportWidth
+			deviceHeight := stageHeight * toViewportSpace
+			lengthen := (viewportHeight - deviceHeight) * toStageSpace
+			stage.height = stageHeight + lengthen
+			stage.width = stageWidth
 			stage.gutterWidth = 0
-			stage.gutterHeight = lengthen / 2
+			stage.gutterHeight = -lengthen / 2
 		}
 	} else {
-		stage.width = width
-		stage.height = height
+		stage.width = stageWidth
+		stage.height = stageHeight
 		stage.gutterWidth = 0
 		stage.gutterHeight = 0
 	}
