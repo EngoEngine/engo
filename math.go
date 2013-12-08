@@ -9,6 +9,8 @@ import (
 	"math"
 )
 
+var tmpM = NewMatrix()
+
 type Vector struct {
 	X, Y, Z float32
 }
@@ -143,58 +145,43 @@ func (m *Matrix) Mul(o *Matrix) *Matrix {
 	return m
 }
 
-func cofactor(m0, m1, m2, m3, m4, m5, m6, m7, m8 gl.Float) gl.Float {
-	return m0*(m4*m8-m5*m7) -
-		m1*(m3*m8-m5*m6) +
-		m2*(m3*m7-m4*m6)
-}
-
 func (m *Matrix) Inv() *Matrix {
-	cf0 := cofactor(m[5], m[6], m[7], m[9], m[10], m[11], m[13], m[14], m[15])
-	cf1 := cofactor(m[4], m[6], m[7], m[8], m[10], m[11], m[12], m[14], m[15])
-	cf2 := cofactor(m[4], m[5], m[7], m[8], m[9], m[11], m[12], m[13], m[15])
-	cf3 := cofactor(m[4], m[5], m[6], m[8], m[9], m[10], m[12], m[13], m[14])
+	det := m[12]*m[9]*m[6]*m[3] - m[8]*m[13]*m[6]*m[3] - m[12]*m[5]*m[10]*m[3] + m[4]*m[13]*m[10]*m[3] + m[8]*m[5]*m[14]*m[3] - m[4]*m[9]*m[14]*m[3] - m[12]*m[9]*m[2]*m[7] + m[8]*m[13]*m[2]*m[7] + m[12]*m[1]*m[10]*m[7] - m[0]*m[13]*m[10]*m[7] - m[8]*m[1]*m[14]*m[7] + m[0]*m[9]*m[14]*m[7] + m[12]*m[5]*m[2]*m[11] - m[4]*m[13]*m[2]*m[11] - m[12]*m[1]*m[6]*m[11] + m[0]*m[13]*m[6]*m[11] + m[4]*m[1]*m[14]*m[11] - m[0]*m[5]*m[14]*m[11] - m[8]*m[5]*m[2]*m[15] + m[4]*m[9]*m[2]*m[15] + m[8]*m[1]*m[6]*m[15] - m[0]*m[9]*m[6]*m[15] - m[4]*m[1]*m[10]*m[15] + m[0]*m[5]*m[10]*m[15]
 
-	determinant := m[0]*cf0 - m[1]*cf1 + m[2]*cf2 - m[3]*cf3
-	if math.Abs(float64(determinant)) <= 0.00001 {
-		return m.Identity()
-	}
+	invDet := 1 / det
 
-	cf4 := cofactor(m[1], m[2], m[3], m[9], m[10], m[11], m[13], m[14], m[15])
-	cf5 := cofactor(m[0], m[2], m[3], m[8], m[10], m[11], m[12], m[14], m[15])
-	cf6 := cofactor(m[0], m[1], m[3], m[8], m[9], m[11], m[12], m[13], m[15])
-	cf7 := cofactor(m[0], m[1], m[2], m[8], m[9], m[10], m[12], m[13], m[14])
-
-	cf8 := cofactor(m[1], m[2], m[3], m[5], m[6], m[7], m[13], m[14], m[15])
-	cf9 := cofactor(m[0], m[2], m[3], m[4], m[6], m[7], m[12], m[14], m[15])
-	cf10 := cofactor(m[0], m[1], m[3], m[4], m[5], m[7], m[12], m[13], m[15])
-	cf11 := cofactor(m[0], m[1], m[2], m[4], m[5], m[6], m[12], m[13], m[14])
-
-	cf12 := cofactor(m[1], m[2], m[3], m[5], m[6], m[7], m[9], m[10], m[11])
-	cf13 := cofactor(m[0], m[2], m[3], m[4], m[6], m[7], m[8], m[10], m[11])
-	cf14 := cofactor(m[0], m[1], m[3], m[4], m[5], m[7], m[8], m[9], m[11])
-	cf15 := cofactor(m[0], m[1], m[2], m[4], m[5], m[6], m[8], m[9], m[10])
-
-	invDeterminant := 1.0 / determinant
-	m[0] = invDeterminant * cf0
-	m[1] = -invDeterminant * cf4
-	m[2] = invDeterminant * cf8
-	m[3] = -invDeterminant * cf12
-
-	m[4] = -invDeterminant * cf1
-	m[5] = invDeterminant * cf5
-	m[6] = -invDeterminant * cf9
-	m[7] = invDeterminant * cf13
-
-	m[8] = invDeterminant * cf2
-	m[9] = -invDeterminant * cf6
-	m[10] = invDeterminant * cf10
-	m[11] = -invDeterminant * cf14
-
-	m[12] = -invDeterminant * cf3
-	m[13] = invDeterminant * cf7
-	m[14] = -invDeterminant * cf11
-	m[15] = invDeterminant * cf15
+	tmpM[0] = m[6]*m[11]*m[13] - m[7]*m[10]*m[13] + m[7]*m[9]*m[14] - m[5]*m[11]*m[14] - m[6]*m[9]*m[15] + m[5]*m[10]*m[15]
+	tmpM[1] = m[3]*m[10]*m[13] - m[2]*m[11]*m[13] - m[3]*m[9]*m[14] + m[1]*m[11]*m[14] + m[2]*m[9]*m[15] - m[1]*m[10]*m[15]
+	tmpM[2] = m[2]*m[7]*m[13] - m[3]*m[6]*m[13] + m[3]*m[5]*m[14] - m[1]*m[7]*m[14] - m[2]*m[5]*m[15] + m[1]*m[6]*m[15]
+	tmpM[3] = m[3]*m[6]*m[9] - m[2]*m[7]*m[9] - m[3]*m[5]*m[10] + m[1]*m[7]*m[10] + m[2]*m[5]*m[11] - m[1]*m[6]*m[11]
+	tmpM[4] = m[7]*m[10]*m[12] - m[6]*m[11]*m[12] - m[7]*m[8]*m[14] + m[4]*m[11]*m[14] + m[6]*m[8]*m[15] - m[4]*m[10]*m[15]
+	tmpM[5] = m[2]*m[11]*m[12] - m[3]*m[10]*m[12] + m[3]*m[8]*m[14] - m[0]*m[11]*m[14] - m[2]*m[8]*m[15] + m[0]*m[10]*m[15]
+	tmpM[6] = m[3]*m[6]*m[12] - m[2]*m[7]*m[12] - m[3]*m[4]*m[14] + m[0]*m[7]*m[14] + m[2]*m[4]*m[15] - m[0]*m[6]*m[15]
+	tmpM[7] = m[2]*m[7]*m[8] - m[3]*m[6]*m[8] + m[3]*m[4]*m[10] - m[0]*m[7]*m[10] - m[2]*m[4]*m[11] + m[0]*m[6]*m[11]
+	tmpM[8] = m[5]*m[11]*m[12] - m[7]*m[9]*m[12] + m[7]*m[8]*m[13] - m[4]*m[11]*m[13] - m[5]*m[8]*m[15] + m[4]*m[9]*m[15]
+	tmpM[9] = m[3]*m[9]*m[12] - m[1]*m[11]*m[12] - m[3]*m[8]*m[13] + m[0]*m[11]*m[13] + m[1]*m[8]*m[15] - m[0]*m[9]*m[15]
+	tmpM[10] = m[1]*m[7]*m[12] - m[3]*m[5]*m[12] + m[3]*m[4]*m[13] - m[0]*m[7]*m[13] - m[1]*m[4]*m[15] + m[0]*m[5]*m[15]
+	tmpM[11] = m[3]*m[5]*m[8] - m[1]*m[7]*m[8] - m[3]*m[4]*m[9] + m[0]*m[7]*m[9] + m[1]*m[4]*m[11] - m[0]*m[5]*m[11]
+	tmpM[12] = m[6]*m[9]*m[12] - m[5]*m[10]*m[12] - m[6]*m[8]*m[13] + m[4]*m[10]*m[13] + m[5]*m[8]*m[14] - m[4]*m[9]*m[14]
+	tmpM[13] = m[1]*m[10]*m[12] - m[2]*m[9]*m[12] + m[2]*m[8]*m[13] - m[0]*m[10]*m[13] - m[1]*m[8]*m[14] + m[0]*m[9]*m[14]
+	tmpM[14] = m[2]*m[5]*m[12] - m[1]*m[6]*m[12] - m[2]*m[4]*m[13] + m[0]*m[6]*m[13] + m[1]*m[4]*m[14] - m[0]*m[5]*m[14]
+	tmpM[15] = m[1]*m[6]*m[8] - m[2]*m[5]*m[8] + m[2]*m[4]*m[9] - m[0]*m[6]*m[9] - m[1]*m[4]*m[10] + m[0]*m[5]*m[10]
+	m[0] = tmpM[0] * invDet
+	m[1] = tmpM[1] * invDet
+	m[2] = tmpM[2] * invDet
+	m[3] = tmpM[3] * invDet
+	m[4] = tmpM[4] * invDet
+	m[5] = tmpM[5] * invDet
+	m[6] = tmpM[6] * invDet
+	m[7] = tmpM[7] * invDet
+	m[8] = tmpM[8] * invDet
+	m[9] = tmpM[9] * invDet
+	m[10] = tmpM[10] * invDet
+	m[11] = tmpM[11] * invDet
+	m[12] = tmpM[12] * invDet
+	m[13] = tmpM[13] * invDet
+	m[14] = tmpM[14] * invDet
+	m[15] = tmpM[15] * invDet
 
 	return m
 }
