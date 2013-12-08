@@ -146,15 +146,15 @@ func RunConfig(c *Config, r Responder) {
 	}
 	defer glfw.CloseWindow()
 
-	config.Width, config.Height = glfw.WindowSize()
-
 	if err := gl.Init(); err != nil {
 		log.Fatal(err)
 	}
 
+	config.Width, config.Height = glfw.WindowSize()
+
 	bgColor = NewColor(0, 0, 0)
 
-	responder.Open()
+	glfw.SetWindowTitle(config.Title)
 
 	if !config.Fullscreen {
 		glfw.SetWindowPos((mode.W-width)/2, (mode.H-height)/2)
@@ -163,8 +163,6 @@ func RunConfig(c *Config, r Responder) {
 	if config.Vsync {
 		glfw.SetSwapInterval(1)
 	}
-
-	glfw.SetWindowTitle(config.Title)
 
 	glfw.SetWindowSizeCallback(func(w, h int) {
 		config.Width, config.Height = glfw.WindowSize()
@@ -209,6 +207,10 @@ func RunConfig(c *Config, r Responder) {
 
 	timing = NewStats(config.LogFPS)
 	timing.Update()
+
+	responder.Open()
+	defer responder.Close()
+
 	for glfw.WindowParam(glfw.Opened) == 1 {
 		responder.Update(float32(timing.Dt))
 		gl.ClearColor(gl.Float(bgColor.R), gl.Float(bgColor.G), gl.Float(bgColor.B), gl.Float(bgColor.A))
@@ -217,7 +219,6 @@ func RunConfig(c *Config, r Responder) {
 		glfw.SwapBuffers()
 		timing.Update()
 	}
-	responder.Close()
 }
 
 func Log(l ...interface{}) {
