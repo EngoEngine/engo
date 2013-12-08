@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/ajhager/eng"
 	"math"
-	"math/rand"
 )
 
 var (
@@ -21,7 +20,7 @@ type Game struct {
 
 func (g *Game) Open() {
 	batch = eng.NewBatch()
-	color = eng.NewColor(1, 1, 1, 1)
+	color = eng.White
 }
 
 func (g *Game) Update(dt float32) {
@@ -71,7 +70,7 @@ func (g *Game) KeyType(k rune) {
 
 func (g *Game) KeyDown(k int) {
 	if k == eng.Space {
-		eng.SetBgColor(eng.NewColor(rand.Float32(), rand.Float32(), rand.Float32(), 1))
+		eng.SetBgColor(eng.NewColorRand())
 	}
 }
 

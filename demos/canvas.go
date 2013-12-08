@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/ajhager/eng"
-	gl "github.com/chsc/gogl/gl33"
 )
 
 var (
@@ -25,8 +24,7 @@ func (g *Game) Draw() {
 
 	canvas.Begin()
 	batch.Begin()
-	gl.ClearColor(.8, .1, .3, 1)
-	gl.Clear(gl.COLOR_BUFFER_BIT)
+	eng.Clear(eng.Sky)
 	eng.DefaultFont().Print(batch, "canvas", x, y, nil)
 	batch.End()
 	canvas.End()
