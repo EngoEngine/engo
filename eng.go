@@ -164,6 +164,9 @@ func RunConfig(c *Config, r Responder) {
 		glfw.SetSwapInterval(1)
 	}
 
+	responder.Open()
+	defer responder.Close()
+
 	glfw.SetWindowSizeCallback(func(w, h int) {
 		config.Width, config.Height = glfw.WindowSize()
 		responder.Resize(w, h)
@@ -207,9 +210,6 @@ func RunConfig(c *Config, r Responder) {
 
 	timing = NewStats(config.LogFPS)
 	timing.Update()
-
-	responder.Open()
-	defer responder.Close()
 
 	for glfw.WindowParam(glfw.Opened) == 1 {
 		responder.Update(float32(timing.Dt))
