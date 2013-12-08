@@ -24,17 +24,17 @@ func (g *Game) Draw() {
 
 	canvas.Begin()
 	batch.Begin()
-	eng.Clear(eng.Sky)
-	eng.DefaultFont().Print(batch, "canvas", x, y, nil)
+	eng.Clear(eng.White)
+	eng.DefaultFont().Print(batch, "canvas", x, y, eng.Black)
 	batch.End()
 	canvas.End()
 
 	region := canvas.Region()
 
 	batch.Begin()
-	batch.Draw(region, -200, 0, 512, 320, .5, .5, 0, nil)
-	batch.Draw(region, 100, 200, 512, 320, .5, .5, 0, nil)
-	batch.Draw(region, 200, -100, 512, 320, .5, .5, 0, nil)
+	batch.Draw(region, -200, 0, 512, 320, .5, .5, 0, eng.Sky)
+	batch.Draw(region, 100, 200, 512, 320, .5, .5, 0, eng.Amber)
+	batch.Draw(region, 200, -100, 512, 320, .5, .5, 0, eng.Sea)
 	batch.End()
 }
 
