@@ -21,16 +21,16 @@ func (g *Game) Update(dt float32) {
 func (g *Game) Draw() {
 }
 
-func (g *Game) MouseMove(x, y int) {
+func (g *Game) MouseMove(x, y float32) {
 }
 
-func (g *Game) MouseDown(x, y int, b int) {
+func (g *Game) MouseDown(x, y float32, b int) {
 }
 
-func (g *Game) MouseUp(x, y int, b int) {
+func (g *Game) MouseUp(x, y float32, b int) {
 }
 
-func (g *Game) MouseScroll(x, y, a int) {
+func (g *Game) MouseScroll(x, y float32, a int) {
 }
 
 func (g *Game) KeyType(k rune) {

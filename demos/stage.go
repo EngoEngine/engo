@@ -35,8 +35,8 @@ func (g *Game) Draw() {
 	batch.End()
 }
 
-func (g *Game) MouseMove(x, y int) {
-	boxX, boxY = stage.ScreenToStage(float32(x), float32(y))
+func (g *Game) MouseMove(x, y float32) {
+	boxX, boxY = stage.ScreenToStage(x, y)
 }
 
 func main() {

@@ -98,14 +98,14 @@ type Responder interface {
 	Close()
 	Update(delta float32)
 	Draw()
-	MouseMove(x, y int)
-	MouseDown(x, y int, button int)
-	MouseUp(x, y int, button int)
+	MouseMove(x, y float32)
+	MouseDown(x, y float32, button int)
+	MouseUp(x, y float32, button int)
+	MouseScroll(x, y float32, amount int)
 	KeyType(key rune)
 	KeyDown(key int)
 	KeyUp(key int)
 	Resize(width, height int)
-	MouseScroll(x, y, amount int)
 }
 
 func Run(title string, width, height int, fullscreen bool, r Responder) {
@@ -173,15 +173,15 @@ func RunConfig(c *Config, r Responder) {
 	})
 
 	glfw.SetMousePosCallback(func(x, y int) {
-		responder.MouseMove(x, y)
+		responder.MouseMove(float32(x), float32(y))
 	})
 
 	glfw.SetMouseButtonCallback(func(b, s int) {
 		x, y := glfw.MousePos()
 		if s == glfw.KeyPress {
-			responder.MouseDown(x, y, b)
+			responder.MouseDown(float32(x), float32(y), b)
 		} else {
-			responder.MouseUp(x, y, b)
+			responder.MouseUp(float32(x), float32(y), b)
 		}
 	})
 
@@ -189,7 +189,7 @@ func RunConfig(c *Config, r Responder) {
 	glfw.SetMouseWheelCallback(func(pos int) {
 		if lastWheel-pos != 0 {
 			x, y := glfw.MousePos()
-			responder.MouseScroll(x, y, lastWheel-pos)
+			responder.MouseScroll(float32(x), float32(y), lastWheel-pos)
 			lastWheel = pos
 		}
 	})

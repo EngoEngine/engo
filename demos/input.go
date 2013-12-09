@@ -7,11 +7,10 @@ import (
 )
 
 var (
-	batch   *eng.Batch
-	mx, my  int
-	mz      float32
-	color   *eng.Color
-	letters string
+	batch      *eng.Batch
+	mx, my, mz float32
+	color      *eng.Color
+	letters    string
 )
 
 type Game struct {
@@ -31,17 +30,17 @@ func (g *Game) Update(dt float32) {
 
 func (g *Game) Draw() {
 	batch.Begin()
-	eng.DefaultFont().Print(batch, fmt.Sprintf("%v %v", mx, my), float32(mx-48), float32(my-16)+mz, color)
+	eng.DefaultFont().Print(batch, fmt.Sprintf("%.0f %.0f", mx, my), mx-48, my-16+mz, color)
 	eng.DefaultFont().Print(batch, letters, 0, 320, nil)
 	batch.End()
 }
 
-func (g *Game) MouseMove(x, y int) {
+func (g *Game) MouseMove(x, y float32) {
 	mx = x
 	my = y
 }
 
-func (g *Game) MouseDown(x, y int, b int) {
+func (g *Game) MouseDown(x, y float32, b int) {
 	switch b {
 	default:
 	case eng.MouseLeft:
@@ -53,14 +52,14 @@ func (g *Game) MouseDown(x, y int, b int) {
 	}
 }
 
-func (g *Game) MouseUp(x, y int, b int) {
+func (g *Game) MouseUp(x, y float32, b int) {
 	color.R = 1
 	color.G = 1
 	color.B = 1
 	color.A = 1
 }
 
-func (g *Game) MouseScroll(x, y, amount int) {
+func (g *Game) MouseScroll(x, y float32, amount int) {
 	mz += float32(amount) * 3
 }
 
