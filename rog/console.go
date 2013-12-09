@@ -13,12 +13,15 @@ import (
 var bgRegion *eng.Region
 
 type Console struct {
-	bg, fg [][]*eng.Color
-	ch     [][]rune
-	w, h   int
+	bg, fg     [][]*eng.Color
+	ch         [][]rune
+	w, h       int
+	font       *eng.Font
+	cellWidth  float32
+	cellHeight float32
 }
 
-func NewConsole(width, height int) *Console {
+func NewConsole(width, height int, font *eng.Font, cellWidth, cellHeight float32) *Console {
 	bg := make([][]*eng.Color, height)
 	fg := make([][]*eng.Color, height)
 	ch := make([][]rune, height)
@@ -33,7 +36,7 @@ func NewConsole(width, height int) *Console {
 		bgRegion = eng.NewRegion(eng.BlankTexture(), 0, 0, 1, 1)
 	}
 
-	con := &Console{bg, fg, ch, width, height}
+	con := &Console{bg, fg, ch, width, height, font, cellWidth, cellHeight}
 
 	for x := 0; x < con.w; x++ {
 		for y := 0; y < con.h; y++ {
@@ -130,6 +133,13 @@ func (con *Console) Set(x, y int, fg, bg eng.Blender, data string, rest ...inter
 	con.set(x, y, 0, 0, con.w, con.h, fg, bg, data, rest...)
 }
 
+// SetFont sets the font data used to render the console.
+func (con *Console) SetFont(font *eng.Font, cellWidth, cellHeight float32) {
+	con.font = font
+	con.cellWidth = cellWidth
+	con.cellHeight = cellHeight
+}
+
 // SetRect draws a string starting at x,y onto the console, wrapping at the bounds created by x, y, w, h if needed.
 // If h is 0, the text will cut off at the bottom of the console, otherwise it will cut off after the y+h row.
 func (con *Console) SetRect(x, y, w, h int, fg, bg eng.Blender, data string, rest ...interface{}) {
@@ -137,21 +147,26 @@ func (con *Console) SetRect(x, y, w, h int, fg, bg eng.Blender, data string, res
 }
 
 // Render takes a batch and font data, and renders the console using them.
-func (con *Console) Render(batch *eng.Batch, offsetX, offsetY int, font *eng.Font, cellWidth, cellHeight int) {
-	w := cellWidth
-	h := cellHeight
+func (con *Console) Render(batch *eng.Batch, offsetX, offsetY float32) {
+	w := con.cellWidth
+	h := con.cellHeight
 	for x := 0; x < con.Width(); x++ {
 		for y := 0; y < con.Height(); y++ {
 			_, bg, _ := con.Get(x, y)
-			batch.Draw(bgRegion, float32(offsetX+x*w), float32(offsetY+y*h), 0, 0, float32(w), float32(h), 0, bg)
+			batch.Draw(bgRegion, offsetX+float32(x)*w, offsetY+float32(y)*h, 0, 0, w, h, 0, bg)
 		}
 	}
 	for x := 0; x < con.Width(); x++ {
 		for y := 0; y < con.Height(); y++ {
 			fg, _, ch := con.Get(x, y)
-			font.Put(batch, ch, float32(offsetX+x*w), float32(offsetY+y*h), fg)
+			con.font.Put(batch, ch, offsetX+float32(x)*w, offsetY+float32(y)*h, fg)
 		}
 	}
+}
+
+// HitCell returns which cell is hit when the console is rendered at the offset.
+func (con *Console) HitCell(x, y, offsetX, offsetY float32) (int, int) {
+	return int((x - offsetX) / con.cellWidth), int((y - offsetY) / con.cellHeight)
 }
 
 // Width returns the width of the console in cells.
