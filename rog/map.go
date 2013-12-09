@@ -21,14 +21,14 @@ type Mapper interface {
 // SparseMap reprsents a 2d field using a map.
 type SparseMap struct {
 	Width, Height int
-	items         map[int]interface{}
+	items         map[int]int
 }
 
 func NewSparseMap(width, height int) *SparseMap {
-	return &SparseMap{width, height, make(map[int]interface{})}
+	return &SparseMap{width, height, make(map[int]int)}
 }
 
-func (m *SparseMap) Map(x, y int, item interface{}) {
+func (m *SparseMap) Map(x, y int, item int) {
 	y = y % m.Height
 	if y < 0 {
 		y = m.Height - y
@@ -37,14 +37,14 @@ func (m *SparseMap) Map(x, y int, item interface{}) {
 	if x < 0 {
 		x = m.Width - x
 	}
-	if item == nil {
+	if item == 0 {
 		delete(m.items, y*m.Width+x)
 	} else {
 		m.items[y*m.Width+x] = item
 	}
 }
 
-func (m *SparseMap) Get(x, y int) interface{} {
+func (m *SparseMap) Get(x, y int) int {
 	y = y % m.Height
 	if y < 0 {
 		y = m.Height - y
