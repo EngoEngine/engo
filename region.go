@@ -34,6 +34,11 @@ func NewRegion(texture *Texture, x, y, w, h int) *Region {
 	return &Region{texture, gl.Float(u), gl.Float(v), gl.Float(u2), gl.Float(v2), width, height}
 }
 
+// NewRegionFull returns a region that covers the entire texture.
+func NewRegionFull(texture *Texture) *Region {
+	return NewRegion(texture, 0, 0, texture.Width(), texture.Height())
+}
+
 // Flip will swap the region's image on the x and/or y axes.
 func (r *Region) Flip(x, y bool) {
 	if x {
