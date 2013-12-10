@@ -9,6 +9,8 @@ var (
 	stage      *scene.Stage
 	region     *eng.Region
 	boxX, boxY float32
+	bigColor   = eng.NewColorBytes(64, 100, 200)
+	smallColor = eng.NewColorBytes(200, 64, 100)
 )
 
 type Game struct {
@@ -30,8 +32,8 @@ func (g *Game) Update(dt float32) {
 func (g *Game) Draw() {
 	batch := stage.Batch()
 	batch.Begin()
-	batch.Draw(region, 0, 0, 0, 0, 1280, 800, 0, eng.DarkerSea)
-	batch.Draw(region, boxX, boxY, .5, .5, 960, 640, 0, eng.DarkSea)
+	batch.Draw(region, 0, 0, 0, 0, 1280, 800, 0, bigColor)
+	batch.Draw(region, boxX, boxY, .5, .5, 960, 640, 0, smallColor)
 	batch.End()
 }
 

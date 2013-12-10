@@ -19,7 +19,7 @@ type Game struct {
 
 func (g *Game) Open() {
 	batch = eng.NewBatch()
-	color = eng.White
+	color = eng.NewColor(1, 1, 1)
 }
 
 func (g *Game) Update(dt float32) {
