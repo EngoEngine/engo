@@ -18,7 +18,7 @@ attribute vec4 in_Position;
 attribute vec4 in_Color;
 attribute vec2 in_TexCoords;
 
-uniform mat4 uf_Matrix;
+uniform vec2 uf_Projection;
 
 varying vec4 var_Color;
 varying vec2 var_TexCoords;
@@ -26,7 +26,9 @@ varying vec2 var_TexCoords;
 void main() {
   var_Color = in_Color;
   var_TexCoords = in_TexCoords;
-  gl_Position = uf_Matrix * in_Position;
+	gl_Position = vec4(in_Position.x / uf_Projection.x - 1.0,
+										 in_Position.y / -uf_Projection.y + 1.0,
+										 0.0, 1.0);
 }`
 
 var batchFrag = `
@@ -53,9 +55,6 @@ type Batch struct {
 	index            int
 	shader           *Shader
 	customShader     *Shader
-	combined         *Matrix
-	projection       *Matrix
-	transform        *Matrix
 	color            *Color
 	blendingDisabled bool
 	blendSrcFunc     uint32
@@ -63,7 +62,9 @@ type Batch struct {
 	inPosition       uint32
 	inColor          uint32
 	inTexCoords      uint32
-	ufMatrix         int32
+	ufProjection     int32
+	projX            float32
+	projY            float32
 }
 
 func NewBatch() *Batch {
@@ -75,7 +76,7 @@ func NewBatch() *Batch {
 	batch.inPosition = batch.shader.GetAttrib("in_Position")
 	batch.inColor = batch.shader.GetAttrib("in_Color")
 	batch.inTexCoords = batch.shader.GetAttrib("in_TexCoords")
-	batch.ufMatrix = batch.shader.GetUniform("uf_Matrix")
+	batch.ufProjection = batch.shader.GetUniform("uf_Projection")
 
 	gl.GenBuffers(1, &batch.vertexVBO)
 	gl.BindBuffer(gl.ARRAY_BUFFER, batch.vertexVBO)
@@ -91,9 +92,9 @@ func NewBatch() *Batch {
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 
-	batch.combined = NewMatrix()
-	batch.transform = NewMatrix()
-	batch.projection = NewMatrix().SetToOrtho(0, float32(Width()), float32(Height()), 0, 0, 1)
+	batch.projX = float32(Width()) / 2
+	batch.projY = float32(Height()) / 2
+
 	batch.color = NewColor(1, 1, 1)
 	batch.blendingDisabled = false
 	batch.blendSrcFunc = gl.SRC_ALPHA
@@ -108,7 +109,6 @@ func (b *Batch) Begin() {
 	if b.drawing {
 		log.Fatal("Batch.End() must be called first")
 	}
-	b.combined.Set(b.projection).Mul(b.transform)
 	b.drawing = true
 	shader := b.shader
 	if b.customShader != nil {
@@ -372,8 +372,9 @@ func (b *Batch) SetShader(shader *Shader) {
 }
 
 // SetProjection allows for setting the projection matrix manually.
-func (b *Batch) SetProjection(m *Matrix) {
-	b.projection.Set(m)
+func (b *Batch) SetProjection(x, y float32) {
+	b.projX = x
+	b.projY = y
 }
 
 func (b *Batch) flush() {
@@ -392,7 +393,7 @@ func (b *Batch) flush() {
 	gl.ActiveTexture(gl.TEXTURE0)
 	b.lastTexture.Bind()
 
-	gl.UniformMatrix4fv(b.ufMatrix, 1, false, &b.combined[0])
+	gl.Uniform2f(b.ufProjection, b.projX, b.projY)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, b.vertexVBO)
 	gl.BufferSubData(gl.ARRAY_BUFFER, 0, 4*2*b.index, gl.Ptr(b.vertices))
