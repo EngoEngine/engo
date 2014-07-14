@@ -24,6 +24,5 @@ func (g *Game) Draw() {
 }
 
 func main() {
-	runtime.LockOSThread()
 	eng.Run("Hello", 1024, 640, false, new(Game))
 }

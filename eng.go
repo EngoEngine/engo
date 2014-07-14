@@ -237,9 +237,9 @@ func RunConfig(c *Config, r Responder) {
 	}
 
 	if config.Fullscreen {
-		Log("SDF")
 		width = mode.Width
 		height = mode.Height
+		glfw.WindowHint(glfw.Decorated, 0)
 	} else {
 		monitor = nil
 	}
@@ -248,9 +248,8 @@ func RunConfig(c *Config, r Responder) {
 
 	glfw.WindowHint(glfw.ContextVersionMajor, 2)
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
-	glfw.WindowHint(glfw.OpenglDebugContext, glfw.True)
 
-	window, err = glfw.CreateWindow(width, height, title, monitor, nil)
+	window, err = glfw.CreateWindow(width, height, title, nil, nil)
 	if err != nil {
 		panic(err)
 	}
