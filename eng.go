@@ -8,8 +8,6 @@ package eng
 import (
 	"github.com/errcw/glow/gl/2.1/gl"
 	glfw "github.com/go-gl/glfw3"
-	"image"
-	"image/draw"
 	"log"
 )
 
@@ -122,13 +120,12 @@ const (
 )
 
 var (
-	responder    Responder
-	window       *glfw.Window
-	config       *Config
-	timing       *stats
-	defaultFont  *Font
-	bgColor      *Color
-	blankTexture *Texture
+	responder   Responder
+	window      *glfw.Window
+	config      *Config
+	timing      *stats
+	defaultFont *Font
+	bgColor     *Color
 )
 
 // A Config holds settings for your game's window and application.
@@ -423,14 +420,4 @@ func DefaultFont() *Font {
 		defaultFont = NewBitmapFont(dfontimg(), dfonttxt)
 	}
 	return defaultFont
-}
-
-// Returns a white 1x1 pixel texture.
-func BlankTexture() *Texture {
-	if blankTexture == nil {
-		img := image.NewRGBA(image.Rect(0, 0, 1, 1))
-		draw.Draw(img, img.Bounds(), &image.Uniform{NewColor(1, 1, 1)}, image.ZP, draw.Src)
-		blankTexture = NewTexture(img)
-	}
-	return blankTexture
 }
