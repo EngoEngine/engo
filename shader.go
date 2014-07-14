@@ -1,11 +1,10 @@
-// Copyright 2013 Joseph Hager. All rights reserved.
+// Copyright 2014 Joseph Hager. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 package eng
 
 import (
-	//"github.com/errcw/glow/gl-core/3.2/gl"
 	"github.com/errcw/glow/gl/2.1/gl"
 	"log"
 	"strings"
