@@ -17,7 +17,7 @@ type Game struct {
 	*eng.Game
 }
 
-func (g *Game) Open() {
+func (g *Game) Setup() {
 	batch = eng.NewBatch()
 	color = eng.NewColor(1, 1, 1)
 }
@@ -35,48 +35,33 @@ func (g *Game) Draw() {
 	batch.End()
 }
 
-func (g *Game) MouseMove(x, y float32) {
-	mx = x
-	my = y
-}
-
-func (g *Game) MouseDown(x, y float32, b eng.MouseButton) {
-	switch b {
-	default:
-	case eng.MouseButtonLeft:
-		color.R = .25
-	case eng.MouseButtonRight:
-		color.G = .25
-	case eng.MouseButtonMiddle:
-		color.B = .25
-	}
-}
-
-func (g *Game) MouseUp(x, y float32, b eng.MouseButton) {
-	color.R = 1
-	color.G = 1
-	color.B = 1
-	color.A = 1
-}
-
-func (g *Game) MouseScroll(x, y, amount float32) {
-	mz += float32(amount) * 3
-}
-
-func (g *Game) KeyType(k rune) {
-	letters = letters + string(k)
-}
-
-func (g *Game) KeyDown(k eng.Key) {
-	if k == eng.Space {
+func (g *Game) Mouse(x, y float32, a eng.Action) {
+	switch a {
+	case eng.MOVE:
+		mx = x
+		my = y
+	case eng.PRESS:
 		eng.SetBgColor(eng.NewColorRand())
+	case eng.RELEASE:
+		eng.SetBgColor(eng.NewColor(0, 0, 0))
 	}
 }
 
-func (g *Game) KeyUp(k eng.Key) {
-	if k == eng.Escape {
-		eng.Exit()
+func (g *Game) Scroll(amount float32) {
+	mz += amount
+}
+
+func (g *Game) Key(key eng.Key, mod eng.Modifier, act eng.Action) {
+	switch act {
+	case eng.RELEASE:
+		if key == eng.Escape {
+			eng.Exit()
+		}
 	}
+}
+
+func (g *Game) Type(char rune) {
+	letters = letters + string(char)
 }
 
 func main() {

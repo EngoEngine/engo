@@ -12,7 +12,7 @@ type Game struct {
 	*eng.Game
 }
 
-func (g *Game) Open() {
+func (g *Game) Setup() {
 	batch = eng.NewBatch()
 }
 

@@ -18,7 +18,7 @@ type Game struct {
 	*eng.Game
 }
 
-func (g *Game) Open() {
+func (g *Game) Setup() {
 	batch = eng.NewBatch()
 	canvas = eng.NewCanvas(eng.Width(), eng.Height())
 }

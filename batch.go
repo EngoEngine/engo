@@ -372,7 +372,6 @@ func (b *Batch) SetShader(shader *Shader) {
 }
 
 // SetProjection allows for setting the projection matrix manually.
-// This is often used with a Camera.
 func (b *Batch) SetProjection(m *Matrix) {
 	b.projection.Set(m)
 }

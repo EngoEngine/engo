@@ -14,7 +14,7 @@ type Game struct {
 	*eng.Game
 }
 
-func (g *Game) Open() {
+func (g *Game) Setup() {
 	batch = eng.NewBatch()
 	ttf = eng.NewTrueTypeFont("data/DroidSansMono.ttf", 75, " !\"#$%&'()*+,-./0123456789:;█<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~")
 }

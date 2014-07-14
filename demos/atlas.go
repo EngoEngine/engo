@@ -13,7 +13,7 @@ type Game struct {
 	*eng.Game
 }
 
-func (g *Game) Open() {
+func (g *Game) Setup() {
 	batch = eng.NewBatch()
 	texture := eng.NewTexture("data/spineboy.png")
 	regions = texture.Unpack("data/spineboy.json")
@@ -26,5 +26,5 @@ func (g *Game) Draw() {
 }
 
 func main() {
-	eng.Run("Atlas", 1024, 640, true, new(Game))
+	eng.Run("Atlas", 1024, 640, false, new(Game))
 }

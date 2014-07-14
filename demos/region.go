@@ -13,7 +13,7 @@ type Game struct {
 	*eng.Game
 }
 
-func (g *Game) Open() {
+func (g *Game) Setup() {
 	batch = eng.NewBatch()
 	texture := eng.NewTexture("data/bot.png")
 	regions = texture.Split(64, 64)

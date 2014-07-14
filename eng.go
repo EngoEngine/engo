@@ -11,8 +11,19 @@ import (
 	"log"
 )
 
-type MouseButton glfw.MouseButton
-type Key glfw.Key
+type Action int
+type Key int
+type Modifier int
+
+var (
+	MOVE    = Action(0)
+	PRESS   = Action(1)
+	RELEASE = Action(2)
+	SHIFT   = Modifier(0x0001)
+	CONTROL = Modifier(0x0002)
+	ALT     = Modifier(0x0004)
+	SUPER   = Modifier(0x0008)
+)
 
 // Common OpenGL constants
 const (
@@ -106,17 +117,6 @@ const (
 	LeftSuper                  = Key(glfw.KeyLeftSuper)
 	RightSuper                 = Key(glfw.KeyRightSuper)
 	Menu                       = Key(glfw.KeyMenu)
-	MouseButton1               = MouseButton(glfw.MouseButton1)
-	MouseButton2               = MouseButton(glfw.MouseButton2)
-	MouseButton3               = MouseButton(glfw.MouseButton3)
-	MouseButton4               = MouseButton(glfw.MouseButton4)
-	MouseButton5               = MouseButton(glfw.MouseButton5)
-	MouseButton6               = MouseButton(glfw.MouseButton6)
-	MouseButton7               = MouseButton(glfw.MouseButton7)
-	MouseButton8               = MouseButton(glfw.MouseButton8)
-	MouseButtonLeft            = MouseButton(glfw.MouseButtonLeft)
-	MouseButtonRight           = MouseButton(glfw.MouseButtonRight)
-	MouseButtonMiddle          = MouseButton(glfw.MouseButtonMiddle)
 )
 
 var (
@@ -169,25 +169,6 @@ type Config struct {
 
 func NewConfig() *Config {
 	return &Config{"Untitled", 800, 600, false, true, false, 1, false}
-}
-
-// A Responder describes an interface for application events.
-//
-// Open is called after the opengl context and window have been
-// created. You should load assets and create eng objects in this method.
-type Responder interface {
-	Open()
-	Close()
-	Update(delta float32)
-	Draw()
-	MouseMove(x, y float32)
-	MouseDown(x, y float32, button MouseButton)
-	MouseUp(x, y float32, button MouseButton)
-	MouseScroll(x, y float32, amount float32)
-	KeyType(key rune)
-	KeyDown(key Key)
-	KeyUp(key Key)
-	Resize(width, height int)
 }
 
 func Run(title string, width, height int, fullscreen bool, r Responder) {
@@ -269,37 +250,35 @@ func RunConfig(c *Config, r Responder) {
 	})
 
 	window.SetCursorPositionCallback(func(window *glfw.Window, x, y float64) {
-		responder.MouseMove(float32(x), float32(y))
+		responder.Mouse(float32(x), float32(y), MOVE)
 	})
 
 	window.SetMouseButtonCallback(func(window *glfw.Window, b glfw.MouseButton, a glfw.Action, m glfw.ModifierKey) {
 		x, y := window.GetCursorPosition()
 		if a == glfw.Press {
-			responder.MouseDown(float32(x), float32(y), MouseButton(b))
+			responder.Mouse(float32(x), float32(y), PRESS)
 		} else {
-			responder.MouseUp(float32(x), float32(y), MouseButton(b))
+			responder.Mouse(float32(x), float32(y), RELEASE)
 		}
 	})
 
 	window.SetScrollCallback(func(window *glfw.Window, xoff, yoff float64) {
-		x, y := window.GetCursorPosition()
-		responder.MouseScroll(float32(x), float32(y), float32(yoff))
+		responder.Scroll(float32(yoff))
 	})
 
 	window.SetKeyCallback(func(window *glfw.Window, k glfw.Key, s int, a glfw.Action, m glfw.ModifierKey) {
 		if a == glfw.Press {
-			responder.KeyDown(Key(k))
+			responder.Key(Key(k), Modifier(m), PRESS)
 		} else {
-			responder.KeyUp(Key(k))
+			responder.Key(Key(k), Modifier(m), RELEASE)
 		}
 	})
 
 	window.SetCharacterCallback(func(window *glfw.Window, char uint) {
-		responder.KeyType(rune(char))
+		responder.Type(rune(char))
 	})
 
-	responder.Open()
-	defer responder.Close()
+	responder.Setup()
 
 	timing = NewStats(config.LogFPS)
 	timing.Update()
