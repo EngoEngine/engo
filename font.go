@@ -1734,7 +1734,7 @@ func dfontimg() *bytes.Buffer {
 	gz, err := gzip.NewReader(bytes.NewBuffer(b))
 
 	if err != nil {
-		panic("Decompression failed: " + err.Error())
+		log.Fatal("Decompression failed: " + err.Error())
 	}
 
 	var buf bytes.Buffer

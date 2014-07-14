@@ -105,7 +105,7 @@ func NewBatch() *Batch {
 // must be called before calling Draw.
 func (b *Batch) Begin() {
 	if b.drawing {
-		panic("Batch.End() must be called first")
+		log.Fatal("Batch.End() must be called first")
 	}
 	b.combined.Set(b.projection).Mul(b.transform)
 	b.drawing = true
@@ -119,7 +119,7 @@ func (b *Batch) Begin() {
 
 func (b *Batch) DrawVerts(r *Region, verts [8]float32, color *Color) {
 	if !b.drawing {
-		panic("Batch.Begin() must be called first")
+		log.Fatal("Batch.Begin() must be called first")
 	}
 
 	if r.texture != b.lastTexture {
@@ -183,7 +183,7 @@ func (b *Batch) DrawVerts(r *Region, verts [8]float32, color *Color) {
 // expensive operation.
 func (b *Batch) Draw(r *Region, x, y, originX, originY, scaleX, scaleY, rotation float32, color *Color) {
 	if !b.drawing {
-		panic("Batch.Begin() must be called first")
+		log.Fatal("Batch.Begin() must be called first")
 	}
 
 	if r.texture != b.lastTexture {
@@ -316,7 +316,7 @@ func (b *Batch) Draw(r *Region, x, y, originX, originY, scaleX, scaleY, rotation
 // gpu. This must be called after a called to Begin.
 func (b *Batch) End() {
 	if !b.drawing {
-		panic("Batch.Begin() must be called first")
+		log.Fatal("Batch.Begin() must be called first")
 	}
 	if b.index > 0 {
 		b.flush()

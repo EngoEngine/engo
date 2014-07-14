@@ -220,11 +220,11 @@ func RunConfig(c *Config, r Responder) {
 
 	monitor, err := glfw.GetPrimaryMonitor()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	mode, err := monitor.GetVideoMode()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	if config.Fullscreen {
@@ -242,7 +242,7 @@ func RunConfig(c *Config, r Responder) {
 
 	window, err = glfw.CreateWindow(width, height, title, nil, nil)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	defer window.Destroy()
 	window.MakeContextCurrent()

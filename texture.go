@@ -45,13 +45,13 @@ func NewTexture(data interface{}) *Texture {
 		defer file.Close()
 		img, _, err := image.Decode(file)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		m = img
 	case io.Reader:
 		img, _, err := image.Decode(data)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		m = img
 	case image.Image:
