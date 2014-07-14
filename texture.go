@@ -6,7 +6,7 @@ package eng
 
 import (
 	"encoding/json"
-	gl "github.com/chsc/gogl/gl32"
+	"github.com/errcw/glow/gl/2.1/gl"
 	"image"
 	"image/draw"
 	_ "image/png"
@@ -20,13 +20,13 @@ import (
 // A Texture wraps an opengl texture and is mostly used for loading
 // images and constructing Regions.
 type Texture struct {
-	id        gl.Uint
-	width     int
-	height    int
-	minFilter gl.Int
-	maxFilter gl.Int
-	uWrap     gl.Int
-	vWrap     gl.Int
+	id        uint32
+	width     int32
+	height    int32
+	minFilter int32
+	maxFilter int32
+	uWrap     int
+	vWrap     int
 }
 
 // NewTexture takes either a string path to an image file, an
@@ -62,10 +62,10 @@ func NewTexture(data interface{}) *Texture {
 	newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
 	draw.Draw(newm, newm.Bounds(), m, b.Min, draw.Src)
 
-	width := m.Bounds().Max.X
-	height := m.Bounds().Max.Y
+	width := int32(m.Bounds().Max.X)
+	height := int32(m.Bounds().Max.Y)
 
-	var id gl.Uint
+	var id uint32
 	gl.GenTextures(1, &id)
 
 	gl.Enable(gl.TEXTURE_2D)
@@ -78,7 +78,7 @@ func NewTexture(data interface{}) *Texture {
 	gl.TexParameteri(gl.TEXTURE_2D, gl.GENERATE_MIPMAP, gl.TRUE)
 
 	gl.PixelStorei(gl.UNPACK_ALIGNMENT, 1)
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.Sizei(width), gl.Sizei(height), 0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Pointer(&newm.Pix[0]))
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(newm.Pix))
 
 	gl.Disable(gl.TEXTURE_2D)
 
@@ -90,8 +90,8 @@ func NewTexture(data interface{}) *Texture {
 func (t *Texture) Split(w, h int) []*Region {
 	x := 0
 	y := 0
-	width := t.Width()
-	height := t.Height()
+	width := int(t.Width())
+	height := int(t.Height())
 
 	rows := height / h
 	cols := width / w
@@ -156,19 +156,19 @@ func (t *Texture) Unbind() {
 }
 
 // Width returns the width of the texture.
-func (t *Texture) Width() int {
+func (t *Texture) Width() int32 {
 	return t.width
 }
 
 // Height returns the height of the texture.
-func (t *Texture) Height() int {
+func (t *Texture) Height() int32 {
 	return t.height
 }
 
 // SetFilter sets the filter type used when scaling a texture up or
 // down. The default is nearest which will not doing any interpolation
 // between pixels.
-func (t *Texture) SetFilter(min, max gl.Int) {
+func (t *Texture) SetFilter(min, max int32) {
 	t.minFilter = min
 	t.maxFilter = max
 	t.Bind()
@@ -177,18 +177,18 @@ func (t *Texture) SetFilter(min, max gl.Int) {
 }
 
 // Returns the current min and max filters used.
-func (t *Texture) Filter() (gl.Int, gl.Int) {
+func (t *Texture) Filter() (int32, int32) {
 	return t.minFilter, t.maxFilter
 }
 
-func (t *Texture) SetWrap(u, v gl.Int) {
+func (t *Texture) SetWrap(u, v int) {
 	t.uWrap = u
 	t.vWrap = v
 	t.Bind()
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, u)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, v)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, int32(u))
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, int32(v))
 }
 
-func (t *Texture) Wrap() (gl.Int, gl.Int) {
+func (t *Texture) Wrap() (int, int) {
 	return t.uWrap, t.vWrap
 }

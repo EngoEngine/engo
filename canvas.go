@@ -5,7 +5,8 @@
 package eng
 
 import (
-	gl "github.com/chsc/gogl/gl32"
+	//"github.com/errcw/glow/gl-core/3.2/gl"
+	"github.com/errcw/glow/gl/2.1/gl"
 	"image"
 	"log"
 )
@@ -13,7 +14,7 @@ import (
 // A Canvas technically wraps an opengl framebuffer. It is used to
 // render to a texture that can then be rendered multiple times with a batch.
 type Canvas struct {
-	id     gl.Uint
+	id     uint32
 	region *Region
 	width  int
 	height int
@@ -54,13 +55,13 @@ func NewCanvas(width, height int) *Canvas {
 
 // Begin should be called before doing any rendering to the canvas.
 func (c *Canvas) Begin() {
-	gl.Viewport(0, 0, gl.Sizei(c.Width()), gl.Sizei(c.Height()))
+	gl.Viewport(0, 0, int32(c.Width()), int32(c.Height()))
 	gl.BindFramebuffer(gl.FRAMEBUFFER, c.id)
 }
 
 // End should be called when done rendering to the canvas.
 func (c *Canvas) End() {
-	gl.Viewport(0, 0, gl.Sizei(Width()), gl.Sizei(Height()))
+	gl.Viewport(0, 0, int32(Width()), int32(Height()))
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 }
 

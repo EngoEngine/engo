@@ -5,9 +5,8 @@
 package eng
 
 import (
-	gl "github.com/chsc/gogl/gl32"
+	"github.com/errcw/glow/gl/2.1/gl"
 	"math"
-	"unsafe"
 )
 
 const size = 1000
@@ -27,8 +26,7 @@ void main() {
   var_Color = in_Color;
   var_TexCoords = in_TexCoords;
   gl_Position = uf_Matrix * in_Position;
-}
-`
+}`
 
 var batchFrag = `
 varying vec4 var_Color;
@@ -37,22 +35,21 @@ varying vec2 var_TexCoords;
 uniform sampler2D uf_Texture;
 
 void main (void) {
-  gl_FragColor = var_Color * texture2D (uf_Texture, var_TexCoords);
-}
-`
+  gl_FragColor = var_Color * texture2D(uf_Texture, var_TexCoords);
+}`
 
 // A Batch allows geometry to be efficiently rendered by buffering
 // render calls and sending them all at once.
 type Batch struct {
 	drawing          bool
 	lastTexture      *Texture
-	vertices         [size][2]gl.Float
-	vertexVBO        gl.Uint
-	colors           [size][4]gl.Float
-	colorVBO         gl.Uint
-	coords           [size][2]gl.Float
-	coordVBO         gl.Uint
-	index            gl.Sizei
+	vertices         []float32
+	vertexVBO        uint32
+	colors           []float32
+	colorVBO         uint32
+	coords           []float32
+	coordVBO         uint32
+	index            int
 	shader           *Shader
 	customShader     *Shader
 	combined         *Matrix
@@ -60,16 +57,19 @@ type Batch struct {
 	transform        *Matrix
 	color            *Color
 	blendingDisabled bool
-	blendSrcFunc     gl.Enum
-	blendDstFunc     gl.Enum
-	inPosition       gl.Uint
-	inColor          gl.Uint
-	inTexCoords      gl.Uint
-	ufMatrix         gl.Int
+	blendSrcFunc     uint32
+	blendDstFunc     uint32
+	inPosition       uint32
+	inColor          uint32
+	inTexCoords      uint32
+	ufMatrix         int32
 }
 
 func NewBatch() *Batch {
 	batch := new(Batch)
+	batch.vertices = make([]float32, 2*size)
+	batch.colors = make([]float32, 4*size)
+	batch.coords = make([]float32, 2*size)
 	batch.shader = NewShader(batchVert, batchFrag)
 	batch.inPosition = batch.shader.GetAttrib("in_Position")
 	batch.inColor = batch.shader.GetAttrib("in_Color")
@@ -78,15 +78,15 @@ func NewBatch() *Batch {
 
 	gl.GenBuffers(1, &batch.vertexVBO)
 	gl.BindBuffer(gl.ARRAY_BUFFER, batch.vertexVBO)
-	gl.BufferData(gl.ARRAY_BUFFER, gl.Sizeiptr(int(unsafe.Sizeof([2]gl.Float{}))*size), gl.Pointer(&batch.vertices[0]), gl.DYNAMIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, 2*4*4*size, gl.Ptr(batch.vertices), gl.DYNAMIC_DRAW)
 
 	gl.GenBuffers(1, &batch.colorVBO)
 	gl.BindBuffer(gl.ARRAY_BUFFER, batch.colorVBO)
-	gl.BufferData(gl.ARRAY_BUFFER, gl.Sizeiptr(int(unsafe.Sizeof([4]gl.Float{}))*size), gl.Pointer(&batch.colors[0]), gl.DYNAMIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, 4*4*size, gl.Ptr(batch.colors), gl.DYNAMIC_DRAW)
 
 	gl.GenBuffers(1, &batch.coordVBO)
 	gl.BindBuffer(gl.ARRAY_BUFFER, batch.coordVBO)
-	gl.BufferData(gl.ARRAY_BUFFER, gl.Sizeiptr(int(unsafe.Sizeof([2]gl.Float{}))*size), gl.Pointer(&batch.coords[0]), gl.DYNAMIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, 2*4*size, gl.Ptr(batch.coords), gl.DYNAMIC_DRAW)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 
@@ -132,40 +132,41 @@ func (b *Batch) DrawVerts(r *Region, verts [8]float32, color *Color) {
 		c = color
 	}
 
-	b.vertices[b.index+0][0] = gl.Float(verts[0])
-	b.vertices[b.index+0][1] = gl.Float(verts[1])
-	b.vertices[b.index+1][0] = gl.Float(verts[2])
-	b.vertices[b.index+1][1] = gl.Float(verts[3])
-	b.vertices[b.index+2][0] = gl.Float(verts[4])
-	b.vertices[b.index+2][1] = gl.Float(verts[5])
-	b.vertices[b.index+3][0] = gl.Float(verts[6])
-	b.vertices[b.index+3][1] = gl.Float(verts[7])
+	vi := b.index * 2
+	b.vertices[vi+0] = verts[0]
+	b.vertices[vi+1] = verts[1]
+	b.vertices[vi+2] = verts[2]
+	b.vertices[vi+3] = verts[3]
+	b.vertices[vi+4] = verts[4]
+	b.vertices[vi+5] = verts[5]
+	b.vertices[vi+6] = verts[6]
+	b.vertices[vi+7] = verts[7]
 
-	b.colors[b.index+0][0] = gl.Float(c.R)
-	b.colors[b.index+0][1] = gl.Float(c.G)
-	b.colors[b.index+0][2] = gl.Float(c.B)
-	b.colors[b.index+0][3] = gl.Float(c.A)
-	b.colors[b.index+1][0] = gl.Float(c.R)
-	b.colors[b.index+1][1] = gl.Float(c.G)
-	b.colors[b.index+1][2] = gl.Float(c.B)
-	b.colors[b.index+1][3] = gl.Float(c.A)
-	b.colors[b.index+2][0] = gl.Float(c.R)
-	b.colors[b.index+2][1] = gl.Float(c.G)
-	b.colors[b.index+2][2] = gl.Float(c.B)
-	b.colors[b.index+2][3] = gl.Float(c.A)
-	b.colors[b.index+3][0] = gl.Float(c.R)
-	b.colors[b.index+3][1] = gl.Float(c.G)
-	b.colors[b.index+3][2] = gl.Float(c.B)
-	b.colors[b.index+3][3] = gl.Float(c.A)
+	b.colors[b.index+0] = c.R
+	b.colors[b.index+1] = c.G
+	b.colors[b.index+2] = c.B
+	b.colors[b.index+3] = c.A
+	b.colors[b.index+4] = c.R
+	b.colors[b.index+5] = c.G
+	b.colors[b.index+6] = c.B
+	b.colors[b.index+7] = c.A
+	b.colors[b.index+8] = c.R
+	b.colors[b.index+9] = c.G
+	b.colors[b.index+10] = c.B
+	b.colors[b.index+11] = c.A
+	b.colors[b.index+12] = c.R
+	b.colors[b.index+13] = c.G
+	b.colors[b.index+14] = c.B
+	b.colors[b.index+15] = c.A
 
-	b.coords[b.index+0][0] = r.u
-	b.coords[b.index+0][1] = r.v
-	b.coords[b.index+1][0] = r.u
-	b.coords[b.index+1][1] = r.v2
-	b.coords[b.index+2][0] = r.u2
-	b.coords[b.index+2][1] = r.v2
-	b.coords[b.index+3][0] = r.u2
-	b.coords[b.index+3][1] = r.v
+	b.coords[b.index+0] = r.u
+	b.coords[b.index+1] = r.v
+	b.coords[b.index+2] = r.u
+	b.coords[b.index+3] = r.v2
+	b.coords[b.index+4] = r.u2
+	b.coords[b.index+5] = r.v2
+	b.coords[b.index+6] = r.u2
+	b.coords[b.index+7] = r.v
 
 	b.index += 4
 
@@ -267,40 +268,42 @@ func (b *Batch) Draw(r *Region, x, y, originX, originY, scaleX, scaleY, rotation
 		c = color
 	}
 
-	b.vertices[b.index+0][0] = gl.Float(x1)
-	b.vertices[b.index+0][1] = gl.Float(y1)
-	b.vertices[b.index+1][0] = gl.Float(x2)
-	b.vertices[b.index+1][1] = gl.Float(y2)
-	b.vertices[b.index+2][0] = gl.Float(x3)
-	b.vertices[b.index+2][1] = gl.Float(y3)
-	b.vertices[b.index+3][0] = gl.Float(x4)
-	b.vertices[b.index+3][1] = gl.Float(y4)
+	vi := b.index * 2
+	b.vertices[vi+0] = x1
+	b.vertices[vi+1] = y1
+	b.vertices[vi+2] = x2
+	b.vertices[vi+3] = y2
+	b.vertices[vi+4] = x3
+	b.vertices[vi+5] = y3
+	b.vertices[vi+6] = x4
+	b.vertices[vi+7] = y4
 
-	b.colors[b.index+0][0] = gl.Float(c.R)
-	b.colors[b.index+0][1] = gl.Float(c.G)
-	b.colors[b.index+0][2] = gl.Float(c.B)
-	b.colors[b.index+0][3] = gl.Float(c.A)
-	b.colors[b.index+1][0] = gl.Float(c.R)
-	b.colors[b.index+1][1] = gl.Float(c.G)
-	b.colors[b.index+1][2] = gl.Float(c.B)
-	b.colors[b.index+1][3] = gl.Float(c.A)
-	b.colors[b.index+2][0] = gl.Float(c.R)
-	b.colors[b.index+2][1] = gl.Float(c.G)
-	b.colors[b.index+2][2] = gl.Float(c.B)
-	b.colors[b.index+2][3] = gl.Float(c.A)
-	b.colors[b.index+3][0] = gl.Float(c.R)
-	b.colors[b.index+3][1] = gl.Float(c.G)
-	b.colors[b.index+3][2] = gl.Float(c.B)
-	b.colors[b.index+3][3] = gl.Float(c.A)
+	ci := b.index * 4
+	b.colors[ci+0] = c.R
+	b.colors[ci+1] = c.G
+	b.colors[ci+2] = c.B
+	b.colors[ci+3] = c.A
+	b.colors[ci+4] = c.R
+	b.colors[ci+5] = c.G
+	b.colors[ci+6] = c.B
+	b.colors[ci+7] = c.A
+	b.colors[ci+8] = c.R
+	b.colors[ci+9] = c.G
+	b.colors[ci+10] = c.B
+	b.colors[ci+11] = c.A
+	b.colors[ci+12] = c.R
+	b.colors[ci+13] = c.G
+	b.colors[ci+14] = c.B
+	b.colors[ci+15] = c.A
 
-	b.coords[b.index+0][0] = r.u
-	b.coords[b.index+0][1] = r.v
-	b.coords[b.index+1][0] = r.u
-	b.coords[b.index+1][1] = r.v2
-	b.coords[b.index+2][0] = r.u2
-	b.coords[b.index+2][1] = r.v2
-	b.coords[b.index+3][0] = r.u2
-	b.coords[b.index+3][1] = r.v
+	b.coords[vi+0] = r.u
+	b.coords[vi+1] = r.v
+	b.coords[vi+2] = r.u
+	b.coords[vi+3] = r.v2
+	b.coords[vi+4] = r.u2
+	b.coords[vi+5] = r.v2
+	b.coords[vi+6] = r.u2
+	b.coords[vi+7] = r.v
 
 	b.index += 4
 
@@ -343,7 +346,7 @@ func (b *Batch) SetBlending(v bool) {
 // default is gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA which will render
 // any alpha channel in your textures as blank. Calling this will
 // flush any pending geometry to the gpu.
-func (b *Batch) SetBlendFunc(src, dst gl.Enum) {
+func (b *Batch) SetBlendFunc(src, dst uint32) {
 	b.flush()
 	b.blendSrcFunc = src
 	b.blendDstFunc = dst
@@ -389,24 +392,24 @@ func (b *Batch) flush() {
 	gl.ActiveTexture(gl.TEXTURE0)
 	b.lastTexture.Bind()
 
-	gl.UniformMatrix4fv(b.ufMatrix, 1, gl.FALSE, &b.combined[0])
+	gl.UniformMatrix4fv(b.ufMatrix, 1, false, &b.combined[0])
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, b.vertexVBO)
-	gl.BufferSubData(gl.ARRAY_BUFFER, gl.Intptr(0), gl.Sizeiptr(int(unsafe.Sizeof([2]gl.Float{}))*int(b.index)), gl.Pointer(&b.vertices[0]))
+	gl.BufferSubData(gl.ARRAY_BUFFER, 0, 4*2*b.index, gl.Ptr(b.vertices))
 	gl.EnableVertexAttribArray(b.inPosition)
-	gl.VertexAttribPointer(b.inPosition, 2, gl.FLOAT, gl.FALSE, 0, nil)
+	gl.VertexAttribPointer(b.inPosition, 2, gl.FLOAT, false, 0, gl.PtrOffset(0))
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, b.colorVBO)
-	gl.BufferSubData(gl.ARRAY_BUFFER, gl.Intptr(0), gl.Sizeiptr(int(unsafe.Sizeof([4]gl.Float{}))*int(b.index)), gl.Pointer(&b.colors[0]))
+	gl.BufferSubData(gl.ARRAY_BUFFER, 0, 4*4*b.index, gl.Ptr(b.colors))
 	gl.EnableVertexAttribArray(b.inColor)
-	gl.VertexAttribPointer(b.inColor, 4, gl.FLOAT, gl.FALSE, 0, nil)
+	gl.VertexAttribPointer(b.inColor, 4, gl.FLOAT, false, 0, gl.PtrOffset(0))
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, b.coordVBO)
-	gl.BufferSubData(gl.ARRAY_BUFFER, gl.Intptr(0), gl.Sizeiptr(int(unsafe.Sizeof([2]gl.Float{}))*int(b.index)), gl.Pointer(&b.coords[0]))
+	gl.BufferSubData(gl.ARRAY_BUFFER, 0, 4*2*b.index, gl.Ptr(b.coords))
 	gl.EnableVertexAttribArray(b.inTexCoords)
-	gl.VertexAttribPointer(b.inTexCoords, 2, gl.FLOAT, gl.FALSE, 0, nil)
+	gl.VertexAttribPointer(b.inTexCoords, 2, gl.FLOAT, false, 0, gl.PtrOffset(0))
 
-	gl.DrawArrays(gl.QUADS, 0, b.index)
+	gl.DrawArrays(gl.QUADS, 0, int32(b.index))
 
 	b.index = 0
 }

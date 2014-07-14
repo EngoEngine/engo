@@ -26,5 +26,5 @@ func (g *Game) Draw() {
 }
 
 func main() {
-	eng.Run("Atlas", 1024, 640, false, new(Game))
+	eng.Run("Atlas", 1024, 640, true, new(Game))
 }

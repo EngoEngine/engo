@@ -124,8 +124,8 @@ func NewGridFont(img interface{}, cellWidth, cellHeight int, maps string) *Font 
 	}
 
 	os := &offset{0, 0, float32(cellWidth)}
-	for y := 0; y < texture.Height()/cellHeight; y++ {
-		for x := 0; x < texture.Width()/cellWidth; x++ {
+	for y := 0; y < int(texture.Height())/cellHeight; y++ {
+		for x := 0; x < int(texture.Width())/cellWidth; x++ {
 			font.offsets = append(font.offsets, os)
 			r := NewRegion(texture, x*cellWidth, y*cellHeight, cellWidth, cellHeight)
 			font.regions = append(font.regions, r)

@@ -5,7 +5,6 @@
 package eng
 
 import (
-	gl "github.com/chsc/gogl/gl32"
 	"math"
 )
 
@@ -37,7 +36,7 @@ func (v *Vector) Prj(m *Matrix) *Vector {
 	return v
 }
 
-type Matrix [16]gl.Float
+type Matrix [16]float32
 
 func NewMatrix() *Matrix {
 	return &Matrix{
@@ -190,21 +189,21 @@ func (m *Matrix) SetToOrtho(left, right, bottom, top, near, far float32) *Matrix
 	rl := right - left
 	tb := top - bottom
 	fn := far - near
-	m[0] = gl.Float(2 / rl)
+	m[0] = 2 / rl
 	m[1] = 0
 	m[2] = 0
 	m[3] = 0
 	m[4] = 0
-	m[5] = gl.Float(2 / tb)
+	m[5] = 2 / tb
 	m[6] = 0
 	m[7] = 0
 	m[8] = 0
 	m[9] = 0
-	m[10] = gl.Float(-2 / fn)
+	m[10] = -2 / fn
 	m[11] = 0
-	m[12] = gl.Float(-(left + right) / rl)
-	m[13] = gl.Float(-(top + bottom) / tb)
-	m[14] = gl.Float(-(far + near) / fn)
+	m[12] = -(left + right) / rl
+	m[13] = -(top + bottom) / tb
+	m[14] = -(far + near) / fn
 	m[15] = 1
 	return m
 }
@@ -264,21 +263,21 @@ func (m *Matrix) SetToLookAt(eye, center, up *Vector) *Matrix {
 		y2 *= length
 	}
 
-	m[0] = gl.Float(x0)
-	m[1] = gl.Float(y0)
-	m[2] = gl.Float(z0)
+	m[0] = x0
+	m[1] = y0
+	m[2] = z0
 	m[3] = 0
-	m[4] = gl.Float(x1)
-	m[5] = gl.Float(y1)
-	m[6] = gl.Float(z1)
+	m[4] = x1
+	m[5] = y1
+	m[6] = z1
 	m[7] = 0
-	m[8] = gl.Float(x2)
-	m[9] = gl.Float(y2)
-	m[10] = gl.Float(z2)
+	m[8] = x2
+	m[9] = y2
+	m[10] = z2
 	m[11] = 0
-	m[12] = gl.Float(-(x0*eyex + x1*eyey + x2*eyez))
-	m[13] = gl.Float(-(y0*eyex + y1*eyey + y2*eyez))
-	m[14] = gl.Float(-(z0*eyex + z1*eyey + z2*eyez))
+	m[12] = -(x0*eyex + x1*eyey + x2*eyez)
+	m[13] = -(y0*eyex + y1*eyey + y2*eyez)
+	m[14] = -(z0*eyex + z1*eyey + z2*eyez)
 	m[15] = 1
 
 	return m

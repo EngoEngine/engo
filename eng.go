@@ -6,12 +6,21 @@
 package eng
 
 import (
-	gl "github.com/chsc/gogl/gl32"
+	"github.com/errcw/glow/gl/2.1/gl"
 	glfw "github.com/go-gl/glfw3"
 	"image"
 	"image/draw"
 	"log"
+	"runtime"
 )
+
+func init() {
+	// GLFW event handling must run on the main OS thread
+	runtime.LockOSThread()
+}
+
+type MouseButton glfw.MouseButton
+type Key glfw.Key
 
 // Common OpenGL constants
 const (
@@ -35,91 +44,92 @@ const (
 	WrapClampToEdge            = gl.CLAMP_TO_EDGE
 	WrapRepeat                 = gl.REPEAT
 	WrapMirroredRepeat         = gl.MIRRORED_REPEAT
-	Escape                     = glfw.KeyEsc
-	F1                         = glfw.KeyF1
-	F2                         = glfw.KeyF2
-	F3                         = glfw.KeyF3
-	F4                         = glfw.KeyF4
-	F5                         = glfw.KeyF5
-	F6                         = glfw.KeyF6
-	F7                         = glfw.KeyF7
-	F8                         = glfw.KeyF8
-	F9                         = glfw.KeyF9
-	F10                        = glfw.KeyF10
-	F11                        = glfw.KeyF11
-	F12                        = glfw.KeyF12
-	F13                        = glfw.KeyF13
-	F14                        = glfw.KeyF14
-	F15                        = glfw.KeyF15
-	F16                        = glfw.KeyF16
-	F17                        = glfw.KeyF17
-	F18                        = glfw.KeyF18
-	F19                        = glfw.KeyF19
-	F20                        = glfw.KeyF20
-	F21                        = glfw.KeyF21
-	F22                        = glfw.KeyF22
-	F23                        = glfw.KeyF23
-	F24                        = glfw.KeyF24
-	F25                        = glfw.KeyF25
-	Up                         = glfw.KeyUp
-	Down                       = glfw.KeyDown
-	Left                       = glfw.KeyLeft
-	Right                      = glfw.KeyRight
-	Lshift                     = glfw.KeyLshift
-	Rshift                     = glfw.KeyRshift
-	Lctrl                      = glfw.KeyLctrl
-	Rctrl                      = glfw.KeyRctrl
-	Lalt                       = glfw.KeyLalt
-	Ralt                       = glfw.KeyRalt
-	Tab                        = glfw.KeyTab
-	Space                      = glfw.KeySpace
-	Enter                      = glfw.KeyEnter
-	Backspace                  = glfw.KeyBackspace
-	Insert                     = glfw.KeyInsert
-	Del                        = glfw.KeyDel
-	Pageup                     = glfw.KeyPageup
-	Pagedown                   = glfw.KeyPagedown
-	Home                       = glfw.KeyHome
-	End                        = glfw.KeyEnd
-	KP0                        = glfw.KeyKP0
-	KP1                        = glfw.KeyKP1
-	KP2                        = glfw.KeyKP2
-	KP3                        = glfw.KeyKP3
-	KP4                        = glfw.KeyKP4
-	KP5                        = glfw.KeyKP5
-	KP6                        = glfw.KeyKP6
-	KP7                        = glfw.KeyKP7
-	KP8                        = glfw.KeyKP8
-	KP9                        = glfw.KeyKP9
-	KPDivide                   = glfw.KeyKPDivide
-	KPMultiply                 = glfw.KeyKPMultiply
-	KPSubtract                 = glfw.KeyKPSubtract
-	KPAdd                      = glfw.KeyKPAdd
-	KPDecimal                  = glfw.KeyKPDecimal
-	KPEqual                    = glfw.KeyKPEqual
-	KPEnter                    = glfw.KeyKPEnter
-	KPNumlock                  = glfw.KeyKPNumlock
-	Capslock                   = glfw.KeyCapslock
-	Scrolllock                 = glfw.KeyScrolllock
-	Pause                      = glfw.KeyPause
-	Lsuper                     = glfw.KeyLsuper
-	Rsuper                     = glfw.KeyRsuper
-	Menu                       = glfw.KeyMenu
-	Mouse1                     = glfw.Mouse1
-	Mouse2                     = glfw.Mouse2
-	Mouse3                     = glfw.Mouse3
-	Mouse4                     = glfw.Mouse4
-	Mouse5                     = glfw.Mouse5
-	Mouse6                     = glfw.Mouse6
-	Mouse7                     = glfw.Mouse7
-	Mouse8                     = glfw.Mouse8
-	MouseLeft                  = glfw.MouseLeft
-	MouseRight                 = glfw.MouseRight
-	MouseMiddle                = glfw.MouseMiddle
+	Escape                     = Key(glfw.KeyEscape)
+	F1                         = Key(glfw.KeyF1)
+	F2                         = Key(glfw.KeyF2)
+	F3                         = Key(glfw.KeyF3)
+	F4                         = Key(glfw.KeyF4)
+	F5                         = Key(glfw.KeyF5)
+	F6                         = Key(glfw.KeyF6)
+	F7                         = Key(glfw.KeyF7)
+	F8                         = Key(glfw.KeyF8)
+	F9                         = Key(glfw.KeyF9)
+	F10                        = Key(glfw.KeyF10)
+	F11                        = Key(glfw.KeyF11)
+	F12                        = Key(glfw.KeyF12)
+	F13                        = Key(glfw.KeyF13)
+	F14                        = Key(glfw.KeyF14)
+	F15                        = Key(glfw.KeyF15)
+	F16                        = Key(glfw.KeyF16)
+	F17                        = Key(glfw.KeyF17)
+	F18                        = Key(glfw.KeyF18)
+	F19                        = Key(glfw.KeyF19)
+	F20                        = Key(glfw.KeyF20)
+	F21                        = Key(glfw.KeyF21)
+	F22                        = Key(glfw.KeyF22)
+	F23                        = Key(glfw.KeyF23)
+	F24                        = Key(glfw.KeyF24)
+	F25                        = Key(glfw.KeyF25)
+	Up                         = Key(glfw.KeyUp)
+	Down                       = Key(glfw.KeyDown)
+	Left                       = Key(glfw.KeyLeft)
+	Right                      = Key(glfw.KeyRight)
+	LeftShift                  = Key(glfw.KeyLeftShift)
+	RightShift                 = Key(glfw.KeyRightShift)
+	LeftControl                = Key(glfw.KeyLeftControl)
+	RightControl               = Key(glfw.KeyRightControl)
+	LeftAlt                    = Key(glfw.KeyLeftAlt)
+	RightAlt                   = Key(glfw.KeyRightAlt)
+	Tab                        = Key(glfw.KeyTab)
+	Space                      = Key(glfw.KeySpace)
+	Enter                      = Key(glfw.KeyEnter)
+	Backspace                  = Key(glfw.KeyBackspace)
+	Insert                     = Key(glfw.KeyInsert)
+	Delete                     = Key(glfw.KeyDelete)
+	PageUp                     = Key(glfw.KeyPageUp)
+	PageDown                   = Key(glfw.KeyPageDown)
+	Home                       = Key(glfw.KeyHome)
+	End                        = Key(glfw.KeyEnd)
+	Kp0                        = Key(glfw.KeyKp0)
+	Kp1                        = Key(glfw.KeyKp1)
+	Kp2                        = Key(glfw.KeyKp2)
+	Kp3                        = Key(glfw.KeyKp3)
+	Kp4                        = Key(glfw.KeyKp4)
+	Kp5                        = Key(glfw.KeyKp5)
+	Kp6                        = Key(glfw.KeyKp6)
+	Kp7                        = Key(glfw.KeyKp7)
+	Kp8                        = Key(glfw.KeyKp8)
+	Kp9                        = Key(glfw.KeyKp9)
+	KpDivide                   = Key(glfw.KeyKpDivide)
+	KpMultiply                 = Key(glfw.KeyKpMultiply)
+	KpSubtract                 = Key(glfw.KeyKpSubtract)
+	KpAdd                      = Key(glfw.KeyKpAdd)
+	KpDecimal                  = Key(glfw.KeyKpDecimal)
+	KpEqual                    = Key(glfw.KeyKpEqual)
+	KpEnter                    = Key(glfw.KeyKpEnter)
+	NumLock                    = Key(glfw.KeyNumLock)
+	CapsLock                   = Key(glfw.KeyCapsLock)
+	ScrollLock                 = Key(glfw.KeyScrollLock)
+	Pause                      = Key(glfw.KeyPause)
+	LeftSuper                  = Key(glfw.KeyLeftSuper)
+	RightSuper                 = Key(glfw.KeyRightSuper)
+	Menu                       = Key(glfw.KeyMenu)
+	MouseButton1               = MouseButton(glfw.MouseButton1)
+	MouseButton2               = MouseButton(glfw.MouseButton2)
+	MouseButton3               = MouseButton(glfw.MouseButton3)
+	MouseButton4               = MouseButton(glfw.MouseButton4)
+	MouseButton5               = MouseButton(glfw.MouseButton5)
+	MouseButton6               = MouseButton(glfw.MouseButton6)
+	MouseButton7               = MouseButton(glfw.MouseButton7)
+	MouseButton8               = MouseButton(glfw.MouseButton8)
+	MouseButtonLeft            = MouseButton(glfw.MouseButtonLeft)
+	MouseButtonRight           = MouseButton(glfw.MouseButtonRight)
+	MouseButtonMiddle          = MouseButton(glfw.MouseButtonMiddle)
 )
 
 var (
 	responder    Responder
+	window       *glfw.Window
 	config       *Config
 	timing       *stats
 	defaultFont  *Font
@@ -180,12 +190,12 @@ type Responder interface {
 	Update(delta float32)
 	Draw()
 	MouseMove(x, y float32)
-	MouseDown(x, y float32, button int)
-	MouseUp(x, y float32, button int)
-	MouseScroll(x, y float32, amount int)
+	MouseDown(x, y float32, button MouseButton)
+	MouseUp(x, y float32, button MouseButton)
+	MouseScroll(x, y float32, amount float32)
 	KeyType(key rune)
-	KeyDown(key int)
-	KeyUp(key int)
+	KeyDown(key Key)
+	KeyUp(key Key)
 	Resize(width, height int)
 }
 
@@ -201,103 +211,115 @@ func RunConfig(c *Config, r Responder) {
 	config = c
 	responder = r
 
-	if err := glfw.Init(); err != nil {
-		log.Fatal(err)
+	glfw.SetErrorCallback(func(err glfw.ErrorCode, desc string) {
+		log.Fatal("GLFW error %v: %v\n", err, desc)
+	})
+
+	if ok := glfw.Init(); ok {
+		defer glfw.Terminate()
 	}
-	defer glfw.Terminate()
 
 	if !config.Resizable {
-		glfw.OpenWindowHint(glfw.WindowNoResize, 1)
+		glfw.WindowHint(glfw.Resizable, 0)
 	}
-	glfw.OpenWindowHint(glfw.FsaaSamples, config.Fsaa)
+	glfw.WindowHint(glfw.Samples, config.Fsaa)
 
 	width := config.Width
 	height := config.Height
-	mode := glfw.DesktopMode()
-	flag := glfw.Windowed
+
+	monitor, err := glfw.GetPrimaryMonitor()
+	if err != nil {
+		panic(err)
+	}
+	mode, err := monitor.GetVideoMode()
+	if err != nil {
+		panic(err)
+	}
 
 	if config.Fullscreen {
-		flag = glfw.Fullscreen
-		width = mode.W
-		height = mode.H
+		Log("SDF")
+		width = mode.Width
+		height = mode.Height
+	} else {
+		monitor = nil
 	}
 
-	if err := glfw.OpenWindow(width, height, 0, 0, 0, 0, 0, 0, flag); err != nil {
-		log.Fatal(err)
+	title := config.Title
+
+	glfw.WindowHint(glfw.ContextVersionMajor, 2)
+	glfw.WindowHint(glfw.ContextVersionMinor, 1)
+	glfw.WindowHint(glfw.OpenglDebugContext, glfw.True)
+
+	window, err = glfw.CreateWindow(width, height, title, monitor, nil)
+	if err != nil {
+		panic(err)
 	}
-	defer glfw.CloseWindow()
+	defer window.Destroy()
+	window.MakeContextCurrent()
+
+	config.Width, config.Height = window.GetSize()
+
+	bgColor = NewColor(0, 0, 0)
+
+	if !config.Fullscreen {
+		window.SetPosition((mode.Width-width)/2, (mode.Height-height)/2)
+	}
+
+	if config.Vsync {
+		glfw.SwapInterval(1)
+	}
 
 	if err := gl.Init(); err != nil {
 		log.Fatal(err)
 	}
 
-	config.Width, config.Height = glfw.WindowSize()
+	window.SetSizeCallback(func(window *glfw.Window, w, h int) {
+		config.Width, config.Height = window.GetSize()
+		responder.Resize(w, h)
+	})
 
-	bgColor = NewColor(0, 0, 0)
+	window.SetCursorPositionCallback(func(window *glfw.Window, x, y float64) {
+		responder.MouseMove(float32(x), float32(y))
+	})
 
-	glfw.SetWindowTitle(config.Title)
+	window.SetMouseButtonCallback(func(window *glfw.Window, b glfw.MouseButton, a glfw.Action, m glfw.ModifierKey) {
+		x, y := window.GetCursorPosition()
+		if a == glfw.Press {
+			responder.MouseDown(float32(x), float32(y), MouseButton(b))
+		} else {
+			responder.MouseUp(float32(x), float32(y), MouseButton(b))
+		}
+	})
 
-	if !config.Fullscreen {
-		glfw.SetWindowPos((mode.W-width)/2, (mode.H-height)/2)
-	}
+	window.SetScrollCallback(func(window *glfw.Window, xoff, yoff float64) {
+		x, y := window.GetCursorPosition()
+		responder.MouseScroll(float32(x), float32(y), float32(yoff))
+	})
 
-	if config.Vsync {
-		glfw.SetSwapInterval(1)
-	}
+	window.SetKeyCallback(func(window *glfw.Window, k glfw.Key, s int, a glfw.Action, m glfw.ModifierKey) {
+		if a == glfw.Press {
+			responder.KeyDown(Key(k))
+		} else {
+			responder.KeyUp(Key(k))
+		}
+	})
+
+	window.SetCharacterCallback(func(window *glfw.Window, char uint) {
+		responder.KeyType(rune(char))
+	})
 
 	responder.Open()
 	defer responder.Close()
 
-	glfw.SetWindowSizeCallback(func(w, h int) {
-		config.Width, config.Height = glfw.WindowSize()
-		responder.Resize(w, h)
-	})
-
-	glfw.SetMousePosCallback(func(x, y int) {
-		responder.MouseMove(float32(x), float32(y))
-	})
-
-	glfw.SetMouseButtonCallback(func(b, s int) {
-		x, y := glfw.MousePos()
-		if s == glfw.KeyPress {
-			responder.MouseDown(float32(x), float32(y), b)
-		} else {
-			responder.MouseUp(float32(x), float32(y), b)
-		}
-	})
-
-	var lastWheel int
-	glfw.SetMouseWheelCallback(func(pos int) {
-		if lastWheel-pos != 0 {
-			x, y := glfw.MousePos()
-			responder.MouseScroll(float32(x), float32(y), lastWheel-pos)
-			lastWheel = pos
-		}
-	})
-
-	glfw.SetKeyCallback(func(k, s int) {
-		if s == glfw.KeyPress {
-			responder.KeyDown(k)
-		} else {
-			responder.KeyUp(k)
-		}
-	})
-
-	glfw.SetCharCallback(func(k, s int) {
-		if s == glfw.KeyPress {
-			responder.KeyType(rune(k))
-		}
-	})
-
 	timing = NewStats(config.LogFPS)
 	timing.Update()
 
-	for glfw.WindowParam(glfw.Opened) == 1 {
+	for !window.ShouldClose() {
 		responder.Update(float32(timing.Dt))
-		gl.ClearColor(gl.Float(bgColor.R), gl.Float(bgColor.G), gl.Float(bgColor.B), gl.Float(bgColor.A))
-		gl.Clear(gl.COLOR_BUFFER_BIT)
+		Clear(bgColor)
 		responder.Draw()
-		glfw.SwapBuffers()
+		window.SwapBuffers()
+		glfw.PollEvents()
 		timing.Update()
 	}
 }
@@ -308,7 +330,7 @@ func Log(l ...interface{}) {
 
 // Clear manually clears with a given color. Mostly used with a Canvas.
 func Clear(color *Color) {
-	gl.ClearColor(gl.Float(color.R), gl.Float(color.G), gl.Float(color.B), gl.Float(color.A))
+	gl.ClearColor(color.R, color.G, color.B, color.A)
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 }
 
@@ -329,68 +351,59 @@ func Size() (int, int) {
 
 // SetSize sets the window width and height.
 func SetSize(w, h int) {
-	glfw.SetWindowSize(w, h)
+	window.SetSize(w, h)
 }
 
 // Focused indicates if the game window is currently focused.
 func Focused() bool {
-	return glfw.WindowParam(glfw.Active) == gl.TRUE
+	return window.GetAttribute(glfw.Focused) == gl.TRUE
 }
 
 // Exit closes the window and breaks out of the game loop.
 func Exit() {
-	glfw.CloseWindow()
+	window.SetShouldClose(true)
 }
 
 // MouseX returns the cursor's horizontal position within the window.
-func MouseX() int {
-	x, _ := glfw.MousePos()
+func MouseX() float64 {
+	x, _ := window.GetCursorPosition()
 	return x
 }
 
 // MouseY returns the cursor's vetical position within the window.
-func MouseY() int {
-	_, y := glfw.MousePos()
+func MouseY() float64 {
+	_, y := window.GetCursorPosition()
 	return y
 }
 
 // MousePos returns the cursor's X and Y position within the window.
-func MousePos() (int, int) {
-	return glfw.MousePos()
+func MousePos() (float64, float64) {
+	return window.GetCursorPosition()
 }
 
 // SetMousePos sets the cursor's X and Y position within the window.
-func SetMousePos(x, y int) {
-	glfw.SetMousePos(x, y)
+func SetMousePos(x, y float64) {
+	window.SetCursorPosition(x, y)
 }
 
 // SetMouseCursor shows or hides the cursor.
 func SetMouseCursor(on bool) {
 	if on {
-		glfw.Enable(glfw.MouseCursor)
+		window.SetInputMode(glfw.Cursor, glfw.CursorNormal)
 	} else {
-		glfw.Disable(glfw.MouseCursor)
+		window.SetInputMode(glfw.Cursor, glfw.CursorHidden)
 	}
 }
 
 // MousePressed takes a mouse button constant and indicates if it is
 // currently pressed.
-func MousePressed(b int) bool {
-	return glfw.MouseButton(b) == glfw.KeyPress
+func MousePressed(b glfw.MouseButton) bool {
+	return window.GetMouseButton(b) == glfw.Press
 }
 
 // KeyPressed takes a key constant and indicates if it is currently pressed.
-func KeyPressed(k int) bool {
-	return glfw.Key(k) == glfw.KeyPress
-}
-
-// SetKeyRepeat toggles key repeat either on or off.
-func SetKeyRepeat(repeat bool) {
-	if repeat {
-		glfw.Enable(glfw.KeyRepeat)
-	} else {
-		glfw.Disable(glfw.KeyRepeat)
-	}
+func KeyPressed(k glfw.Key) bool {
+	return window.GetKey(k) == glfw.Press
 }
 
 // SetBgColor sets the default opengl clear color.
