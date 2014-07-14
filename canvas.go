@@ -28,8 +28,8 @@ func NewCanvas(width, height int) *Canvas {
 	canvas.height = height
 
 	texture := NewTexture(image.NewRGBA(image.Rect(0, 0, width, height)))
-	texture.SetFilter(FilterLinear, FilterLinear)
-	texture.SetWrap(WrapClampToEdge, WrapClampToEdge)
+	texture.SetFilter(gl.LINEAR, gl.LINEAR)
+	texture.SetWrap(gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE)
 
 	gl.GenFramebuffers(1, &canvas.id)
 
