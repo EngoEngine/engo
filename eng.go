@@ -11,13 +11,7 @@ import (
 	"image"
 	"image/draw"
 	"log"
-	"runtime"
 )
-
-func init() {
-	// GLFW event handling must run on the main OS thread
-	runtime.LockOSThread()
-}
 
 type MouseButton glfw.MouseButton
 type Key glfw.Key
