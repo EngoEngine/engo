@@ -29,7 +29,7 @@ func (g *Game) Draw() {
 
 	canvas.Begin()
 	batch.Begin()
-	eng.Clear(white)
+	canvas.Clear(white)
 	batch.SetColor(black)
 	eng.DefaultFont().Print(batch, "canvas", x, y)
 	batch.End()

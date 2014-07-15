@@ -5,7 +5,6 @@
 package eng
 
 import (
-	"github.com/errcw/glow/gl/2.1/gl"
 	"log"
 	"math"
 )
@@ -88,21 +87,21 @@ func NewBatch() *Batch {
 		batch.indices[i+5] = uint16(j + 3)
 	}
 
-	gl.GenBuffers(1, &batch.indexVBO)
-	gl.GenBuffers(1, &batch.vertexVBO)
+	GL.GenBuffers(1, &batch.indexVBO)
+	GL.GenBuffers(1, &batch.vertexVBO)
 
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, batch.indexVBO)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, 6*2*size, gl.Ptr(batch.indices), gl.STATIC_DRAW)
+	GL.BindBuffer(GL.ELEMENT_ARRAY_BUFFER, batch.indexVBO)
+	GL.BufferData(GL.ELEMENT_ARRAY_BUFFER, 6*2*size, batch.indices, GL.STATIC_DRAW)
 
-	gl.BindBuffer(gl.ARRAY_BUFFER, batch.vertexVBO)
-	gl.BufferData(gl.ARRAY_BUFFER, 20*4*size, gl.Ptr(batch.vertices), gl.DYNAMIC_DRAW)
+	GL.BindBuffer(GL.ARRAY_BUFFER, batch.vertexVBO)
+	GL.BufferData(GL.ARRAY_BUFFER, 20*4*size, batch.vertices, GL.DYNAMIC_DRAW)
 
 	batch.projX = float32(Width()) / 2
 	batch.projY = float32(Height()) / 2
 
 	batch.blendingDisabled = false
-	batch.blendSrcFunc = gl.SRC_ALPHA
-	batch.blendDstFunc = gl.ONE_MINUS_SRC_ALPHA
+	batch.blendSrcFunc = GL.SRC_ALPHA
+	batch.blendDstFunc = GL.ONE_MINUS_SRC_ALPHA
 
 	return batch
 }
@@ -132,12 +131,12 @@ func (b *Batch) End() {
 		b.flush()
 	}
 	if !b.blendingDisabled {
-		gl.Disable(gl.BLEND)
+		GL.Disable(GL.BLEND)
 	}
 	b.drawing = false
 
-	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	gl.UseProgram(0)
+	GL.BindBuffer(GL.ARRAY_BUFFER, 0)
+	GL.UseProgram(0)
 
 	b.lastTexture = nil
 }
@@ -148,31 +147,31 @@ func (b *Batch) flush() {
 	}
 
 	if b.blendingDisabled {
-		gl.Disable(gl.BLEND)
+		GL.Disable(GL.BLEND)
 	} else {
-		gl.Enable(gl.BLEND)
-		gl.BlendFunc(b.blendSrcFunc, b.blendDstFunc)
+		GL.Enable(GL.BLEND)
+		GL.BlendFunc(b.blendSrcFunc, b.blendDstFunc)
 	}
 
-	gl.Enable(gl.TEXTURE_2D)
-	gl.ActiveTexture(gl.TEXTURE0)
+	GL.Enable(GL.TEXTURE_2D)
+	GL.ActiveTexture(GL.TEXTURE0)
 	b.lastTexture.Bind()
 
-	gl.Uniform2f(b.ufProjection, b.projX, b.projY)
+	GL.Uniform2f(b.ufProjection, b.projX, b.projY)
 
-	gl.BindBuffer(gl.ARRAY_BUFFER, b.vertexVBO)
-	gl.BufferSubData(gl.ARRAY_BUFFER, 0, 20*4*b.index, gl.Ptr(b.vertices))
+	GL.BindBuffer(GL.ARRAY_BUFFER, b.vertexVBO)
+	GL.BufferSubData(GL.ARRAY_BUFFER, 0, 20*4*b.index, b.vertices)
 
-	gl.EnableVertexAttribArray(b.inPosition)
-	gl.EnableVertexAttribArray(b.inTexCoords)
-	gl.EnableVertexAttribArray(b.inColor)
+	GL.EnableVertexAttribArray(b.inPosition)
+	GL.EnableVertexAttribArray(b.inTexCoords)
+	GL.EnableVertexAttribArray(b.inColor)
 
-	gl.VertexAttribPointer(b.inPosition, 2, gl.FLOAT, false, 20, gl.PtrOffset(0))
-	gl.VertexAttribPointer(b.inTexCoords, 2, gl.FLOAT, false, 20, gl.PtrOffset(8))
-	gl.VertexAttribPointer(b.inColor, 4, gl.UNSIGNED_BYTE, true, 20, gl.PtrOffset(16))
+	GL.VertexAttribPointer(b.inPosition, 2, GL.FLOAT, false, 20, 0)
+	GL.VertexAttribPointer(b.inTexCoords, 2, GL.FLOAT, false, 20, 8)
+	GL.VertexAttribPointer(b.inColor, 4, GL.UNSIGNED_BYTE, true, 20, 16)
 
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, b.indexVBO)
-	gl.DrawElements(gl.TRIANGLES, int32(6*b.index), gl.UNSIGNED_SHORT, gl.PtrOffset(0))
+	GL.BindBuffer(GL.ELEMENT_ARRAY_BUFFER, b.indexVBO)
+	GL.DrawElements(GL.TRIANGLES, int32(6*b.index), GL.UNSIGNED_SHORT, 0)
 
 	b.index = 0
 }

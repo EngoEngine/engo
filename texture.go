@@ -6,7 +6,6 @@ package eng
 
 import (
 	"encoding/json"
-	"github.com/errcw/glow/gl/2.1/gl"
 	"image"
 	"image/draw"
 	_ "image/png"
@@ -25,8 +24,8 @@ type Texture struct {
 	height    int32
 	minFilter int32
 	maxFilter int32
-	uWrap     int
-	vWrap     int
+	uWrap     int32
+	vWrap     int32
 }
 
 // NewTexture takes either a string path to an image file, an
@@ -66,22 +65,22 @@ func NewTexture(data interface{}) *Texture {
 	height := int32(m.Bounds().Max.Y)
 
 	var id uint32
-	gl.GenTextures(1, &id)
+	GL.GenTextures(1, &id)
 
-	gl.Enable(gl.TEXTURE_2D)
-	gl.BindTexture(gl.TEXTURE_2D, id)
+	GL.Enable(GL.TEXTURE_2D)
+	GL.BindTexture(GL.TEXTURE_2D, id)
 
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.GENERATE_MIPMAP, gl.TRUE)
+	GL.TexParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE)
+	GL.TexParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE)
+	GL.TexParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR_MIPMAP_LINEAR)
+	GL.TexParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST)
+	GL.TexParameteri(GL.TEXTURE_2D, GL.GENERATE_MIPMAP, GL.TRUE)
 
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(newm.Pix))
+	GL.TexImage2D(GL.TEXTURE_2D, 0, GL.RGBA, width, height, 0, GL.RGBA, GL.UNSIGNED_BYTE, newm.Pix)
 
-	gl.Disable(gl.TEXTURE_2D)
+	GL.Disable(GL.TEXTURE_2D)
 
-	return &Texture{id, width, height, gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE}
+	return &Texture{id, width, height, GL.LINEAR, GL.LINEAR, GL.CLAMP_TO_EDGE, GL.CLAMP_TO_EDGE}
 }
 
 // Split creates Regions from every width, height rect going from left
@@ -141,17 +140,17 @@ func (t *Texture) Unpack(path string) map[string]*Region {
 
 // Delete will dispose of the texture.
 func (t *Texture) Delete() {
-	gl.DeleteTextures(1, &t.id)
+	GL.DeleteTextures(1, &t.id)
 }
 
 // Bind will bind the texture.
 func (t *Texture) Bind() {
-	gl.BindTexture(gl.TEXTURE_2D, t.id)
+	GL.BindTexture(GL.TEXTURE_2D, t.id)
 }
 
 // Unbind will unbind all textures.
 func (t *Texture) Unbind() {
-	gl.BindTexture(gl.TEXTURE_2D, 0)
+	GL.BindTexture(GL.TEXTURE_2D, 0)
 }
 
 // Width returns the width of the texture.
@@ -171,8 +170,8 @@ func (t *Texture) SetFilter(min, max int32) {
 	t.minFilter = min
 	t.maxFilter = max
 	t.Bind()
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, min)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, max)
+	GL.TexParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, min)
+	GL.TexParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, max)
 }
 
 // Returns the current min and max filters used.
@@ -180,14 +179,14 @@ func (t *Texture) Filter() (int32, int32) {
 	return t.minFilter, t.maxFilter
 }
 
-func (t *Texture) SetWrap(u, v int) {
+func (t *Texture) SetWrap(u, v int32) {
 	t.uWrap = u
 	t.vWrap = v
 	t.Bind()
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, int32(u))
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, int32(v))
+	GL.TexParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, u)
+	GL.TexParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, v)
 }
 
-func (t *Texture) Wrap() (int, int) {
+func (t *Texture) Wrap() (int32, int32) {
 	return t.uWrap, t.vWrap
 }
