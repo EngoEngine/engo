@@ -30,16 +30,20 @@ func (g *Game) Draw() {
 	canvas.Begin()
 	batch.Begin()
 	eng.Clear(white)
-	eng.DefaultFont().Print(batch, "canvas", x, y, black)
+	batch.SetColor(black)
+	eng.DefaultFont().Print(batch, "canvas", x, y)
 	batch.End()
 	canvas.End()
 
 	region := canvas.Region()
 
 	batch.Begin()
-	batch.Draw(region, -200, 0, 512, 320, .5, .5, 0, blue)
-	batch.Draw(region, 100, 200, 512, 320, .5, .5, 0, red)
-	batch.Draw(region, 200, -100, 512, 320, .5, .5, 0, green)
+	batch.SetColor(blue)
+	batch.Draw(region, -200, 0, 512, 320, .5, .5, 0)
+	batch.SetColor(red)
+	batch.Draw(region, 100, 200, 512, 320, .5, .5, 0)
+	batch.SetColor(green)
+	batch.Draw(region, 200, -100, 512, 320, .5, .5, 0)
 	batch.End()
 }
 

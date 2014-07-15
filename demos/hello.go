@@ -13,12 +13,13 @@ type Game struct {
 }
 
 func (g *Game) Setup() {
+	eng.SetBgColor(eng.NewColor(0.5, 0.75, 0.5))
 	batch = eng.NewBatch()
 }
 
 func (g *Game) Draw() {
 	batch.Begin()
-	eng.DefaultFont().Print(batch, "Hello, world!", 0, 0, nil)
+	eng.DefaultFont().Print(batch, "Hello, world!", 0, 0)
 	batch.End()
 }
 

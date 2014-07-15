@@ -73,6 +73,15 @@ func (c *Color) Copy() *Color {
 	return &Color{c.R, c.G, c.B, c.A}
 }
 
+func (c *Color) FloatBits() float32 {
+	r := byte(c.R * 255)
+	g := byte(c.G * 255)
+	b := byte(c.B * 255)
+	a := byte(c.A * 255)
+	i := (uint32(a)<<24 | uint32(b)<<16 | uint32(g)<<8 | uint32(r)) & 0xfeffffff
+	return math.Float32frombits(i)
+}
+
 // Add = old + new
 func (c *Color) Add(o *Color) *Color {
 	return add(o, c)

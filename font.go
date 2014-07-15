@@ -138,12 +138,12 @@ func (f *Font) mapRune(ch rune) (int, bool) {
 	return position, ok
 }
 
-func (f *Font) Put(batch *Batch, r rune, x, y float32, color *Color) {
+func (f *Font) Put(batch *Batch, r rune, x, y float32) {
 	i, ok := f.mapRune(r)
 	if ok {
 		region := f.regions[i]
 		offset := f.offsets[i]
-		batch.Draw(region, x+offset.xoffset, y+offset.yoffset, 0, 0, 1, 1, 0, color)
+		batch.Draw(region, x+offset.xoffset, y+offset.yoffset, 0, 0, 1, 1, 0)
 	}
 }
 
@@ -151,7 +151,7 @@ func (f *Font) Put(batch *Batch, r rune, x, y float32, color *Color) {
 // x, y using the given color. If color == nil, the given batch's
 // current color will be used. If the string contains a rune that is
 // not in the font, that rune will be skipped.
-func (f *Font) Print(batch *Batch, t interface{}, x, y float32, color *Color) {
+func (f *Font) Print(batch *Batch, t interface{}, x, y float32) {
 	text := ""
 	switch t := t.(type) {
 	default:
@@ -166,7 +166,7 @@ func (f *Font) Print(batch *Batch, t interface{}, x, y float32, color *Color) {
 		if ok {
 			region := f.regions[i]
 			offset := f.offsets[i]
-			batch.Draw(region, xx+offset.xoffset, y+offset.yoffset, 0, 0, 1, 1, 0, color)
+			batch.Draw(region, xx+offset.xoffset, y+offset.yoffset, 0, 0, 1, 1, 0)
 			xx += offset.xadvance
 		}
 	}

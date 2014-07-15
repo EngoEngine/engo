@@ -21,7 +21,7 @@ func (g *Game) Setup() {
 
 func (g *Game) Draw() {
 	batch.Begin()
-	batch.Draw(regions["head"], 480, 300, 32, 32, 1, 1, 0, nil)
+	batch.Draw(regions["head"], 480, 300, 32, 32, 1, 1, 0)
 	batch.End()
 }
 

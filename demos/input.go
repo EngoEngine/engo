@@ -30,8 +30,9 @@ func (g *Game) Update(dt float32) {
 
 func (g *Game) Draw() {
 	batch.Begin()
-	eng.DefaultFont().Print(batch, fmt.Sprintf("%.0f %.0f", mx, my), mx-48, my-16+mz, color)
-	eng.DefaultFont().Print(batch, letters, 0, 320, nil)
+	batch.SetColor(color)
+	eng.DefaultFont().Print(batch, fmt.Sprintf("%.0f %.0f", mx, my), mx-48, my-16+mz)
+	eng.DefaultFont().Print(batch, letters, 0, 320)
 	batch.End()
 }
 

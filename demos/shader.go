@@ -20,8 +20,7 @@ void main() {
 	gl_Position = vec4(in_Position.x / uf_Projection.x - 1.0,
 										 in_Position.y / -uf_Projection.y + 1.0,
 										 0.0, 1.0);
-}
-`
+}`
 
 const frag = `
 varying vec4 var_Color;
@@ -31,8 +30,7 @@ uniform sampler2D uf_Texture;
 
 void main (void) {
   gl_FragColor = vec4(1, var_TexCoords.x, var_TexCoords.y, 1) * texture2D (uf_Texture, var_TexCoords);
-}
-`
+}`
 
 var batch *eng.Batch
 
@@ -47,7 +45,7 @@ func (g *Game) Setup() {
 
 func (g *Game) Draw() {
 	batch.Begin()
-	eng.DefaultFont().Print(batch, "Hello, world!", 430, 280, nil)
+	eng.DefaultFont().Print(batch, "Hello, world!", 430, 280)
 	batch.End()
 }
 

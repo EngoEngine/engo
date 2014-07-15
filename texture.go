@@ -77,7 +77,6 @@ func NewTexture(data interface{}) *Texture {
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.GENERATE_MIPMAP, gl.TRUE)
 
-	gl.PixelStorei(gl.UNPACK_ALIGNMENT, 1)
 	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(newm.Pix))
 
 	gl.Disable(gl.TEXTURE_2D)
