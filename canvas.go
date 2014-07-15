@@ -5,7 +5,6 @@
 package eng
 
 import (
-	//"github.com/errcw/glow/gl-core/3.2/gl"
 	"github.com/errcw/glow/gl/2.1/gl"
 	"image"
 	"log"

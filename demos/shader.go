@@ -9,7 +9,7 @@ attribute vec4 in_Position;
 attribute vec4 in_Color;
 attribute vec2 in_TexCoords;
 
-uniform mat4 uf_Matrix;
+uniform vec2 uf_Projection;
 
 varying vec4 var_Color;
 varying vec2 var_TexCoords;
@@ -17,7 +17,9 @@ varying vec2 var_TexCoords;
 void main() {
   var_Color = in_Color;
   var_TexCoords = in_TexCoords;
-  gl_Position = uf_Matrix * in_Position;
+	gl_Position = vec4(in_Position.x / uf_Projection.x - 1.0,
+										 in_Position.y / -uf_Projection.y + 1.0,
+										 0.0, 1.0);
 }
 `
 
