@@ -69,14 +69,18 @@ type Batch struct {
 
 func NewBatch() *Batch {
 	batch := new(Batch)
-	batch.vertices = make([]float32, 2*size)
-	batch.colors = make([]float32, 4*size)
-	batch.coords = make([]float32, 2*size)
+
 	batch.shader = NewShader(batchVert, batchFrag)
 	batch.inPosition = batch.shader.GetAttrib("in_Position")
 	batch.inColor = batch.shader.GetAttrib("in_Color")
 	batch.inTexCoords = batch.shader.GetAttrib("in_TexCoords")
 	batch.ufProjection = batch.shader.GetUniform("uf_Projection")
+
+	batch.color = NewColor(1, 1, 1)
+
+	batch.vertices = make([]float32, 2*size)
+	batch.colors = make([]float32, 4*size)
+	batch.coords = make([]float32, 2*size)
 
 	gl.GenBuffers(1, &batch.vertexVBO)
 	gl.BindBuffer(gl.ARRAY_BUFFER, batch.vertexVBO)
@@ -90,12 +94,9 @@ func NewBatch() *Batch {
 	gl.BindBuffer(gl.ARRAY_BUFFER, batch.coordVBO)
 	gl.BufferData(gl.ARRAY_BUFFER, 2*4*size, gl.Ptr(batch.coords), gl.DYNAMIC_DRAW)
 
-	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-
 	batch.projX = float32(Width()) / 2
 	batch.projY = float32(Height()) / 2
 
-	batch.color = NewColor(1, 1, 1)
 	batch.blendingDisabled = false
 	batch.blendSrcFunc = gl.SRC_ALPHA
 	batch.blendDstFunc = gl.ONE_MINUS_SRC_ALPHA
@@ -118,62 +119,62 @@ func (b *Batch) Begin() {
 	shader.Bind()
 }
 
-func (b *Batch) DrawVerts(r *Region, verts [8]float32, color *Color) {
+// End finishes up rendering and flushes any remaining geometry to the
+// gpu. This must be called after a called to Begin.
+func (b *Batch) End() {
 	if !b.drawing {
 		log.Fatal("Batch.Begin() must be called first")
 	}
-
-	if r.texture != b.lastTexture {
-		b.flush()
-		b.lastTexture = r.texture
-	}
-
-	c := b.color
-	if color != nil {
-		c = color
-	}
-
-	vi := b.index * 2
-	b.vertices[vi+0] = verts[0]
-	b.vertices[vi+1] = verts[1]
-	b.vertices[vi+2] = verts[2]
-	b.vertices[vi+3] = verts[3]
-	b.vertices[vi+4] = verts[4]
-	b.vertices[vi+5] = verts[5]
-	b.vertices[vi+6] = verts[6]
-	b.vertices[vi+7] = verts[7]
-
-	b.colors[b.index+0] = c.R
-	b.colors[b.index+1] = c.G
-	b.colors[b.index+2] = c.B
-	b.colors[b.index+3] = c.A
-	b.colors[b.index+4] = c.R
-	b.colors[b.index+5] = c.G
-	b.colors[b.index+6] = c.B
-	b.colors[b.index+7] = c.A
-	b.colors[b.index+8] = c.R
-	b.colors[b.index+9] = c.G
-	b.colors[b.index+10] = c.B
-	b.colors[b.index+11] = c.A
-	b.colors[b.index+12] = c.R
-	b.colors[b.index+13] = c.G
-	b.colors[b.index+14] = c.B
-	b.colors[b.index+15] = c.A
-
-	b.coords[b.index+0] = r.u
-	b.coords[b.index+1] = r.v
-	b.coords[b.index+2] = r.u
-	b.coords[b.index+3] = r.v2
-	b.coords[b.index+4] = r.u2
-	b.coords[b.index+5] = r.v2
-	b.coords[b.index+6] = r.u2
-	b.coords[b.index+7] = r.v
-
-	b.index += 4
-
-	if b.index >= size {
+	if b.index > 0 {
 		b.flush()
 	}
+	if !b.blendingDisabled {
+		gl.Disable(gl.BLEND)
+	}
+	b.drawing = false
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	gl.UseProgram(0)
+
+	b.lastTexture = nil
+}
+
+func (b *Batch) flush() {
+	if b.lastTexture == nil {
+		return
+	}
+
+	if b.blendingDisabled {
+		gl.Disable(gl.BLEND)
+	} else {
+		gl.Enable(gl.BLEND)
+		gl.BlendFunc(b.blendSrcFunc, b.blendDstFunc)
+	}
+
+	gl.Enable(gl.TEXTURE_2D)
+	gl.ActiveTexture(gl.TEXTURE0)
+	b.lastTexture.Bind()
+
+	gl.Uniform2f(b.ufProjection, b.projX, b.projY)
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, b.vertexVBO)
+	gl.BufferSubData(gl.ARRAY_BUFFER, 0, 4*2*b.index, gl.Ptr(b.vertices))
+	gl.EnableVertexAttribArray(b.inPosition)
+	gl.VertexAttribPointer(b.inPosition, 2, gl.FLOAT, false, 0, gl.PtrOffset(0))
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, b.colorVBO)
+	gl.BufferSubData(gl.ARRAY_BUFFER, 0, 4*4*b.index, gl.Ptr(b.colors))
+	gl.EnableVertexAttribArray(b.inColor)
+	gl.VertexAttribPointer(b.inColor, 4, gl.FLOAT, false, 0, gl.PtrOffset(0))
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, b.coordVBO)
+	gl.BufferSubData(gl.ARRAY_BUFFER, 0, 4*2*b.index, gl.Ptr(b.coords))
+	gl.EnableVertexAttribArray(b.inTexCoords)
+	gl.VertexAttribPointer(b.inTexCoords, 2, gl.FLOAT, false, 0, gl.PtrOffset(0))
+
+	gl.DrawArrays(gl.QUADS, 0, int32(b.index))
+
+	b.index = 0
 }
 
 // Draw renders a Region with its top left corner at x, y. Scaling and
@@ -313,26 +314,6 @@ func (b *Batch) Draw(r *Region, x, y, originX, originY, scaleX, scaleY, rotation
 	}
 }
 
-// End finishes up rendering and flushes any remaining geometry to the
-// gpu. This must be called after a called to Begin.
-func (b *Batch) End() {
-	if !b.drawing {
-		log.Fatal("Batch.Begin() must be called first")
-	}
-	if b.index > 0 {
-		b.flush()
-	}
-	if !b.blendingDisabled {
-		gl.Disable(gl.BLEND)
-	}
-	b.drawing = false
-
-	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	gl.UseProgram(0)
-
-	b.lastTexture = nil
-}
-
 // SetBlending will toggle blending for rendering on the batch.
 // Blending is a relatively expensive operation and should be disabled
 // if your goemetry is opaque.
@@ -375,42 +356,4 @@ func (b *Batch) SetShader(shader *Shader) {
 func (b *Batch) SetProjection(x, y float32) {
 	b.projX = x
 	b.projY = y
-}
-
-func (b *Batch) flush() {
-	if b.lastTexture == nil {
-		return
-	}
-
-	if b.blendingDisabled {
-		gl.Disable(gl.BLEND)
-	} else {
-		gl.Enable(gl.BLEND)
-		gl.BlendFunc(b.blendSrcFunc, b.blendDstFunc)
-	}
-
-	gl.Enable(gl.TEXTURE_2D)
-	gl.ActiveTexture(gl.TEXTURE0)
-	b.lastTexture.Bind()
-
-	gl.Uniform2f(b.ufProjection, b.projX, b.projY)
-
-	gl.BindBuffer(gl.ARRAY_BUFFER, b.vertexVBO)
-	gl.BufferSubData(gl.ARRAY_BUFFER, 0, 4*2*b.index, gl.Ptr(b.vertices))
-	gl.EnableVertexAttribArray(b.inPosition)
-	gl.VertexAttribPointer(b.inPosition, 2, gl.FLOAT, false, 0, gl.PtrOffset(0))
-
-	gl.BindBuffer(gl.ARRAY_BUFFER, b.colorVBO)
-	gl.BufferSubData(gl.ARRAY_BUFFER, 0, 4*4*b.index, gl.Ptr(b.colors))
-	gl.EnableVertexAttribArray(b.inColor)
-	gl.VertexAttribPointer(b.inColor, 4, gl.FLOAT, false, 0, gl.PtrOffset(0))
-
-	gl.BindBuffer(gl.ARRAY_BUFFER, b.coordVBO)
-	gl.BufferSubData(gl.ARRAY_BUFFER, 0, 4*2*b.index, gl.Ptr(b.coords))
-	gl.EnableVertexAttribArray(b.inTexCoords)
-	gl.VertexAttribPointer(b.inTexCoords, 2, gl.FLOAT, false, 0, gl.PtrOffset(0))
-
-	gl.DrawArrays(gl.QUADS, 0, int32(b.index))
-
-	b.index = 0
 }
