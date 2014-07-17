@@ -9,7 +9,7 @@ func main() {
 	config.Title = "Config"
 	config.Width = 800
 	config.Height = 600
-	config.Fullscreen = false
+	config.Fullscreen = true
 	config.Vsync = true
 	config.Resizable = true
 	config.Fsaa = 4

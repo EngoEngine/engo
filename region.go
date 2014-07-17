@@ -1,11 +1,10 @@
-// Copyright 2013 Joseph Hager. All rights reserved.
+// Copyright 2014 Joseph Hager. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 package eng
 
 import (
-	gl "github.com/chsc/gogl/gl32"
 	"math"
 )
 
@@ -13,8 +12,8 @@ import (
 // using a Batch.
 type Region struct {
 	texture       *Texture
-	u, v          gl.Float
-	u2, v2        gl.Float
+	u, v          float32
+	u2, v2        float32
 	width, height int
 }
 
@@ -31,12 +30,12 @@ func NewRegion(texture *Texture, x, y, w, h int) *Region {
 	width := int(math.Abs(float64(w)))
 	height := int(math.Abs(float64(h)))
 
-	return &Region{texture, gl.Float(u), gl.Float(v), gl.Float(u2), gl.Float(v2), width, height}
+	return &Region{texture, u, v, u2, v2, width, height}
 }
 
 // NewRegionFull returns a region that covers the entire texture.
 func NewRegionFull(texture *Texture) *Region {
-	return NewRegion(texture, 0, 0, texture.Width(), texture.Height())
+	return NewRegion(texture, 0, 0, int(texture.Width()), int(texture.Height()))
 }
 
 // Flip will swap the region's image on the x and/or y axes.

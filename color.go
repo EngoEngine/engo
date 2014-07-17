@@ -1,4 +1,4 @@
-// Copyright 2013 Joseph Hager. All rights reserved.
+// Copyright 2014 Joseph Hager. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -71,6 +71,15 @@ func (c *Color) RGBA() (r, g, b, a uint32) {
 // Copy returns a new color with the same components.
 func (c *Color) Copy() *Color {
 	return &Color{c.R, c.G, c.B, c.A}
+}
+
+func (c *Color) FloatBits() float32 {
+	r := byte(c.R * 255)
+	g := byte(c.G * 255)
+	b := byte(c.B * 255)
+	a := byte(c.A * 255)
+	i := (uint32(a)<<24 | uint32(b)<<16 | uint32(g)<<8 | uint32(r)) & 0xfeffffff
+	return math.Float32frombits(i)
 }
 
 // Add = old + new

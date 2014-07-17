@@ -1,75 +1,91 @@
-// Copyright 2013 Joseph Hager. All rights reserved.
+// Copyright 2014 Joseph Hager. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 package eng
 
-import (
-	gl "github.com/chsc/gogl/gl32"
-	"log"
-)
-
 // A Shader abstracts the loading, compiling, and linking of shader
 // programs, which can directly modify the rendering of vertices and pixels.
 type Shader struct {
-	id gl.Uint
+	id *ProgramObject
 }
 
 // NewShader takes the source of a vertex and fragment shader and
 // returns a compiled and linked shader program.
 func NewShader(vertSrc, fragSrc string) *Shader {
-	glVertSrc := gl.GLString(vertSrc)
-	defer gl.GLStringFree(glVertSrc)
-	vertShader := gl.CreateShader(gl.VERTEX_SHADER)
-	gl.ShaderSource(vertShader, 1, &glVertSrc, nil)
-	gl.CompileShader(vertShader)
-	defer gl.DeleteShader(vertShader)
+	vertShader := GL.CreateShader(GL.VERTEX_SHADER)
+	GL.ShaderSource(vertShader, vertSrc)
+	GL.CompileShader(vertShader)
+	defer GL.DeleteShader(vertShader)
 
-	glFragSrc := gl.GLString(fragSrc)
-	defer gl.GLStringFree(glFragSrc)
-	fragShader := gl.CreateShader(gl.FRAGMENT_SHADER)
-	gl.ShaderSource(fragShader, 1, &glFragSrc, nil)
-	gl.CompileShader(fragShader)
-	defer gl.DeleteShader(fragShader)
+	/*
+		var status int32
+		gl.GetShaderiv(vertShader, gl.COMPILE_STATUS, &status)
+		if status == gl.FALSE {
+			var logLength int32
+			gl.GetShaderiv(vertShader, gl.INFO_LOG_LENGTH, &logLength)
 
-	program := gl.CreateProgram()
-	gl.AttachShader(program, vertShader)
-	gl.AttachShader(program, fragShader)
+			logGL := strings.Repeat("\x00", int(logLength+1))
+			gl.GetShaderInfoLog(vertShader, logLength, nil, gl.Str(logGL))
 
-	gl.LinkProgram(program)
+			log.Fatal("failed to compile %v: %v", vertSrc, logGL)
+		}
+	*/
 
-	var linkStatus gl.Int
-	gl.GetProgramiv(program, gl.LINK_STATUS, &linkStatus)
-	if linkStatus == 0 {
-		log.Fatal("Unable to link shader program.")
-	}
+	fragShader := GL.CreateShader(GL.FRAGMENT_SHADER)
+	GL.ShaderSource(fragShader, fragSrc)
+	GL.CompileShader(fragShader)
+	defer GL.DeleteShader(fragShader)
 
-	gl.ValidateProgram(program)
+	/*
+		gl.GetShaderiv(fragShader, gl.COMPILE_STATUS, &status)
+		if status == gl.FALSE {
+			var logLength int32
+			gl.GetShaderiv(fragShader, gl.INFO_LOG_LENGTH, &logLength)
 
-	var validateStatus gl.Int
-	gl.GetProgramiv(program, gl.VALIDATE_STATUS, &validateStatus)
-	if validateStatus == 0 {
-		log.Fatal("Unable to validate shader program.")
-	}
+			logGL := strings.Repeat("\x00", int(logLength+1))
+			gl.GetShaderInfoLog(fragShader, logLength, nil, gl.Str(logGL))
+
+			log.Fatal("failed to compile %v: %v", fragSrc, logGL)
+		}
+	*/
+
+	program := GL.CreateProgram()
+	GL.AttachShader(program, vertShader)
+	GL.AttachShader(program, fragShader)
+
+	GL.LinkProgram(program)
+
+	/*
+		var linkStatus int32
+		gl.GetProgramiv(program, gl.LINK_STATUS, &linkStatus)
+		if linkStatus == 0 {
+			log.Fatal("Unable to link shader program.")
+		}
+
+		gl.ValidateProgram(program)
+
+		var validateStatus int32
+		gl.GetProgramiv(program, gl.VALIDATE_STATUS, &validateStatus)
+		if validateStatus == 0 {
+			log.Fatal("Unable to validate shader program.")
+		}
+	*/
 
 	return &Shader{program}
 }
 
 // Bind turns the shader on to be used during rendering.
 func (s *Shader) Bind() {
-	gl.UseProgram(s.id)
+	GL.UseProgram(s.id)
 }
 
 // GetUniform returns the location of the named uniform.
-func (s *Shader) GetUniform(uniform string) gl.Int {
-	glUniform := gl.GLString(uniform)
-	defer gl.GLStringFree(glUniform)
-	return gl.GetUniformLocation(s.id, glUniform)
+func (s *Shader) GetUniform(uniform string) *UniformObject {
+	return GL.GetUniformLocation(s.id, uniform)
 }
 
 // GetAttrib returns the location of the named attribute.
-func (s *Shader) GetAttrib(attrib string) gl.Uint {
-	glAttrib := gl.GLString(attrib)
-	defer gl.GLStringFree(glAttrib)
-	return gl.Uint(gl.GetAttribLocation(s.id, glAttrib))
+func (s *Shader) GetAttrib(attrib string) int {
+	return GL.GetAttribLocation(s.id, attrib)
 }

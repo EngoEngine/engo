@@ -1,19 +1,19 @@
-// Copyright 2013 Joseph Hager. All rights reserved.
+// Copyright 2014 Joseph Hager. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 package eng
 
 import (
-	gl "github.com/chsc/gogl/gl32"
-	"image"
-	"log"
+//"image"
+//"log"
 )
 
+/*
 // A Canvas technically wraps an opengl framebuffer. It is used to
 // render to a texture that can then be rendered multiple times with a batch.
 type Canvas struct {
-	id     gl.Uint
+	id     uint32
 	region *Region
 	width  int
 	height int
@@ -27,22 +27,22 @@ func NewCanvas(width, height int) *Canvas {
 	canvas.height = height
 
 	texture := NewTexture(image.NewRGBA(image.Rect(0, 0, width, height)))
-	texture.SetFilter(FilterLinear, FilterLinear)
-	texture.SetWrap(WrapClampToEdge, WrapClampToEdge)
+	texture.SetFilter(GL.LINEAR, GL.LINEAR)
+	texture.SetWrap(GL.CLAMP_TO_EDGE, GL.CLAMP_TO_EDGE)
 
-	gl.GenFramebuffers(1, &canvas.id)
+	GL.GenFramebuffers(1, &canvas.id)
 
 	texture.Bind()
-	gl.BindFramebuffer(gl.FRAMEBUFFER, canvas.id)
-	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture.id, 0)
+	GL.BindFramebuffer(GL.FRAMEBUFFER, canvas.id)
+	GL.FramebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, GL.TEXTURE_2D, texture.id, 0)
 
-	result := gl.CheckFramebufferStatus(gl.FRAMEBUFFER)
+	result := GL.CheckFramebufferStatus(GL.FRAMEBUFFER)
 
 	texture.Unbind()
-	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	GL.BindFramebuffer(GL.FRAMEBUFFER, 0)
 
-	if result != gl.FRAMEBUFFER_COMPLETE {
-		gl.DeleteFramebuffers(1, &canvas.id)
+	if result != GL.FRAMEBUFFER_COMPLETE {
+		GL.DeleteFramebuffers(1, &canvas.id)
 		log.Fatal("canvas couldn't be constructed")
 	}
 
@@ -54,14 +54,19 @@ func NewCanvas(width, height int) *Canvas {
 
 // Begin should be called before doing any rendering to the canvas.
 func (c *Canvas) Begin() {
-	gl.Viewport(0, 0, gl.Sizei(c.Width()), gl.Sizei(c.Height()))
-	gl.BindFramebuffer(gl.FRAMEBUFFER, c.id)
+	GL.Viewport(0, 0, int32(c.Width()), int32(c.Height()))
+	GL.BindFramebuffer(GL.FRAMEBUFFER, c.id)
 }
 
 // End should be called when done rendering to the canvas.
 func (c *Canvas) End() {
-	gl.Viewport(0, 0, gl.Sizei(Width()), gl.Sizei(Height()))
-	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	GL.Viewport(0, 0, int32(Width()), int32(Height()))
+	GL.BindFramebuffer(GL.FRAMEBUFFER, 0)
+}
+
+func (c *Canvas) Clear(color *Color) {
+	GL.ClearColor(color.R, color.G, color.B, color.A)
+	GL.Clear(GL.COLOR_BUFFER_BIT)
 }
 
 // Width is the width of the canvas.
@@ -79,3 +84,4 @@ func (c *Canvas) Height() int {
 func (c *Canvas) Region() *Region {
 	return c.region
 }
+*/

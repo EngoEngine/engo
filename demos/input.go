@@ -11,13 +11,19 @@ var (
 	mx, my, mz float32
 	color      *eng.Color
 	letters    string
+	font       *eng.Font
 )
 
 type Game struct {
 	*eng.Game
 }
 
-func (g *Game) Open() {
+func (g *Game) Load() {
+	eng.Files.Add("font", "data/font.png")
+}
+
+func (g *Game) Setup() {
+	font = eng.NewGridFont(eng.Files.Image("font"), 20, 20, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~")
 	batch = eng.NewBatch()
 	color = eng.NewColor(1, 1, 1)
 }
@@ -30,53 +36,39 @@ func (g *Game) Update(dt float32) {
 
 func (g *Game) Draw() {
 	batch.Begin()
-	eng.DefaultFont().Print(batch, fmt.Sprintf("%.0f %.0f", mx, my), mx-48, my-16+mz, color)
-	eng.DefaultFont().Print(batch, letters, 0, 320, nil)
+	batch.SetColor(color)
+	font.Print(batch, fmt.Sprintf("%.0f %.0f", mx, my), mx, my+10+mz)
+	font.Print(batch, letters, 0, 320)
 	batch.End()
 }
 
-func (g *Game) MouseMove(x, y float32) {
-	mx = x
-	my = y
-}
-
-func (g *Game) MouseDown(x, y float32, b int) {
-	switch b {
-	default:
-	case eng.MouseLeft:
-		color.R = .25
-	case eng.MouseRight:
-		color.G = .25
-	case eng.MouseMiddle:
-		color.B = .25
-	}
-}
-
-func (g *Game) MouseUp(x, y float32, b int) {
-	color.R = 1
-	color.G = 1
-	color.B = 1
-	color.A = 1
-}
-
-func (g *Game) MouseScroll(x, y float32, amount int) {
-	mz += float32(amount) * 3
-}
-
-func (g *Game) KeyType(k rune) {
-	letters = letters + string(k)
-}
-
-func (g *Game) KeyDown(k int) {
-	if k == eng.Space {
+func (g *Game) Mouse(x, y float32, a eng.Action) {
+	switch a {
+	case eng.MOVE:
+		mx = x
+		my = y
+	case eng.PRESS:
 		eng.SetBgColor(eng.NewColorRand())
+	case eng.RELEASE:
+		eng.SetBgColor(eng.NewColor(0, 0, 0))
 	}
 }
 
-func (g *Game) KeyUp(k int) {
-	if k == eng.Escape {
-		eng.Exit()
+func (g *Game) Scroll(amount float32) {
+	mz += amount
+}
+
+func (g *Game) Key(key eng.Key, mod eng.Modifier, act eng.Action) {
+	switch act {
+	case eng.RELEASE:
+		if key == eng.Escape {
+			eng.Exit()
+		}
 	}
+}
+
+func (g *Game) Type(char rune) {
+	letters = letters + string(char)
 }
 
 func main() {
