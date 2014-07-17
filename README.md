@@ -1,15 +1,22 @@
-eng 2D game library for go
-===
+# eng v0.2.0
 
-eng depends on [github.com/go-gl/glfw](http://github.com/go-gl/glfw).
-* Ubuntu: apt-get install libglfw-dev libxrandr-dev
-* OSX: brew tap homebrew/versions; brew install glfw2
-* Windows: download the [glfw2](http://sourceforge.net/projects/glfw/files/glfw/2.7.7/) binaries, then drop the GL directory into C:\MinGW\include (64bit: C:\MinGW\mingw-w64-x86_6\include) and the library files into C:\MinGW\lib (64bit: C:\MinGW\mingw-w64-x86_6\lib). You will then need to install glfw.dll system wide or have it in the directory with your game.
+A 2D game library for go. Expect bugs and major API changes. Just a proof of concept at the moment.
 
-Install
--------
+## Desktop Build
+
+The desktop backend depends on [glfw](http://github.com/go-gl/glfw).
+* Ubuntu: apt-get install glfw3
+* OSX: brew tap homebrew/versions; brew install glfw3
+* Windows: download the [glfw3](http://www.glfw.org/docs/latest/) binaries, then drop the GL directory into C:\MinGW\include (64bit: C:\MinGW\mingw-w64-x86_6\include) and the library files into C:\MinGW\lib (64bit: C:\MinGW\mingw-w64-x86_6\lib). You will then need to install glfw.dll system wide or have it in the directory with your game.
+
+## Web Build
+
+The web backend depends on [gopherjs](http://github.com/neelance/gopherjs)
+
+## Install
+
 `go get github.com/ajhager/eng`
 
-Documentation
--------------
+## Documentation
+
 [godoc.org](http://godoc.org/github.com/ajhager/eng)
