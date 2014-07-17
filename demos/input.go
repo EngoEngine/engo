@@ -11,13 +11,19 @@ var (
 	mx, my, mz float32
 	color      *eng.Color
 	letters    string
+	font       *eng.Font
 )
 
 type Game struct {
 	*eng.Game
 }
 
+func (g *Game) Load() {
+	eng.Files.Add("font", "data/font.png")
+}
+
 func (g *Game) Setup() {
+	font = eng.NewGridFont(eng.Files.Image("font"), 20, 20, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~")
 	batch = eng.NewBatch()
 	color = eng.NewColor(1, 1, 1)
 }
@@ -31,8 +37,8 @@ func (g *Game) Update(dt float32) {
 func (g *Game) Draw() {
 	batch.Begin()
 	batch.SetColor(color)
-	eng.DefaultFont().Print(batch, fmt.Sprintf("%.0f %.0f", mx, my), mx-48, my-16+mz)
-	eng.DefaultFont().Print(batch, letters, 0, 320)
+	font.Print(batch, fmt.Sprintf("%.0f %.0f", mx, my), mx, my+10+mz)
+	font.Print(batch, letters, 0, 320)
 	batch.End()
 }
 

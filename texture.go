@@ -6,81 +6,41 @@ package eng
 
 import (
 	"encoding/json"
-	"image"
-	"image/draw"
-	_ "image/png"
-	"io"
-	"io/ioutil"
 	"log"
-	"os"
 	"strings"
 )
 
 // A Texture wraps an opengl texture and is mostly used for loading
 // images and constructing Regions.
 type Texture struct {
-	id        uint32
-	width     int32
-	height    int32
-	minFilter int32
-	maxFilter int32
-	uWrap     int32
-	vWrap     int32
+	id        *TextureObject
+	width     int
+	height    int
+	minFilter int
+	maxFilter int
+	uWrap     int
+	vWrap     int
 }
 
 // NewTexture takes either a string path to an image file, an
 // io.Reader containing image date or an image.Image and returns a Texture.
-func NewTexture(data interface{}) *Texture {
-	var m image.Image
+func NewTexture(img Image) *Texture {
+	id := GL.CreateTexture()
 
-	switch data := data.(type) {
-	default:
-		log.Fatal("NewTexture needs a string or io.Reader")
-	case string:
-		file, err := os.Open(data)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer file.Close()
-		img, _, err := image.Decode(file)
-		if err != nil {
-			log.Fatal(err)
-		}
-		m = img
-	case io.Reader:
-		img, _, err := image.Decode(data)
-		if err != nil {
-			log.Fatal(err)
-		}
-		m = img
-	case image.Image:
-		m = data
-	}
-
-	b := m.Bounds()
-	newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
-	draw.Draw(newm, newm.Bounds(), m, b.Min, draw.Src)
-
-	width := int32(m.Bounds().Max.X)
-	height := int32(m.Bounds().Max.Y)
-
-	var id uint32
-	GL.GenTextures(1, &id)
-
-	GL.Enable(GL.TEXTURE_2D)
 	GL.BindTexture(GL.TEXTURE_2D, id)
 
 	GL.TexParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE)
 	GL.TexParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE)
-	GL.TexParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR_MIPMAP_LINEAR)
+	GL.TexParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR)
 	GL.TexParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST)
-	GL.TexParameteri(GL.TEXTURE_2D, GL.GENERATE_MIPMAP, GL.TRUE)
 
-	GL.TexImage2D(GL.TEXTURE_2D, 0, GL.RGBA, width, height, 0, GL.RGBA, GL.UNSIGNED_BYTE, newm.Pix)
+	if img.Data() == nil {
+		print("SDF")
+	}
 
-	GL.Disable(GL.TEXTURE_2D)
+	GL.TexImage2D(GL.TEXTURE_2D, 0, GL.RGBA, img.Width(), img.Height(), 0, GL.RGBA, GL.UNSIGNED_BYTE, img.Data())
 
-	return &Texture{id, width, height, GL.LINEAR, GL.LINEAR, GL.CLAMP_TO_EDGE, GL.CLAMP_TO_EDGE}
+	return &Texture{id, img.Width(), img.Height(), GL.LINEAR, GL.LINEAR, GL.CLAMP_TO_EDGE, GL.CLAMP_TO_EDGE}
 }
 
 // Split creates Regions from every width, height rect going from left
@@ -111,13 +71,15 @@ func (t *Texture) Split(w, h int) []*Region {
 func (t *Texture) Unpack(path string) map[string]*Region {
 	regions := make(map[string]*Region)
 
-	file, err := ioutil.ReadFile(path)
-	if err != nil {
-		log.Fatal(err)
-	}
+	/*
+		file, err := ioutil.ReadFile(path)
+		if err != nil {
+			log.Fatal(err)
+		}
+	*/
 
 	var data interface{}
-	err = json.Unmarshal(file, &data)
+	err := json.Unmarshal([]byte(path), &data)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -140,7 +102,7 @@ func (t *Texture) Unpack(path string) map[string]*Region {
 
 // Delete will dispose of the texture.
 func (t *Texture) Delete() {
-	GL.DeleteTextures(1, &t.id)
+	GL.DeleteTexture(t.id)
 }
 
 // Bind will bind the texture.
@@ -150,23 +112,23 @@ func (t *Texture) Bind() {
 
 // Unbind will unbind all textures.
 func (t *Texture) Unbind() {
-	GL.BindTexture(GL.TEXTURE_2D, 0)
+	GL.BindTexture(GL.TEXTURE_2D, nil)
 }
 
 // Width returns the width of the texture.
-func (t *Texture) Width() int32 {
+func (t *Texture) Width() int {
 	return t.width
 }
 
 // Height returns the height of the texture.
-func (t *Texture) Height() int32 {
+func (t *Texture) Height() int {
 	return t.height
 }
 
 // SetFilter sets the filter type used when scaling a texture up or
 // down. The default is nearest which will not doing any interpolation
 // between pixels.
-func (t *Texture) SetFilter(min, max int32) {
+func (t *Texture) SetFilter(min, max int) {
 	t.minFilter = min
 	t.maxFilter = max
 	t.Bind()
@@ -175,11 +137,11 @@ func (t *Texture) SetFilter(min, max int32) {
 }
 
 // Returns the current min and max filters used.
-func (t *Texture) Filter() (int32, int32) {
+func (t *Texture) Filter() (int, int) {
 	return t.minFilter, t.maxFilter
 }
 
-func (t *Texture) SetWrap(u, v int32) {
+func (t *Texture) SetWrap(u, v int) {
 	t.uWrap = u
 	t.vWrap = v
 	t.Bind()
@@ -187,6 +149,6 @@ func (t *Texture) SetWrap(u, v int32) {
 	GL.TexParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, v)
 }
 
-func (t *Texture) Wrap() (int32, int32) {
+func (t *Texture) Wrap() (int, int) {
 	return t.uWrap, t.vWrap
 }

@@ -5,10 +5,11 @@
 package eng
 
 import (
-	"image"
-	"log"
+//"image"
+//"log"
 )
 
+/*
 // A Canvas technically wraps an opengl framebuffer. It is used to
 // render to a texture that can then be rendered multiple times with a batch.
 type Canvas struct {
@@ -83,3 +84,4 @@ func (c *Canvas) Height() int {
 func (c *Canvas) Region() *Region {
 	return c.region
 }
+*/

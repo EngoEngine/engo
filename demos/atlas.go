@@ -13,10 +13,15 @@ type Game struct {
 	*eng.Game
 }
 
+func (g *Game) Load() {
+	eng.Files.Add("spineboy", "data/spineboy.png")
+	eng.Files.Add("spineboy", "data/spineboy.json")
+}
+
 func (g *Game) Setup() {
 	batch = eng.NewBatch()
-	texture := eng.NewTexture("data/spineboy.png")
-	regions = texture.Unpack("data/spineboy.json")
+	texture := eng.NewTexture(eng.Files.Image("spineboy"))
+	regions = texture.Unpack(eng.Files.Json("spineboy"))
 }
 
 func (g *Game) Draw() {

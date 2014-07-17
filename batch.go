@@ -9,7 +9,7 @@ import (
 	"math"
 )
 
-const size = 1000
+const size = 10000
 const degToRad = math.Pi / 180
 
 var batchVert = ` 
@@ -31,6 +31,13 @@ void main() {
 }`
 
 var batchFrag = `
+#ifdef GL_ES
+#define LOWP lowp
+precision mediump float;
+#else
+#define LOWP
+#endif
+
 varying vec4 var_Color;
 varying vec2 var_TexCoords;
 
@@ -47,19 +54,19 @@ type Batch struct {
 	lastTexture      *Texture
 	color            float32
 	vertices         []float32
-	vertexVBO        uint32
+	vertexVBO        *BufferObject
 	indices          []uint16
-	indexVBO         uint32
+	indexVBO         *BufferObject
 	index            int
 	shader           *Shader
 	customShader     *Shader
 	blendingDisabled bool
-	blendSrcFunc     uint32
-	blendDstFunc     uint32
-	inPosition       uint32
-	inColor          uint32
-	inTexCoords      uint32
-	ufProjection     int32
+	blendSrcFunc     int
+	blendDstFunc     int
+	inPosition       int
+	inColor          int
+	inTexCoords      int
+	ufProjection     *UniformObject
 	projX            float32
 	projY            float32
 }
@@ -87,14 +94,14 @@ func NewBatch() *Batch {
 		batch.indices[i+5] = uint16(j + 3)
 	}
 
-	GL.GenBuffers(1, &batch.indexVBO)
-	GL.GenBuffers(1, &batch.vertexVBO)
+	batch.indexVBO = GL.CreateBuffer()
+	batch.vertexVBO = GL.CreateBuffer()
 
 	GL.BindBuffer(GL.ELEMENT_ARRAY_BUFFER, batch.indexVBO)
-	GL.BufferData(GL.ELEMENT_ARRAY_BUFFER, 6*2*size, batch.indices, GL.STATIC_DRAW)
+	GL.BufferData(GL.ELEMENT_ARRAY_BUFFER, batch.indices, GL.STATIC_DRAW)
 
 	GL.BindBuffer(GL.ARRAY_BUFFER, batch.vertexVBO)
-	GL.BufferData(GL.ARRAY_BUFFER, 20*4*size, batch.vertices, GL.DYNAMIC_DRAW)
+	GL.BufferData(GL.ARRAY_BUFFER, batch.vertices, GL.DYNAMIC_DRAW)
 
 	batch.projX = float32(Width()) / 2
 	batch.projY = float32(Height()) / 2
@@ -135,8 +142,8 @@ func (b *Batch) End() {
 	}
 	b.drawing = false
 
-	GL.BindBuffer(GL.ARRAY_BUFFER, 0)
-	GL.UseProgram(0)
+	GL.BindBuffer(GL.ARRAY_BUFFER, nil)
+	GL.UseProgram(nil)
 
 	b.lastTexture = nil
 }
@@ -153,7 +160,6 @@ func (b *Batch) flush() {
 		GL.BlendFunc(b.blendSrcFunc, b.blendDstFunc)
 	}
 
-	GL.Enable(GL.TEXTURE_2D)
 	GL.ActiveTexture(GL.TEXTURE0)
 	b.lastTexture.Bind()
 
@@ -171,7 +177,7 @@ func (b *Batch) flush() {
 	GL.VertexAttribPointer(b.inColor, 4, GL.UNSIGNED_BYTE, true, 20, 16)
 
 	GL.BindBuffer(GL.ELEMENT_ARRAY_BUFFER, b.indexVBO)
-	GL.DrawElements(GL.TRIANGLES, int32(6*b.index), GL.UNSIGNED_SHORT, 0)
+	GL.DrawElements(GL.TRIANGLES, 6*b.index, GL.UNSIGNED_SHORT, 0)
 
 	b.index = 0
 }
@@ -191,6 +197,9 @@ func (b *Batch) Draw(r *Region, x, y, originX, originY, scaleX, scaleY, rotation
 		b.flush()
 		b.lastTexture = r.texture
 	}
+
+	originX = float32(r.width) * originX
+	originY = float32(r.height) * originY
 
 	worldOriginX := x + originX
 	worldOriginY := y + originY
@@ -311,7 +320,7 @@ func (b *Batch) SetBlending(v bool) {
 // default is gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA which will render
 // any alpha channel in your textures as blank. Calling this will
 // flush any pending geometry to the gpu.
-func (b *Batch) SetBlendFunc(src, dst uint32) {
+func (b *Batch) SetBlendFunc(src, dst int) {
 	b.flush()
 	b.blendSrcFunc = src
 	b.blendDstFunc = dst
@@ -320,16 +329,6 @@ func (b *Batch) SetBlendFunc(src, dst uint32) {
 // SetColor changes the current batch rendering tint. This defaults to white.
 func (b *Batch) SetColor(color *Color) {
 	b.color = color.FloatBits()
-}
-
-// SetShader changes the shader used to rendering geometry. If the
-// passed in shader == nil, the batch will go back to using its
-// default shader. The shader should name the incoming vertex
-// position, color, and texture coordinates to 'in_Position',
-// 'in_Color', and 'in_TexCoords' respectively. The transform projection
-// matrix will be passed in as 'uf_Matrix'.
-func (b *Batch) SetShader(shader *Shader) {
-	b.customShader = shader
 }
 
 // SetProjection allows for setting the projection matrix manually.

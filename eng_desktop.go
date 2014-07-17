@@ -9,8 +9,20 @@ package eng
 import (
 	"github.com/errcw/glow/gl/2.1/gl"
 	glfw "github.com/go-gl/glfw3"
+	"image"
+	"image/draw"
+	_ "image/png"
+	"io"
+	"io/ioutil"
 	"log"
+	"os"
+	"reflect"
+	"runtime"
 )
+
+func init() {
+	runtime.LockOSThread()
+}
 
 var window *glfw.Window
 
@@ -73,6 +85,9 @@ func run() {
 	if err := gl.Init(); err != nil {
 		log.Fatal(err)
 	}
+	GL = newgl2()
+
+	GL.Viewport(0, 0, config.Width, config.Height)
 
 	window.SetSizeCallback(func(window *glfw.Window, w, h int) {
 		config.Width, config.Height = window.GetSize()
@@ -108,10 +123,14 @@ func run() {
 		responder.Type(rune(char))
 	})
 
-	responder.Setup()
+	responder.Load()
 
 	timing = NewStats(config.LogFPS)
 	timing.Update()
+
+	Files.Load(func() {})
+
+	responder.Setup()
 
 	for !window.ShouldClose() {
 		responder.Update(float32(timing.Dt))
@@ -127,6 +146,13 @@ func run() {
 func exit() {
 	window.SetShouldClose(true)
 }
+
+type TextureObject uint32
+type BufferObject uint32
+type FramebufferObject uint32
+type ProgramObject uint32
+type UniformObject uint32
+type ShaderObject uint32
 
 func newgl2() *gl2 {
 	return &gl2{
@@ -156,187 +182,324 @@ func newgl2() *gl2 {
 		gl.TEXTURE_MIN_FILTER,
 		gl.TEXTURE_MAG_FILTER,
 		gl.LINEAR_MIPMAP_LINEAR,
-		gl.GENERATE_MIPMAP,
 		gl.NEAREST,
-		gl.TRUE,
-		gl.FALSE,
 		gl.RGBA,
 	}
 }
 
 type gl2 struct {
-	ELEMENT_ARRAY_BUFFER uint32
-	ARRAY_BUFFER         uint32
-	STATIC_DRAW          uint32
-	DYNAMIC_DRAW         uint32
-	SRC_ALPHA            uint32
-	ONE_MINUS_SRC_ALPHA  uint32
-	BLEND                uint32
-	TEXTURE_2D           uint32
-	TEXTURE0             uint32
-	UNSIGNED_SHORT       uint32
-	UNSIGNED_BYTE        uint32
-	FLOAT                uint32
-	TRIANGLES            uint32
-	LINEAR               int32
-	CLAMP_TO_EDGE        int32
-	FRAMEBUFFER          uint32
-	COLOR_ATTACHMENT0    uint32
-	FRAMEBUFFER_COMPLETE uint32
-	COLOR_BUFFER_BIT     uint32
-	VERTEX_SHADER        uint32
-	FRAGMENT_SHADER      uint32
-	TEXTURE_WRAP_S       uint32
-	TEXTURE_WRAP_T       uint32
-	TEXTURE_MIN_FILTER   uint32
-	TEXTURE_MAG_FILTER   uint32
-	LINEAR_MIPMAP_LINEAR int32
-	GENERATE_MIPMAP      uint32
-	NEAREST              int32
-	TRUE                 int32
-	FALSE                int32
-	RGBA                 uint32
+	ELEMENT_ARRAY_BUFFER int
+	ARRAY_BUFFER         int
+	STATIC_DRAW          int
+	DYNAMIC_DRAW         int
+	SRC_ALPHA            int
+	ONE_MINUS_SRC_ALPHA  int
+	BLEND                int
+	TEXTURE_2D           int
+	TEXTURE0             int
+	UNSIGNED_SHORT       int
+	UNSIGNED_BYTE        int
+	FLOAT                int
+	TRIANGLES            int
+	LINEAR               int
+	CLAMP_TO_EDGE        int
+	FRAMEBUFFER          int
+	COLOR_ATTACHMENT0    int
+	FRAMEBUFFER_COMPLETE int
+	COLOR_BUFFER_BIT     int
+	VERTEX_SHADER        int
+	FRAGMENT_SHADER      int
+	TEXTURE_WRAP_S       int
+	TEXTURE_WRAP_T       int
+	TEXTURE_MIN_FILTER   int
+	TEXTURE_MAG_FILTER   int
+	LINEAR_MIPMAP_LINEAR int
+	NEAREST              int
+	RGBA                 int
 }
 
 func (z *gl2) ClearColor(r, g, b, a float32) {
 	gl.ClearColor(r, g, b, a)
 }
 
-func (z *gl2) Clear(flags uint32) {
-	gl.Clear(flags)
+func (z *gl2) Clear(flags int) {
+	gl.Clear(uint32(flags))
 }
 
-func (z *gl2) GenBuffers(num int32, loc *uint32) {
-	gl.GenBuffers(num, loc)
+func (z *gl2) CreateBuffer() *BufferObject {
+	var loc uint32
+	gl.GenBuffers(1, &loc)
+	buffer := BufferObject(loc)
+	return &buffer
 }
 
-func (z *gl2) BindBuffer(typ, buf uint32) {
-	gl.BindBuffer(typ, buf)
+func (z *gl2) BindBuffer(typ int, buf *BufferObject) {
+	if buf == nil {
+		gl.BindBuffer(uint32(typ), 0)
+		return
+	}
+	gl.BindBuffer(uint32(typ), uint32(*buf))
 }
 
-func (z *gl2) BufferData(typ uint32, size int, data interface{}, flag uint32) {
-	gl.BufferData(typ, size, gl.Ptr(data), flag)
+func (z *gl2) BufferData(target int, data interface{}, flag int) {
+	s := uintptr(reflect.ValueOf(data).Len()) * reflect.TypeOf(data).Elem().Size()
+	gl.BufferData(uint32(target), int(s), gl.Ptr(data), uint32(flag))
 }
 
-func (z *gl2) Enable(flag uint32) {
-	gl.Enable(flag)
+func (z *gl2) Enable(flag int) {
+	gl.Enable(uint32(flag))
 }
 
-func (z *gl2) Disable(flag uint32) {
-	gl.Disable(flag)
+func (z *gl2) Disable(flag int) {
+	gl.Disable(uint32(flag))
 }
 
-func (z *gl2) BlendFunc(src, dst uint32) {
-	gl.BlendFunc(src, dst)
+func (z *gl2) BlendFunc(src, dst int) {
+	gl.BlendFunc(uint32(src), uint32(dst))
 }
 
-func (z *gl2) ActiveTexture(flag uint32) {
-	gl.ActiveTexture(flag)
+func (z *gl2) ActiveTexture(flag int) {
+	gl.ActiveTexture(uint32(flag))
 }
 
-func (z *gl2) Uniform2f(uf int32, x, y float32) {
-	gl.Uniform2f(uf, x, y)
+func (z *gl2) Uniform2f(uf *UniformObject, x, y float32) {
+	gl.Uniform2f(int32(*uf), x, y)
 }
 
-func (z *gl2) BufferSubData(flag uint32, offset int, size int, data interface{}) {
-	gl.BufferSubData(flag, offset, size, gl.Ptr(data))
+func (z *gl2) BufferSubData(flag, offset, size int, data interface{}) {
+	gl.BufferSubData(uint32(flag), offset, size, gl.Ptr(data))
 }
 
-func (z *gl2) EnableVertexAttribArray(pos uint32) {
-	gl.EnableVertexAttribArray(pos)
+func (z *gl2) EnableVertexAttribArray(pos int) {
+	gl.EnableVertexAttribArray(uint32(pos))
 }
 
-func (z *gl2) VertexAttribPointer(pos uint32, size int32, typ uint32, b bool, stride int32, offset int) {
-	gl.VertexAttribPointer(pos, size, typ, b, stride, gl.PtrOffset(offset))
+func (z *gl2) VertexAttribPointer(pos, size, typ int, n bool, stride, offset int) {
+	gl.VertexAttribPointer(uint32(pos), int32(size), uint32(typ), n, int32(stride), gl.PtrOffset(offset))
 }
 
-func (z *gl2) DrawElements(typ uint32, size int32, flag uint32, offset int) {
-	gl.DrawElements(typ, size, flag, gl.PtrOffset(offset))
+func (z *gl2) DrawElements(typ, size, flag, offset int) {
+	gl.DrawElements(uint32(typ), int32(size), uint32(flag), gl.PtrOffset(offset))
 }
 
-func (z *gl2) GenFramebuffers(num int32, loc *uint32) {
-	gl.GenFramebuffers(num, loc)
+func (z *gl2) CreateFramebuffer() *FramebufferObject {
+	var loc uint32
+	gl.GenFramebuffers(1, &loc)
+	fb := FramebufferObject(loc)
+	return &fb
 }
 
-func (z *gl2) BindFramebuffer(typ, buf uint32) {
-	gl.BindFramebuffer(typ, buf)
+func (z *gl2) BindFramebuffer(typ int, buf *FramebufferObject) {
+	if buf == nil {
+		gl.BindFramebuffer(uint32(typ), 0)
+		return
+	}
+	gl.BindFramebuffer(uint32(typ), uint32(*buf))
 }
 
-func (z *gl2) DeleteFramebuffers(num int32, loc *uint32) {
-	gl.DeleteFramebuffers(num, loc)
+func (z *gl2) DeleteFramebuffer(buf *FramebufferObject) {
+	buffer := uint32(*buf)
+	gl.DeleteFramebuffers(1, &buffer)
 }
 
-func (z *gl2) FramebufferTexture2D(target, attachment, textarget, texture uint32, level int32) {
-	gl.FramebufferTexture2D(target, attachment, textarget, texture, level)
+func (z *gl2) FramebufferTexture2D(target, attachment, textarget int, texture *TextureObject, level int) {
+	gl.FramebufferTexture2D(uint32(target), uint32(attachment), uint32(textarget), uint32(*texture), int32(level))
 }
 
-func (z *gl2) CheckFramebufferStatus(target uint32) uint32 {
-	return gl.CheckFramebufferStatus(target)
+func (z *gl2) CheckFramebufferStatus(target int) int {
+	return int(gl.CheckFramebufferStatus(uint32(target)))
 }
 
-func (z *gl2) Viewport(x, y, width, height int32) {
-	gl.Viewport(x, y, width, height)
+func (z *gl2) Viewport(x, y, width, height int) {
+	gl.Viewport(int32(x), int32(y), int32(width), int32(height))
 }
 
-func (z *gl2) ShaderSource(shader uint32, num int32, src string, length *int32) {
+func (z *gl2) ShaderSource(shader *ShaderObject, src string) {
 	source := gl.Str(src + "\x00")
-	gl.ShaderSource(shader, num, &source, length)
+	gl.ShaderSource(uint32(*shader), 1, &source, nil)
 }
 
-func (z *gl2) CreateShader(flag uint32) uint32 {
-	return gl.CreateShader(flag)
+func (z *gl2) CreateShader(flag int) *ShaderObject {
+	shader := ShaderObject(gl.CreateShader(uint32(flag)))
+	return &shader
 }
 
-func (z *gl2) CompileShader(shader uint32) {
-	gl.CompileShader(shader)
+func (z *gl2) CompileShader(shader *ShaderObject) {
+	gl.CompileShader(uint32(*shader))
 }
 
-func (z *gl2) DeleteShader(shader uint32) {
-	gl.DeleteShader(shader)
+func (z *gl2) DeleteShader(shader *ShaderObject) {
+	gl.DeleteShader(uint32(*shader))
 }
 
-func (z *gl2) CreateProgram() uint32 {
-	return gl.CreateProgram()
+func (z *gl2) CreateProgram() *ProgramObject {
+	program := ProgramObject(gl.CreateProgram())
+	return &program
 }
 
-func (z *gl2) AttachShader(program uint32, shader uint32) {
-	gl.AttachShader(program, shader)
+func (z *gl2) AttachShader(program *ProgramObject, shader *ShaderObject) {
+	gl.AttachShader(uint32(*program), uint32(*shader))
 }
 
-func (z *gl2) LinkProgram(program uint32) {
-	gl.LinkProgram(program)
+func (z *gl2) LinkProgram(program *ProgramObject) {
+	gl.LinkProgram(uint32(*program))
 }
 
-func (z *gl2) UseProgram(program uint32) {
-	gl.UseProgram(program)
+func (z *gl2) UseProgram(program *ProgramObject) {
+	if program == nil {
+		gl.UseProgram(0)
+		return
+	}
+	gl.UseProgram(uint32(*program))
 }
 
-func (z *gl2) GetUniformLocation(shader uint32, uniform string) int32 {
-	return gl.GetUniformLocation(shader, gl.Str(uniform+"\x00"))
+func (z *gl2) GetUniformLocation(program *ProgramObject, uniform string) *UniformObject {
+	uo := UniformObject(gl.GetUniformLocation(uint32(*program), gl.Str(uniform+"\x00")))
+	return &uo
 }
 
-func (z *gl2) GetAttribLocation(shader uint32, attrib string) int32 {
-	return gl.GetAttribLocation(shader, gl.Str(attrib+"\x00"))
+func (z *gl2) GetAttribLocation(program *ProgramObject, attrib string) int {
+	return int(gl.GetAttribLocation(uint32(*program), gl.Str(attrib+"\x00")))
 }
 
-func (z *gl2) GenTextures(num int32, loc *uint32) {
-	gl.GenTextures(num, loc)
+func (z *gl2) CreateTexture() *TextureObject {
+	var loc uint32
+	gl.GenTextures(1, &loc)
+	texture := TextureObject(loc)
+	return &texture
 }
 
-func (z *gl2) BindTexture(target uint32, texture uint32) {
-	gl.BindTexture(target, texture)
+func (z *gl2) BindTexture(target int, texture *TextureObject) {
+	if texture == nil {
+		gl.BindTexture(uint32(target), 0)
+		return
+	}
+	gl.BindTexture(uint32(target), uint32(*texture))
 }
 
-func (z *gl2) DeleteTextures(num int32, loc *uint32) {
-	gl.DeleteTextures(num, loc)
+func (z *gl2) DeleteTexture(tex *TextureObject) {
+	texture := uint32(*tex)
+	gl.DeleteTextures(1, &texture)
 }
 
-func (z *gl2) TexParameteri(target uint32, param uint32, value int32) {
-	gl.TexParameteri(target, param, value)
+func (z *gl2) TexParameteri(target int, param int, value int) {
+	gl.TexParameteri(uint32(target), uint32(param), int32(value))
 }
 
-func (z *gl2) TexImage2D(target uint32, level int32, internalFormat uint32, width, height, border int32, format, xtype uint32, pixels interface{}) {
-	gl.TexImage2D(target, level, int32(internalFormat), width, height, border, format, xtype, gl.Ptr(pixels))
+func (z *gl2) TexImage2D(target, level, internalFormat, width, height, border, format, kind int, data interface{}) {
+	var pix []uint8
+	if data == nil {
+		pix = nil
+	} else {
+		pix = data.(*image.NRGBA).Pix
+	}
+	gl.TexImage2D(uint32(target), int32(level), int32(internalFormat), int32(width), int32(height), int32(border), uint32(format), uint32(kind), gl.Ptr(pix))
+}
+
+type ImageObject struct {
+	data *image.NRGBA
+}
+
+func (i *ImageObject) Data() interface{} {
+	return i.data
+}
+
+func (i *ImageObject) Width() int {
+	return i.data.Rect.Max.X
+}
+
+func (i *ImageObject) Height() int {
+	return i.data.Rect.Max.Y
+}
+
+func loadImage(r Resource) (Image, error) {
+	file, err := os.Open(r.url)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	img, _, err := image.Decode(file)
+	if err != nil {
+		return nil, err
+	}
+
+	b := img.Bounds()
+	newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+	draw.Draw(newm, newm.Bounds(), img, b.Min, draw.Src)
+
+	return &ImageObject{newm}, nil
+}
+
+func loadJson(r Resource) (string, error) {
+	file, err := ioutil.ReadFile(r.url)
+	if err != nil {
+		return "", err
+	}
+	return string(file), nil
+}
+
+type Assets struct {
+	queue  []string
+	cache  map[string]Image
+	loads  int
+	errors int
+}
+
+func NewAssets() *Assets {
+	return &Assets{make([]string, 0), make(map[string]Image), 0, 0}
+}
+
+func (a *Assets) Image(path string) {
+	a.queue = append(a.queue, path)
+}
+
+func (a *Assets) Get(path string) Image {
+	return a.cache[path]
+}
+
+func (a *Assets) Load(onFinish func()) {
+	if len(a.queue) == 0 {
+		onFinish()
+	} else {
+		for _, path := range a.queue {
+			img := LoadImage(path)
+			a.cache[path] = img
+		}
+	}
+}
+
+func LoadImage(data interface{}) Image {
+	var m image.Image
+
+	switch data := data.(type) {
+	default:
+		log.Fatal("NewTexture needs a string or io.Reader")
+	case string:
+		file, err := os.Open(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+		img, _, err := image.Decode(file)
+		if err != nil {
+			log.Fatal(err)
+		}
+		m = img
+	case io.Reader:
+		img, _, err := image.Decode(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+		m = img
+	case image.Image:
+		m = data
+	}
+
+	b := m.Bounds()
+	newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+	draw.Draw(newm, newm.Bounds(), m, b.Min, draw.Src)
+
+	return &ImageObject{newm}
 }
 
 const (
@@ -353,19 +516,6 @@ const (
 	F10          = Key(glfw.KeyF10)
 	F11          = Key(glfw.KeyF11)
 	F12          = Key(glfw.KeyF12)
-	F13          = Key(glfw.KeyF13)
-	F14          = Key(glfw.KeyF14)
-	F15          = Key(glfw.KeyF15)
-	F16          = Key(glfw.KeyF16)
-	F17          = Key(glfw.KeyF17)
-	F18          = Key(glfw.KeyF18)
-	F19          = Key(glfw.KeyF19)
-	F20          = Key(glfw.KeyF20)
-	F21          = Key(glfw.KeyF21)
-	F22          = Key(glfw.KeyF22)
-	F23          = Key(glfw.KeyF23)
-	F24          = Key(glfw.KeyF24)
-	F25          = Key(glfw.KeyF25)
 	Up           = Key(glfw.KeyUp)
 	Down         = Key(glfw.KeyDown)
 	Left         = Key(glfw.KeyLeft)

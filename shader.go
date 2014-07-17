@@ -7,14 +7,14 @@ package eng
 // A Shader abstracts the loading, compiling, and linking of shader
 // programs, which can directly modify the rendering of vertices and pixels.
 type Shader struct {
-	id uint32
+	id *ProgramObject
 }
 
 // NewShader takes the source of a vertex and fragment shader and
 // returns a compiled and linked shader program.
 func NewShader(vertSrc, fragSrc string) *Shader {
 	vertShader := GL.CreateShader(GL.VERTEX_SHADER)
-	GL.ShaderSource(vertShader, 1, vertSrc, nil)
+	GL.ShaderSource(vertShader, vertSrc)
 	GL.CompileShader(vertShader)
 	defer GL.DeleteShader(vertShader)
 
@@ -33,7 +33,7 @@ func NewShader(vertSrc, fragSrc string) *Shader {
 	*/
 
 	fragShader := GL.CreateShader(GL.FRAGMENT_SHADER)
-	GL.ShaderSource(fragShader, 1, fragSrc, nil)
+	GL.ShaderSource(fragShader, fragSrc)
 	GL.CompileShader(fragShader)
 	defer GL.DeleteShader(fragShader)
 
@@ -81,11 +81,11 @@ func (s *Shader) Bind() {
 }
 
 // GetUniform returns the location of the named uniform.
-func (s *Shader) GetUniform(uniform string) int32 {
+func (s *Shader) GetUniform(uniform string) *UniformObject {
 	return GL.GetUniformLocation(s.id, uniform)
 }
 
 // GetAttrib returns the location of the named attribute.
-func (s *Shader) GetAttrib(attrib string) uint32 {
-	return uint32(GL.GetAttribLocation(s.id, attrib))
+func (s *Shader) GetAttrib(attrib string) int {
+	return GL.GetAttribLocation(s.id, attrib)
 }
