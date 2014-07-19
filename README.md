@@ -15,9 +15,16 @@ The web backend depends on [gopherjs](http://github.com/neelance/gopherjs). eng 
 
 `go get github.com/ajhager/eng/srv`
 
-Run `srv` in the same directory as your game, with your static files in a directory named 'data'. Access http://localhost:8080/main if your game file is at ./main.go.
+Run `srv` in the same directory as your game, with your static files in a directory named 'data'. Access http://localhost:8080/ if your game file is at ./main.go. Any other file name can be accessed at http://localhost:8080/name, where 'name' would be name.go.
 
-You can supply a custom asset directory with the --static flag.
+You can supply a custom flags to srv:
+
+`
+Usage of srv:
+	-host="127.0.0.1": The host at which to serve your games
+	-port=8080: The port at which to serve your games
+	-static="data": The relative path to your assets
+`
 
 ## Install
 
