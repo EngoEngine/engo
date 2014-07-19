@@ -80,7 +80,7 @@ func (g *Game) Draw() {
 	n := strconv.FormatInt(int64(num), 10)
 	batch.Begin()
 	for _, bot := range bots {
-		batch.Draw(bot.Image, bot.X, bot.Y, 0.5, 0.5, 0.5, 0.5, 0)
+		batch.Draw(bot.Image, bot.X, bot.Y, 0.5, 0.5, 0.75, 0.75, 0)
 	}
 	font.Print(batch, n, 0, 0)
 	batch.End()
@@ -97,5 +97,5 @@ func (g *Game) Mouse(x, y float32, a eng.Action) {
 }
 
 func main() {
-	eng.Run("Hello", 1024, 640, false, new(Game))
+	eng.Run("Hello", 1024, 640, true, new(Game))
 }

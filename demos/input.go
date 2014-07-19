@@ -72,5 +72,5 @@ func (g *Game) Type(char rune) {
 }
 
 func main() {
-	eng.Run("Input", 1024, 640, false, new(Game))
+	eng.Run("Input", 1024, 640, true, new(Game))
 }
