@@ -5,7 +5,7 @@
 package eng
 
 import (
-	"strings"
+	"path"
 )
 
 var (
@@ -58,8 +58,7 @@ func NewLoader() *Loader {
 }
 
 func (l *Loader) Add(name, url string) {
-	parts := strings.Split(url, ".")
-	kind := parts[len(parts)-1]
+	kind := path.Ext(url)[1:]
 	l.resources = append(l.resources, Resource{kind, name, url})
 }
 
