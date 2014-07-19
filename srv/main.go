@@ -20,14 +20,28 @@ var page = `
 		html, body {
 			padding: 0;
 			margin: 0;
-			background: #222222;
+			font-family: Arial;
+			background: #1a1a1a;
+			{{if .Error}}
+			background: #4a1a1a;
+			{{end}}
 			width: 100%;
 			height: 100%;
 			overflow: hidden;
+			font-size: 18px;
+		}
+		div#error {
+			color: #a1a1a1;
+			font-size: 2em;
+			text-align: center;
+			padding: 20px;
 		}
 		</style>
 	</head>
   <body>
+		{{if .Error}}
+		<div id="error">{{.Error}}</div>
+		{{end}}
 		<script>
 			{{.Script}}
 		</script>
@@ -38,9 +52,17 @@ var page = `
 type Game struct {
 	Name   string
 	Script template.JS
+	Error  error
 }
 
 func programHandler(w http.ResponseWriter, r *http.Request) {
+	// Parse the html template.
+	t, err := template.New("path").Parse(page)
+	if err != nil {
+		fmt.Fprintf(w, "ERROR: %v", err)
+		return
+	}
+
 	// Determine the program to build.
 	path := r.URL.Path[1:]
 	if len(path) == 0 {
@@ -50,7 +72,7 @@ func programHandler(w http.ResponseWriter, r *http.Request) {
 	// Open the program's source.
 	f, err := os.Open(fmt.Sprintf("%s.go", path))
 	if err != nil {
-		fmt.Fprintf(w, "ERROR: %v", err)
+		t.Execute(w, &Game{"Error", "", err})
 		return
 	}
 
@@ -58,18 +80,13 @@ func programHandler(w http.ResponseWriter, r *http.Request) {
 	var out bytes.Buffer
 	err = gopherjslib.Build(f, &out, nil)
 	if err != nil {
-		fmt.Fprintf(w, "ERROR: %v", err)
+		t.Execute(w, &Game{"Error", "", err})
 		return
 	}
 	script := out.String()
 
-	// Plug the compiled js into the template.
-	t, err := template.New("path").Parse(page)
-	if err != nil {
-		fmt.Fprintf(w, "ERROR: %v", err)
-		return
-	}
-	t.Execute(w, &Game{path, template.JS(script)})
+	// Plug in the compiled javascript.
+	t.Execute(w, &Game{path, template.JS(script), nil})
 }
 
 func staticHandler(w http.ResponseWriter, r *http.Request) {
