@@ -41,12 +41,20 @@ type Game struct {
 }
 
 func programHandler(w http.ResponseWriter, r *http.Request) {
+	// Determine the program to build.
 	path := r.URL.Path[1:]
+	if len(path) == 0 {
+		path = "main"
+	}
+
+	// Open the program's source.
 	f, err := os.Open(fmt.Sprintf("%s.go", path))
 	if err != nil {
 		fmt.Fprintf(w, "ERROR: %v", err)
 		return
 	}
+
+	// Compile the program's source.
 	var out bytes.Buffer
 	err = gopherjslib.Build(f, &out, nil)
 	if err != nil {
@@ -55,6 +63,7 @@ func programHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	script := out.String()
 
+	// Plug the compiled js into the template.
 	t, err := template.New("path").Parse(page)
 	if err != nil {
 		fmt.Fprintf(w, "ERROR: %v", err)
