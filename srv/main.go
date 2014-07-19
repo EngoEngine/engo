@@ -8,6 +8,7 @@ import (
 	"html/template"
 	"net/http"
 	"os"
+	"path"
 )
 
 var page = `
@@ -39,7 +40,7 @@ type Game struct {
 	Script template.JS
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func programHandler(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path[1:]
 	f, err := os.Open(fmt.Sprintf("%s.go", path))
 	if err != nil {
@@ -62,13 +63,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, &Game{path, template.JS(script)})
 }
 
+func staticHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, r.URL.Path[1:])
+}
+
 func main() {
 	static := flag.String("static", "data", "Path to static files")
 	flag.Parse()
 
-	http.HandleFunc("/", handler)
-	http.HandleFunc(fmt.Sprintf("/%s/", *static), func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, r.URL.Path[1:])
-	})
+	http.HandleFunc("/", programHandler)
+	http.HandleFunc(fmt.Sprintf("/%s/", path.Clean(*static)), staticHandler)
 	http.ListenAndServe(":8080", nil)
 }
