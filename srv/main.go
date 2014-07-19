@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/go-on/gopherjslib"
 	"html/template"
 	"net/http"
@@ -15,7 +16,8 @@ var page = `
 <!DOCTYPE html>
 <html>
 	<head>
-    <title>{{.Name}}</title>
+		<title>ENG! {{.Name}}</title>
+		<link rel="icon" type="image/png" href="/favicon.png">
 		<style>
 		html, body {
 			padding: 0;
@@ -94,13 +96,13 @@ func staticHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-
 	static := flag.String("static", "data", "The relative path to your assets")
 	host := flag.String("host", "127.0.0.1", "The host at which to serve your games")
 	port := flag.Int("port", 8080, "The port at which to serve your games")
 	flag.Parse()
 
 	http.HandleFunc("/", programHandler)
+	http.Handle("/favicon.png", http.FileServer(&assetfs.AssetFS{Asset, AssetDir, "."}))
 	http.HandleFunc(fmt.Sprintf("/%s/", path.Clean(*static)), staticHandler)
 
 	fmt.Printf("Now open your browser to http://%s:%d!\n", *host, *port)
