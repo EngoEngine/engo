@@ -50,25 +50,21 @@ void main (void) {
 // A Batch allows geometry to be efficiently rendered by buffering
 // render calls and sending them all at once.
 type Batch struct {
-	drawing          bool
-	lastTexture      *Texture
-	color            float32
-	vertices         []float32
-	vertexVBO        *BufferObject
-	indices          []uint16
-	indexVBO         *BufferObject
-	index            int
-	shader           *Shader
-	customShader     *Shader
-	blendingDisabled bool
-	blendSrcFunc     int
-	blendDstFunc     int
-	inPosition       int
-	inColor          int
-	inTexCoords      int
-	ufProjection     *UniformObject
-	projX            float32
-	projY            float32
+	drawing      bool
+	lastTexture  *Texture
+	color        float32
+	vertices     []float32
+	vertexVBO    *BufferObject
+	indices      []uint16
+	indexVBO     *BufferObject
+	index        int
+	shader       *Shader
+	inPosition   int
+	inColor      int
+	inTexCoords  int
+	ufProjection *UniformObject
+	projX        float32
+	projY        float32
 }
 
 func NewBatch() *Batch {
@@ -106,9 +102,8 @@ func NewBatch() *Batch {
 	batch.projX = float32(Width()) / 2
 	batch.projY = float32(Height()) / 2
 
-	batch.blendingDisabled = false
-	batch.blendSrcFunc = GL.SRC_ALPHA
-	batch.blendDstFunc = GL.ONE_MINUS_SRC_ALPHA
+	GL.Enable(GL.BLEND)
+	GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA)
 
 	return batch
 }
@@ -120,12 +115,7 @@ func (b *Batch) Begin() {
 		log.Fatal("Batch.End() must be called first")
 	}
 	b.drawing = true
-	shader := b.shader
-	if b.customShader != nil {
-		shader = b.customShader
-	}
-
-	shader.Bind()
+	b.shader.Bind()
 }
 
 // End finishes up rendering and flushes any remaining geometry to the
@@ -137,13 +127,10 @@ func (b *Batch) End() {
 	if b.index > 0 {
 		b.flush()
 	}
-	if !b.blendingDisabled {
-		GL.Disable(GL.BLEND)
-	}
 	b.drawing = false
 
-	GL.BindBuffer(GL.ARRAY_BUFFER, nil)
-	GL.UseProgram(nil)
+	//GL.BindBuffer(GL.ARRAY_BUFFER, nil)
+	//GL.UseProgram(nil)
 
 	b.lastTexture = nil
 }
@@ -151,13 +138,6 @@ func (b *Batch) End() {
 func (b *Batch) flush() {
 	if b.lastTexture == nil {
 		return
-	}
-
-	if b.blendingDisabled {
-		GL.Disable(GL.BLEND)
-	} else {
-		GL.Enable(GL.BLEND)
-		GL.BlendFunc(b.blendSrcFunc, b.blendDstFunc)
 	}
 
 	GL.ActiveTexture(GL.TEXTURE0)
@@ -304,26 +284,6 @@ func (b *Batch) Draw(r *Region, x, y, originX, originY, scaleX, scaleY, rotation
 	if b.index >= size {
 		b.flush()
 	}
-}
-
-// SetBlending will toggle blending for rendering on the batch.
-// Blending is a relatively expensive operation and should be disabled
-// if your goemetry is opaque.
-func (b *Batch) SetBlending(v bool) {
-	if v != b.blendingDisabled {
-		b.flush()
-		b.blendingDisabled = !b.blendingDisabled
-	}
-}
-
-// SetBlendFunc sets the opengl src and dst blending functions. The
-// default is gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA which will render
-// any alpha channel in your textures as blank. Calling this will
-// flush any pending geometry to the gpu.
-func (b *Batch) SetBlendFunc(src, dst int) {
-	b.flush()
-	b.blendSrcFunc = src
-	b.blendDstFunc = dst
 }
 
 // SetColor changes the current batch rendering tint. This defaults to white.
