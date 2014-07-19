@@ -94,11 +94,15 @@ func staticHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	static := flag.String("static", "data", "Path to static files")
-	port := flag.Int("port", 8080, "Port to serve on")
+
+	static := flag.String("static", "data", "The relative path to your assets")
+	host := flag.String("host", "127.0.0.1", "The host at which to serve your games")
+	port := flag.Int("port", 8080, "The port at which to serve your games")
 	flag.Parse()
 
 	http.HandleFunc("/", programHandler)
 	http.HandleFunc(fmt.Sprintf("/%s/", path.Clean(*static)), staticHandler)
-	http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
+
+	fmt.Printf("Now open your browser to http://%s:%d!\n", *host, *port)
+	http.ListenAndServe(fmt.Sprintf("%s:%d", *host, *port), nil)
 }
