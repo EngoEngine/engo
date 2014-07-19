@@ -78,9 +78,10 @@ func staticHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	static := flag.String("static", "data", "Path to static files")
+	port := flag.Int("port", 8080, "Port to serve on")
 	flag.Parse()
 
 	http.HandleFunc("/", programHandler)
 	http.HandleFunc(fmt.Sprintf("/%s/", path.Clean(*static)), staticHandler)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
 }
