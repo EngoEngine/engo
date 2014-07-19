@@ -21,9 +21,9 @@ var page = `
 			padding: 0;
 			margin: 0;
 			font-family: Arial;
-			background: #1a1a1a;
+			background: #000000;
 			{{if .Error}}
-			background: #4a1a1a;
+			background: #f4f4f4;
 			{{end}}
 			width: 100%;
 			height: 100%;
@@ -31,10 +31,10 @@ var page = `
 			font-size: 18px;
 		}
 		div#error {
-			color: #a1a1a1;
-			font-size: 2em;
+			color: #4b5464;
+			font-size: 1.75em;
 			text-align: center;
-			padding: 20px;
+			padding: 80px;
 		}
 		</style>
 	</head>
