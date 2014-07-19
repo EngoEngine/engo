@@ -22,8 +22,6 @@ type Texture struct {
 	vWrap     int
 }
 
-// NewTexture takes either a string path to an image file, an
-// io.Reader containing image date or an image.Image and returns a Texture.
 func NewTexture(img Image) *Texture {
 	id := GL.CreateTexture()
 
@@ -35,7 +33,7 @@ func NewTexture(img Image) *Texture {
 	GL.TexParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST)
 
 	if img.Data() == nil {
-		print("SDF")
+		panic("Texture image data is nil.")
 	}
 
 	GL.TexImage2D(GL.TEXTURE_2D, 0, GL.RGBA, img.Width(), img.Height(), 0, GL.RGBA, GL.UNSIGNED_BYTE, img.Data())
@@ -70,13 +68,6 @@ func (t *Texture) Split(w, h int) []*Region {
 
 func (t *Texture) Unpack(path string) map[string]*Region {
 	regions := make(map[string]*Region)
-
-	/*
-		file, err := ioutil.ReadFile(path)
-		if err != nil {
-			log.Fatal(err)
-		}
-	*/
 
 	var data interface{}
 	err := json.Unmarshal([]byte(path), &data)

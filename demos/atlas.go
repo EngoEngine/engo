@@ -28,8 +28,8 @@ func (g *Game) Setup() {
 func (g *Game) Draw() {
 	batch.Begin()
 	batch.Draw(regions["head"], 680, 200, 0.5, 0.5, 1, 1, 0)
-	batch.Draw(regions["left-foot"], 930, 515, 0.5, 0.5, 1, 1, 15)
-	batch.Draw(regions["eyes"], 540, 400, 0.5, 0.5, 1, 1, 0)
+	batch.Draw(regions["left-foot"], 930, 515, 0.5, 0.5, 1, 1, -45)
+	batch.Draw(regions["eyes"], 540, 400, 0.5, 0.5, 1, 1, 45)
 	batch.End()
 }
 
