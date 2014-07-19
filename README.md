@@ -13,9 +13,11 @@ The desktop backend depends on [glfw](http://github.com/go-gl/glfw).
 
 The web backend depends on [gopherjs](http://github.com/neelance/gopherjs). eng comes with a utility for quickly testing out your games in the browser.
 
-`go get github.com/ajhager/eng/bld`
+`go get github.com/ajhager/eng/srv`
 
-Run `bld` in the same directory as your game, with your static files in a directory named 'data'. Access http://localhost:8080/main if your game file is at ./main.go.
+Run `srv` in the same directory as your game, with your static files in a directory named 'data'. Access http://localhost:8080/main if your game file is at ./main.go.
+
+You can supply a custom asset directory with the --static flag.
 
 ## Install
 
