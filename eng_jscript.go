@@ -11,6 +11,7 @@ import (
 	"github.com/gopherjs/webgl"
 	"log"
 	"math"
+	"math/rand"
 	"strconv"
 )
 
@@ -24,7 +25,6 @@ var gl *webgl.Context
 func run() {
 	document := js.Global.Get("document")
 	canvas := document.Call("createElement", "canvas")
-	canvas.Get("style").Set("background", "#000000")
 
 	target := document.Call("getElementById", config.Title)
 	if target.IsNull() {
@@ -431,7 +431,7 @@ func loadImage(r Resource) (Image, error) {
 	img.Call("addEventListener", "error", func(o js.Object) {
 		go func() { ch <- &js.Error{Object: o} }()
 	}, false)
-	img.Set("src", r.url)
+	img.Set("src", r.url+"?"+strconv.FormatInt(rand.Int63(), 10))
 
 	err := <-ch
 	if err != nil {
