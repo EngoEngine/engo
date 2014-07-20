@@ -4,7 +4,7 @@
 
 // +build !netgo,!android
 
-package eng
+package engi
 
 import (
 	"github.com/errcw/glow/gl/2.1/gl"

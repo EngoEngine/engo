@@ -4,7 +4,7 @@
 
 // +build netgo
 
-package eng
+package engi
 
 import (
 	"github.com/gopherjs/gopherjs/js"
