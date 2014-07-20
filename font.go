@@ -101,13 +101,15 @@ func NewGridFont(img Image, cellWidth, cellHeight int, maps string) *Font {
 	font := new(Font)
 	font.regions = make([]*Region, 0)
 	font.offsets = make([]*offset, 0)
-	font.mapping = make(map[rune]int)
 	font.texture = texture
 
-	i := 0
-	for _, v := range maps {
-		font.mapping[v] = i
-		i++
+	if len(maps) != 0 {
+		font.mapping = make(map[rune]int)
+		i := 0
+		for _, v := range maps {
+			font.mapping[v] = i
+			i++
+		}
 	}
 
 	os := &offset{0, 0, float32(cellWidth)}

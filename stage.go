@@ -1,3 +1,7 @@
+// Copyright 2014 Joseph Hager. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package eng
 
 var (
@@ -97,9 +101,35 @@ type Stage struct {
 }
 
 func NewStage() *Stage {
-	return &Stage{NewBatch(), make([]Displayer, 0)}
+	return new(Stage)
 }
 
+func (s *Stage) SetBg(color *Color) {
+	SetBgColor(color)
+}
+
+func (s *Stage) Add(object Displayer) {
+	s.objects = append(s.objects, object)
+}
+
+func (s *Stage) Sprite(region *Region, x, y float32) *Sprite {
+	sprite := NewSprite(region, x, y)
+	s.Add(sprite)
+	return sprite
+}
+
+func (s *Stage) Text(font *Font, x, y float32, content string) *Text {
+	text := NewText(font, x, y, content)
+	s.Add(text)
+	return text
+}
+
+func (s *Stage) Load() {}
+func (s *Stage) Init() {
+	s.batch = NewBatch()
+	s.objects = make([]Displayer, 0)
+}
+func (s *Stage) Setup() {}
 func (s *Stage) Draw() {
 	s.batch.Begin()
 	for _, object := range s.objects {
@@ -107,7 +137,13 @@ func (s *Stage) Draw() {
 	}
 	s.batch.End()
 }
-
-func (s *Stage) Add(object Displayer) {
-	s.objects = append(s.objects, object)
+func (s *Stage) Resize(width, height int)          {}
+func (s *Stage) Update(dt float32)                 {}
+func (s *Stage) Mouse(x, y float32, action Action) {}
+func (s *Stage) Scroll(amount float32)             {}
+func (s *Stage) Type(char rune)                    {}
+func (s *Stage) Key(key Key, mod Modifier, act Action) {
+	if key == Escape {
+		Exit()
+	}
 }

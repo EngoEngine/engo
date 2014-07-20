@@ -130,6 +130,7 @@ func run() {
 
 	Files.Load(func() {})
 
+	responder.Init()
 	responder.Setup()
 
 	for !window.ShouldClose() {

@@ -139,6 +139,7 @@ func run() {
 	responder.Load()
 
 	Files.Load(func() {
+		responder.Init()
 		responder.Setup()
 		RequestAnimationFrame(animate)
 	})
