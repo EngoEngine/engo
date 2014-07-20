@@ -78,10 +78,10 @@ func NewConfig() *Config {
 type Responder interface {
 	init()
 	draw()
-	Load()
+	resize(width, height int)
+	Preload()
 	Setup()
-	Update(delta float32)
-	Resize(width, height int)
+	Update()
 	Mouse(x, y float32, action Action)
 	Scroll(amount float32)
 	Key(key Key, modifier Modifier, action Action)
@@ -137,19 +137,4 @@ func OpenConfig(c *Config, r Responder) {
 // Exit closes the window and breaks out of the game loop.
 func Exit() {
 	exit()
-}
-
-// Width returns the current window width.
-func Width() float32 {
-	return float32(config.Width)
-}
-
-// Height returns the current window height.
-func Height() float32 {
-	return float32(config.Height)
-}
-
-// Fps returns the number of frames being rendered each second.
-func Fps() float32 {
-	return float32(timing.Fps)
 }

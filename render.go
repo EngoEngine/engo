@@ -29,8 +29,8 @@ const vec2 center = vec2(-1.0, 1.0);
 void main() {
   var_Color = in_Color;
   var_TexCoords = in_TexCoords;
-	gl_Position = vec4(in_Position.x / uf_Projection.x - 1.0,
-										 in_Position.y / -uf_Projection.y + 1.0,
+	gl_Position = vec4(in_Position.x / uf_Projection.x + center.x,
+										 in_Position.y / -uf_Projection.y + center.y,
 										 0.0, 1.0);
 }`
 
@@ -342,7 +342,7 @@ type Batch struct {
 	projY        float32
 }
 
-func NewBatch() *Batch {
+func NewBatch(width, height float32) *Batch {
 	batch := new(Batch)
 
 	batch.shader = NewShader(batchVert, batchFrag)
@@ -372,8 +372,8 @@ func NewBatch() *Batch {
 	GL.BindBuffer(GL.ARRAY_BUFFER, batch.vertexVBO)
 	GL.BufferData(GL.ARRAY_BUFFER, batch.vertices, GL.DYNAMIC_DRAW)
 
-	batch.projX = float32(Width()) / 2
-	batch.projY = float32(Height()) / 2
+	batch.projX = width / 2
+	batch.projY = height / 2
 
 	GL.Enable(GL.BLEND)
 	GL.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA)
@@ -555,8 +555,7 @@ func (b *Batch) Draw(r *Region, x, y, originX, originY, scaleX, scaleY, rotation
 	}
 }
 
-// SetProjection allows for setting the projection matrix manually.
-func (b *Batch) SetProjection(x, y float32) {
-	b.projX = x
-	b.projY = y
+func (b *Batch) SetProjection(width, height float32) {
+	b.projX = width / 2
+	b.projY = height / 2
 }

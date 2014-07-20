@@ -12,9 +12,9 @@ func NewGame() *Game {
 	return &Game{engi.NewStage()}
 }
 
-func (game *Game) Load() {
-	engi.Files.Add("bot", "data/bot.png")
-	engi.Files.Add("font", "data/font.png")
+func (game *Game) Preload() {
+	game.Load("bot", "data/bot.png")
+	game.Load("font", "data/font.png")
 }
 
 func (game *Game) Setup() {

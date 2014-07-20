@@ -115,6 +115,10 @@ func (s *Stage) SetBg(color uint32) {
 	GL.ClearColor(r, g, b, 1.0)
 }
 
+func (s *Stage) Load(name, path string) {
+	Files.Add(name, path)
+}
+
 func (s *Stage) Add(object Displayer) {
 	s.objects = append(s.objects, object)
 }
@@ -141,9 +145,17 @@ func (s *Stage) Height() float32 {
 	return float32(config.Height)
 }
 
-func (s *Stage) Load() {}
+func (s *Stage) Delta() float32 {
+	return float32(timing.Dt)
+}
+
+func (s *Stage) Fps() float32 {
+	return float32(timing.Fps)
+}
+
+func (s *Stage) Preload() {}
 func (s *Stage) init() {
-	s.batch = NewBatch()
+	s.batch = NewBatch(s.Width(), s.Height())
 	s.objects = make([]Displayer, 0)
 }
 func (s *Stage) Setup() {}
@@ -154,8 +166,10 @@ func (s *Stage) draw() {
 	}
 	s.batch.End()
 }
-func (s *Stage) Resize(width, height int)          {}
-func (s *Stage) Update(dt float32)                 {}
+func (s *Stage) resize(width, height int) {
+	s.batch.SetProjection(s.Width()/2, s.Height()/2)
+}
+func (s *Stage) Update()                           {}
 func (s *Stage) Mouse(x, y float32, action Action) {}
 func (s *Stage) Scroll(amount float32)             {}
 func (s *Stage) Type(char rune)                    {}

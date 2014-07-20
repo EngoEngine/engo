@@ -136,7 +136,7 @@ func run() {
 	timing = NewStats(config.LogFPS)
 	timing.Update()
 
-	responder.Load()
+	responder.Preload()
 
 	Files.Load(func() {
 		responder.init()
@@ -147,7 +147,7 @@ func run() {
 
 func animate(dt float32) {
 	RequestAnimationFrame(animate)
-	responder.Update(float32(timing.Dt))
+	responder.Update()
 	GL.Clear(GL.COLOR_BUFFER_BIT)
 	responder.draw()
 	timing.Update()

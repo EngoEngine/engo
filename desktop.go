@@ -91,7 +91,7 @@ func run() {
 
 	window.SetSizeCallback(func(window *glfw.Window, w, h int) {
 		config.Width, config.Height = window.GetSize()
-		responder.Resize(w, h)
+		responder.resize(w, h)
 	})
 
 	window.SetCursorPositionCallback(func(window *glfw.Window, x, y float64) {
@@ -123,7 +123,7 @@ func run() {
 		responder.Type(rune(char))
 	})
 
-	responder.Load()
+	responder.Preload()
 
 	timing = NewStats(config.LogFPS)
 	timing.Update()
@@ -134,7 +134,7 @@ func run() {
 	responder.Setup()
 
 	for !window.ShouldClose() {
-		responder.Update(float32(timing.Dt))
+		responder.Update()
 		GL.Clear(gl.COLOR_BUFFER_BIT)
 		responder.draw()
 		window.SwapBuffers()
