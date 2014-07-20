@@ -1,4 +1,4 @@
-# [ENG v0.2.0](http://ajhager.com/eng)
+# [ENG v0.2.0](http://ajhager.com/engi)
 
 A 2D game library for go. Expect bugs and major API changes. Just a proof of concept at the moment.
 
@@ -13,11 +13,11 @@ The desktop backend depends on [glfw](http://github.com/go-gl/glfw).
 
 The web backend depends on [gopherjs](http://github.com/neelance/gopherjs). eng comes with a utility for quickly testing out your games in the browser.
 
-`go get github.com/ajhager/eng/srv`
+`go get github.com/ajhager/engi/srvi`
 
-Run `srv` in the same directory as your game, with your static files in a directory named 'data'. Access http://localhost:8080/ if your game file is at ./main.go. Any other file name can be accessed at http://localhost:8080/name, where 'name' would be name.go.
+Run `srvi` in the same directory as your game, with your static files in a directory named 'data'. Access http://localhost:8080/ if your game file is at ./main.go. Any other file name can be accessed at http://localhost:8080/name, where 'name' would be name.go.
 
-You can supply a custom flags to srv:
+You can supply a custom flags to srvi:
 
 `
 Usage of srv:
@@ -28,8 +28,8 @@ Usage of srv:
 
 ## Install
 
-`go get github.com/ajhager/eng`
+`go get github.com/ajhager/engi`
 
 ## Documentation
 
-[godoc.org](http://godoc.org/github.com/ajhager/eng)
+[godoc.org](http://godoc.org/github.com/ajhager/engi)
