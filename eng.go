@@ -14,7 +14,6 @@ var (
 	responder Responder
 	config    *Config
 	timing    *stats
-	bgColor   *Color
 	Files     *Loader
 	GL        *gl2
 )
@@ -120,40 +119,6 @@ func (t *stats) Update() {
 	}
 }
 
-type Color struct {
-	R byte
-	G byte
-	B byte
-	A float32
-}
-
-func NewColor(r, g, b byte, a float32) *Color {
-	return &Color{r, g, b, a}
-}
-
-// Color satisfies the Go color.Color interface.
-func (c *Color) RGBA() (r, g, b, a uint32) {
-	r = uint32(float32(c.R) / 255.0 * 65535.0)
-	g = uint32(float32(c.G) / 255.0 * 65535.0)
-	b = uint32(float32(c.B) / 255.0 * 65535.0)
-	a = uint32(c.A * 65535.0)
-	return
-}
-
-// Copy returns a new color with the same components.
-func (c *Color) Copy() *Color {
-	return &Color{c.R, c.G, c.B, c.A}
-}
-
-func (c *Color) FloatBits() float32 {
-	r := uint32(c.R)
-	g := uint32(c.G)
-	b := uint32(c.B)
-	a := uint32(c.A * 255)
-	i := (a<<24 | b<<16 | g<<8 | r) & 0xfeffffff
-	return math.Float32frombits(i)
-}
-
 // Run should be called with a type that satisfies the Responder
 // interface. Windows will be setup using your Config and a runloop
 // will start, blocking the main thread and calling methods on the
@@ -166,7 +131,6 @@ func OpenConfig(c *Config, r Responder) {
 	config = c
 	responder = r
 	Files = NewLoader()
-	bgColor = NewColor(0, 0, 0, 0)
 	run()
 }
 
@@ -183,11 +147,6 @@ func Width() float32 {
 // Height returns the current window height.
 func Height() float32 {
 	return float32(config.Height)
-}
-
-// SetBgColor sets the default opengl clear color.
-func SetBgColor(c *Color) {
-	bgColor = c.Copy()
 }
 
 // Fps returns the number of frames being rendered each second.

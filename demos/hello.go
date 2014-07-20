@@ -18,20 +18,20 @@ func (game *Game) Load() {
 }
 
 func (game *Game) Setup() {
-	game.SetBg(engi.NewColor(45, 54, 56, 1))
+	game.SetBg(0x2d3638)
 
 	texture := engi.NewTexture(engi.Files.Image("bot"))
 	regions := texture.Split(64, 64)
 	font := engi.NewGridFont(engi.Files.Image("font"), 20, 20, "")
 
-	bot := game.Sprite(regions[0], engi.Width()/2, engi.Height()/3)
+	bot := game.Sprite(regions[0], game.Width()/2, game.Height()/3)
 	bot.Scale.SetTo(3)
 	bot.Pivot.Y = 0
 
-	text := game.Text(font, engi.Width()/2, engi.Height()/3, "ENGi")
+	text := game.Text(font, game.Width()/2, game.Height()/3, "ENGi")
 	text.Scale.SetTo(1.5)
 	text.Pivot.Set(0.5, 1)
-	text.SetColor(engi.NewColor(108, 183, 103, 1))
+	text.Tint = 0x6cb767
 }
 
 func main() {

@@ -4,9 +4,7 @@
 
 package engi
 
-var (
-	whiteFloatBits = NewColor(255, 255, 255, 1).FloatBits()
-)
+import "math"
 
 type Displayer interface {
 	Display(*Batch)
@@ -31,11 +29,16 @@ type Entity struct {
 	Scale    *Point
 	Pivot    *Point
 	Rotation float32
-	color    float32
+	Tint     uint32
+	Alpha    float32
 }
 
-func (e *Entity) SetColor(color *Color) {
-	e.color = color.FloatBits()
+func (e *Entity) floatBits() float32 {
+	r := uint32((e.Tint >> 16) & 0xFF)
+	g := uint32((e.Tint >> 8) & 0xFF)
+	b := uint32(e.Tint & 0xFF)
+	a := uint32(e.Alpha * 255.0)
+	return math.Float32frombits((a<<24 | b<<16 | g<<8 | r) & 0xfeffffff)
 }
 
 func NewEntity(x, y float32) *Entity {
@@ -44,7 +47,8 @@ func NewEntity(x, y float32) *Entity {
 		Scale:    &Point{1, 1},
 		Pivot:    &Point{0.5, 0.5},
 		Rotation: 0,
-		color:    whiteFloatBits,
+		Tint:     0xffffff,
+		Alpha:    1,
 	}
 }
 
@@ -58,7 +62,7 @@ func NewSprite(region *Region, x, y float32) *Sprite {
 }
 
 func (s *Sprite) Display(batch *Batch) {
-	batch.Draw(s.region, s.Position.X, s.Position.Y, s.Pivot.X, s.Pivot.Y, s.Scale.X, s.Scale.Y, s.Rotation, s.color)
+	batch.Draw(s.region, s.Position.X, s.Position.Y, s.Pivot.X, s.Pivot.Y, s.Scale.X, s.Scale.Y, s.Rotation, s.floatBits())
 }
 
 type Text struct {
@@ -85,7 +89,7 @@ func (t *Text) Display(batch *Batch) {
 			x := px + offset.xoffset*sx
 			y := py + offset.yoffset*sy - (region.height * sy * t.Pivot.Y)
 			if t.width != 0 {
-				batch.Draw(region, x, y, 0, 0, sx, sy, 0, t.color)
+				batch.Draw(region, x, y, 0, 0, sx, sy, 0, t.floatBits())
 			}
 			px += offset.xadvance * sx
 		}
@@ -104,8 +108,11 @@ func NewStage() *Stage {
 	return new(Stage)
 }
 
-func (s *Stage) SetBg(color *Color) {
-	SetBgColor(color)
+func (s *Stage) SetBg(color uint32) {
+	r := float32((color>>16)&0xFF) / 255.0
+	g := float32((color>>8)&0xFF) / 255.0
+	b := float32(color&0xFF) / 255.0
+	GL.ClearColor(r, g, b, 1.0)
 }
 
 func (s *Stage) Add(object Displayer) {
@@ -122,6 +129,16 @@ func (s *Stage) Text(font *Font, x, y float32, content string) *Text {
 	text := NewText(font, x, y, content)
 	s.Add(text)
 	return text
+}
+
+// Width returns the current window width.
+func (s *Stage) Width() float32 {
+	return float32(config.Width)
+}
+
+// Width returns the current window width.
+func (s *Stage) Height() float32 {
+	return float32(config.Height)
 }
 
 func (s *Stage) Load() {}
