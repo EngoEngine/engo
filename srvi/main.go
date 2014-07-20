@@ -16,7 +16,7 @@ var page = `
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>ENG! {{.Name}}</title>
+		<title>ENGi {{.Name}}</title>
 		<link rel="icon" type="image/png" href="/favicon.png">
 		<style>
 		html, body {
