@@ -125,12 +125,12 @@ func (s *Stage) Text(font *Font, x, y float32, content string) *Text {
 }
 
 func (s *Stage) Load() {}
-func (s *Stage) Init() {
+func (s *Stage) init() {
 	s.batch = NewBatch()
 	s.objects = make([]Displayer, 0)
 }
 func (s *Stage) Setup() {}
-func (s *Stage) Draw() {
+func (s *Stage) draw() {
 	s.batch.Begin()
 	for _, object := range s.objects {
 		object.Display(s.batch)

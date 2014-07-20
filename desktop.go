@@ -130,14 +130,14 @@ func run() {
 
 	Files.Load(func() {})
 
-	responder.Init()
+	responder.init()
 	responder.Setup()
 
 	for !window.ShouldClose() {
 		responder.Update(float32(timing.Dt))
 		GL.ClearColor(float32(bgColor.R)/255.0, float32(bgColor.G)/255.0, float32(bgColor.B)/255.0, bgColor.A)
 		GL.Clear(gl.COLOR_BUFFER_BIT)
-		responder.Draw()
+		responder.draw()
 		window.SwapBuffers()
 		glfw.PollEvents()
 		timing.Update()

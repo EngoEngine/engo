@@ -4,12 +4,12 @@ import (
 	"github.com/ajhager/eng"
 )
 
-func NewGame() *Game {
-	return &Game{eng.NewStage()}
-}
-
 type Game struct {
 	*eng.Stage
+}
+
+func NewGame() *Game {
+	return &Game{eng.NewStage()}
 }
 
 func (game *Game) Load() {
