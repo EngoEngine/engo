@@ -135,7 +135,7 @@ func run() {
 
 	for !window.ShouldClose() {
 		responder.Update(float32(timing.Dt))
-		GL.ClearColor(bgColor.R, bgColor.G, bgColor.B, bgColor.A)
+		GL.ClearColor(float32(bgColor.R)/255.0, float32(bgColor.G)/255.0, float32(bgColor.B)/255.0, bgColor.A)
 		GL.Clear(gl.COLOR_BUFFER_BIT)
 		responder.Draw()
 		window.SwapBuffers()

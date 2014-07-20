@@ -148,7 +148,7 @@ func run() {
 func animate(dt float32) {
 	RequestAnimationFrame(animate)
 	responder.Update(float32(timing.Dt))
-	GL.ClearColor(bgColor.R, bgColor.G, bgColor.B, bgColor.A)
+	GL.ClearColor(float32(bgColor.R)/255.0, float32(bgColor.G)/255.0, float32(bgColor.B)/255.0, bgColor.A)
 	GL.Clear(GL.COLOR_BUFFER_BIT)
 	responder.Draw()
 	timing.Update()

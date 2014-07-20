@@ -5,7 +5,7 @@
 package eng
 
 var (
-	whiteFloatBits = NewColor(1, 1, 1).FloatBits()
+	whiteFloatBits = NewColor(255, 255, 255, 1).FloatBits()
 )
 
 type Displayer interface {

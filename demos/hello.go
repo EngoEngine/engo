@@ -4,6 +4,10 @@ import (
 	"github.com/ajhager/eng"
 )
 
+func NewGame() *Game {
+	return &Game{eng.NewStage()}
+}
+
 type Game struct {
 	*eng.Stage
 }
@@ -14,7 +18,7 @@ func (game *Game) Load() {
 }
 
 func (game *Game) Setup() {
-	game.SetBg(eng.NewColorHex(0x2d3638))
+	game.SetBg(eng.NewColor(45, 54, 56, 1))
 
 	texture := eng.NewTexture(eng.Files.Image("bot"))
 	regions := texture.Split(64, 64)
@@ -27,9 +31,9 @@ func (game *Game) Setup() {
 	text := game.Text(font, eng.Width()/2, eng.Height()/3, "ENG!")
 	text.Scale.SetTo(1.5)
 	text.Pivot.Set(0.5, 1)
-	text.SetColor(eng.NewColorHex(0x6cb767))
+	text.SetColor(eng.NewColor(108, 183, 103, 1))
 }
 
 func main() {
-	eng.Run("Hello", 1024, 640, true, &Game{eng.NewStage()})
+	eng.Open("Hello", 1024, 640, true, NewGame())
 }
