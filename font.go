@@ -130,32 +130,6 @@ func (f *Font) mapRune(ch rune) (int, bool) {
 	return position, ok
 }
 
-func (f *Font) Put(batch *Batch, r rune, x, y float32) {
-	i, ok := f.mapRune(r)
-	if ok {
-		region := f.regions[i]
-		offset := f.offsets[i]
-		batch.Draw(region, x+offset.xoffset, y+offset.yoffset, 0, 0, 1, 1, 0)
-	}
-}
-
-// Print renders some text with the first letter's top left corner at
-// x, y using the given color. If color == nil, the given batch's
-// current color will be used. If the string contains a rune that is
-// not in the font, that rune will be skipped.
-func (f *Font) Print(batch *Batch, text string, x, y float32) {
-	xx := x
-	for _, v := range text {
-		i, ok := f.mapRune(v)
-		if ok {
-			region := f.regions[i]
-			offset := f.offsets[i]
-			batch.Draw(region, xx+offset.xoffset, y+offset.yoffset, 0, 0, 1, 1, 0)
-			xx += offset.xadvance
-		}
-	}
-}
-
 // Texture returns the backing texture of the font. This can be useful
 // for setting the filter or wrap modes which default to linear and
 // wrap to edge respectively.

@@ -22,6 +22,8 @@ uniform vec2 uf_Projection;
 varying vec4 var_Color;
 varying vec2 var_TexCoords;
 
+const vec2 center = vec2(-1.0, 1.0);
+
 void main() {
   var_Color = in_Color;
   var_TexCoords = in_TexCoords;
@@ -52,7 +54,6 @@ void main (void) {
 type Batch struct {
 	drawing      bool
 	lastTexture  *Texture
-	color        float32
 	vertices     []float32
 	vertexVBO    *BufferObject
 	indices      []uint16
@@ -75,8 +76,6 @@ func NewBatch() *Batch {
 	batch.inColor = batch.shader.GetAttrib("in_Color")
 	batch.inTexCoords = batch.shader.GetAttrib("in_TexCoords")
 	batch.ufProjection = batch.shader.GetUniform("uf_Projection")
-
-	batch.color = NewColorA(1, 1, 1, 1).FloatBits()
 
 	batch.vertices = make([]float32, 20*size)
 	batch.indices = make([]uint16, 6*size)
@@ -129,9 +128,6 @@ func (b *Batch) End() {
 	}
 	b.drawing = false
 
-	//GL.BindBuffer(GL.ARRAY_BUFFER, nil)
-	//GL.UseProgram(nil)
-
 	b.lastTexture = nil
 }
 
@@ -162,24 +158,23 @@ func (b *Batch) flush() {
 	b.index = 0
 }
 
-// Draw renders a Region with its top left corner at x, y. Scaling and
-// rotation will be with respect to the origin. If color is nil, the
-// current batch color will be used. If the backing texture in the
-// region is different than the last rendered region, any pending
-// geometry will be flushed. Switching textures is a relatively
-// expensive operation.
-func (b *Batch) Draw(r *Region, x, y, originX, originY, scaleX, scaleY, rotation float32) {
+func (b *Batch) Draw(r *Region, x, y, originX, originY, scaleX, scaleY, rotation, color float32) {
 	if !b.drawing {
 		log.Fatal("Batch.Begin() must be called first")
 	}
 
 	if r.texture != b.lastTexture {
-		b.flush()
+		if b.lastTexture != nil {
+			b.flush()
+		}
 		b.lastTexture = r.texture
 	}
 
-	originX = float32(r.width) * originX
-	originY = float32(r.height) * originY
+	x -= originX * r.width
+	y -= originY * r.height
+
+	originX = r.width * originX
+	originY = r.height * originY
 
 	worldOriginX := x + originX
 	worldOriginY := y + originY
@@ -259,36 +254,31 @@ func (b *Batch) Draw(r *Region, x, y, originX, originY, scaleX, scaleY, rotation
 	b.vertices[idx+1] = y1
 	b.vertices[idx+2] = r.u
 	b.vertices[idx+3] = r.v
-	b.vertices[idx+4] = b.color
+	b.vertices[idx+4] = color
 
 	b.vertices[idx+5] = x4
 	b.vertices[idx+6] = y4
 	b.vertices[idx+7] = r.u2
 	b.vertices[idx+8] = r.v
-	b.vertices[idx+9] = b.color
+	b.vertices[idx+9] = color
 
 	b.vertices[idx+10] = x2
 	b.vertices[idx+11] = y2
 	b.vertices[idx+12] = r.u
 	b.vertices[idx+13] = r.v2
-	b.vertices[idx+14] = b.color
+	b.vertices[idx+14] = color
 
 	b.vertices[idx+15] = x3
 	b.vertices[idx+16] = y3
 	b.vertices[idx+17] = r.u2
 	b.vertices[idx+18] = r.v2
-	b.vertices[idx+19] = b.color
+	b.vertices[idx+19] = color
 
 	b.index += 1
 
 	if b.index >= size {
 		b.flush()
 	}
-}
-
-// SetColor changes the current batch rendering tint. This defaults to white.
-func (b *Batch) SetColor(color *Color) {
-	b.color = color.FloatBits()
 }
 
 // SetProjection allows for setting the projection matrix manually.

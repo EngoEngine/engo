@@ -5,10 +5,8 @@ import (
 )
 
 var (
-	batch *eng.Batch
-	font  *eng.Font
-	blue  = eng.NewColorHex(0x33b5e5)
-	grey  = eng.NewColorHex(0xf4f4f4)
+	regions []*eng.Region
+	stage   *eng.Stage
 )
 
 type Game struct {
@@ -16,20 +14,32 @@ type Game struct {
 }
 
 func (g *Game) Load() {
+	eng.Files.Add("bot", "data/bot.png")
 	eng.Files.Add("font", "data/font.png")
 }
 
 func (g *Game) Setup() {
-	font = eng.NewGridFont(eng.Files.Image("font"), 20, 20, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~")
-	eng.SetBgColor(blue)
-	batch = eng.NewBatch()
+	eng.SetBgColor(eng.NewColorHex(0x2d3638))
+
+	texture := eng.NewTexture(eng.Files.Image("bot"))
+	regions = texture.Split(64, 64)
+
+	font := eng.NewGridFont(eng.Files.Image("font"), 20, 20, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~")
+
+	stage = eng.NewStage()
+	bot := eng.NewSprite(regions[0], eng.Width()/2, eng.Height()/3)
+	bot.Scale.SetTo(3)
+	bot.Pivot.Set(0.5, 0)
+	stage.Add(bot)
+	text := eng.NewText(font, eng.Width()/2, eng.Height()/3, "ENG!")
+	text.Scale.SetTo(1.5)
+	text.Pivot.Set(0.5, 1)
+	text.SetColor(eng.NewColorHexA(0x6cb767, 1))
+	stage.Add(text)
 }
 
 func (g *Game) Draw() {
-	batch.Begin()
-	batch.SetColor(grey)
-	font.Print(batch, "hello world", eng.Width()/2-120, eng.Height()/2-20)
-	batch.End()
+	stage.Draw()
 }
 
 func main() {

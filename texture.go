@@ -17,7 +17,7 @@ type Region struct {
 	texture       *Texture
 	u, v          float32
 	u2, v2        float32
-	width, height int
+	width, height float32
 }
 
 // NewRegion constructs an image from the rectangle x, y, w, h on the
@@ -30,8 +30,8 @@ func NewRegion(texture *Texture, x, y, w, h int) *Region {
 	v := float32(y) * invTexHeight
 	u2 := float32(x+w) * invTexWidth
 	v2 := float32(y+h) * invTexHeight
-	width := int(math.Abs(float64(w)))
-	height := int(math.Abs(float64(h)))
+	width := float32(math.Abs(float64(w)))
+	height := float32(math.Abs(float64(h)))
 
 	return &Region{texture, u, v, u2, v2, width, height}
 }
