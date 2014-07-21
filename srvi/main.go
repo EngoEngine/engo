@@ -99,12 +99,25 @@ func main() {
 	static := flag.String("static", "data", "The relative path to your assets")
 	host := flag.String("host", "127.0.0.1", "The host at which to serve your games")
 	port := flag.Int("port", 8080, "The port at which to serve your games")
+
+	banner := `   _______ _   ___ 
+  / __/ _ \ | / (_)
+ _\ \/ , _/ |/ / / 
+/___/_/|_||___/_/  says... 
+`
+
+	flag.Usage = func() {
+		fmt.Fprintln(os.Stderr, banner)
+		fmt.Fprintln(os.Stderr, "Configure me with these flags!")
+		flag.PrintDefaults()
+	}
+
 	flag.Parse()
 
 	http.HandleFunc("/", programHandler)
 	http.Handle("/favicon.png", http.FileServer(&assetfs.AssetFS{Asset, AssetDir, "."}))
 	http.HandleFunc(fmt.Sprintf("/%s/", path.Clean(*static)), staticHandler)
-
-	fmt.Printf("Now open your browser to http://%s:%d!\n", *host, *port)
+	fmt.Println(banner)
+	fmt.Printf("Open your browser to http://%s:%d!\n", *host, *port)
 	http.ListenAndServe(fmt.Sprintf("%s:%d", *host, *port), nil)
 }

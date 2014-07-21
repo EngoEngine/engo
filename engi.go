@@ -90,12 +90,14 @@ type Responder interface {
 
 type stats struct {
 	Elapsed, Dt, Fps, Frames, Period float64
+	Start                            time.Time
 	Then                             time.Time
 	show                             bool
 }
 
 func NewStats(show bool) *stats {
 	st := new(stats)
+	st.Start = time.Now()
 	st.Period = 1
 	st.Update()
 	st.show = show
@@ -132,9 +134,4 @@ func OpenConfig(c *Config, r Responder) {
 	responder = r
 	Files = NewLoader()
 	run()
-}
-
-// Exit closes the window and breaks out of the game loop.
-func Exit() {
-	exit()
 }

@@ -149,8 +149,16 @@ func (s *Stage) Delta() float32 {
 	return float32(timing.Dt)
 }
 
+func (s *Stage) Time() float32 {
+	return float32(timing.Start.Sub(timing.Then).Seconds())
+}
+
 func (s *Stage) Fps() float32 {
 	return float32(timing.Fps)
+}
+
+func (s *Stage) Exit() {
+	exit()
 }
 
 func (s *Stage) Preload() {}
@@ -175,6 +183,6 @@ func (s *Stage) Scroll(amount float32)             {}
 func (s *Stage) Type(char rune)                    {}
 func (s *Stage) Key(key Key, mod Modifier, act Action) {
 	if key == Escape {
-		Exit()
+		s.Exit()
 	}
 }
