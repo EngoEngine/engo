@@ -12,7 +12,7 @@ go get -u github.com/ajhager/engi/srvi
 
 Run `srvi` in the same directory as your game, with your static files in a directory named 'data'. Access http://localhost:8080/ if your game file is at ./main.go. Any other file name can be accessed at http://localhost:8080/name, where 'name' would be name.go.
 
-```bash
+```
    _______ _   ___
   / __/ _ \ | / (_)
  _\ \/ , _/ |/ / /
