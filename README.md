@@ -8,7 +8,9 @@ Expect bugs and major API changes. Just a proof of concept at the moment.
 
 ## Install
 
-`go get -u github.com/ajhager/engi`
+```bash
+go get -u github.com/ajhager/engi
+```
 
 ## Desktop
 
