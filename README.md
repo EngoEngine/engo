@@ -19,7 +19,7 @@ The desktop backend depends on [glfw](http://github.com/go-gl/glfw).
 
 ## Web
 
-The web backend depends on [gopherjs](http://github.com/neelance/gopherjs). Check out the [SERVi](http://github.com/ajhager/engi/srvi) utility for trying out your games in the browser.
+The web backend depends on [gopherjs](http://github.com/neelance/gopherjs). Check out the [SERVi](http://github.com/ajhager/engi/tree/master/srvi) utility for trying out your games in the browser.
 
 ## Documentation
 
