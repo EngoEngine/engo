@@ -72,7 +72,7 @@ type Config struct {
 }
 
 func NewConfig() *Config {
-	return &Config{"ENG!", 800, 600, false, true, false, 1, false}
+	return &Config{"ENG!", 800, 600, false, false, false, 0, false}
 }
 
 type Responder interface {

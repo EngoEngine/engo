@@ -123,9 +123,7 @@ func (s *Stage) Add(object Displayer) {
 	s.objects = append(s.objects, object)
 }
 
-func (s *Stage) Sprite(name string, x, y float32) *Sprite {
-	texture := NewTexture(Files.Image(name))
-	region := NewRegion(texture, 0, 0, texture.Width(), texture.Height())
+func (s *Stage) Sprite(region *Region, x, y float32) *Sprite {
 	sprite := NewSprite(region, x, y)
 	s.Add(sprite)
 	return sprite

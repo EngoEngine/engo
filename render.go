@@ -372,6 +372,14 @@ func NewBatch(width, height float32) *Batch {
 	GL.BindBuffer(GL.ARRAY_BUFFER, batch.vertexVBO)
 	GL.BufferData(GL.ARRAY_BUFFER, batch.vertices, GL.DYNAMIC_DRAW)
 
+	GL.EnableVertexAttribArray(batch.inPosition)
+	GL.EnableVertexAttribArray(batch.inTexCoords)
+	GL.EnableVertexAttribArray(batch.inColor)
+
+	GL.VertexAttribPointer(batch.inPosition, 2, GL.FLOAT, false, 20, 0)
+	GL.VertexAttribPointer(batch.inTexCoords, 2, GL.FLOAT, false, 20, 8)
+	GL.VertexAttribPointer(batch.inColor, 4, GL.UNSIGNED_BYTE, true, 20, 16)
+
 	batch.projX = width / 2
 	batch.projY = height / 2
 
@@ -410,23 +418,11 @@ func (b *Batch) flush() {
 		return
 	}
 
-	GL.ActiveTexture(GL.TEXTURE0)
 	b.lastTexture.Bind()
 
 	GL.Uniform2f(b.ufProjection, b.projX, b.projY)
 
-	GL.BindBuffer(GL.ARRAY_BUFFER, b.vertexVBO)
 	GL.BufferSubData(GL.ARRAY_BUFFER, 0, 20*4*b.index, b.vertices)
-
-	GL.EnableVertexAttribArray(b.inPosition)
-	GL.EnableVertexAttribArray(b.inTexCoords)
-	GL.EnableVertexAttribArray(b.inColor)
-
-	GL.VertexAttribPointer(b.inPosition, 2, GL.FLOAT, false, 20, 0)
-	GL.VertexAttribPointer(b.inTexCoords, 2, GL.FLOAT, false, 20, 8)
-	GL.VertexAttribPointer(b.inColor, 4, GL.UNSIGNED_BYTE, true, 20, 16)
-
-	GL.BindBuffer(GL.ELEMENT_ARRAY_BUFFER, b.indexVBO)
 	GL.DrawElements(GL.TRIANGLES, 6*b.index, GL.UNSIGNED_SHORT, 0)
 
 	b.index = 0

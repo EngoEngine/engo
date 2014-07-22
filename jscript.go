@@ -32,8 +32,14 @@ func run() {
 	}
 	target.Call("appendChild", canvas)
 
+	attrs := webgl.DefaultAttributes()
+	attrs.Alpha = false
+	attrs.Depth = false
+	attrs.PremultipliedAlpha = false
+	attrs.Antialias = false
+
 	var err error
-	gl, err = webgl.NewContext(canvas, nil)
+	gl, err = webgl.NewContext(canvas, attrs)
 	if err != nil {
 		log.Fatal(err)
 	}

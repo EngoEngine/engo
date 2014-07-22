@@ -23,7 +23,10 @@ func (game *Game) Preload() {
 func (game *Game) Setup() {
 	game.SetBg(0x2d3638)
 
-	bot := game.Sprite("bot", game.Width()/2, game.Height()/2)
+	texture := engi.NewTexture(engi.Files.Image("bot"))
+	region := engi.NewRegion(texture, 0, 0, texture.Width(), texture.Height())
+
+	bot := game.Sprite(region, game.Width()/2, game.Height()/2)
 	bot.Pivot.Y = 1
 	game.bot = bot
 
@@ -35,11 +38,9 @@ func (game *Game) Setup() {
 	game.text = text
 }
 
-var time float32
 var on bool
 
 func (game *Game) Update() {
-	time += game.Delta() * 200
 	if on {
 		game.bot.Rotation = float32(math.Sin(float64(game.Time() * 200)))
 	} else {
