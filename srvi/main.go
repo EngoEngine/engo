@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 )
 
 var page = `
@@ -67,8 +68,8 @@ func programHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Determine the program to build.
 	path := r.URL.Path[1:]
-	if len(path) == 0 {
-		path = "main"
+	if strings.HasSuffix(path, "/") {
+		path += "main"
 	}
 
 	// Open the program's source.

@@ -1,6 +1,6 @@
-# SERVi
+# SRVi
 
-SERVi is a utility for quickly testing out your games in the browser. It supports hosting a server, displaying errors, and rebuilding your game each time you refesh the page.
+SRVi is a utility for quickly testing out your games in the browser. It supports hosting a server, displaying errors, and rebuilding your game each time you refesh the page.
 
 ## Install
 
