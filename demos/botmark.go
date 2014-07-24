@@ -48,8 +48,7 @@ func (game *Game) Update() {
 	if on {
 		for i := 0; i < 10; i++ {
 			bot := &Bot{game.Sprite(region, 0, 0), rand.Float32() * 500, rand.Float32()*500 - 250}
-			bot.Alpha = 0.75
-			bot.Scale.SetTo(1.5)
+			bot.Scale.SetTo(2)
 			bots = append(bots, bot)
 		}
 		num += 10
@@ -98,5 +97,5 @@ func (game *Game) Mouse(x, y float32, action engi.Action) {
 }
 
 func main() {
-	engi.Open("Botmark", 800, 600, false, NewGame())
+	engi.Open("Botmark", 1024, 640, true, NewGame())
 }
