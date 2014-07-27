@@ -32,7 +32,7 @@ func (game *Game) Preload() {
 func (game *Game) Setup() {
 	game.SetBg(0x2d3638)
 	texture := engi.NewTexture(engi.Files.Image("bot"))
-	region = engi.NewRegion(texture, 0, 0, texture.Width(), texture.Height())
+	region = engi.NewRegionFull(texture)
 }
 
 var time float32
@@ -46,12 +46,11 @@ func (game *Game) Update() {
 	}
 
 	if on {
-		for i := 0; i < 10; i++ {
-			bot := &Bot{game.Sprite(region, 0, 0), rand.Float32() * 500, rand.Float32()*500 - 250}
-			bot.Scale.SetTo(2)
+		for i := 0; i < 25; i++ {
+			bot := &Bot{game.NewSprite(region, 0, 0), rand.Float32() * 500, rand.Float32()*500 - 250}
 			bots = append(bots, bot)
 		}
-		num += 10
+		num += 25
 	}
 
 	minX := float32(0)
@@ -97,5 +96,5 @@ func (game *Game) Mouse(x, y float32, action engi.Action) {
 }
 
 func main() {
-	engi.Open("Botmark", 1024, 640, true, NewGame())
+	engi.Open("Botmark", 800, 600, false, NewGame())
 }

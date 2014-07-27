@@ -65,59 +65,16 @@ func NewShader(vertSrc, fragSrc string) *Shader {
 	GL.CompileShader(vertShader)
 	defer GL.DeleteShader(vertShader)
 
-	/*
-		var status int32
-		gl.GetShaderiv(vertShader, gl.COMPILE_STATUS, &status)
-		if status == gl.FALSE {
-			var logLength int32
-			gl.GetShaderiv(vertShader, gl.INFO_LOG_LENGTH, &logLength)
-
-			logGL := strings.Repeat("\x00", int(logLength+1))
-			gl.GetShaderInfoLog(vertShader, logLength, nil, gl.Str(logGL))
-
-			log.Fatal("failed to compile %v: %v", vertSrc, logGL)
-		}
-	*/
-
 	fragShader := GL.CreateShader(GL.FRAGMENT_SHADER)
 	GL.ShaderSource(fragShader, fragSrc)
 	GL.CompileShader(fragShader)
 	defer GL.DeleteShader(fragShader)
-
-	/*
-		gl.GetShaderiv(fragShader, gl.COMPILE_STATUS, &status)
-		if status == gl.FALSE {
-			var logLength int32
-			gl.GetShaderiv(fragShader, gl.INFO_LOG_LENGTH, &logLength)
-
-			logGL := strings.Repeat("\x00", int(logLength+1))
-			gl.GetShaderInfoLog(fragShader, logLength, nil, gl.Str(logGL))
-
-			log.Fatal("failed to compile %v: %v", fragSrc, logGL)
-		}
-	*/
 
 	program := GL.CreateProgram()
 	GL.AttachShader(program, vertShader)
 	GL.AttachShader(program, fragShader)
 
 	GL.LinkProgram(program)
-
-	/*
-		var linkStatus int32
-		gl.GetProgramiv(program, gl.LINK_STATUS, &linkStatus)
-		if linkStatus == 0 {
-			log.Fatal("Unable to link shader program.")
-		}
-
-		gl.ValidateProgram(program)
-
-		var validateStatus int32
-		gl.GetProgramiv(program, gl.VALIDATE_STATUS, &validateStatus)
-		if validateStatus == 0 {
-			log.Fatal("Unable to validate shader program.")
-		}
-	*/
 
 	return &Shader{program}
 }
@@ -358,8 +315,8 @@ func NewBatch(width, height float32) *Batch {
 		batch.indices[i+0] = uint16(j + 0)
 		batch.indices[i+1] = uint16(j + 1)
 		batch.indices[i+2] = uint16(j + 2)
-		batch.indices[i+3] = uint16(j + 2)
-		batch.indices[i+4] = uint16(j + 1)
+		batch.indices[i+3] = uint16(j + 0)
+		batch.indices[i+4] = uint16(j + 2)
 		batch.indices[i+5] = uint16(j + 3)
 	}
 
@@ -426,6 +383,76 @@ func (b *Batch) flush() {
 	GL.DrawElements(GL.TRIANGLES, 6*b.index, GL.UNSIGNED_SHORT, 0)
 
 	b.index = 0
+}
+
+func (batch *Batch) Render(s *Sprite) {
+	if s == nil || s.region == nil {
+		return
+	}
+
+	if !batch.drawing {
+		log.Fatal("Batch.Begin() must be called first")
+	}
+
+	r := s.region
+	if r.texture != batch.lastTexture {
+		if batch.lastTexture != nil {
+			batch.flush()
+		}
+		batch.lastTexture = r.texture
+	}
+
+	color := s.color
+	vertices := batch.vertices
+
+	aX := s.Anchor.X
+	aY := s.Anchor.Y
+
+	w0 := r.width * (1 - aX)
+	w1 := r.width * -aX
+
+	h0 := r.height * (1 - aY)
+	h1 := r.height * -aY
+
+	transform := s.transform
+	a := transform.A
+	b := transform.C
+	c := transform.B
+	d := transform.D
+	tx := transform.TX
+	ty := transform.TY
+
+	idx := batch.index * 20
+
+	vertices[idx+0] = a*w1 + c*h1 + tx
+	vertices[idx+1] = d*h1 + b*w1 + ty
+	vertices[idx+2] = r.u
+	vertices[idx+3] = r.v
+	vertices[idx+4] = color
+
+	vertices[idx+5] = a*w0 + c*h1 + tx
+	vertices[idx+6] = d*h1 + b*w0 + ty
+	vertices[idx+7] = r.u2
+	vertices[idx+8] = r.v
+	vertices[idx+9] = color
+
+	vertices[idx+10] = a*w0 + c*h0 + tx
+	vertices[idx+11] = d*h0 + b*w0 + ty
+	vertices[idx+12] = r.u2
+	vertices[idx+13] = r.v2
+	vertices[idx+14] = color
+
+	vertices[idx+15] = a*w1 + c*h0 + tx
+	vertices[idx+16] = d*h0 + b*w1 + ty
+	vertices[idx+17] = r.u
+	vertices[idx+18] = r.v2
+	vertices[idx+19] = color
+
+	batch.index += 1
+
+	if batch.index >= size {
+		batch.flush()
+	}
 }
 
 func (b *Batch) Draw(r *Region, x, y, originX, originY, scaleX, scaleY, rotation, color float32) {

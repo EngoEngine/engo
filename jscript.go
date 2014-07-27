@@ -36,6 +36,7 @@ func run() {
 	attrs.Alpha = false
 	attrs.Depth = false
 	attrs.PremultipliedAlpha = false
+	attrs.PreserveDrawingBuffer = false
 	attrs.Antialias = false
 
 	var err error
