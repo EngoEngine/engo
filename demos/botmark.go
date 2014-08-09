@@ -10,6 +10,7 @@ var (
 	on     bool
 	num    int
 	region *engi.Region
+	batch  *engi.Batch
 )
 
 type Bot struct {
@@ -18,47 +19,42 @@ type Bot struct {
 }
 
 type Game struct {
-	*engi.Stage
-}
-
-func NewGame() *Game {
-	return &Game{Stage: engi.NewStage()}
+	*engi.Game
 }
 
 func (game *Game) Preload() {
-	game.Load("bot", "data/icon.png")
+	engi.Files.Add("bot", "data/icon.png")
 }
 
 func (game *Game) Setup() {
-	game.SetBg(0x2d3638)
+	engi.SetBg(0x2d3638)
 	texture := engi.NewTexture(engi.Files.Image("bot"))
 	region = engi.NewRegionFull(texture)
+	batch = engi.NewBatch(800, 600)
 }
 
 var time float32
 
-func (game *Game) Update() {
-	time += game.Delta()
+func (game *Game) Update(dt float32) {
+	time += dt
 	if time > 1 {
+		println(int(engi.Fps()))
 		println(num)
-		println(int(game.Fps()))
 		time = 0
 	}
 
 	if on {
-		for i := 0; i < 25; i++ {
-			bot := &Bot{game.NewSprite(region, 0, 0), rand.Float32() * 500, rand.Float32()*500 - 250}
+		for i := 0; i < 10; i++ {
+			bot := &Bot{engi.NewSprite(region, 0, 0), rand.Float32() * 500, rand.Float32()*500 - 250}
 			bots = append(bots, bot)
 		}
-		num += 25
+		num += 10
 	}
 
 	minX := float32(0)
-	maxX := game.Width()
+	maxX := float32(800)
 	minY := float32(0)
-	maxY := game.Height()
-
-	dt := game.Delta()
+	maxY := float32(600)
 
 	for _, bot := range bots {
 		bot.Position.X += bot.DX * dt
@@ -86,6 +82,14 @@ func (game *Game) Update() {
 	}
 }
 
+func (game *Game) Render() {
+	batch.Begin()
+	for _, bot := range bots {
+		bot.Render(batch)
+	}
+	batch.End()
+}
+
 func (game *Game) Mouse(x, y float32, action engi.Action) {
 	switch action {
 	case engi.PRESS:
@@ -96,5 +100,5 @@ func (game *Game) Mouse(x, y float32, action engi.Action) {
 }
 
 func main() {
-	engi.Open("Botmark", 800, 600, false, NewGame())
+	engi.Open("Botmark", 800, 600, false, &Game{})
 }

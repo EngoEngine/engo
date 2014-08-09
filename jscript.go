@@ -146,7 +146,6 @@ func run() {
 	responder.Preload()
 
 	Files.Load(func() {
-		responder.init()
 		responder.Setup()
 		RequestAnimationFrame(animate)
 	})
@@ -154,9 +153,9 @@ func run() {
 
 func animate(dt float32) {
 	RequestAnimationFrame(animate)
-	responder.Update()
+	responder.Update(float32(timing.Dt))
 	GL.Clear(GL.COLOR_BUFFER_BIT)
-	responder.draw()
+	responder.Render()
 	timing.Update()
 }
 

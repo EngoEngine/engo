@@ -79,6 +79,15 @@ type Font struct {
 	mapping map[rune]int
 }
 
+func (f *Font) Put(batch *Batch, r rune, x, y float32, color uint32) {
+	i, ok := f.mapRune(r)
+	if ok {
+		region := f.regions[i]
+		offset := f.offsets[i]
+		batch.Draw(region, x+offset.xoffset, y+offset.yoffset, 0, 0, 1, 1, 0, color, 1)
+	}
+}
+
 /*
 // NewBitmapFont constructs a new bitmap font from the bmfont format.
 // fnt and img should either be string paths to the font and image

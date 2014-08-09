@@ -346,8 +346,6 @@ func NewBatch(width, height float32) *Batch {
 	return batch
 }
 
-// Begin calculates the combined matrix and sets up rendering. This
-// must be called before calling Draw.
 func (b *Batch) Begin() {
 	if b.drawing {
 		log.Fatal("Batch.End() must be called first")
@@ -385,77 +383,7 @@ func (b *Batch) flush() {
 	b.index = 0
 }
 
-func (batch *Batch) Render(s *Sprite) {
-	if s == nil || s.region == nil {
-		return
-	}
-
-	if !batch.drawing {
-		log.Fatal("Batch.Begin() must be called first")
-	}
-
-	r := s.region
-	if r.texture != batch.lastTexture {
-		if batch.lastTexture != nil {
-			batch.flush()
-		}
-		batch.lastTexture = r.texture
-	}
-
-	color := s.color
-	vertices := batch.vertices
-
-	aX := s.Anchor.X
-	aY := s.Anchor.Y
-
-	w0 := r.width * (1 - aX)
-	w1 := r.width * -aX
-
-	h0 := r.height * (1 - aY)
-	h1 := r.height * -aY
-
-	transform := s.transform
-	a := transform.A
-	b := transform.C
-	c := transform.B
-	d := transform.D
-	tx := transform.TX
-	ty := transform.TY
-
-	idx := batch.index * 20
-
-	vertices[idx+0] = a*w1 + c*h1 + tx
-	vertices[idx+1] = d*h1 + b*w1 + ty
-	vertices[idx+2] = r.u
-	vertices[idx+3] = r.v
-	vertices[idx+4] = color
-
-	vertices[idx+5] = a*w0 + c*h1 + tx
-	vertices[idx+6] = d*h1 + b*w0 + ty
-	vertices[idx+7] = r.u2
-	vertices[idx+8] = r.v
-	vertices[idx+9] = color
-
-	vertices[idx+10] = a*w0 + c*h0 + tx
-	vertices[idx+11] = d*h0 + b*w0 + ty
-	vertices[idx+12] = r.u2
-	vertices[idx+13] = r.v2
-	vertices[idx+14] = color
-
-	vertices[idx+15] = a*w1 + c*h0 + tx
-	vertices[idx+16] = d*h0 + b*w1 + ty
-	vertices[idx+17] = r.u
-	vertices[idx+18] = r.v2
-	vertices[idx+19] = color
-
-	batch.index += 1
-
-	if batch.index >= size {
-		batch.flush()
-	}
-}
-
-func (b *Batch) Draw(r *Region, x, y, originX, originY, scaleX, scaleY, rotation, color float32) {
+func (b *Batch) Draw(r *Region, x, y, originX, originY, scaleX, scaleY, rotation float32, color uint32, transparency float32) {
 	if !b.drawing {
 		log.Fatal("Batch.Begin() must be called first")
 	}
@@ -545,31 +473,37 @@ func (b *Batch) Draw(r *Region, x, y, originX, originY, scaleX, scaleY, rotation
 	x4 += worldOriginX
 	y4 += worldOriginY
 
+	red := (color >> 16) & 0xFF
+	green := ((color >> 8) & 0xFF) << 8
+	blue := (color & 0xFF) << 16
+	alpha := uint32(transparency*255.0) << 24
+	tint := math.Float32frombits((alpha | blue | green | red) & 0xfeffffff)
+
 	idx := b.index * 20
 
 	b.vertices[idx+0] = x1
 	b.vertices[idx+1] = y1
 	b.vertices[idx+2] = r.u
 	b.vertices[idx+3] = r.v
-	b.vertices[idx+4] = color
+	b.vertices[idx+4] = tint
 
 	b.vertices[idx+5] = x4
 	b.vertices[idx+6] = y4
 	b.vertices[idx+7] = r.u2
 	b.vertices[idx+8] = r.v
-	b.vertices[idx+9] = color
+	b.vertices[idx+9] = tint
 
-	b.vertices[idx+10] = x2
-	b.vertices[idx+11] = y2
-	b.vertices[idx+12] = r.u
+	b.vertices[idx+10] = x3
+	b.vertices[idx+11] = y3
+	b.vertices[idx+12] = r.u2
 	b.vertices[idx+13] = r.v2
-	b.vertices[idx+14] = color
+	b.vertices[idx+14] = tint
 
-	b.vertices[idx+15] = x3
-	b.vertices[idx+16] = y3
-	b.vertices[idx+17] = r.u2
+	b.vertices[idx+15] = x2
+	b.vertices[idx+16] = y2
+	b.vertices[idx+17] = r.u
 	b.vertices[idx+18] = r.v2
-	b.vertices[idx+19] = color
+	b.vertices[idx+19] = tint
 
 	b.index += 1
 
@@ -582,3 +516,68 @@ func (b *Batch) SetProjection(width, height float32) {
 	b.projX = width / 2
 	b.projY = height / 2
 }
+
+/*
+type alignment float32
+
+const (
+	LEFT   = alignment(0)
+	CENTER = alignment(0.5)
+	RIGHT  = alignment(1)
+)
+
+type Text struct {
+	*Sprite
+	font  *Font
+	text  string
+	width float32
+	align int
+}
+
+func NewText(font *Font, x, y float32, text string) *Text {
+	container := NewGroup()
+	container.Position.Set(x, y)
+	t := &Text{Sprite: container, font: font, text: text}
+	t.Build()
+	return t
+}
+
+func (t *Text) SetTint(tint uint32) {
+	for _, child := range t.children {
+		child.SetTint(tint)
+	}
+	t.Sprite.SetTint(tint)
+}
+
+func (t *Text) SetAlign(align alignment) {
+	t.align = align
+	t.Build()
+}
+
+func (t *Text) Build() {
+	t.width = 0
+	for _, v := range t.text {
+		i, ok := t.font.mapRune(v)
+		if ok {
+			offset := t.font.offsets[i]
+			t.width += offset.xadvance * t.Scale.X
+		}
+	}
+
+	px := -(t.width * t.align)
+	py := -(float32(0)
+	for _, v := range t.text {
+		i, exists := t.font.mapRune(v)
+		if exists {
+			region := t.font.regions[i]
+			offset := t.font.offsets[i]
+			x := px + offset.xoffset
+			y := py + offset.yoffset - (region.height * t.Anchor.Y)
+			sprite := NewSprite(region, x, y)
+			sprite.color = t.color
+			t.AddChild(sprite)
+			px += offset.xadvance * sx
+		}
+	}
+}
+*/

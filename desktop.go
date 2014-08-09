@@ -91,7 +91,7 @@ func run() {
 
 	window.SetSizeCallback(func(window *glfw.Window, w, h int) {
 		config.Width, config.Height = window.GetSize()
-		responder.resize(w, h)
+		responder.Resize(w, h)
 	})
 
 	window.SetCursorPositionCallback(func(window *glfw.Window, x, y float64) {
@@ -130,13 +130,12 @@ func run() {
 
 	Files.Load(func() {})
 
-	responder.init()
 	responder.Setup()
 
 	for !window.ShouldClose() {
-		responder.Update()
+		responder.Update(float32(timing.Dt))
 		GL.Clear(gl.COLOR_BUFFER_BIT)
-		responder.draw()
+		responder.Render()
 		window.SwapBuffers()
 		glfw.PollEvents()
 		timing.Update()
@@ -394,6 +393,10 @@ func (z *gl2) TexImage2D(target, level, internalFormat, width, height, border, f
 		pix = data.(*image.NRGBA).Pix
 	}
 	gl.TexImage2D(uint32(target), int32(level), int32(internalFormat), int32(width), int32(height), int32(border), uint32(format), uint32(kind), gl.Ptr(pix))
+}
+
+func NewImageObject(img *image.NRGBA) *ImageObject {
+	return &ImageObject{img}
 }
 
 type ImageObject struct {

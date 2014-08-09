@@ -76,17 +76,32 @@ func NewConfig() *Config {
 }
 
 type Responder interface {
-	init()
-	draw()
-	resize(width, height int)
+	Render()
+	Resize(width, height int)
 	Preload()
 	Setup()
-	Update()
+	Update(dt float32)
 	Mouse(x, y float32, action Action)
 	Scroll(amount float32)
 	Key(key Key, modifier Modifier, action Action)
 	Type(char rune)
 }
+
+type Game struct{}
+
+func (g *Game) Preload()                          {}
+func (g *Game) Setup()                            {}
+func (g *Game) Update(dt float32)                 {}
+func (g *Game) Render()                           {}
+func (g *Game) Resize(w, h int)                   {}
+func (g *Game) Mouse(x, y float32, action Action) {}
+func (g *Game) Scroll(amount float32)             {}
+func (g *Game) Key(key Key, modifier Modifier, action Action) {
+	if key == Escape {
+		Exit()
+	}
+}
+func (g *Game) Type(char rune) {}
 
 type stats struct {
 	Elapsed, Dt, Fps, Frames, Period float64
@@ -134,4 +149,35 @@ func OpenConfig(c *Config, r Responder) {
 	responder = r
 	Files = NewLoader()
 	run()
+}
+
+func SetBg(color uint32) {
+	r := float32((color>>16)&0xFF) / 255.0
+	g := float32((color>>8)&0xFF) / 255.0
+	b := float32(color&0xFF) / 255.0
+	GL.ClearColor(r, g, b, 1.0)
+}
+
+func Width() float32 {
+	return float32(config.Width)
+}
+
+func Height() float32 {
+	return float32(config.Height)
+}
+
+func Delta() float32 {
+	return float32(timing.Dt)
+}
+
+func Time() float32 {
+	return float32(timing.Start.Sub(timing.Then).Seconds())
+}
+
+func Fps() float32 {
+	return float32(timing.Fps)
+}
+
+func Exit() {
+	exit()
 }
