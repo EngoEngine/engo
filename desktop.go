@@ -20,13 +20,12 @@ import (
 	"runtime"
 )
 
-func init() {
-	runtime.LockOSThread()
-}
-
 var window *glfw.Window
 
 func run() {
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+
 	glfw.SetErrorCallback(func(err glfw.ErrorCode, desc string) {
 		log.Fatal("GLFW error %v: %v\n", err, desc)
 	})

@@ -15,7 +15,7 @@ const size = 10000
 const degToRad = math.Pi / 180
 
 var batchVert = ` 
-attribute vec4 in_Position;
+attribute vec2 in_Position;
 attribute vec4 in_Color;
 attribute vec2 in_TexCoords;
 
