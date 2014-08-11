@@ -1,5 +1,19 @@
 package engi
 
+type Point struct {
+	X, Y float32
+}
+
+func (p *Point) Set(x, y float32) {
+	p.X = x
+	p.Y = y
+}
+
+func (p *Point) SetTo(v float32) {
+	p.X = v
+	p.Y = v
+}
+
 type Sprite struct {
 	Position *Point
 	Scale    *Point
