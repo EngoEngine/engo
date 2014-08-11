@@ -16,7 +16,17 @@ brew tap homebrew/versions; brew install glfw3
 
 ## Linux
 
-On Ubuntu you will need libx11 and libxcb installed. I will add an exact apt-get command soon.
+Ubuntu 14.04:
+
+```bash
+sudo apt-get install build-essential git mesa-common-dev libx11-dev libx11-xcb-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-randr0-dev libxcb-render-util0-dev libxcb-xkb-dev libfreetype6-dev libbz2-dev
+```
+
+Arch:
+
+```bash
+pacman -Sy base-devel git mesa libx11 libxcb xcb-util-wm xcb-util-image libxrandr xcb-util-renderutil libxkbcommon-x11 freetype2 bzip2
+```
 
 ## Windows
 
