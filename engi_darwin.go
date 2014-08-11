@@ -2,19 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// +build !windows,!linux,!netgo,!android
+
 package engi
 
 import (
 	glfw "github.com/go-gl/glfw3"
 	"github.com/go-gl/glow/gl/2.1/gl"
-	"image"
-	"image/draw"
-	_ "image/png"
-	"io"
-	"io/ioutil"
 	"log"
-	"os"
-	"reflect"
 	"runtime"
 )
 
