@@ -19,6 +19,8 @@ import (
 var window *chippy.Window
 
 func program() {
+	defer chippy.Exit()
+
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 
@@ -103,8 +105,6 @@ func program() {
 					responder.Scroll(float32(-1))
 				}
 			case chippy.CloseEvent, chippy.DestroyedEvent:
-				// Not triggering
-				println(1)
 				return
 			default:
 			}
@@ -126,7 +126,6 @@ func run() {
 
 func exit() {
 	window.Destroy()
-	chippy.Exit()
 }
 
 const Escape = Key(keyboard.Escape)
