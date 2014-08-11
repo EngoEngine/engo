@@ -1,4 +1,4 @@
-# [ENGi v0.3.0](http://ajhager.com/engi)
+# [ENGi v0.4.0](http://ajhager.com/engi)
 
 A multi-platform 2D game library for Go.
 
@@ -6,22 +6,31 @@ A multi-platform 2D game library for Go.
 
 Expect bugs and major API changes. Just a proof of concept at the moment.
 
+## OSX
+
+The darwin backend depends on [glfw3](http://github.com/go-gl/glfw). You can install it using homebrew:
+
+```bash
+brew tap homebrew/versions; brew install glfw3
+```
+
+## Linux
+
+On Ubuntu you will need libx11 and libxcb installed. I will add an exact apt-get command soon.
+
+## Windows
+
+As long as you have mingw installed correctly for CGO, everything should work out of the box.
+
+## Web
+
+The web backend depends on [gopherjs](http://github.com/neelance/gopherjs). Check out the [SERVi](http://github.com/ajhager/engi/tree/master/srvi) utility for testing your games in the browser.
+
 ## Install
 
 ```bash
 go get -u github.com/ajhager/engi
 ```
-
-## Desktop
-
-The desktop backend depends on [glfw](http://github.com/go-gl/glfw).
-* Ubuntu: apt-get install glfw3
-* OSX: brew tap homebrew/versions; brew install glfw3
-* Windows: download the [glfw3](http://www.glfw.org/docs/latest/) binaries, then drop the GL directory into C:\MinGW\include (64bit: C:\MinGW\mingw-w64-x86_6\include) and the library files into C:\MinGW\lib (64bit: C:\MinGW\mingw-w64-x86_6\lib). You will then need to install glfw.dll system wide or have it in the directory with your game.
-
-## Web
-
-The web backend depends on [gopherjs](http://github.com/neelance/gopherjs). Check out the [SERVi](http://github.com/ajhager/engi/tree/master/srvi) utility for trying out your games in the browser.
 
 ## Documentation
 
