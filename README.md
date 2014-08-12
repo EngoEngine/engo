@@ -4,7 +4,7 @@ A multi-platform 2D game library for Go.
 
 ## Status
 
-Expect bugs and major API changes. Just a proof of concept at the moment.
+*SUPER ALPHA* Expect bugs and major API changes. Just a proof of concept at the moment.
 
 ## OSX
 
