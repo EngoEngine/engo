@@ -6,7 +6,7 @@ import (
 
 type Game struct {
 	*engi.Game
-	bot   *engi.Region
+	bot   engi.Drawable
 	batch *engi.Batch
 }
 
@@ -17,8 +17,7 @@ func (game *Game) Preload() {
 
 func (game *Game) Setup() {
 	engi.SetBg(0x2d3739)
-	texture := engi.NewTexture(engi.Files.Image("bot"))
-	game.bot = engi.NewRegion(texture, 0, 0, texture.Width(), texture.Height())
+	game.bot = engi.Files.Image("bot")
 }
 
 func (game *Game) Render() {

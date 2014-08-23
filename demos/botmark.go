@@ -28,8 +28,8 @@ func (game *Game) Preload() {
 
 func (game *Game) Setup() {
 	engi.SetBg(0x2d3638)
-	texture := engi.NewTexture(engi.Files.Image("bot"))
-	region = engi.NewRegionFull(texture)
+	texture := engi.Files.Image("bot")
+	region = engi.NewRegion(texture, 0, 0, int(texture.Width()), int(texture.Height()))
 	batch = engi.NewBatch(800, 600)
 }
 
