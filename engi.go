@@ -19,20 +19,6 @@ var (
 	GL        *gl2
 )
 
-type Action int
-type Key int
-type Modifier int
-
-var (
-	MOVE    = Action(0)
-	PRESS   = Action(1)
-	RELEASE = Action(2)
-	SHIFT   = Modifier(0x0001)
-	CONTROL = Modifier(0x0002)
-	ALT     = Modifier(0x0004)
-	SUPER   = Modifier(0x0008)
-)
-
 type Responder interface {
 	Render()
 	Resize(width, height int)
