@@ -22,11 +22,11 @@ func init() {
 var canvas js.Object
 var gl *webgl.Context
 
-func run() {
+func run(title string, width, height int, fullscreen bool) {
 	document := js.Global.Get("document")
 	canvas := document.Call("createElement", "canvas")
 
-	target := document.Call("getElementById", config.Title)
+	target := document.Call("getElementById", title)
 	if target.IsNull() {
 		target = document.Get("body")
 	}
@@ -52,18 +52,18 @@ func run() {
 	view.Get("style").Set("display", "block")
 	winWidth := js.Global.Get("innerWidth").Int()
 	winHeight := js.Global.Get("innerHeight").Int()
-	if config.Fullscreen {
+	if fullscreen {
 		view.Set("width", winWidth)
 		view.Set("height", winHeight)
 	} else {
-		view.Set("width", config.Width)
-		view.Set("height", config.Height)
-		view.Get("style").Set("marginLeft", toPx((winWidth-config.Width)/2))
-		view.Get("style").Set("marginTop", toPx((winHeight-config.Height)/2))
+		view.Set("width", width)
+		view.Set("height", height)
+		view.Get("style").Set("marginLeft", toPx((winWidth-width)/2))
+		view.Get("style").Set("marginTop", toPx((winHeight-height)/2))
 	}
 
-	config.Width = view.Get("width").Int()
-	config.Height = view.Get("height").Int()
+	width = view.Get("width").Int()
+	height = view.Get("height").Int()
 
 	canvas.Call("addEventListener", "mousemove", func(ev js.Object) {
 		rect := canvas.Call("getBoundingClientRect")
@@ -138,9 +138,9 @@ func run() {
 		responder.Key(Key(ev.Get("keyCode").Int()), 0, RELEASE)
 	}, false)
 
-	GL.Viewport(0, 0, config.Width, config.Height)
+	GL.Viewport(0, 0, width, height)
 
-	timing = NewStats(config.LogFPS)
+	timing = NewStats(false)
 	timing.Update()
 
 	responder.Preload()

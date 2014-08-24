@@ -22,21 +22,13 @@ import (
 
 var window *glfw.Window
 
-func run() {
+func run(title string, width, height int, fullscreen bool) {
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 
 	if err := glfw.Init(); err != nil {
 		defer glfw.Terminate()
 	}
-
-	if !config.Resizable {
-		glfw.WindowHint(glfw.Resizable, 0)
-	}
-	glfw.WindowHint(glfw.Samples, config.Fsaa)
-
-	width := config.Width
-	height := config.Height
 
 	monitor, err := glfw.GetPrimaryMonitor()
 	if err != nil {
@@ -47,15 +39,13 @@ func run() {
 		log.Fatal(err)
 	}
 
-	if config.Fullscreen {
+	if fullscreen {
 		width = mode.Width
 		height = mode.Height
 		glfw.WindowHint(glfw.Decorated, 0)
 	} else {
 		monitor = nil
 	}
-
-	title := config.Title
 
 	glfw.WindowHint(glfw.ContextVersionMajor, 2)
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
@@ -67,26 +57,24 @@ func run() {
 	defer window.Destroy()
 	window.MakeContextCurrent()
 
-	config.Width, config.Height = window.GetSize()
+	width, height = window.GetSize()
 
-	if !config.Fullscreen {
+	if !fullscreen {
 		window.SetPosition((mode.Width-width)/2, (mode.Height-height)/2)
 	}
 
-	if config.Vsync {
-		glfw.SwapInterval(1)
-	}
+	glfw.SwapInterval(1)
 
 	if err := gl.Init(); err != nil {
 		log.Fatal(err)
 	}
 	GL = newgl2()
 
-	GL.Viewport(0, 0, config.Width, config.Height)
-
+	GL.Viewport(0, 0, width, height)
 	window.SetSizeCallback(func(window *glfw.Window, w, h int) {
-		config.Width, config.Height = window.GetSize()
-		responder.Resize(w, h)
+		width, height = window.GetSize()
+		GL.Viewport(0, 0, width, height)
+		responder.Resize(width, height)
 	})
 
 	window.SetCursorPositionCallback(func(window *glfw.Window, x, y float64) {
@@ -120,7 +108,7 @@ func run() {
 
 	responder.Preload()
 
-	timing = NewStats(config.LogFPS)
+	timing = NewStats(false)
 	timing.Update()
 
 	Files.Load(func() {})
