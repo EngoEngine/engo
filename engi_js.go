@@ -140,11 +140,7 @@ func run(title string, width, height int, fullscreen bool) {
 
 	GL.Viewport(0, 0, width, height)
 
-	timing = NewStats(false)
-	timing.Update()
-
 	responder.Preload()
-
 	Files.Load(func() {
 		responder.Setup()
 		RequestAnimationFrame(animate)
@@ -153,10 +149,10 @@ func run(title string, width, height int, fullscreen bool) {
 
 func animate(dt float32) {
 	RequestAnimationFrame(animate)
-	responder.Update(float32(timing.Dt))
+	responder.Update(Time.Delta())
 	GL.Clear(GL.COLOR_BUFFER_BIT)
 	responder.Render()
-	timing.Update()
+	Time.Tick()
 }
 
 func exit() {

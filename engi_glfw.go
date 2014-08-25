@@ -107,21 +107,16 @@ func run(title string, width, height int, fullscreen bool) {
 	})
 
 	responder.Preload()
-
-	timing = NewStats(false)
-	timing.Update()
-
 	Files.Load(func() {})
-
 	responder.Setup()
 
 	for !window.ShouldClose() {
-		responder.Update(float32(timing.Dt))
+		responder.Update(Time.Delta())
 		GL.Clear(gl.COLOR_BUFFER_BIT)
 		responder.Render()
 		window.SwapBuffers()
 		glfw.PollEvents()
-		timing.Update()
+		Time.Tick()
 	}
 }
 

@@ -38,7 +38,7 @@ var time float32
 func (game *Game) Update(dt float32) {
 	time += dt
 	if time > 1 {
-		println(int(engi.Fps()))
+		println(int(engi.Time.Fps()))
 		println(num)
 		time = 0
 	}
