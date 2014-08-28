@@ -8,11 +8,15 @@ A multi-platform 2D game library for Go.
 
 ## Desktop
 
-The desktop backend depends on glfw3, but the package includes the source code and links it statically.
+The desktop backend depends on glfw3, but  includes the source code and links it statically.
 
 ## Web
 
-The web backend depends on [gopherjs](http://github.com/neelance/gopherjs). Check out the [SERVi](http://github.com/ajhager/engi/tree/master/srvi) utility for testing your games in the browser.
+The web backend depends on [gopherjs](http://github.com/neelance/gopherjs).
+
+## Android
+
+The android backend is in the works, following the daily updates to the go.mobile repo.
 
 ## Install
 
