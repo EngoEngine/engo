@@ -1,10 +1,14 @@
-# [ENGi v0.5.0](http://ajhager.com/engi)
+# [ENGi v0.6.0](http://ajhager.com/engi)
 
 A multi-platform 2D game library for Go.
 
 ## Status
 
 *SUPER ALPHA* Expect bugs and major API changes. Just a proof of concept at the moment.
+
+		* Better asset management
+		* Clean native interfaces
+		* More consistent and powerful input
 
 ## Desktop
 
