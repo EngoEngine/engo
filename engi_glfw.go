@@ -7,8 +7,6 @@
 package engi
 
 import (
-	"github.com/go-gl/glow/gl/2.1/gl"
-	glfw "github.com/slimsag/glfw3"
 	"image"
 	"image/draw"
 	_ "image/png"
@@ -18,6 +16,9 @@ import (
 	"os"
 	"reflect"
 	"runtime"
+
+	"github.com/go-gl/glow/gl/2.1/gl"
+	glfw "github.com/slimsag/glfw3"
 )
 
 var window *glfw.Window
@@ -118,6 +119,16 @@ func run(title string, width, height int, fullscreen bool) {
 		glfw.PollEvents()
 		Time.Tick()
 	}
+}
+
+func width() float32 {
+	width, _ := window.GetSize()
+	return float32(width)
+}
+
+func height() float32 {
+	_, height := window.GetSize()
+	return float32(height)
 }
 
 func exit() {

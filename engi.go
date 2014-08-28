@@ -6,8 +6,6 @@ package engi
 
 var (
 	responder Responder
-	width     float32
-	height    float32
 	Time      *Clock
 	Files     *Loader
 	GL        *gl2
@@ -28,11 +26,11 @@ func SetBg(color uint32) {
 }
 
 func Width() float32 {
-	return float32(width)
+	return width()
 }
 
 func Height() float32 {
-	return float32(height)
+	return height()
 }
 
 func Exit() {

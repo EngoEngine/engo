@@ -7,12 +7,13 @@
 package engi
 
 import (
-	"github.com/gopherjs/gopherjs/js"
-	"github.com/gopherjs/webgl"
 	"log"
 	"math"
 	"math/rand"
 	"strconv"
+
+	"github.com/gopherjs/gopherjs/js"
+	"github.com/gopherjs/webgl"
 )
 
 func init() {
@@ -24,7 +25,7 @@ var gl *webgl.Context
 
 func run(title string, width, height int, fullscreen bool) {
 	document := js.Global.Get("document")
-	canvas := document.Call("createElement", "canvas")
+	canvas = document.Call("createElement", "canvas")
 
 	target := document.Call("getElementById", title)
 	if target.IsNull() {
@@ -47,23 +48,18 @@ func run(title string, width, height int, fullscreen bool) {
 
 	GL = newgl2()
 
-	view := canvas
-
-	view.Get("style").Set("display", "block")
+	canvas.Get("style").Set("display", "block")
 	winWidth := js.Global.Get("innerWidth").Int()
 	winHeight := js.Global.Get("innerHeight").Int()
 	if fullscreen {
-		view.Set("width", winWidth)
-		view.Set("height", winHeight)
+		canvas.Set("width", winWidth)
+		canvas.Set("height", winHeight)
 	} else {
-		view.Set("width", width)
-		view.Set("height", height)
-		view.Get("style").Set("marginLeft", toPx((winWidth-width)/2))
-		view.Get("style").Set("marginTop", toPx((winHeight-height)/2))
+		canvas.Set("width", width)
+		canvas.Set("height", height)
+		canvas.Get("style").Set("marginLeft", toPx((winWidth-width)/2))
+		canvas.Get("style").Set("marginTop", toPx((winHeight-height)/2))
 	}
-
-	width = view.Get("width").Int()
-	height = view.Get("height").Int()
 
 	canvas.Call("addEventListener", "mousemove", func(ev js.Object) {
 		rect := canvas.Call("getBoundingClientRect")
@@ -145,6 +141,14 @@ func run(title string, width, height int, fullscreen bool) {
 		responder.Setup()
 		RequestAnimationFrame(animate)
 	})
+}
+
+func width() float32 {
+	return float32(canvas.Get("width").Int())
+}
+
+func height() float32 {
+	return float32(canvas.Get("height").Int())
 }
 
 func animate(dt float32) {
