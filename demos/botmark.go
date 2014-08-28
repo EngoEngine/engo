@@ -28,8 +28,8 @@ func (game *Game) Preload() {
 
 func (game *Game) Setup() {
 	engi.SetBg(0x2d3638)
-	texture := engi.NewTexture(engi.Files.Image("bot"))
-	region = engi.NewRegionFull(texture)
+	texture := engi.Files.Image("bot")
+	region = engi.NewRegion(texture, 0, 0, int(texture.Width()), int(texture.Height()))
 	batch = engi.NewBatch(800, 600)
 }
 
@@ -38,7 +38,7 @@ var time float32
 func (game *Game) Update(dt float32) {
 	time += dt
 	if time > 1 {
-		println(int(engi.Fps()))
+		println(int(engi.Time.Fps()))
 		println(num)
 		time = 0
 	}

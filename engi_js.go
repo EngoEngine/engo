@@ -7,12 +7,13 @@
 package engi
 
 import (
-	"github.com/gopherjs/gopherjs/js"
-	"github.com/gopherjs/webgl"
 	"log"
 	"math"
 	"math/rand"
 	"strconv"
+
+	"github.com/gopherjs/gopherjs/js"
+	"github.com/gopherjs/webgl"
 )
 
 func init() {
@@ -22,11 +23,11 @@ func init() {
 var canvas js.Object
 var gl *webgl.Context
 
-func run() {
+func run(title string, width, height int, fullscreen bool) {
 	document := js.Global.Get("document")
-	canvas := document.Call("createElement", "canvas")
+	canvas = document.Call("createElement", "canvas")
 
-	target := document.Call("getElementById", config.Title)
+	target := document.Call("getElementById", title)
 	if target.IsNull() {
 		target = document.Get("body")
 	}
@@ -47,23 +48,18 @@ func run() {
 
 	GL = newgl2()
 
-	view := canvas
-
-	view.Get("style").Set("display", "block")
+	canvas.Get("style").Set("display", "block")
 	winWidth := js.Global.Get("innerWidth").Int()
 	winHeight := js.Global.Get("innerHeight").Int()
-	if config.Fullscreen {
-		view.Set("width", winWidth)
-		view.Set("height", winHeight)
+	if fullscreen {
+		canvas.Set("width", winWidth)
+		canvas.Set("height", winHeight)
 	} else {
-		view.Set("width", config.Width)
-		view.Set("height", config.Height)
-		view.Get("style").Set("marginLeft", toPx((winWidth-config.Width)/2))
-		view.Get("style").Set("marginTop", toPx((winHeight-config.Height)/2))
+		canvas.Set("width", width)
+		canvas.Set("height", height)
+		canvas.Get("style").Set("marginLeft", toPx((winWidth-width)/2))
+		canvas.Get("style").Set("marginTop", toPx((winHeight-height)/2))
 	}
-
-	config.Width = view.Get("width").Int()
-	config.Height = view.Get("height").Int()
 
 	canvas.Call("addEventListener", "mousemove", func(ev js.Object) {
 		rect := canvas.Call("getBoundingClientRect")
@@ -138,25 +134,29 @@ func run() {
 		responder.Key(Key(ev.Get("keyCode").Int()), 0, RELEASE)
 	}, false)
 
-	GL.Viewport(0, 0, config.Width, config.Height)
-
-	timing = NewStats(config.LogFPS)
-	timing.Update()
+	GL.Viewport(0, 0, width, height)
 
 	responder.Preload()
-
 	Files.Load(func() {
 		responder.Setup()
 		RequestAnimationFrame(animate)
 	})
 }
 
+func width() float32 {
+	return float32(canvas.Get("width").Int())
+}
+
+func height() float32 {
+	return float32(canvas.Get("height").Int())
+}
+
 func animate(dt float32) {
 	RequestAnimationFrame(animate)
-	responder.Update(float32(timing.Dt))
+	responder.Update(Time.Delta())
 	GL.Clear(GL.COLOR_BUFFER_BIT)
 	responder.Render()
-	timing.Update()
+	Time.Tick()
 }
 
 func exit() {
@@ -483,108 +483,3 @@ func (i *ImageObject) Width() int {
 func (i *ImageObject) Height() int {
 	return i.data.Get("height").Int()
 }
-
-const (
-	Dash         = Key(189)
-	Apostrophe   = Key(222)
-	Semicolon    = Key(186)
-	Equals       = Key(187)
-	Comma        = Key(188)
-	Period       = Key(190)
-	Slash        = Key(191)
-	Backslash    = Key(220)
-	Backspace    = Key(8)
-	Tab          = Key(9)
-	CapsLock     = Key(20)
-	Space        = Key(32)
-	Enter        = Key(13)
-	Escape       = Key(27)
-	Insert       = Key(45)
-	PrintScreen  = Key(42)
-	Delete       = Key(46)
-	PageUp       = Key(33)
-	PageDown     = Key(34)
-	Home         = Key(36)
-	End          = Key(35)
-	Pause        = Key(19)
-	ScrollLock   = Key(145)
-	ArrowLeft    = Key(37)
-	ArrowRight   = Key(39)
-	ArrowDown    = Key(40)
-	ArrowUp      = Key(38)
-	LeftBracket  = Key(219)
-	LeftShift    = Key(16)
-	LeftControl  = Key(17)
-	LeftSuper    = Key(73)
-	LeftAlt      = Key(18)
-	RightBracket = Key(221)
-	RightShift   = Key(16)
-	RightControl = Key(17)
-	RightSuper   = Key(73)
-	RightAlt     = Key(18)
-	Zero         = Key(48)
-	One          = Key(49)
-	Two          = Key(50)
-	Three        = Key(51)
-	Four         = Key(52)
-	Five         = Key(53)
-	Six          = Key(54)
-	Seven        = Key(55)
-	Eight        = Key(56)
-	Nine         = Key(57)
-	F1           = Key(112)
-	F2           = Key(113)
-	F3           = Key(114)
-	F4           = Key(115)
-	F5           = Key(116)
-	F6           = Key(117)
-	F7           = Key(118)
-	F8           = Key(119)
-	F9           = Key(120)
-	F10          = Key(121)
-	F11          = Key(122)
-	F12          = Key(123)
-	A            = Key(65)
-	B            = Key(66)
-	C            = Key(67)
-	D            = Key(68)
-	E            = Key(69)
-	F            = Key(70)
-	G            = Key(71)
-	H            = Key(72)
-	I            = Key(73)
-	J            = Key(74)
-	K            = Key(75)
-	L            = Key(76)
-	M            = Key(77)
-	N            = Key(78)
-	O            = Key(79)
-	P            = Key(80)
-	Q            = Key(81)
-	R            = Key(82)
-	S            = Key(83)
-	T            = Key(84)
-	U            = Key(85)
-	V            = Key(86)
-	W            = Key(87)
-	X            = Key(88)
-	Y            = Key(89)
-	Z            = Key(90)
-	NumLock      = Key(144)
-	NumMultiply  = Key(106)
-	NumDivide    = Key(111)
-	NumAdd       = Key(107)
-	NumSubtract  = Key(109)
-	NumZero      = Key(96)
-	NumOne       = Key(97)
-	NumTwo       = Key(98)
-	NumThree     = Key(99)
-	NumFour      = Key(100)
-	NumFive      = Key(101)
-	NumSix       = Key(102)
-	NumSeven     = Key(103)
-	NumEight     = Key(104)
-	NumNine      = Key(105)
-	NumDecimal   = Key(110)
-	NumEnter     = Key(13)
-)

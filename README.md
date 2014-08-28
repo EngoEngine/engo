@@ -1,4 +1,4 @@
-# [ENGi v0.4.0](http://ajhager.com/engi)
+# [ENGi v0.5.0](http://ajhager.com/engi)
 
 A multi-platform 2D game library for Go.
 
@@ -6,35 +6,17 @@ A multi-platform 2D game library for Go.
 
 *SUPER ALPHA* Expect bugs and major API changes. Just a proof of concept at the moment.
 
-## OSX
+## Desktop
 
-The darwin backend depends on [glfw3](http://github.com/go-gl/glfw). You can install it using homebrew:
-
-```bash
-brew tap homebrew/versions; brew install glfw3
-```
-
-## Linux
-
-Ubuntu 14.04:
-
-```bash
-sudo apt-get install build-essential git mesa-common-dev libx11-dev libx11-xcb-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-randr0-dev libxcb-render-util0-dev libxcb-xkb-dev libfreetype6-dev libbz2-dev
-```
-
-Arch:
-
-```bash
-pacman -Sy base-devel git mesa libx11 libxcb xcb-util-wm xcb-util-image libxrandr xcb-util-renderutil libxkbcommon-x11 freetype2 bzip2
-```
-
-## Windows
-
-As long as you have mingw installed correctly for CGO, everything should work out of the box.
+The desktop backend depends on glfw3, but  includes the source code and links it statically.
 
 ## Web
 
-The web backend depends on [gopherjs](http://github.com/neelance/gopherjs). Check out the [SERVi](http://github.com/ajhager/engi/tree/master/srvi) utility for testing your games in the browser.
+The web backend depends on [gopherjs](http://github.com/neelance/gopherjs).
+
+## Android
+
+The android backend is in the works, following the daily updates to the go.mobile repo.
 
 ## Install
 
