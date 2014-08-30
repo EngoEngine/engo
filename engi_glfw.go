@@ -17,8 +17,8 @@ import (
 	"reflect"
 	"runtime"
 
+	glfw "azul3d.org/native/glfw.v3.1"
 	"github.com/go-gl/glow/gl/2.1/gl"
-	glfw "github.com/slimsag/glfw3"
 )
 
 var window *glfw.Window
