@@ -48,7 +48,7 @@ func run(title string, width, height int, fullscreen bool) {
 
 	GL = newgl2()
 
-	js.Global.Get("onunload").Set(func() {
+	js.Global.Set("onunload", func() {
 		responder.Close()
 	})
 
