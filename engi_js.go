@@ -48,6 +48,10 @@ func run(title string, width, height int, fullscreen bool) {
 
 	GL = newgl2()
 
+	js.Global.Get("onunload").Set(func() {
+		responder.Close()
+	})
+
 	canvas.Get("style").Set("display", "block")
 	winWidth := js.Global.Get("innerWidth").Int()
 	winHeight := js.Global.Get("innerHeight").Int()
@@ -160,6 +164,7 @@ func animate(dt float32) {
 }
 
 func exit() {
+	responder.Close()
 }
 
 func toPx(n int) string {
