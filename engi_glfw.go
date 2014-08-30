@@ -119,6 +119,7 @@ func run(title string, width, height int, fullscreen bool) {
 		glfw.PollEvents()
 		Time.Tick()
 	}
+	responder.Close()
 }
 
 func width() float32 {

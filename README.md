@@ -6,9 +6,13 @@ A multi-platform 2D game library for Go.
 
 *SUPER ALPHA* Expect bugs and major API changes. Just a proof of concept at the moment.
 
+		* Support for custom mappings on fonts
 		* Better asset management
+		* Add support for built-in colors and images
 		* Clean native interfaces
 		* More consistent and powerful input
+		* Support multiple windows / games
+		* Better windowed / borderless windowed / fullscreen support
 
 ## Desktop
 

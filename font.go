@@ -31,6 +31,18 @@ func NewGridFont(texture *Texture, cellWidth, cellHeight int) *Font {
 	return &Font{glyphs}
 }
 
+func (f *Font) Remap(mapping string) {
+	glyphs := make(map[rune]*glyph)
+
+	i := 0
+	for _, v := range mapping {
+		glyphs[v] = f.glyphs[rune(i)]
+		i++
+	}
+
+	f.glyphs = glyphs
+}
+
 func (f *Font) Put(batch *Batch, r rune, x, y float32, color uint32) {
 	if g, ok := f.glyphs[r]; ok {
 		batch.Draw(g.region, x+g.xoffset, y+g.yoffset, 0, 0, 1, 1, 0, color, 1)

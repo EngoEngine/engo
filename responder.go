@@ -9,6 +9,7 @@ type Responder interface {
 	Resize(width, height int)
 	Preload()
 	Setup()
+	Close()
 	Update(dt float32)
 	Mouse(x, y float32, action Action)
 	Scroll(amount float32)
@@ -20,6 +21,7 @@ type Game struct{}
 
 func (g *Game) Preload()                          {}
 func (g *Game) Setup()                            {}
+func (g *Game) Close()                            {}
 func (g *Game) Update(dt float32)                 {}
 func (g *Game) Render()                           {}
 func (g *Game) Resize(w, h int)                   {}
