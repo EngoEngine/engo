@@ -12,8 +12,8 @@ import (
 	"math/rand"
 	"strconv"
 
+	"github.com/ajhager/webgl"
 	"github.com/gopherjs/gopherjs/js"
-	"github.com/gopherjs/webgl"
 )
 
 func init() {
@@ -45,8 +45,6 @@ func run(title string, width, height int, fullscreen bool) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	GL = newgl2()
 
 	js.Global.Set("onunload", func() {
 		responder.Close()
@@ -138,7 +136,7 @@ func run(title string, width, height int, fullscreen bool) {
 		responder.Key(Key(ev.Get("keyCode").Int()), 0, RELEASE)
 	}, false)
 
-	GL.Viewport(0, 0, width, height)
+	gl.Viewport(0, 0, width, height)
 
 	responder.Preload()
 	Files.Load(func() {
@@ -158,7 +156,7 @@ func height() float32 {
 func animate(dt float32) {
 	RequestAnimationFrame(animate)
 	responder.Update(Time.Delta())
-	GL.Clear(GL.COLOR_BUFFER_BIT)
+	gl.Clear(gl.COLOR_BUFFER_BIT)
 	responder.Render()
 	Time.Tick()
 }
@@ -209,227 +207,6 @@ func RequestAnimationFrame(callback func(float32)) int {
 
 func CancelAnimationFrame(id int) {
 	js.Global.Call("cancelAnimationFrame")
-}
-
-type TextureObject struct{ js.Object }
-type BufferObject struct{ js.Object }
-type FramebufferObject struct{ js.Object }
-type ProgramObject struct{ js.Object }
-type UniformObject struct{ js.Object }
-type ShaderObject struct{ js.Object }
-
-func newgl2() *gl2 {
-	return &gl2{
-		gl.ELEMENT_ARRAY_BUFFER,
-		gl.ARRAY_BUFFER,
-		gl.STATIC_DRAW,
-		gl.DYNAMIC_DRAW,
-		gl.SRC_ALPHA,
-		gl.ONE_MINUS_SRC_ALPHA,
-		gl.BLEND,
-		gl.TEXTURE_2D,
-		gl.TEXTURE0,
-		gl.UNSIGNED_SHORT,
-		gl.UNSIGNED_BYTE,
-		gl.FLOAT,
-		gl.TRIANGLES,
-		gl.LINEAR,
-		gl.CLAMP_TO_EDGE,
-		gl.FRAMEBUFFER,
-		gl.COLOR_ATTACHMENT0,
-		gl.FRAMEBUFFER_COMPLETE,
-		gl.COLOR_BUFFER_BIT,
-		gl.VERTEX_SHADER,
-		gl.FRAGMENT_SHADER,
-		gl.TEXTURE_WRAP_S,
-		gl.TEXTURE_WRAP_T,
-		gl.TEXTURE_MIN_FILTER,
-		gl.TEXTURE_MAG_FILTER,
-		gl.LINEAR_MIPMAP_LINEAR,
-		gl.NEAREST,
-		gl.RGBA,
-	}
-}
-
-type gl2 struct {
-	ELEMENT_ARRAY_BUFFER int
-	ARRAY_BUFFER         int
-	STATIC_DRAW          int
-	DYNAMIC_DRAW         int
-	SRC_ALPHA            int
-	ONE_MINUS_SRC_ALPHA  int
-	BLEND                int
-	TEXTURE_2D           int
-	TEXTURE0             int
-	UNSIGNED_SHORT       int
-	UNSIGNED_BYTE        int
-	FLOAT                int
-	TRIANGLES            int
-	LINEAR               int
-	CLAMP_TO_EDGE        int
-	FRAMEBUFFER          int
-	COLOR_ATTACHMENT0    int
-	FRAMEBUFFER_COMPLETE int
-	COLOR_BUFFER_BIT     int
-	VERTEX_SHADER        int
-	FRAGMENT_SHADER      int
-	TEXTURE_WRAP_S       int
-	TEXTURE_WRAP_T       int
-	TEXTURE_MIN_FILTER   int
-	TEXTURE_MAG_FILTER   int
-	LINEAR_MIPMAP_LINEAR int
-	NEAREST              int
-	RGBA                 int
-}
-
-func (z *gl2) BindTexture(target int, texture *TextureObject) {
-	gl.BindTexture(target, texture.Object)
-}
-
-func (z *gl2) DeleteTexture(tex *TextureObject) {
-	gl.DeleteTexture(tex)
-}
-
-func (z *gl2) TexParameteri(target int, param int, value int) {
-	gl.TexParameteri(target, param, value)
-}
-
-func (z *gl2) UseProgram(program *ProgramObject) {
-	if program != nil {
-		gl.UseProgram(program.Object)
-	}
-}
-
-func (z *gl2) GetUniformLocation(program *ProgramObject, uniform string) *UniformObject {
-	return &UniformObject{gl.GetUniformLocation(program.Object, uniform)}
-}
-
-func (z *gl2) GetAttribLocation(program *ProgramObject, attrib string) int {
-	return gl.GetAttribLocation(program.Object, attrib)
-}
-
-func (z *gl2) Disable(flag int) {
-	gl.Disable(flag)
-}
-
-func (z *gl2) BindBuffer(typ int, buf *BufferObject) {
-	if buf != nil {
-		gl.BindBuffer(typ, buf.Object)
-	}
-}
-
-func (z *gl2) Enable(flag int) {
-	gl.Enable(flag)
-}
-
-func (z *gl2) BlendFunc(src, dst int) {
-	gl.BlendFunc(src, dst)
-}
-
-func (z *gl2) ActiveTexture(flag int) {
-	gl.ActiveTexture(flag)
-}
-
-func (z *gl2) Uniform2f(uf *UniformObject, x, y float32) {
-	gl.Uniform2f(uf.Object, x, y)
-}
-
-func (z *gl2) BufferSubData(flag, offset, size int, data interface{}) {
-	gl.BufferSubData(flag, offset, data)
-}
-
-func (z *gl2) EnableVertexAttribArray(pos int) {
-	gl.EnableVertexAttribArray(pos)
-}
-
-func (z *gl2) VertexAttribPointer(pos, size, typ int, n bool, stride, offset int) {
-	gl.VertexAttribPointer(pos, size, typ, n, stride, offset)
-}
-
-func (z *gl2) DrawElements(typ, size, flag, offset int) {
-	gl.DrawElements(typ, size, flag, offset)
-}
-
-func (z *gl2) CreateBuffer() *BufferObject {
-	return &BufferObject{gl.CreateBuffer()}
-}
-
-func (z *gl2) BufferData(typ int, data interface{}, flag int) {
-	gl.BufferData(typ, data, flag)
-}
-
-func (z *gl2) Viewport(x, y, width, height int) {
-	gl.Viewport(x, y, width, height)
-}
-
-func (z *gl2) BindFramebuffer(typ int, buf *FramebufferObject) {
-	gl.BindFramebuffer(typ, buf)
-}
-
-func (z *gl2) ClearColor(r, g, b, a float32) {
-	gl.ClearColor(r, g, b, a)
-}
-
-func (z *gl2) Clear(flags int) {
-	gl.Clear(flags)
-}
-
-func (z *gl2) CreateFramebuffer() *FramebufferObject {
-	return &FramebufferObject{gl.CreateFramebuffer()}
-}
-
-func (z *gl2) FramebufferTexture2D(target, attachment, textarget int, texture *TextureObject, level int) {
-	gl.FramebufferTexture2D(target, attachment, textarget, texture, level)
-}
-
-func (z *gl2) CheckFramebufferStatus(target int) int {
-	return gl.CheckFramebufferStatus(target)
-}
-
-func (z *gl2) DeleteFramebuffer(buf *FramebufferObject) {
-	gl.DeleteFramebuffer(buf)
-}
-
-func (z *gl2) CreateShader(flag int) *ShaderObject {
-	return &ShaderObject{gl.CreateShader(flag)}
-}
-
-func (z *gl2) ShaderSource(shader *ShaderObject, src string) {
-	gl.ShaderSource(shader.Object, src)
-}
-
-func (z *gl2) CompileShader(shader *ShaderObject) {
-	gl.CompileShader(shader.Object)
-}
-
-func (z *gl2) DeleteShader(shader *ShaderObject) {
-	gl.DeleteShader(shader.Object)
-}
-
-func (z *gl2) AttachShader(program *ProgramObject, shader *ShaderObject) {
-	gl.AttachShader(program.Object, shader.Object)
-}
-
-func (z *gl2) CreateProgram() *ProgramObject {
-	return &ProgramObject{gl.CreateProgram()}
-}
-
-func (z *gl2) LinkProgram(program *ProgramObject) {
-	gl.LinkProgram(program.Object)
-}
-
-func (z *gl2) CreateTexture() *TextureObject {
-	return &TextureObject{gl.CreateTexture()}
-}
-
-func (z *gl2) TexImage2D(target, level, internalFormat, width, height, border, format, kind int, data interface{}) {
-	var pix js.Object
-	if data == nil {
-		pix = nil
-	} else {
-		pix = data.(js.Object)
-	}
-	gl.TexImage2D(target, level, internalFormat, format, kind, pix)
 }
 
 func loadImage(r Resource) (Image, error) {

@@ -7,6 +7,8 @@ package engi
 import (
 	"math"
 	"path"
+
+	"github.com/ajhager/webgl"
 )
 
 type Resource struct {
@@ -66,21 +68,21 @@ type Image interface {
 	Height() int
 }
 
-func LoadShader(vertSrc, fragSrc string) *ProgramObject {
-	vertShader := GL.CreateShader(GL.VERTEX_SHADER)
-	GL.ShaderSource(vertShader, vertSrc)
-	GL.CompileShader(vertShader)
-	defer GL.DeleteShader(vertShader)
+func LoadShader(vertSrc, fragSrc string) *webgl.Program {
+	vertShader := gl.CreateShader(gl.VERTEX_SHADER)
+	gl.ShaderSource(vertShader, vertSrc)
+	gl.CompileShader(vertShader)
+	defer gl.DeleteShader(vertShader)
 
-	fragShader := GL.CreateShader(GL.FRAGMENT_SHADER)
-	GL.ShaderSource(fragShader, fragSrc)
-	GL.CompileShader(fragShader)
-	defer GL.DeleteShader(fragShader)
+	fragShader := gl.CreateShader(gl.FRAGMENT_SHADER)
+	gl.ShaderSource(fragShader, fragSrc)
+	gl.CompileShader(fragShader)
+	defer gl.DeleteShader(fragShader)
 
-	program := GL.CreateProgram()
-	GL.AttachShader(program, vertShader)
-	GL.AttachShader(program, fragShader)
-	GL.LinkProgram(program)
+	program := gl.CreateProgram()
+	gl.AttachShader(program, vertShader)
+	gl.AttachShader(program, fragShader)
+	gl.LinkProgram(program)
 
 	return program
 }
@@ -114,7 +116,7 @@ func (r *Region) Height() float32 {
 	return float32(r.height)
 }
 
-func (r *Region) Texture() *TextureObject {
+func (r *Region) Texture() *webgl.Texture {
 	return r.texture.id
 }
 
@@ -123,26 +125,26 @@ func (r *Region) View() (float32, float32, float32, float32) {
 }
 
 type Texture struct {
-	id     *TextureObject
+	id     *webgl.Texture
 	width  int
 	height int
 }
 
 func NewTexture(img Image) *Texture {
-	id := GL.CreateTexture()
+	id := gl.CreateTexture()
 
-	GL.BindTexture(GL.TEXTURE_2D, id)
+	gl.BindTexture(gl.TEXTURE_2D, id)
 
-	GL.TexParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE)
-	GL.TexParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE)
-	GL.TexParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR)
-	GL.TexParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
 	if img.Data() == nil {
 		panic("Texture image data is nil.")
 	}
 
-	GL.TexImage2D(GL.TEXTURE_2D, 0, GL.RGBA, img.Width(), img.Height(), 0, GL.RGBA, GL.UNSIGNED_BYTE, img.Data())
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img.Data())
 
 	return &Texture{id, img.Width(), img.Height()}
 }
@@ -157,7 +159,7 @@ func (t *Texture) Height() float32 {
 	return float32(t.height)
 }
 
-func (t *Texture) Texture() *TextureObject {
+func (t *Texture) Texture() *webgl.Texture {
 	return t.id
 }
 
