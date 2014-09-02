@@ -16,11 +16,11 @@ A multi-platform 2D game library for Go.
 
 ## Desktop
 
-The desktop backend depends on glfw3, but  includes the source code and links it statically.
+The desktop backend depends on glfw3, but includes the source code and links it statically. If you are having linker errors on Windows, I suggest using [TDM-GCC](http://tdm-gcc.tdragon.net/download) instead of MinGW as your cgo compiler.
 
 ## Web
 
-The web backend depends on [gopherjs](http://github.com/neelance/gopherjs).
+The web backend depends on [gopherjs](http://github.com/neelance/gopherjs). ```gopherjs build``` is very much like ```go build```, then you can embed the resulting javascript file into your html document.
 
 ## Android
 
