@@ -4,10 +4,13 @@
 
 package engi
 
+import "github.com/ajhager/webgl"
+
 var (
 	responder Responder
 	Time      *Clock
 	Files     *Loader
+	gl        *webgl.Context
 )
 
 func Open(title string, width, height int, fullscreen bool, r Responder) {

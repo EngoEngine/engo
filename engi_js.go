@@ -21,7 +21,6 @@ func init() {
 }
 
 var canvas js.Object
-var gl *webgl.Context
 
 func run(title string, width, height int, fullscreen bool) {
 	document := js.Global.Get("document")
