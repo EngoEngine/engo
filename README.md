@@ -6,7 +6,6 @@ A multi-platform 2D game library for Go.
 
 *SUPER ALPHA* Expect bugs and major API changes. Just a proof of concept at the moment.
 
-		* Add a native interface to webgl repo.
 		* Clean native interfaces
 		* Better asset management
 		* More consistent and powerful input
