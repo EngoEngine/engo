@@ -27,16 +27,25 @@ func (w *World) Systems() []*System {
 }
 
 type Entity struct {
-	id string
+	id         string
+	components []Component
 }
 
-type Component struct {
+func (e *Entity) AddComponent(component Component) {
+	e.components = append(e.components, component)
+}
+
+type Component interface {
+	Name() string
+}
+
+type PositionComponent struct {
+	X, Y int
+}
+
+func (pc PositionComponent) Name() string {
+	return "Position"
 }
 
 type System struct {
-}
-
-type Message interface {
-	Name() string
-	Data() interface{}
 }

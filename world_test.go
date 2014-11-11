@@ -1,7 +1,6 @@
 package engi
 
 import (
-	"log"
 	"testing"
 )
 
@@ -12,6 +11,17 @@ func TestAddEntity(t *testing.T) {
 	entityTwo := Entity{}
 	world.AddEntity(&entityTwo)
 	if len(world.Entities()) == 0 {
+		t.Fail()
+	}
+}
+
+func TestAddComponent(t *testing.T) {
+	world := World{}
+	entity := Entity{}
+	world.AddEntity(&entity)
+	component := PositionComponent{0, 10}
+	entity.AddComponent(component)
+	if len(entity.components) == 0 {
 		t.Fail()
 	}
 }
