@@ -6,7 +6,7 @@ import (
 
 type World struct {
 	entities []*Entity
-	systems  []*System
+	systems  []System
 }
 
 func (w *World) AddEntity(entity *Entity) {
@@ -14,15 +14,15 @@ func (w *World) AddEntity(entity *Entity) {
 	w.entities = append(w.entities, entity)
 }
 
-func (w *World) AddSystem() {
-
+func (w *World) AddSystem(system System) {
+	w.systems = append(w.systems, system)
 }
 
 func (w *World) Entities() []*Entity {
 	return w.entities
 }
 
-func (w *World) Systems() []*System {
+func (w *World) Systems() []System {
 	return w.systems
 }
 
@@ -47,5 +47,19 @@ func (pc PositionComponent) Name() string {
 	return "Position"
 }
 
-type System struct {
+type System interface {
+	Update()
+	Name() string
+	Priority() int
+}
+
+type TestSystem struct{}
+
+func (ts TestSystem) Update() {}
+
+func (ts TestSystem) Name() string {
+	return "TestSystem"
+}
+func (ts TestSystem) Priority() int {
+	return 0
 }
