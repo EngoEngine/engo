@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/ajhager/engi"
+	"github.com/paked/engi"
 )
 
 type Game struct {
@@ -24,10 +24,25 @@ func (game *Game) Setup() {
 }
 
 func (game *Game) Render() {
+
+}
+
+type RenderSystem struct {
+}
+
+func (rs RenderSystem) Update(dt float32) {
 	game.batch.Begin()
 	game.font.Print(game.batch, "ENGI", 475, 200, 0xffffff)
 	game.batch.Draw(game.bot, 512, 320, 0.5, 0.5, 10, 10, 0, 0xffffff, 1)
 	game.batch.End()
+}
+
+func (rs RenderSystem) Name() string {
+	return "RenderSytem"
+}
+
+func (rs RenderSystem) Priority() int {
+	return 1
 }
 
 func main() {

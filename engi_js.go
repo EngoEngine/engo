@@ -158,6 +158,15 @@ func animate(dt float32) {
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 	responder.Render()
 	Time.Tick()
+
+	/*
+		responder.Update(Time.Delta())
+		gl.Clear(gl.COLOR_BUFFER_BIT)
+		responder.Render()
+		window.SwapBuffers()
+		glfw.PollEvents()
+		Time.Tick()
+	*/
 }
 
 func exit() {

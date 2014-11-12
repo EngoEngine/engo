@@ -48,18 +48,26 @@ func (pc PositionComponent) Name() string {
 }
 
 type System interface {
-	Update()
+	Update(dt float32)
 	Name() string
 	Priority() int
 }
 
 type TestSystem struct{}
 
-func (ts TestSystem) Update() {}
+func (ts TestSystem) Update(dt float32) {}
 
 func (ts TestSystem) Name() string {
 	return "TestSystem"
 }
 func (ts TestSystem) Priority() int {
 	return 0
+}
+
+/* Testing */
+
+func upd() {
+	responder.Update(Time.Delta())
+	gl.Clear(gl.COLOR_BUFFER_BIT)
+	responder.Render()
 }

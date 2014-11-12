@@ -108,9 +108,9 @@ func run(title string, width, height int, fullscreen bool) {
 	responder.Setup()
 
 	for !window.ShouldClose() {
-		responder.Update(Time.Delta())
-		gl.Clear(gl.COLOR_BUFFER_BIT)
-		responder.Render()
+
+		upd()
+
 		window.SwapBuffers()
 		glfw.PollEvents()
 		Time.Tick()
