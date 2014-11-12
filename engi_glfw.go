@@ -66,6 +66,7 @@ func run(title string, width, height int, fullscreen bool) {
 	glfw.SwapInterval(1)
 
 	gl = webgl.NewContext()
+	Gl = gl
 
 	gl.Viewport(0, 0, width, height)
 	window.SetSizeCallback(func(window *glfw.Window, w, h int) {
@@ -108,8 +109,9 @@ func run(title string, width, height int, fullscreen bool) {
 	responder.Setup()
 
 	for !window.ShouldClose() {
-
-		upd()
+		// TheWorld.Update(Time.Delta())
+		responder.Update(Time.Delta())
+		// upd()
 
 		window.SwapBuffers()
 		glfw.PollEvents()

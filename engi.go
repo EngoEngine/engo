@@ -11,6 +11,8 @@ var (
 	Time      *Clock
 	Files     *Loader
 	gl        *webgl.Context
+	TheWorld  World
+	Gl        = gl
 )
 
 func Open(title string, width, height int, fullscreen bool, r Responder) {

@@ -5,6 +5,7 @@ import (
 )
 
 type World struct {
+	Game
 	entities []*Entity
 	systems  []System
 }
@@ -24,6 +25,18 @@ func (w *World) Entities() []*Entity {
 
 func (w *World) Systems() []System {
 	return w.systems
+}
+
+func (w *World) Update(dt float32) {
+	for _, system := range w.Systems() {
+		system.Update(dt)
+	}
+
+	for i, entity := range w.Entities() {
+		if entity.id == "" {
+			w.entities[i] = nil
+		}
+	}
 }
 
 type Entity struct {
@@ -62,12 +75,4 @@ func (ts TestSystem) Name() string {
 }
 func (ts TestSystem) Priority() int {
 	return 0
-}
-
-/* Testing */
-
-func upd() {
-	responder.Update(Time.Delta())
-	gl.Clear(gl.COLOR_BUFFER_BIT)
-	responder.Render()
 }
