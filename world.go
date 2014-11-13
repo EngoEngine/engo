@@ -28,13 +28,11 @@ func (w *World) Systems() []System {
 }
 
 func (w *World) Update(dt float32) {
-	for _, system := range w.Systems() {
-		system.Update(dt)
-	}
-
-	for i, entity := range w.Entities() {
-		if entity.id == "" {
-			w.entities[i] = nil
+	for _, entity := range w.Entities() {
+		for _, system := range w.Systems() {
+			system.Pre()
+			system.Update(entity, dt)
+			system.Post()
 		}
 	}
 }
@@ -46,6 +44,10 @@ type Entity struct {
 
 func (e *Entity) AddComponent(component Component) {
 	e.components = append(e.components, component)
+}
+
+func (e *Entity) ID() string {
+	return e.id
 }
 
 type Component interface {
@@ -61,9 +63,11 @@ func (pc PositionComponent) Name() string {
 }
 
 type System interface {
-	Update(dt float32)
+	Update(entity *Entity, dt float32)
 	Name() string
 	Priority() int
+	Pre()
+	Post()
 }
 
 type TestSystem struct{}
