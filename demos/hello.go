@@ -61,10 +61,11 @@ type RenderComponent struct {
 
 func main() {
 	World = &GameWorld{}
-	entity := engi.Entity{}
-	World.AddEntity(&entity)
+	entity := engi.NewEntity([]string{"RenderSystem", "TestSystem"})
+	World.AddEntity(entity)
 
 	World.AddSystem(RenderSystem{})
+	World.AddSystem(engi.TestSystem{})
 
 	engi.Open("Hello", 1024, 640, false, World)
 }

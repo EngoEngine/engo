@@ -134,7 +134,7 @@ func run(title string, width, height int, fullscreen bool) {
 	js.Global.Call("addEventListener", "keyup", func(ev js.Object) {
 		responder.Key(Key(ev.Get("keyCode").Int()), 0, RELEASE)
 	}, false)
-
+	Gl = gl
 	gl.Viewport(0, 0, width, height)
 
 	responder.Preload()
@@ -155,8 +155,8 @@ func height() float32 {
 func animate(dt float32) {
 	RequestAnimationFrame(animate)
 	responder.Update(Time.Delta())
-	gl.Clear(gl.COLOR_BUFFER_BIT)
-	responder.Render()
+	// gl.Clear(gl.COLOR_BUFFER_BIT)
+	// responder.Render()
 	Time.Tick()
 
 	/*

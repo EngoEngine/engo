@@ -7,7 +7,7 @@ import (
 type World struct {
 	Game
 	entities []*Entity
-	systems  []System
+	systems  []Systemer
 }
 
 func (w *World) AddEntity(entity *Entity) {
@@ -15,7 +15,7 @@ func (w *World) AddEntity(entity *Entity) {
 	w.entities = append(w.entities, entity)
 }
 
-func (w *World) AddSystem(system System) {
+func (w *World) AddSystem(system Systemer) {
 	w.systems = append(w.systems, system)
 }
 
@@ -23,16 +23,18 @@ func (w *World) Entities() []*Entity {
 	return w.entities
 }
 
-func (w *World) Systems() []System {
+func (w *World) Systems() []Systemer {
 	return w.systems
 }
 
 func (w *World) Update(dt float32) {
 	for _, entity := range w.Entities() {
 		for _, system := range w.Systems() {
-			system.Pre()
-			system.Update(entity, dt)
-			system.Post()
+			if entity.DoesRequire(system.Name()) {
+				system.Pre()
+				system.Update(entity, dt)
+				system.Post()
+			}
 		}
 	}
 }
@@ -40,6 +42,21 @@ func (w *World) Update(dt float32) {
 type Entity struct {
 	id         string
 	components []Component
+	requires   []string
+}
+
+func NewEntity(requires []string) *Entity {
+	return &Entity{requires: requires}
+}
+
+func (e *Entity) DoesRequire(name string) bool {
+	for _, requirement := range e.requires {
+		if requirement == name {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (e *Entity) AddComponent(component Component) {
@@ -62,7 +79,7 @@ func (pc PositionComponent) Name() string {
 	return "Position"
 }
 
-type System interface {
+type Systemer interface {
 	Update(entity *Entity, dt float32)
 	Name() string
 	Priority() int
@@ -72,7 +89,11 @@ type System interface {
 
 type TestSystem struct{}
 
-func (ts TestSystem) Update(dt float32) {}
+func (ts TestSystem) Pre()  {}
+func (ts TestSystem) Post() {}
+func (ts TestSystem) Update(entity *Entity, dt float32) {
+	print(entity.ID() + "YOLO\n")
+}
 
 func (ts TestSystem) Name() string {
 	return "TestSystem"
