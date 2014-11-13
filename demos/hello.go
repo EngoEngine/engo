@@ -27,8 +27,22 @@ func (game *GameWorld) Preload() {
 
 func (game *GameWorld) Setup() {
 	engi.SetBg(0x2d3739)
-	game.bot = engi.Files.Image("bot")
-	game.font = engi.NewGridFont(engi.Files.Image("font"), 20, 20)
+
+	entity := engi.NewEntity([]string{"RenderSystem"})
+	component := RenderComponent{engi.Files.Image("bot")}
+	entity.AddComponent(component)
+	game.AddEntity(entity)
+
+	// entityTwo := engi.NewEntity([]string{"RenderSystem"})
+	// componentTwo := RenderComponent{engi.NewGridFont(engi.Files.Image("font"), 20, 20)}
+	// entityTwo.AddComponent(componentTwo)
+	// game.AddEntity(entityTwo)
+
+	game.AddSystem(RenderSystem{})
+	game.AddSystem(engi.TestSystem{})
+
+	// game.bot = engi.Files.Image("bot")
+	// game.font =
 	log.Println("Setup")
 }
 
@@ -44,8 +58,19 @@ func (rs RenderSystem) Post() {
 	World.batch.End()
 }
 func (rs RenderSystem) Update(entity *engi.Entity, dt float32) {
-	World.font.Print(World.batch, "ENGI", 475, 200, 0xffffff)
-	World.batch.Draw(World.bot, 512, 320, 0.5, 0.5, 10, 10, 0, 0xffffff, 1)
+	// log.Println(entity.GetComponent("RenderComponent"))
+
+	component, ok := entity.GetComponent("RenderComponent").(RenderComponent)
+	if ok {
+		switch component.Display.(type) {
+		case engi.Drawable:
+			drawable := component.Display.(engi.Drawable)
+			World.batch.Draw(drawable, 512, 320, 0.5, 0.5, 10, 10, 0, 0xffffff, 1)
+		case engi.Font:
+			font := component.Display.(engi.Font)
+			font.Print(batch, "Hello", 0, 0, 0x000)
+		}
+	}
 }
 
 func (rs RenderSystem) Name() string {
@@ -57,15 +82,14 @@ func (rs RenderSystem) Priority() int {
 }
 
 type RenderComponent struct {
+	Display interface{}
+}
+
+func (rc RenderComponent) Name() string {
+	return "RenderComponent"
 }
 
 func main() {
 	World = &GameWorld{}
-	entity := engi.NewEntity([]string{"RenderSystem", "TestSystem"})
-	World.AddEntity(entity)
-
-	World.AddSystem(RenderSystem{})
-	World.AddSystem(engi.TestSystem{})
-
 	engi.Open("Hello", 1024, 640, false, World)
 }
