@@ -28,25 +28,27 @@ func (game *GameWorld) Preload() {
 func (game *GameWorld) Setup() {
 	engi.SetBg(0x2d3739)
 
+	game.AddSystem(&RenderSystem{})
+
 	entity := engi.NewEntity([]string{"RenderSystem"})
-	component := RenderComponent{engi.Files.Image("bot")}
+	component := NewRenderComponent(engi.Files.Image("bot"), engi.Point{0, 0}, engi.Point{10, 10})
 	entity.AddComponent(component)
 	game.AddEntity(entity)
 
-	// entityTwo := engi.NewEntity([]string{"RenderSystem"})
-	// componentTwo := RenderComponent{engi.NewGridFont(engi.Files.Image("font"), 20, 20)}
-	// entityTwo.AddComponent(componentTwo)
-	// game.AddEntity(entityTwo)
+	entityTwo := engi.NewEntity([]string{"RenderSystem"})
+	componentTwo := NewRenderComponent(engi.Files.Image("font"), engi.Point{100, 100}, engi.Point{1, 1})
 
-	game.AddSystem(RenderSystem{})
-	game.AddSystem(engi.TestSystem{})
-
-	// game.bot = engi.Files.Image("bot")
-	// game.font =
+	entityTwo.AddComponent(componentTwo)
+	game.AddEntity(entityTwo)
 	log.Println("Setup")
 }
 
 type RenderSystem struct {
+	*engi.System
+}
+
+func (rs *RenderSystem) New() {
+	rs.System = &engi.System{}
 }
 
 func (rs RenderSystem) Pre() {
@@ -57,15 +59,15 @@ func (rs RenderSystem) Pre() {
 func (rs RenderSystem) Post() {
 	World.batch.End()
 }
-func (rs RenderSystem) Update(entity *engi.Entity, dt float32) {
-	// log.Println(entity.GetComponent("RenderComponent"))
 
+func (rs RenderSystem) Update(entity *engi.Entity, dt float32) {
 	component, ok := entity.GetComponent("RenderComponent").(RenderComponent)
 	if ok {
 		switch component.Display.(type) {
 		case engi.Drawable:
 			drawable := component.Display.(engi.Drawable)
-			World.batch.Draw(drawable, 512, 320, 0.5, 0.5, 10, 10, 0, 0xffffff, 1)
+			// World.batch.Draw(drawable, 512, 320, 0.5, 0.5, 10, 10, 0, 0xffffff, 1)
+			World.batch.Draw(drawable, component.Position.X, component.Position.Y, 0, 0, component.Scale.X, component.Scale.Y, 0, 0xffffff, 1)
 		case engi.Font:
 			font := component.Display.(engi.Font)
 			font.Print(batch, "Hello", 0, 0, 0x000)
@@ -82,7 +84,13 @@ func (rs RenderSystem) Priority() int {
 }
 
 type RenderComponent struct {
-	Display interface{}
+	Display  interface{}
+	Position engi.Point
+	Scale    engi.Point
+}
+
+func NewRenderComponent(display interface{}, position, scale engi.Point) RenderComponent {
+	return RenderComponent{Display: display, Position: position, Scale: scale}
 }
 
 func (rc RenderComponent) Name() string {
