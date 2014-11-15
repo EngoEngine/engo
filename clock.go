@@ -28,7 +28,10 @@ func NewClock() *Clock {
 func (c *Clock) Tick() {
 	now := time.Now()
 	c.frames += 1
-	c.delta = now.Sub(c.frame).Seconds()
+	if !c.frame.IsZero() {
+		c.delta = now.Sub(c.frame).Seconds()
+	}
+
 	c.elapsed += c.delta
 	c.frame = now
 

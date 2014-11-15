@@ -98,14 +98,15 @@ var (
 )
 
 func (ms *MovingSystem) Update(entity *engi.Entity, dt float32) {
-	if dt < 1 {
-		vel = 100 * dt
-		space, hasSpace := entity.GetComponent("SpaceComponent").(*SpaceComponent)
-		if hasSpace {
-			space.Position.X += vel
-			log.Println(dt)
-		}
+	// if dt < 1 {
+	log.Println(engi.Time.Time(), "the time")
+	vel = 100 * dt
+	space, hasSpace := entity.GetComponent("SpaceComponent").(*SpaceComponent)
+	if hasSpace {
+		space.Position.X += vel
+		log.Println(dt)
 	}
+	// }
 }
 
 func (ms MovingSystem) Name() string {
