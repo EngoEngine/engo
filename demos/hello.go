@@ -8,9 +8,7 @@ import (
 var World *GameWorld
 
 type GameWorld struct {
-	bot   engi.Drawable
 	batch *engi.Batch
-	font  *engi.Font
 	engi.World
 }
 
@@ -25,8 +23,9 @@ func (game *GameWorld) Setup() {
 	engi.SetBg(0x2d3739)
 
 	game.AddSystem(&RenderSystem{})
+	game.AddSystem(&MovingSystem{})
 
-	entity := engi.NewEntity([]string{"RenderSystem"})
+	entity := engi.NewEntity([]string{"RenderSystem", "MovingSystem"})
 	texture := engi.Files.Image("bot")
 	render := NewRenderComponent(texture, engi.Point{0, 0}, engi.Point{1, 1}, "bot")
 	space := SpaceComponent{Position: engi.Point{10, 10}, Width: texture.Width(), Height: texture.Height()}
@@ -62,35 +61,17 @@ func (rs RenderSystem) Post() {
 var pos float32
 
 func (rs *RenderSystem) Update(entity *engi.Entity, dt float32) {
-	// component, ok := entity.GetComponent("RenderComponent").(RenderComponent)
-	// space, ok := entity.GetComponent("SpaceComponent").(SpaceComponent)
-	// if ok {
-	// 	switch component.Display.(type) {
-	// 	case engi.Drawable:
-	// 		drawable := component.Display.(engi.Drawable)
-	// 		World.batch.Draw(drawable, component.Position.X, component.Position.Y, 0, 0, component.Scale.X, component.Scale.Y, 0, 0xffffff, 1)
-	// 	case *engi.Font:
-	// 		font := component.Display.(*engi.Font)
-	// 		font.Print(World.batch, component.Label, component.Position.X, component.Position.Y, 0xffffff)
-	// 	}
-	// }
-
 	render, hasRender := entity.GetComponent("RenderComponent").(*RenderComponent)
 	space, hasSpace := entity.GetComponent("SpaceComponent").(*SpaceComponent)
 	if hasRender && hasSpace {
-		log.Println(space.Position.X, space.Position.Y)
-		// pos += 1
-		// pos += 1 * dt
-		// log.Println(dt)
-		// space.Position.Y += .30 * dt
-		// log.Println(pos, "pos")
 		switch render.Display.(type) {
 		case engi.Drawable:
 			drawable := render.Display.(engi.Drawable)
 			World.batch.Draw(drawable, space.Position.X, space.Position.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, 0xffffff, 1)
+		case *engi.Font:
+			font := render.Display.(*engi.Font)
+			font.Print(World.batch, render.Label, space.Position.X, space.Position.Y, 0xffffff)
 		}
-
-		// space.Position.Y += 1 * dt
 		log.Println(space.Position)
 	}
 }
@@ -101,6 +82,34 @@ func (rs RenderSystem) Name() string {
 
 func (rs RenderSystem) Priority() int {
 	return 1
+}
+
+type MovingSystem struct {
+	*engi.System
+}
+
+func (ms *MovingSystem) New() {
+	ms.System = &engi.System{}
+}
+
+var (
+	DX  = 500
+	vel float32
+)
+
+func (ms *MovingSystem) Update(entity *engi.Entity, dt float32) {
+	if dt < 1 {
+		vel = 100 * dt
+		space, hasSpace := entity.GetComponent("SpaceComponent").(*SpaceComponent)
+		if hasSpace {
+			space.Position.X += vel
+			log.Println(dt)
+		}
+	}
+}
+
+func (ms MovingSystem) Name() string {
+	return "MovingSystem"
 }
 
 type RenderComponent struct {
