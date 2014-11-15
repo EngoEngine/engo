@@ -126,17 +126,12 @@ func (s *System) AddEntity(entity *Entity) {
 	s.entities = append(s.entities, entity)
 }
 
-type TestSystem struct{}
-
-func (ts TestSystem) Pre()  {}
-func (ts TestSystem) Post() {}
-func (ts TestSystem) Update(entity *Entity, dt float32) {
-	print(entity.ID() + "YOLO\n")
+type SpaceComponent struct {
+	Position Point
+	Width    float32
+	Height   float32
 }
 
-func (ts TestSystem) Name() string {
-	return "TestSystem"
-}
-func (ts TestSystem) Priority() int {
-	return 0
+func (sc SpaceComponent) Name() string {
+	return "SpaceComponent"
 }

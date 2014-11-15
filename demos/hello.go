@@ -27,15 +27,14 @@ func (game *GameWorld) Setup() {
 
 	entity := engi.NewEntity([]string{"RenderSystem", "MovingSystem"})
 	texture := engi.Files.Image("bot")
-	render := NewRenderComponent(texture, engi.Point{0, 0}, engi.Point{1, 1}, "bot")
-	space := SpaceComponent{Position: engi.Point{10, 10}, Width: texture.Width(), Height: texture.Height()}
+	render := NewRenderComponent(texture, engi.Point{1, 1}, "bot")
+	space := engi.SpaceComponent{Position: engi.Point{10, 10}, Width: texture.Width(), Height: texture.Height()}
 	entity.AddComponent(&render)
 	entity.AddComponent(&space)
 	game.AddEntity(entity)
 
 	// entityTwo := engi.NewEntity([]string{"RenderSystem"})
 	// componentTwo := NewRenderComponent(engi.NewGridFont(engi.Files.Image("font"), 20, 20), engi.Point{200, 400}, engi.Point{1, 1}, "YOLO MATE WASSUP")
-
 	// entityTwo.AddComponent(&componentTwo)
 	// game.AddEntity(entityTwo)
 	// log.Println("Setup")
@@ -62,7 +61,7 @@ var pos float32
 
 func (rs *RenderSystem) Update(entity *engi.Entity, dt float32) {
 	render, hasRender := entity.GetComponent("RenderComponent").(*RenderComponent)
-	space, hasSpace := entity.GetComponent("SpaceComponent").(*SpaceComponent)
+	space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
 	if hasRender && hasSpace {
 		switch render.Display.(type) {
 		case engi.Drawable:
@@ -98,15 +97,13 @@ var (
 )
 
 func (ms *MovingSystem) Update(entity *engi.Entity, dt float32) {
-	// if dt < 1 {
 	log.Println(engi.Time.Time(), "the time")
 	vel = 100 * dt
-	space, hasSpace := entity.GetComponent("SpaceComponent").(*SpaceComponent)
+	space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
 	if hasSpace {
 		space.Position.X += vel
 		log.Println(dt)
 	}
-	// }
 }
 
 func (ms MovingSystem) Name() string {
@@ -114,28 +111,17 @@ func (ms MovingSystem) Name() string {
 }
 
 type RenderComponent struct {
-	Display  interface{}
-	Position engi.Point
-	Scale    engi.Point
-	Label    string
+	Display interface{}
+	Scale   engi.Point
+	Label   string
 }
 
-func NewRenderComponent(display interface{}, position, scale engi.Point, label string) RenderComponent {
-	return RenderComponent{Display: display, Position: position, Scale: scale, Label: label}
+func NewRenderComponent(display interface{}, scale engi.Point, label string) RenderComponent {
+	return RenderComponent{Display: display, Scale: scale, Label: label}
 }
 
 func (rc RenderComponent) Name() string {
 	return "RenderComponent"
-}
-
-type SpaceComponent struct {
-	Position engi.Point
-	Width    float32
-	Height   float32
-}
-
-func (sc SpaceComponent) Name() string {
-	return "SpaceComponent"
 }
 
 func main() {
