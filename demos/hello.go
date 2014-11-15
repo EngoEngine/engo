@@ -5,11 +5,7 @@ import (
 	"log"
 )
 
-var (
-	bot   engi.Drawable
-	batch *engi.Batch
-	World *GameWorld
-)
+var World *GameWorld
 
 type GameWorld struct {
 	bot   engi.Drawable
@@ -31,12 +27,12 @@ func (game *GameWorld) Setup() {
 	game.AddSystem(&RenderSystem{})
 
 	entity := engi.NewEntity([]string{"RenderSystem"})
-	component := NewRenderComponent(engi.Files.Image("bot"), engi.Point{0, 0}, engi.Point{10, 10})
+	component := NewRenderComponent(engi.Files.Image("bot"), engi.Point{0, 0}, engi.Point{10, 10}, "bot")
 	entity.AddComponent(component)
 	game.AddEntity(entity)
 
 	entityTwo := engi.NewEntity([]string{"RenderSystem"})
-	componentTwo := NewRenderComponent(engi.Files.Image("font"), engi.Point{100, 100}, engi.Point{1, 1})
+	componentTwo := NewRenderComponent(engi.NewGridFont(engi.Files.Image("font"), 20, 20), engi.Point{200, 400}, engi.Point{1, 1}, "YOLO MATE WASSUP")
 
 	entityTwo.AddComponent(componentTwo)
 	game.AddEntity(entityTwo)
@@ -66,11 +62,10 @@ func (rs RenderSystem) Update(entity *engi.Entity, dt float32) {
 		switch component.Display.(type) {
 		case engi.Drawable:
 			drawable := component.Display.(engi.Drawable)
-			// World.batch.Draw(drawable, 512, 320, 0.5, 0.5, 10, 10, 0, 0xffffff, 1)
 			World.batch.Draw(drawable, component.Position.X, component.Position.Y, 0, 0, component.Scale.X, component.Scale.Y, 0, 0xffffff, 1)
-		case engi.Font:
-			font := component.Display.(engi.Font)
-			font.Print(batch, "Hello", 0, 0, 0x000)
+		case *engi.Font:
+			font := component.Display.(*engi.Font)
+			font.Print(World.batch, component.Label, component.Position.X, component.Position.Y, 0xffffff)
 		}
 	}
 }
@@ -87,10 +82,11 @@ type RenderComponent struct {
 	Display  interface{}
 	Position engi.Point
 	Scale    engi.Point
+	Label    string
 }
 
-func NewRenderComponent(display interface{}, position, scale engi.Point) RenderComponent {
-	return RenderComponent{Display: display, Position: position, Scale: scale}
+func NewRenderComponent(display interface{}, position, scale engi.Point, label string) RenderComponent {
+	return RenderComponent{Display: display, Position: position, Scale: scale, Label: label}
 }
 
 func (rc RenderComponent) Name() string {
