@@ -38,9 +38,8 @@ func (w *World) Systems() []Systemer {
 func (w *World) Update(dt float32) {
 	for _, system := range w.Systems() {
 		system.Pre()
-		delta := Time.Delta()
 		for _, entity := range system.Entities() {
-			system.Update(entity, delta)
+			system.Update(entity, dt)
 		}
 		system.Post()
 	}
