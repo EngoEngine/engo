@@ -57,8 +57,6 @@ func (rs RenderSystem) Post() {
 	World.batch.End()
 }
 
-var pos float32
-
 func (rs *RenderSystem) Update(entity *engi.Entity, dt float32) {
 	render, hasRender := entity.GetComponent("RenderComponent").(*RenderComponent)
 	space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
@@ -91,18 +89,20 @@ func (ms *MovingSystem) New() {
 	ms.System = &engi.System{}
 }
 
-var (
-	DX  = 500
-	vel float32
-)
+var vel float32
 
 func (ms *MovingSystem) Update(entity *engi.Entity, dt float32) {
-	log.Println(engi.Time.Time(), "the time")
-	vel = 100 * dt
 	space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
 	if hasSpace {
-		space.Position.X += vel
-		log.Println(dt)
+		vel = 200 * dt
+		if World.K.KEY_D.JustPressed() {
+			space.Position.X += vel
+			log.Println(dt)
+		}
+
+		if World.K.KEY_A.JustPressed() {
+			space.Position.X -= vel
+		}
 	}
 }
 

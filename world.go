@@ -9,6 +9,7 @@ type World struct {
 	Game
 	entities []*Entity
 	systems  []Systemer
+	K        KeyManager
 }
 
 func (w *World) AddEntity(entity *Entity) {
@@ -18,7 +19,6 @@ func (w *World) AddEntity(entity *Entity) {
 	for i, system := range w.systems {
 		log.Println(i, system)
 		system.AddEntity(entity)
-		// w.systems[i] = system
 	}
 }
 
@@ -33,6 +33,14 @@ func (w *World) Entities() []*Entity {
 
 func (w *World) Systems() []Systemer {
 	return w.systems
+}
+
+func (w *World) Key(key Key, modifier Modifier, action Action) {
+	w.Game.Key(key, modifier, action)
+	w.K.KEY_W.set(key == W && action == PRESS)
+	w.K.KEY_A.set(key == A && action == PRESS)
+	w.K.KEY_S.set(key == S && action == PRESS)
+	w.K.KEY_D.set(key == D && action == PRESS)
 }
 
 func (w *World) Update(dt float32) {
@@ -122,7 +130,6 @@ func (s System) Entities() []*Entity {
 }
 
 func (s *System) AddEntity(entity *Entity) {
-	// log.Println(entity)
 	s.entities = append(s.entities, entity)
 }
 
