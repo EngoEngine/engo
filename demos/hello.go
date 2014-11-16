@@ -115,6 +115,14 @@ func (ms *MovingSystem) Update(entity *engi.Entity, dt float32) {
 		if World.K.KEY_A.JustPressed() {
 			space.Position.X -= vel
 		}
+
+		if World.K.KEY_S.JustPressed() {
+			space.Position.Y += vel
+		}
+
+		if World.K.KEY_W.JustPressed() {
+			space.Position.Y -= vel
+		}
 	}
 }
 
