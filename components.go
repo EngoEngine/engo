@@ -14,6 +14,10 @@ func (sc SpaceComponent) Name() string {
 	return "SpaceComponent"
 }
 
+func (sc SpaceComponent) AABB() AABB {
+	return AABB{Min: sc.Position, Max: Point{sc.Position.X + sc.Width, sc.Position.Y + sc.Height}}
+}
+
 type CollisionMasterComponent struct {
 }
 

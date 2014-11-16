@@ -47,11 +47,21 @@ func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 	space, hasSpace := entity.GetComponent("SpaceComponent").(*SpaceComponent)
 	collisionMaster, hasCollisionMaster := entity.GetComponent("CollisionMasterComponent").(*CollisionMasterComponent)
 	if hasSpace && hasCollisionMaster {
-		// println("Youre in the club")
 		log.Println("Youre in the club", space, collisionMaster)
 		for _, other := range cs.Entities() {
 			if other.ID() != entity.ID() {
-				// log.Println("And its not you!")
+				otherSpace, otherHasSpace := other.GetComponent("SpaceComponent").(*SpaceComponent)
+				if otherHasSpace {
+					entityAABB := space.AABB()
+					otherAABB := otherSpace.AABB()
+					if IsIntersecting(entityAABB, otherAABB) {
+						mtd := MinimumTranslation(entityAABB, otherAABB)
+						log.Println(mtd)
+						space.Position.X += mtd.X
+						space.Position.Y += mtd.Y
+						log.Println("ARE COLLIDING? I THKN SO")
+					}
+				}
 			}
 		}
 	}

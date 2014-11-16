@@ -38,12 +38,12 @@ func (game *GameWorld) Setup() {
 
 	entity3 := engi.NewEntity([]string{"RenderSystem", "CollisionSystem"})
 	render3 := NewRenderComponent(texture, engi.Point{10, 10}, "bigbot")
-	space3 := engi.SpaceComponent{Position: engi.Point{100, 100}, Width: texture.Width() * render3.Scale.X, Height: texture.Height() * render.Scale.Y}
+	space3 := engi.SpaceComponent{Position: engi.Point{100, 100}, Width: texture.Width() * render3.Scale.X, Height: texture.Height() * render3.Scale.Y}
 	entity3.AddComponent(&render3)
 	entity3.AddComponent(&space3)
 	game.AddEntity(entity3)
 
-	entityTwo := engi.NewEntity([]string{"RenderSystem", "CollisionSystem"})
+	entityTwo := engi.NewEntity([]string{"RenderSystem"})
 	componentTwo := NewRenderComponent(engi.NewGridFont(engi.Files.Image("font"), 20, 20), engi.Point{1, 1}, "wut.")
 	space2 := engi.SpaceComponent{Position: engi.Point{500, 100}, Width: 100, Height: 100}
 	entityTwo.AddComponent(&componentTwo)
@@ -81,7 +81,7 @@ func (rs *RenderSystem) Update(entity *engi.Entity, dt float32) {
 			font := render.Display.(*engi.Font)
 			font.Print(World.batch, render.Label, space.Position.X, space.Position.Y, 0xffffff)
 		}
-		log.Println(space.Position)
+		// log.Println(space.Position)
 	}
 }
 
@@ -105,7 +105,6 @@ var vel float32
 
 func (ms *MovingSystem) Update(entity *engi.Entity, dt float32) {
 	space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
-	log.Println(entity.ID())
 	if hasSpace {
 		vel = 200 * dt
 		if World.K.KEY_D.JustPressed() {
