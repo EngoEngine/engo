@@ -33,11 +33,13 @@ func (game *GameWorld) Setup() {
 	entity.AddComponent(&space)
 	game.AddEntity(entity)
 
-	// entityTwo := engi.NewEntity([]string{"RenderSystem"})
-	// componentTwo := NewRenderComponent(engi.NewGridFont(engi.Files.Image("font"), 20, 20), engi.Point{200, 400}, engi.Point{1, 1}, "YOLO MATE WASSUP")
-	// entityTwo.AddComponent(&componentTwo)
-	// game.AddEntity(entityTwo)
-	// log.Println("Setup")
+	entityTwo := engi.NewEntity([]string{"RenderSystem"})
+	componentTwo := NewRenderComponent(engi.NewGridFont(engi.Files.Image("font"), 20, 20), engi.Point{1, 1}, "wut.")
+	space2 := engi.SpaceComponent{Position: engi.Point{500, 100}, Width: 100, Height: 100}
+	entityTwo.AddComponent(&componentTwo)
+	entityTwo.AddComponent(&space2)
+	game.AddEntity(entityTwo)
+	log.Println("Setup")
 }
 
 type RenderSystem struct {
@@ -93,6 +95,7 @@ var vel float32
 
 func (ms *MovingSystem) Update(entity *engi.Entity, dt float32) {
 	space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
+	log.Println(entity.ID())
 	if hasSpace {
 		vel = 200 * dt
 		if World.K.KEY_D.JustPressed() {

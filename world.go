@@ -17,8 +17,10 @@ func (w *World) AddEntity(entity *Entity) {
 	w.entities = append(w.entities, entity)
 	log.Println(w.systems)
 	for i, system := range w.systems {
-		log.Println(i, system)
-		system.AddEntity(entity)
+		if entity.DoesRequire(system.Name()) {
+			log.Println(i, system)
+			system.AddEntity(entity)
+		}
 	}
 }
 
