@@ -45,7 +45,7 @@ func (cs *CollisionSystem) New() {
 
 func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 	space, hasSpace := entity.GetComponent("SpaceComponent").(*SpaceComponent)
-	collisionMaster, hasCollisionMaster := entity.GetComponent("CollisionMasterComponent").(*CollisionMasterComponent)
+	_, hasCollisionMaster := entity.GetComponent("CollisionMasterComponent").(*CollisionMasterComponent)
 	if hasSpace && hasCollisionMaster {
 		log.Println("Youre in the club", space, collisionMaster)
 		for _, other := range cs.Entities() {
@@ -56,10 +56,8 @@ func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 					otherAABB := otherSpace.AABB()
 					if IsIntersecting(entityAABB, otherAABB) {
 						mtd := MinimumTranslation(entityAABB, otherAABB)
-						log.Println(mtd)
 						space.Position.X += mtd.X
 						space.Position.Y += mtd.Y
-						log.Println("ARE COLLIDING? I THKN SO")
 					}
 				}
 			}
