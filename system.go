@@ -1,5 +1,9 @@
 package engi
 
+import (
+	"log"
+)
+
 type Systemer interface {
 	Update(entity *Entity, dt float32)
 	Name() string
@@ -29,4 +33,30 @@ func (s System) Entities() []*Entity {
 
 func (s *System) AddEntity(entity *Entity) {
 	s.entities = append(s.entities, entity)
+}
+
+type CollisionSystem struct {
+	*System
+}
+
+func (cs *CollisionSystem) New() {
+	cs.System = &System{}
+}
+
+func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
+	space, hasSpace := entity.GetComponent("SpaceComponent").(*SpaceComponent)
+	collisionMaster, hasCollisionMaster := entity.GetComponent("CollisionMasterComponent").(*CollisionMasterComponent)
+	if hasSpace && hasCollisionMaster {
+		// println("Youre in the club")
+		log.Println("Youre in the club", space, collisionMaster)
+		for _, other := range cs.Entities() {
+			if other.ID() != entity.ID() {
+				// log.Println("And its not you!")
+			}
+		}
+	}
+}
+
+func (cs CollisionSystem) Name() string {
+	return "CollisionSystem"
 }

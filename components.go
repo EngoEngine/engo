@@ -4,14 +4,6 @@ type Component interface {
 	Name() string
 }
 
-type PositionComponent struct {
-	X, Y int
-}
-
-func (pc PositionComponent) Name() string {
-	return "Position"
-}
-
 type SpaceComponent struct {
 	Position Point
 	Width    float32
@@ -20,4 +12,15 @@ type SpaceComponent struct {
 
 func (sc SpaceComponent) Name() string {
 	return "SpaceComponent"
+}
+
+type CollisionMasterComponent struct {
+}
+
+func (cm CollisionMasterComponent) Name() string {
+	return "CollisionMasterComponent"
+}
+
+func (cm CollisionMasterComponent) Is() bool {
+	return true
 }

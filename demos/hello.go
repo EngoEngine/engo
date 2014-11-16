@@ -24,16 +24,26 @@ func (game *GameWorld) Setup() {
 
 	game.AddSystem(&RenderSystem{})
 	game.AddSystem(&MovingSystem{})
+	game.AddSystem(&engi.CollisionSystem{})
 
-	entity := engi.NewEntity([]string{"RenderSystem", "MovingSystem"})
+	entity := engi.NewEntity([]string{"RenderSystem", "MovingSystem", "CollisionSystem"})
 	texture := engi.Files.Image("bot")
 	render := NewRenderComponent(texture, engi.Point{1, 1}, "bot")
-	space := engi.SpaceComponent{Position: engi.Point{10, 10}, Width: texture.Width(), Height: texture.Height()}
+	space := engi.SpaceComponent{Position: engi.Point{10, 10}, Width: texture.Width() * render.Scale.X, Height: texture.Height() * render.Scale.Y}
+	collisionMaster := engi.CollisionMasterComponent{}
 	entity.AddComponent(&render)
 	entity.AddComponent(&space)
+	entity.AddComponent(&collisionMaster)
 	game.AddEntity(entity)
 
-	entityTwo := engi.NewEntity([]string{"RenderSystem"})
+	entity3 := engi.NewEntity([]string{"RenderSystem", "CollisionSystem"})
+	render3 := NewRenderComponent(texture, engi.Point{10, 10}, "bigbot")
+	space3 := engi.SpaceComponent{Position: engi.Point{100, 100}, Width: texture.Width() * render3.Scale.X, Height: texture.Height() * render.Scale.Y}
+	entity3.AddComponent(&render3)
+	entity3.AddComponent(&space3)
+	game.AddEntity(entity3)
+
+	entityTwo := engi.NewEntity([]string{"RenderSystem", "CollisionSystem"})
 	componentTwo := NewRenderComponent(engi.NewGridFont(engi.Files.Image("font"), 20, 20), engi.Point{1, 1}, "wut.")
 	space2 := engi.SpaceComponent{Position: engi.Point{500, 100}, Width: 100, Height: 100}
 	entityTwo.AddComponent(&componentTwo)
