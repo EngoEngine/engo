@@ -100,7 +100,6 @@ func (ms *MovingSystem) Update(entity *engi.Entity, dt float32) {
 		vel = 200 * dt
 		if World.K.KEY_D.JustPressed() {
 			space.Position.X += vel
-			log.Println(dt)
 		}
 
 		if World.K.KEY_A.JustPressed() {
