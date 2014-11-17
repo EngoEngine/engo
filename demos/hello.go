@@ -28,7 +28,7 @@ func (game *GameWorld) Setup() {
 
 	entity := engi.NewEntity([]string{"RenderSystem", "MovingSystem", "CollisionSystem"})
 	texture := engi.Files.Image("bot")
-	render := NewRenderComponent(texture, engi.Point{1, 1}, "bot")
+	render := engi.NewRenderComponent(texture, engi.Point{1, 1}, "bot")
 	space := engi.SpaceComponent{Position: engi.Point{10, 10}, Width: texture.Width() * render.Scale.X, Height: texture.Height() * render.Scale.Y}
 	collisionMaster := engi.CollisionMasterComponent{}
 	entity.AddComponent(&render)
@@ -37,60 +37,19 @@ func (game *GameWorld) Setup() {
 	game.AddEntity(entity)
 
 	entity3 := engi.NewEntity([]string{"RenderSystem", "CollisionSystem"})
-	render3 := NewRenderComponent(texture, engi.Point{10, 10}, "bigbot")
+	render3 := engi.NewRenderComponent(texture, engi.Point{10, 10}, "bigbot")
 	space3 := engi.SpaceComponent{Position: engi.Point{100, 100}, Width: texture.Width() * render3.Scale.X, Height: texture.Height() * render3.Scale.Y}
 	entity3.AddComponent(&render3)
 	entity3.AddComponent(&space3)
 	game.AddEntity(entity3)
 
 	entityTwo := engi.NewEntity([]string{"RenderSystem"})
-	componentTwo := NewRenderComponent(engi.NewGridFont(engi.Files.Image("font"), 20, 20), engi.Point{1, 1}, "wut.")
+	componentTwo := engi.NewRenderComponent(engi.NewGridFont(engi.Files.Image("font"), 20, 20), engi.Point{1, 1}, "wut.")
 	space2 := engi.SpaceComponent{Position: engi.Point{500, 100}, Width: 100, Height: 100}
 	entityTwo.AddComponent(&componentTwo)
 	entityTwo.AddComponent(&space2)
 	game.AddEntity(entityTwo)
 	log.Println("Setup")
-}
-
-type RenderSystem struct {
-	*engi.System
-}
-
-func (rs *RenderSystem) New() {
-	rs.System = &engi.System{}
-}
-
-func (rs RenderSystem) Pre() {
-	engi.Gl.Clear(engi.Gl.COLOR_BUFFER_BIT)
-	World.batch.Begin()
-}
-
-func (rs RenderSystem) Post() {
-	World.batch.End()
-}
-
-func (rs *RenderSystem) Update(entity *engi.Entity, dt float32) {
-	render, hasRender := entity.GetComponent("RenderComponent").(*RenderComponent)
-	space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
-	if hasRender && hasSpace {
-		switch render.Display.(type) {
-		case engi.Drawable:
-			drawable := render.Display.(engi.Drawable)
-			World.batch.Draw(drawable, space.Position.X, space.Position.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, 0xffffff, 1)
-		case *engi.Font:
-			font := render.Display.(*engi.Font)
-			font.Print(World.batch, render.Label, space.Position.X, space.Position.Y, 0xffffff)
-		}
-		// log.Println(space.Position)
-	}
-}
-
-func (rs RenderSystem) Name() string {
-	return "RenderSystem"
-}
-
-func (rs RenderSystem) Priority() int {
-	return 1
 }
 
 type MovingSystem struct {
@@ -129,18 +88,44 @@ func (ms MovingSystem) Name() string {
 	return "MovingSystem"
 }
 
-type RenderComponent struct {
-	Display interface{}
-	Scale   engi.Point
-	Label   string
+type RenderSystem struct {
+	*engi.System
 }
 
-func NewRenderComponent(display interface{}, scale engi.Point, label string) RenderComponent {
-	return RenderComponent{Display: display, Scale: scale, Label: label}
+func (rs *RenderSystem) New() {
+	rs.System = &engi.System{}
 }
 
-func (rc RenderComponent) Name() string {
-	return "RenderComponent"
+func (rs RenderSystem) Pre() {
+	engi.Gl.Clear(engi.Gl.COLOR_BUFFER_BIT)
+	World.batch.Begin()
+}
+
+func (rs RenderSystem) Post() {
+	World.batch.End()
+}
+
+func (rs *RenderSystem) Update(entity *engi.Entity, dt float32) {
+	render, hasRender := entity.GetComponent("RenderComponent").(*engi.RenderComponent)
+	space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
+	if hasRender && hasSpace {
+		switch render.Display.(type) {
+		case engi.Drawable:
+			drawable := render.Display.(engi.Drawable)
+			World.batch.Draw(drawable, space.Position.X, space.Position.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, 0xffffff, 1)
+		case *engi.Font:
+			font := render.Display.(*engi.Font)
+			font.Print(World.batch, render.Label, space.Position.X, space.Position.Y, 0xffffff)
+		}
+	}
+}
+
+func (rs RenderSystem) Name() string {
+	return "RenderSystem"
+}
+
+func (rs RenderSystem) Priority() int {
+	return 1
 }
 
 func main() {

@@ -43,6 +43,8 @@ func (w *World) Key(key Key, modifier Modifier, action Action) {
 	w.K.KEY_A.set(key == A && action == PRESS)
 	w.K.KEY_S.set(key == S && action == PRESS)
 	w.K.KEY_D.set(key == D && action == PRESS)
+
+	w.K.KEY_SPACE.set(key == Space && action == PRESS)
 }
 
 func (w *World) Update(dt float32) {

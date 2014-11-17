@@ -1,7 +1,7 @@
 package engi
 
 import (
-	"log"
+// "log"
 )
 
 type Systemer interface {
@@ -47,7 +47,7 @@ func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 	space, hasSpace := entity.GetComponent("SpaceComponent").(*SpaceComponent)
 	_, hasCollisionMaster := entity.GetComponent("CollisionMasterComponent").(*CollisionMasterComponent)
 	if hasSpace && hasCollisionMaster {
-		log.Println("Youre in the club", space, collisionMaster)
+		// log.Println("Youre in the club", space)
 		for _, other := range cs.Entities() {
 			if other.ID() != entity.ID() {
 				otherSpace, otherHasSpace := other.GetComponent("SpaceComponent").(*SpaceComponent)

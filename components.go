@@ -28,3 +28,17 @@ func (cm CollisionMasterComponent) Name() string {
 func (cm CollisionMasterComponent) Is() bool {
 	return true
 }
+
+type RenderComponent struct {
+	Display interface{}
+	Scale   Point
+	Label   string
+}
+
+func NewRenderComponent(display interface{}, scale Point, label string) RenderComponent {
+	return RenderComponent{Display: display, Scale: scale, Label: label}
+}
+
+func (rc RenderComponent) Name() string {
+	return "RenderComponent"
+}
