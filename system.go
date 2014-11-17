@@ -68,3 +68,45 @@ func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 func (cs CollisionSystem) Name() string {
 	return "CollisionSystem"
 }
+
+type RenderSystem struct {
+	*System
+	batch *Batch
+}
+
+func (rs *RenderSystem) New() {
+	rs.System = &System{}
+	rs.batch = NewBatch(Width(), Height())
+}
+
+func (rs RenderSystem) Pre() {
+	Gl.Clear(Gl.COLOR_BUFFER_BIT)
+	rs.batch.Begin()
+}
+
+func (rs RenderSystem) Post() {
+	rs.batch.End()
+}
+
+func (rs *RenderSystem) Update(entity *Entity, dt float32) {
+	render, hasRender := entity.GetComponent("RenderComponent").(*RenderComponent)
+	space, hasSpace := entity.GetComponent("SpaceComponent").(*SpaceComponent)
+	if hasRender && hasSpace {
+		switch render.Display.(type) {
+		case Drawable:
+			drawable := render.Display.(Drawable)
+			rs.batch.Draw(drawable, space.Position.X, space.Position.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, 0xffffff, 1)
+		case *Font:
+			font := render.Display.(*Font)
+			font.Print(rs.batch, render.Label, space.Position.X, space.Position.Y, 0xffffff)
+		}
+	}
+}
+
+func (rs RenderSystem) Name() string {
+	return "RenderSystem"
+}
+
+func (rs RenderSystem) Priority() int {
+	return 1
+}
