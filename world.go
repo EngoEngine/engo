@@ -9,13 +9,11 @@ type World struct {
 	Game
 	entities []*Entity
 	systems  []Systemer
-	K        KeyManager
 }
 
 func (w *World) AddEntity(entity *Entity) {
 	entity.id = strconv.Itoa(len(w.entities))
 	w.entities = append(w.entities, entity)
-	log.Println(w.systems)
 	for i, system := range w.systems {
 		if entity.DoesRequire(system.Name()) {
 			log.Println(i, system)
@@ -37,15 +35,6 @@ func (w *World) Systems() []Systemer {
 	return w.systems
 }
 
-func (w *World) Key(key Key, modifier Modifier, action Action) {
-	w.Game.Key(key, modifier, action)
-	w.K.KEY_W.set(key == W && action == PRESS)
-	w.K.KEY_A.set(key == A && action == PRESS)
-	w.K.KEY_S.set(key == S && action == PRESS)
-	w.K.KEY_D.set(key == D && action == PRESS)
-	w.K.KEY_SPACE.set(key == Space && action == PRESS)
-}
-
 func (w *World) Update(dt float32) {
 	for _, system := range w.Systems() {
 		system.Pre()
@@ -53,5 +42,9 @@ func (w *World) Update(dt float32) {
 			system.Update(entity, dt)
 		}
 		system.Post()
+	}
+
+	if Keys.KEY_ESCAPE.JustPressed() {
+		Exit()
 	}
 }

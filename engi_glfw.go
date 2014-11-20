@@ -93,10 +93,11 @@ func run(title string, width, height int, fullscreen bool) {
 	})
 
 	window.SetKeyCallback(func(window *glfw.Window, k glfw.Key, s int, a glfw.Action, m glfw.ModifierKey) {
+		key := Key(k)
 		if a == glfw.Press {
-			responder.Key(Key(k), Modifier(m), PRESS)
+			states[key] = true
 		} else if a == glfw.Release {
-			responder.Key(Key(k), Modifier(m), RELEASE)
+			states[key] = false
 		}
 	})
 
@@ -109,12 +110,11 @@ func run(title string, width, height int, fullscreen bool) {
 	responder.Setup()
 
 	for !window.ShouldClose() {
-		// TheWorld.Update(Time.Delta())
 		responder.Update(Time.Delta())
-		// upd()
 
 		window.SwapBuffers()
 		glfw.PollEvents()
+		keysUpdate()
 		Time.Tick()
 	}
 	responder.Close()

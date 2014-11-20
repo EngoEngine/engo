@@ -5,6 +5,10 @@ var (
 	KEY_STATE_DOWN      string = "down"
 	KEY_STATE_JUST_DOWN string = "justdown"
 	KEY_STATE_JUST_UP   string = "justup"
+
+	states map[Key]bool
+
+	Keys KeyManager
 )
 
 type KeyManager struct {
@@ -59,4 +63,19 @@ func (key KeyState) Up() bool {
 
 func (key KeyState) Down() bool {
 	return key.State() == KEY_STATE_DOWN
+}
+
+func keysUpdate() {
+	Keys.KEY_W.set(states[W])
+	Keys.KEY_A.set(states[A])
+	Keys.KEY_S.set(states[S])
+	Keys.KEY_D.set(states[D])
+
+	Keys.KEY_UP.set(states[ArrowUp])
+	Keys.KEY_DOWN.set(states[ArrowDown])
+	Keys.KEY_LEFT.set(states[ArrowLeft])
+	Keys.KEY_RIGHT.set(states[ArrowRight])
+
+	Keys.KEY_SPACE.set(states[Space])
+	Keys.KEY_ESCAPE.set(states[Escape])
 }

@@ -128,11 +128,14 @@ func run(title string, width, height int, fullscreen bool) {
 	}, false)
 
 	js.Global.Call("addEventListener", "keydown", func(ev js.Object) {
-		responder.Key(Key(ev.Get("keyCode").Int()), 0, PRESS)
+		key := Key(ev.Get("keyCode").Int())
+		states[key] = true
 	}, false)
 
 	js.Global.Call("addEventListener", "keyup", func(ev js.Object) {
-		responder.Key(Key(ev.Get("keyCode").Int()), 0, RELEASE)
+		key := Key(ev.Get("keyCode").Int())
+		states[key] = false
+		// responder.Key(Key(ev.Get("keyCode").Int()), 0, RELEASE)
 	}, false)
 	Gl = gl
 	gl.Viewport(0, 0, width, height)
@@ -156,6 +159,7 @@ func animate(dt float32) {
 	RequestAnimationFrame(animate)
 	responder.Update(Time.Delta())
 	Time.Tick()
+	keysUpdate()
 }
 
 func exit() {
