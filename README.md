@@ -1,4 +1,4 @@
-# [ENGi v0.6.0](http://ajhager.com/engi)
+<!-- # [ENGi v0.6.0](http://ajhager.com/engi)
 
 A multi-platform 2D game library for Go.
 
@@ -36,3 +36,13 @@ go get -u github.com/ajhager/engi
 ## Documentation
 
 [godoc.org](http://godoc.org/github.com/ajhager/engi)
+ -->
+
+# Engi v0.7.0
+
+An cross-platform game engine written entirely in Go following my interpretation of the Entity Component System paradigm.
+
+
+
+Many thanks to [ajhager](http://github.com/ajhager) for 
+<!-- Engi is a fork of http://github.com/ajhager/engi.  -->
