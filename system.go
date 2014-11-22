@@ -13,10 +13,14 @@ type Systemer interface {
 	New()
 	Entities() []*Entity
 	AddEntity(entity *Entity)
+	Push(message Message)
+	Receive(message Message)
+	Messages() []Message
 }
 
 type System struct {
-	entities []*Entity
+	entities     []*Entity
+	messageQueue []Message
 }
 
 func (s System) New()  {}
@@ -33,6 +37,16 @@ func (s System) Entities() []*Entity {
 
 func (s *System) AddEntity(entity *Entity) {
 	s.entities = append(s.entities, entity)
+}
+
+func (system *System) Push(message Message) {
+	system.messageQueue = append(system.messageQueue, message)
+}
+
+func (system System) Receive(message Message) {}
+
+func (system System) Messages() []Message {
+	return system.messageQueue
 }
 
 type CollisionSystem struct {
@@ -58,6 +72,7 @@ func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 						mtd := MinimumTranslation(entityAABB, otherAABB)
 						space.Position.X += mtd.X
 						space.Position.Y += mtd.Y
+						TheWorld.Mailbox.Dispatch(CollisionMessage{})
 					}
 				}
 			}

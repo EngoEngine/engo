@@ -22,7 +22,7 @@ func (pong *PongGame) Setup() {
 	ball := engi.NewEntity([]string{"RenderSystem", "CollisionSystem", "MovementSystem"})
 	ballTexture := engi.Files.Image("ball")
 	ballRender := engi.NewRenderComponent(ballTexture, engi.Point{2, 2}, "ball")
-	ballSpace := engi.SpaceComponent{engi.Point{10, 10}, ballTexture.Width() * ballRender.Scale.X, ballTexture.Height() * ballRender.Scale.Y}
+	ballSpace := engi.SpaceComponent{engi.Point{(engi.Width() - ballTexture.Width()) / 2, (engi.Height() - ballTexture.Height()) / 2}, ballTexture.Width() * ballRender.Scale.X, ballTexture.Height() * ballRender.Scale.Y}
 	ballCollisionMaster := engi.CollisionMasterComponent{}
 	ballSpeed := SpeedComponent{}
 	ballSpeed.Point = engi.Point{100, 0}
@@ -36,7 +36,7 @@ func (pong *PongGame) Setup() {
 		paddle := engi.NewEntity([]string{"RenderSystem", "CollisionSystem"})
 		paddleTexture := engi.Files.Image("paddle")
 		paddleRender := engi.NewRenderComponent(paddleTexture, engi.Point{2, 2}, "paddle")
-		paddleSpace := engi.SpaceComponent{engi.Point{100 * float32(i), 10}, paddleRender.Scale.X * paddleTexture.Width(), paddleRender.Scale.Y * paddleTexture.Height()}
+		paddleSpace := engi.SpaceComponent{engi.Point{(engi.Width() - ballTexture.Width()/2) * float32(i), (engi.Height() - ballTexture.Height()) / 2}, paddleRender.Scale.X * paddleTexture.Width(), paddleRender.Scale.Y * paddleTexture.Height()}
 		paddle.AddComponent(&paddleRender)
 		paddle.AddComponent(&paddleSpace)
 		pong.AddEntity(paddle)
@@ -49,6 +49,7 @@ type MovementSystem struct {
 
 func (ms *MovementSystem) New() {
 	ms.System = &engi.System{}
+	engi.TheWorld.Mailbox.Listen("CollisionMessage", ms)
 }
 
 func (ms MovementSystem) Name() string {
@@ -63,6 +64,9 @@ func (ms MovementSystem) Update(entity *engi.Entity, dt float32) {
 		space.Position.Y += speed.Y * dt
 	}
 }
+func (ms MovementSystem) Receive(message engi.Message) {
+	println("WOOT")
+}
 
 type SpeedComponent struct {
 	engi.Point
@@ -70,6 +74,22 @@ type SpeedComponent struct {
 
 func (speed SpeedComponent) Name() string {
 	return "SpeedComponent"
+}
+
+type BallSystem struct {
+	*engi.System
+}
+
+func (bs *BallSystem) New() {
+	bs.System = &engi.System{}
+}
+
+func (bs BallSystem) Name() string {
+	return "BallSystem"
+}
+
+func (bs *BallSystem) Update(entity *engi.Entity, dt float32) {
+
 }
 
 func main() {
