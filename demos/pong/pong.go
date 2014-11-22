@@ -128,7 +128,7 @@ func (bs *BallSystem) Update(entity *engi.Entity, dt float32) {
 
 		if space.Position.Y > 800 {
 			space.Position.Y = 800 - 16
-			speed.Y *= -1
+			// speed.Y *= -1
 		}
 	}
 }
