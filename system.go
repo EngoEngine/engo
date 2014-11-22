@@ -47,10 +47,6 @@ func (system System) Messages() []Message {
 }
 
 func (system *System) Dismiss(i int) {
-	// first := system.messageQueue[:i]
-	// second := system.messageQueue[i+1:]
-	// // a = append(a[:i], a[i+1:]...)
-	// system.messageQueue = append(system.messageQueue[:i], system.messageQueue[i+1])
 	system.messageQueue = system.messageQueue[:i+copy(system.messageQueue[i:], system.messageQueue[i+1:])]
 }
 

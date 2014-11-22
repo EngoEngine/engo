@@ -18,46 +18,56 @@ func (pong *PongGame) Setup() {
 	engi.SetBg(0x2d3739)
 	pong.AddSystem(&engi.RenderSystem{})
 	pong.AddSystem(&engi.CollisionSystem{})
-	pong.AddSystem(&MovementSystem{})
+	pong.AddSystem(&SpeedSystem{})
+	pong.AddSystem(&ControlSystem{})
+	pong.AddSystem(&BallSystem{})
 
-	ball := engi.NewEntity([]string{"RenderSystem", "CollisionSystem", "MovementSystem"})
+	ball := engi.NewEntity([]string{"RenderSystem", "CollisionSystem", "SpeedSystem", "BallSystem"})
 	ballTexture := engi.Files.Image("ball")
 	ballRender := engi.NewRenderComponent(ballTexture, engi.Point{2, 2}, "ball")
 	ballSpace := engi.SpaceComponent{engi.Point{(engi.Width() - ballTexture.Width()) / 2, (engi.Height() - ballTexture.Height()) / 2}, ballTexture.Width() * ballRender.Scale.X, ballTexture.Height() * ballRender.Scale.Y}
 	ballCollisionMaster := engi.CollisionMasterComponent{}
 	ballSpeed := SpeedComponent{}
-	ballSpeed.Point = engi.Point{100, 0}
+	ballSpeed.Point = engi.Point{300, 300}
 	ball.AddComponent(&ballRender)
 	ball.AddComponent(&ballSpace)
 	ball.AddComponent(&ballCollisionMaster)
 	ball.AddComponent(&ballSpeed)
 	pong.AddEntity(ball)
 
+	schemes := []string{"WASD", ""}
 	for i := 0; i < 2; i++ {
-		paddle := engi.NewEntity([]string{"RenderSystem", "CollisionSystem"})
+		paddle := engi.NewEntity([]string{"RenderSystem", "CollisionSystem", "ControlSystem"})
 		paddleTexture := engi.Files.Image("paddle")
 		paddleRender := engi.NewRenderComponent(paddleTexture, engi.Point{2, 2}, "paddle")
-		paddleSpace := engi.SpaceComponent{engi.Point{(engi.Width() - ballTexture.Width()/2) * float32(i), (engi.Height() - ballTexture.Height()) / 2}, paddleRender.Scale.X * paddleTexture.Width(), paddleRender.Scale.Y * paddleTexture.Height()}
+		x := float32(0)
+		if i != 0 {
+			// x = (engi.Width() / 2) - (paddleTexture.Width() * paddleRender.Scale.X)
+			x = 800 - 16
+		}
+		paddleSpace := engi.SpaceComponent{engi.Point{x, (engi.Height() - paddleTexture.Height()) / 2}, paddleRender.Scale.X * paddleTexture.Width(), paddleRender.Scale.Y * paddleTexture.Height()}
+		paddleControl := ControlComponent{schemes[i]}
 		paddle.AddComponent(&paddleRender)
 		paddle.AddComponent(&paddleSpace)
+		paddle.AddComponent(&paddleControl)
 		pong.AddEntity(paddle)
 	}
 }
 
-type MovementSystem struct {
+type SpeedSystem struct {
 	*engi.System
 }
 
-func (ms *MovementSystem) New() {
+func (ms *SpeedSystem) New() {
 	ms.System = &engi.System{}
 	engi.TheWorld.Mailbox.Listen("CollisionMessage", ms)
 }
 
-func (ms MovementSystem) Name() string {
-	return "MovementSystem"
+func (ms SpeedSystem) Name() string {
+	return "SpeedSystem"
 }
 
-func (ms MovementSystem) Update(entity *engi.Entity, dt float32) {
+func (ms SpeedSystem) Update(entity *engi.Entity, dt float32) {
 	speed, hasSpeed := entity.GetComponent("SpeedComponent").(*SpeedComponent)
 	space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
 	if hasSpeed && hasSpace {
@@ -65,14 +75,14 @@ func (ms MovementSystem) Update(entity *engi.Entity, dt float32) {
 		space.Position.Y += speed.Y * dt
 	}
 }
-func (ms MovementSystem) Receive(message engi.Message) {
+func (ms SpeedSystem) Receive(message engi.Message) {
 	collision, isCollision := message.(engi.CollisionMessage)
 	if isCollision {
 		log.Println(collision, message)
-
 		speed, hasSpeed := collision.Entity.GetComponent("SpeedComponent").(*SpeedComponent)
 		if hasSpeed {
 			speed.X *= -1
+			speed.Y *= -1
 		}
 	}
 }
@@ -98,7 +108,74 @@ func (bs BallSystem) Name() string {
 }
 
 func (bs *BallSystem) Update(entity *engi.Entity, dt float32) {
+	space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
+	speed, hasSpeed := entity.GetComponent("SpeedComponent").(*SpeedComponent)
+	if hasSpace && hasSpeed {
+		if space.Position.X < 0 {
+			space.Position.X = 0
+			speed.X *= -1
+		}
 
+		if space.Position.Y < 0 {
+			space.Position.Y = 0
+			speed.Y *= -1
+		}
+
+		if space.Position.X > 800 {
+			space.Position.X = 800 - 16
+			speed.X *= -1
+		}
+
+		if space.Position.Y > 800 {
+			space.Position.Y = 800 - 16
+			speed.Y *= -1
+		}
+	}
+}
+
+type ControlSystem struct {
+	*engi.System
+}
+
+func (c *ControlSystem) Name() string {
+	return "ControlSystem"
+}
+func (c *ControlSystem) New() {
+	c.System = &engi.System{}
+}
+
+func (c *ControlSystem) Update(entity *engi.Entity, dt float32) {
+	//Check scheme
+	// -Move entity based on that
+	control, hasControl := entity.GetComponent("ControlComponent").(*ControlComponent)
+	space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
+	if hasControl && hasSpace {
+		up := false
+		down := false
+		if control.Scheme == "WASD" {
+			up = engi.Keys.KEY_W.Down()
+			down = engi.Keys.KEY_S.Down()
+		} else {
+			up = engi.Keys.KEY_UP.Down()
+			down = engi.Keys.KEY_DOWN.Down()
+		}
+
+		if up {
+			space.Position.Y -= 600 * dt
+		}
+
+		if down {
+			space.Position.Y += 600 * dt
+		}
+	}
+}
+
+type ControlComponent struct {
+	Scheme string
+}
+
+func (cs ControlComponent) Name() string {
+	return "ControlComponent"
 }
 
 func main() {
