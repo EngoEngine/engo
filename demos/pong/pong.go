@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/paked/engi"
+	"log"
 )
 
 type PongGame struct {
@@ -65,7 +66,15 @@ func (ms MovementSystem) Update(entity *engi.Entity, dt float32) {
 	}
 }
 func (ms MovementSystem) Receive(message engi.Message) {
-	println("WOOT")
+	collision, isCollision := message.(engi.CollisionMessage)
+	if isCollision {
+		log.Println(collision, message)
+
+		speed, hasSpeed := collision.Entity.GetComponent("SpeedComponent").(*SpeedComponent)
+		if hasSpeed {
+			speed.X *= -1
+		}
+	}
 }
 
 type SpeedComponent struct {

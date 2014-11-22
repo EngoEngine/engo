@@ -1,9 +1,5 @@
 package engi
 
-import (
-// "log"
-)
-
 type Systemer interface {
 	Update(entity *Entity, dt float32)
 	Name() string
@@ -16,6 +12,7 @@ type Systemer interface {
 	Push(message Message)
 	Receive(message Message)
 	Messages() []Message
+	Dismiss(i int)
 }
 
 type System struct {
@@ -49,6 +46,14 @@ func (system System) Messages() []Message {
 	return system.messageQueue
 }
 
+func (system *System) Dismiss(i int) {
+	// first := system.messageQueue[:i]
+	// second := system.messageQueue[i+1:]
+	// // a = append(a[:i], a[i+1:]...)
+	// system.messageQueue = append(system.messageQueue[:i], system.messageQueue[i+1])
+	system.messageQueue = system.messageQueue[:i+copy(system.messageQueue[i:], system.messageQueue[i+1:])]
+}
+
 type CollisionSystem struct {
 	*System
 }
@@ -72,7 +77,7 @@ func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 						mtd := MinimumTranslation(entityAABB, otherAABB)
 						space.Position.X += mtd.X
 						space.Position.Y += mtd.Y
-						TheWorld.Mailbox.Dispatch(CollisionMessage{})
+						TheWorld.Mailbox.Dispatch(CollisionMessage{entity})
 					}
 				}
 			}

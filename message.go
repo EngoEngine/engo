@@ -4,7 +4,9 @@ type Message interface {
 	Type() string
 }
 
-type CollisionMessage struct{}
+type CollisionMessage struct {
+	Entity *Entity
+}
 
 func (collision CollisionMessage) Type() string {
 	return "CollisionMessage"
