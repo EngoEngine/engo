@@ -1,5 +1,7 @@
 package engi
 
+// import "log"
+
 type Systemer interface {
 	Update(entity *Entity, dt float32)
 	Name() string
@@ -80,7 +82,7 @@ func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 				mtd := MinimumTranslation(entityAABB, otherAABB)
 				space.Position.X += mtd.X
 				space.Position.Y += mtd.Y
-				TheWorld.Mailbox.Dispatch(CollisionMessage{entity})
+				Mailbox.Dispatch(CollisionMessage{entity})
 			}
 		}
 	}

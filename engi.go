@@ -11,7 +11,7 @@ var (
 	Time      *Clock
 	Files     *Loader
 	gl        *webgl.Context
-	TheWorld  World
+	Mailbox   MessageManager
 	Gl        = gl
 )
 

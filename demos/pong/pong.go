@@ -97,7 +97,6 @@ func (ms SpeedSystem) Receive(message engi.Message) {
 		}
 
 		speed.X *= -1
-		// speed.Y *= -1
 	}
 }
 
