@@ -32,7 +32,7 @@ func (pong *PongGame) Setup() {
 	ballSpace := engi.SpaceComponent{engi.Point{(engi.Width() - ballTexture.Width()) / 2, (engi.Height() - ballTexture.Height()) / 2}, ballTexture.Width() * ballRender.Scale.X, ballTexture.Height() * ballRender.Scale.Y}
 	ballCollisionMaster := engi.CollisionMasterComponent{}
 	ballSpeed := SpeedComponent{}
-	ballSpeed.Point = engi.Point{300, 300}
+	ballSpeed.Point = engi.Point{300, 100}
 	ball.AddComponent(&ballRender)
 	ball.AddComponent(&ballSpace)
 	ball.AddComponent(&ballCollisionMaster)
@@ -71,7 +71,7 @@ type SpeedSystem struct {
 
 func (ms *SpeedSystem) New() {
 	ms.System = &engi.System{}
-	engi.TheWorld.Mailbox.Listen("CollisionMessage", ms)
+	engi.Mailbox.Listen("CollisionMessage", ms)
 }
 
 func (ms SpeedSystem) Name() string {
@@ -128,7 +128,8 @@ func (bs *BallSystem) Update(entity *engi.Entity, dt float32) {
 	}
 
 	if space.Position.X < 0 {
-		engi.TheWorld.Mailbox.Dispatch(ScoreMessage{1})
+		engi.Mailbox.Dispatch(ScoreMessage{1})
+		// engi.TheWorld.Mailbox.Dispatch(ScoreMessage{1})
 
 		space.Position.X = 400 - 16
 		space.Position.Y = 400 - 16
@@ -142,7 +143,7 @@ func (bs *BallSystem) Update(entity *engi.Entity, dt float32) {
 	}
 
 	if space.Position.X > 800 {
-		engi.TheWorld.Mailbox.Dispatch(ScoreMessage{2})
+		engi.Mailbox.Dispatch(ScoreMessage{2})
 
 		space.Position.X = 400 - 16
 		space.Position.Y = 400 - 16
@@ -218,7 +219,7 @@ func (score *ScoreSystem) Name() string {
 
 func (c *ScoreSystem) New() {
 	c.System = &engi.System{}
-	engi.TheWorld.Mailbox.Listen("ScoreMessage", c)
+	engi.Mailbox.Listen("ScoreMessage", c)
 }
 
 func (sc *ScoreSystem) Receive(message engi.Message) {

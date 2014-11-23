@@ -9,7 +9,6 @@ type World struct {
 	Game
 	entities []*Entity
 	systems  []Systemer
-	Mailbox  MessageManager
 }
 
 func (w *World) AddEntity(entity *Entity) {

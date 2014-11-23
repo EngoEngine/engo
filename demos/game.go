@@ -7,7 +7,9 @@ import (
 	"log"
 )
 
-var World *Game
+var (
+	W Game
+)
 
 type Game struct {
 	engi.World
@@ -23,11 +25,12 @@ func (game *Game) Setup() {
 	engi.SetBg(0x2d3739)
 	game.AddSystem(&engi.RenderSystem{})
 	game.AddSystem(&engi.CollisionSystem{})
+	game.AddSystem(&DeathSystem{})
 	game.AddSystem(&FallingSystem{})
 	game.AddSystem(&ControlSystem{})
 	game.AddSystem(&RockSpawnSystem{})
 
-	guy := engi.NewEntity([]string{"RenderSystem", "ControlSystem", "RockSpawnSystem", "CollisionSystem"})
+	guy := engi.NewEntity([]string{"RenderSystem", "ControlSystem", "RockSpawnSystem", "CollisionSystem", "DeathSystem"})
 	texture := engi.Files.Image("guy")
 	render := engi.NewRenderComponent(texture, engi.Point{4, 4}, "guy")
 	collisionMaster := engi.CollisionMasterComponent{}
@@ -41,6 +44,8 @@ func (game *Game) Setup() {
 	guy.AddComponent(&collisionMaster)
 
 	game.AddEntity(guy)
+
+	game.AddEntity(NewRock())
 }
 
 type ControlSystem struct {
@@ -57,7 +62,6 @@ func (control ControlSystem) Name() string {
 
 func (control *ControlSystem) Update(entity *engi.Entity, dt float32) {
 	var space *engi.SpaceComponent
-	// space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
 	if !entity.GetComponent(&space) {
 		return
 	}
@@ -95,12 +99,11 @@ func (rock *RockSpawnSystem) New() {
 
 func (rock *RockSpawnSystem) Update(entity *engi.Entity, dt float32) {
 	if engi.Keys.KEY_SPACE.JustPressed() {
-		World.AddEntity(NewRock())
 	}
 }
 
 func NewRock() *engi.Entity {
-	rock := engi.NewEntity([]string{"RenderSystem", "FallingSystem", "CollisionSystem"})
+	rock := engi.NewEntity([]string{"RenderSystem", "FallingSystem", "CollisionSystem", "SpeedSystem"})
 	texture := engi.Files.Image("rock")
 	render := engi.NewRenderComponent(texture, engi.Point{4, 4}, "rock")
 	space := engi.SpaceComponent{engi.Point{10, 10}, texture.Width() * render.Scale.X, texture.Height() * render.Scale.Y}
@@ -113,33 +116,50 @@ type FallingSystem struct {
 	*engi.System
 }
 
-func (falling *FallingSystem) New() {
-	falling.System = &engi.System{}
-	engi.Mailbox.Listen("CollisionMessage", falling)
+func (fs *FallingSystem) New() {
+	fs.System = &engi.System{}
+	engi.Mailbox.Listen("CollisionMessage", fs)
 }
 
-func (falling *FallingSystem) Name() string {
+func (fs FallingSystem) Name() string {
 	return "FallingSystem"
 }
 
-func (falling FallingSystem) Recieve(message engi.Message) {
-	// collisonMessage, isCollisionMesage := message.(engi.CollisionMessage)
-	// if !isCollisionMesage {
-	// 	return
-	// }
-	log.Println("RECD MESSAGE")
-}
-
-func (falling *FallingSystem) Update(entity *engi.Entity, dt float32) {
+func (fs FallingSystem) Update(entity *engi.Entity, dt float32) {
 	var space *engi.SpaceComponent
 	if !entity.GetComponent(&space) {
 		return
 	}
-
 	space.Position.Y += 200 * dt
+}
+
+type DeathSystem struct {
+	*engi.System
+}
+
+func (ds *DeathSystem) New() {
+	ds.System = &engi.System{}
+	engi.Mailbox.Listen("CollisionMessage", ds)
+}
+
+func (ds DeathSystem) Name() string {
+	return "DeathSystem"
+}
+
+func (fs DeathSystem) Update(entity *engi.Entity, dt float32) {
+
+}
+
+func (fs DeathSystem) Receive(message engi.Message) {
+	collision, isCollision := message.(engi.CollisionMessage)
+	if isCollision {
+		log.Println(collision, message)
+		log.Println("DEAD")
+	}
 }
 
 func main() {
 	log.Println("[Game] Says hello, written in github.com/paked/engi + Go")
-	engi.Open("Stream Game", 800, 800, false, &Game{})
+	W = Game{}
+	engi.Open("Stream Game", 800, 800, false, &W)
 }
