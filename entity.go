@@ -3,22 +3,18 @@ package engi
 type Entity struct {
 	id         string
 	components []Component
-	requires   []string
+	requires   map[string]bool
 }
 
 func NewEntity(requires []string) *Entity {
-	return &Entity{requires: requires}
-}
-
-func (e *Entity) DoesRequire(name string) bool {
-	for _, requirement := range e.requires {
-		if requirement == name {
-			return true
-		}
+	e := &Entity{requires: make(map[string]bool)}
+	for _, req := range requires {
+		e.requires[req] = true
 	}
-
-	return false
+	return e
 }
+
+func (e *Entity) DoesRequire(name string) bool { return e.requires[name] }
 
 func (e *Entity) AddComponent(component Component) {
 	e.components = append(e.components, component)
