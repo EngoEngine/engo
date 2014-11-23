@@ -59,23 +59,33 @@ func (cs *CollisionSystem) New() {
 }
 
 func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
-	space, hasSpace := entity.GetComponent("SpaceComponent").(*SpaceComponent)
-	_, hasCollisionMaster := entity.GetComponent("CollisionMasterComponent").(*CollisionMasterComponent)
-	if hasSpace && hasCollisionMaster {
-		// log.Println("Youre in the club", space)
-		for _, other := range cs.Entities() {
-			if other.ID() != entity.ID() {
-				otherSpace, otherHasSpace := other.GetComponent("SpaceComponent").(*SpaceComponent)
-				if otherHasSpace {
-					entityAABB := space.AABB()
-					otherAABB := otherSpace.AABB()
-					if IsIntersecting(entityAABB, otherAABB) {
-						mtd := MinimumTranslation(entityAABB, otherAABB)
-						space.Position.X += mtd.X
-						space.Position.Y += mtd.Y
-						TheWorld.Mailbox.Dispatch(CollisionMessage{entity})
-					}
-				}
+	var space *SpaceComponent
+
+	if !entity.GetComponent(space) {
+		return
+	}
+
+	if !entity.GetComponent(&CollisionMasterComponent{}) {
+		return
+	}
+
+	for _, other := range cs.Entities() {
+		if other.ID() != entity.ID() {
+			// var  := &SpaceComponent{}
+			var otherSpace *SpaceComponent
+
+			hasOtherSpace := other.GetComponent(otherSpace)
+			if !hasOtherSpace {
+				return
+			}
+
+			entityAABB := space.AABB()
+			otherAABB := otherSpace.AABB()
+			if IsIntersecting(entityAABB, otherAABB) {
+				mtd := MinimumTranslation(entityAABB, otherAABB)
+				space.Position.X += mtd.X
+				space.Position.Y += mtd.Y
+				TheWorld.Mailbox.Dispatch(CollisionMessage{entity})
 			}
 		}
 	}
@@ -105,17 +115,22 @@ func (rs RenderSystem) Post() {
 }
 
 func (rs *RenderSystem) Update(entity *Entity, dt float32) {
-	render, hasRender := entity.GetComponent("RenderComponent").(*RenderComponent)
-	space, hasSpace := entity.GetComponent("SpaceComponent").(*SpaceComponent)
-	if hasRender && hasSpace {
-		switch render.Display.(type) {
-		case Drawable:
-			drawable := render.Display.(Drawable)
-			rs.batch.Draw(drawable, space.Position.X, space.Position.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, 0xffffff, 1)
-		case *Font:
-			font := render.Display.(*Font)
-			font.Print(rs.batch, render.Label, space.Position.X, space.Position.Y, 0xffffff)
-		}
+	var render *RenderComponent
+	var space *SpaceComponent
+
+	hasRender := entity.GetComponent(render)
+	hasSpace := entity.GetComponent(space)
+	if !hasRender || !hasSpace {
+		return
+	}
+
+	switch render.Display.(type) {
+	case Drawable:
+		drawable := render.Display.(Drawable)
+		rs.batch.Draw(drawable, space.Position.X, space.Position.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, 0xffffff, 1)
+	case *Font:
+		font := render.Display.(*Font)
+		font.Print(rs.batch, render.Label, space.Position.X, space.Position.Y, 0xffffff)
 	}
 }
 

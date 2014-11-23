@@ -134,10 +134,11 @@ func (falling *FallingSystem) Recieve(message engi.Message) {
 }
 
 func (falling *FallingSystem) Update(entity *engi.Entity, dt float32) {
-	space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
-	if !hasSpace {
-		return
-	}
+	space
+	// space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
+	// if !hasSpace {
+	// 	return
+	// }
 
 	space.Position.Y += 200 * dt
 }

@@ -79,8 +79,9 @@ func (ms SpeedSystem) Name() string {
 }
 
 func (ms SpeedSystem) Update(entity *engi.Entity, dt float32) {
-	speed, hasSpeed := entity.GetComponent("SpeedComponent").(*SpeedComponent)
-	space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
+	var speed *SpeedComponent
+	// speed, hasSpeed := entity.GetComponent("SpeedComponent").(*SpeedComponent)
+	// space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
 	if hasSpeed && hasSpace {
 		space.Position.X += speed.X * dt
 		space.Position.Y += speed.Y * dt
