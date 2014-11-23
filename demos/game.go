@@ -1,5 +1,3 @@
-//GAME IDEAS GUSY. GIVE ME SOME STUFF - QUICK as an example kinda trhing
-
 package main
 
 import (

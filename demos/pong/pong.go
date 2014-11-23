@@ -129,12 +129,11 @@ func (bs *BallSystem) Update(entity *engi.Entity, dt float32) {
 
 	if space.Position.X < 0 {
 		engi.Mailbox.Dispatch(ScoreMessage{1})
-		// engi.TheWorld.Mailbox.Dispatch(ScoreMessage{1})
 
 		space.Position.X = 400 - 16
 		space.Position.Y = 400 - 16
-		speed.X = 300 * rand.Float32()
-		speed.Y = 300 * rand.Float32()
+		speed.X = 800 * rand.Float32()
+		speed.Y = 800 * rand.Float32()
 	}
 
 	if space.Position.Y < 0 {
@@ -142,18 +141,17 @@ func (bs *BallSystem) Update(entity *engi.Entity, dt float32) {
 		speed.Y *= -1
 	}
 
-	if space.Position.X > 800 {
+	if space.Position.X > (800 - 16) {
 		engi.Mailbox.Dispatch(ScoreMessage{2})
 
 		space.Position.X = 400 - 16
 		space.Position.Y = 400 - 16
-		speed.X = 300 * rand.Float32()
-		speed.Y = 300 * rand.Float32()
+		speed.X = 800 * rand.Float32()
+		speed.Y = 800 * rand.Float32()
 	}
 
-	if space.Position.Y > 800 {
-		space.Position.Y = 800 - 16
-
+	if space.Position.Y > (800 - 16) {
+		// space.Position.Y = 800 - 16
 		speed.Y *= -1
 	}
 }
