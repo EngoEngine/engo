@@ -1,36 +1,39 @@
 package engi
 
+import (
+	"reflect"
+)
+
 type Entity struct {
 	id         string
-	components []Component
-	requires   []string
+	components map[reflect.Type]Component
+	requires   map[string]bool
 }
 
 func NewEntity(requires []string) *Entity {
-	return &Entity{requires: requires}
-}
-
-func (e *Entity) DoesRequire(name string) bool {
-	for _, requirement := range e.requires {
-		if requirement == name {
-			return true
-		}
+	e := &Entity{requires: make(map[string]bool)}
+	for _, req := range requires {
+		e.requires[req] = true
 	}
-
-	return false
+	return e
 }
+
+func (e *Entity) DoesRequire(name string) bool { return e.requires[name] }
 
 func (e *Entity) AddComponent(component Component) {
-	e.components = append(e.components, component)
+	e.components[reflect.TypeOf(component)] = component
 }
 
-func (e *Entity) GetComponent(name string) Component {
-	for _, component := range e.components {
-		if component.Name() == name {
-			return component
-		}
+// GetComponent takes a double pointer to a Component,
+// and populates it with the value of the right type.
+func (e *Entity) GetComponent(x interface{}) bool {
+	v := reflect.ValueOf(x).Elem() // *T
+	c, ok := e.components[v.Type()]
+	if !ok {
+		return false
 	}
-	return nil
+	v.Set(reflect.ValueOf(c))
+	return true
 }
 
 func (e *Entity) ID() string {
