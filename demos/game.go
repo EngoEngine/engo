@@ -58,8 +58,9 @@ func (control ControlSystem) Name() string {
 }
 
 func (control *ControlSystem) Update(entity *engi.Entity, dt float32) {
-	space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
-	if !hasSpace {
+	var space *engi.SpaceComponent
+	// space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
+	if !entity.GetComponent(&space) {
 		return
 	}
 

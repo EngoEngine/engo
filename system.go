@@ -60,12 +60,8 @@ func (cs *CollisionSystem) New() {
 
 func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 	var space *SpaceComponent
-
-	if !entity.GetComponent(space) {
-		return
-	}
-
-	if !entity.GetComponent(&CollisionMasterComponent{}) {
+	var collisionMaster *CollisionMasterComponent
+	if !entity.GetComponent(&space) || !entity.GetComponent(&collisionMaster) {
 		return
 	}
 
@@ -74,8 +70,7 @@ func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 			// var  := &SpaceComponent{}
 			var otherSpace *SpaceComponent
 
-			hasOtherSpace := other.GetComponent(otherSpace)
-			if !hasOtherSpace {
+			if !other.GetComponent(&otherSpace) {
 				return
 			}
 
@@ -118,9 +113,12 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 	var render *RenderComponent
 	var space *SpaceComponent
 
-	hasRender := entity.GetComponent(render)
-	hasSpace := entity.GetComponent(space)
-	if !hasRender || !hasSpace {
+	// hasRender := entity.GetComponent(render)
+	// hasSpace := entity.GetComponent(space)
+	// if !hasRender || !hasSpace {
+	// 	return
+	// }
+	if !entity.GetComponent(&render) || !entity.GetComponent(&space) {
 		return
 	}
 

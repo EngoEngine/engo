@@ -1,6 +1,7 @@
 package engi
 
 import (
+	// "log"
 	"reflect"
 )
 
@@ -11,7 +12,7 @@ type Entity struct {
 }
 
 func NewEntity(requires []string) *Entity {
-	e := &Entity{requires: make(map[string]bool)}
+	e := &Entity{requires: make(map[string]bool), components: make(map[reflect.Type]Component)}
 	for _, req := range requires {
 		e.requires[req] = true
 	}

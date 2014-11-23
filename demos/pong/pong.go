@@ -80,22 +80,24 @@ func (ms SpeedSystem) Name() string {
 
 func (ms SpeedSystem) Update(entity *engi.Entity, dt float32) {
 	var speed *SpeedComponent
-	// speed, hasSpeed := entity.GetComponent("SpeedComponent").(*SpeedComponent)
-	// space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
-	if hasSpeed && hasSpace {
-		space.Position.X += speed.X * dt
-		space.Position.Y += speed.Y * dt
+	var space *engi.SpaceComponent
+	if !entity.GetComponent(&speed) || !entity.GetComponent(&space) {
+		return
 	}
+	space.Position.X += speed.X * dt
+	space.Position.Y += speed.Y * dt
 }
 func (ms SpeedSystem) Receive(message engi.Message) {
 	collision, isCollision := message.(engi.CollisionMessage)
 	if isCollision {
 		log.Println(collision, message)
-		speed, hasSpeed := collision.Entity.GetComponent("SpeedComponent").(*SpeedComponent)
-		if hasSpeed {
-			speed.X *= -1
-			speed.Y *= -1
+		var speed *SpeedComponent
+		if !collision.Entity.GetComponent(&speed) {
+			return
 		}
+
+		speed.X *= -1
+		// speed.Y *= -1
 	}
 }
 
@@ -120,37 +122,39 @@ func (bs BallSystem) Name() string {
 }
 
 func (bs *BallSystem) Update(entity *engi.Entity, dt float32) {
-	space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
-	speed, hasSpeed := entity.GetComponent("SpeedComponent").(*SpeedComponent)
-	if hasSpace && hasSpeed {
-		if space.Position.X < 0 {
-			engi.TheWorld.Mailbox.Dispatch(ScoreMessage{1})
+	var space *engi.SpaceComponent
+	var speed *SpeedComponent
+	if !entity.GetComponent(&space) || !entity.GetComponent(&speed) {
+		return
+	}
 
-			space.Position.X = 400 - 16
-			space.Position.Y = 400 - 16
-			speed.X = 300 * rand.Float32()
-			speed.Y = 300 * rand.Float32()
-		}
+	if space.Position.X < 0 {
+		engi.TheWorld.Mailbox.Dispatch(ScoreMessage{1})
 
-		if space.Position.Y < 0 {
-			space.Position.Y = 0
-			speed.Y *= -1
-		}
+		space.Position.X = 400 - 16
+		space.Position.Y = 400 - 16
+		speed.X = 300 * rand.Float32()
+		speed.Y = 300 * rand.Float32()
+	}
 
-		if space.Position.X > 800 {
-			engi.TheWorld.Mailbox.Dispatch(ScoreMessage{2})
+	if space.Position.Y < 0 {
+		space.Position.Y = 0
+		speed.Y *= -1
+	}
 
-			space.Position.X = 400 - 16
-			space.Position.Y = 400 - 16
-			speed.X = 300 * rand.Float32()
-			speed.Y = 300 * rand.Float32()
-		}
+	if space.Position.X > 800 {
+		engi.TheWorld.Mailbox.Dispatch(ScoreMessage{2})
 
-		if space.Position.Y > 800 {
-			space.Position.Y = 800 - 16
+		space.Position.X = 400 - 16
+		space.Position.Y = 400 - 16
+		speed.X = 300 * rand.Float32()
+		speed.Y = 300 * rand.Float32()
+	}
 
-			speed.Y *= -1
-		}
+	if space.Position.Y > 800 {
+		space.Position.Y = 800 - 16
+
+		speed.Y *= -1
 	}
 }
 
@@ -170,27 +174,30 @@ func (c *ControlSystem) New() {
 func (c *ControlSystem) Update(entity *engi.Entity, dt float32) {
 	//Check scheme
 	// -Move entity based on that
-	control, hasControl := entity.GetComponent("ControlComponent").(*ControlComponent)
-	space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
-	if hasControl && hasSpace {
-		up := false
-		down := false
-		if control.Scheme == "WASD" {
-			up = engi.Keys.KEY_W.Down()
-			down = engi.Keys.KEY_S.Down()
-		} else {
-			up = engi.Keys.KEY_UP.Down()
-			down = engi.Keys.KEY_DOWN.Down()
-		}
+	var control *ControlComponent
+	var space *engi.SpaceComponent
 
-		if up {
-			space.Position.Y -= 800 * dt
-		}
-
-		if down {
-			space.Position.Y += 800 * dt
-		}
+	if !entity.GetComponent(&space) || !entity.GetComponent(&control) {
+		return
 	}
+	up := false
+	down := false
+	if control.Scheme == "WASD" {
+		up = engi.Keys.KEY_W.Down()
+		down = engi.Keys.KEY_S.Down()
+	} else {
+		up = engi.Keys.KEY_UP.Down()
+		down = engi.Keys.KEY_DOWN.Down()
+	}
+
+	if up {
+		space.Position.Y -= 800 * dt
+	}
+
+	if down {
+		space.Position.Y += 800 * dt
+	}
+
 }
 
 type ControlComponent struct {
@@ -229,10 +236,9 @@ func (sc *ScoreSystem) Receive(message engi.Message) {
 }
 
 func (c *ScoreSystem) Update(entity *engi.Entity, dt float32) {
-
-	render, hasRender := entity.GetComponent("RenderComponent").(*engi.RenderComponent)
-	space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
-	if !hasRender || !hasSpace {
+	var render *engi.RenderComponent
+	var space *engi.SpaceComponent
+	if !entity.GetComponent(&render) || !entity.GetComponent(&space) {
 		return
 	}
 
