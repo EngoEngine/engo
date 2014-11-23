@@ -32,7 +32,7 @@ func MinimumTranslation(rect1 AABB, rect2 AABB) Point {
 	}
 
 	if top > 0 || bottom < 0 {
-		log.Println("Box aint interyepting")
+		log.Println("Box aint intercepting")
 		return mtd
 		//box doesnt intercept
 	}

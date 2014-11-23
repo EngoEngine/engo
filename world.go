@@ -9,6 +9,7 @@ type World struct {
 	Game
 	entities []*Entity
 	systems  []Systemer
+	Mailbox  MessageManager
 }
 
 func (w *World) AddEntity(entity *Entity) {
@@ -39,6 +40,10 @@ func (w *World) Update(dt float32) {
 	for _, system := range w.Systems() {
 		system.Pre()
 		for _, entity := range system.Entities() {
+			for i, message := range system.Messages() {
+				system.Receive(message)
+				system.Dismiss(i)
+			}
 			system.Update(entity, dt)
 		}
 		system.Post()

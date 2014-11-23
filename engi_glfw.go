@@ -111,7 +111,6 @@ func run(title string, width, height int, fullscreen bool) {
 
 	for !window.ShouldClose() {
 		responder.Update(Time.Delta())
-
 		window.SwapBuffers()
 		glfw.PollEvents()
 		keysUpdate()

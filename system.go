@@ -1,8 +1,6 @@
 package engi
 
-import (
-// "log"
-)
+// import "log"
 
 type Systemer interface {
 	Update(entity *Entity, dt float32)
@@ -13,10 +11,15 @@ type Systemer interface {
 	New()
 	Entities() []*Entity
 	AddEntity(entity *Entity)
+	Push(message Message)
+	Receive(message Message)
+	Messages() []Message
+	Dismiss(i int)
 }
 
 type System struct {
-	entities []*Entity
+	entities     []*Entity
+	messageQueue []Message
 }
 
 func (s System) New()  {}
@@ -35,6 +38,20 @@ func (s *System) AddEntity(entity *Entity) {
 	s.entities = append(s.entities, entity)
 }
 
+func (system *System) Push(message Message) {
+	system.messageQueue = append(system.messageQueue, message)
+}
+
+func (system System) Receive(message Message) {}
+
+func (system System) Messages() []Message {
+	return system.messageQueue
+}
+
+func (system *System) Dismiss(i int) {
+	system.messageQueue = system.messageQueue[:i+copy(system.messageQueue[i:], system.messageQueue[i+1:])]
+}
+
 type CollisionSystem struct {
 	*System
 }
@@ -44,22 +61,28 @@ func (cs *CollisionSystem) New() {
 }
 
 func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
-	space, hasSpace := entity.GetComponent("SpaceComponent").(*SpaceComponent)
-	_, hasCollisionMaster := entity.GetComponent("CollisionMasterComponent").(*CollisionMasterComponent)
-	if hasSpace && hasCollisionMaster {
-		// log.Println("Youre in the club", space)
-		for _, other := range cs.Entities() {
-			if other.ID() != entity.ID() {
-				otherSpace, otherHasSpace := other.GetComponent("SpaceComponent").(*SpaceComponent)
-				if otherHasSpace {
-					entityAABB := space.AABB()
-					otherAABB := otherSpace.AABB()
-					if IsIntersecting(entityAABB, otherAABB) {
-						mtd := MinimumTranslation(entityAABB, otherAABB)
-						space.Position.X += mtd.X
-						space.Position.Y += mtd.Y
-					}
-				}
+	var space *SpaceComponent
+	var collisionMaster *CollisionMasterComponent
+	if !entity.GetComponent(&space) || !entity.GetComponent(&collisionMaster) {
+		return
+	}
+
+	for _, other := range cs.Entities() {
+		if other.ID() != entity.ID() {
+			// var  := &SpaceComponent{}
+			var otherSpace *SpaceComponent
+
+			if !other.GetComponent(&otherSpace) {
+				return
+			}
+
+			entityAABB := space.AABB()
+			otherAABB := otherSpace.AABB()
+			if IsIntersecting(entityAABB, otherAABB) {
+				mtd := MinimumTranslation(entityAABB, otherAABB)
+				space.Position.X += mtd.X
+				space.Position.Y += mtd.Y
+				Mailbox.Dispatch(CollisionMessage{entity})
 			}
 		}
 	}
@@ -89,17 +112,25 @@ func (rs RenderSystem) Post() {
 }
 
 func (rs *RenderSystem) Update(entity *Entity, dt float32) {
-	render, hasRender := entity.GetComponent("RenderComponent").(*RenderComponent)
-	space, hasSpace := entity.GetComponent("SpaceComponent").(*SpaceComponent)
-	if hasRender && hasSpace {
-		switch render.Display.(type) {
-		case Drawable:
-			drawable := render.Display.(Drawable)
-			rs.batch.Draw(drawable, space.Position.X, space.Position.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, 0xffffff, 1)
-		case *Font:
-			font := render.Display.(*Font)
-			font.Print(rs.batch, render.Label, space.Position.X, space.Position.Y, 0xffffff)
-		}
+	var render *RenderComponent
+	var space *SpaceComponent
+
+	// hasRender := entity.GetComponent(render)
+	// hasSpace := entity.GetComponent(space)
+	// if !hasRender || !hasSpace {
+	// 	return
+	// }
+	if !entity.GetComponent(&render) || !entity.GetComponent(&space) {
+		return
+	}
+
+	switch render.Display.(type) {
+	case Drawable:
+		drawable := render.Display.(Drawable)
+		rs.batch.Draw(drawable, space.Position.X, space.Position.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, 0xffffff, 1)
+	case *Font:
+		font := render.Display.(*Font)
+		font.Print(rs.batch, render.Label, space.Position.X, space.Position.Y, 0xffffff)
 	}
 }
 
