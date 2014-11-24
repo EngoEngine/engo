@@ -12,7 +12,8 @@ type glyph struct {
 }
 
 type Font struct {
-	glyphs map[rune]*glyph
+	glyphs                map[rune]*glyph
+	cellWidth, cellHeight int
 }
 
 func NewGridFont(texture *Texture, cellWidth, cellHeight int) *Font {
@@ -28,7 +29,7 @@ func NewGridFont(texture *Texture, cellWidth, cellHeight int) *Font {
 		}
 	}
 
-	return &Font{glyphs}
+	return &Font{glyphs, cellWidth, cellHeight}
 }
 
 func (f *Font) Remap(mapping string) {
@@ -57,4 +58,12 @@ func (f *Font) Print(batch *Batch, text string, x, y float32, color uint32) {
 			xx += g.xadvance
 		}
 	}
+}
+
+func (f *Font) CellWidth() int {
+	return f.cellWidth
+}
+
+func (f *Font) CellHeight() int {
+	return f.cellHeight
 }

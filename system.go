@@ -115,11 +115,6 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 	var render *RenderComponent
 	var space *SpaceComponent
 
-	// hasRender := entity.GetComponent(render)
-	// hasSpace := entity.GetComponent(space)
-	// if !hasRender || !hasSpace {
-	// 	return
-	// }
 	if !entity.GetComponent(&render) || !entity.GetComponent(&space) {
 		return
 	}
@@ -131,6 +126,9 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 	case *Font:
 		font := render.Display.(*Font)
 		font.Print(rs.batch, render.Label, space.Position.X, space.Position.Y, 0xffffff)
+	case *Text:
+		text := render.Display.(*Text)
+		text.Draw(rs.batch, space.Position)
 	}
 }
 
