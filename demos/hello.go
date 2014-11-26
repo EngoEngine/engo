@@ -37,11 +37,10 @@ func (game *GameWorld) Setup() {
 	textTexture := engi.NewText("Hello World", engi.NewGridFont(engi.Files.Image("font"), 20, 20))
 	textRender := engi.NewRenderComponent(textTexture, engi.Point{1, 1}, "yolo?")
 	textSpace := engi.SpaceComponent{engi.Point{100, 100}, textTexture.Width(), textTexture.Height()}
-	// text.AddComponent(&textTexture)
+
 	text.AddComponent(&textRender)
 	text.AddComponent(&textSpace)
 	game.AddEntity(text)
-	// textRender := engi.SpaceComponent{Position: engi.Point{100, 100}}
 }
 
 type MovingSystem struct {

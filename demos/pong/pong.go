@@ -151,12 +151,10 @@ func (bs *BallSystem) Update(entity *engi.Entity, dt float32) {
 	}
 
 	if space.Position.Y > (800 - 16) {
-		// space.Position.Y = 800 - 16
+		space.Position.Y = 800 - 16
 		speed.Y *= -1
 	}
 }
-
-// func ResetBall(space, speed)
 
 type ControlSystem struct {
 	*engi.System
