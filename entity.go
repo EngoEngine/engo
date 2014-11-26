@@ -8,6 +8,7 @@ type Entity struct {
 	id         string
 	components map[reflect.Type]Component
 	requires   map[string]bool
+	Exists     bool
 }
 
 func NewEntity(requires []string) *Entity {
@@ -15,6 +16,7 @@ func NewEntity(requires []string) *Entity {
 	for _, req := range requires {
 		e.requires[req] = true
 	}
+	e.Exists = true
 	return e
 }
 

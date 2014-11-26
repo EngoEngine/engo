@@ -1,7 +1,5 @@
 package engi
 
-// import "log"
-
 type Systemer interface {
 	Update(entity *Entity, dt float32)
 	Name() string
