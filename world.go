@@ -38,11 +38,11 @@ func (w *World) Systems() []Systemer {
 func (w *World) Update(dt float32) {
 	for _, system := range w.Systems() {
 		system.Pre()
+		for i, message := range system.Messages() {
+			system.Receive(message)
+			system.Dismiss(i)
+		}
 		for _, entity := range system.Entities() {
-			for i, message := range system.Messages() {
-				system.Receive(message)
-				system.Dismiss(i)
-			}
 			system.Update(entity, dt)
 		}
 		system.Post()
