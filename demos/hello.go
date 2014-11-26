@@ -15,6 +15,7 @@ type GameWorld struct {
 func (game *GameWorld) Preload() {
 	engi.Files.Add("bot", "data/icon.png")
 	engi.Files.Add("font", "data/font.png")
+	engi.Files.Add("rock", "data/rock.png")
 	game.batch = engi.NewBatch(engi.Width(), engi.Height())
 	log.Println("Preloaded")
 }

@@ -8,13 +8,13 @@ type Tilemap struct {
 
 type Tile struct {
 	Point
-	Image Drawable
+	Image *Texture
 }
 
 func NewTilemap() *Tilemap {
 	tilemap := Tilemap{}
 	// size := Point{10, 10}
-	mapString := [][]string{{"1", "1", "1"}, {"1", "0", "1"}, {"1", "1", "1"}}
+	mapString := [][]string{{"1", "2", "1"}, {"1", "0", "1"}, {"1", "2", "1"}}
 	position := Point{}
 	tilesize := 16
 
@@ -24,8 +24,15 @@ func NewTilemap() *Tilemap {
 	}
 
 	for y, slice := range mapString {
-		for x, _ := range slice {
-			tile := Tile{Point: Point{position.X + float32(x*tilesize), position.Y + float32(y*tilesize)}, Image: Files.Image("bot")}
+		for x, key := range slice {
+			var image *Texture
+			switch key {
+			case "1":
+				image = Files.Image("bot")
+			case "2":
+				image = Files.Image("rock")
+			}
+			tile := Tile{Point: Point{position.X + float32(x*tilesize), position.Y + float32(y*tilesize)}, Image: image}
 			tilemap.Tiles[y][x] = tile
 		}
 	}
