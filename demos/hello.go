@@ -41,6 +41,15 @@ func (game *GameWorld) Setup() {
 	text.AddComponent(&textRender)
 	text.AddComponent(&textSpace)
 	game.AddEntity(text)
+
+	gameMap := engi.NewEntity([]string{"RenderSystem"})
+	tilemap := engi.NewTilemap()
+	mapRender := engi.NewRenderComponent(tilemap, engi.Point{1, 1}, "map")
+	mapSpace := engi.SpaceComponent{engi.Point{100, 100}, textTexture.Width(), textTexture.Height()}
+	gameMap.AddComponent(&mapRender)
+	gameMap.AddComponent(&mapSpace)
+
+	game.AddEntity(gameMap)
 }
 
 type MovingSystem struct {

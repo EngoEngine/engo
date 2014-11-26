@@ -1,5 +1,7 @@
 package engi
 
+import "log"
+
 type Systemer interface {
 	Update(entity *Entity, dt float32)
 	Name() string
@@ -127,7 +129,18 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 	case *Text:
 		text := render.Display.(*Text)
 		text.Draw(rs.batch, space.Position)
+	case *Tilemap:
+		tilemap := render.Display.(*Tilemap)
+		// tilesize := 16
+		for _, slice := range tilemap.Tiles {
+			for _, tile := range slice {
+				log.Printf("%T", tile.Image)
+				rs.batch.Draw(tile.Image, tile.X, tile.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
+			}
+		}
 	}
+
+	log.Printf("%T", render.Display)
 }
 
 func (rs RenderSystem) Name() string {
