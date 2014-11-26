@@ -76,6 +76,10 @@ func (ms *MovingSystem) Update(entity *engi.Entity, dt float32) {
 	if engi.Keys.KEY_S.Down() {
 		space.Position.Y += vel
 	}
+
+	if engi.Keys.KEY_SPACE.JustPressed() {
+		entity.Exists = false
+	}
 }
 
 func (ms MovingSystem) Name() string {
