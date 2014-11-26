@@ -44,7 +44,7 @@ func (game *GameWorld) Setup() {
 	game.AddEntity(text)
 
 	gameMap := engi.NewEntity([]string{"RenderSystem"})
-	tilemap := engi.NewTilemap()
+	tilemap := engi.NewTilemap([][]string{{"1", "2", "1"}, {"1", "0", "1"}, {"1", "2", "1"}, {"1", "2", "1"}})
 	mapRender := engi.NewRenderComponent(tilemap, engi.Point{1, 1}, "map")
 	mapSpace := engi.SpaceComponent{engi.Point{100, 100}, textTexture.Width(), textTexture.Height()}
 	gameMap.AddComponent(&mapRender)

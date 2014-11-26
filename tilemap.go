@@ -11,10 +11,8 @@ type Tile struct {
 	Image *Texture
 }
 
-func NewTilemap() *Tilemap {
+func NewTilemap(mapString [][]string) *Tilemap {
 	tilemap := Tilemap{}
-	// size := Point{10, 10}
-	mapString := [][]string{{"1", "2", "1"}, {"1", "0", "1"}, {"1", "2", "1"}}
 	position := Point{}
 	tilesize := 16
 
