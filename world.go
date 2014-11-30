@@ -21,6 +21,15 @@ func (w *World) AddEntity(entity *Entity) {
 	}
 }
 
+// func (w *World) RemoveEntity(e *Entity) {
+// 	for i, match := range w.Entities() {
+// 		if e.ID() == match.ID() {
+// 			w.entities = append(w.entities[i:], w.entities[:i+1]...)
+// 			return
+// 		}
+// 	}
+// }
+
 func (w *World) AddSystem(system Systemer) {
 	system.New()
 	w.systems = append(w.systems, system)

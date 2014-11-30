@@ -151,6 +151,7 @@ func (fs DeathSystem) Update(entity *engi.Entity, dt float32) {
 func (fs DeathSystem) Receive(message engi.Message) {
 	collision, isCollision := message.(engi.CollisionMessage)
 	if isCollision {
+		W.RemoveEntity(collision.Entity)
 		log.Println(collision, message)
 		log.Println("DEAD")
 	}
