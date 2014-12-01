@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/paked/engi"
 	"log"
+	"math/rand"
 )
 
 var (
@@ -42,8 +43,6 @@ func (game *Game) Setup() {
 	guy.AddComponent(&collisionMaster)
 
 	game.AddEntity(guy)
-
-	game.AddEntity(NewRock())
 }
 
 type ControlSystem struct {
@@ -96,15 +95,20 @@ func (rock *RockSpawnSystem) New() {
 }
 
 func (rock *RockSpawnSystem) Update(entity *engi.Entity, dt float32) {
-	if engi.Keys.KEY_SPACE.JustPressed() {
+	if rand.Float32() < .96 {
+		return
 	}
+
+	position := engi.Point{0, -32}
+	position.X = rand.Float32() * (engi.Width())
+	W.AddEntity(NewRock(position))
 }
 
-func NewRock() *engi.Entity {
+func NewRock(position engi.Point) *engi.Entity {
 	rock := engi.NewEntity([]string{"RenderSystem", "FallingSystem", "CollisionSystem", "SpeedSystem"})
 	texture := engi.Files.Image("rock")
 	render := engi.NewRenderComponent(texture, engi.Point{4, 4}, "rock")
-	space := engi.SpaceComponent{engi.Point{10, 10}, texture.Width() * render.Scale.X, texture.Height() * render.Scale.Y}
+	space := engi.SpaceComponent{position, texture.Width() * render.Scale.X, texture.Height() * render.Scale.Y}
 	rock.AddComponent(&render)
 	rock.AddComponent(&space)
 	return rock
@@ -151,7 +155,6 @@ func (fs DeathSystem) Update(entity *engi.Entity, dt float32) {
 func (fs DeathSystem) Receive(message engi.Message) {
 	collision, isCollision := message.(engi.CollisionMessage)
 	if isCollision {
-		W.RemoveEntity(collision.Entity)
 		log.Println(collision, message)
 		log.Println("DEAD")
 	}

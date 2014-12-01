@@ -15,6 +15,7 @@ type GameWorld struct {
 func (game *GameWorld) Preload() {
 	engi.Files.Add("bot", "data/icon.png")
 	engi.Files.Add("font", "data/font.png")
+	engi.Files.Add("rock", "data/rock.png")
 	game.batch = engi.NewBatch(engi.Width(), engi.Height())
 	log.Println("Preloaded")
 }
@@ -37,11 +38,19 @@ func (game *GameWorld) Setup() {
 	textTexture := engi.NewText("Hello World", engi.NewGridFont(engi.Files.Image("font"), 20, 20))
 	textRender := engi.NewRenderComponent(textTexture, engi.Point{1, 1}, "yolo?")
 	textSpace := engi.SpaceComponent{engi.Point{100, 100}, textTexture.Width(), textTexture.Height()}
-	// text.AddComponent(&textTexture)
+
 	text.AddComponent(&textRender)
 	text.AddComponent(&textSpace)
 	game.AddEntity(text)
-	// textRender := engi.SpaceComponent{Position: engi.Point{100, 100}}
+
+	gameMap := engi.NewEntity([]string{"RenderSystem"})
+	tilemap := engi.NewTilemap([][]string{{"1", "2", "1"}, {"1", "0", "1"}, {"1", "2", "1"}, {"1", "2", "1"}})
+	mapRender := engi.NewRenderComponent(tilemap, engi.Point{1, 1}, "map")
+	mapSpace := engi.SpaceComponent{engi.Point{100, 100}, textTexture.Width(), textTexture.Height()}
+	gameMap.AddComponent(&mapRender)
+	gameMap.AddComponent(&mapSpace)
+
+	game.AddEntity(gameMap)
 }
 
 type MovingSystem struct {
