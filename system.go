@@ -136,7 +136,7 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 			for _, tile := range slice {
 				if tile.Image != nil {
 					log.Printf("%v", tile.Image)
-					rs.batch.Draw(tile.Image, tile.X, tile.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
+					rs.batch.Draw(tile.Image, tile.X+space.Position.X, tile.Y+space.Position.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
 				}
 			}
 		}
