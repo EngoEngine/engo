@@ -49,7 +49,7 @@ func (game *GameWorld) Setup() {
 	gameMap := engi.NewEntity([]string{"RenderSystem", "CollisionSystem"})
 	tilemap := engi.NewTilemap([][]string{{"1", "2", "1"}, {"0", "0", "2"}, {"0", "0", "1"}, {"2", "1", "2"}}, engi.Files.Image("sheet"))
 	mapRender := engi.NewRenderComponent(tilemap, engi.Point{1, 1}, "map")
-	mapSpace := engi.SpaceComponent{engi.Point{100, 100}, textTexture.Width(), textTexture.Height()}
+	mapSpace := engi.SpaceComponent{engi.Point{100, 100}, 0, 0}
 	gameMap.AddComponent(&mapRender)
 	gameMap.AddComponent(&mapSpace)
 

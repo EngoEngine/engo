@@ -28,7 +28,7 @@ func NewTilemap(mapString [][]string, sheet *Texture) *Tilemap {
 	for y, slice := range mapString {
 		for x, key := range slice {
 			var image Drawable
-			solid := true
+			solid := false
 			index, err := strconv.Atoi(key)
 			if err != nil {
 				panic(err)
