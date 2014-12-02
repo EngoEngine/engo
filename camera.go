@@ -1,9 +1,5 @@
 package engi
 
-// import (
-// 	"log"
-// )
-
 type Camera struct {
 	Point
 	tracking *Entity
