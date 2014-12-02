@@ -16,6 +16,7 @@ func (game *GameWorld) Preload() {
 	engi.Files.Add("bot", "data/icon.png")
 	engi.Files.Add("font", "data/font.png")
 	engi.Files.Add("rock", "data/rock.png")
+	engi.Files.Add("sheet", "data/sheet.png")
 	game.batch = engi.NewBatch(engi.Width(), engi.Height())
 	log.Println("Preloaded")
 }
@@ -46,7 +47,7 @@ func (game *GameWorld) Setup() {
 	game.AddEntity(text)
 
 	gameMap := engi.NewEntity([]string{"RenderSystem", "CollisionSystem"})
-	tilemap := engi.NewTilemap([][]string{{"1", "2", "1"}, {"0", "0", "1"}, {"0", "0", "1"}, {"1", "2", "1"}})
+	tilemap := engi.NewTilemap([][]string{{"1", "2", "1"}, {"0", "0", "2"}, {"0", "0", "1"}, {"2", "1", "2"}}, engi.Files.Image("sheet"))
 	mapRender := engi.NewRenderComponent(tilemap, engi.Point{1, 1}, "map")
 	mapSpace := engi.SpaceComponent{engi.Point{100, 100}, textTexture.Width(), textTexture.Height()}
 	gameMap.AddComponent(&mapRender)

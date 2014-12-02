@@ -9,11 +9,11 @@ type Tilemap struct {
 
 type Tile struct {
 	Point
-	Image *Texture
+	Image Drawable
 	Solid bool
 }
 
-func NewTilemap(mapString [][]string) *Tilemap {
+func NewTilemap(mapString [][]string, sheet *Texture) *Tilemap {
 	tilemap := Tilemap{}
 	position := Point{}
 	tilemap.Tilesize = 16
@@ -25,13 +25,13 @@ func NewTilemap(mapString [][]string) *Tilemap {
 
 	for y, slice := range mapString {
 		for x, key := range slice {
-			var image *Texture
+			var image Drawable
 			solid := true
 			switch key {
 			case "1":
-				image = Files.Image("bot")
+				image = getRegionOfSpriteSheet(sheet, 16, 1)
 			case "2":
-				image = Files.Image("rock")
+				image = getRegionOfSpriteSheet(sheet, 16, 2)
 			default:
 				solid = false
 			}
@@ -64,4 +64,16 @@ func CollideTilemap(e *Entity, et *Entity, t *Tilemap) {
 			}
 		}
 	}
+}
+
+func getRegionOfSpriteSheet(texture *Texture, tilesize int, index int) *Region {
+	width, height, tileX, tileY := int(texture.Width()), int(texture.Height()), float32(0), float32(0)
+
+	widthInSprites := width / tilesize
+	heightInSprites := height / tilesize
+
+	tileX = float32(index % widthInSprites)
+	tileY = float32(index / heightInSprites)
+
+	return NewRegion(texture, int(tileX)*tilesize, int(tileY)*int(tilesize), tilesize, tilesize)
 }
