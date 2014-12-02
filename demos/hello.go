@@ -25,6 +25,7 @@ func (game *GameWorld) Setup() {
 
 	game.AddSystem(&engi.RenderSystem{})
 	game.AddSystem(&MovingSystem{})
+	game.AddSystem(&engi.CollisionSystem{})
 
 	entity := engi.NewEntity([]string{"RenderSystem", "MovingSystem", "CollisionSystem"})
 	texture := engi.Files.Image("bot")
@@ -32,6 +33,7 @@ func (game *GameWorld) Setup() {
 	space := engi.SpaceComponent{Position: engi.Point{10, 10}, Width: texture.Width() * render.Scale.X, Height: texture.Height() * render.Scale.Y}
 	entity.AddComponent(&render)
 	entity.AddComponent(&space)
+	entity.AddComponent(&engi.CollisionMasterComponent{})
 	game.AddEntity(entity)
 
 	text := engi.NewEntity([]string{"RenderSystem"})
@@ -43,8 +45,8 @@ func (game *GameWorld) Setup() {
 	text.AddComponent(&textSpace)
 	game.AddEntity(text)
 
-	gameMap := engi.NewEntity([]string{"RenderSystem"})
-	tilemap := engi.NewTilemap([][]string{{"1", "2", "1"}, {"1", "0", "1"}, {"1", "2", "1"}, {"1", "2", "1"}})
+	gameMap := engi.NewEntity([]string{"RenderSystem", "CollisionSystem"})
+	tilemap := engi.NewTilemap([][]string{{"1", "2", "1"}, {"0", "0", "1"}, {"0", "0", "1"}, {"1", "2", "1"}})
 	mapRender := engi.NewRenderComponent(tilemap, engi.Point{1, 1}, "map")
 	mapSpace := engi.SpaceComponent{engi.Point{100, 100}, textTexture.Width(), textTexture.Height()}
 	gameMap.AddComponent(&mapRender)
@@ -68,7 +70,7 @@ func (ms *MovingSystem) Update(entity *engi.Entity, dt float32) {
 	if !entity.GetComponent(&space) {
 		return
 	}
-	// space, hasSpace := entity.GetComponent("SpaceComponent").(*engi.SpaceComponent)
+
 	vel = 200 * dt
 	if engi.Keys.KEY_D.Down() {
 		space.Position.X += vel

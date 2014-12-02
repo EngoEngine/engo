@@ -37,3 +37,24 @@ func NewTilemap(mapString [][]string) *Tilemap {
 
 	return &tilemap
 }
+
+func CollideTilemap(e *Entity, et *Entity, t *Tilemap) {
+	var eSpace *SpaceComponent
+	var tSpace *SpaceComponent
+
+	if !e.GetComponent(&eSpace) || !et.GetComponent(&tSpace) {
+		return
+	}
+
+	for _, slice := range t.Tiles {
+		for _, tile := range slice {
+			aabb := AABB{Point{tile.X + tSpace.Position.X, tile.Y + tSpace.Position.Y}, Point{tile.X + tSpace.Position.X + 16, tile.Y + tSpace.Position.Y + 16}}
+			if IsIntersecting(eSpace.AABB(), aabb) {
+				mtd := MinimumTranslation(eSpace.AABB(), aabb)
+				eSpace.Position.X += mtd.X
+				eSpace.Position.Y += mtd.Y
+				Mailbox.Dispatch(CollisionMessage{e})
+			}
+		}
+	}
+}

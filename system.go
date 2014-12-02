@@ -66,10 +66,18 @@ func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 	if !entity.GetComponent(&space) || !entity.GetComponent(&collisionMaster) {
 		return
 	}
-
+	log.Println("YOLO")
 	for _, other := range cs.Entities() {
 		if other.ID() != entity.ID() {
-			// var  := &SpaceComponent{}
+
+			var r *RenderComponent
+			other.GetComponent(&r)
+			t, ok := r.Display.(*Tilemap)
+			if ok {
+				CollideTilemap(entity, other, t)
+				return
+			}
+
 			var otherSpace *SpaceComponent
 
 			if !other.GetComponent(&otherSpace) {
@@ -131,18 +139,15 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 		text.Draw(rs.batch, space.Position)
 	case *Tilemap:
 		tilemap := render.Display.(*Tilemap)
-		// tilesize := 16
 		for _, slice := range tilemap.Tiles {
 			for _, tile := range slice {
 				if tile.Image != nil {
-					log.Printf("%v", tile.Image)
+					// log.Printf("%v", tile.Image)
 					rs.batch.Draw(tile.Image, tile.X+space.Position.X, tile.Y+space.Position.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
 				}
 			}
 		}
 	}
-
-	// log.Printf("%T", render.Display)
 }
 
 func (rs RenderSystem) Name() string {
