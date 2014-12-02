@@ -127,10 +127,10 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 	switch render.Display.(type) {
 	case Drawable:
 		drawable := render.Display.(Drawable)
-		rs.batch.Draw(drawable, space.Position.X, space.Position.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, 0xffffff, 1)
+		rs.batch.Draw(drawable, space.Position.X-Cam.X, space.Position.Y-Cam.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, 0xffffff, 1)
 	case *Font:
 		font := render.Display.(*Font)
-		font.Print(rs.batch, render.Label, space.Position.X, space.Position.Y, 0xffffff)
+		font.Print(rs.batch, render.Label, space.Position.X-Cam.X, space.Position.Y-Cam.Y, 0xffffff)
 	case *Text:
 		text := render.Display.(*Text)
 		text.Draw(rs.batch, space.Position)
@@ -139,7 +139,7 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 		for _, slice := range tilemap.Tiles {
 			for _, tile := range slice {
 				if tile.Image != nil {
-					rs.batch.Draw(tile.Image, tile.X+space.Position.X, tile.Y+space.Position.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
+					rs.batch.Draw(tile.Image, (tile.X+space.Position.X)-Cam.X, (tile.Y+space.Position.Y)-Cam.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
 				}
 			}
 		}

@@ -13,6 +13,7 @@ var (
 	gl        *webgl.Context
 	Mailbox   MessageManager
 	Gl        = gl
+	Cam       *Camera
 )
 
 func Open(title string, width, height int, fullscreen bool, r Responder) {
@@ -20,7 +21,12 @@ func Open(title string, width, height int, fullscreen bool, r Responder) {
 	responder = r
 	Time = NewClock()
 	Files = NewLoader()
+	SetCamera(&Camera{})
 	run(title, width, height, fullscreen)
+}
+
+func SetCamera(c *Camera) {
+	Cam = c
 }
 
 func SetBg(color uint32) {

@@ -54,6 +54,8 @@ func (game *GameWorld) Setup() {
 	gameMap.AddComponent(&mapSpace)
 
 	game.AddEntity(gameMap)
+
+	engi.Cam.FollowEntity(entity)
 }
 
 type MovingSystem struct {

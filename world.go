@@ -44,6 +44,7 @@ func (w *World) Systems() []Systemer {
 }
 
 func (w *World) Update(dt float32) {
+	Cam.Update(dt)
 	for _, system := range w.Systems() {
 		system.Pre()
 		for i, message := range system.Messages() {
