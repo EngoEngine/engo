@@ -1,7 +1,5 @@
 package engi
 
-import "log"
-
 type Systemer interface {
 	Update(entity *Entity, dt float32)
 	Name() string
@@ -66,7 +64,6 @@ func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 	if !entity.GetComponent(&space) || !entity.GetComponent(&collisionMaster) {
 		return
 	}
-	log.Println("YOLO")
 	for _, other := range cs.Entities() {
 		if other.ID() != entity.ID() {
 
