@@ -1,6 +1,8 @@
 package engi
 
-import ()
+import (
+	"strconv"
+)
 
 type Tilemap struct {
 	Tiles    [][]Tile
@@ -27,14 +29,15 @@ func NewTilemap(mapString [][]string, sheet *Texture) *Tilemap {
 		for x, key := range slice {
 			var image Drawable
 			solid := true
-			switch key {
-			case "1":
-				image = getRegionOfSpriteSheet(sheet, 16, 1)
-			case "2":
-				image = getRegionOfSpriteSheet(sheet, 16, 2)
-			default:
-				solid = false
+			index, err := strconv.Atoi(key)
+			if err != nil {
+				panic(err)
 			}
+			if index > 0 {
+				image = getRegionOfSpriteSheet(sheet, tilemap.Tilesize, index)
+				solid = true
+			}
+
 			tile := Tile{Point: Point{position.X + float32(x*tilemap.Tilesize), position.Y + float32(y*tilemap.Tilesize)}, Image: image, Solid: solid}
 			tilemap.Tiles[y][x] = tile
 		}
