@@ -1,6 +1,7 @@
 package engi
 
 import (
+	// "log"
 	"strconv"
 )
 
@@ -71,12 +72,11 @@ func CollideTilemap(e *Entity, et *Entity, t *Tilemap) {
 
 func getRegionOfSpriteSheet(texture *Texture, tilesize int, index int) *Region {
 	width, height, tileX, tileY := int(texture.Width()), int(texture.Height()), float32(0), float32(0)
-
 	widthInSprites := width / tilesize
 	heightInSprites := height / tilesize
 
 	tileX = float32(index % widthInSprites)
-	tileY = float32(index / heightInSprites)
+	tileY = (float32(index) - tileX) / float32(heightInSprites)
 
 	return NewRegion(texture, int(tileX)*tilesize, int(tileY)*int(tilesize), tilesize, tilesize)
 }
