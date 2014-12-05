@@ -1,5 +1,9 @@
 package engi
 
+import (
+	"log"
+)
+
 type Spritesheet struct {
 	texture               *Texture
 	CellWidth, CellHeight int
@@ -26,12 +30,41 @@ func NewSpritesheet(filename string, cellsize int) *Spritesheet {
 	return &Spritesheet{texture: Files.Image(filename), CellWidth: cellsize, CellHeight: cellsize, cache: make(map[int]*Region)}
 }
 
+func NewAnimationComponent() *AnimationComponent {
+	return &AnimationComponent{Animations: make(map[string][]int)}
+}
+
 type AnimationComponent struct {
-	Index      int
-	Rate       float32
-	Change     float32
-	S          *Spritesheet
-	Animations map[string][]int
+	Index            int
+	_index           int
+	Rate             float32
+	Change           float32
+	S                *Spritesheet
+	Animations       map[string][]int
+	CurrentAnimation []int
+}
+
+func (ac *AnimationComponent) SelectAnimation(name string) {
+	ac.CurrentAnimation = ac.Animations[name]
+}
+
+func (ac *AnimationComponent) AddAnimation(name string, indexes []int) {
+	ac.Animations[name] = indexes
+}
+
+func (ac *AnimationComponent) Increment() {
+	if len(ac.CurrentAnimation) == 0 {
+		log.Println("No data for this animation")
+		return
+	}
+
+	log.Println("Incrementing")
+	ac.Index += 1
+	if ac.Index >= len(ac.CurrentAnimation) {
+		ac.Index = 0
+	}
+	ac._index = ac.CurrentAnimation[ac.Index]
+	ac.Change = 0
 }
 
 func (ac AnimationComponent) Name() string {
@@ -62,11 +95,7 @@ func (a *AnimationSystem) Update(e *Entity, dt float32) {
 
 	ac.Change += dt
 	if ac.Change >= ac.Rate {
-		ac.Index += 1
-		if ac.Index >= int(ac.S.Width()*ac.S.Height()) {
-			ac.Index = 0
-		}
-		ac.Change = 0
+		ac.Increment()
 		r.Display = ac.S.Cell(ac.Index)
 	}
 }

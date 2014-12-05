@@ -17,7 +17,7 @@ func (game *GameWorld) Preload() {
 	engi.Files.Add("font", "data/font.png")
 	engi.Files.Add("rock", "data/rock.png")
 	engi.Files.Add("sheet", "data/sheet.png")
-	engi.Files.Add("sample", "data/samplesheet.png")
+	engi.Files.Add("sample", "data/Hero.png")
 
 	game.batch = engi.NewBatch(engi.Width(), engi.Height())
 	log.Println("Preloaded")
@@ -34,12 +34,18 @@ func (game *GameWorld) Setup() {
 	entity := engi.NewEntity([]string{"RenderSystem", "MovingSystem", "CollisionSystem", "AnimationSystem"})
 	texture := engi.Files.Image("bot")
 	spritesheet := engi.NewSpritesheet("sample", 16)
-	animation := engi.AnimationComponent{Rate: .1, S: spritesheet}
-	render := engi.NewRenderComponent(spritesheet.Cell(0), engi.Point{1, 1}, "bot")
+
+	animation := engi.NewAnimationComponent()
+	animation.Rate = .1
+	animation.S = spritesheet
+	animation.AddAnimation("default", []int{0, 1, 2, 3})
+	animation.SelectAnimation("default")
+
+	render := engi.NewRenderComponent(spritesheet.Cell(0), engi.Point{2, 2}, "bot")
 	space := engi.SpaceComponent{Position: engi.Point{10, 10}, Width: texture.Width() * render.Scale.X, Height: texture.Height() * render.Scale.Y}
 	entity.AddComponent(&render)
 	entity.AddComponent(&space)
-	entity.AddComponent(&animation)
+	entity.AddComponent(animation)
 	entity.AddComponent(&engi.CollisionMasterComponent{})
 	game.AddEntity(entity)
 
