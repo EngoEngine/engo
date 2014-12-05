@@ -1,9 +1,5 @@
 package engi
 
-import (
-// "log"
-)
-
 type Spritesheet struct {
 	texture               *Texture
 	CellWidth, CellHeight int
@@ -11,6 +7,9 @@ type Spritesheet struct {
 }
 
 func (s Spritesheet) Cell(i int) *Region {
+	if r := s.cache[i]; r != nil {
+		return r
+	}
 	s.cache[i] = getRegionOfSpriteSheet(s.texture, 16, i)
 	return s.cache[i]
 }
