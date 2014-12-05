@@ -27,11 +27,11 @@ func NewSpritesheet(filename string, cellsize int) *Spritesheet {
 }
 
 type AnimationComponent struct {
-	Index  int
-	Rate   float32
-	Change float32
-	Tick   float32
-	S      *Spritesheet
+	Index      int
+	Rate       float32
+	Change     float32
+	S          *Spritesheet
+	Animations map[string][]int
 }
 
 func (ac AnimationComponent) Name() string {

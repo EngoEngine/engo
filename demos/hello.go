@@ -34,7 +34,7 @@ func (game *GameWorld) Setup() {
 	entity := engi.NewEntity([]string{"RenderSystem", "MovingSystem", "CollisionSystem", "AnimationSystem"})
 	texture := engi.Files.Image("bot")
 	spritesheet := engi.NewSpritesheet("sample", 16)
-	animation := engi.AnimationComponent{Rate: 1, S: spritesheet}
+	animation := engi.AnimationComponent{Rate: .1, S: spritesheet}
 	render := engi.NewRenderComponent(spritesheet.Cell(0), engi.Point{1, 1}, "bot")
 	space := engi.SpaceComponent{Position: engi.Point{10, 10}, Width: texture.Width() * render.Scale.X, Height: texture.Height() * render.Scale.Y}
 	entity.AddComponent(&render)
