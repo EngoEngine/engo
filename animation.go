@@ -67,6 +67,10 @@ func (ac *AnimationComponent) Increment() {
 	ac.Change = 0
 }
 
+func (ac *AnimationComponent) Cell() *Region {
+	return ac.S.Cell(ac._index)
+}
+
 func (ac AnimationComponent) Name() string {
 	return "AnimationComponent"
 }
@@ -96,6 +100,6 @@ func (a *AnimationSystem) Update(e *Entity, dt float32) {
 	ac.Change += dt
 	if ac.Change >= ac.Rate {
 		ac.Increment()
-		r.Display = ac.S.Cell(ac.Index)
+		r.Display = ac.Cell()
 	}
 }

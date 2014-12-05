@@ -38,7 +38,7 @@ func (game *GameWorld) Setup() {
 	animation := engi.NewAnimationComponent()
 	animation.Rate = .1
 	animation.S = spritesheet
-	animation.AddAnimation("default", []int{0, 1, 2, 3})
+	animation.AddAnimation("default", []int{4, 5, 6, 7})
 	animation.SelectAnimation("default")
 
 	render := engi.NewRenderComponent(spritesheet.Cell(0), engi.Point{2, 2}, "bot")
