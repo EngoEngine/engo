@@ -60,10 +60,15 @@ func (cs *CollisionSystem) New() {
 
 func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 	var space *SpaceComponent
-	var collisionMaster *CollisionMasterComponent
-	if !entity.GetComponent(&space) || !entity.GetComponent(&collisionMaster) {
+	var collisionComponent *CollisionComponent
+	if !entity.GetComponent(&space) || !entity.GetComponent(&collisionComponent) {
 		return
 	}
+
+	if !collisionComponent.Main {
+		return
+	}
+
 	for _, other := range cs.Entities() {
 		if other.ID() != entity.ID() {
 
@@ -76,17 +81,30 @@ func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 			}
 
 			var otherSpace *SpaceComponent
-
-			if !other.GetComponent(&otherSpace) {
+			var otherCollision *CollisionComponent
+			if !other.GetComponent(&otherSpace) || !other.GetComponent(&otherCollision) {
 				return
 			}
 
 			entityAABB := space.AABB()
+			offset := Point{collisionComponent.Extra.X / 2, collisionComponent.Extra.Y / 2}
+			entityAABB.Min.X -= offset.X
+			entityAABB.Min.Y -= offset.Y
+			entityAABB.Max.X += offset.X
+			entityAABB.Max.Y += offset.Y
 			otherAABB := otherSpace.AABB()
+			offset = Point{otherCollision.Extra.X / 2, otherCollision.Extra.Y / 2}
+			otherAABB.Min.X -= offset.X
+			otherAABB.Min.Y -= offset.Y
+			otherAABB.Max.X += offset.X
+			otherAABB.Max.Y += offset.Y
 			if IsIntersecting(entityAABB, otherAABB) {
-				mtd := MinimumTranslation(entityAABB, otherAABB)
-				space.Position.X += mtd.X
-				space.Position.Y += mtd.Y
+				if otherCollision.Solid && collisionComponent.Solid {
+					mtd := MinimumTranslation(entityAABB, otherAABB)
+					space.Position.X += mtd.X
+					space.Position.Y += mtd.Y
+				}
+
 				Mailbox.Dispatch(CollisionMessage{entity})
 			}
 		}

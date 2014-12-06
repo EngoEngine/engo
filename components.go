@@ -25,6 +25,15 @@ func (cm CollisionMasterComponent) Name() string {
 	return "CollisionMasterComponent"
 }
 
+type CollisionComponent struct {
+	Solid, Main bool
+	Extra       Point
+}
+
+func (cc CollisionComponent) Name() string {
+	return "CollisionComponent"
+}
+
 func (cm CollisionMasterComponent) Is() bool {
 	return true
 }
