@@ -20,7 +20,6 @@ func (mm *MessageManager) Dispatch(message Message) {
 	systems := mm.listeners[message.Type()]
 
 	for _, system := range systems {
-		// println("Has message")
 		system.Push(message)
 	}
 }

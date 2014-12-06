@@ -32,15 +32,16 @@ func (game *Game) Setup() {
 	guy := engi.NewEntity([]string{"RenderSystem", "ControlSystem", "RockSpawnSystem", "CollisionSystem", "DeathSystem"})
 	texture := engi.Files.Image("guy")
 	render := engi.NewRenderComponent(texture, engi.Point{4, 4}, "guy")
-	collisionMaster := engi.CollisionMasterComponent{}
+	collision := engi.CollisionComponent{Solid: true, Main: true}
 
 	width := texture.Width() * render.Scale.X
 	height := texture.Height() * render.Scale.Y
 
 	space := engi.SpaceComponent{engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2}, width, height}
+
 	guy.AddComponent(&render)
 	guy.AddComponent(&space)
-	guy.AddComponent(&collisionMaster)
+	guy.AddComponent(&collision)
 
 	game.AddEntity(guy)
 }
@@ -109,8 +110,10 @@ func NewRock(position engi.Point) *engi.Entity {
 	texture := engi.Files.Image("rock")
 	render := engi.NewRenderComponent(texture, engi.Point{4, 4}, "rock")
 	space := engi.SpaceComponent{position, texture.Width() * render.Scale.X, texture.Height() * render.Scale.Y}
+	collision := engi.CollisionComponent{Solid: true}
 	rock.AddComponent(&render)
 	rock.AddComponent(&space)
+	rock.AddComponent(&collision)
 	return rock
 }
 

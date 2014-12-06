@@ -51,3 +51,11 @@ func NewRenderComponent(display interface{}, scale Point, label string) RenderCo
 func (rc RenderComponent) Name() string {
 	return "RenderComponent"
 }
+
+type LinkComponent struct {
+	Entity *Entity
+}
+
+func (lc LinkComponent) Name() string {
+	return "LinkComponent"
+}

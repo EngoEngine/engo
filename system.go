@@ -1,5 +1,9 @@
 package engi
 
+import (
+	"log"
+)
+
 type Systemer interface {
 	Update(entity *Entity, dt float32)
 	Name() string
@@ -47,6 +51,7 @@ func (system System) Messages() []Message {
 }
 
 func (system *System) Dismiss(i int) {
+	log.Println(i, len(system.messageQueue))
 	system.messageQueue = system.messageQueue[:i+copy(system.messageQueue[i:], system.messageQueue[i+1:])]
 }
 
