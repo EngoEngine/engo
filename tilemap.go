@@ -63,7 +63,7 @@ func CollideTilemap(e *Entity, et *Entity, t *Tilemap) {
 					mtd := MinimumTranslation(eSpace.AABB(), aabb)
 					eSpace.Position.X += mtd.X
 					eSpace.Position.Y += mtd.Y
-					Mailbox.Dispatch(CollisionMessage{e})
+					Mailbox.Dispatch(CollisionMessage{e, et})
 				}
 			}
 		}

@@ -6,6 +6,7 @@ type Message interface {
 
 type CollisionMessage struct {
 	Entity *Entity
+	To     *Entity
 }
 
 func (collision CollisionMessage) Type() string {

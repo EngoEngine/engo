@@ -9,6 +9,7 @@ type Entity struct {
 	components map[reflect.Type]Component
 	requires   map[string]bool
 	Exists     bool
+	Pattern    string
 }
 
 func NewEntity(requires []string) *Entity {
