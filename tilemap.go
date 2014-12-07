@@ -19,7 +19,7 @@ type Tile struct {
 func NewTilemap(mapString [][]string, sheet *Texture) *Tilemap {
 	tilemap := Tilemap{}
 	position := Point{}
-	tilemap.Tilesize = 16
+	tilemap.Tilesize = 32
 
 	tilemap.Tiles = make([][]Tile, len(mapString))
 	for i := range tilemap.Tiles {

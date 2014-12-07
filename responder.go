@@ -15,6 +15,7 @@ type Responder interface {
 	Scroll(amount float32)
 	Key(key Key, modifier Modifier, action Action)
 	Type(char rune)
+	AddEntity(e *Entity)
 }
 
 type Game struct{}

@@ -14,7 +14,7 @@ func (s Spritesheet) Cell(i int) *Region {
 	if r := s.cache[i]; r != nil {
 		return r
 	}
-	s.cache[i] = getRegionOfSpriteSheet(s.texture, 16, i)
+	s.cache[i] = getRegionOfSpriteSheet(s.texture, s.CellWidth, i)
 	return s.cache[i]
 }
 
@@ -58,7 +58,7 @@ func (ac *AnimationComponent) Increment() {
 		return
 	}
 
-	log.Println("Incrementing")
+	// log.Println("Incrementing")
 	ac.Index += 1
 	if ac.Index >= len(ac.CurrentAnimation) {
 		ac.Index = 0

@@ -23,6 +23,7 @@ type KeyManager struct {
 	KEY_SPACE   KeyState
 	KEY_CONTROL KeyState
 	KEY_ESCAPE  KeyState
+	SHIFT       KeyState
 }
 
 type KeyState struct {
@@ -78,4 +79,6 @@ func keysUpdate() {
 
 	Keys.KEY_SPACE.set(states[Space])
 	Keys.KEY_ESCAPE.set(states[Escape])
+	Keys.KEY_CONTROL.set(states[LeftControl])
+	Keys.SHIFT.set(states[LeftShift])
 }

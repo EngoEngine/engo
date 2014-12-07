@@ -14,6 +14,7 @@ var (
 	Mailbox   MessageManager
 	Gl        = gl
 	Cam       *Camera
+	Wo        Responder
 )
 
 func Open(title string, width, height int, fullscreen bool, r Responder) {
@@ -22,6 +23,7 @@ func Open(title string, width, height int, fullscreen bool, r Responder) {
 	Time = NewClock()
 	Files = NewLoader()
 	SetCamera(&Camera{})
+	Wo = r
 	run(title, width, height, fullscreen)
 }
 

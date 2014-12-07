@@ -70,7 +70,7 @@ func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 	}
 
 	for _, other := range cs.Entities() {
-		if other.ID() != entity.ID() {
+		if other.ID() != entity.ID() && other.Exists {
 
 			var r *RenderComponent
 			other.GetComponent(&r)
