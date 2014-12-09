@@ -9,6 +9,7 @@ type World struct {
 	Game
 	entities []*Entity
 	systems  []Systemer
+	batch    *Batch
 }
 
 func (w *World) AddEntity(entity *Entity) {
@@ -20,15 +21,6 @@ func (w *World) AddEntity(entity *Entity) {
 		}
 	}
 }
-
-// func (w *World) RemoveEntity(e *Entity) {
-// 	for i, match := range w.Entities() {
-// 		if e.ID() == match.ID() {
-// 			w.entities = append(w.entities[i:], w.entities[:i+1]...)
-// 			return
-// 		}
-// 	}
-// }
 
 func (w *World) AddSystem(system Systemer) {
 	system.New()
@@ -66,4 +58,8 @@ func (w *World) Update(dt float32) {
 	if Keys.KEY_ESCAPE.JustPressed() {
 		Exit()
 	}
+}
+
+func (w *World) Batch() *Batch {
+	return w.batch
 }
