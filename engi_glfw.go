@@ -108,7 +108,7 @@ func run(title string, width, height int, fullscreen bool) {
 	responder.Preload()
 	Files.Load(func() {})
 	responder.Setup()
-
+	Wo.New()
 	for !window.ShouldClose() {
 		responder.Update(Time.Delta())
 		window.SwapBuffers()

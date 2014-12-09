@@ -1,7 +1,6 @@
 package engi
 
 import (
-	// "log"
 	"strconv"
 )
 
@@ -10,6 +9,10 @@ type World struct {
 	entities []*Entity
 	systems  []Systemer
 	batch    *Batch
+}
+
+func (w *World) New() {
+	w.batch = NewBatch(Width(), Height())
 }
 
 func (w *World) AddEntity(entity *Entity) {
@@ -35,7 +38,17 @@ func (w *World) Systems() []Systemer {
 	return w.systems
 }
 
+func (w *World) Pre() {
+	Gl.Clear(Gl.COLOR_BUFFER_BIT)
+	w.batch.Begin()
+}
+
+func (w *World) Post() {
+	w.batch.End()
+}
+
 func (w *World) Update(dt float32) {
+	w.Pre()
 	Cam.Update(dt)
 	for _, system := range w.Systems() {
 		system.Pre()
@@ -58,6 +71,8 @@ func (w *World) Update(dt float32) {
 	if Keys.KEY_ESCAPE.JustPressed() {
 		Exit()
 	}
+
+	w.Post()
 }
 
 func (w *World) Batch() *Batch {
