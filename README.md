@@ -41,5 +41,13 @@ If you were to run this code, a white 800x800 window would appear on your screen
 *TODO* Write about systems
 
 
+#TODO
+
+* Finish Documentation
+* Rethink rendering system
+* Redo messaging
+* Default shapes
+
+
 
 
