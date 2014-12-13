@@ -1,5 +1,9 @@
 package engi
 
+import (
+	"log"
+)
+
 type Camera struct {
 	Point
 	tracking *Entity
@@ -22,8 +26,9 @@ func (cam *Camera) Update(dt float32) {
 		if !cam.tracking.GetComponent(&space) {
 			return
 		}
-		lerp := float32(.07)
+		lerp := float32(.09)
 		cam.X += ((space.Position.X + space.Width/2) - (cam.X + Width()/2)) * lerp
 		cam.Y += ((space.Position.Y + space.Height/2) - (cam.Y + Height()/2)) * lerp
+		log.Println(cam.X, cam.Y)
 	}
 }
