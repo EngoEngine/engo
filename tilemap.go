@@ -16,10 +16,10 @@ type Tile struct {
 	Solid bool
 }
 
-func NewTilemap(mapString [][]string, sheet *Texture) *Tilemap {
+func NewTilemap(mapString [][]string, sheet *Texture, tilesize int) *Tilemap {
 	tilemap := Tilemap{}
 	position := Point{}
-	tilemap.Tilesize = 32
+	tilemap.Tilesize = tilesize
 
 	tilemap.Tiles = make([][]Tile, len(mapString))
 	for i := range tilemap.Tiles {

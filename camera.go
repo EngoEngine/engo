@@ -16,7 +16,7 @@ func (cam *Camera) FollowEntity(entity *Entity) {
 		return
 	}
 
-	centerDiference(&cam.Point, Width(), Height(), space)
+	centerCam(&cam.Point, Width(), Height(), 1, space)
 	// cam.Point = space.Position
 }
 
@@ -27,14 +27,12 @@ func (cam *Camera) Update(dt float32) {
 		if !cam.tracking.GetComponent(&space) {
 			return
 		}
-		// lerp := float32(.09)
 		log.Println(cam.Point)
-		centerDiference(&cam.Point, Width(), Height(), space)
-
+		centerCam(&cam.Point, Width(), Height(), 0.09, space)
 	}
 }
 
-func centerDiference(to *Point, width, height float32, space *SpaceComponent) {
-	to.X += ((space.Position.X + space.Width/2) - (to.X + width/2))
-	to.Y += ((space.Position.Y + space.Height/2) - (to.Y + height/2))
+func centerCam(to *Point, width, height, lerp float32, space *SpaceComponent) {
+	to.X += ((space.Position.X + space.Width/2) - (to.X + width/2)) * lerp
+	to.Y += ((space.Position.Y + space.Height/2) - (to.Y + height/2)) * lerp
 }
