@@ -139,7 +139,7 @@ func run(title string, width, height int, fullscreen bool) {
 	}, false)
 	Gl = gl
 	gl.Viewport(0, 0, width, height)
-
+	Wo.New()
 	responder.Preload()
 	Files.Load(func() {
 		responder.Setup()

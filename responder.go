@@ -16,6 +16,8 @@ type Responder interface {
 	Key(key Key, modifier Modifier, action Action)
 	Type(char rune)
 	AddEntity(e *Entity)
+	Batch() *Batch
+	New()
 }
 
 type Game struct{}

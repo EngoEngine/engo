@@ -117,21 +117,17 @@ func (cs CollisionSystem) Name() string {
 
 type RenderSystem struct {
 	*System
-	batch *Batch
 }
 
 func (rs *RenderSystem) New() {
 	rs.System = &System{}
-	rs.batch = NewBatch(Width(), Height())
 }
 
 func (rs RenderSystem) Pre() {
-	Gl.Clear(Gl.COLOR_BUFFER_BIT)
-	rs.batch.Begin()
+
 }
 
 func (rs RenderSystem) Post() {
-	rs.batch.End()
 }
 
 func (rs *RenderSystem) Update(entity *Entity, dt float32) {
@@ -145,19 +141,19 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 	switch render.Display.(type) {
 	case Drawable:
 		drawable := render.Display.(Drawable)
-		rs.batch.Draw(drawable, space.Position.X-Cam.X, space.Position.Y-Cam.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, 0xffffff, 1)
+		Wo.Batch().Draw(drawable, space.Position.X-Cam.X, space.Position.Y-Cam.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, 0xffffff, 1)
 	case *Font:
 		font := render.Display.(*Font)
-		font.Print(rs.batch, render.Label, space.Position.X-Cam.X, space.Position.Y-Cam.Y, 0xffffff)
+		font.Print(Wo.Batch(), render.Label, space.Position.X-Cam.X, space.Position.Y-Cam.Y, 0xffffff)
 	case *Text:
 		text := render.Display.(*Text)
-		text.Draw(rs.batch, space.Position)
+		text.Draw(Wo.Batch(), space.Position)
 	case *Tilemap:
 		tilemap := render.Display.(*Tilemap)
 		for _, slice := range tilemap.Tiles {
 			for _, tile := range slice {
 				if tile.Image != nil {
-					rs.batch.Draw(tile.Image, (tile.X+space.Position.X)-Cam.X, (tile.Y+space.Position.Y)-Cam.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
+					Wo.Batch().Draw(tile.Image, (tile.X+space.Position.X)-Cam.X, (tile.Y+space.Position.Y)-Cam.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
 				}
 			}
 		}
