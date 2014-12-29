@@ -30,12 +30,12 @@ func (pong *PongGame) Setup() {
 	ballTexture := engi.Files.Image("ball")
 	ballRender := engi.NewRenderComponent(ballTexture, engi.Point{2, 2}, "ball")
 	ballSpace := engi.SpaceComponent{engi.Point{(engi.Width() - ballTexture.Width()) / 2, (engi.Height() - ballTexture.Height()) / 2}, ballTexture.Width() * ballRender.Scale.X, ballTexture.Height() * ballRender.Scale.Y}
-	ballCollisionMaster := engi.CollisionMasterComponent{}
+	ballCollision := engi.CollisionComponent{Main: true, Solid: true}
 	ballSpeed := SpeedComponent{}
 	ballSpeed.Point = engi.Point{300, 100}
 	ball.AddComponent(&ballRender)
 	ball.AddComponent(&ballSpace)
-	ball.AddComponent(&ballCollisionMaster)
+	ball.AddComponent(&ballCollision)
 	ball.AddComponent(&ballSpeed)
 	pong.AddEntity(ball)
 
@@ -58,9 +58,11 @@ func (pong *PongGame) Setup() {
 		}
 		paddleSpace := engi.SpaceComponent{engi.Point{x, (engi.Height() - paddleTexture.Height()) / 2}, paddleRender.Scale.X * paddleTexture.Width(), paddleRender.Scale.Y * paddleTexture.Height()}
 		paddleControl := ControlComponent{schemes[i]}
+		paddleCollision := engi.CollisionComponent{Main: false, Solid: true}
 		paddle.AddComponent(&paddleRender)
 		paddle.AddComponent(&paddleSpace)
 		paddle.AddComponent(&paddleControl)
+		paddle.AddComponent(&paddleCollision)
 		pong.AddEntity(paddle)
 	}
 }
@@ -71,7 +73,18 @@ type SpeedSystem struct {
 
 func (ms *SpeedSystem) New() {
 	ms.System = &engi.System{}
-	engi.Mailbox.Listen("CollisionMessage", ms)
+	engi.Mailbox.Listen("CollisionMessage", func(message interface{}) {
+		log.Println("collision")
+		collision, isCollision := message.(engi.CollisionMessage)
+		if isCollision {
+			var speed *SpeedComponent
+			if !collision.Entity.GetComponent(&speed) {
+				return
+			}
+
+			speed.X *= -1
+		}
+	})
 }
 
 func (ms SpeedSystem) Name() string {
@@ -87,17 +100,8 @@ func (ms SpeedSystem) Update(entity *engi.Entity, dt float32) {
 	space.Position.X += speed.X * dt
 	space.Position.Y += speed.Y * dt
 }
-func (ms SpeedSystem) Receive(message engi.Message) {
-	collision, isCollision := message.(engi.CollisionMessage)
-	if isCollision {
-		log.Println(collision, message)
-		var speed *SpeedComponent
-		if !collision.Entity.GetComponent(&speed) {
-			return
-		}
 
-		speed.X *= -1
-	}
+func (ms SpeedSystem) Receive(message engi.Message) {
 }
 
 type SpeedComponent struct {
@@ -128,7 +132,7 @@ func (bs *BallSystem) Update(entity *engi.Entity, dt float32) {
 	}
 
 	if space.Position.X < 0 {
-		engi.Mailbox.Dispatch(ScoreMessage{1})
+		engi.Mailbox.Dispatch("ScoreMesasge", ScoreMessage{1})
 
 		space.Position.X = 400 - 16
 		space.Position.Y = 400 - 16
@@ -142,7 +146,7 @@ func (bs *BallSystem) Update(entity *engi.Entity, dt float32) {
 	}
 
 	if space.Position.X > (800 - 16) {
-		engi.Mailbox.Dispatch(ScoreMessage{2})
+		engi.Mailbox.Dispatch("ScoreMessage", ScoreMessage{2})
 
 		space.Position.X = 400 - 16
 		space.Position.Y = 400 - 16
@@ -213,22 +217,24 @@ func (score *ScoreSystem) Name() string {
 	return "ScoreSystem"
 }
 
-func (c *ScoreSystem) New() {
-	c.System = &engi.System{}
-	engi.Mailbox.Listen("ScoreMessage", c)
+func (sc *ScoreSystem) New() {
+	sc.System = &engi.System{}
+	engi.Mailbox.Listen("ScoreMessage", func(message interface{}) {
+		scoreMessage, isScore := message.(ScoreMessage)
+		if !isScore {
+			return
+		}
+
+		if scoreMessage.Player != 1 {
+			sc.PlayerOneScore += 1
+		} else {
+			sc.PlayerTwoScore += 1
+		}
+	})
 }
 
 func (sc *ScoreSystem) Receive(message engi.Message) {
-	scoreMessage, isScore := message.(ScoreMessage)
-	if !isScore {
-		return
-	}
 
-	if scoreMessage.Player != 1 {
-		sc.PlayerOneScore += 1
-	} else {
-		sc.PlayerTwoScore += 1
-	}
 }
 
 func (c *ScoreSystem) Update(entity *engi.Entity, dt float32) {

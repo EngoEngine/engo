@@ -1,5 +1,7 @@
 package engi
 
+type Handler func(i interface{})
+
 type Message interface {
 	Type() string
 }
@@ -14,20 +16,20 @@ func (collision CollisionMessage) Type() string {
 }
 
 type MessageManager struct {
-	listeners map[string][]Systemer
+	listeners map[string][]Handler
 }
 
-func (mm *MessageManager) Dispatch(message Message) {
-	systems := mm.listeners[message.Type()]
+func (mm *MessageManager) Dispatch(name string, message interface{}) {
+	handlers := mm.listeners[name]
 
-	for _, system := range systems {
-		system.Push(message)
+	for _, handler := range handlers {
+		handler(message)
 	}
 }
 
-func (mm *MessageManager) Listen(messageType string, system Systemer) {
+func (mm *MessageManager) Listen(messageType string, handler Handler) {
 	if mm.listeners == nil {
-		mm.listeners = make(map[string][]Systemer)
+		mm.listeners = make(map[string][]Handler)
 	}
-	mm.listeners[messageType] = append(mm.listeners[messageType], system)
+	mm.listeners[messageType] = append(mm.listeners[messageType], handler)
 }
