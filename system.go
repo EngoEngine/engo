@@ -9,10 +9,10 @@ type Systemer interface {
 	New()
 	Entities() []*Entity
 	AddEntity(entity *Entity)
-	Push(message Message)
-	Receive(message Message)
-	Messages() []Message
-	Dismiss(i int)
+	// Push(message Message)
+	// Receive(message Message)
+	// Messages() []Message
+	// Dismiss(i int)
 }
 
 type System struct {
@@ -34,20 +34,6 @@ func (s System) Entities() []*Entity {
 
 func (s *System) AddEntity(entity *Entity) {
 	s.entities = append(s.entities, entity)
-}
-
-func (system *System) Push(message Message) {
-	system.messageQueue = append(system.messageQueue, message)
-}
-
-func (system System) Receive(message Message) {}
-
-func (system System) Messages() []Message {
-	return system.messageQueue
-}
-
-func (system *System) Dismiss(i int) {
-	system.messageQueue = system.messageQueue[:i+copy(system.messageQueue[i:], system.messageQueue[i+1:])]
 }
 
 type CollisionSystem struct {

@@ -52,14 +52,6 @@ func (w *World) Update(dt float32) {
 	Cam.Update(dt)
 	for _, system := range w.Systems() {
 		system.Pre()
-		for _, message := range system.Messages() {
-			system.Receive(message)
-		}
-
-		for len(system.Messages()) != 0 {
-			system.Dismiss(0)
-		}
-
 		for _, entity := range system.Entities() {
 			if entity.Exists {
 				system.Update(entity, dt)
