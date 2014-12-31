@@ -1,12 +1,13 @@
+// Copyright 2014 Harrison Shoebridge. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package engi
 
-import (
-	"log"
-)
-
+// A rather basic camera
 type Camera struct {
 	Point
-	tracking *Entity
+	tracking *Entity // The entity that is currently being followed
 }
 
 func (cam *Camera) FollowEntity(entity *Entity) {
@@ -27,7 +28,6 @@ func (cam *Camera) Update(dt float32) {
 		if !cam.tracking.GetComponent(&space) {
 			return
 		}
-		log.Println(cam.Point)
 		centerCam(&cam.Point, Width(), Height(), 0.09, space)
 	}
 }
