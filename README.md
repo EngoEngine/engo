@@ -1,7 +1,19 @@
 #Engi 
 A cross-platform game engine written in Go following an interpretation of the Entity Component System paradigm
 
-More documentation will be added later, but here is a little getting started guide!
+Currently documentation is pretty scarce, this is because I have not *completely* finalized the API and am about to go through a "pretification" process in order to increase elegance and usability. For a basic up to date example of most features, look to the demos/hello.go and demos/pong/pong.go files. These files are currently your best friends for learning engi, well and me (feel free to shoot me a DM or issue whenever you want!).
+
+Before you read the basic doc, heres a few notes for me about future elegance
+    * engi.Files adding in a list
+    * initialize batch cleaner
+    * neater systems adding
+    * Clean entity construction
+    * constructors for default components
+    * automatically detect which systems should be added to based off component wants
+    * basic components and systems in seperate files
+    * pretty camera implementation
+    * presets (prefabs?) easy re initialization of an entity pattern
+
 ##Installation
 ```go get -u github.com/paked/engi```
 
@@ -40,13 +52,6 @@ If you were to run this code, a white 800x800 window would appear on your screen
 
 *TODO* Write about systems
 
-
-#TODO
-
-* Finish Documentation
-* Rethink rendering system
-* Redo messaging
-* Default shapes
 
 
 
