@@ -8,23 +8,17 @@ import (
 var World *GameWorld
 
 type GameWorld struct {
-	batch *engi.Batch
 	engi.World
 }
 
 func (game *GameWorld) Preload() {
+	game.New()
 	engi.Files.Add(engi.NewResource("bot", "data/icon.png"),
 		engi.NewResource("font", "data/font.png"),
 		engi.NewResource("rock", "data/rock.png"),
 		engi.NewResource("sheet", "data/sheet.png"),
 		engi.NewResource("sample", "data/Hero.png"))
-	// engi.Files.Add("bot", "data/icon.png")
-	// engi.Files.Add("font", "data/font.png")
-	// engi.Files.Add("rock", "data/rock.png")
-	// engi.Files.Add("sheet", "data/sheet.png")
-	// engi.Files.Add("sample", "data/Hero.png")
 
-	game.batch = engi.NewBatch(engi.Width(), engi.Height())
 	log.Println("Preloaded")
 }
 
