@@ -1,5 +1,5 @@
 #Engi 
-A cross-platform game engine written in Go following an interpretation of the Entity Component System paradigm
+A cross-platform game engine written in Go following an interpretation of the Entity Component System paradigm. Engi is currently compilable for Mac OSX, Linux, Windows and the Web. With the release of Go 1.4, sporting Android and the inception of IOS compatibility, mobile will soon be added as a release target.
 
 Currently documentation is pretty scarce, this is because I have not *completely* finalized the API and am about to go through a "pretification" process in order to increase elegance and usability. For a basic up to date example of most features, look to the demos/hello.go and demos/pong/pong.go files. These files are currently your best friends for learning engi, well and me (feel free to shoot me a DM or issue whenever you want!).
 
