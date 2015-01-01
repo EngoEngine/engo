@@ -5,6 +5,7 @@
 package engi
 
 import (
+	"log"
 	"math"
 	"path"
 
@@ -31,9 +32,15 @@ func NewLoader() *Loader {
 	}
 }
 
-func (l *Loader) Add(name, url string) {
-	kind := path.Ext(url)[1:]
-	l.resources = append(l.resources, Resource{kind, name, url})
+func NewResource(name, url string) Resource {
+	return Resource{name: name, url: url, kind: path.Ext(url)[1:]}
+}
+
+func (l *Loader) Add(resources ...Resource) {
+	for _, r := range resources {
+		l.resources = append(l.resources, r)
+		log.Println(r)
+	}
 }
 
 func (l *Loader) Image(name string) *Texture {
