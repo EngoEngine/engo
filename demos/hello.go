@@ -30,23 +30,23 @@ func (game *GameWorld) Setup() {
 	game.AddSystem(&engi.CollisionSystem{})
 	game.AddSystem(&engi.AnimationSystem{})
 
-	entity := engi.NewEntity([]string{"RenderSystem", "MovingSystem", "CollisionSystem", "AnimationSystem"})
-	texture := engi.Files.Image("bot")
-	spritesheet := engi.NewSpritesheet("sample", 16, 16)
+	// entity := engi.NewEntity([]string{"RenderSystem", "MovingSystem", "CollisionSystem", "AnimationSystem"})
+	// texture := engi.Files.Image("bot")
+	// spritesheet := engi.NewSpritesheet("sample", 16, 16)
 
-	animation := engi.NewAnimationComponent()
-	animation.Rate = .1
-	animation.S = spritesheet
-	animation.AddAnimation("default", []int{4, 5, 6, 7})
-	animation.SelectAnimation("default")
+	// animation := engi.NewAnimationComponent()
+	// animation.Rate = .1
+	// animation.S = spritesheet
+	// animation.AddAnimation("default", []int{4, 5, 6, 7})
+	// animation.SelectAnimation("default")
 
-	render := engi.NewRenderComponent(spritesheet.Cell(0), engi.Point{2, 2}, "bot")
-	space := engi.SpaceComponent{Position: engi.Point{10, 10}, Width: texture.Width() * render.Scale.X, Height: texture.Height() * render.Scale.Y}
-	entity.AddComponent(&render)
-	entity.AddComponent(&space)
-	entity.AddComponent(animation)
-	entity.AddComponent(&engi.CollisionMasterComponent{})
-	game.AddEntity(entity)
+	// render := engi.NewRenderComponent(spritesheet.Cell(0), engi.Point{2, 2}, "bot")
+	// space := engi.SpaceComponent{Position: engi.Point{10, 10}, Width: texture.Width() * render.Scale.X, Height: texture.Height() * render.Scale.Y}
+	// entity.AddComponent(&render)
+	// entity.AddComponent(&space)
+	// entity.AddComponent(animation)
+	// entity.AddComponent(&engi.CollisionMasterComponent{})
+	// game.AddEntity(entity)
 
 	text := engi.NewEntity([]string{"RenderSystem"})
 	textTexture := engi.NewText("Hello World", engi.NewGridFont(engi.Files.Image("font"), 20, 20))
@@ -66,7 +66,7 @@ func (game *GameWorld) Setup() {
 
 	game.AddEntity(gameMap)
 
-	engi.Cam.FollowEntity(entity)
+	// engi.Cam.FollowEntity(entity)
 }
 
 type MovingSystem struct {
