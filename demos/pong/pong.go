@@ -12,9 +12,9 @@ type PongGame struct {
 }
 
 func (pong PongGame) Preload() {
-	engi.Files.Add("ball", "assets/ball.png")
-	engi.Files.Add("paddle", "assets/paddle.png")
-	engi.Files.Add("font", "assets/font.png")
+	engi.Files.Add(engi.NewResource("ball", "assets/ball.png"),
+		engi.NewResource("paddle", "assets/paddle.png"),
+		engi.NewResource("font", "assets/font.png"))
 }
 
 func (pong *PongGame) Setup() {
