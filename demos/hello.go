@@ -26,89 +26,23 @@ func (game *GameWorld) Setup() {
 	engi.SetBg(0x2d3739)
 
 	game.AddSystem(&engi.RenderSystem{})
-	game.AddSystem(&MovingSystem{})
-	game.AddSystem(&engi.CollisionSystem{})
-	game.AddSystem(&engi.AnimationSystem{})
 
-	// entity := engi.NewEntity([]string{"RenderSystem", "MovingSystem", "CollisionSystem", "AnimationSystem"})
-	// texture := engi.Files.Image("bot")
-	// spritesheet := engi.NewSpritesheet("sample", 16, 16)
+	guy := engi.NewEntity([]string{"RenderSystem", "ControlSystem", "CollisionSystem", "DeathSystem"})
+	texture := engi.Files.Image("bot")
+	render := engi.NewRenderComponent(texture, engi.Point{8, 8}, "guy")
+	collision := engi.CollisionComponent{Solid: true, Main: true}
 
-	// animation := engi.NewAnimationComponent()
-	// animation.Rate = .1
-	// animation.S = spritesheet
-	// animation.AddAnimation("default", []int{4, 5, 6, 7})
-	// animation.SelectAnimation("default")
+	width := texture.Width() * render.Scale.X
+	height := texture.Height() * render.Scale.Y
 
-	// render := engi.NewRenderComponent(spritesheet.Cell(0), engi.Point{2, 2}, "bot")
-	// space := engi.SpaceComponent{Position: engi.Point{10, 10}, Width: texture.Width() * render.Scale.X, Height: texture.Height() * render.Scale.Y}
-	// entity.AddComponent(&render)
-	// entity.AddComponent(&space)
-	// entity.AddComponent(animation)
-	// entity.AddComponent(&engi.CollisionMasterComponent{})
-	// game.AddEntity(entity)
+	space := engi.SpaceComponent{engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2}, width, height}
 
-	text := engi.NewEntity([]string{"RenderSystem"})
-	textTexture := engi.NewText("Hello World", engi.NewGridFont(engi.Files.Image("font"), 20, 20))
-	textRender := engi.NewRenderComponent(textTexture, engi.Point{1, 1}, "yolo?")
-	textSpace := engi.SpaceComponent{engi.Point{100, 100}, textTexture.Width(), textTexture.Height()}
+	guy.AddComponent(&render)
+	guy.AddComponent(&space)
+	guy.AddComponent(&collision)
 
-	text.AddComponent(&textRender)
-	text.AddComponent(&textSpace)
-	game.AddEntity(text)
+	game.AddEntity(guy)
 
-	gameMap := engi.NewEntity([]string{"RenderSystem", "CollisionSystem"})
-	tilemap := engi.NewTilemap([][]string{{"1", "2", "3"}, {"4", "5", "1"}, {"2", "3", "4"}, {"5", "1", "2"}}, engi.Files.Image("sheet"), 16)
-	mapRender := engi.NewRenderComponent(tilemap, engi.Point{1, 1}, "map")
-	mapSpace := engi.SpaceComponent{engi.Point{100, 100}, 0, 0}
-	gameMap.AddComponent(&mapRender)
-	gameMap.AddComponent(&mapSpace)
-
-	game.AddEntity(gameMap)
-
-	// engi.Cam.FollowEntity(entity)
-}
-
-type MovingSystem struct {
-	*engi.System
-}
-
-func (ms *MovingSystem) New() {
-	ms.System = &engi.System{}
-}
-
-var vel float32
-
-func (ms *MovingSystem) Update(entity *engi.Entity, dt float32) {
-	var space *engi.SpaceComponent
-	if !entity.GetComponent(&space) {
-		return
-	}
-
-	vel = 200 * dt
-	if engi.Keys.KEY_D.Down() {
-		space.Position.X += vel
-	}
-
-	if engi.Keys.KEY_A.Down() {
-		space.Position.X -= vel
-	}
-
-	if engi.Keys.KEY_W.Down() {
-		space.Position.Y -= vel
-	}
-
-	if engi.Keys.KEY_S.Down() {
-		space.Position.Y += vel
-	}
-
-	if engi.Keys.KEY_SPACE.JustPressed() {
-		entity.Exists = false
-	}
-}
-
-func (ms MovingSystem) Name() string {
-	return "MovingSystem"
 }
 
 func main() {
