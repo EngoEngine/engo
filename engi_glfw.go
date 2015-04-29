@@ -16,63 +16,62 @@ import (
 	"os"
 	"runtime"
 
-	glfw "azul3d.org/native/glfw.v3.1"
+	"azul3d.org/native/glfw.v4"
 	"github.com/ajhager/webgl"
 )
 
 var window *glfw.Window
 
+// fatalErr calls log.Fatal with the given error if it is non-nil.
+func fatalErr(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func run(title string, width, height int, fullscreen bool) {
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 
-	if err := glfw.Init(); err != nil {
-		defer glfw.Terminate()
-	}
+	fatalErr(glfw.Init())
 
 	monitor, err := glfw.GetPrimaryMonitor()
-	if err != nil {
-		log.Fatal(err)
-	}
+	fatalErr(err)
 	mode, err := monitor.GetVideoMode()
-	if err != nil {
-		log.Fatal(err)
-	}
+	fatalErr(err)
 
 	if fullscreen {
 		width = mode.Width
 		height = mode.Height
-		glfw.WindowHint(glfw.Decorated, 0)
+		fatalErr(glfw.WindowHint(glfw.Decorated, 0))
 	} else {
 		monitor = nil
 	}
 
-	glfw.WindowHint(glfw.ContextVersionMajor, 2)
-	glfw.WindowHint(glfw.ContextVersionMinor, 1)
+	fatalErr(glfw.WindowHint(glfw.ContextVersionMajor, 2))
+	fatalErr(glfw.WindowHint(glfw.ContextVersionMinor, 1))
 
 	window, err = glfw.CreateWindow(width, height, title, nil, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer window.Destroy()
+	fatalErr(err)
 	window.MakeContextCurrent()
 
-	width, height = window.GetSize()
-
 	if !fullscreen {
-		window.SetPosition((mode.Width-width)/2, (mode.Height-height)/2)
+		fatalErr(window.SetPosition((mode.Width-width)/2, (mode.Height-height)/2))
 	}
 
-	glfw.SwapInterval(1)
+	width, height, err = window.GetFramebufferSize()
+	fatalErr(err)
+
+	fatalErr(glfw.SwapInterval(1))
 
 	gl = webgl.NewContext()
-	Gl = gl
 
 	gl.Viewport(0, 0, width, height)
-	window.SetSizeCallback(func(window *glfw.Window, w, h int) {
-		width, height = window.GetSize()
+	window.SetFramebufferSizeCallback(func(window *glfw.Window, w, h int) {
+		width, height, err = window.GetFramebufferSize()
+		fatalErr(err)
 		gl.Viewport(0, 0, width, height)
-		responder.Resize(width, height)
+		responder.Resize(w, h)
 	})
 
 	window.SetCursorPositionCallback(func(window *glfw.Window, x, y float64) {
@@ -80,7 +79,8 @@ func run(title string, width, height int, fullscreen bool) {
 	})
 
 	window.SetMouseButtonCallback(func(window *glfw.Window, b glfw.MouseButton, a glfw.Action, m glfw.ModifierKey) {
-		x, y := window.GetCursorPosition()
+		x, y, err := window.GetCursorPosition()
+		fatalErr(err)
 		if a == glfw.Press {
 			responder.Mouse(float32(x), float32(y), PRESS)
 		} else {
@@ -105,32 +105,40 @@ func run(title string, width, height int, fullscreen bool) {
 		responder.Type(char)
 	})
 
+	Gl = gl
+
 	responder.Preload()
 	Files.Load(func() {})
 	responder.Setup()
+
 	Wo.New()
-	for !window.ShouldClose() {
+	shouldClose, err := window.ShouldClose()
+	for !shouldClose {
 		responder.Update(Time.Delta())
 		window.SwapBuffers()
 		glfw.PollEvents()
 		keysUpdate()
 		Time.Tick()
+		shouldClose, err = window.ShouldClose()
 	}
+
 	responder.Close()
 }
 
 func width() float32 {
-	width, _ := window.GetSize()
+	width, _, err := window.GetSize()
+	fatalErr(err)
 	return float32(width)
 }
 
 func height() float32 {
-	_, height := window.GetSize()
+	_, height, err := window.GetSize()
+	fatalErr(err)
 	return float32(height)
 }
 
 func exit() {
-	window.SetShouldClose(true)
+	fatalErr(window.SetShouldClose(true))
 }
 
 func init() {
