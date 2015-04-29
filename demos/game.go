@@ -15,9 +15,10 @@ type Game struct {
 }
 
 func (game Game) Preload() {
-	engi.Files.Add("guy", "data/icon.png")
-	engi.Files.Add("rock", "data/rock.png")
-	engi.Files.Add("font", "data/font.go")
+	engi.Files.Add(engi.NewResource("guy", "data/icon.png"),
+		engi.NewResource("rock", "data/rock.png"),
+		engi.NewResource("font", "data/font.png"))
+
 }
 
 func (game *Game) Setup() {
@@ -123,7 +124,8 @@ type FallingSystem struct {
 
 func (fs *FallingSystem) New() {
 	fs.System = &engi.System{}
-	engi.Mailbox.Listen("CollisionMessage", fs)
+	//engi.Mailbox.Listen("CollisionMessage", fs)
+
 }
 
 func (fs FallingSystem) Name() string {
@@ -144,7 +146,14 @@ type DeathSystem struct {
 
 func (ds *DeathSystem) New() {
 	ds.System = &engi.System{}
-	engi.Mailbox.Listen("CollisionMessage", ds)
+	engi.Mailbox.Listen("ScoreMessage", func(message interface{}) {
+		collision, isCollision := message.(engi.CollisionMessage)
+		if isCollision {
+			log.Println(collision, message)
+			log.Println("DEAD")
+		}
+	})
+
 }
 
 func (ds DeathSystem) Name() string {
