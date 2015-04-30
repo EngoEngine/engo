@@ -18,6 +18,22 @@ func (sc SpaceComponent) AABB() AABB {
 	return AABB{Min: sc.Position, Max: Point{sc.Position.X + sc.Width, sc.Position.Y + sc.Height}}
 }
 
+type PhysicsComponent struct {
+	// Is the entity touching the ground?
+	Grounded bool
+
+	Gravity  float32
+	Velocity Point
+
+	// Ground and Air Friction
+	G_Friction float32
+	A_Friction float32
+}
+
+func (spc PhysicsComponent) Name() string {
+	return "PhysicsComponent"
+}
+
 type CollisionMasterComponent struct {
 }
 
