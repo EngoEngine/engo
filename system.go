@@ -60,11 +60,6 @@ func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 
 			var r *RenderComponent
 			other.GetComponent(&r)
-			t, ok := r.Display.(*Tilemap)
-			if ok {
-				CollideTilemap(entity, other, t)
-				return
-			}
 
 			var otherSpace *SpaceComponent
 			var otherCollision *CollisionComponent
@@ -136,11 +131,9 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 		text.Draw(Wo.Batch(), space.Position)
 	case *Tilemap:
 		tilemap := render.Display.(*Tilemap)
-		for _, slice := range tilemap.Tiles {
-			for _, tile := range slice {
-				if tile.Image != nil {
-					Wo.Batch().Draw(tile.Image, (tile.X+space.Position.X)-Cam.X, (tile.Y+space.Position.Y)-Cam.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
-				}
+		for _, tile := range tilemap.Tiles {
+			if tile.Image != nil {
+				Wo.Batch().Draw(tile.Image, (tile.X+space.Position.X)-Cam.X, (tile.Y+space.Position.Y)-Cam.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
 			}
 		}
 	}
