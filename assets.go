@@ -22,6 +22,7 @@ type Loader struct {
 	resources []Resource
 	images    map[string]*Texture
 	jsons     map[string]string
+	levels    map[string]*Level
 }
 
 func NewLoader() *Loader {
@@ -29,6 +30,7 @@ func NewLoader() *Loader {
 		resources: make([]Resource, 1),
 		images:    make(map[string]*Texture),
 		jsons:     make(map[string]string),
+		levels:    make(map[string]*Level),
 	}
 }
 
@@ -51,6 +53,10 @@ func (l *Loader) Json(name string) string {
 	return l.jsons[name]
 }
 
+func (l *Loader) Level(name string) *Level {
+	return l.levels[name]
+}
+
 func (l *Loader) Load(onFinish func()) {
 	for _, r := range l.resources {
 		switch r.kind {
@@ -63,6 +69,11 @@ func (l *Loader) Load(onFinish func()) {
 			data, err := loadJson(r)
 			if err == nil {
 				l.jsons[r.name] = data
+			}
+		case "tmx":
+			data, err := createLevelFromTmx(r)
+			if err == nil {
+				l.levels[r.name] = data
 			}
 		}
 	}

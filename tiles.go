@@ -65,3 +65,13 @@ func getRegionOfSpriteSheet(texture *Texture, tilesize int, index int) *Region {
 
 	return NewRegion(texture, int(pointer.X), int(pointer.Y), tilesize, tilesize)
 }
+
+func TilesFromLevel(lvl *Level) *Tilemap {
+	tilemap := NewTilemap(lvl.Tilesets[0].Image,
+		lvl.Layers[0].TileMapping,
+		lvl.Tilesets[0].TileWidth,
+		lvl.Layers[0].Height,
+		lvl.Layers[0].Width,
+	)
+	return tilemap
+}
