@@ -5,11 +5,11 @@
 package engi
 
 import (
+	"github.com/ajhager/webgl"
+	"io/ioutil"
 	"log"
 	"math"
 	"path"
-
-	"github.com/ajhager/webgl"
 )
 
 type Resource struct {
@@ -34,8 +34,27 @@ func NewLoader() *Loader {
 	}
 }
 
-func NewResource(name, url string) Resource {
-	return Resource{name: name, url: url, kind: path.Ext(url)[1:]}
+func NewResource(url string) Resource {
+	kind := path.Ext(url)
+	//name := strings.TrimSuffix(path.Base(url), kind)
+	name := path.Base(url)
+	return Resource{name: name, url: url, kind: kind[1:]}
+}
+
+func (l *Loader) AddFromDir(url string, recurse bool) {
+	files, err := ioutil.ReadDir(url)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, f := range files {
+		furl := url + "/" + f.Name()
+		if !f.IsDir() {
+			r := NewResource(furl)
+			Files.Add(r)
+		} else if recurse {
+			Files.AddFromDir(furl, recurse)
+		}
+	}
 }
 
 func (l *Loader) Add(resources ...Resource) {

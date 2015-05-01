@@ -8,6 +8,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
+	"path"
 	"strings"
 )
 
@@ -95,17 +96,8 @@ func createLevelFromTmx(r Resource) (*Level, error) {
 	}
 
 	// Load in the images needed for the tilesets
-	//for i := 0; i < len(lvl.Tilesets); i++ {
 	for k, ts := range lvl.Tilesets {
-		//TODO
-		url := "data/maps/" + ts.ImageSrc.Source
-		name := "doesn't matter"
-		r = NewResource(name, url)
-		data, err := loadImage(r)
-		if err != nil {
-			return lvl, err
-		}
-		ts.Image = NewTexture(data)
+		ts.Image = Files.Image(path.Base(ts.ImageSrc.Source))
 		lvl.Tilesets[k] = ts
 	}
 
