@@ -49,16 +49,16 @@ func (l *Loader) AddFromDir(url string, recurse bool) {
 	for _, f := range files {
 		furl := url + "/" + f.Name()
 		if !f.IsDir() {
-			r := NewResource(furl)
-			Files.Add(r)
+			Files.Add(furl)
 		} else if recurse {
 			Files.AddFromDir(furl, recurse)
 		}
 	}
 }
 
-func (l *Loader) Add(resources ...Resource) {
-	for _, r := range resources {
+func (l *Loader) Add(urls ...string) {
+	for _, u := range urls {
+		r := NewResource(u)
 		l.resources = append(l.resources, r)
 		log.Println(r)
 	}
