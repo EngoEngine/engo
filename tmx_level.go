@@ -9,26 +9,27 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path"
+	"sort"
 	"strings"
 )
 
 // Just used to create levelTileset->Image
-type tilesetImgSrc struct {
+type TMXtilesetSrc struct {
 	Source string `xml:"source,attr"`
 	Width  int    `xml:"width,attr"`
 	Height int    `xml:"height,attr"`
 }
 
-type levelTileset struct {
+type TMXtileset struct {
 	Firstgid   int           `xml:"firstgid,attr"`
 	Name       string        `xml:"name,attr"`
 	TileWidth  int           `xml:"tilewidth,attr"`
 	TileHeight int           `xml:"tileheight,attr"`
-	ImageSrc   tilesetImgSrc `xml:"image"`
+	ImageSrc   TMXtilesetSrc `xml:"image"`
 	Image      *Texture
 }
 
-type levelLayer struct {
+type TMXlayer struct {
 	Name        string `xml:"name,attr"`
 	Width       int    `xml:"width,attr"`
 	Height      int    `xml:"height,attr"`
@@ -37,30 +38,38 @@ type levelLayer struct {
 	CompData []byte `xml:"data"`
 }
 
-type Level struct {
-	Width      int            `xml:"width,attr"`
-	Height     int            `xml:"height,attr"`
-	TileWidth  int            `xml:"tilewidth,attr"`
-	TileHeight int            `xml:"tileheight,attr"`
-	Tilesets   []levelTileset `xml:"tileset"`
-	Layers     []levelLayer   `xml:"layer"`
+type TMXlevel struct {
+	Width      int          `xml:"width,attr"`
+	Height     int          `xml:"height,attr"`
+	TileWidth  int          `xml:"tilewidth,attr"`
+	TileHeight int          `xml:"tileheight,attr"`
+	Tilesets   []TMXtileset `xml:"tileset"`
+	Layers     []TMXlayer   `xml:"layer"`
 }
+
+type ByFirstgid []TMXtileset
+
+func (t ByFirstgid) Len() int           { return len(t) }
+func (t ByFirstgid) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
+func (t ByFirstgid) Less(i, j int) bool { return t[i].Firstgid < t[j].Firstgid }
 
 // MUST BE base64 ENCODED and COMPRESSED WITH zlib!
 func createLevelFromTmx(r Resource) (*Level, error) {
+	tlvl := &TMXlevel{}
 	lvl := &Level{}
+
 	tmx, err := readTmx(r.url)
 	if err != nil {
 		return lvl, err
 	}
 
-	if err := xml.Unmarshal([]byte(tmx), &lvl); err != nil {
+	if err := xml.Unmarshal([]byte(tmx), &tlvl); err != nil {
 		fmt.Printf("Error unmarshalling XML: %v", err)
 	}
 
 	// Extract the tile mappings from the compressed data at each layer
-	for idx := range lvl.Layers {
-		layer := &lvl.Layers[idx]
+	for idx := range tlvl.Layers {
+		layer := &tlvl.Layers[idx]
 
 		// Trim leading/trailing whitespace ( inneficient )
 		layer.CompData = []byte(strings.TrimSpace(string(layer.CompData)))
@@ -96,11 +105,32 @@ func createLevelFromTmx(r Resource) (*Level, error) {
 	}
 
 	// Load in the images needed for the tilesets
-	for k, ts := range lvl.Tilesets {
+	for k, ts := range tlvl.Tilesets {
 		ts.Image = Files.Image(path.Base(ts.ImageSrc.Source))
-		lvl.Tilesets[k] = ts
+		tlvl.Tilesets[k] = ts
 	}
 
+	ld := &LevelData{}
+	ld.Width = tlvl.Width
+	ld.Height = tlvl.Height
+	ld.TileWidth = tlvl.TileWidth
+	ld.TileHeight = tlvl.TileHeight
+
+	// get the tilesheets in order and in generic format
+	sort.Sort(ByFirstgid(tlvl.Tilesets))
+	ts := make([]tilesheet, len(tlvl.Tilesets))
+	for i, tts := range tlvl.Tilesets {
+		ts[i] = tilesheet{tts.Image, tts.Firstgid}
+	}
+	ld.Tileset = createTileset(ts, ld.TileWidth, ld.TileHeight)
+
+	ls := make([]layer, len(tlvl.Layers))
+	for i, tls := range tlvl.Layers {
+		ls[i] = layer{tls.Name, tls.TileMapping}
+	}
+
+	ld.Layers = ls
+	lvl = createLevel(ld)
 	return lvl, nil
 }
 

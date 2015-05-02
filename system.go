@@ -129,9 +129,9 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 	case *Text:
 		text := render.Display.(*Text)
 		text.Draw(Wo.Batch(), space.Position)
-	case *Tilemap:
-		tilemap := render.Display.(*Tilemap)
-		for _, tile := range tilemap.Tiles {
+	case *Level:
+		level := render.Display.(*Level)
+		for _, tile := range level.Tiles {
 			if tile.Image != nil {
 				Wo.Batch().Draw(tile.Image, (tile.X+space.Position.X)-Cam.X, (tile.Y+space.Position.Y)-Cam.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
 			}
