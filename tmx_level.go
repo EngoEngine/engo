@@ -14,22 +14,22 @@ import (
 )
 
 // Just used to create levelTileset->Image
-type TMXtilesetSrc struct {
+type TMXTilesetSrc struct {
 	Source string `xml:"source,attr"`
 	Width  int    `xml:"width,attr"`
 	Height int    `xml:"height,attr"`
 }
 
-type TMXtileset struct {
+type TMXTileset struct {
 	Firstgid   int           `xml:"firstgid,attr"`
 	Name       string        `xml:"name,attr"`
 	TileWidth  int           `xml:"tilewidth,attr"`
 	TileHeight int           `xml:"tileheight,attr"`
-	ImageSrc   TMXtilesetSrc `xml:"image"`
+	ImageSrc   TMXTilesetSrc `xml:"image"`
 	Image      *Texture
 }
 
-type TMXlayer struct {
+type TMXLayer struct {
 	Name        string `xml:"name,attr"`
 	Width       int    `xml:"width,attr"`
 	Height      int    `xml:"height,attr"`
@@ -38,16 +38,32 @@ type TMXlayer struct {
 	CompData []byte `xml:"data"`
 }
 
-type TMXlevel struct {
-	Width      int          `xml:"width,attr"`
-	Height     int          `xml:"height,attr"`
-	TileWidth  int          `xml:"tilewidth,attr"`
-	TileHeight int          `xml:"tileheight,attr"`
-	Tilesets   []TMXtileset `xml:"tileset"`
-	Layers     []TMXlayer   `xml:"layer"`
+type TMXPolyline struct {
+	Points string `xml:"points,attr"`
 }
 
-type ByFirstgid []TMXtileset
+type TMXObj struct {
+	X         int           `xml:"x,attr"`
+	Y         int           `xml:"y,attr"`
+	Polylines []TMXPolyline `xml:"polyline"`
+}
+
+type TMXObjGroup struct {
+	Name    string   `xml:"name,attr"`
+	Objects []TMXObj `xml:"object"`
+}
+
+type TMXLevel struct {
+	Width      int           `xml:"width,attr"`
+	Height     int           `xml:"height,attr"`
+	TileWidth  int           `xml:"tilewidth,attr"`
+	TileHeight int           `xml:"tileheight,attr"`
+	Tilesets   []TMXTileset  `xml:"tileset"`
+	Layers     []TMXLayer    `xml:"layer"`
+	ObjGroups  []TMXObjGroup `xml:"objectgroup"`
+}
+
+type ByFirstgid []TMXTileset
 
 func (t ByFirstgid) Len() int           { return len(t) }
 func (t ByFirstgid) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
@@ -55,7 +71,7 @@ func (t ByFirstgid) Less(i, j int) bool { return t[i].Firstgid < t[j].Firstgid }
 
 // MUST BE base64 ENCODED and COMPRESSED WITH zlib!
 func createLevelFromTmx(r Resource) (*Level, error) {
-	tlvl := &TMXlevel{}
+	tlvl := &TMXLevel{}
 	lvl := &Level{}
 
 	tmx, err := readTmx(r.url)
@@ -110,27 +126,27 @@ func createLevelFromTmx(r Resource) (*Level, error) {
 		tlvl.Tilesets[k] = ts
 	}
 
-	ld := &LevelData{}
-	ld.Width = tlvl.Width
-	ld.Height = tlvl.Height
-	ld.TileWidth = tlvl.TileWidth
-	ld.TileHeight = tlvl.TileHeight
+	lvl.Width = tlvl.Width
+	lvl.Height = tlvl.Height
+	lvl.TileWidth = tlvl.TileWidth
+	lvl.TileHeight = tlvl.TileHeight
 
 	// get the tilesheets in order and in generic format
 	sort.Sort(ByFirstgid(tlvl.Tilesets))
-	ts := make([]tilesheet, len(tlvl.Tilesets))
+	ts := make([]*tilesheet, len(tlvl.Tilesets))
 	for i, tts := range tlvl.Tilesets {
-		ts[i] = tilesheet{tts.Image, tts.Firstgid}
+		ts[i] = &tilesheet{tts.Image, tts.Firstgid}
 	}
-	ld.Tileset = createTileset(ts, ld.TileWidth, ld.TileHeight)
 
-	ls := make([]layer, len(tlvl.Layers))
+	lvlTileset := createTileset(lvl, ts)
+
+	lvlLayers := make([]*layer, len(tlvl.Layers))
 	for i, tls := range tlvl.Layers {
-		ls[i] = layer{tls.Name, tls.TileMapping}
+		lvlLayers[i] = &layer{tls.Name, tls.TileMapping}
 	}
 
-	ld.Layers = ls
-	lvl = createLevel(ld)
+	lvl.Tiles = createLevelTiles(lvl, lvlLayers, lvlTileset)
+
 	return lvl, nil
 }
 

@@ -1,16 +1,16 @@
 package engi
 
 type Level struct {
-	Tiles []*tile
-}
-
-type LevelData struct {
 	Width      int
 	Height     int
 	TileWidth  int
 	TileHeight int
-	Tileset    []*tile
-	Layers     []layer
+	Tiles      []*tile
+}
+
+type line struct {
+	P1 Point
+	P2 Point
 }
 
 type tile struct {
@@ -28,8 +28,10 @@ type layer struct {
 	TileMapping []uint32
 }
 
-func createTileset(sheets []tilesheet, tw, th int) []*tile {
+func createTileset(lvl *Level, sheets []*tilesheet) []*tile {
 	tileset := make([]*tile, 0)
+	tw := lvl.TileWidth
+	th := lvl.TileHeight
 
 	for _, sheet := range sheets {
 		setWidth := int(sheet.Image.Width()) / tw
@@ -46,25 +48,25 @@ func createTileset(sheets []tilesheet, tw, th int) []*tile {
 	return tileset
 }
 
-func createLevel(ld *LevelData) *Level {
+func createLevelTiles(lvl *Level, layers []*layer, ts []*tile) []*tile {
 	tilemap := make([]*tile, 0)
 
-	for _, layer := range ld.Layers {
-		mapping := layer.TileMapping
-		for y := 0; y < ld.Height; y++ {
-			for x := 0; x < ld.Width; x++ {
-				idx := x + y*ld.Width
+	for _, lay := range layers {
+		mapping := lay.TileMapping
+		for y := 0; y < lvl.Height; y++ {
+			for x := 0; x < lvl.Width; x++ {
+				idx := x + y*lvl.Width
 				t := &tile{}
 				if tileIdx := int(mapping[idx]) - 1; tileIdx >= 0 {
-					t.Image = ld.Tileset[tileIdx].Image
-					t.Point = Point{float32(x * ld.TileWidth), float32(y * ld.TileHeight)}
+					t.Image = ts[tileIdx].Image
+					t.Point = Point{float32(x * lvl.TileWidth), float32(y * lvl.TileHeight)}
 				}
 				tilemap = append(tilemap, t)
 			}
 		}
 	}
 
-	return &Level{tilemap}
+	return tilemap
 }
 
 // Works for tiles rendered right-down
