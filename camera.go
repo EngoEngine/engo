@@ -6,7 +6,7 @@ package engi
 
 // A rather basic camera
 type Camera struct {
-	Point
+	pos, to Point
 	tracking *Entity // The entity that is currently being followed
 }
 
@@ -16,9 +16,9 @@ func (cam *Camera) FollowEntity(entity *Entity) {
 	if !cam.tracking.GetComponent(&space) {
 		return
 	}
-
-	centerCam(&cam.Point, Width(), Height(), 1, space)
-	// cam.Point = space.Position
+	
+	cam.to = space.Position
+	cam.centerCam(Width(), Height(), 1, space)
 }
 
 func (cam *Camera) Update(dt float32) {
@@ -28,11 +28,16 @@ func (cam *Camera) Update(dt float32) {
 		if !cam.tracking.GetComponent(&space) {
 			return
 		}
-		centerCam(&cam.Point, Width(), Height(), 0.09, space)
+		cam.centerCam(Width(), Height(), 0.09, space)
 	}
 }
 
-func centerCam(to *Point, width, height, lerp float32, space *SpaceComponent) {
-	to.X += ((space.Position.X + space.Width/2) - (to.X + width/2)) * lerp
-	to.Y += ((space.Position.Y + space.Height/2) - (to.Y + height/2)) * lerp
+func (cam *Camera) centerCam( width, height, lerp float32, space *SpaceComponent) {
+
+	cam.to.X += ((space.Position.X + space.Width/2) - (cam.to.X + width/2)) * lerp
+	cam.to.Y += ((space.Position.Y + space.Height) - (cam.to.Y + height)) * lerp
+	
+	if(!(cam.to.X + width >= 1600) && !(cam.to.X <= 0 )) {
+		cam.pos = cam.to
+	}
 }
