@@ -4,6 +4,8 @@
 
 package engi
 
+import "math"
+
 // A rather basic camera
 type Camera struct {
 	pos, to  Point
@@ -36,12 +38,15 @@ func (cam *Camera) centerCam(width, height, lerp float32, space *SpaceComponent)
 	lvl := Files.Level("test.tmx")
 
 	maxX := float32(lvl.Width * lvl.TileWidth)
-	//maxY := float32(lvl.Height * lvl.TileHeight)
+	maxY := float32(lvl.Height * lvl.TileHeight)
 
 	cam.to.X += ((space.Position.X + space.Width/2) - (cam.to.X + width/2)) * lerp
-	cam.to.Y += ((space.Position.Y + space.Height) - (cam.to.Y + height)) * lerp
+	cam.to.Y += ((space.Position.Y + space.Height/2) - (cam.to.Y + height/2)) * lerp
 
 	if !(cam.to.X+width >= maxX) && !(cam.to.X <= 0) {
-		cam.pos = cam.to
+		cam.pos.X = cam.to.X
+	}
+	if !(float32(math.Abs(float64(cam.to.Y)))+height/2 >= maxY) {
+		cam.pos.Y = cam.to.Y
 	}
 }
