@@ -65,7 +65,6 @@ func run(title string, width, height int, fullscreen bool) {
 	fatalErr(glfw.SwapInterval(1))
 
 	gl = webgl.NewContext()
-
 	gl.Viewport(0, 0, width, height)
 	window.SetFramebufferSizeCallback(func(window *glfw.Window, w, h int) {
 		width, height, err = window.GetFramebufferSize()

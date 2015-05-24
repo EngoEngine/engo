@@ -122,10 +122,10 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 	switch render.Display.(type) {
 	case Drawable:
 		drawable := render.Display.(Drawable)
-		Wo.Batch().Draw(drawable, space.Position.X-Cam.X, space.Position.Y-Cam.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, 0xffffff, 1)
+		Wo.Batch().Draw(drawable, space.Position.X-Cam.pos.X, space.Position.Y-Cam.pos.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, 0xffffff, 1)
 	case *Font:
 		font := render.Display.(*Font)
-		font.Print(Wo.Batch(), render.Label, space.Position.X-Cam.X, space.Position.Y-Cam.Y, 0xffffff)
+		font.Print(Wo.Batch(), render.Label, space.Position.X-Cam.pos.X, space.Position.Y-Cam.pos.Y, 0xffffff)
 	case *Text:
 		text := render.Display.(*Text)
 		text.Draw(Wo.Batch(), space.Position)
@@ -133,7 +133,7 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 		level := render.Display.(*Level)
 		for _, tile := range level.Tiles {
 			if tile.Image != nil {
-				Wo.Batch().Draw(tile.Image, (tile.X+space.Position.X)-Cam.X, (tile.Y+space.Position.Y)-Cam.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
+				Wo.Batch().Draw(tile.Image, (tile.X+space.Position.X)-Cam.pos.X, (tile.Y+space.Position.Y)-Cam.pos.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
 			}
 		}
 	}

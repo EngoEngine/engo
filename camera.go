@@ -4,9 +4,11 @@
 
 package engi
 
+import "math"
+
 // A rather basic camera
 type Camera struct {
-	Point
+	pos, to  Point
 	tracking *Entity // The entity that is currently being followed
 }
 
@@ -17,8 +19,8 @@ func (cam *Camera) FollowEntity(entity *Entity) {
 		return
 	}
 
-	centerCam(&cam.Point, Width(), Height(), 1, space)
-	// cam.Point = space.Position
+	cam.to = space.Position
+	cam.centerCam(Width(), Height(), 1, space)
 }
 
 func (cam *Camera) Update(dt float32) {
@@ -28,11 +30,23 @@ func (cam *Camera) Update(dt float32) {
 		if !cam.tracking.GetComponent(&space) {
 			return
 		}
-		centerCam(&cam.Point, Width(), Height(), 0.09, space)
+		cam.centerCam(Width(), Height(), 0.09, space)
 	}
 }
 
-func centerCam(to *Point, width, height, lerp float32, space *SpaceComponent) {
-	to.X += ((space.Position.X + space.Width/2) - (to.X + width/2)) * lerp
-	to.Y += ((space.Position.Y + space.Height/2) - (to.Y + height/2)) * lerp
+func (cam *Camera) centerCam(width, height, lerp float32, space *SpaceComponent) {
+	lvl := Files.Level("test.tmx")
+
+	maxX := float32(lvl.Width * lvl.TileWidth)
+	maxY := float32(lvl.Height * lvl.TileHeight)
+
+	cam.to.X += ((space.Position.X + space.Width/2) - (cam.to.X + width/2)) * lerp
+	cam.to.Y += ((space.Position.Y + space.Height/2) - (cam.to.Y + height/2)) * lerp
+
+	if !(cam.to.X+width >= maxX) && !(cam.to.X <= 0) {
+		cam.pos.X = cam.to.X
+	}
+	if !(float32(math.Abs(float64(cam.to.Y)))+height/2 >= maxY) {
+		cam.pos.Y = cam.to.Y
+	}
 }
