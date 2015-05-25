@@ -71,6 +71,7 @@ func (a *Point) ProjectOnto(b Point) Point {
 func (a *Point) Normalize() (Point, float32) {
 	mag := float32(math.Sqrt(float64(a.X*a.X + a.Y*a.Y)))
 	unit := Point{a.X / mag, a.Y / mag}
+
 	return unit, mag
 }
 
@@ -84,6 +85,7 @@ type Line struct {
 func (l *Line) PointSide(point Point) bool {
 	one := (point.X - l.P1.X) * (l.P2.Y - l.P1.Y)
 	two := (point.Y - l.P1.Y) * (l.P2.X - l.P1.X)
+
 	return math.Signbit(float64(one - two))
 }
 
@@ -120,10 +122,10 @@ func (l *Line) PointDistanceSquared(point Point) float32 {
 		return (y0-y1)*(y0-y1) + (x0-x1)*(x0-x1)
 	} else if t > 1 {
 		return (y0-y2)*(y0-y2) + (x0-x2)*(x0-x2)
-	} else {
-		return (x0-(x1+t*(x2-x1)))*(x0-(x1+t*(x2-x1))) +
-			(y0-(y1+t*(y2-y1)))*(y0-(y1+t*(y2-y1)))
 	}
+
+	return (x0-(x1+t*(x2-x1)))*(x0-(x1+t*(x2-x1))) +
+		(y0-(y1+t*(y2-y1)))*(y0-(y1+t*(y2-y1)))
 }
 
 // Returns the point where the two lines intersect
