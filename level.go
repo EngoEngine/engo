@@ -6,9 +6,10 @@ type Level struct {
 	TileWidth  int
 	TileHeight int
 	Tiles      []*tile
+	LineBounds []Line
 }
 
-type line struct {
+type Line struct {
 	P1 Point
 	P2 Point
 }

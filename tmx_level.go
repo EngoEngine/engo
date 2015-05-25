@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"path"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -147,7 +148,39 @@ func createLevelFromTmx(r Resource) (*Level, error) {
 
 	lvl.Tiles = createLevelTiles(lvl, lvlLayers, lvlTileset)
 
+	for _, o := range tlvl.ObjGroups[0].Objects {
+		p := o.Polylines[0].Points
+		lvl.LineBounds = append(lvl.LineBounds, pointStringToLines(p, o.X, o.Y)...)
+	}
+
 	return lvl, nil
+}
+
+func pointStringToLines(str string, xOff, yOff int) []Line {
+	pts := strings.Split(str, " ")
+	floatPts := make([][]int, len(pts))
+	for i, x := range pts {
+		pt := strings.Split(x, ",")
+		floatPts[i] = make([]int, 2)
+		floatPts[i][0], _ = strconv.Atoi(pt[0])
+		floatPts[i][1], _ = strconv.Atoi(pt[1])
+	}
+
+	lines := make([]Line, len(floatPts)-1)
+
+	// Now to globalize line coordinates
+	for i := 0; i < len(floatPts)-1; i++ {
+		x1 := float32(floatPts[i][0] + xOff)
+		y1 := float32(floatPts[i][1] + yOff)
+		x2 := float32(floatPts[i+1][0] + xOff)
+		y2 := float32(floatPts[i+1][1] + yOff)
+		p1 := Point{x1, y1}
+		p2 := Point{x2, y2}
+		newLine := Line{p1, p2}
+		lines = append(lines, newLine)
+	}
+
+	return lines
 }
 
 func readTmx(url string) (string, error) {
