@@ -6,7 +6,7 @@ type Level struct {
 	TileWidth  int
 	TileHeight int
 	Tiles      []*tile
-	Platforms  []Line
+	LineBounds []Line
 }
 
 type Line struct {

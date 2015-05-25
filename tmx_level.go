@@ -148,13 +148,10 @@ func createLevelFromTmx(r Resource) (*Level, error) {
 
 	lvl.Tiles = createLevelTiles(lvl, lvlLayers, lvlTileset)
 
-	plats := make([]Line, 0)
 	for _, o := range tlvl.ObjGroups[0].Objects {
 		p := o.Polylines[0].Points
-		plats = append(plats, pointStringToLines(p, o.X, o.Y)...)
+		lvl.LineBounds = append(lvl.LineBounds, pointStringToLines(p, o.X, o.Y)...)
 	}
-
-	lvl.Platforms = plats
 
 	return lvl, nil
 }
