@@ -9,11 +9,6 @@ type Level struct {
 	LineBounds []Line
 }
 
-type Line struct {
-	P1 Point
-	P2 Point
-}
-
 type tile struct {
 	Point
 	Image *Region
