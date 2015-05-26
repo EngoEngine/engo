@@ -38,14 +38,8 @@ func (cam *Camera) centerCam(width, height, lerp float32, space *SpaceComponent)
 	cam.to.X += ((space.Position.X + space.Width/2) - (cam.to.X + width/2)) * lerp
 	cam.to.Y += ((space.Position.Y + space.Height/2) - (cam.to.Y + height/2)) * lerp
 
-	if cam.to.X > 0 && cam.to.X+width < WorldBounds.Max.X {
-		cam.pos.X = floorFloat32(cam.to.X)
-	}
-
-	if cam.to.Y > 0 && cam.to.Y+height < WorldBounds.Max.Y {
-		cam.pos.Y = floorFloat32(cam.pos.Y)
-	}
-
+	cam.pos.X = Clamp(floorFloat32(cam.to.X), 0, WorldBounds.Max.X-width)
+	cam.pos.Y = Clamp(floorFloat32(cam.to.Y), 0, WorldBounds.Max.Y-height)
 }
 
 func floorFloat32(i float32) float32 {
