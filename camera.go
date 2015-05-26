@@ -44,16 +44,16 @@ func (cam *Camera) centerCam(width, height, lerp float32, space *SpaceComponent)
 	cam.to.Y += ((space.Position.Y + space.Height/2) - (cam.to.Y + height/2)) * lerp
 
 	if !(cam.to.X+width >= maxX) && !(cam.to.X <= 0) {
-		cam.pos.X = fif(cam.to.X)
+		cam.pos.X = floorFloat32(cam.to.X)
 	}
 	if !(float32(math.Abs(float64(cam.to.Y)))+height/2 >= maxY) {
-		cam.pos.Y = fif(cam.to.Y)
+		cam.pos.Y = floorFloat32(cam.to.Y)
 	}
 }
 
 // floatIntFloat is for those dark days when you need to remove an unwanted
 // decimal place value.
 // TODO check performance of this vs traditional versions
-func floatIntFloat(i float32) float32 {
-	return float32(int(i))
+func floorFloat32(i float32) float32 {
+	return float32(math.Floor(float64(i)))
 }
