@@ -158,22 +158,22 @@ func createLevelFromTmx(r Resource) (*Level, error) {
 
 func pointStringToLines(str string, xOff, yOff int) []Line {
 	pts := strings.Split(str, " ")
-	floatPts := make([][]int, len(pts))
+	floatPts := make([][]float64, len(pts))
 	for i, x := range pts {
 		pt := strings.Split(x, ",")
-		floatPts[i] = make([]int, 2)
-		floatPts[i][0], _ = strconv.Atoi(pt[0])
-		floatPts[i][1], _ = strconv.Atoi(pt[1])
+		floatPts[i] = make([]float64, 2)
+		floatPts[i][0], _ = strconv.ParseFloat(pt[0], 64)
+		floatPts[i][1], _ = strconv.ParseFloat(pt[1], 64)
 	}
 
 	lines := make([]Line, len(floatPts)-1)
 
 	// Now to globalize line coordinates
 	for i := 0; i < len(floatPts)-1; i++ {
-		x1 := float32(floatPts[i][0] + xOff)
-		y1 := float32(floatPts[i][1] + yOff)
-		x2 := float32(floatPts[i+1][0] + xOff)
-		y2 := float32(floatPts[i+1][1] + yOff)
+		x1 := float32(floatPts[i][0] + float64(xOff))
+		y1 := float32(floatPts[i][1] + float64(yOff))
+		x2 := float32(floatPts[i+1][0] + float64(xOff))
+		y2 := float32(floatPts[i+1][1] + float64(yOff))
 		p1 := Point{x1, y1}
 		p2 := Point{x2, y2}
 		newLine := Line{p1, p2}
