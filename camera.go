@@ -35,25 +35,13 @@ func (cam *Camera) Update(dt float32) {
 }
 
 func (cam *Camera) centerCam(width, height, lerp float32, space *SpaceComponent) {
-	lvl := Files.Level("test.tmx")
-
-	maxX := float32(lvl.Width * lvl.TileWidth)
-	maxY := float32(lvl.Height * lvl.TileHeight)
-
 	cam.to.X += ((space.Position.X + space.Width/2) - (cam.to.X + width/2)) * lerp
 	cam.to.Y += ((space.Position.Y + space.Height/2) - (cam.to.Y + height/2)) * lerp
 
-	if !(cam.to.X+width >= maxX) && !(cam.to.X <= 0) {
-		cam.pos.X = floorFloat32(cam.to.X)
-	}
-	if !(float32(math.Abs(float64(cam.to.Y)))+height/2 >= maxY) {
-		cam.pos.Y = floorFloat32(cam.to.Y)
-	}
+	cam.pos.X = Clamp(floorFloat32(cam.to.X), 0, WorldBounds.Max.X-width)
+	cam.pos.Y = Clamp(floorFloat32(cam.to.Y), 0, WorldBounds.Max.Y-height)
 }
 
-// floatIntFloat is for those dark days when you need to remove an unwanted
-// decimal place value.
-// TODO check performance of this vs traditional versions
 func floorFloat32(i float32) float32 {
 	return float32(math.Floor(float64(i)))
 }

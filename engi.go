@@ -7,14 +7,15 @@ package engi
 import "github.com/ajhager/webgl"
 
 var (
-	responder Responder
-	Time      *Clock
-	Files     *Loader
-	gl        *webgl.Context
-	Mailbox   MessageManager
-	Gl        = gl
-	Cam       *Camera
-	Wo        Responder
+	responder   Responder
+	Time        *Clock
+	Files       *Loader
+	gl          *webgl.Context
+	Mailbox     MessageManager
+	Gl          = gl
+	Cam         *Camera
+	Wo          Responder
+	WorldBounds AABB
 )
 
 func Open(title string, width, height int, fullscreen bool, r Responder) {
