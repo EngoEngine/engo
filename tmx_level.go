@@ -44,8 +44,8 @@ type TMXPolyline struct {
 }
 
 type TMXObj struct {
-	X         int           `xml:"x,attr"`
-	Y         int           `xml:"y,attr"`
+	X         float64       `xml:"x,attr"`
+	Y         float64       `xml:"y,attr"`
 	Polylines []TMXPolyline `xml:"polyline"`
 }
 
@@ -156,14 +156,14 @@ func createLevelFromTmx(r Resource) (*Level, error) {
 	return lvl, nil
 }
 
-func pointStringToLines(str string, xOff, yOff int) []Line {
+func pointStringToLines(str string, xOff, yOff float64) []Line {
 	pts := strings.Split(str, " ")
-	floatPts := make([][]int, len(pts))
+	floatPts := make([][]float64, len(pts))
 	for i, x := range pts {
 		pt := strings.Split(x, ",")
-		floatPts[i] = make([]int, 2)
-		floatPts[i][0], _ = strconv.Atoi(pt[0])
-		floatPts[i][1], _ = strconv.Atoi(pt[1])
+		floatPts[i] = make([]float64, 2)
+		floatPts[i][0], _ = strconv.ParseFloat(pt[0], 64)
+		floatPts[i][1], _ = strconv.ParseFloat(pt[1], 64)
 	}
 
 	lines := make([]Line, len(floatPts)-1)
