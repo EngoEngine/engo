@@ -44,8 +44,8 @@ type TMXPolyline struct {
 }
 
 type TMXObj struct {
-	X         int           `xml:"x,attr"`
-	Y         int           `xml:"y,attr"`
+	X         float64       `xml:"x,attr"`
+	Y         float64       `xml:"y,attr"`
 	Polylines []TMXPolyline `xml:"polyline"`
 }
 
@@ -156,7 +156,7 @@ func createLevelFromTmx(r Resource) (*Level, error) {
 	return lvl, nil
 }
 
-func pointStringToLines(str string, xOff, yOff int) []Line {
+func pointStringToLines(str string, xOff, yOff float64) []Line {
 	pts := strings.Split(str, " ")
 	floatPts := make([][]float64, len(pts))
 	for i, x := range pts {
@@ -170,10 +170,10 @@ func pointStringToLines(str string, xOff, yOff int) []Line {
 
 	// Now to globalize line coordinates
 	for i := 0; i < len(floatPts)-1; i++ {
-		x1 := float32(floatPts[i][0] + float64(xOff))
-		y1 := float32(floatPts[i][1] + float64(yOff))
-		x2 := float32(floatPts[i+1][0] + float64(xOff))
-		y2 := float32(floatPts[i+1][1] + float64(yOff))
+		x1 := float32(floatPts[i][0] + xOff)
+		y1 := float32(floatPts[i][1] + yOff)
+		x2 := float32(floatPts[i+1][0] + xOff)
+		y2 := float32(floatPts[i+1][1] + yOff)
 		p1 := Point{x1, y1}
 		p2 := Point{x2, y2}
 		newLine := Line{p1, p2}
