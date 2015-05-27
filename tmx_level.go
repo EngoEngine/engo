@@ -54,6 +54,17 @@ type TMXObjGroup struct {
 	Objects []TMXObj `xml:"object"`
 }
 
+type TMXImgSrc struct {
+	Source string `xml:"source,attr"`
+}
+
+type TMXImgLayer struct {
+	Name   string    `xml:"name,attr"`
+	X      float64   `xml:"x,attr"`
+	Y      float64   `xml:"y,attr"`
+	ImgSrc TMXImgSrc `xml:"image"`
+}
+
 type TMXLevel struct {
 	Width      int           `xml:"width,attr"`
 	Height     int           `xml:"height,attr"`
@@ -62,6 +73,7 @@ type TMXLevel struct {
 	Tilesets   []TMXTileset  `xml:"tileset"`
 	Layers     []TMXLayer    `xml:"layer"`
 	ObjGroups  []TMXObjGroup `xml:"objectgroup"`
+	ImgLayers  []TMXImgLayer `xml:"imagelayer"`
 }
 
 type ByFirstgid []TMXTileset
@@ -151,6 +163,14 @@ func createLevelFromTmx(r Resource) (*Level, error) {
 	for _, o := range tlvl.ObjGroups[0].Objects {
 		p := o.Polylines[0].Points
 		lvl.LineBounds = append(lvl.LineBounds, pointStringToLines(p, o.X, o.Y)...)
+	}
+
+	for i := 0; i < len(tlvl.ImgLayers); i++ {
+		curImg := Files.Image(path.Base(tlvl.ImgLayers[i].ImgSrc.Source))
+		curX := float32(tlvl.ImgLayers[i].X)
+		curY := float32(tlvl.ImgLayers[i].Y)
+		reg := NewRegion(curImg, 0, 0, curImg.width, curImg.height)
+		lvl.Images = append(lvl.Images, &tile{Point{curX, curY}, reg})
 	}
 
 	return lvl, nil
