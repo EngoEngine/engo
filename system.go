@@ -131,6 +131,11 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 		text.Draw(Wo.Batch(), space.Position)
 	case *Level:
 		level := render.Display.(*Level)
+		for _, img := range level.Images {
+			if img.Image != nil {
+				Wo.Batch().Draw(img.Image, img.X-Cam.pos.X, img.Y-Cam.pos.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
+			}
+		}
 		for _, tile := range level.Tiles {
 			if tile.Image != nil {
 				Wo.Batch().Draw(tile.Image, (tile.X+space.Position.X)-Cam.pos.X, (tile.Y+space.Position.Y)-Cam.pos.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
