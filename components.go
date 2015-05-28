@@ -39,13 +39,14 @@ func (cm CollisionMasterComponent) Is() bool {
 }
 
 type RenderComponent struct {
-	Display interface{}
-	Scale   Point
-	Label   string
+	Display  interface{}
+	Scale    Point
+	Label    string
+	Priority int
 }
 
 func NewRenderComponent(display interface{}, scale Point, label string) RenderComponent {
-	return RenderComponent{Display: display, Scale: scale, Label: label}
+	return RenderComponent{Display: display, Scale: scale, Label: label, Priority: MiddleGround}
 }
 
 func (rc RenderComponent) Name() string {

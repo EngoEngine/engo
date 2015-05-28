@@ -96,23 +96,74 @@ func (cs CollisionSystem) Name() string {
 	return "CollisionSystem"
 }
 
+const (
+	ForeGround   = 2
+	MiddleGround = 1
+	BackGround   = 0
+)
+
 type RenderSystem struct {
+	renders map[int][]*Entity
 	*System
 }
 
 func (rs *RenderSystem) New() {
+	rs.renders = make(map[int][]*Entity)
 	rs.System = &System{}
 }
 
 func (rs RenderSystem) Pre() {
-
+	delete(rs.renders, 0)
+	delete(rs.renders, 1)
+	delete(rs.renders, 2)
 }
 
 func (rs RenderSystem) Post() {
+	for i := 2; i >= 0; i-- {
+		for _, entity := range rs.renders[i] {
+			var render *RenderComponent
+			var space *SpaceComponent
+
+			if !entity.GetComponent(&render) || !entity.GetComponent(&space) {
+				return
+			}
+
+			switch render.Display.(type) {
+			case Drawable:
+				drawable := render.Display.(Drawable)
+				Wo.Batch().Draw(drawable, space.Position.X-Cam.pos.X, space.Position.Y-Cam.pos.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, 0xffffff, 1)
+			case *Font:
+				font := render.Display.(*Font)
+				font.Print(Wo.Batch(), render.Label, space.Position.X-Cam.pos.X, space.Position.Y-Cam.pos.Y, 0xffffff)
+			case *Text:
+				text := render.Display.(*Text)
+				text.Draw(Wo.Batch(), space.Position)
+			case *Level:
+				level := render.Display.(*Level)
+				for _, img := range level.Images {
+					if img.Image != nil {
+						Wo.Batch().Draw(img.Image, img.X-Cam.pos.X, img.Y-Cam.pos.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
+					}
+				}
+				for _, tile := range level.Tiles {
+					if tile.Image != nil {
+						Wo.Batch().Draw(tile.Image, (tile.X+space.Position.X)-Cam.pos.X, (tile.Y+space.Position.Y)-Cam.pos.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
+					}
+				}
+			}
+		}
+
+	}
 }
 
 func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 	var render *RenderComponent
+	if !entity.GetComponent(&render) {
+		return
+	}
+
+	rs.renders[render.Priority] = append(rs.renders[render.Priority], entity)
+	/*var render *RenderComponent
 	var space *SpaceComponent
 
 	if !entity.GetComponent(&render) || !entity.GetComponent(&space) {
@@ -141,7 +192,7 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 				Wo.Batch().Draw(tile.Image, (tile.X+space.Position.X)-Cam.pos.X, (tile.Y+space.Position.Y)-Cam.pos.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
 			}
 		}
-	}
+	}*/
 }
 
 func (rs RenderSystem) Name() string {
