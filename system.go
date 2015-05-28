@@ -133,7 +133,7 @@ func (rs RenderSystem) Post() {
 			switch render.Display.(type) {
 			case Drawable:
 				drawable := render.Display.(Drawable)
-				Wo.Batch().Draw(drawable, space.Position.X-Cam.pos.X, space.Position.Y-Cam.pos.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, 0xffffff, 1)
+				Wo.Batch().Draw(drawable, space.Position.X-Cam.pos.X, space.Position.Y-Cam.pos.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, render.Color, render.Transparency)
 			case *Font:
 				font := render.Display.(*Font)
 				font.Print(Wo.Batch(), render.Label, space.Position.X-Cam.pos.X, space.Position.Y-Cam.pos.Y, 0xffffff)
