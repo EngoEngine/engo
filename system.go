@@ -96,31 +96,33 @@ func (cs CollisionSystem) Name() string {
 	return "CollisionSystem"
 }
 
+type PriorityLevel int
+
 const (
-	ForeGround   = 2
-	MiddleGround = 1
-	BackGround   = 0
+	Foreground   PriorityLevel = 2
+	MiddleGround PriorityLevel = 1
+	Background   PriorityLevel = 0
 )
 
 type RenderSystem struct {
-	renders map[int][]*Entity
+	renders map[PriorityLevel][]*Entity
 	*System
 }
 
 func (rs *RenderSystem) New() {
-	rs.renders = make(map[int][]*Entity)
+	rs.renders = make(map[PriorityLevel][]*Entity)
 	rs.System = &System{}
 }
 
 func (rs RenderSystem) Pre() {
-	delete(rs.renders, 0)
-	delete(rs.renders, 1)
-	delete(rs.renders, 2)
+	delete(rs.renders, Foreground)
+	delete(rs.renders, MiddleGround)
+	delete(rs.renders, Background)
 }
 
 func (rs RenderSystem) Post() {
 	for i := 2; i >= 0; i-- {
-		for _, entity := range rs.renders[i] {
+		for _, entity := range rs.renders[PriorityLevel(i)] {
 			var render *RenderComponent
 			var space *SpaceComponent
 

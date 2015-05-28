@@ -42,7 +42,7 @@ type RenderComponent struct {
 	Display  interface{}
 	Scale    Point
 	Label    string
-	Priority int
+	Priority PriorityLevel
 }
 
 func NewRenderComponent(display interface{}, scale Point, label string) RenderComponent {
