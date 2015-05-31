@@ -123,12 +123,6 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 	case Drawable:
 		drawable := render.Display.(Drawable)
 		Wo.Batch().Draw(drawable, space.Position.X-Cam.pos.X, space.Position.Y-Cam.pos.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, 0xffffff, 1)
-	case *Font:
-		font := render.Display.(*Font)
-		font.Print(Wo.Batch(), render.Label, space.Position.X-Cam.pos.X, space.Position.Y-Cam.pos.Y, 0xffffff)
-	case *Text:
-		text := render.Display.(*Text)
-		text.Draw(Wo.Batch(), space.Position)
 	case *Level:
 		level := render.Display.(*Level)
 		for _, img := range level.Images {
