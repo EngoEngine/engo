@@ -4,6 +4,7 @@ import (
 	"code.google.com/p/freetype-go/freetype"
 	"code.google.com/p/freetype-go/freetype/truetype"
 	"image"
+	"image/color"
 	"image/draw"
 	"io/ioutil"
 	"log"
@@ -11,19 +12,23 @@ import (
 
 var (
 	dpi = float64(72)
-	fg  = image.Black
-	bg  = image.Transparent
 )
+
+type Color struct {
+	R, G, B, A uint8
+}
 
 // TODO FG and BG color config
 type Font struct {
-	Url  string
+	URL  string
 	Size float64
+	BG   Color
+	FG   Color
 	ttf  *truetype.Font
 }
 
 func (f *Font) Create() {
-	url := f.Url
+	url := f.URL
 
 	// Read and parse the font
 	ttfBytes, err := ioutil.ReadFile(url)
@@ -38,8 +43,6 @@ func (f *Font) Create() {
 		return
 	}
 	f.ttf = ttf
-
-	return
 }
 
 func (f *Font) TextDimensions(text string) (int, int, int) {
@@ -79,6 +82,11 @@ func (f *Font) Render(text string) *Texture {
 	width, height, yBearing := f.TextDimensions(text)
 	font := f.ttf
 	size := f.Size
+
+	// Colors
+	fg := image.NewUniform(color.NRGBA{f.FG.R, f.FG.G, f.FG.B, f.FG.A})
+	bg := image.NewUniform(color.NRGBA{f.BG.R, f.BG.G, f.BG.B, f.BG.A})
+
 	// Create the font context
 	c := freetype.NewContext()
 
