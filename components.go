@@ -39,7 +39,7 @@ func (cm CollisionMasterComponent) Is() bool {
 }
 
 type RenderComponent struct {
-	Display      interface{}
+	Display      Renderable
 	Scale        Point
 	Label        string
 	Priority     PriorityLevel
@@ -47,7 +47,7 @@ type RenderComponent struct {
 	Color        uint32
 }
 
-func NewRenderComponent(display interface{}, scale Point, label string) RenderComponent {
+func NewRenderComponent(display Renderable, scale Point, label string) RenderComponent {
 	return RenderComponent{
 		Display:      display,
 		Scale:        scale,

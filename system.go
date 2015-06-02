@@ -148,32 +148,7 @@ func (rs *RenderSystem) Post() {
 				return
 			}
 
-			switch render.Display.(type) {
-			case Renderable:
-				r := render.Display.(Renderable)
-				r.Render(Wo.Batch(), render, space)
-			case Drawable:
-				drawable := render.Display.(Drawable)
-				Wo.Batch().Draw(drawable, space.Position.X-Cam.pos.X, space.Position.Y-Cam.pos.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, render.Color, render.Transparency)
-			case *Font:
-				font := render.Display.(*Font)
-				font.Print(Wo.Batch(), render.Label, space.Position.X-Cam.pos.X, space.Position.Y-Cam.pos.Y, 0xffffff)
-			case *Text:
-				text := render.Display.(*Text)
-				text.Draw(Wo.Batch(), space.Position)
-			case *Level:
-				level := render.Display.(*Level)
-				for _, img := range level.Images {
-					if img.Image != nil {
-						Wo.Batch().Draw(img.Image, img.X-Cam.pos.X, img.Y-Cam.pos.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
-					}
-				}
-				for _, tile := range level.Tiles {
-					if tile.Image != nil {
-						Wo.Batch().Draw(tile.Image, (tile.X+space.Position.X)-Cam.pos.X, (tile.Y+space.Position.Y)-Cam.pos.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
-					}
-				}
-			}
+			render.Display.Render(Wo.Batch(), render, space)
 		}
 
 	}

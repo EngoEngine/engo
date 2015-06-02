@@ -131,6 +131,10 @@ type Region struct {
 	width, height float32
 }
 
+func (r *Region) Render(b *Batch, render *RenderComponent, space *SpaceComponent) {
+	r.texture.Render(b, render, space)
+}
+
 func NewRegion(texture *Texture, x, y, w, h int) *Region {
 	invTexWidth := 1.0 / float32(texture.Width())
 	invTexHeight := 1.0 / float32(texture.Height())
@@ -184,6 +188,16 @@ func NewTexture(img Image) *Texture {
 	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img.Data())
 
 	return &Texture{id, img.Width(), img.Height()}
+}
+
+func (t *Texture) Render(b *Batch, render *RenderComponent, space *SpaceComponent) {
+	Wo.Batch().Draw(t,
+		space.Position.X-Cam.pos.X, space.Position.Y-Cam.pos.Y,
+		0, 0,
+		render.Scale.X, render.Scale.Y,
+		0,
+		render.Color, render.Transparency)
+
 }
 
 // Width returns the width of the texture.

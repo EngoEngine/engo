@@ -10,6 +10,20 @@ type Level struct {
 	Images     []*tile
 }
 
+func (lvl *Level) Render(b *Batch, render *RenderComponent, space *SpaceComponent) {
+	for _, img := range lvl.Images {
+		if img.Image != nil {
+			Wo.Batch().Draw(img.Image, img.X-Cam.pos.X, img.Y-Cam.pos.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
+		}
+	}
+
+	for _, tile := range lvl.Tiles {
+		if tile.Image != nil {
+			Wo.Batch().Draw(tile.Image, (tile.X+space.Position.X)-Cam.pos.X, (tile.Y+space.Position.Y)-Cam.pos.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
+		}
+	}
+}
+
 type tile struct {
 	Point
 	Image *Region
