@@ -134,6 +134,10 @@ func (rs RenderSystem) Pre() {
 	delete(rs.renders, Background)
 }
 
+type Renderable interface {
+	Render(b *Batch, render *RenderComponent, space *SpaceComponent)
+}
+
 func (rs *RenderSystem) Post() {
 	for i := 4; i >= 0; i-- {
 		for _, entity := range rs.renders[PriorityLevel(i)] {
@@ -145,6 +149,9 @@ func (rs *RenderSystem) Post() {
 			}
 
 			switch render.Display.(type) {
+			case Renderable:
+				r := render.Display.(Renderable)
+				r.Render(Wo.Batch(), render, space)
 			case Drawable:
 				drawable := render.Display.(Drawable)
 				Wo.Batch().Draw(drawable, space.Position.X-Cam.pos.X, space.Position.Y-Cam.pos.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, render.Color, render.Transparency)
