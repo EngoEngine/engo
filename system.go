@@ -96,46 +96,77 @@ func (cs CollisionSystem) Name() string {
 	return "CollisionSystem"
 }
 
+type PriorityLevel int
+
+const (
+	HUDGround    PriorityLevel = 4
+	Foreground   PriorityLevel = 3
+	MiddleGround PriorityLevel = 2
+	ScenicGround PriorityLevel = 1
+	Background   PriorityLevel = 0
+)
+
 type RenderSystem struct {
+	renders map[PriorityLevel][]*Entity
+	changed bool
 	*System
 }
 
 func (rs *RenderSystem) New() {
+	rs.renders = make(map[PriorityLevel][]*Entity)
 	rs.System = &System{}
 }
 
+func (rs *RenderSystem) AddEntity(e *Entity) {
+	rs.changed = true
+	rs.System.AddEntity(e)
+}
+
 func (rs RenderSystem) Pre() {
-
-}
-
-func (rs RenderSystem) Post() {
-}
-
-func (rs *RenderSystem) Update(entity *Entity, dt float32) {
-	var render *RenderComponent
-	var space *SpaceComponent
-
-	if !entity.GetComponent(&render) || !entity.GetComponent(&space) {
+	if !rs.changed {
 		return
 	}
 
-	switch render.Display.(type) {
-	case Drawable:
-		drawable := render.Display.(Drawable)
-		Wo.Batch().Draw(drawable, space.Position.X-Cam.pos.X, space.Position.Y-Cam.pos.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, 0xffffff, 1)
-	case *Level:
-		level := render.Display.(*Level)
-		for _, img := range level.Images {
-			if img.Image != nil {
-				Wo.Batch().Draw(img.Image, img.X-Cam.pos.X, img.Y-Cam.pos.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
+	delete(rs.renders, HUDGround)
+	delete(rs.renders, Foreground)
+	delete(rs.renders, MiddleGround)
+	delete(rs.renders, ScenicGround)
+	delete(rs.renders, Background)
+}
+
+type Renderable interface {
+	Render(b *Batch, render *RenderComponent, space *SpaceComponent)
+}
+
+func (rs *RenderSystem) Post() {
+	for i := 4; i >= 0; i-- {
+		for _, entity := range rs.renders[PriorityLevel(i)] {
+			var render *RenderComponent
+			var space *SpaceComponent
+
+			if !entity.GetComponent(&render) || !entity.GetComponent(&space) {
+				return
 			}
+
+			render.Display.Render(Wo.Batch(), render, space)
 		}
-		for _, tile := range level.Tiles {
-			if tile.Image != nil {
-				Wo.Batch().Draw(tile.Image, (tile.X+space.Position.X)-Cam.pos.X, (tile.Y+space.Position.Y)-Cam.pos.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
-			}
-		}
+
 	}
+
+	rs.changed = false
+}
+
+func (rs *RenderSystem) Update(entity *Entity, dt float32) {
+	if !rs.changed {
+		return
+	}
+
+	var render *RenderComponent
+	if !entity.GetComponent(&render) {
+		return
+	}
+
+	rs.renders[render.Priority] = append(rs.renders[render.Priority], entity)
 }
 
 func (rs RenderSystem) Name() string {
