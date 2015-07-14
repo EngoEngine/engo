@@ -5,11 +5,11 @@
 package engi
 
 import (
+	"github.com/ajhager/webgl"
+	"io/ioutil"
 	"log"
 	"math"
 	"path"
-
-	"github.com/ajhager/webgl"
 )
 
 type Resource struct {
@@ -22,6 +22,7 @@ type Loader struct {
 	resources []Resource
 	images    map[string]*Texture
 	jsons     map[string]string
+	levels    map[string]*Level
 }
 
 func NewLoader() *Loader {
@@ -29,15 +30,35 @@ func NewLoader() *Loader {
 		resources: make([]Resource, 1),
 		images:    make(map[string]*Texture),
 		jsons:     make(map[string]string),
+		levels:    make(map[string]*Level),
 	}
 }
 
-func NewResource(name, url string) Resource {
-	return Resource{name: name, url: url, kind: path.Ext(url)[1:]}
+func NewResource(url string) Resource {
+	kind := path.Ext(url)
+	//name := strings.TrimSuffix(path.Base(url), kind)
+	name := path.Base(url)
+	return Resource{name: name, url: url, kind: kind[1:]}
 }
 
-func (l *Loader) Add(resources ...Resource) {
-	for _, r := range resources {
+func (l *Loader) AddFromDir(url string, recurse bool) {
+	files, err := ioutil.ReadDir(url)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, f := range files {
+		furl := url + "/" + f.Name()
+		if !f.IsDir() {
+			Files.Add(furl)
+		} else if recurse {
+			Files.AddFromDir(furl, recurse)
+		}
+	}
+}
+
+func (l *Loader) Add(urls ...string) {
+	for _, u := range urls {
+		r := NewResource(u)
 		l.resources = append(l.resources, r)
 		log.Println(r)
 	}
@@ -49,6 +70,10 @@ func (l *Loader) Image(name string) *Texture {
 
 func (l *Loader) Json(name string) string {
 	return l.jsons[name]
+}
+
+func (l *Loader) Level(name string) *Level {
+	return l.levels[name]
 }
 
 func (l *Loader) Load(onFinish func()) {
@@ -63,6 +88,11 @@ func (l *Loader) Load(onFinish func()) {
 			data, err := loadJson(r)
 			if err == nil {
 				l.jsons[r.name] = data
+			}
+		case "tmx":
+			data, err := createLevelFromTmx(r)
+			if err == nil {
+				l.levels[r.name] = data
 			}
 		}
 	}
@@ -99,6 +129,10 @@ type Region struct {
 	u, v          float32
 	u2, v2        float32
 	width, height float32
+}
+
+func (r *Region) Render(b *Batch, render *RenderComponent, space *SpaceComponent) {
+	r.texture.Render(b, render, space)
 }
 
 func NewRegion(texture *Texture, x, y, w, h int) *Region {
@@ -154,6 +188,16 @@ func NewTexture(img Image) *Texture {
 	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img.Data())
 
 	return &Texture{id, img.Width(), img.Height()}
+}
+
+func (t *Texture) Render(b *Batch, render *RenderComponent, space *SpaceComponent) {
+	Wo.Batch().Draw(t,
+		space.Position.X-Cam.pos.X, space.Position.Y-Cam.pos.Y,
+		0, 0,
+		render.Scale.X, render.Scale.Y,
+		0,
+		render.Color, render.Transparency)
+
 }
 
 // Width returns the width of the texture.

@@ -4,10 +4,13 @@
 
 package engi
 
+import "math"
+
 // A rather basic camera
 type Camera struct {
-	Point
-	tracking *Entity // The entity that is currently being followed
+	DeadzoneSize Point
+	pos, to      Point
+	tracking     *Entity // The entity that is currently being followed
 }
 
 func (cam *Camera) FollowEntity(entity *Entity) {
@@ -17,22 +20,53 @@ func (cam *Camera) FollowEntity(entity *Entity) {
 		return
 	}
 
-	centerCam(&cam.Point, Width(), Height(), 1, space)
-	// cam.Point = space.Position
+	cam.to = space.Position
+	cam.centerCam(Width(), Height(), 1, space)
 }
 
 func (cam *Camera) Update(dt float32) {
-	// maxPoints := 8
 	if cam.tracking != nil {
 		var space *SpaceComponent
 		if !cam.tracking.GetComponent(&space) {
 			return
 		}
-		centerCam(&cam.Point, Width(), Height(), 0.09, space)
+		cam.centerCam(Width(), Height(), 0.09, space)
 	}
 }
 
-func centerCam(to *Point, width, height, lerp float32, space *SpaceComponent) {
-	to.X += ((space.Position.X + space.Width/2) - (to.X + width/2)) * lerp
-	to.Y += ((space.Position.Y + space.Height/2) - (to.Y + height/2)) * lerp
+func (cam *Camera) centerCam(width, height, lerp float32, space *SpaceComponent) {
+	cam.to.X += ((space.Position.X + space.Width/2) - (cam.to.X + width/2)) * lerp
+	cam.to.Y += ((space.Position.Y + space.Height/2) - (cam.to.Y + height/2)) * lerp
+
+	dWidth := cam.DeadzoneSize.X
+	dHeight := cam.DeadzoneSize.Y
+
+	if dWidth == 0 {
+		dWidth = 200
+	}
+
+	if dHeight == 0 {
+		dHeight = 200
+	}
+
+	min, max := Point{}, Point{}
+
+	min.X, min.Y = cam.to.X-(dWidth/2), cam.to.Y-(dHeight/2)
+	max.X, max.Y = min.X+dWidth, min.Y+dHeight
+
+	if cam.pos.X < min.X {
+		cam.pos.X = Clamp(floorFloat32(min.X), WorldBounds.Min.X, WorldBounds.Max.X-width)
+	} else if cam.pos.X > max.X {
+		cam.pos.X = Clamp(floorFloat32(max.X), WorldBounds.Min.X, WorldBounds.Max.X-width)
+	}
+
+	if cam.pos.Y < min.X {
+		cam.pos.Y = Clamp(floorFloat32(min.Y), WorldBounds.Min.Y, WorldBounds.Max.Y-height)
+	} else if cam.pos.Y > max.Y {
+		cam.pos.Y = Clamp(floorFloat32(max.Y), WorldBounds.Min.Y, WorldBounds.Max.Y-height)
+	}
+}
+
+func floorFloat32(i float32) float32 {
+	return float32(math.Floor(float64(i)))
 }

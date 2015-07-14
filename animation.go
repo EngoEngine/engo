@@ -26,7 +26,7 @@ func (s *Spritesheet) Cell(i int) *Region {
 	if r := s.cache[i]; r != nil {
 		return r
 	}
-	s.cache[i] = getRegionOfSpriteSheet(s.texture, s.CellWidth, i)
+	s.cache[i] = regionFromSheet(s.texture, s.CellWidth, s.CellHeight, i)
 	return s.cache[i]
 }
 

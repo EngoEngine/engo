@@ -1,69 +1,115 @@
-// Copyright 2014 Joseph Hager. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 package engi
 
-type glyph struct {
-	region   *Region
-	xoffset  float32
-	yoffset  float32
-	xadvance float32
+import (
+	"code.google.com/p/freetype-go/freetype"
+	"code.google.com/p/freetype-go/freetype/truetype"
+	"image"
+	"image/color"
+	"image/draw"
+	"io/ioutil"
+	"log"
+)
+
+var (
+	dpi = float64(72)
+)
+
+type Color struct {
+	R, G, B, A uint8
 }
 
+// TODO FG and BG color config
 type Font struct {
-	glyphs                map[rune]*glyph
-	cellWidth, cellHeight int
+	URL  string
+	Size float64
+	BG   Color
+	FG   Color
+	ttf  *truetype.Font
 }
 
-func NewGridFont(texture *Texture, cellWidth, cellHeight int) *Font {
-	i := 0
-	glyphs := make(map[rune]*glyph)
+func (f *Font) Create() {
+	url := f.URL
 
-	for y := 0; y < int(texture.Height())/cellHeight; y++ {
-		for x := 0; x < int(texture.Width())/cellWidth; x++ {
-			g := &glyph{xadvance: float32(cellWidth)}
-			g.region = NewRegion(texture, x*cellWidth, y*cellHeight, cellWidth, cellHeight)
-			glyphs[rune(i)] = g
-			i += 1
+	// Read and parse the font
+	ttfBytes, err := ioutil.ReadFile(url)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	ttf, err := freetype.ParseFont(ttfBytes)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	f.ttf = ttf
+}
+
+func (f *Font) TextDimensions(text string) (int, int, int) {
+	font := f.ttf
+	size := f.Size
+	var (
+		totalWidth  = int32(0)
+		totalHeight = int32(size)
+		maxYBearing = int32(0)
+	)
+	fupe := font.FUnitsPerEm()
+	for _, char := range text {
+		idx := font.Index(char)
+		hm := font.HMetric(fupe, idx)
+		vm := font.VMetric(fupe, idx)
+		g := truetype.NewGlyphBuf()
+		err := g.Load(font, fupe, idx, truetype.NoHinting)
+		if err != nil {
+			log.Println(err)
+			return 0, 0, 0
+		}
+		totalWidth += hm.AdvanceWidth
+		yB := (vm.TopSideBearing * int32(size)) / fupe
+		if yB > maxYBearing {
+			maxYBearing = yB
 		}
 	}
 
-	return &Font{glyphs, cellWidth, cellHeight}
+	// Scale to actual pixel size
+	totalWidth *= int32(size)
+	totalWidth /= fupe
+
+	return int(totalWidth), int(totalHeight), int(maxYBearing)
 }
 
-func (f *Font) Remap(mapping string) {
-	glyphs := make(map[rune]*glyph)
+func (f *Font) Render(text string) *Texture {
+	width, height, yBearing := f.TextDimensions(text)
+	font := f.ttf
+	size := f.Size
 
-	i := 0
-	for _, v := range mapping {
-		glyphs[v] = f.glyphs[rune(i)]
-		i++
+	// Colors
+	fg := image.NewUniform(color.NRGBA{f.FG.R, f.FG.G, f.FG.B, f.FG.A})
+	bg := image.NewUniform(color.NRGBA{f.BG.R, f.BG.G, f.BG.B, f.BG.A})
+
+	// Create the font context
+	c := freetype.NewContext()
+
+	nrgba := image.NewNRGBA(image.Rect(0, 0, width, height))
+	draw.Draw(nrgba, nrgba.Bounds(), bg, image.ZP, draw.Src)
+
+	c.SetDPI(dpi)
+	c.SetFont(font)
+	c.SetFontSize(size)
+	c.SetClip(nrgba.Bounds())
+	c.SetDst(nrgba)
+	c.SetSrc(fg)
+
+	// Draw the text.
+	pt := freetype.Pt(0, int(yBearing))
+	_, err := c.DrawString(text, pt)
+	if err != nil {
+		log.Println(err)
+		return nil
 	}
 
-	f.glyphs = glyphs
-}
+	// Create texture
+	imObj := &ImageObject{nrgba}
+	return NewTexture(imObj)
 
-func (f *Font) Put(batch *Batch, r rune, x, y float32, color uint32) {
-	if g, ok := f.glyphs[r]; ok {
-		batch.Draw(g.region, x+g.xoffset, y+g.yoffset, 0, 0, 1, 1, 0, color, 1)
-	}
-}
-
-func (f *Font) Print(batch *Batch, text string, x, y float32, color uint32) {
-	xx := x
-	for _, r := range text {
-		if g, ok := f.glyphs[r]; ok {
-			batch.Draw(g.region, xx+g.xoffset, y+g.yoffset, 0, 0, 1, 1, 0, color, 1)
-			xx += g.xadvance
-		}
-	}
-}
-
-func (f *Font) CellWidth() int {
-	return f.cellWidth
-}
-
-func (f *Font) CellHeight() int {
-	return f.cellHeight
 }
