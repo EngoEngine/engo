@@ -4,7 +4,11 @@
 
 package engi
 
-import "github.com/ajhager/webgl"
+import (
+	"fmt"
+
+	"github.com/ajhager/webgl"
+)
 
 var (
 	responder   Responder
@@ -16,6 +20,9 @@ var (
 	Cam         *Camera
 	Wo          Responder
 	WorldBounds AABB
+
+	fpsLimit        = 120
+	resetLoopTicker = make(chan bool, 1)
 )
 
 func Open(title string, width, height int, fullscreen bool, r Responder) {
@@ -37,6 +44,15 @@ func SetBg(color uint32) {
 	g := float32((color>>8)&0xFF) / 255.0
 	b := float32(color&0xFF) / 255.0
 	gl.ClearColor(r, g, b, 1.0)
+}
+
+func SetFPSLimit(limit int) error {
+	if limit <= 0 {
+		return fmt.Errorf("FPS Limit out of bounds. Requires > 0")
+	}
+	fpsLimit = limit
+	resetLoopTicker <- true
+	return nil
 }
 
 func Width() float32 {
