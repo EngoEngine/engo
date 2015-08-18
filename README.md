@@ -3,7 +3,15 @@ A cross-platform game engine written in Go following an interpretation of the En
 
 Currently documentation is pretty scarce, this is because I have not *completely* finalized the API and am about to go through a "pretification" process in order to increase elegance and usability. For a basic up to date example of most features, look to the demos/hello.go and demos/pong/pong.go files. These files are currently your best friends for learning engi, well and me (feel free to shoot me a DM or issue whenever you want!).
 
+## Examples
 If you want to see some projects using engi, check out the [demos folder](http://https://github.com/paked/engi/tree/master/demos). [Newbrict/OakTale](https://github.com/Newbrict/OakTale) is probably the best place to see the newer features (tilemaps, z-layers, physics)
+
+## Getting in touch / Contributing
+Currently we are active on the [gopher slack](http://gophers.slack.com) (You can request an invite here: http://bit.ly/go-slack-signup) under the [#engi](https://gophers.slack.com/messages/engi/) channel.
+
+The roadmap is available on [trello here](https://trello.com/b/VdqrmpEz/github-com-paked-engi). If you wish to have something added, or want to discuss a new feature you should begin talking about it in either an issue or on the previously mentioned slack channel.
+
+## Docs
 
 Before you read the basic doc, here are a few notes for me (and other contributors) about ideas to achieve elegance
 
