@@ -15,6 +15,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"time"
 
 	"github.com/ajhager/webgl"
 	"github.com/go-gl/glfw/v3.1/glfw"
@@ -121,15 +122,26 @@ func run(title string, width, height int, fullscreen bool) {
 	responder.Setup()
 
 	Wo.New()
-	shouldClose := window.ShouldClose()
-	for !shouldClose {
-		responder.Update(Time.Delta())
-		window.SwapBuffers()
-		glfw.PollEvents()
-		keysUpdate()
-		Time.Tick()
-		shouldClose = window.ShouldClose()
+	ticker := time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
+
+Outer:
+	for {
+		select {
+		case <-ticker.C:
+			responder.Update(Time.Delta())
+			window.SwapBuffers()
+			glfw.PollEvents()
+			keysUpdate()
+			Time.Tick()
+			if window.ShouldClose() {
+				break Outer
+			}
+		case <-resetLoopTicker:
+			ticker.Stop()
+			ticker = time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
+		}
 	}
+	ticker.Stop()
 
 	responder.Close()
 }
