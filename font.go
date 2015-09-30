@@ -1,13 +1,16 @@
 package engi
 
 import (
-	"code.google.com/p/freetype-go/freetype"
-	"code.google.com/p/freetype-go/freetype/truetype"
 	"image"
 	"image/color"
 	"image/draw"
 	"io/ioutil"
 	"log"
+
+	"github.com/golang/freetype"
+	"github.com/golang/freetype/truetype"
+	"golang.org/x/image/font"
+	"golang.org/x/image/math/fixed"
 )
 
 var (
@@ -46,33 +49,33 @@ func (f *Font) Create() {
 }
 
 func (f *Font) TextDimensions(text string) (int, int, int) {
-	font := f.ttf
+	fnt := f.ttf
 	size := f.Size
 	var (
-		totalWidth  = int32(0)
-		totalHeight = int32(size)
-		maxYBearing = int32(0)
+		totalWidth  = fixed.Int26_6(0)
+		totalHeight = fixed.Int26_6(size)
+		maxYBearing = fixed.Int26_6(0)
 	)
-	fupe := font.FUnitsPerEm()
+	fupe := fixed.Int26_6(fnt.FUnitsPerEm())
 	for _, char := range text {
-		idx := font.Index(char)
-		hm := font.HMetric(fupe, idx)
-		vm := font.VMetric(fupe, idx)
-		g := truetype.NewGlyphBuf()
-		err := g.Load(font, fupe, idx, truetype.NoHinting)
+		idx := fnt.Index(char)
+		hm := fnt.HMetric(fupe, idx)
+		vm := fnt.VMetric(fupe, idx)
+		g := truetype.GlyphBuf{}
+		err := g.Load(fnt, fupe, idx, font.HintingNone)
 		if err != nil {
 			log.Println(err)
 			return 0, 0, 0
 		}
 		totalWidth += hm.AdvanceWidth
-		yB := (vm.TopSideBearing * int32(size)) / fupe
+		yB := (vm.TopSideBearing * fixed.Int26_6(size)) / fupe
 		if yB > maxYBearing {
 			maxYBearing = yB
 		}
 	}
 
 	// Scale to actual pixel size
-	totalWidth *= int32(size)
+	totalWidth *= fixed.Int26_6(size)
 	totalWidth /= fupe
 
 	return int(totalWidth), int(totalHeight), int(maxYBearing)
