@@ -5,16 +5,24 @@ import (
 	"github.com/paked/engi"
 	"log"
 	"math/rand"
+	"sync"
 )
 
 type PongGame struct {
 	engi.World
 }
 
+var (
+	basicFont *engi.Font
+)
+
 func (pong PongGame) Preload() {
-	engi.Files.Add(engi.NewResource("ball", "assets/ball.png"),
-		engi.NewResource("paddle", "assets/paddle.png"),
-		engi.NewResource("font", "assets/font.png"))
+	engi.Files.Add("assets/ball.png", "assets/paddle.png")
+
+	basicFont = (&engi.Font{URL: "assets/Roboto-Regular.ttf", Size: 32, FG: engi.Color{255, 255, 255, 255}})
+	if err := basicFont.Create(); err != nil {
+		log.Fatalln("Could not load font:", err)
+	}
 }
 
 func (pong *PongGame) Setup() {
@@ -27,7 +35,7 @@ func (pong *PongGame) Setup() {
 	pong.AddSystem(&ScoreSystem{})
 
 	ball := engi.NewEntity([]string{"RenderSystem", "CollisionSystem", "SpeedSystem", "BallSystem"})
-	ballTexture := engi.Files.Image("ball")
+	ballTexture := engi.Files.Image("ball.png")
 	ballRender := engi.NewRenderComponent(ballTexture, engi.Point{2, 2}, "ball")
 	ballSpace := engi.SpaceComponent{engi.Point{(engi.Width() - ballTexture.Width()) / 2, (engi.Height() - ballTexture.Height()) / 2}, ballTexture.Width() * ballRender.Scale.X, ballTexture.Height() * ballRender.Scale.Y}
 	ballCollision := engi.CollisionComponent{Main: true, Solid: true}
@@ -40,9 +48,9 @@ func (pong *PongGame) Setup() {
 	pong.AddEntity(ball)
 
 	score := engi.NewEntity([]string{"RenderSystem", "ScoreSystem"})
-	scoreTex := engi.NewGridFont(engi.Files.Image("font"), 20, 20)
-	scoreRender := engi.NewRenderComponent(scoreTex, engi.Point{1, 1}, "YOLO <3")
-	scoreSpace := engi.SpaceComponent{engi.Point{100, 100}, 10, 10}
+
+	scoreRender := engi.NewRenderComponent(basicFont.Render(" "), engi.Point{1, 1}, "YOLO <3")
+	scoreSpace := engi.SpaceComponent{engi.Point{100, 100}, 100, 100}
 	score.AddComponent(&scoreRender)
 	score.AddComponent(&scoreSpace)
 	pong.AddEntity(score)
@@ -50,7 +58,7 @@ func (pong *PongGame) Setup() {
 	schemes := []string{"WASD", ""}
 	for i := 0; i < 2; i++ {
 		paddle := engi.NewEntity([]string{"RenderSystem", "CollisionSystem", "ControlSystem"})
-		paddleTexture := engi.Files.Image("paddle")
+		paddleTexture := engi.Files.Image("paddle.png")
 		paddleRender := engi.NewRenderComponent(paddleTexture, engi.Point{2, 2}, "paddle")
 		x := float32(0)
 		if i != 0 {
@@ -132,7 +140,7 @@ func (bs *BallSystem) Update(entity *engi.Entity, dt float32) {
 	}
 
 	if space.Position.X < 0 {
-		engi.Mailbox.Dispatch("ScoreMesasge", ScoreMessage{1})
+		engi.Mailbox.Dispatch("ScoreMessage", ScoreMessage{1})
 
 		space.Position.X = 400 - 16
 		space.Position.Y = 400 - 16
@@ -211,6 +219,8 @@ func (cs ControlComponent) Name() string {
 type ScoreSystem struct {
 	*engi.System
 	PlayerOneScore, PlayerTwoScore int
+	upToDate                       bool
+	scoreLock                      sync.RWMutex
 }
 
 func (score *ScoreSystem) Name() string {
@@ -218,6 +228,7 @@ func (score *ScoreSystem) Name() string {
 }
 
 func (sc *ScoreSystem) New() {
+	sc.upToDate = true
 	sc.System = &engi.System{}
 	engi.Mailbox.Listen("ScoreMessage", func(message interface{}) {
 		scoreMessage, isScore := message.(ScoreMessage)
@@ -225,31 +236,36 @@ func (sc *ScoreSystem) New() {
 			return
 		}
 
+		sc.scoreLock.Lock()
 		if scoreMessage.Player != 1 {
 			sc.PlayerOneScore += 1
 		} else {
 			sc.PlayerTwoScore += 1
 		}
+		sc.upToDate = false
+		sc.scoreLock.Unlock()
 	})
-}
-
-func (sc *ScoreSystem) Receive(message engi.Message) {
-
 }
 
 func (c *ScoreSystem) Update(entity *engi.Entity, dt float32) {
 	var render *engi.RenderComponent
 	var space *engi.SpaceComponent
+
 	if !entity.GetComponent(&render) || !entity.GetComponent(&space) {
 		return
 	}
 
-	render.Label = fmt.Sprintf("%v vs %v", c.PlayerOneScore, c.PlayerTwoScore)
+	if !c.upToDate {
+		c.scoreLock.RLock()
+		render.Label = fmt.Sprintf("%v vs %v", c.PlayerOneScore, c.PlayerTwoScore)
+		c.upToDate = true
+		c.scoreLock.RUnlock()
 
-	width := len(render.Label) * 20
+		render.Display = basicFont.Render(render.Label)
+		width := len(render.Label) * 20
 
-	space.Position.X = float32(400 - (width / 2))
-
+		space.Position.X = float32(400 - (width / 2))
+	}
 }
 
 type ScoreMessage struct {

@@ -30,22 +30,22 @@ type Font struct {
 	ttf  *truetype.Font
 }
 
-func (f *Font) Create() {
+func (f *Font) Create() error {
 	url := f.URL
 
 	// Read and parse the font
 	ttfBytes, err := ioutil.ReadFile(url)
 	if err != nil {
-		log.Println(err)
-		return
+		return err
 	}
 
 	ttf, err := freetype.ParseFont(ttfBytes)
 	if err != nil {
-		log.Println(err)
-		return
+		return err
 	}
 	f.ttf = ttf
+
+	return nil
 }
 
 func (f *Font) TextDimensions(text string) (int, int, int) {
