@@ -7,7 +7,7 @@ package engi
 import (
 	"fmt"
 
-	"github.com/ajhager/webgl"
+	"github.com/paked/webgl"
 )
 
 var (

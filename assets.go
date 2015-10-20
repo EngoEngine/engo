@@ -5,7 +5,7 @@
 package engi
 
 import (
-	"github.com/ajhager/webgl"
+	"github.com/paked/webgl"
 	"io/ioutil"
 	"log"
 	"math"

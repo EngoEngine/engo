@@ -8,7 +8,7 @@ import (
 	"log"
 	"math"
 
-	"github.com/ajhager/webgl"
+	"github.com/paked/webgl"
 )
 
 const size = 10000

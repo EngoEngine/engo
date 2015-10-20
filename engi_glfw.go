@@ -17,8 +17,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/ajhager/webgl"
 	"github.com/go-gl/glfw/v3.1/glfw"
+	"github.com/paked/webgl"
 )
 
 var (
