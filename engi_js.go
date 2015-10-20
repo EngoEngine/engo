@@ -12,8 +12,8 @@ import (
 	"math/rand"
 	"strconv"
 
-	"github.com/ajhager/webgl"
 	"github.com/gopherjs/gopherjs/js"
+	"github.com/paked/webgl"
 )
 
 func init() {
