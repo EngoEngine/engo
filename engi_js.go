@@ -40,7 +40,7 @@ func run(title string, width, height int, fullscreen bool) {
 	attrs.Antialias = false
 
 	var err error
-	gl, err = webgl.NewContext(canvas, attrs)
+	Gl, err = webgl.NewContext(canvas, attrs)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -137,8 +137,8 @@ func run(title string, width, height int, fullscreen bool) {
 		states[key] = false
 		// responder.Key(Key(ev.Get("keyCode").Int()), 0, RELEASE)
 	}, false)
-	Gl = gl
-	gl.Viewport(0, 0, width, height)
+	Gl = Gl
+	Gl.Viewport(0, 0, width, height)
 	Wo.New()
 	responder.Preload()
 	Files.Load(func() {

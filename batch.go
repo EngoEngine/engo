@@ -33,6 +33,7 @@ type Batch struct {
 	inColor      int
 	inTexCoords  int
 	ufProjection *webgl.UniformLocation
+	center       *webgl.UniformLocation
 	projX        float32
 	projY        float32
 }
@@ -41,10 +42,11 @@ func NewBatch(width, height float32) *Batch {
 	batch := new(Batch)
 
 	batch.shader = LoadShader(batchVert, batchFrag)
-	batch.inPosition = gl.GetAttribLocation(batch.shader, "in_Position")
-	batch.inColor = gl.GetAttribLocation(batch.shader, "in_Color")
-	batch.inTexCoords = gl.GetAttribLocation(batch.shader, "in_TexCoords")
-	batch.ufProjection = gl.GetUniformLocation(batch.shader, "uf_Projection")
+	batch.inPosition = Gl.GetAttribLocation(batch.shader, "in_Position")
+	batch.inTexCoords = Gl.GetAttribLocation(batch.shader, "in_TexCoords")
+	batch.inColor = Gl.GetAttribLocation(batch.shader, "in_Color")
+	batch.ufProjection = Gl.GetUniformLocation(batch.shader, "uf_Projection")
+	batch.center = Gl.GetUniformLocation(batch.shader, "center")
 
 	batch.vertices = make([]float32, 20*size)
 	batch.indices = make([]uint16, 6*size)
@@ -58,28 +60,28 @@ func NewBatch(width, height float32) *Batch {
 		batch.indices[i+5] = uint16(j + 3)
 	}
 
-	batch.indexVBO = gl.CreateBuffer()
-	batch.vertexVBO = gl.CreateBuffer()
+	batch.indexVBO = Gl.CreateBuffer()
+	batch.vertexVBO = Gl.CreateBuffer()
 
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, batch.indexVBO)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, batch.indices, gl.STATIC_DRAW)
+	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, batch.indexVBO)
+	Gl.BufferData(Gl.ELEMENT_ARRAY_BUFFER, batch.indices, Gl.STATIC_DRAW)
 
-	gl.BindBuffer(gl.ARRAY_BUFFER, batch.vertexVBO)
-	gl.BufferData(gl.ARRAY_BUFFER, batch.vertices, gl.DYNAMIC_DRAW)
+	Gl.BindBuffer(Gl.ARRAY_BUFFER, batch.vertexVBO)
+	Gl.BufferData(Gl.ARRAY_BUFFER, batch.vertices, Gl.DYNAMIC_DRAW)
 
-	gl.EnableVertexAttribArray(batch.inPosition)
-	gl.EnableVertexAttribArray(batch.inTexCoords)
-	gl.EnableVertexAttribArray(batch.inColor)
+	Gl.EnableVertexAttribArray(batch.inPosition)
+	Gl.EnableVertexAttribArray(batch.inTexCoords)
+	Gl.EnableVertexAttribArray(batch.inColor)
 
-	gl.VertexAttribPointer(batch.inPosition, 2, gl.FLOAT, false, 20, 0)
-	gl.VertexAttribPointer(batch.inTexCoords, 2, gl.FLOAT, false, 20, 8)
-	gl.VertexAttribPointer(batch.inColor, 4, gl.UNSIGNED_BYTE, true, 20, 16)
+	Gl.VertexAttribPointer(batch.inPosition, 2, Gl.FLOAT, false, 20, 0)
+	Gl.VertexAttribPointer(batch.inTexCoords, 2, Gl.FLOAT, false, 20, 8)
+	Gl.VertexAttribPointer(batch.inColor, 4, Gl.UNSIGNED_BYTE, true, 20, 16)
 
 	batch.projX = width / 2
 	batch.projY = height / 2
 
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	Gl.Enable(Gl.BLEND)
+	Gl.BlendFunc(Gl.SRC_ALPHA, Gl.ONE_MINUS_SRC_ALPHA)
 
 	return batch
 }
@@ -89,7 +91,7 @@ func (b *Batch) Begin() {
 		log.Fatal("Batch.End() must be called first")
 	}
 	b.drawing = true
-	gl.UseProgram(b.shader)
+	Gl.UseProgram(b.shader)
 }
 
 func (b *Batch) End() {
@@ -109,19 +111,20 @@ func (b *Batch) flush() {
 		return
 	}
 
-	gl.BindTexture(gl.TEXTURE_2D, b.lastTexture)
+	Gl.BindTexture(Gl.TEXTURE_2D, b.lastTexture)
 
-	gl.Uniform2f(b.ufProjection, b.projX, b.projY)
+	Gl.Uniform2f(b.ufProjection, b.projX, b.projY)
+	Gl.Uniform3f(b.center, Cam.x/Width(), Cam.y/Height(), Cam.z)
 
-	gl.BufferSubData(gl.ARRAY_BUFFER, 0, b.vertices)
-	gl.DrawElements(gl.TRIANGLES, 6*b.index, gl.UNSIGNED_SHORT, 0)
+	Gl.BufferSubData(Gl.ARRAY_BUFFER, 0, b.vertices)
+	Gl.DrawElements(Gl.TRIANGLES, 6*b.index, Gl.UNSIGNED_SHORT, 0)
 
 	b.index = 0
 }
 
-func (b *Batch) SetProjection(width, height float32) {
-	b.projX = width / 2
-	b.projY = height / 2
+func (b *Batch) SetProjection(width, height, depth float32) {
+	b.projX = width
+	b.projY = height
 }
 
 func (b *Batch) Draw(r Drawable, x, y, originX, originY, scaleX, scaleY, rotation float32, color uint32, transparency float32) {

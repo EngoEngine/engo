@@ -17,6 +17,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/paked/webgl"
 )
@@ -76,11 +77,11 @@ func run(title string, width, height int, fullscreen bool) {
 
 	glfw.SwapInterval(1)
 
-	gl = webgl.NewContext()
-	gl.Viewport(0, 0, width, height)
+	Gl = webgl.NewContext()
+	Gl.Viewport(0, 0, width, height)
 	window.SetFramebufferSizeCallback(func(window *glfw.Window, w, h int) {
 		width, height = window.GetFramebufferSize()
-		gl.Viewport(0, 0, width, height)
+		Gl.Viewport(0, 0, width, height)
 		responder.Resize(w, h)
 	})
 
@@ -115,7 +116,11 @@ func run(title string, width, height int, fullscreen bool) {
 		responder.Type(char)
 	})
 
-	Gl = gl
+	Gl.MatrixMode(gl.PROJECTION)
+	Gl.LoadIdentity()
+	ratio := float64(1920) / float64(1200) // TODO: fix
+	Gl.Frustum(-0.5, 0.5, -0.5*ratio, 0.5*ratio, 1, 50)
+	Gl.MatrixMode(gl.MODELVIEW)
 
 	responder.Preload()
 	Files.Load(func() {})
