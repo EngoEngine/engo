@@ -77,8 +77,8 @@ func NewBatch(width, height float32) *Batch {
 	Gl.VertexAttribPointer(batch.inTexCoords, 2, Gl.FLOAT, false, 20, 8)
 	Gl.VertexAttribPointer(batch.inColor, 4, Gl.UNSIGNED_BYTE, true, 20, 16)
 
-	batch.projX = width
-	batch.projY = height
+	batch.projX = width / 2
+	batch.projY = height / 2
 
 	Gl.Enable(Gl.BLEND)
 	Gl.BlendFunc(Gl.SRC_ALPHA, Gl.ONE_MINUS_SRC_ALPHA)

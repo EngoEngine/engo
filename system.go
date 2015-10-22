@@ -99,10 +99,10 @@ func (cs CollisionSystem) Name() string {
 type PriorityLevel int
 
 const (
-	HUDGround    PriorityLevel = 4
-	Foreground   PriorityLevel = 3
-	MiddleGround PriorityLevel = 2
-	ScenicGround PriorityLevel = 1
+	HUDGround    PriorityLevel = 40
+	Foreground   PriorityLevel = 30
+	MiddleGround PriorityLevel = 20
+	ScenicGround PriorityLevel = 10
 	Background   PriorityLevel = 0
 )
 
@@ -139,7 +139,7 @@ type Renderable interface {
 }
 
 func (rs *RenderSystem) Post() {
-	for i := 4; i >= 0; i-- {
+	for i := 0; i < int(HUDGround); i++ {
 		for _, entity := range rs.renders[PriorityLevel(i)] {
 			var render *RenderComponent
 			var space *SpaceComponent
@@ -150,7 +150,6 @@ func (rs *RenderSystem) Post() {
 
 			render.Display.Render(Wo.Batch(), render, space)
 		}
-
 	}
 
 	rs.changed = false

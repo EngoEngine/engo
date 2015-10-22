@@ -77,7 +77,6 @@ func (cam *Camera) Update(dt float32) {
 
 	var space *SpaceComponent
 	if !cam.tracking.GetComponent(&space) {
-		cam.centerCam(Width(), Height(), cam.z)
 		return
 	}
 

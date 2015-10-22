@@ -252,7 +252,6 @@ attribute vec2 in_TexCoords;
 
 uniform vec2 uf_Projection;
 uniform vec3 center;
-//const vec3 center = vec3(-1.0, 1.0, 1.0);
 
 varying vec4 var_Color;
 varying vec2 var_TexCoords;
@@ -260,9 +259,9 @@ varying vec2 var_TexCoords;
 void main() {
   var_Color = in_Color;
   var_TexCoords = in_TexCoords;
-  gl_Position = vec4(in_Position.x /  uf_Projection.x - center.x,
-				 	 in_Position.y / -uf_Projection.y + center.y,
-										 0.0, center.z);
+  gl_Position = vec4(in_Position.x /  uf_Projection.x - center.x - 0.5,
+				 	 in_Position.y / -uf_Projection.y + center.y + 0.5,
+										 0, center.z);
 }`
 
 var batchFrag = `
