@@ -17,7 +17,6 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/paked/webgl"
 )
@@ -115,12 +114,6 @@ func run(title string, width, height int, fullscreen bool) {
 	window.SetCharCallback(func(window *glfw.Window, char rune) {
 		responder.Type(char)
 	})
-
-	Gl.MatrixMode(gl.PROJECTION)
-	Gl.LoadIdentity()
-	ratio := float64(1920) / float64(1200) // TODO: fix
-	Gl.Frustum(-0.5, 0.5, -0.5*ratio, 0.5*ratio, 1, 50)
-	Gl.MatrixMode(gl.MODELVIEW)
 
 	responder.Preload()
 	Files.Load(func() {})
