@@ -25,7 +25,7 @@ var (
 )
 
 func Open(title string, width, height int, fullscreen bool, r Responder) {
-	states = make(map[Key]bool)
+	keyStates = make(map[Key]bool)
 	responder = r
 	Time = NewClock()
 	Files = NewLoader()

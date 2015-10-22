@@ -6,7 +6,6 @@ package engi
 
 import (
 	"github.com/go-gl/mathgl/mgl32"
-	"log"
 )
 
 var (
@@ -49,7 +48,6 @@ func (cam *Camera) Zoom(value float32) {
 
 func (cam *Camera) MoveToX(location float32) {
 	cam.x = mgl32.Clamp(location, WorldBounds.Min.X, WorldBounds.Max.X)
-	log.Println(cam.x)
 }
 
 func (cam *Camera) MoveToY(location float32) {

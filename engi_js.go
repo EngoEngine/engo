@@ -129,12 +129,12 @@ func run(title string, width, height int, fullscreen bool) {
 
 	js.Global.Call("addEventListener", "keydown", func(ev js.Object) {
 		key := Key(ev.Get("keyCode").Int())
-		states[key] = true
+		keyStates[key] = true
 	}, false)
 
 	js.Global.Call("addEventListener", "keyup", func(ev js.Object) {
 		key := Key(ev.Get("keyCode").Int())
-		states[key] = false
+		keyStates[key] = false
 		// responder.Key(Key(ev.Get("keyCode").Int()), 0, RELEASE)
 	}, false)
 	Gl = Gl

@@ -106,9 +106,9 @@ func run(title string, width, height int, fullscreen bool) {
 	window.SetKeyCallback(func(window *glfw.Window, k glfw.Key, s int, a glfw.Action, m glfw.ModifierKey) {
 		key := Key(k)
 		if a == glfw.Press {
-			states[key] = true
+			keyStates[key] = true
 		} else if a == glfw.Release {
-			states[key] = false
+			keyStates[key] = false
 		}
 	})
 
