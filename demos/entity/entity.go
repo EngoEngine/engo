@@ -14,7 +14,8 @@ type GameWorld struct {
 
 func (game *GameWorld) Preload() {
 	game.New()
-	engi.Files.Add(engi.NewResource("bot", "data/icon.png"))
+
+	engi.Files.AddFromDir("data", false)
 
 	log.Println("Preloaded")
 }
@@ -25,7 +26,7 @@ func (game *GameWorld) Setup() {
 	game.AddSystem(&engi.RenderSystem{})
 
 	guy := engi.NewEntity([]string{"RenderSystem", "ScaleSystem"})
-	texture := engi.Files.Image("bot")
+	texture := engi.Files.Image("icon.png")
 	render := engi.NewRenderComponent(texture, engi.Point{8, 8}, "guy")
 
 	width := texture.Width() * render.Scale.X
