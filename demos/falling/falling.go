@@ -15,10 +15,7 @@ type Game struct {
 }
 
 func (game Game) Preload() {
-	engi.Files.Add(engi.NewResource("guy", "data/icon.png"),
-		engi.NewResource("rock", "data/rock.png"),
-		engi.NewResource("font", "data/font.png"))
-
+	engi.Files.AddFromDir("data", false)
 }
 
 func (game *Game) Setup() {
@@ -31,7 +28,7 @@ func (game *Game) Setup() {
 	game.AddSystem(&RockSpawnSystem{})
 
 	guy := engi.NewEntity([]string{"RenderSystem", "ControlSystem", "RockSpawnSystem", "CollisionSystem", "DeathSystem"})
-	texture := engi.Files.Image("guy")
+	texture := engi.Files.Image("icon.png")
 	render := engi.NewRenderComponent(texture, engi.Point{4, 4}, "guy")
 	collision := engi.CollisionComponent{Solid: true, Main: true}
 
@@ -108,7 +105,7 @@ func (rock *RockSpawnSystem) Update(entity *engi.Entity, dt float32) {
 
 func NewRock(position engi.Point) *engi.Entity {
 	rock := engi.NewEntity([]string{"RenderSystem", "FallingSystem", "CollisionSystem", "SpeedSystem"})
-	texture := engi.Files.Image("rock")
+	texture := engi.Files.Image("rock.png")
 	render := engi.NewRenderComponent(texture, engi.Point{4, 4}, "rock")
 	space := engi.SpaceComponent{position, texture.Width() * render.Scale.X, texture.Height() * render.Scale.Y}
 	collision := engi.CollisionComponent{Solid: true}
