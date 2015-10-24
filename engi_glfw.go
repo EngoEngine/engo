@@ -76,11 +76,11 @@ func run(title string, width, height int, fullscreen bool) {
 
 	glfw.SwapInterval(1)
 
-	gl = webgl.NewContext()
-	gl.Viewport(0, 0, width, height)
+	Gl = webgl.NewContext()
+	Gl.Viewport(0, 0, width, height)
 	window.SetFramebufferSizeCallback(func(window *glfw.Window, w, h int) {
 		width, height = window.GetFramebufferSize()
-		gl.Viewport(0, 0, width, height)
+		Gl.Viewport(0, 0, width, height)
 		responder.Resize(w, h)
 	})
 
@@ -105,17 +105,15 @@ func run(title string, width, height int, fullscreen bool) {
 	window.SetKeyCallback(func(window *glfw.Window, k glfw.Key, s int, a glfw.Action, m glfw.ModifierKey) {
 		key := Key(k)
 		if a == glfw.Press {
-			states[key] = true
+			keyStates[key] = true
 		} else if a == glfw.Release {
-			states[key] = false
+			keyStates[key] = false
 		}
 	})
 
 	window.SetCharCallback(func(window *glfw.Window, char rune) {
 		responder.Type(char)
 	})
-
-	Gl = gl
 
 	responder.Preload()
 	Files.Load(func() {})

@@ -14,9 +14,8 @@ var (
 	responder   Responder
 	Time        *Clock
 	Files       *Loader
-	gl          *webgl.Context
+	Gl          *webgl.Context
 	Mailbox     MessageManager
-	Gl          = gl
 	Cam         *Camera
 	Wo          Responder
 	WorldBounds AABB
@@ -26,7 +25,7 @@ var (
 )
 
 func Open(title string, width, height int, fullscreen bool, r Responder) {
-	states = make(map[Key]bool)
+	keyStates = make(map[Key]bool)
 	responder = r
 	Time = NewClock()
 	Files = NewLoader()
@@ -43,7 +42,7 @@ func SetBg(color uint32) {
 	r := float32((color>>16)&0xFF) / 255.0
 	g := float32((color>>8)&0xFF) / 255.0
 	b := float32(color&0xFF) / 255.0
-	gl.ClearColor(r, g, b, 1.0)
+	Gl.ClearColor(r, g, b, 1.0)
 }
 
 func SetFPSLimit(limit int) error {

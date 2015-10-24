@@ -106,20 +106,20 @@ type Image interface {
 }
 
 func LoadShader(vertSrc, fragSrc string) *webgl.Program {
-	vertShader := gl.CreateShader(gl.VERTEX_SHADER)
-	gl.ShaderSource(vertShader, vertSrc)
-	gl.CompileShader(vertShader)
-	defer gl.DeleteShader(vertShader)
+	vertShader := Gl.CreateShader(Gl.VERTEX_SHADER)
+	Gl.ShaderSource(vertShader, vertSrc)
+	Gl.CompileShader(vertShader)
+	defer Gl.DeleteShader(vertShader)
 
-	fragShader := gl.CreateShader(gl.FRAGMENT_SHADER)
-	gl.ShaderSource(fragShader, fragSrc)
-	gl.CompileShader(fragShader)
-	defer gl.DeleteShader(fragShader)
+	fragShader := Gl.CreateShader(Gl.FRAGMENT_SHADER)
+	Gl.ShaderSource(fragShader, fragSrc)
+	Gl.CompileShader(fragShader)
+	defer Gl.DeleteShader(fragShader)
 
-	program := gl.CreateProgram()
-	gl.AttachShader(program, vertShader)
-	gl.AttachShader(program, fragShader)
-	gl.LinkProgram(program)
+	program := Gl.CreateProgram()
+	Gl.AttachShader(program, vertShader)
+	Gl.AttachShader(program, fragShader)
+	Gl.LinkProgram(program)
 
 	return program
 }
@@ -172,27 +172,27 @@ type Texture struct {
 }
 
 func NewTexture(img Image) *Texture {
-	id := gl.CreateTexture()
+	id := Gl.CreateTexture()
 
-	gl.BindTexture(gl.TEXTURE_2D, id)
+	Gl.BindTexture(Gl.TEXTURE_2D, id)
 
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+	Gl.TexParameteri(Gl.TEXTURE_2D, Gl.TEXTURE_WRAP_S, Gl.CLAMP_TO_EDGE)
+	Gl.TexParameteri(Gl.TEXTURE_2D, Gl.TEXTURE_WRAP_T, Gl.CLAMP_TO_EDGE)
+	Gl.TexParameteri(Gl.TEXTURE_2D, Gl.TEXTURE_MIN_FILTER, Gl.LINEAR)
+	Gl.TexParameteri(Gl.TEXTURE_2D, Gl.TEXTURE_MAG_FILTER, Gl.NEAREST)
 
 	if img.Data() == nil {
 		panic("Texture image data is nil.")
 	}
 
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img.Data())
+	Gl.TexImage2D(Gl.TEXTURE_2D, 0, Gl.RGBA, Gl.RGBA, Gl.UNSIGNED_BYTE, img.Data())
 
 	return &Texture{id, img.Width(), img.Height()}
 }
 
 func (t *Texture) Render(b *Batch, render *RenderComponent, space *SpaceComponent) {
 	Wo.Batch().Draw(t,
-		space.Position.X-Cam.pos.X, space.Position.Y-Cam.pos.Y,
+		space.Position.X, space.Position.Y,
 		0, 0,
 		render.Scale.X, render.Scale.Y,
 		0,
@@ -244,24 +244,24 @@ func (s *Sprite) Render(batch *Batch) {
 	batch.Draw(s.Region, s.Position.X, s.Position.Y, s.Anchor.X, s.Anchor.Y, s.Scale.X, s.Scale.Y, s.Rotation, s.Color, s.Alpha)
 }
 
+// TODO: center was originally a "const vec2" - but I have no idea how to handle that, so I changed it
 var batchVert = ` 
 attribute vec2 in_Position;
 attribute vec4 in_Color;
 attribute vec2 in_TexCoords;
 
 uniform vec2 uf_Projection;
+uniform vec3 center;
 
 varying vec4 var_Color;
 varying vec2 var_TexCoords;
 
-const vec2 center = vec2(-1.0, 1.0);
-
 void main() {
   var_Color = in_Color;
   var_TexCoords = in_TexCoords;
-	gl_Position = vec4(in_Position.x / uf_Projection.x + center.x,
-										 in_Position.y / -uf_Projection.y + center.y,
-										 0.0, 1.0);
+  gl_Position = vec4(in_Position.x /  uf_Projection.x - center.x - 0.5,
+				 	 in_Position.y / -uf_Projection.y + center.y + 0.5,
+										 0, center.z);
 }`
 
 var batchFrag = `

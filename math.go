@@ -4,17 +4,6 @@ import (
 	"math"
 )
 
-// Returns x where b<=x<=c | x is a clamped between b and c
-func Clamp(a, b, c float32) float32 {
-	if a < b {
-		return b
-	} else if a > c {
-		return c
-	} else {
-		return a
-	}
-}
-
 type Point struct {
 	X, Y float32
 }
