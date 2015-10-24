@@ -15,14 +15,14 @@ type Game struct {
 }
 
 func (game Game) Preload() {
-	engi.Files.Add(engi.NewResource("guy", "data/icon.png"),
-		engi.NewResource("rock", "data/rock.png"),
-		engi.NewResource("font", "data/font.png"))
-
+	// Add all the files in the data directory non recursively
+	engi.Files.AddFromDir("data", false)
 }
 
 func (game *Game) Setup() {
 	engi.SetBg(0x2d3739)
+
+	// Add all of the systems
 	game.AddSystem(&engi.RenderSystem{})
 	game.AddSystem(&engi.CollisionSystem{})
 	game.AddSystem(&DeathSystem{})
@@ -30,9 +30,11 @@ func (game *Game) Setup() {
 	game.AddSystem(&ControlSystem{})
 	game.AddSystem(&RockSpawnSystem{})
 
+	// Create new entity subscribed to all the systems!
 	guy := engi.NewEntity([]string{"RenderSystem", "ControlSystem", "RockSpawnSystem", "CollisionSystem", "DeathSystem"})
-	texture := engi.Files.Image("guy")
+	texture := engi.Files.Image("icon.png")
 	render := engi.NewRenderComponent(texture, engi.Point{4, 4}, "guy")
+	// Tell the collision system that this player is solid
 	collision := engi.CollisionComponent{Solid: true, Main: true}
 
 	width := texture.Width() * render.Scale.X
@@ -97,6 +99,7 @@ func (rock *RockSpawnSystem) New() {
 }
 
 func (rock *RockSpawnSystem) Update(entity *engi.Entity, dt float32) {
+	// 4% change of spawning a rock each frame
 	if rand.Float32() < .96 {
 		return
 	}
@@ -108,13 +111,16 @@ func (rock *RockSpawnSystem) Update(entity *engi.Entity, dt float32) {
 
 func NewRock(position engi.Point) *engi.Entity {
 	rock := engi.NewEntity([]string{"RenderSystem", "FallingSystem", "CollisionSystem", "SpeedSystem"})
-	texture := engi.Files.Image("rock")
+
+	texture := engi.Files.Image("rock.png")
 	render := engi.NewRenderComponent(texture, engi.Point{4, 4}, "rock")
 	space := engi.SpaceComponent{position, texture.Width() * render.Scale.X, texture.Height() * render.Scale.Y}
 	collision := engi.CollisionComponent{Solid: true}
+
 	rock.AddComponent(&render)
 	rock.AddComponent(&space)
 	rock.AddComponent(&collision)
+
 	return rock
 }
 
@@ -146,6 +152,7 @@ type DeathSystem struct {
 
 func (ds *DeathSystem) New() {
 	ds.System = &engi.System{}
+	// Subscribe to ScoreMessage
 	engi.Mailbox.Listen("ScoreMessage", func(message interface{}) {
 		collision, isCollision := message.(engi.CollisionMessage)
 		if isCollision {

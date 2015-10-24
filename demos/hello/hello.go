@@ -15,11 +15,10 @@ type GameWorld struct {
 
 func (game *GameWorld) Preload() {
 	game.New()
-	engi.Files.Add(engi.NewResource("bot", "data/icon.png"),
-		engi.NewResource("font", "data/font.png"),
-		engi.NewResource("rock", "data/rock.png"),
-		engi.NewResource("sheet", "data/sheet.png"),
-		engi.NewResource("sample", "data/Hero.png"))
+
+	// This could be done individually: engi.Files.Add("data/icon.png"), etc
+	// Second value (false) says whether to check recursively or not
+	engi.Files.AddFromDir("data", false)
 
 	log.Println("Preloaded")
 }
@@ -31,7 +30,7 @@ func (game *GameWorld) Setup() {
 	game.AddSystem(&ScaleSystem{})
 
 	guy := engi.NewEntity([]string{"RenderSystem", "ScaleSystem"})
-	texture := engi.Files.Image("bot")
+	texture := engi.Files.Image("icon.png")
 	render := engi.NewRenderComponent(texture, engi.Point{8, 8}, "guy")
 	collision := engi.CollisionComponent{Solid: true, Main: true}
 
