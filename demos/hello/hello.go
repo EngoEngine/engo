@@ -17,6 +17,7 @@ func (game *GameWorld) Preload() {
 	game.New()
 
 	// This could be done individually: engi.Files.Add("data/icon.png"), etc
+	// Second value (false) says whether to check recursively or not
 	engi.Files.AddFromDir("data", false)
 
 	log.Println("Preloaded")
