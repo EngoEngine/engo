@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	MinZoom float32 = 0.5
-	MaxZoom float32 = 50
+	MinZoom float32 = 0.25
+	MaxZoom float32 = 3
 )
 
 // A rather basic camera
