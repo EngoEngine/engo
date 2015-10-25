@@ -191,7 +191,7 @@ func NewTexture(img Image) *Texture {
 }
 
 func (t *Texture) Render(b *Batch, render *RenderComponent, space *SpaceComponent) {
-	Wo.Batch().Draw(t,
+	Wo.Batch(render.Priority).Draw(t,
 		space.Position.X, space.Position.Y,
 		0, 0,
 		render.Scale.X, render.Scale.Y,
@@ -244,7 +244,7 @@ func (s *Sprite) Render(batch *Batch) {
 	batch.Draw(s.Region, s.Position.X, s.Position.Y, s.Anchor.X, s.Anchor.Y, s.Scale.X, s.Scale.Y, s.Rotation, s.Color, s.Alpha)
 }
 
-var batchVert = ` 
+var batchVert = `
 attribute vec2 in_Position;
 attribute vec4 in_Color;
 attribute vec2 in_TexCoords;
@@ -264,6 +264,41 @@ void main() {
 }`
 
 var batchFrag = `
+#ifdef GL_ES
+#define LOWP lowp
+precision mediump float;
+#else
+#define LOWP
+#endif
+
+varying vec4 var_Color;
+varying vec2 var_TexCoords;
+
+uniform sampler2D uf_Texture;
+
+void main (void) {
+  gl_FragColor = var_Color * texture2D(uf_Texture, var_TexCoords);
+}`
+
+var hudVert = `
+attribute vec2 in_Position;
+attribute vec4 in_Color;
+attribute vec2 in_TexCoords;
+
+uniform vec2 uf_Projection;
+uniform vec3 center;
+
+varying vec4 var_Color;
+varying vec2 var_TexCoords;
+
+void main() {
+  var_Color = in_Color;
+  var_TexCoords = in_TexCoords;
+  gl_Position = vec4((4.0*in_Position.x - uf_Projection.x) / uf_Projection.x,
+  					 (4.0*in_Position.y - uf_Projection.y) / -uf_Projection.y, 0, 1.0);
+}`
+
+var hudFrag = `
 #ifdef GL_ES
 #define LOWP lowp
 precision mediump float;

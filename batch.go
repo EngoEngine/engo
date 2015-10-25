@@ -38,10 +38,10 @@ type Batch struct {
 	projY        float32
 }
 
-func NewBatch(width, height float32) *Batch {
+func NewBatch(width, height float32, vertSrc, fragSrc string) *Batch {
 	batch := new(Batch)
 
-	batch.shader = LoadShader(batchVert, batchFrag)
+	batch.shader = LoadShader(vertSrc, fragSrc)
 	batch.inPosition = Gl.GetAttribLocation(batch.shader, "in_Position")
 	batch.inTexCoords = Gl.GetAttribLocation(batch.shader, "in_TexCoords")
 	batch.inColor = Gl.GetAttribLocation(batch.shader, "in_Color")
