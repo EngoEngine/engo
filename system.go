@@ -99,11 +99,15 @@ func (cs CollisionSystem) Name() string {
 type PriorityLevel int
 
 const (
+	// HighestGround is the highest PriorityLevel that will be rendered
+	HighestGround PriorityLevel = 50
+	// HUDGround is a PriorityLevel from which everything isn't being affected by the Camera
 	HUDGround    PriorityLevel = 40
 	Foreground   PriorityLevel = 30
 	MiddleGround PriorityLevel = 20
 	ScenicGround PriorityLevel = 10
-	Background   PriorityLevel = 0
+	// Background is the lowest PriorityLevel that will be rendered
+	Background PriorityLevel = 0
 )
 
 type RenderSystem struct {
@@ -127,11 +131,7 @@ func (rs RenderSystem) Pre() {
 		return
 	}
 
-	delete(rs.renders, HUDGround)
-	delete(rs.renders, Foreground)
-	delete(rs.renders, MiddleGround)
-	delete(rs.renders, ScenicGround)
-	delete(rs.renders, Background)
+	rs.renders = make(map[PriorityLevel][]*Entity)
 }
 
 type Renderable interface {
@@ -139,8 +139,24 @@ type Renderable interface {
 }
 
 func (rs *RenderSystem) Post() {
-	for i := 0; i < int(HUDGround); i++ {
-		for _, entity := range rs.renders[PriorityLevel(i)] {
+	var currentBatch *Batch
+
+	for i := Background; i <= HighestGround; i++ {
+		if len(rs.renders[i]) == 0 {
+			continue
+		}
+
+		// Retrieve a batch, may be the default one -- then call .Begin() if we arent already using it
+		batch := Wo.Batch(i)
+		if batch != currentBatch {
+			if currentBatch != nil {
+				currentBatch.End()
+			}
+			batch.Begin()
+			currentBatch = batch
+		}
+		// Then render everything for this level
+		for _, entity := range rs.renders[i] {
 			var render *RenderComponent
 			var space *SpaceComponent
 
@@ -148,8 +164,12 @@ func (rs *RenderSystem) Post() {
 				return
 			}
 
-			render.Display.Render(Wo.Batch(), render, space)
+			render.Display.Render(batch, render, space)
 		}
+	}
+
+	if currentBatch != nil {
+		currentBatch.End()
 	}
 
 	rs.changed = false

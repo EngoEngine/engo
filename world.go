@@ -8,11 +8,21 @@ type World struct {
 	Game
 	entities []*Entity
 	systems  []Systemer
-	batch    *Batch
+
+	defaultBatch *Batch
+	hudBatch     *Batch
+
+	isSetup bool
 }
 
 func (w *World) New() {
-	w.batch = NewBatch(Width(), Height())
+	if !w.isSetup {
+
+		w.defaultBatch = NewBatch(Width(), Height(), batchVert, batchFrag)
+		w.hudBatch = NewBatch(Width(), Height(), hudVert, hudFrag)
+
+		w.isSetup = true
+	}
 }
 
 func (w *World) AddEntity(entity *Entity) {
@@ -40,12 +50,9 @@ func (w *World) Systems() []Systemer {
 
 func (w *World) Pre() {
 	Gl.Clear(Gl.COLOR_BUFFER_BIT)
-	w.batch.Begin()
 }
 
-func (w *World) Post() {
-	w.batch.End()
-}
+func (w *World) Post() {}
 
 func (w *World) Update(dt float32) {
 	w.Pre()
@@ -67,6 +74,10 @@ func (w *World) Update(dt float32) {
 	w.Post()
 }
 
-func (w *World) Batch() *Batch {
-	return w.batch
+func (w *World) Batch(prio PriorityLevel) *Batch {
+	if prio >= HUDGround {
+		return w.hudBatch
+	} else {
+		return w.defaultBatch
+	}
 }
