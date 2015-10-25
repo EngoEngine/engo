@@ -80,13 +80,8 @@ func (game *Game) Scroll(amount float32) {
 
 // Setup is called before the main loop is started
 func (game *Game) Setup() {
-	// Set some basic variables we'll be using later
-	game.World.New()
-
-	game.AddSystem(&engi.RenderSystem{})
 	engi.SetBg(0x222222)
-	engi.Cam.Setup()
-	engi.WorldBounds.Max = engi.Point{worldWidth, worldHeight}
+	game.AddSystem(&engi.RenderSystem{})
 
 	// Adding KeyboardScroller so we can actually see the difference between background and HUD when scrolling
 	game.AddSystem(engi.NewKeyboardScroller(scrollSpeed, engi.W, engi.D, engi.S, engi.A))

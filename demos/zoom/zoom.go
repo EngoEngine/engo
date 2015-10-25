@@ -12,7 +12,7 @@ type Game struct {
 }
 
 var (
-	scrollSpeed float32 = 700
+	zoomSpeed   float32 = 0.125
 	worldWidth  float32 = 800
 	worldHeight float32 = 800
 )
@@ -50,19 +50,25 @@ func generateBackground() *engi.Entity {
 	return field
 }
 
+// Scroll is called whenever the mouse wheel scrolls
+func (game *Game) Scroll(amount float32) {
+	// Adding this line, allows for zooming on scrolling the mouse wheel
+	engi.Cam.Zoom(-1 * amount * zoomSpeed)
+}
+
 // Setup is called before the main loop is started
 func (game *Game) Setup() {
 	engi.SetBg(0x222222)
 	game.AddSystem(&engi.RenderSystem{})
 
-	// The most important line in this whole demo:
-	game.AddSystem(engi.NewKeyboardScroller(scrollSpeed, engi.W, engi.D, engi.S, engi.A))
+	// Explicitly set WorldBounds for better default Camera values
+	engi.WorldBounds.Max = engi.Point{worldWidth, worldHeight}
 
-	// Create the background; this way we'll see when we actually scroll
+	// Create the background; this way we'll see when we actually zoom
 	game.AddEntity(generateBackground())
 }
 
 func main() {
 	engi.SetFPSLimit(120)
-	engi.Open("KeyboardScroller Demo", 400, 400, false, &Game{})
+	engi.Open("Zoom Demo", 400, 400, false, &Game{})
 }
