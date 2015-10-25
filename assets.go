@@ -244,7 +244,6 @@ func (s *Sprite) Render(batch *Batch) {
 	batch.Draw(s.Region, s.Position.X, s.Position.Y, s.Anchor.X, s.Anchor.Y, s.Scale.X, s.Scale.Y, s.Rotation, s.Color, s.Alpha)
 }
 
-// TODO: center was originally a "const vec2" - but I have no idea how to handle that, so I changed it
 var batchVert = ` 
 attribute vec2 in_Position;
 attribute vec4 in_Color;
@@ -259,8 +258,8 @@ varying vec2 var_TexCoords;
 void main() {
   var_Color = in_Color;
   var_TexCoords = in_TexCoords;
-  gl_Position = vec4(in_Position.x /  uf_Projection.x - center.x - 0.5,
-				 	 in_Position.y / -uf_Projection.y + center.y + 0.5,
+  gl_Position = vec4(in_Position.x /  uf_Projection.x - center.x,
+				 	 in_Position.y / -uf_Projection.y + center.y,
 										 0, center.z);
 }`
 
