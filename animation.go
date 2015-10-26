@@ -15,10 +15,14 @@ type Spritesheet struct {
 	cache                 map[int]*Region // The cell cache cells
 }
 
+func NewSpritesheetFromTexture(texture *Texture, cellWidth, cellHeight int) *Spritesheet {
+	return &Spritesheet{texture: texture, CellWidth: cellWidth, CellHeight: cellHeight, cache: make(map[int]*Region)}
+}
+
 // Simple handler for creating a new spritesheet from a file
 // textureName is the name of a texture already preloaded with engi.Files.Add
-func NewSpritesheet(textureName string, cellWidth, cellHeight int) *Spritesheet {
-	return &Spritesheet{texture: Files.Image(textureName), CellWidth: cellWidth, CellHeight: cellHeight, cache: make(map[int]*Region)}
+func NewSpritesheetFromFile(textureName string, cellWidth, cellHeight int) *Spritesheet {
+	return NewSpritesheetFromTexture(Files.Image(textureName), cellWidth, cellHeight)
 }
 
 // Get the region at the index i, updates and pulls from cache if need be
@@ -28,6 +32,20 @@ func (s *Spritesheet) Cell(i int) *Region {
 	}
 	s.cache[i] = regionFromSheet(s.texture, s.CellWidth, s.CellHeight, i)
 	return s.cache[i]
+}
+
+func (s *Spritesheet) CellCount() int {
+	return int(s.Width()) * int(s.Height())
+}
+
+func (s *Spritesheet) Cells() []*Region {
+	cellsNo := s.CellCount()
+	cells := make([]*Region, cellsNo)
+	for i := 0; i < cellsNo; i++ {
+		cells[i] = s.Cell(i)
+	}
+
+	return cells
 }
 
 // The amount of tiles on the x-axis of the spritesheet
@@ -40,52 +58,54 @@ func (s Spritesheet) Height() float32 {
 	return s.texture.Height() / float32(s.CellHeight)
 }
 
+type AnimationAction struct {
+	Name   string
+	Frames []int
+}
+
 // Component that controls animation in rendering entities
 type AnimationComponent struct {
-	Index            int              // What frame in the is being used
-	_index           int              // The index of the tile that should currently be being displayed
+	index            int              // What frame in the is being used
 	Rate             float32          // How often frames should increment, in seconds.
 	change           float32          // The time since the last incrementation
-	S                *Spritesheet     // Pointer to the source spritesheet
+	Regions          []*Region        // Pointer to the array of regions
 	Animations       map[string][]int // All possible animations
-	CurrentAnimation []int            // The currently animation
+	CurrentAnimation []int            // The current animation
 }
 
 // Create a new pointer to AnimationComponent
-func NewAnimationComponent() *AnimationComponent {
-	return &AnimationComponent{Animations: make(map[string][]int)}
+func NewAnimationComponent(regions []*Region, rate float32) *AnimationComponent {
+	return &AnimationComponent{
+		Animations: make(map[string][]int),
+		Regions:    regions,
+		Rate:       rate,
+	}
 }
 
-func (ac *AnimationComponent) SelectAnimation(name string) {
+func (ac *AnimationComponent) SelectAnimationByName(name string) {
 	ac.CurrentAnimation = ac.Animations[name]
 }
 
-func (ac *AnimationComponent) AddAnimation(name string, indexes []int) {
-	ac.Animations[name] = indexes
+func (ac *AnimationComponent) SelectAnimationByAction(action *AnimationAction) {
+	ac.CurrentAnimation = ac.Animations[action.Name]
 }
 
-// Increment the frame
-func (ac *AnimationComponent) Increment() {
-	if len(ac.CurrentAnimation) == 0 {
-		log.Println("No data for this animation")
-		return
-	}
-
-	ac.Index += 1
-	if ac.Index >= len(ac.CurrentAnimation) {
-		ac.Index = 0
-	}
-	ac._index = ac.CurrentAnimation[ac.Index]
-	ac.change = 0
-
+func (ac *AnimationComponent) AddAnimationAction(action *AnimationAction) {
+	ac.Animations[action.Name] = action.Frames
 }
 
-//Bug(me) Don't need to use _index at all, use ac.CurrentAnimation[ac.Index] instead. Set ac.Index as a private member variable
+func (ac *AnimationComponent) AddAnimationActions(actions []*AnimationAction) {
+	for _, action := range actions {
+		ac.Animations[action.Name] = action.Frames
+	}
+}
+
 func (ac *AnimationComponent) Cell() *Region {
-	return ac.S.Cell(ac._index)
+	idx := ac.CurrentAnimation[ac.index]
+	return ac.Regions[idx]
 }
 
-func (ac AnimationComponent) Name() string {
+func (ac *AnimationComponent) Name() string {
 	return "AnimationComponent"
 }
 
@@ -113,7 +133,20 @@ func (a *AnimationSystem) Update(e *Entity, dt float32) {
 
 	ac.change += dt
 	if ac.change >= ac.Rate {
-		ac.Increment()
+		a.NextFrame(ac)
 		r.Display = ac.Cell()
 	}
+}
+
+func (a *AnimationSystem) NextFrame(ac *AnimationComponent) {
+	if len(ac.CurrentAnimation) == 0 {
+		log.Println("No data for this animation")
+		return
+	}
+
+	ac.index += 1
+	if ac.index >= len(ac.CurrentAnimation) {
+		ac.index = 0
+	}
+	ac.change = 0
 }

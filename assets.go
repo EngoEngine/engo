@@ -132,7 +132,7 @@ type Region struct {
 }
 
 func (r *Region) Render(b *Batch, render *RenderComponent, space *SpaceComponent) {
-	r.texture.Render(b, render, space)
+	b.Draw(r, space.Position.X, space.Position.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, render.Color, render.Transparency)
 }
 
 func NewRegion(texture *Texture, x, y, w, h int) *Region {
@@ -240,11 +240,7 @@ func NewSprite(region *Region, x, y float32) *Sprite {
 	}
 }
 
-func (s *Sprite) Render(batch *Batch) {
-	batch.Draw(s.Region, s.Position.X, s.Position.Y, s.Anchor.X, s.Anchor.Y, s.Scale.X, s.Scale.Y, s.Rotation, s.Color, s.Alpha)
-}
-
-var batchVert = `
+var batchVert = ` 
 attribute vec2 in_Position;
 attribute vec4 in_Color;
 attribute vec2 in_TexCoords;
