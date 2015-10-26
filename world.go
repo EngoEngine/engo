@@ -22,6 +22,14 @@ func (w *World) New() {
 		w.hudBatch = NewBatch(Width(), Height(), hudVert, hudFrag)
 
 		w.isSetup = true
+
+		// Default WorldBounds values
+		if WorldBounds.Max.X == 0 && WorldBounds.Max.Y == 0 {
+			WorldBounds.Max = Point{Width(), Height()}
+		}
+
+		// TODO: The Camera is a Systemer, but is also kind of "required", so should be added automatically
+		Cam.Setup()
 	}
 }
 

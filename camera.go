@@ -20,8 +20,8 @@ type Camera struct {
 }
 
 func (cam *Camera) Setup() {
-	cam.x = 0
-	cam.y = 0
+	cam.x = WorldBounds.Max.X / 2
+	cam.y = WorldBounds.Max.Y / 2
 	cam.z = 1
 }
 

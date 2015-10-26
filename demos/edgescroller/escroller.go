@@ -20,7 +20,7 @@ var (
 
 // generateBackground creates a background of green tiles - might not be the most efficient way to do this
 func generateBackground() *engi.Entity {
-	rect := image.Rect(0, 0, 1600, 1600)
+	rect := image.Rect(0, 0, int(worldWidth), int(worldHeight))
 	img := image.NewNRGBA(rect)
 	c1 := color.RGBA{102, 153, 0, 255}
 	c2 := color.RGBA{102, 173, 0, 255}
@@ -53,11 +53,8 @@ func generateBackground() *engi.Entity {
 
 // Setup is called before the main loop is started
 func (game *Game) Setup() {
-	// Set some basic variables we'll be using later
-	game.AddSystem(&engi.RenderSystem{})
 	engi.SetBg(0x222222)
-	engi.Cam.Setup()
-	engi.WorldBounds.Max = engi.Point{worldWidth, worldHeight}
+	game.AddSystem(&engi.RenderSystem{})
 
 	// The most important line in this whole demo:
 	game.AddSystem(engi.NewEdgeScroller(scrollSpeed, edgeMargin))
