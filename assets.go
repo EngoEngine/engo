@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
+	"os"
 	"path"
 )
 
@@ -23,6 +24,7 @@ type Loader struct {
 	images    map[string]*Texture
 	jsons     map[string]string
 	levels    map[string]*Level
+	sounds    map[string]string
 }
 
 func NewLoader() *Loader {
@@ -31,6 +33,7 @@ func NewLoader() *Loader {
 		images:    make(map[string]*Texture),
 		jsons:     make(map[string]string),
 		levels:    make(map[string]*Level),
+		sounds:    make(map[string]string),
 	}
 }
 
@@ -76,6 +79,14 @@ func (l *Loader) Level(name string) *Level {
 	return l.levels[name]
 }
 
+func (l *Loader) Sound(name string) ReadSeekCloser {
+	f, err := os.Open(l.sounds[name])
+	if err != nil {
+		return nil
+	}
+	return f
+}
+
 func (l *Loader) Load(onFinish func()) {
 	for _, r := range l.resources {
 		switch r.kind {
@@ -94,6 +105,8 @@ func (l *Loader) Load(onFinish func()) {
 			if err == nil {
 				l.levels[r.name] = data
 			}
+		case "wav":
+			l.sounds[r.name] = r.url
 		}
 	}
 	onFinish()

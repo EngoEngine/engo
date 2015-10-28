@@ -114,7 +114,7 @@ func (b *Batch) flush() {
 	Gl.BindTexture(Gl.TEXTURE_2D, b.lastTexture)
 
 	Gl.Uniform2f(b.ufProjection, b.projX, b.projY)
-	Gl.Uniform3f(b.center, Cam.x/Width(), Cam.y/Height(), Cam.z)
+	Gl.Uniform3f(b.center, cam.x/Width(), cam.y/Height(), cam.z)
 
 	Gl.BufferSubData(Gl.ARRAY_BUFFER, 0, b.vertices)
 	Gl.DrawElements(Gl.TRIANGLES, 6*b.index, Gl.UNSIGNED_SHORT, 0)

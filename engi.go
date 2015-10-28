@@ -16,7 +16,7 @@ var (
 	Files       *Loader
 	Gl          *webgl.Context
 	Mailbox     MessageManager
-	Cam         *Camera
+	cam         *cameraSystem
 	Wo          Responder
 	WorldBounds AABB
 
@@ -29,13 +29,8 @@ func Open(title string, width, height int, fullscreen bool, r Responder) {
 	responder = r
 	Time = NewClock()
 	Files = NewLoader()
-	SetCamera(&Camera{})
 	Wo = r
 	run(title, width, height, fullscreen)
-}
-
-func SetCamera(c *Camera) {
-	Cam = c
 }
 
 func SetBg(color uint32) {

@@ -34,28 +34,28 @@ func (c *KeyboardScroller) Update(entity *Entity, dt float32) {
 
 	for _, upKey := range c.upKeys {
 		if Keys.Get(upKey).Down() {
-			Cam.MoveY(-c.scrollSpeed * dt)
+			Mailbox.Dispatch(CameraMessage{YAxis, -c.scrollSpeed * dt, true})
 			break
 		}
 	}
 
 	for _, rightKey := range c.rightKeys {
 		if Keys.Get(rightKey).Down() {
-			Cam.MoveX(c.scrollSpeed * dt)
+			Mailbox.Dispatch(CameraMessage{XAxis, c.scrollSpeed * dt, true})
 			break
 		}
 	}
 
 	for _, downKey := range c.downKeys {
 		if Keys.Get(downKey).Down() {
-			Cam.MoveY(c.scrollSpeed * dt)
+			Mailbox.Dispatch(CameraMessage{YAxis, c.scrollSpeed * dt, true})
 			break
 		}
 	}
 
 	for _, leftKey := range c.leftKeys {
 		if Keys.Get(leftKey).Down() {
-			Cam.MoveX(-c.scrollSpeed * dt)
+			Mailbox.Dispatch(CameraMessage{XAxis, -c.scrollSpeed * dt, true})
 			break
 		}
 	}
@@ -106,15 +106,15 @@ func (c *EdgeScroller) Update(entity *Entity, dt float32) {
 	maxX, maxY := window.GetSize()
 
 	if curX < c.margin {
-		Cam.MoveX(-c.scrollSpeed * dt)
+		Mailbox.Dispatch(CameraMessage{XAxis, -c.scrollSpeed * dt, true})
 	} else if curX > float64(maxX)-c.margin {
-		Cam.MoveX(c.scrollSpeed * dt)
+		Mailbox.Dispatch(CameraMessage{XAxis, c.scrollSpeed * dt, true})
 	}
 
 	if curY < c.margin {
-		Cam.MoveY(-c.scrollSpeed * dt)
+		Mailbox.Dispatch(CameraMessage{YAxis, -c.scrollSpeed * dt, true})
 	} else if curY > float64(maxY)-c.margin {
-		Cam.MoveY(c.scrollSpeed * dt)
+		Mailbox.Dispatch(CameraMessage{YAxis, c.scrollSpeed * dt, true})
 	}
 }
 

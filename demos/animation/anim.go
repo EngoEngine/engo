@@ -4,7 +4,10 @@ import (
 	"github.com/paked/engi"
 )
 
-var World *GameWorld
+var (
+	zoomSpeed float32 = -0.125
+	World     *GameWorld
+)
 
 type GameWorld struct {
 	engi.World
@@ -57,7 +60,7 @@ func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Sprites
 }
 
 func (game *GameWorld) Scroll(amount float32) {
-	engi.Cam.Zoom(-1 * amount * 0.125)
+	engi.Mailbox.Dispatch(engi.CameraMessage{Axis: engi.ZAxis, Value: amount * zoomSpeed, Incremental: true})
 }
 
 func main() {

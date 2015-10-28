@@ -29,8 +29,10 @@ func (w *World) New() {
 			WorldBounds.Max = Point{Width(), Height()}
 		}
 
-		// TODO: The Camera is a Systemer, but is also kind of "required", so should be added automatically
-		Cam.Setup()
+		// Initialize cameraSystem
+		cam = &cameraSystem{}
+		cam.New()
+		w.AddSystem(cam)
 	}
 }
 
@@ -65,7 +67,6 @@ func (w *World) Post() {}
 
 func (w *World) Update(dt float32) {
 	w.Pre()
-	Cam.Update(dt)
 
 	var unp *UnpauseComponent
 
