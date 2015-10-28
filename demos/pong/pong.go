@@ -81,7 +81,7 @@ type SpeedSystem struct {
 
 func (ms *SpeedSystem) New() {
 	ms.System = &engi.System{}
-	engi.Mailbox.Listen("CollisionMessage", func(message interface{}) {
+	engi.Mailbox.Listen("CollisionMessage", func(message engi.Message) {
 		log.Println("collision")
 		collision, isCollision := message.(engi.CollisionMessage)
 		if isCollision {
@@ -139,7 +139,7 @@ func (bs *BallSystem) Update(entity *engi.Entity, dt float32) {
 	}
 
 	if space.Position.X < 0 {
-		engi.Mailbox.Dispatch("ScoreMessage", ScoreMessage{1})
+		engi.Mailbox.Dispatch(ScoreMessage{1})
 
 		space.Position.X = 400 - 16
 		space.Position.Y = 400 - 16
@@ -153,7 +153,7 @@ func (bs *BallSystem) Update(entity *engi.Entity, dt float32) {
 	}
 
 	if space.Position.X > (800 - 16) {
-		engi.Mailbox.Dispatch("ScoreMessage", ScoreMessage{2})
+		engi.Mailbox.Dispatch(ScoreMessage{2})
 
 		space.Position.X = 400 - 16
 		space.Position.Y = 400 - 16
@@ -229,7 +229,7 @@ func (ScoreSystem) Type() string {
 func (sc *ScoreSystem) New() {
 	sc.upToDate = true
 	sc.System = &engi.System{}
-	engi.Mailbox.Listen("ScoreMessage", func(message interface{}) {
+	engi.Mailbox.Listen("ScoreMessage", func(message engi.Message) {
 		scoreMessage, isScore := message.(ScoreMessage)
 		if !isScore {
 			return
@@ -271,7 +271,7 @@ type ScoreMessage struct {
 	Player int
 }
 
-func (score ScoreMessage) Type() string {
+func (ScoreMessage) Type() string {
 	return "ScoreMessage"
 }
 

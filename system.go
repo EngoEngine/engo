@@ -86,7 +86,7 @@ func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 					space.Position.Y += mtd.Y
 				}
 
-				Mailbox.Dispatch("CollisionMessage", CollisionMessage{Entity: entity, To: other})
+				Mailbox.Dispatch(CollisionMessage{Entity: entity, To: other})
 			}
 		}
 	}
