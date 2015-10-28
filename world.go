@@ -37,7 +37,7 @@ func (w *World) AddEntity(entity *Entity) {
 	entity.id = strconv.Itoa(len(w.entities))
 	w.entities = append(w.entities, entity)
 	for _, system := range w.systems {
-		if entity.DoesRequire(system.Name()) {
+		if entity.DoesRequire(system.Type()) {
 			system.AddEntity(entity)
 		}
 	}

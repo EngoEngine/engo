@@ -1,7 +1,7 @@
 package engi
 
 type Component interface {
-	Name() string
+	Type() string
 }
 
 type SpaceComponent struct {
@@ -10,7 +10,7 @@ type SpaceComponent struct {
 	Height   float32
 }
 
-func (sc SpaceComponent) Name() string {
+func (SpaceComponent) Type() string {
 	return "SpaceComponent"
 }
 
@@ -21,7 +21,7 @@ func (sc SpaceComponent) AABB() AABB {
 type CollisionMasterComponent struct {
 }
 
-func (cm CollisionMasterComponent) Name() string {
+func (CollisionMasterComponent) Type() string {
 	return "CollisionMasterComponent"
 }
 
@@ -30,7 +30,7 @@ type CollisionComponent struct {
 	Extra       Point
 }
 
-func (cc CollisionComponent) Name() string {
+func (CollisionComponent) Type() string {
 	return "CollisionComponent"
 }
 
@@ -58,7 +58,7 @@ func NewRenderComponent(display Renderable, scale Point, label string) RenderCom
 	}
 }
 
-func (rc RenderComponent) Name() string {
+func (RenderComponent) Type() string {
 	return "RenderComponent"
 }
 
@@ -66,6 +66,6 @@ type LinkComponent struct {
 	Entity *Entity
 }
 
-func (lc LinkComponent) Name() string {
+func (LinkComponent) Type() string {
 	return "LinkComponent"
 }

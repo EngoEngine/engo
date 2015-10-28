@@ -121,7 +121,7 @@ func (ac *AnimationComponent) Cell() Renderable {
 	return ac.Renderables[idx]
 }
 
-func (ac *AnimationComponent) Name() string {
+func (*AnimationComponent) Type() string {
 	return "AnimationComponent"
 }
 
@@ -133,7 +133,7 @@ func (a *AnimationSystem) New() {
 	a.System = &System{}
 }
 
-func (a AnimationSystem) Name() string {
+func (AnimationSystem) Type() string {
 	return "AnimationSystem"
 }
 

@@ -2,7 +2,7 @@ package engi
 
 type Systemer interface {
 	Update(entity *Entity, dt float32)
-	Name() string
+	Type() string
 	Priority() int
 	Pre()
 	Post()
@@ -92,7 +92,7 @@ func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 	}
 }
 
-func (cs CollisionSystem) Name() string {
+func (*CollisionSystem) Type() string {
 	return "CollisionSystem"
 }
 
@@ -188,10 +188,10 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 	rs.renders[render.Priority] = append(rs.renders[render.Priority], entity)
 }
 
-func (rs RenderSystem) Name() string {
+func (*RenderSystem) Type() string {
 	return "RenderSystem"
 }
 
-func (rs RenderSystem) Priority() int {
+func (rs *RenderSystem) Priority() int {
 	return 1
 }
