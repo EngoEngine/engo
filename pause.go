@@ -4,7 +4,7 @@ package engi
 // system-wide pauses.
 type UnpauseComponent struct{}
 
-func (UnpauseComponent) Name() string {
+func (UnpauseComponent) Type() string {
 	return "UnpauseComponent"
 }
 
@@ -28,7 +28,7 @@ func (ps *PauseSystem) New() {
 
 func (*PauseSystem) Update(*Entity, float32) {}
 
-func (PauseSystem) Name() string {
+func (PauseSystem) Type() string {
 	return "PauseSystem"
 }
 
