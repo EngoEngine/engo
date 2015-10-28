@@ -54,7 +54,7 @@ func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Sprites
 
 	space := engi.SpaceComponent{*point, 0, 0}
 	render := engi.NewRenderComponent(spriteSheet.Cell(action.Frames[0]), engi.Point{3, 3}, "hero")
-	animation := engi.NewAnimationComponent(spriteSheet.Cells(), 0.1)
+	animation := engi.NewAnimationComponent(spriteSheet.Renderables(), 0.1)
 	animation.AddAnimationActions(game.actions)
 	animation.SelectAnimationByAction(action)
 	entity.AddComponent(&render)
