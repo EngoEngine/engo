@@ -14,7 +14,6 @@ type GameWorld struct {
 	SKILL_ACTION *engi.AnimationAction
 	DIE_ACTION   *engi.AnimationAction
 	actions      []*engi.AnimationAction
-	activeAction *engi.AnimationAction
 }
 
 func (game *GameWorld) Preload() {
@@ -25,7 +24,6 @@ func (game *GameWorld) Preload() {
 	game.SKILL_ACTION = &engi.AnimationAction{Name: "skill", Frames: []int{44, 45, 46, 47, 48, 49, 50, 51, 52, 53}}
 	game.DIE_ACTION = &engi.AnimationAction{Name: "die", Frames: []int{28, 29, 30}}
 	game.actions = []*engi.AnimationAction{game.DIE_ACTION, game.STOP_ACTION, game.WALK_ACTION, game.RUN_ACTION, game.SKILL_ACTION}
-	game.activeAction = game.RUN_ACTION
 }
 
 func (game *GameWorld) Setup() {
@@ -46,9 +44,9 @@ func (game *GameWorld) Setup() {
 func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Spritesheet, action *engi.AnimationAction) *engi.Entity {
 	entity := engi.NewEntity([]string{"AnimationSystem", "RenderSystem"})
 
-	space := engi.SpaceComponent{*point, 100, 100}
+	space := engi.SpaceComponent{*point, 0, 0}
 	render := engi.NewRenderComponent(spriteSheet.Cell(action.Frames[0]), engi.Point{3, 3}, "hero")
-	animation := engi.NewAnimationComponent(spriteSheet.Cells(), 0.1)
+	animation := engi.NewAnimationComponent(spriteSheet.Renderables(), 0.1)
 	animation.AddAnimationActions(game.actions)
 	animation.SelectAnimationByAction(action)
 	entity.AddComponent(&render)

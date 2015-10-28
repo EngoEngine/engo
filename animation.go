@@ -26,12 +26,27 @@ func NewSpritesheetFromFile(textureName string, cellWidth, cellHeight int) *Spri
 }
 
 // Get the region at the index i, updates and pulls from cache if need be
-func (s *Spritesheet) Cell(i int) *Region {
-	if r := s.cache[i]; r != nil {
+func (s *Spritesheet) Cell(index int) *Region {
+	if r := s.cache[index]; r != nil {
 		return r
 	}
-	s.cache[i] = regionFromSheet(s.texture, s.CellWidth, s.CellHeight, i)
-	return s.cache[i]
+	s.cache[index] = regionFromSheet(s.texture, s.CellWidth, s.CellHeight, index)
+
+	return s.cache[index]
+}
+
+func (s *Spritesheet) Renderable(index int) Renderable {
+	return s.Cell(index)
+}
+
+func (s *Spritesheet) Renderables() []Renderable {
+	renderables := make([]Renderable, s.CellCount())
+
+	for i := 0; i < s.CellCount(); i++ {
+		renderables[i] = s.Renderable(i)
+	}
+
+	return renderables
 }
 
 func (s *Spritesheet) CellCount() int {
@@ -68,17 +83,17 @@ type AnimationComponent struct {
 	index            int              // What frame in the is being used
 	Rate             float32          // How often frames should increment, in seconds.
 	change           float32          // The time since the last incrementation
-	Regions          []*Region        // Pointer to the array of regions
+	Renderables      []Renderable     // Renderables
 	Animations       map[string][]int // All possible animations
 	CurrentAnimation []int            // The current animation
 }
 
 // Create a new pointer to AnimationComponent
-func NewAnimationComponent(regions []*Region, rate float32) *AnimationComponent {
+func NewAnimationComponent(renderables []Renderable, rate float32) *AnimationComponent {
 	return &AnimationComponent{
-		Animations: make(map[string][]int),
-		Regions:    regions,
-		Rate:       rate,
+		Animations:  make(map[string][]int),
+		Renderables: renderables,
+		Rate:        rate,
 	}
 }
 
@@ -100,9 +115,10 @@ func (ac *AnimationComponent) AddAnimationActions(actions []*AnimationAction) {
 	}
 }
 
-func (ac *AnimationComponent) Cell() *Region {
+func (ac *AnimationComponent) Cell() Renderable {
 	idx := ac.CurrentAnimation[ac.index]
-	return ac.Regions[idx]
+
+	return ac.Renderables[idx]
 }
 
 func (ac *AnimationComponent) Name() string {
