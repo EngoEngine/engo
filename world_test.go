@@ -12,7 +12,7 @@ func (ts *TestSystem) New() {
 	ts.System = &System{}
 }
 
-func (ts *TestSystem) Name() string {
+func (*TestSystem) Type() string {
 	return "TestSystem"
 }
 

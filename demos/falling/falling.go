@@ -57,7 +57,7 @@ func (control *ControlSystem) New() {
 	control.System = &engi.System{}
 }
 
-func (control ControlSystem) Name() string {
+func (ControlSystem) Type() string {
 	return "ControlSystem"
 }
 
@@ -90,7 +90,7 @@ type RockSpawnSystem struct {
 	*engi.System
 }
 
-func (rock RockSpawnSystem) Name() string {
+func (RockSpawnSystem) Type() string {
 	return "RockSpawnSystem"
 }
 
@@ -134,11 +134,11 @@ func (fs *FallingSystem) New() {
 
 }
 
-func (fs FallingSystem) Name() string {
+func (FallingSystem) Type() string {
 	return "FallingSystem"
 }
 
-func (fs FallingSystem) Update(entity *engi.Entity, dt float32) {
+func (fs *FallingSystem) Update(entity *engi.Entity, dt float32) {
 	var space *engi.SpaceComponent
 	if !entity.GetComponent(&space) {
 		return
@@ -163,15 +163,15 @@ func (ds *DeathSystem) New() {
 
 }
 
-func (ds DeathSystem) Name() string {
+func (DeathSystem) Type() string {
 	return "DeathSystem"
 }
 
-func (fs DeathSystem) Update(entity *engi.Entity, dt float32) {
+func (fs *DeathSystem) Update(entity *engi.Entity, dt float32) {
 
 }
 
-func (fs DeathSystem) Receive(message engi.Message) {
+func (fs *DeathSystem) Receive(message engi.Message) {
 	collision, isCollision := message.(engi.CollisionMessage)
 	if isCollision {
 		log.Println(collision, message)

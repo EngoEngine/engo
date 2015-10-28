@@ -50,7 +50,7 @@ type ScaleSystem struct {
 	*engi.System
 }
 
-func (s *ScaleSystem) Name() string {
+func (ScaleSystem) Type() string {
 	return "ScaleSystem"
 }
 

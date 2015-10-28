@@ -17,7 +17,7 @@ type KeyboardScroller struct {
 	isSetup bool
 }
 
-func (c *KeyboardScroller) Name() string {
+func (*KeyboardScroller) Type() string {
 	return "KeyboardScroller"
 }
 
@@ -77,7 +77,7 @@ func NewKeyboardScroller(scrollSpeed float32, up, right, down, left Key) *Keyboa
 	}
 	kbs.New()
 	kbs.BindKeyboard(up, right, down, left)
-	kbs.AddEntity(NewEntity([]string{kbs.Name()}))
+	kbs.AddEntity(NewEntity([]string{kbs.Type()}))
 	return kbs
 }
 
@@ -90,7 +90,7 @@ type EdgeScroller struct {
 	isSetup bool
 }
 
-func (c *EdgeScroller) Name() string {
+func (*EdgeScroller) Type() string {
 	return "EdgeScroller"
 }
 
@@ -124,6 +124,6 @@ func NewEdgeScroller(scrollSpeed float32, margin float64) *EdgeScroller {
 		margin:      margin,
 	}
 	es.New()
-	es.AddEntity(NewEntity([]string{es.Name()}))
+	es.AddEntity(NewEntity([]string{es.Type()}))
 	return es
 }

@@ -95,11 +95,11 @@ func (ms *SpeedSystem) New() {
 	})
 }
 
-func (ms SpeedSystem) Name() string {
+func (*SpeedSystem) Type() string {
 	return "SpeedSystem"
 }
 
-func (ms SpeedSystem) Update(entity *engi.Entity, dt float32) {
+func (ms *SpeedSystem) Update(entity *engi.Entity, dt float32) {
 	var speed *SpeedComponent
 	var space *engi.SpaceComponent
 	if !entity.GetComponent(&speed) || !entity.GetComponent(&space) {
@@ -109,14 +109,13 @@ func (ms SpeedSystem) Update(entity *engi.Entity, dt float32) {
 	space.Position.Y += speed.Y * dt
 }
 
-func (ms SpeedSystem) Receive(message engi.Message) {
-}
+func (ms *SpeedSystem) Receive(message engi.Message) {}
 
 type SpeedComponent struct {
 	engi.Point
 }
 
-func (speed SpeedComponent) Name() string {
+func (SpeedComponent) Type() string {
 	return "SpeedComponent"
 }
 
@@ -128,7 +127,7 @@ func (bs *BallSystem) New() {
 	bs.System = &engi.System{}
 }
 
-func (bs BallSystem) Name() string {
+func (BallSystem) Type() string {
 	return "BallSystem"
 }
 
@@ -172,7 +171,7 @@ type ControlSystem struct {
 	*engi.System
 }
 
-func (c *ControlSystem) Name() string {
+func (ControlSystem) Type() string {
 	return "ControlSystem"
 }
 func (c *ControlSystem) New() {
@@ -212,7 +211,7 @@ type ControlComponent struct {
 	Scheme string
 }
 
-func (cs ControlComponent) Name() string {
+func (ControlComponent) Type() string {
 	return "ControlComponent"
 }
 
@@ -223,7 +222,7 @@ type ScoreSystem struct {
 	scoreLock                      sync.RWMutex
 }
 
-func (score *ScoreSystem) Name() string {
+func (ScoreSystem) Type() string {
 	return "ScoreSystem"
 }
 
