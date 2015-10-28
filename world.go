@@ -13,6 +13,7 @@ type World struct {
 	hudBatch     *Batch
 
 	isSetup bool
+	paused  bool
 }
 
 func (w *World) New() {
@@ -65,9 +66,18 @@ func (w *World) Post() {}
 func (w *World) Update(dt float32) {
 	w.Pre()
 	Cam.Update(dt)
+
+	var unp *UnpauseComponent
+
 	for _, system := range w.Systems() {
 		system.Pre()
 		for _, entity := range system.Entities() {
+			if w.paused {
+				ok := entity.GetComponent(&unp)
+				if !ok {
+					continue // so skip it
+				}
+			}
 			if entity.Exists {
 				system.Update(entity, dt)
 			}

@@ -153,7 +153,7 @@ type DeathSystem struct {
 func (ds *DeathSystem) New() {
 	ds.System = &engi.System{}
 	// Subscribe to ScoreMessage
-	engi.Mailbox.Listen("ScoreMessage", func(message interface{}) {
+	engi.Mailbox.Listen("ScoreMessage", func(message engi.Message) {
 		collision, isCollision := message.(engi.CollisionMessage)
 		if isCollision {
 			log.Println(collision, message)
