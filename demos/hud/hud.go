@@ -47,9 +47,9 @@ func generateBackground() *engi.Entity {
 	field := engi.NewEntity([]string{"RenderSystem"})
 	fieldRender := engi.NewRenderComponent(engi.NewRegion(engi.NewTexture(bgTexture), 0, 0, int(worldWidth), int(worldHeight)), engi.Point{1, 1}, "Background1")
 	fieldRender.Priority = engi.Background
-	fieldSpace := engi.SpaceComponent{engi.Point{0, 0}, worldWidth, worldHeight}
-	field.AddComponent(&fieldRender)
-	field.AddComponent(&fieldSpace)
+	fieldSpace := &engi.SpaceComponent{engi.Point{0, 0}, worldWidth, worldHeight}
+	field.AddComponent(fieldRender)
+	field.AddComponent(fieldSpace)
 	return field
 }
 
@@ -67,9 +67,9 @@ func generateHUDBackground(width, height float32) *engi.Entity {
 	field := engi.NewEntity([]string{"RenderSystem"})
 	fieldRender := engi.NewRenderComponent(engi.NewRegion(engi.NewTexture(bgTexture), 0, 0, int(width), int(height)), engi.Point{0.5, 0.5}, "HUDBackground1")
 	fieldRender.Priority = hudBackgroundPriority
-	fieldSpace := engi.SpaceComponent{engi.Point{-1, -1}, width, height}
-	field.AddComponent(&fieldRender)
-	field.AddComponent(&fieldSpace)
+	fieldSpace := &engi.SpaceComponent{engi.Point{-1, -1}, width, height}
+	field.AddComponent(fieldRender)
+	field.AddComponent(fieldSpace)
 	return field
 }
 
