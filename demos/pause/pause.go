@@ -52,13 +52,13 @@ func (game *GameWorld) Setup() {
 func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Spritesheet, action *engi.AnimationAction) *engi.Entity {
 	entity := engi.NewEntity([]string{"AnimationSystem", "RenderSystem"})
 
-	space := engi.SpaceComponent{*point, 0, 0}
+	space := &engi.SpaceComponent{*point, 0, 0}
 	render := engi.NewRenderComponent(spriteSheet.Cell(action.Frames[0]), engi.Point{3, 3}, "hero")
 	animation := engi.NewAnimationComponent(spriteSheet.Renderables(), 0.1)
 	animation.AddAnimationActions(game.actions)
 	animation.SelectAnimationByAction(action)
-	entity.AddComponent(&render)
-	entity.AddComponent(&space)
+	entity.AddComponent(render)
+	entity.AddComponent(space)
 	entity.AddComponent(animation)
 
 	return entity

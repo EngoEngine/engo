@@ -37,22 +37,22 @@ func (pong *PongGame) Setup() {
 	ball := engi.NewEntity([]string{"RenderSystem", "CollisionSystem", "SpeedSystem", "BallSystem"})
 	ballTexture := engi.Files.Image("ball.png")
 	ballRender := engi.NewRenderComponent(ballTexture, engi.Point{2, 2}, "ball")
-	ballSpace := engi.SpaceComponent{engi.Point{(engi.Width() - ballTexture.Width()) / 2, (engi.Height() - ballTexture.Height()) / 2}, ballTexture.Width() * ballRender.Scale.X, ballTexture.Height() * ballRender.Scale.Y}
-	ballCollision := engi.CollisionComponent{Main: true, Solid: true}
-	ballSpeed := SpeedComponent{}
+	ballSpace := &engi.SpaceComponent{engi.Point{(engi.Width() - ballTexture.Width()) / 2, (engi.Height() - ballTexture.Height()) / 2}, ballTexture.Width() * ballRender.Scale.X, ballTexture.Height() * ballRender.Scale.Y}
+	ballCollision := &engi.CollisionComponent{Main: true, Solid: true}
+	ballSpeed := &SpeedComponent{}
 	ballSpeed.Point = engi.Point{300, 100}
-	ball.AddComponent(&ballRender)
-	ball.AddComponent(&ballSpace)
-	ball.AddComponent(&ballCollision)
-	ball.AddComponent(&ballSpeed)
+	ball.AddComponent(ballRender)
+	ball.AddComponent(ballSpace)
+	ball.AddComponent(ballCollision)
+	ball.AddComponent(ballSpeed)
 	pong.AddEntity(ball)
 
 	score := engi.NewEntity([]string{"RenderSystem", "ScoreSystem"})
 
 	scoreRender := engi.NewRenderComponent(basicFont.Render(" "), engi.Point{1, 1}, "YOLO <3")
-	scoreSpace := engi.SpaceComponent{engi.Point{100, 100}, 100, 100}
-	score.AddComponent(&scoreRender)
-	score.AddComponent(&scoreSpace)
+	scoreSpace := &engi.SpaceComponent{engi.Point{100, 100}, 100, 100}
+	score.AddComponent(scoreRender)
+	score.AddComponent(scoreSpace)
 	pong.AddEntity(score)
 
 	schemes := []string{"WASD", ""}
@@ -64,13 +64,13 @@ func (pong *PongGame) Setup() {
 		if i != 0 {
 			x = 800 - 16
 		}
-		paddleSpace := engi.SpaceComponent{engi.Point{x, (engi.Height() - paddleTexture.Height()) / 2}, paddleRender.Scale.X * paddleTexture.Width(), paddleRender.Scale.Y * paddleTexture.Height()}
-		paddleControl := ControlComponent{schemes[i]}
-		paddleCollision := engi.CollisionComponent{Main: false, Solid: true}
-		paddle.AddComponent(&paddleRender)
-		paddle.AddComponent(&paddleSpace)
-		paddle.AddComponent(&paddleControl)
-		paddle.AddComponent(&paddleCollision)
+		paddleSpace := &engi.SpaceComponent{engi.Point{x, (engi.Height() - paddleTexture.Height()) / 2}, paddleRender.Scale.X * paddleTexture.Width(), paddleRender.Scale.Y * paddleTexture.Height()}
+		paddleControl := &ControlComponent{schemes[i]}
+		paddleCollision := &engi.CollisionComponent{Main: false, Solid: true}
+		paddle.AddComponent(paddleRender)
+		paddle.AddComponent(paddleSpace)
+		paddle.AddComponent(paddleControl)
+		paddle.AddComponent(paddleCollision)
 		pong.AddEntity(paddle)
 	}
 }
