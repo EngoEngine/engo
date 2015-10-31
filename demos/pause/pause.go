@@ -43,10 +43,10 @@ func (game *GameWorld) Setup() {
 	game.AddEntity(game.CreateEntity(&engi.Point{900, 0}, spriteSheet, game.SKILL_ACTION))
 
 	// This animation is special
-	death := game.CreateEntity(&engi.Point{1200, 0}, spriteSheet, game.DIE_ACTION)
+	d_entity := game.CreateEntity(&engi.Point{1200, 0}, spriteSheet, game.DIE_ACTION)
 	// ... because now, it's not affected by pausing
-	death.AddComponent(&engi.UnpauseComponent{})
-	game.AddEntity(death)
+	d_entity.AddComponent(&engi.UnpauseComponent{})
+	game.AddEntity(d_entity)
 }
 
 func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Spritesheet, action *engi.AnimationAction) *engi.Entity {

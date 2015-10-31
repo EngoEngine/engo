@@ -80,5 +80,5 @@ func (c *ScaleSystem) Update(e *engi.Entity, dt float32) {
 
 func main() {
 	World = &GameWorld{}
-	engi.Open("Hello", 1024, 640, false, World)
+	engi.Open("Hello Demo", 1024, 640, false, World)
 }
