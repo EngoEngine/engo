@@ -30,6 +30,9 @@ var (
 	Hand      *glfw.Cursor
 	HResize   *glfw.Cursor
 	VResize   *glfw.Cursor
+
+	headlessWidth  = 800
+	headlessHeight = 800
 )
 
 // fatalErr calls log.Fatal with the given error if it is non-nil.
@@ -115,6 +118,14 @@ func run(title string, width, height int, fullscreen bool) {
 		responder.Type(char)
 	})
 
+	runLoop(false)
+}
+
+func runHeadless() {
+	runLoop(true)
+}
+
+func runLoop(headless bool) {
 	responder.Preload()
 	Files.Load(func() {})
 	responder.Setup()
@@ -127,13 +138,18 @@ Outer:
 		select {
 		case <-ticker.C:
 			responder.Update(Time.Delta())
-			window.SwapBuffers()
-			glfw.PollEvents()
-			keysUpdate()
-			Time.Tick()
-			if window.ShouldClose() {
-				break Outer
+
+			if !headless {
+				if window.ShouldClose() {
+					break Outer
+				}
+
+				window.SwapBuffers()
+				glfw.PollEvents()
+				keysUpdate()
 			}
+
+			Time.Tick()
 		case <-resetLoopTicker:
 			ticker.Stop()
 			ticker = time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
@@ -145,11 +161,17 @@ Outer:
 }
 
 func width() float32 {
+	if headless {
+		return float32(headlessWidth)
+	}
 	width, _ := window.GetSize()
 	return float32(width)
 }
 
 func height() float32 {
+	if headless {
+		return float32(headlessHeight)
+	}
 	_, height := window.GetSize()
 	return float32(height)
 }

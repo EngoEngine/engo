@@ -19,10 +19,10 @@ type World struct {
 func (w *World) New() {
 	if !w.isSetup {
 
-		w.defaultBatch = NewBatch(Width(), Height(), batchVert, batchFrag)
-		w.hudBatch = NewBatch(Width(), Height(), hudVert, hudFrag)
-
-		w.isSetup = true
+		if !headless {
+			w.defaultBatch = NewBatch(Width(), Height(), batchVert, batchFrag)
+			w.hudBatch = NewBatch(Width(), Height(), hudVert, hudFrag)
+		}
 
 		// Default WorldBounds values
 		if WorldBounds.Max.X == 0 && WorldBounds.Max.Y == 0 {
@@ -32,6 +32,8 @@ func (w *World) New() {
 		// Initialize cameraSystem
 		cam = &cameraSystem{}
 		w.AddSystem(cam)
+
+		w.isSetup = true
 	}
 }
 
@@ -59,7 +61,9 @@ func (w *World) Systems() []Systemer {
 }
 
 func (w *World) Pre() {
-	Gl.Clear(Gl.COLOR_BUFFER_BIT)
+	if !headless {
+		Gl.Clear(Gl.COLOR_BUFFER_BIT)
+	}
 }
 
 func (w *World) Post() {}
@@ -70,6 +74,10 @@ func (w *World) Update(dt float32) {
 	var unp *UnpauseComponent
 
 	for _, system := range w.Systems() {
+		if headless && system.SkipOnHeadless() {
+			continue // so skip it
+		}
+
 		system.Pre()
 		for _, entity := range system.Entities() {
 			if w.paused {

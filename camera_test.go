@@ -1,15 +1,14 @@
-package engi_test
+package engi
 
 import (
-	"github.com/paked/engi"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestCameraMoveX(t *testing.T) {
-	cam := &engi.cameraSystem{}
-	cam.Setup()
-	engi.WorldBounds = engi.AABB{engi.Point{0, 0}, engi.Point{300, 300}}
+	cam := &cameraSystem{}
+	cam.New()
+	WorldBounds = AABB{Point{0, 0}, Point{300, 300}}
 
 	currentX := cam.X()
 
@@ -32,16 +31,16 @@ func TestCameraMoveX(t *testing.T) {
 	assert.Equal(t, cam.X(), currentX, "Moving by -10 units, should have moved the camera back by 10 units")
 
 	cam.moveX(305)
-	assert.Equal(t, cam.X(), engi.WorldBounds.Max.X, "Moving too many unit, should have moved the camera to the maximum")
+	assert.Equal(t, cam.X(), WorldBounds.Max.X, "Moving too many unit, should have moved the camera to the maximum")
 
 	cam.moveX(-305)
-	assert.Equal(t, cam.X(), engi.WorldBounds.Min.X, "Moving too many units back, should have moved the camera to the minimum")
+	assert.Equal(t, cam.X(), WorldBounds.Min.X, "Moving too many units back, should have moved the camera to the minimum")
 }
 
 func TestCameraMoveY(t *testing.T) {
-	cam := &engi.cameraSystem{}
-	cam.Setup()
-	engi.WorldBounds = engi.AABB{engi.Point{0, 0}, engi.Point{300, 300}}
+	cam := &cameraSystem{}
+	cam.New()
+	WorldBounds = AABB{Point{0, 0}, Point{300, 300}}
 
 	currentY := cam.Y()
 
@@ -64,15 +63,15 @@ func TestCameraMoveY(t *testing.T) {
 	assert.Equal(t, cam.Y(), currentY, "Moving by -10 units, should have moved the camera back by 10 units")
 
 	cam.moveY(305)
-	assert.Equal(t, cam.Y(), engi.WorldBounds.Max.Y, "Moving too many unit, should have moved the camera to the maximum")
+	assert.Equal(t, cam.Y(), WorldBounds.Max.Y, "Moving too many unit, should have moved the camera to the maximum")
 
 	cam.moveY(-305)
-	assert.Equal(t, cam.Y(), engi.WorldBounds.Min.Y, "Moving too many units back, should have moved the camera to the minimum")
+	assert.Equal(t, cam.Y(), WorldBounds.Min.Y, "Moving too many units back, should have moved the camera to the minimum")
 }
 
 func TestCameraZoom(t *testing.T) {
-	cam := &engi.cameraSystem{}
-	cam.Setup()
+	cam := &cameraSystem{}
+	cam.New()
 
 	currentZ := cam.Z()
 
@@ -95,16 +94,16 @@ func TestCameraZoom(t *testing.T) {
 	assert.Equal(t, cam.Z(), currentZ, "Should be zoomed out to the starting zoom level")
 
 	cam.zoom(-1000)
-	assert.Equal(t, cam.Z(), engi.MinZoom, "Should be zoomed out to the minimum zoom level")
+	assert.Equal(t, cam.Z(), MinZoom, "Should be zoomed out to the minimum zoom level")
 
 	cam.zoom(1000)
-	assert.Equal(t, cam.Z(), engi.MaxZoom, "Should be zoomed in to the maximum zoom level")
+	assert.Equal(t, cam.Z(), MaxZoom, "Should be zoomed in to the maximum zoom level")
 }
 
 func TestCameraMoveToX(t *testing.T) {
-	cam := &engi.cameraSystem{}
-	cam.Setup()
-	engi.WorldBounds = engi.AABB{engi.Point{0, 0}, engi.Point{300, 300}}
+	cam := &cameraSystem{}
+	cam.New()
+	WorldBounds = AABB{Point{0, 0}, Point{300, 300}}
 
 	currentX := cam.X()
 
@@ -112,16 +111,16 @@ func TestCameraMoveToX(t *testing.T) {
 	assert.Equal(t, cam.X(), currentX+5, "Moving to current + 5 should get us to current + 5")
 
 	cam.moveToX(600)
-	assert.Equal(t, cam.X(), engi.WorldBounds.Max.X, "Moving to a location out of bounds, should get us to the maximum")
+	assert.Equal(t, cam.X(), WorldBounds.Max.X, "Moving to a location out of bounds, should get us to the maximum")
 
 	cam.moveToX(-10)
-	assert.Equal(t, cam.X(), engi.WorldBounds.Min.X, "Moving to a location out of bounds, should get us to the minimum")
+	assert.Equal(t, cam.X(), WorldBounds.Min.X, "Moving to a location out of bounds, should get us to the minimum")
 }
 
 func TestCameraMoveToY(t *testing.T) {
-	cam := &engi.cameraSystem{}
-	cam.Setup()
-	engi.WorldBounds = engi.AABB{engi.Point{0, 0}, engi.Point{300, 300}}
+	cam := &cameraSystem{}
+	cam.New()
+	WorldBounds = AABB{Point{0, 0}, Point{300, 300}}
 
 	currentY := cam.Y()
 
@@ -129,15 +128,15 @@ func TestCameraMoveToY(t *testing.T) {
 	assert.Equal(t, cam.Y(), currentY+5, "Moving to current + 5 should get us to current + 5")
 
 	cam.moveToY(600)
-	assert.Equal(t, cam.Y(), engi.WorldBounds.Max.Y, "Moving to a location out of bounds, should get us to the maximum")
+	assert.Equal(t, cam.Y(), WorldBounds.Max.Y, "Moving to a location out of bounds, should get us to the maximum")
 
 	cam.moveToY(-10)
-	assert.Equal(t, cam.Y(), engi.WorldBounds.Min.Y, "Moving to a location out of bounds, should get us to the minimum")
+	assert.Equal(t, cam.Y(), WorldBounds.Min.Y, "Moving to a location out of bounds, should get us to the minimum")
 }
 
 func TestCameraZoomTo(t *testing.T) {
-	cam := &engi.cameraSystem{}
-	cam.Setup()
+	cam := &cameraSystem{}
+	cam.New()
 
 	currentZ := cam.Z()
 
@@ -145,8 +144,8 @@ func TestCameraZoomTo(t *testing.T) {
 	assert.Equal(t, cam.Z(), currentZ+5, "Zooming to current + 5 should get us to current + 5")
 
 	cam.zoomTo(600)
-	assert.Equal(t, cam.Z(), engi.MaxZoom, "Zooming too close, should get us to the minimum distance")
+	assert.Equal(t, cam.Z(), MaxZoom, "Zooming too close, should get us to the minimum distance")
 
 	cam.zoomTo(-10)
-	assert.Equal(t, cam.Z(), engi.MinZoom, "Zooming too far, should get us to the maximum distance")
+	assert.Equal(t, cam.Z(), MinZoom, "Zooming too far, should get us to the maximum distance")
 }
