@@ -180,7 +180,6 @@ func (fs *DeathSystem) Receive(message engi.Message) {
 }
 
 func main() {
-	log.Println("[Game] Says hello, written in github.com/paked/engi + Go")
 	W = Game{}
-	engi.Open("Stream Game", 800, 800, false, &W)
+	engi.Open("Falling Demo", 800, 800, false, &W)
 }
