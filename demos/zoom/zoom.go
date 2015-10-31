@@ -12,7 +12,7 @@ type Game struct {
 }
 
 var (
-	zoomSpeed   float32 = 0.125
+	zoomSpeed   float32 = -0.125
 	worldWidth  float32 = 800
 	worldHeight float32 = 800
 )
@@ -53,7 +53,7 @@ func generateBackground() *engi.Entity {
 // Scroll is called whenever the mouse wheel scrolls
 func (game *Game) Scroll(amount float32) {
 	// Adding this line, allows for zooming on scrolling the mouse wheel
-	engi.Cam.Zoom(-1 * amount * zoomSpeed)
+	engi.Mailbox.Dispatch(engi.CameraMessage{Axis: engi.ZAxis, Value: amount * zoomSpeed, Incremental: true})
 }
 
 // Setup is called before the main loop is started
@@ -61,7 +61,7 @@ func (game *Game) Setup() {
 	engi.SetBg(0x222222)
 	game.AddSystem(&engi.RenderSystem{})
 
-	// Explicitly set WorldBounds for better default Camera values
+	// Explicitly set WorldBounds for better default CameraSystem values
 	engi.WorldBounds.Max = engi.Point{worldWidth, worldHeight}
 
 	// Create the background; this way we'll see when we actually zoom

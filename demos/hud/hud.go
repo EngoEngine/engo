@@ -12,7 +12,7 @@ type Game struct {
 }
 
 var (
-	zoomSpeed   float32 = 0.125
+	zoomSpeed   float32 = -0.125
 	scrollSpeed float32 = 700
 	worldWidth  float32 = 800
 	worldHeight float32 = 800
@@ -75,7 +75,7 @@ func generateHUDBackground(width, height float32) *engi.Entity {
 
 // Scroll enables us to zoom in/out, when scrolling our mouse wheel
 func (game *Game) Scroll(amount float32) {
-	engi.Cam.Zoom(-1 * amount * zoomSpeed)
+	engi.Mailbox.Dispatch(engi.CameraMessage{Axis: engi.ZAxis, Value: amount * zoomSpeed, Incremental: true})
 }
 
 // Setup is called before the main loop is started

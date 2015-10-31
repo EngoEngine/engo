@@ -27,6 +27,10 @@ func (e *Entity) AddComponent(component Component) {
 	e.components[reflect.TypeOf(component)] = component
 }
 
+func (e *Entity) RemoveComponent(component Component) {
+	delete(e.components, reflect.TypeOf(component))
+}
+
 // GetComponent takes a double pointer to a Component,
 // and populates it with the value of the right type.
 func (e *Entity) GetComponent(x interface{}) bool {
