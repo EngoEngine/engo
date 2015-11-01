@@ -13,7 +13,10 @@ type Entity struct {
 }
 
 func NewEntity(requires []string) *Entity {
-	e := &Entity{requires: make(map[string]bool), components: make(map[reflect.Type]Component)}
+	_uuid := GenerateUUID()
+	_requires := make(map[string]bool)
+	_components := make(map[reflect.Type]Component)
+	e := &Entity{id: _uuid, requires: _requires, components: _components}
 	for _, req := range requires {
 		e.requires[req] = true
 	}
@@ -21,7 +24,9 @@ func NewEntity(requires []string) *Entity {
 	return e
 }
 
-func (e *Entity) DoesRequire(name string) bool { return e.requires[name] }
+func (e *Entity) DoesRequire(name string) bool {
+	return e.requires[name]
+}
 
 func (e *Entity) AddComponent(component Component) {
 	e.components[reflect.TypeOf(component)] = component

@@ -6,7 +6,6 @@ package engi
 
 import (
 	"fmt"
-
 	"github.com/paked/webgl"
 )
 
