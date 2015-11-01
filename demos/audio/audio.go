@@ -51,6 +51,7 @@ type GameWorld struct {
 }
 
 func (game *GameWorld) Preload() {
+	game.New()
 	engi.Files.Add("assets/hero.png")
 	engi.Files.Add("assets/326488.wav")
 	engi.Files.Add("assets/326064.wav")

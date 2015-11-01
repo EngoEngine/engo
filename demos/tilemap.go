@@ -13,6 +13,7 @@ type GameWorld struct {
 }
 
 func (game *GameWorld) Preload() {
+	game.New()
 	engi.Files.Add("data/sheet.png")
 
 	log.Println("Preloaded")
