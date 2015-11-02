@@ -1,9 +1,5 @@
 package engi
 
-import (
-	"strconv"
-)
-
 type World struct {
 	Game
 	entities []*Entity
@@ -38,7 +34,6 @@ func (w *World) New() {
 }
 
 func (w *World) AddEntity(entity *Entity) {
-	entity.id = strconv.Itoa(len(w.entities))
 	w.entities = append(w.entities, entity)
 	for _, system := range w.systems {
 		if entity.DoesRequire(system.Type()) {
