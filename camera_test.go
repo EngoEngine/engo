@@ -140,8 +140,8 @@ func TestCameraZoomTo(t *testing.T) {
 
 	currentZ := cam.Z()
 
-	cam.zoomTo(currentZ + 5)
-	assert.Equal(t, cam.Z(), currentZ+5, "Zooming to current + 5 should get us to current + 5")
+	cam.zoomTo(currentZ + 1)
+	assert.Equal(t, cam.Z(), currentZ+1, "Zooming to current + 1 should get us to current + 1")
 
 	cam.zoomTo(600)
 	assert.Equal(t, cam.Z(), MaxZoom, "Zooming too close, should get us to the minimum distance")
