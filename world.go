@@ -1,9 +1,5 @@
 package engi
 
-import (
-	"strconv"
-)
-
 type World struct {
 	entities []*Entity
 	systems  []Systemer
@@ -17,8 +13,10 @@ type World struct {
 
 func (w *World) new() {
 	if !w.isSetup {
-		w.defaultBatch = NewBatch(Width(), Height(), batchVert, batchFrag)
-		w.hudBatch = NewBatch(Width(), Height(), hudVert, hudFrag)
+		if !headless {
+			w.defaultBatch = NewBatch(Width(), Height(), batchVert, batchFrag)
+			w.hudBatch = NewBatch(Width(), Height(), hudVert, hudFrag)
+		}
 
 		// Default WorldBounds values
 		WorldBounds.Max = Point{Width(), Height()}
@@ -28,12 +26,15 @@ func (w *World) new() {
 		cam.New()
 		w.AddSystem(cam)
 
+		// Initialize cameraSystem
+		cam = &cameraSystem{}
+		w.AddSystem(cam)
+
 		w.isSetup = true
 	}
 }
 
 func (w *World) AddEntity(entity *Entity) {
-	entity.id = strconv.Itoa(len(w.entities))
 	w.entities = append(w.entities, entity)
 	for _, system := range w.systems {
 		if entity.DoesRequire(system.Type()) {
@@ -56,18 +57,24 @@ func (w *World) Systems() []Systemer {
 	return w.systems
 }
 
-func (w *World) pre() {
-	Gl.Clear(Gl.COLOR_BUFFER_BIT)
+func (w *World) Pre() {
+	if !headless {
+		Gl.Clear(Gl.COLOR_BUFFER_BIT)
+	}
 }
 
 func (w *World) post() {}
 
-func (w *World) update(dt float32) {
-	w.pre()
+func (w *World) Update(dt float32) {
+	w.Pre()
 
 	var unp *UnpauseComponent
 
 	for _, system := range w.Systems() {
+		if headless && system.SkipOnHeadless() {
+			continue // so skip it
+		}
+
 		system.Pre()
 		for _, entity := range system.Entities() {
 			if w.paused {

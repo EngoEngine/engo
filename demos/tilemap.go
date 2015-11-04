@@ -13,9 +13,7 @@ type GameWorld struct {
 }
 
 func (game *GameWorld) Preload() {
-	engi.Files.Add(
-		engi.NewResource("sheet", "data/sheet.png"),
-	)
+	engi.Files.Add("data/sheet.png")
 
 	log.Println("Preloaded")
 }
@@ -35,9 +33,9 @@ func (game *GameWorld) Setup() {
 		engi.Files.Image("sheet"), 16)
 
 	mapRender := engi.NewRenderComponent(tilemap, engi.Point{1, 1}, "map")
-	mapSpace := engi.SpaceComponent{engi.Point{100, 100}, 0, 0}
-	gameMap.AddComponent(&mapRender)
-	gameMap.AddComponent(&mapSpace)
+	mapSpace := &engi.SpaceComponent{engi.Point{100, 100}, 0, 0}
+	gameMap.AddComponent(mapRender)
+	gameMap.AddComponent(mapSpace)
 
 	game.AddEntity(gameMap)
 }

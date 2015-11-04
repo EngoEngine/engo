@@ -27,7 +27,7 @@ func (as *AudioSystem) New() {
 	}
 
 	if err := al.OpenDevice(); err != nil {
-		log.Println("ERROR:", err)
+		log.Println("Error initializing AudioSystem:", err)
 		return
 	}
 
@@ -58,7 +58,7 @@ func (as *AudioSystem) Update(entity *Entity, dt float32) {
 		var err error
 		ac.player, err = NewPlayer(f, 0, 0)
 		if err != nil {
-			log.Println("ERROR:", err)
+			log.Println("Error initializing AudioSystem:", err)
 			return
 		}
 	}
@@ -75,7 +75,7 @@ func (as *AudioSystem) Update(entity *Entity, dt float32) {
 
 		// Prepares if the track hasn't been buffered before.
 		if err := ac.player.prepare(ac.Background, 0, false); err != nil {
-			log.Println("ERROR:", err)
+			log.Println("Error initializing AudioSystem:", err)
 			return
 		}
 

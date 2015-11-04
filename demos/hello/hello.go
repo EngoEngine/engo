@@ -29,16 +29,16 @@ func (game *GameWorld) Setup(w *engi.World) {
 	guy := engi.NewEntity([]string{"RenderSystem", "ScaleSystem"})
 	texture := engi.Files.Image("icon.png")
 	render := engi.NewRenderComponent(texture, engi.Point{8, 8}, "guy")
-	collision := engi.CollisionComponent{Solid: true, Main: true}
+	collision := &engi.CollisionComponent{Solid: true, Main: true}
 
 	width := texture.Width() * render.Scale.X
 	height := texture.Height() * render.Scale.Y
 
-	space := engi.SpaceComponent{engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2}, width, height}
+	space := &engi.SpaceComponent{engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2}, width, height}
 
-	guy.AddComponent(&render)
-	guy.AddComponent(&space)
-	guy.AddComponent(&collision)
+	guy.AddComponent(render)
+	guy.AddComponent(space)
+	guy.AddComponent(collision)
 
 	w.AddEntity(guy)
 }
@@ -77,5 +77,5 @@ func (c *ScaleSystem) Update(e *engi.Entity, dt float32) {
 
 func main() {
 	World = &GameWorld{}
-	engi.Open("Hello", 1024, 640, false, World)
+	engi.Open("Hello Demo", 1024, 640, false, World)
 }

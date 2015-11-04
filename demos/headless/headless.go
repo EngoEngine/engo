@@ -8,7 +8,9 @@ import (
 	"sync"
 )
 
-type PongGame struct{}
+type PongGame struct {
+	engi.World
+}
 
 var (
 	basicFont *engi.Font
@@ -23,14 +25,14 @@ func (pong PongGame) Preload() {
 	}
 }
 
-func (pong *PongGame) Setup(w *engi.World) {
+func (pong *PongGame) Setup() {
 	engi.SetBg(0x2d3739)
-	w.AddSystem(&engi.RenderSystem{})
-	w.AddSystem(&engi.CollisionSystem{})
-	w.AddSystem(&SpeedSystem{})
-	w.AddSystem(&ControlSystem{})
-	w.AddSystem(&BallSystem{})
-	w.AddSystem(&ScoreSystem{})
+	pong.AddSystem(&engi.RenderSystem{})
+	pong.AddSystem(&engi.CollisionSystem{})
+	pong.AddSystem(&SpeedSystem{})
+	pong.AddSystem(&ControlSystem{})
+	pong.AddSystem(&BallSystem{})
+	pong.AddSystem(&ScoreSystem{})
 
 	ball := engi.NewEntity([]string{"RenderSystem", "CollisionSystem", "SpeedSystem", "BallSystem"})
 	ballTexture := engi.Files.Image("ball.png")
@@ -39,19 +41,19 @@ func (pong *PongGame) Setup(w *engi.World) {
 	ballCollision := &engi.CollisionComponent{Main: true, Solid: true}
 	ballSpeed := &SpeedComponent{}
 	ballSpeed.Point = engi.Point{300, 100}
-
-	ball.AddComponent(&ballRender)
-	ball.AddComponent(&ballSpace)
-	ball.AddComponent(&ballCollision)
-	ball.AddComponent(&ballSpeed)
-	w.AddEntity(ball)
+	ball.AddComponent(ballRender)
+	ball.AddComponent(ballSpace)
+	ball.AddComponent(ballCollision)
+	ball.AddComponent(ballSpeed)
+	pong.AddEntity(ball)
 
 	score := engi.NewEntity([]string{"RenderSystem", "ScoreSystem"})
+
 	scoreRender := engi.NewRenderComponent(basicFont.Render(" "), engi.Point{1, 1}, "YOLO <3")
-	scoreSpace := engi.SpaceComponent{engi.Point{100, 100}, 100, 100}
-	score.AddComponent(&scoreRender)
-	score.AddComponent(&scoreSpace)
-	w.AddEntity(score)
+	scoreSpace := &engi.SpaceComponent{engi.Point{100, 100}, 100, 100}
+	score.AddComponent(scoreRender)
+	score.AddComponent(scoreSpace)
+	pong.AddEntity(score)
 
 	schemes := []string{"WASD", ""}
 	for i := 0; i < 2; i++ {
@@ -62,15 +64,14 @@ func (pong *PongGame) Setup(w *engi.World) {
 		if i != 0 {
 			x = 800 - 16
 		}
-
-		paddleSpace := engi.SpaceComponent{engi.Point{x, (engi.Height() - paddleTexture.Height()) / 2}, paddleRender.Scale.X * paddleTexture.Width(), paddleRender.Scale.Y * paddleTexture.Height()}
-		paddleControl := ControlComponent{schemes[i]}
-		paddleCollision := engi.CollisionComponent{Main: false, Solid: true}
-		paddle.AddComponent(&paddleRender)
-		paddle.AddComponent(&paddleSpace)
-		paddle.AddComponent(&paddleControl)
-		paddle.AddComponent(&paddleCollision)
-		w.AddEntity(paddle)
+		paddleSpace := &engi.SpaceComponent{engi.Point{x, (engi.Height() - paddleTexture.Height()) / 2}, paddleRender.Scale.X * paddleTexture.Width(), paddleRender.Scale.Y * paddleTexture.Height()}
+		paddleControl := &ControlComponent{schemes[i]}
+		paddleCollision := &engi.CollisionComponent{Main: false, Solid: true}
+		paddle.AddComponent(paddleRender)
+		paddle.AddComponent(paddleSpace)
+		paddle.AddComponent(paddleControl)
+		paddle.AddComponent(paddleCollision)
+		pong.AddEntity(paddle)
 	}
 }
 
@@ -276,5 +277,5 @@ func (ScoreMessage) Type() string {
 }
 
 func main() {
-	engi.Open("Pong", 800, 800, false, &PongGame{})
+	engi.OpenHeadless(&PongGame{})
 }

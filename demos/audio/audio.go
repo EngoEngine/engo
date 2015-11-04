@@ -37,10 +37,11 @@ func (ms *moveSystem) Update(entity *engi.Entity, dt float32) {
 
 var (
 	zoomSpeed float32 = -0.125
-	World     *Game
+	World     *GameWorld
 )
 
-type Game struct {
+type GameWorld struct {
+	engi.World
 	RUN_ACTION   *engi.AnimationAction
 	WALK_ACTION  *engi.AnimationAction
 	STOP_ACTION  *engi.AnimationAction
@@ -49,7 +50,7 @@ type Game struct {
 	actions      []*engi.AnimationAction
 }
 
-func (game *Game) Preload() {
+func (game *GameWorld) Preload() {
 	engi.Files.Add("assets/hero.png")
 	engi.Files.Add("assets/326488.wav")
 	engi.Files.Add("assets/326064.wav")
@@ -61,7 +62,7 @@ func (game *Game) Preload() {
 	game.actions = []*engi.AnimationAction{game.DIE_ACTION, game.STOP_ACTION, game.WALK_ACTION, game.RUN_ACTION, game.SKILL_ACTION}
 }
 
-func (game *Game) Setup(w *engi.World) {
+func (game *GameWorld) Setup(w *engi.World) {
 	engi.SetBg(0xFFFFFF)
 
 	w.AddSystem(&engi.RenderSystem{})
@@ -79,11 +80,12 @@ func (game *Game) Setup(w *engi.World) {
 	w.AddEntity(backgroundMusic)
 }
 
-func (game *Game) CreateEntity(point *engi.Point, spriteSheet *engi.Spritesheet, action *engi.AnimationAction) *engi.Entity {
+func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Spritesheet, action *engi.AnimationAction) *engi.Entity {
 	entity := engi.NewEntity([]string{"AudioSystem", "AnimationSystem", "RenderSystem", "moveSystem"})
 
 	space := engi.SpaceComponent{*point, 0, 0}
 	render := engi.NewRenderComponent(spriteSheet.Cell(action.Frames[0]), engi.Point{3, 3}, "hero")
+
 	animation := engi.NewAnimationComponent(spriteSheet.Renderables(), 0.1)
 	animation.AddAnimationActions(game.actions)
 	animation.SelectAnimationByAction(action)
@@ -95,11 +97,11 @@ func (game *Game) CreateEntity(point *engi.Point, spriteSheet *engi.Spritesheet,
 }
 
 // TODO: deprecated
-func (game *Game) Scroll(amount float32) {
+func (game *GameWorld) Scroll(amount float32) {
 	engi.Mailbox.Dispatch(engi.CameraMessage{Axis: engi.ZAxis, Value: amount * zoomSpeed, Incremental: true})
 }
 
 func main() {
-	World = &Game{}
+	World = &GameWorld{}
 	engi.Open("Audio Demo", 1024, 640, false, World)
 }

@@ -33,10 +33,10 @@ func (game *GameWorld) Setup(w *engi.World) {
 	width := texture.Width() * render.Scale.X
 	height := texture.Height() * render.Scale.Y
 
-	space := engi.SpaceComponent{engi.Point{0, 0}, width, height}
+	space := &engi.SpaceComponent{engi.Point{0, 0}, width, height}
 
-	guy.AddComponent(&render)
-	guy.AddComponent(&space)
+	guy.AddComponent(render)
+	guy.AddComponent(space)
 
 	w.AddEntity(guy)
 }

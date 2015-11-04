@@ -47,8 +47,8 @@ type RenderComponent struct {
 	Color        uint32
 }
 
-func NewRenderComponent(display Renderable, scale Point, label string) RenderComponent {
-	return RenderComponent{
+func NewRenderComponent(display Renderable, scale Point, label string) *RenderComponent {
+	return &RenderComponent{
 		Display:      display,
 		Scale:        scale,
 		Label:        label,

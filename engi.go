@@ -6,7 +6,6 @@ package engi
 
 import (
 	"fmt"
-
 	"github.com/paked/webgl"
 )
 
@@ -20,6 +19,7 @@ var (
 	WorldBounds AABB
 
 	fpsLimit        = 120
+	headless        bool
 	resetLoopTicker = make(chan bool, 1)
 )
 
@@ -27,15 +27,26 @@ func Open(title string, width, height int, fullscreen bool, r CustomGame) {
 	keyStates = make(map[Key]bool)
 	Time = NewClock()
 	Files = NewLoader()
-
 	run(r, title, width, height, fullscreen)
 }
 
+func OpenHeadless(r CustomGame) {
+	Time = NewClock()
+	Files = NewLoader() // TODO: do we want files in Headless mode?
+
+	// TODO: change these (#35)
+	headless = true
+
+	runHeadless(r)
+}
+
 func SetBg(color uint32) {
-	r := float32((color>>16)&0xFF) / 255.0
-	g := float32((color>>8)&0xFF) / 255.0
-	b := float32(color&0xFF) / 255.0
-	Gl.ClearColor(r, g, b, 1.0)
+	if !headless {
+		r := float32((color>>16)&0xFF) / 255.0
+		g := float32((color>>8)&0xFF) / 255.0
+		b := float32(color&0xFF) / 255.0
+		Gl.ClearColor(r, g, b, 1.0)
+	}
 }
 
 func SetFPSLimit(limit int) error {

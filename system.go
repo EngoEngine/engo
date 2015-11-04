@@ -10,6 +10,7 @@ type Systemer interface {
 	Entities() []*Entity
 	AddEntity(entity *Entity)
 	SetWorld(*World)
+	SkipOnHeadless() bool
 	// Push(message Message)
 	// Receive(message Message)
 	// Messages() []Message
@@ -17,9 +18,10 @@ type Systemer interface {
 }
 
 type System struct {
-	entities     []*Entity
-	messageQueue []Message
-	World        *World
+	entities             []*Entity
+	messageQueue         []Message
+	World                *World
+	ShouldSkipOnHeadless bool
 }
 
 func (s System) New()  {}
@@ -40,6 +42,10 @@ func (s *System) AddEntity(entity *Entity) {
 
 func (s *System) SetWorld(w *World) {
 	s.World = w
+}
+
+func (s System) SkipOnHeadless() bool {
+	return s.ShouldSkipOnHeadless
 }
 
 type CollisionSystem struct {
@@ -125,6 +131,7 @@ type RenderSystem struct {
 func (rs *RenderSystem) New() {
 	rs.renders = make(map[PriorityLevel][]*Entity)
 	rs.System = &System{}
+	rs.ShouldSkipOnHeadless = true
 }
 
 func (rs *RenderSystem) AddEntity(e *Entity) {
