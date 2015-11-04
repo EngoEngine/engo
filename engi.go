@@ -45,6 +45,16 @@ func OpenHeadless(r Responder) {
 	runHeadless()
 }
 
+func OpenHeadlessNoRun(r Responder) {
+	Time = NewClock()
+	Files = NewLoader() // TODO: do we want files in Headless mode?
+
+	// TODO: change these (#35)
+	responder = r
+	Wo = r
+	headless = true
+}
+
 func SetBg(color uint32) {
 	if !headless {
 		r := float32((color>>16)&0xFF) / 255.0

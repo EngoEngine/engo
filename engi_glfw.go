@@ -125,31 +125,41 @@ func runHeadless() {
 	runLoop(true)
 }
 
-func runLoop(headless bool) {
+// RunIteration runs one iteration / frame
+func RunIteration() {
+	responder.Update(Time.Delta())
+
+	if !headless {
+		window.SwapBuffers()
+		glfw.PollEvents()
+		keysUpdate()
+	}
+
+	Time.Tick()
+}
+
+// RunPreparation is called only once, and is called automatically when calling Open
+// It is only here for benchmarking in combination with OpenHeadlessNoRun
+func RunPreparation() {
 	responder.Preload()
 	Files.Load(func() {})
 	responder.Setup()
 
 	Wo.New()
-	ticker := time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
+}
 
+func runLoop(headless bool) {
+	RunPreparation()
+
+	ticker := time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
 Outer:
 	for {
 		select {
 		case <-ticker.C:
-			responder.Update(Time.Delta())
-
-			if !headless {
-				if window.ShouldClose() {
-					break Outer
-				}
-
-				window.SwapBuffers()
-				glfw.PollEvents()
-				keysUpdate()
+			RunIteration()
+			if !headless && window.ShouldClose() {
+				break Outer
 			}
-
-			Time.Tick()
 		case <-resetLoopTicker:
 			ticker.Stop()
 			ticker = time.NewTicker(time.Duration(int(time.Second) / fpsLimit))

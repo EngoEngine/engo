@@ -102,6 +102,20 @@ func (*CollisionSystem) Type() string {
 	return "CollisionSystem"
 }
 
+type NilSystem struct {
+	*System
+}
+
+func (ns *NilSystem) New() {
+	ns.System = &System{}
+}
+
+func (*NilSystem) Update(*Entity, float32) {}
+
+func (*NilSystem) Type() string {
+	return "NilSystem"
+}
+
 type PriorityLevel int
 
 const (
