@@ -18,6 +18,7 @@ type GameWorld struct {
 }
 
 func (game *GameWorld) Preload() {
+	game.New()
 	engi.Files.Add("assets/hero.png")
 	game.STOP_ACTION = &engi.AnimationAction{Name: "stop", Frames: []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}}
 	game.RUN_ACTION = &engi.AnimationAction{Name: "run", Frames: []int{16, 17, 18, 19, 20, 21}}
