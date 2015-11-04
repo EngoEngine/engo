@@ -7,9 +7,7 @@ import (
 	"github.com/paked/engi"
 )
 
-type Game struct {
-	engi.World
-}
+type Game struct{}
 
 var (
 	zoomSpeed   float32 = -0.125
@@ -50,25 +48,27 @@ func generateBackground() *engi.Entity {
 	return field
 }
 
+// TODO: deprecated
 // Scroll is called whenever the mouse wheel scrolls
 func (game *Game) Scroll(amount float32) {
 	// Adding this line, allows for zooming on scrolling the mouse wheel
 	engi.Mailbox.Dispatch(engi.CameraMessage{Axis: engi.ZAxis, Value: amount * zoomSpeed, Incremental: true})
 }
 
+func (game *Game) Preload() {}
+
 // Setup is called before the main loop is started
-func (game *Game) Setup() {
+func (game *Game) Setup(w *engi.World) {
 	engi.SetBg(0x222222)
-	game.AddSystem(&engi.RenderSystem{})
+	w.AddSystem(&engi.RenderSystem{})
 
 	// Explicitly set WorldBounds for better default CameraSystem values
 	engi.WorldBounds.Max = engi.Point{worldWidth, worldHeight}
 
 	// Create the background; this way we'll see when we actually zoom
-	game.AddEntity(generateBackground())
+	w.AddEntity(generateBackground())
 }
 
 func main() {
-	engi.SetFPSLimit(120)
 	engi.Open("Zoom Demo", 400, 400, false, &Game{})
 }

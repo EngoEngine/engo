@@ -10,25 +10,23 @@ var (
 	W Game
 )
 
-type Game struct {
-	engi.World
-}
+type Game struct{}
 
 func (game Game) Preload() {
 	// Add all the files in the data directory non recursively
 	engi.Files.AddFromDir("data", false)
 }
 
-func (game *Game) Setup() {
+func (game *Game) Setup(w *engi.World) {
 	engi.SetBg(0x2d3739)
 
 	// Add all of the systems
-	game.AddSystem(&engi.RenderSystem{})
-	game.AddSystem(&engi.CollisionSystem{})
-	game.AddSystem(&DeathSystem{})
-	game.AddSystem(&FallingSystem{})
-	game.AddSystem(&ControlSystem{})
-	game.AddSystem(&RockSpawnSystem{})
+	w.AddSystem(&engi.RenderSystem{})
+	w.AddSystem(&engi.CollisionSystem{})
+	w.AddSystem(&DeathSystem{})
+	w.AddSystem(&FallingSystem{})
+	w.AddSystem(&ControlSystem{})
+	w.AddSystem(&RockSpawnSystem{})
 
 	// Create new entity subscribed to all the systems!
 	guy := engi.NewEntity([]string{"RenderSystem", "ControlSystem", "RockSpawnSystem", "CollisionSystem", "DeathSystem"})
@@ -46,7 +44,7 @@ func (game *Game) Setup() {
 	guy.AddComponent(&space)
 	guy.AddComponent(&collision)
 
-	game.AddEntity(guy)
+	w.AddEntity(guy)
 }
 
 type ControlSystem struct {
@@ -106,7 +104,7 @@ func (rock *RockSpawnSystem) Update(entity *engi.Entity, dt float32) {
 
 	position := engi.Point{0, -32}
 	position.X = rand.Float32() * (engi.Width())
-	W.AddEntity(NewRock(position))
+	rock.World.AddEntity(NewRock(position))
 }
 
 func NewRock(position engi.Point) *engi.Entity {
@@ -180,7 +178,6 @@ func (fs *DeathSystem) Receive(message engi.Message) {
 }
 
 func main() {
-	log.Println("[Game] Says hello, written in github.com/paked/engi + Go")
 	W = Game{}
 	engi.Open("Stream Game", 800, 800, false, &W)
 }

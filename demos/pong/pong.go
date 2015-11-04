@@ -8,9 +8,7 @@ import (
 	"sync"
 )
 
-type PongGame struct {
-	engi.World
-}
+type PongGame struct{}
 
 var (
 	basicFont *engi.Font
@@ -25,14 +23,14 @@ func (pong PongGame) Preload() {
 	}
 }
 
-func (pong *PongGame) Setup() {
+func (pong *PongGame) Setup(w *engi.World) {
 	engi.SetBg(0x2d3739)
-	pong.AddSystem(&engi.RenderSystem{})
-	pong.AddSystem(&engi.CollisionSystem{})
-	pong.AddSystem(&SpeedSystem{})
-	pong.AddSystem(&ControlSystem{})
-	pong.AddSystem(&BallSystem{})
-	pong.AddSystem(&ScoreSystem{})
+	w.AddSystem(&engi.RenderSystem{})
+	w.AddSystem(&engi.CollisionSystem{})
+	w.AddSystem(&SpeedSystem{})
+	w.AddSystem(&ControlSystem{})
+	w.AddSystem(&BallSystem{})
+	w.AddSystem(&ScoreSystem{})
 
 	ball := engi.NewEntity([]string{"RenderSystem", "CollisionSystem", "SpeedSystem", "BallSystem"})
 	ballTexture := engi.Files.Image("ball.png")
@@ -45,7 +43,7 @@ func (pong *PongGame) Setup() {
 	ball.AddComponent(&ballSpace)
 	ball.AddComponent(&ballCollision)
 	ball.AddComponent(&ballSpeed)
-	pong.AddEntity(ball)
+	w.AddEntity(ball)
 
 	score := engi.NewEntity([]string{"RenderSystem", "ScoreSystem"})
 
@@ -53,7 +51,7 @@ func (pong *PongGame) Setup() {
 	scoreSpace := engi.SpaceComponent{engi.Point{100, 100}, 100, 100}
 	score.AddComponent(&scoreRender)
 	score.AddComponent(&scoreSpace)
-	pong.AddEntity(score)
+	w.AddEntity(score)
 
 	schemes := []string{"WASD", ""}
 	for i := 0; i < 2; i++ {
@@ -71,7 +69,7 @@ func (pong *PongGame) Setup() {
 		paddle.AddComponent(&paddleSpace)
 		paddle.AddComponent(&paddleControl)
 		paddle.AddComponent(&paddleCollision)
-		pong.AddEntity(paddle)
+		w.AddEntity(paddle)
 	}
 }
 

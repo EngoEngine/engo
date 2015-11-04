@@ -7,9 +7,7 @@ import (
 	"github.com/paked/engi"
 )
 
-type Game struct {
-	engi.World
-}
+type Game struct{}
 
 var (
 	zoomSpeed   float32 = -0.125
@@ -78,16 +76,18 @@ func (game *Game) Scroll(amount float32) {
 	engi.Mailbox.Dispatch(engi.CameraMessage{Axis: engi.ZAxis, Value: amount * zoomSpeed, Incremental: true})
 }
 
+func (game *Game) Preload() {}
+
 // Setup is called before the main loop is started
-func (game *Game) Setup() {
+func (game *Game) Setup(w *engi.World) {
 	engi.SetBg(0x222222)
-	game.AddSystem(&engi.RenderSystem{})
+	w.AddSystem(&engi.RenderSystem{})
 
 	// Adding KeyboardScroller so we can actually see the difference between background and HUD when scrolling
-	game.AddSystem(engi.NewKeyboardScroller(scrollSpeed, engi.W, engi.D, engi.S, engi.A))
+	w.AddSystem(engi.NewKeyboardScroller(scrollSpeed, engi.W, engi.D, engi.S, engi.A))
 
 	// Create background, so we can see difference between this and HUD
-	game.AddEntity(generateBackground())
+	w.AddEntity(generateBackground())
 
 	// Creating the HUD
 	hudWidth := float32(200)   // Can be anything you want
@@ -95,10 +95,9 @@ func (game *Game) Setup() {
 
 	// Generate something that uses the PriorityLevel HUDGround or up
 	hudBg := generateHUDBackground(hudWidth, hudHeight)
-	game.AddEntity(hudBg)
+	w.AddEntity(hudBg)
 }
 
 func main() {
-	engi.SetFPSLimit(120)
 	engi.Open("HUD Demo", 400, 400, false, &Game{})
 }
