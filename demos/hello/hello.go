@@ -9,12 +9,9 @@ import (
 
 var World *GameWorld
 
-type GameWorld struct {
-	engi.World
-}
+type GameWorld struct{}
 
 func (game *GameWorld) Preload() {
-	game.New()
 
 	// This could be done individually: engi.Files.Add("data/icon.png"), etc
 	// Second value (false) says whether to check recursively or not
@@ -23,11 +20,11 @@ func (game *GameWorld) Preload() {
 	log.Println("Preloaded")
 }
 
-func (game *GameWorld) Setup() {
+func (game *GameWorld) Setup(w *engi.World) {
 	engi.SetBg(0x2d3739)
 
-	game.AddSystem(&engi.RenderSystem{})
-	game.AddSystem(&ScaleSystem{})
+	w.AddSystem(&engi.RenderSystem{})
+	w.AddSystem(&ScaleSystem{})
 
 	guy := engi.NewEntity([]string{"RenderSystem", "ScaleSystem"})
 	texture := engi.Files.Image("icon.png")
@@ -43,7 +40,7 @@ func (game *GameWorld) Setup() {
 	guy.AddComponent(space)
 	guy.AddComponent(collision)
 
-	game.AddEntity(guy)
+	w.AddEntity(guy)
 }
 
 type ScaleSystem struct {

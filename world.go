@@ -1,7 +1,6 @@
 package engi
 
 type World struct {
-	Game
 	entities []*Entity
 	systems  []Systemer
 
@@ -12,18 +11,20 @@ type World struct {
 	paused  bool
 }
 
-func (w *World) New() {
+func (w *World) new() {
 	if !w.isSetup {
-
 		if !headless {
 			w.defaultBatch = NewBatch(Width(), Height(), batchVert, batchFrag)
 			w.hudBatch = NewBatch(Width(), Height(), hudVert, hudFrag)
 		}
 
 		// Default WorldBounds values
-		if WorldBounds.Max.X == 0 && WorldBounds.Max.Y == 0 {
-			WorldBounds.Max = Point{Width(), Height()}
-		}
+		WorldBounds.Max = Point{Width(), Height()}
+
+		// Initialize cameraSystem
+		cam = &cameraSystem{}
+		cam.New()
+		w.AddSystem(cam)
 
 		// Initialize cameraSystem
 		cam = &cameraSystem{}
@@ -44,6 +45,7 @@ func (w *World) AddEntity(entity *Entity) {
 
 func (w *World) AddSystem(system Systemer) {
 	system.New()
+	system.SetWorld(w)
 	w.systems = append(w.systems, system)
 }
 
@@ -61,7 +63,7 @@ func (w *World) Pre() {
 	}
 }
 
-func (w *World) Post() {}
+func (w *World) post() {}
 
 func (w *World) Update(dt float32) {
 	w.Pre()
@@ -92,10 +94,10 @@ func (w *World) Update(dt float32) {
 		Exit()
 	}
 
-	w.Post()
+	w.post()
 }
 
-func (w *World) Batch(prio PriorityLevel) *Batch {
+func (w *World) batch(prio PriorityLevel) *Batch {
 	if prio >= HUDGround {
 		return w.hudBatch
 	} else {

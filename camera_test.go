@@ -31,6 +31,7 @@ func TestCameraMoveX(t *testing.T) {
 	assert.Equal(t, cam.X(), currentX, "Moving by -10 units, should have moved the camera back by 10 units")
 
 	cam.moveX(305)
+
 	assert.Equal(t, cam.X(), WorldBounds.Max.X, "Moving too many unit, should have moved the camera to the maximum")
 
 	cam.moveX(-305)
@@ -94,6 +95,7 @@ func TestCameraZoom(t *testing.T) {
 	assert.Equal(t, cam.Z(), currentZ, "Should be zoomed out to the starting zoom level")
 
 	cam.zoom(-1000)
+
 	assert.Equal(t, cam.Z(), MinZoom, "Should be zoomed out to the minimum zoom level")
 
 	cam.zoom(1000)
@@ -111,6 +113,7 @@ func TestCameraMoveToX(t *testing.T) {
 	assert.Equal(t, cam.X(), currentX+5, "Moving to current + 5 should get us to current + 5")
 
 	cam.moveToX(600)
+
 	assert.Equal(t, cam.X(), WorldBounds.Max.X, "Moving to a location out of bounds, should get us to the maximum")
 
 	cam.moveToX(-10)
@@ -128,6 +131,7 @@ func TestCameraMoveToY(t *testing.T) {
 	assert.Equal(t, cam.Y(), currentY+5, "Moving to current + 5 should get us to current + 5")
 
 	cam.moveToY(600)
+
 	assert.Equal(t, cam.Y(), WorldBounds.Max.Y, "Moving to a location out of bounds, should get us to the maximum")
 
 	cam.moveToY(-10)
@@ -144,6 +148,7 @@ func TestCameraZoomTo(t *testing.T) {
 	assert.Equal(t, cam.Z(), currentZ+5, "Zooming to current + 5 should get us to current + 5")
 
 	cam.zoomTo(600)
+
 	assert.Equal(t, cam.Z(), MaxZoom, "Zooming too close, should get us to the minimum distance")
 
 	cam.zoomTo(-10)

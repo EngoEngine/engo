@@ -11,8 +11,6 @@ func (UnpauseComponent) Type() string {
 // PauseSystem is a Systemer that listens for Pause messages, and then pauses the entire world
 type PauseSystem struct {
 	*System
-	// TODO: can we handle this any other way?
-	World *World
 }
 
 func (ps *PauseSystem) New() {

@@ -7,7 +7,6 @@ import (
 var World *GameWorld
 
 type GameWorld struct {
-	engi.World
 	RUN_ACTION   *engi.AnimationAction
 	WALK_ACTION  *engi.AnimationAction
 	STOP_ACTION  *engi.AnimationAction
@@ -28,25 +27,26 @@ func (game *GameWorld) Preload() {
 	game.activeAction = game.RUN_ACTION
 }
 
-func (game *GameWorld) Setup() {
+func (game *GameWorld) Setup(w *engi.World) {
 	engi.SetBg(0xFFFFFF)
 
-	game.AddSystem(&engi.RenderSystem{})
-	game.AddSystem(&engi.AnimationSystem{})
-	game.AddSystem(&engi.PauseSystem{World: &game.World})
+	w.AddSystem(&engi.RenderSystem{})
+	w.AddSystem(&engi.AnimationSystem{})
+	w.AddSystem(&engi.PauseSystem{})
 
 	spriteSheet := engi.NewSpritesheetFromFile("hero.png", 150, 150)
 
-	game.AddEntity(game.CreateEntity(&engi.Point{0, 0}, spriteSheet, game.RUN_ACTION))
-	game.AddEntity(game.CreateEntity(&engi.Point{300, 0}, spriteSheet, game.WALK_ACTION))
-	game.AddEntity(game.CreateEntity(&engi.Point{600, 0}, spriteSheet, game.STOP_ACTION))
-	game.AddEntity(game.CreateEntity(&engi.Point{900, 0}, spriteSheet, game.SKILL_ACTION))
+	w.AddEntity(game.CreateEntity(&engi.Point{0, 0}, spriteSheet, game.RUN_ACTION))
+	w.AddEntity(game.CreateEntity(&engi.Point{300, 0}, spriteSheet, game.WALK_ACTION))
+	w.AddEntity(game.CreateEntity(&engi.Point{600, 0}, spriteSheet, game.STOP_ACTION))
+	w.AddEntity(game.CreateEntity(&engi.Point{900, 0}, spriteSheet, game.SKILL_ACTION))
 
 	// This animation is special
 	d_entity := game.CreateEntity(&engi.Point{1200, 0}, spriteSheet, game.DIE_ACTION)
 	// ... because now, it's not affected by pausing
 	d_entity.AddComponent(&engi.UnpauseComponent{})
-	game.AddEntity(d_entity)
+
+	w.AddEntity(d_entity)
 }
 
 func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Spritesheet, action *engi.AnimationAction) *engi.Entity {
@@ -64,6 +64,7 @@ func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Sprites
 	return entity
 }
 
+// TODO: deprecated
 func (game *GameWorld) Scroll(amount float32) {
 	// Pause the game if we're scrolling up; else, unpause
 	engi.Mailbox.Dispatch(engi.PauseMessage{amount > 0})

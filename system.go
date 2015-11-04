@@ -9,6 +9,7 @@ type Systemer interface {
 	New()
 	Entities() []*Entity
 	AddEntity(entity *Entity)
+	SetWorld(*World)
 	SkipOnHeadless() bool
 	// Push(message Message)
 	// Receive(message Message)
@@ -19,6 +20,7 @@ type Systemer interface {
 type System struct {
 	entities             []*Entity
 	messageQueue         []Message
+	World                *World
 	ShouldSkipOnHeadless bool
 }
 
@@ -36,6 +38,10 @@ func (s System) Entities() []*Entity {
 
 func (s *System) AddEntity(entity *Entity) {
 	s.entities = append(s.entities, entity)
+}
+
+func (s *System) SetWorld(w *World) {
+	s.World = w
 }
 
 func (s System) SkipOnHeadless() bool {
@@ -154,7 +160,7 @@ func (rs *RenderSystem) Post() {
 		}
 
 		// Retrieve a batch, may be the default one -- then call .Begin() if we arent already using it
-		batch := Wo.Batch(i)
+		batch := world.batch(i)
 		if batch != currentBatch {
 			if currentBatch != nil {
 				currentBatch.End()

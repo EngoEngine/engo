@@ -42,7 +42,7 @@ func fatalErr(err error) {
 	}
 }
 
-func run(title string, width, height int, fullscreen bool) {
+func run(customGame CustomGame, title string, width, height int, fullscreen bool) {
 
 	err := glfw.Init()
 	fatalErr(err)
@@ -84,25 +84,28 @@ func run(title string, width, height int, fullscreen bool) {
 	window.SetFramebufferSizeCallback(func(window *glfw.Window, w, h int) {
 		width, height = window.GetFramebufferSize()
 		Gl.Viewport(0, 0, width, height)
-		responder.Resize(w, h)
+		// TODO: when do we want to handle resizing? and who should deal with it?
+		// responder.Resize(w, h)
 	})
 
 	window.SetCursorPosCallback(func(window *glfw.Window, x, y float64) {
-		responder.Mouse(float32(x), float32(y), MOVE)
+		Mouse.X, Mouse.Y = x, y
+		Mouse.Action = MOVE
 	})
 
 	window.SetMouseButtonCallback(func(window *glfw.Window, b glfw.MouseButton, a glfw.Action, m glfw.ModifierKey) {
-		x, y := window.GetCursorPos()
+		Mouse.X, Mouse.Y = window.GetCursorPos()
 
 		if a == glfw.Press {
-			responder.Mouse(float32(x), float32(y), PRESS)
+			Mouse.Action = PRESS
 		} else {
-			responder.Mouse(float32(x), float32(y), RELEASE)
+			Mouse.Action = RELEASE
 		}
 	})
 
 	window.SetScrollCallback(func(window *glfw.Window, xoff, yoff float64) {
-		responder.Scroll(float32(yoff))
+		Mouse.ScrollX = xoff
+		Mouse.ScrollY = yoff
 	})
 
 	window.SetKeyCallback(func(window *glfw.Window, k glfw.Key, s int, a glfw.Action, m glfw.ModifierKey) {
@@ -115,29 +118,33 @@ func run(title string, width, height int, fullscreen bool) {
 	})
 
 	window.SetCharCallback(func(window *glfw.Window, char rune) {
-		responder.Type(char)
+		// TODO: what does this do, when can we use it?
+		// it's like KeyCallback, but for specific characters instead of keys...?
+		// responder.Type(char)
 	})
 
-	runLoop(false)
+	runLoop(customGame, false)
 }
 
-func runHeadless() {
-	runLoop(true)
+func runHeadless(customGame CustomGame) {
+	runLoop(customGame, true)
 }
 
-func runLoop(headless bool) {
-	responder.Preload()
+func runLoop(customGame CustomGame, headless bool) {
 	Files.Load(func() {})
-	responder.Setup()
 
-	Wo.New()
+	world = &World{}
+	world.new()
+
+	customGame.Setup(world)
+
 	ticker := time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
 
 Outer:
 	for {
 		select {
 		case <-ticker.C:
-			responder.Update(Time.Delta())
+			world.Update(Time.Delta())
 
 			if !headless {
 				if window.ShouldClose() {
@@ -156,8 +163,6 @@ Outer:
 		}
 	}
 	ticker.Stop()
-
-	responder.Close()
 }
 
 func width() float32 {

@@ -62,29 +62,30 @@ func (game *GameWorld) Preload() {
 	game.actions = []*engi.AnimationAction{game.DIE_ACTION, game.STOP_ACTION, game.WALK_ACTION, game.RUN_ACTION, game.SKILL_ACTION}
 }
 
-func (game *GameWorld) Setup() {
+func (game *GameWorld) Setup(w *engi.World) {
 	engi.SetBg(0xFFFFFF)
 
-	game.AddSystem(&engi.RenderSystem{})
-	game.AddSystem(&engi.AnimationSystem{})
-	game.AddSystem(&engi.AudioSystem{})
-	game.AddSystem(&moveSystem{})
-	game.AddSystem(engi.NewEdgeScroller(800, 20))
+	w.AddSystem(&engi.RenderSystem{})
+	w.AddSystem(&engi.AnimationSystem{})
+	w.AddSystem(&engi.AudioSystem{})
+	w.AddSystem(&moveSystem{})
+	w.AddSystem(engi.NewEdgeScroller(800, 20))
 
 	spriteSheet := engi.NewSpritesheetFromFile("hero.png", 150, 150)
 
-	game.AddEntity(game.CreateEntity(&engi.Point{600, 0}, spriteSheet, game.STOP_ACTION))
+	w.AddEntity(game.CreateEntity(&engi.Point{600, 0}, spriteSheet, game.STOP_ACTION))
 
 	backgroundMusic := engi.NewEntity([]string{"AudioSystem"})
 	backgroundMusic.AddComponent(&engi.AudioComponent{File: "326488.wav", Repeat: true, Background: true})
-	game.AddEntity(backgroundMusic)
+	w.AddEntity(backgroundMusic)
 }
 
 func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Spritesheet, action *engi.AnimationAction) *engi.Entity {
 	entity := engi.NewEntity([]string{"AudioSystem", "AnimationSystem", "RenderSystem", "moveSystem"})
 
 	space := engi.SpaceComponent{*point, 0, 0}
-	render := engi.NewRenderComponent(spriteSheet.Renderable(action.Frames[0]), engi.Point{3, 3}, "hero")
+	render := engi.NewRenderComponent(spriteSheet.Cell(action.Frames[0]), engi.Point{3, 3}, "hero")
+
 	animation := engi.NewAnimationComponent(spriteSheet.Renderables(), 0.1)
 	animation.AddAnimationActions(game.actions)
 	animation.SelectAnimationByAction(action)
@@ -95,9 +96,9 @@ func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Sprites
 	return entity
 }
 
+// TODO: deprecated
 func (game *GameWorld) Scroll(amount float32) {
 	engi.Mailbox.Dispatch(engi.CameraMessage{Axis: engi.ZAxis, Value: amount * zoomSpeed, Incremental: true})
-
 }
 
 func main() {

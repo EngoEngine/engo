@@ -10,13 +10,12 @@ import (
 )
 
 var (
-	responder   Responder
 	Time        *Clock
 	Files       *Loader
 	Gl          *webgl.Context
 	Mailbox     MessageManager
 	cam         *cameraSystem
-	Wo          Responder
+	world       *World
 	WorldBounds AABB
 
 	fpsLimit        = 120
@@ -24,25 +23,21 @@ var (
 	resetLoopTicker = make(chan bool, 1)
 )
 
-func Open(title string, width, height int, fullscreen bool, r Responder) {
+func Open(title string, width, height int, fullscreen bool, r CustomGame) {
 	keyStates = make(map[Key]bool)
-	responder = r
 	Time = NewClock()
 	Files = NewLoader()
-	Wo = r
-	run(title, width, height, fullscreen)
+	run(r, title, width, height, fullscreen)
 }
 
-func OpenHeadless(r Responder) {
+func OpenHeadless(r CustomGame) {
 	Time = NewClock()
 	Files = NewLoader() // TODO: do we want files in Headless mode?
 
 	// TODO: change these (#35)
-	responder = r
-	Wo = r
 	headless = true
 
-	runHeadless()
+	runHeadless(r)
 }
 
 func SetBg(color uint32) {

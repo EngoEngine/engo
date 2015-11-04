@@ -8,23 +8,19 @@ import (
 
 var World *GameWorld
 
-type GameWorld struct {
-	engi.World
-}
+type GameWorld struct{}
 
 func (game *GameWorld) Preload() {
-	game.New()
-
 	// Load all files from the data directory. Do not do it recursively.
 	engi.Files.AddFromDir("data", false)
 
 	log.Println("Preloaded")
 }
 
-func (game *GameWorld) Setup() {
+func (game *GameWorld) Setup(w *engi.World) {
 	engi.SetBg(0x2d3739)
 
-	game.AddSystem(&engi.RenderSystem{})
+	w.AddSystem(&engi.RenderSystem{})
 
 	// Create an entity part of the Render and Scale systems
 	guy := engi.NewEntity([]string{"RenderSystem", "ScaleSystem"})
@@ -42,7 +38,7 @@ func (game *GameWorld) Setup() {
 	guy.AddComponent(render)
 	guy.AddComponent(space)
 
-	game.AddEntity(guy)
+	w.AddEntity(guy)
 }
 
 func main() {
