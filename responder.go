@@ -4,6 +4,10 @@
 
 package engi
 
+import (
+	"testing"
+)
+
 type Responder interface {
 	Render()
 	Resize(width, height int)
@@ -36,3 +40,35 @@ func (g *Game) Key(key Key, modifier Modifier, action Action) {
 	}
 }
 func (g *Game) Type(char rune) {}
+
+type inlineGame struct {
+	World
+	preloadFunc func(*World)
+	setupFunc   func(*World)
+}
+
+func (m *inlineGame) Preload() {
+	m.preloadFunc(&m.World)
+}
+
+func (m *inlineGame) Setup() {
+	m.setupFunc(&m.World)
+}
+
+// NewGame allows you to create a `Responder` using two inline functions `preload` and `setup`.
+func NewGame(preload, setup func(*World)) Responder {
+	g := &inlineGame{preloadFunc: preload, setupFunc: setup}
+	return g
+}
+
+// Bench is a helper-function to easily benchmark one frame, given a preload / setup function
+func Bench(b *testing.B, preload, setup func(w *World)) {
+	g := NewGame(preload, setup)
+
+	OpenHeadlessNoRun(g)
+	RunPreparation()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		RunIteration()
+	}
+}
