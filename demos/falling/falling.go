@@ -14,7 +14,8 @@ type Game struct {
 	engi.World
 }
 
-func (game Game) Preload() {
+func (game *Game) Preload() {
+	game.New()
 	// Add all the files in the data directory non recursively
 	engi.Files.AddFromDir("data", false)
 }

@@ -2,7 +2,7 @@ package engi
 
 type World struct {
 	Game
-	entities []*Entity
+	entities map[string]*Entity
 	systems  []Systemer
 
 	defaultBatch *Batch
@@ -14,7 +14,7 @@ type World struct {
 
 func (w *World) New() {
 	if !w.isSetup {
-
+		w.entities = make(map[string]*Entity)
 		if !headless {
 			w.defaultBatch = NewBatch(Width(), Height(), batchVert, batchFrag)
 			w.hudBatch = NewBatch(Width(), Height(), hudVert, hudFrag)
@@ -34,12 +34,17 @@ func (w *World) New() {
 }
 
 func (w *World) AddEntity(entity *Entity) {
-	w.entities = append(w.entities, entity)
+	w.entities[entity.ID()] = entity
+
 	for _, system := range w.systems {
 		if entity.DoesRequire(system.Type()) {
 			system.AddEntity(entity)
 		}
 	}
+}
+
+func (w *World) RemoveEntity(entity *Entity) {
+	delete(w.entities, entity.ID())
 }
 
 func (w *World) AddSystem(system Systemer) {
@@ -48,7 +53,12 @@ func (w *World) AddSystem(system Systemer) {
 }
 
 func (w *World) Entities() []*Entity {
-	return w.entities
+	entities := make([]*Entity, len(w.entities))
+	for _, v := range w.entities {
+		entities = append(entities, v)
+	}
+
+	return entities
 }
 
 func (w *World) Systems() []Systemer {

@@ -61,14 +61,11 @@ func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 		return
 	}
 
+	var otherSpace *SpaceComponent
+	var otherCollision *CollisionComponent
+
 	for _, other := range cs.Entities() {
 		if other.ID() != entity.ID() && other.Exists {
-
-			var r *RenderComponent
-			other.GetComponent(&r)
-
-			var otherSpace *SpaceComponent
-			var otherCollision *CollisionComponent
 			if !other.GetComponent(&otherSpace) || !other.GetComponent(&otherCollision) {
 				return
 			}

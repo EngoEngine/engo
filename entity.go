@@ -6,7 +6,7 @@ import (
 
 type Entity struct {
 	id         string
-	components map[reflect.Type]Component
+	components map[string]Component
 	requires   map[string]bool
 	Exists     bool
 	Pattern    string
@@ -16,7 +16,7 @@ func NewEntity(requires []string) *Entity {
 	e := &Entity{
 		id:         generateUUID(),
 		requires:   make(map[string]bool),
-		components: make(map[reflect.Type]Component),
+		components: make(map[string]Component),
 	}
 	for _, req := range requires {
 		e.requires[req] = true
@@ -30,18 +30,18 @@ func (e *Entity) DoesRequire(name string) bool {
 }
 
 func (e *Entity) AddComponent(component Component) {
-	e.components[reflect.TypeOf(component)] = component
+	e.components[reflect.TypeOf(component).String()] = component
 }
 
 func (e *Entity) RemoveComponent(component Component) {
-	delete(e.components, reflect.TypeOf(component))
+	delete(e.components, reflect.TypeOf(component).String())
 }
 
 // GetComponent takes a double pointer to a Component,
 // and populates it with the value of the right type.
 func (e *Entity) GetComponent(x interface{}) bool {
 	v := reflect.ValueOf(x).Elem() // *T
-	c, ok := e.components[v.Type()]
+	c, ok := e.components[v.Type().String()]
 	if !ok {
 		return false
 	}

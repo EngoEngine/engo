@@ -16,7 +16,8 @@ var (
 	basicFont *engi.Font
 )
 
-func (pong PongGame) Preload() {
+func (pong *PongGame) Preload() {
+	pong.New()
 	engi.Files.Add("assets/ball.png", "assets/paddle.png")
 
 	basicFont = (&engi.Font{URL: "assets/Roboto-Regular.ttf", Size: 32, FG: engi.Color{255, 255, 255, 255}})

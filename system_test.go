@@ -1,7 +1,6 @@
-package engi_test
+package engi
 
 import (
-	"github.com/paked/engi"
 	"testing"
 )
 
@@ -9,49 +8,49 @@ import (
 func BenchmarkCollisionSystem10(b *testing.B) {
 	const count = 10
 
-	preload := func(w *engi.World) {}
-	setup := func(w *engi.World) {
-		w.AddSystem(&engi.CollisionSystem{})
+	preload := func(w *World) {}
+	setup := func(w *World) {
+		w.AddSystem(&CollisionSystem{})
 		for i := 0; i < count; i++ {
-			ent := engi.NewEntity([]string{"CollisionSystem"})
-			ent.AddComponent(&engi.SpaceComponent{engi.Point{0, 0}, 10, 10})
-			ent.AddComponent(&engi.CollisionComponent{Solid: i%2 == 0, Main: true})
+			ent := NewEntity([]string{"CollisionSystem"})
+			ent.AddComponent(&SpaceComponent{Point{0, 0}, 10, 10})
+			ent.AddComponent(&CollisionComponent{Solid: i%2 == 0, Main: true})
 			w.AddEntity(ent)
 		}
 	}
-	engi.Bench(b, preload, setup)
+	Bench(b, preload, setup)
 }
 
 // BenchmarkCollisionSystem100 creates 100 entities, of which half are solid, and all are Main
 func BenchmarkCollisionSystem100(b *testing.B) {
 	const count = 100
 
-	preload := func(w *engi.World) {}
-	setup := func(w *engi.World) {
-		w.AddSystem(&engi.CollisionSystem{})
+	preload := func(w *World) {}
+	setup := func(w *World) {
+		w.AddSystem(&CollisionSystem{})
 		for i := 0; i < count; i++ {
-			ent := engi.NewEntity([]string{"CollisionSystem"})
-			ent.AddComponent(&engi.SpaceComponent{engi.Point{0, 0}, 10, 10})
-			ent.AddComponent(&engi.CollisionComponent{Solid: i%2 == 0, Main: true})
+			ent := NewEntity([]string{"CollisionSystem"})
+			ent.AddComponent(&SpaceComponent{Point{0, 0}, 10, 10})
+			ent.AddComponent(&CollisionComponent{Solid: i%2 == 0, Main: true})
 			w.AddEntity(ent)
 		}
 	}
-	engi.Bench(b, preload, setup)
+	Bench(b, preload, setup)
 }
 
 // BenchmarkCollisionSystem1000 creates 1000 entities, of which half are solid, and all are Main
 func BenchmarkCollisionSystem1000(b *testing.B) {
 	const count = 1000
 
-	preload := func(w *engi.World) {}
-	setup := func(w *engi.World) {
-		w.AddSystem(&engi.CollisionSystem{})
+	preload := func(w *World) {}
+	setup := func(w *World) {
+		w.AddSystem(&CollisionSystem{})
 		for i := 0; i < count; i++ {
-			ent := engi.NewEntity([]string{"CollisionSystem"})
-			ent.AddComponent(&engi.SpaceComponent{engi.Point{0, 0}, 10, 10})
-			ent.AddComponent(&engi.CollisionComponent{Solid: i%2 == 0, Main: true})
+			ent := NewEntity([]string{"CollisionSystem"})
+			ent.AddComponent(&SpaceComponent{Point{0, 0}, 10, 10})
+			ent.AddComponent(&CollisionComponent{Solid: i%2 == 0, Main: true})
 			w.AddEntity(ent)
 		}
 	}
-	engi.Bench(b, preload, setup)
+	Bench(b, preload, setup)
 }
