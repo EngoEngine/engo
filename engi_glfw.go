@@ -18,6 +18,8 @@ import (
 	"time"
 
 	"github.com/go-gl/glfw/v3.1/glfw"
+	"github.com/golang/freetype"
+	"github.com/golang/freetype/truetype"
 	"github.com/paked/webgl"
 )
 
@@ -341,6 +343,15 @@ func loadJson(r Resource) (string, error) {
 		return "", err
 	}
 	return string(file), nil
+}
+
+func loadFont(r Resource) (*truetype.Font, error) {
+	ttfBytes, err := ioutil.ReadFile(r.url)
+	if err != nil {
+		return nil, err
+	}
+
+	return freetype.ParseFont(ttfBytes)
 }
 
 type Assets struct {

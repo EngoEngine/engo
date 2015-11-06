@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 
+	"fmt"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
@@ -30,11 +31,10 @@ type Font struct {
 	ttf  *truetype.Font
 }
 
+// Create is for loading fonts from the disk, given a location
 func (f *Font) Create() error {
-	url := f.URL
-
 	// Read and parse the font
-	ttfBytes, err := ioutil.ReadFile(url)
+	ttfBytes, err := ioutil.ReadFile(f.URL)
 	if err != nil {
 		return err
 	}
@@ -44,6 +44,17 @@ func (f *Font) Create() error {
 		return err
 	}
 	f.ttf = ttf
+
+	return nil
+}
+
+// CreatePreloaded is for loading fonts which have already been defined (and loaded) within Preload
+func (f *Font) CreatePreloaded() error {
+	var ok bool
+	f.ttf, ok = Files.fonts[f.URL]
+	if !ok {
+		return fmt.Errorf("could not find preloaded font: %s", f.URL)
+	}
 
 	return nil
 }
