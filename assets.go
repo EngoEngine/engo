@@ -5,6 +5,7 @@
 package engi
 
 import (
+	"github.com/golang/freetype/truetype"
 	"github.com/paked/webgl"
 	"io/ioutil"
 	"log"
@@ -25,6 +26,7 @@ type Loader struct {
 	jsons     map[string]string
 	levels    map[string]*Level
 	sounds    map[string]string
+	fonts     map[string]*truetype.Font
 }
 
 func NewLoader() *Loader {
@@ -34,6 +36,7 @@ func NewLoader() *Loader {
 		jsons:     make(map[string]string),
 		levels:    make(map[string]*Level),
 		sounds:    make(map[string]string),
+		fonts:     make(map[string]*truetype.Font),
 	}
 }
 
@@ -107,6 +110,11 @@ func (l *Loader) Load(onFinish func()) {
 			}
 		case "wav":
 			l.sounds[r.name] = r.url
+		case "ttf":
+			f, err := loadFont(r)
+			if err == nil {
+				l.fonts[r.name] = f
+			}
 		}
 	}
 	onFinish()

@@ -18,12 +18,7 @@ var (
 
 func (pong *PongGame) Preload() {
 	pong.New()
-	engi.Files.Add("assets/ball.png", "assets/paddle.png")
-
-	basicFont = (&engi.Font{URL: "assets/Roboto-Regular.ttf", Size: 32, FG: engi.Color{255, 255, 255, 255}})
-	if err := basicFont.Create(); err != nil {
-		log.Fatalln("Could not load font:", err)
-	}
+	engi.Files.AddFromDir("assets", true)
 }
 
 func (pong *PongGame) Setup() {
@@ -34,6 +29,11 @@ func (pong *PongGame) Setup() {
 	pong.AddSystem(&ControlSystem{})
 	pong.AddSystem(&BallSystem{})
 	pong.AddSystem(&ScoreSystem{})
+
+	basicFont = (&engi.Font{URL: "Roboto-Regular.ttf", Size: 32, FG: engi.Color{255, 255, 255, 255}})
+	if err := basicFont.CreatePreloaded(); err != nil {
+		log.Fatalln("Could not load font:", err)
+	}
 
 	ball := engi.NewEntity([]string{"RenderSystem", "CollisionSystem", "SpeedSystem", "BallSystem"})
 	ballTexture := engi.Files.Image("ball.png")
