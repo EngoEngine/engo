@@ -1,7 +1,6 @@
 package engi
 
 type World struct {
-	Game
 	entities map[string]*Entity
 	systems  []Systemer
 
@@ -12,7 +11,7 @@ type World struct {
 	paused  bool
 }
 
-func (w *World) New() {
+func (w *World) new() {
 	if !w.isSetup {
 		w.entities = make(map[string]*Entity)
 		if !headless {
@@ -21,9 +20,7 @@ func (w *World) New() {
 		}
 
 		// Default WorldBounds values
-		if WorldBounds.Max.X == 0 && WorldBounds.Max.Y == 0 {
-			WorldBounds.Max = Point{Width(), Height()}
-		}
+		WorldBounds.Max = Point{Width(), Height()}
 
 		// Initialize cameraSystem
 		cam = &cameraSystem{}
@@ -44,11 +41,17 @@ func (w *World) AddEntity(entity *Entity) {
 }
 
 func (w *World) RemoveEntity(entity *Entity) {
+	for _, system := range w.systems {
+		if entity.DoesRequire(system.Type()) {
+			system.RemoveEntity(entity)
+		}
+	}
 	delete(w.entities, entity.ID())
 }
 
 func (w *World) AddSystem(system Systemer) {
 	system.New()
+	system.SetWorld(w)
 	w.systems = append(w.systems, system)
 }
 
@@ -65,16 +68,16 @@ func (w *World) Systems() []Systemer {
 	return w.systems
 }
 
-func (w *World) Pre() {
+func (w *World) pre() {
 	if !headless {
 		Gl.Clear(Gl.COLOR_BUFFER_BIT)
 	}
 }
 
-func (w *World) Post() {}
+func (w *World) post() {}
 
-func (w *World) Update(dt float32) {
-	w.Pre()
+func (w *World) update(dt float32) {
+	w.pre()
 
 	var unp *UnpauseComponent
 
@@ -98,14 +101,10 @@ func (w *World) Update(dt float32) {
 		system.Post()
 	}
 
-	if Keys.KEY_ESCAPE.JustPressed() {
-		Exit()
-	}
-
-	w.Post()
+	w.post()
 }
 
-func (w *World) Batch(prio PriorityLevel) *Batch {
+func (w *World) batch(prio PriorityLevel) *Batch {
 	if prio >= HUDGround {
 		return w.hudBatch
 	} else {

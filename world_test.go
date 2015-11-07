@@ -9,7 +9,7 @@ type TestSystem struct {
 }
 
 func (ts *TestSystem) New() {
-	ts.System = &System{}
+	ts.System = NewSystem()
 }
 
 func (*TestSystem) Type() string {
@@ -19,7 +19,9 @@ func (*TestSystem) Type() string {
 func (ts *TestSystem) Update(e *Entity, dt float32) {}
 
 func TestAddEntity(t *testing.T) {
+	headless = true
 	world := World{}
+	world.new()
 	entityOne := Entity{}
 	world.AddEntity(&entityOne)
 	entityTwo := Entity{}
@@ -30,17 +32,24 @@ func TestAddEntity(t *testing.T) {
 }
 
 func TestAddSystem(t *testing.T) {
+	headless = true
 	world := World{}
+	world.new()
+
+	before := len(world.Systems())
+
 	system := &TestSystem{}
 	world.AddSystem(system)
 
-	if len(world.Systems()) != 1 {
+	if len(world.Systems()) != before+1 {
 		t.Fail()
 	}
 }
 
 func TestAddComponent(t *testing.T) {
+	headless = true
 	world := World{}
+	world.new()
 	world.AddSystem(&TestSystem{})
 	entity := NewEntity([]string{"TestSystem"})
 	world.AddEntity(entity)

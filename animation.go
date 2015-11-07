@@ -130,7 +130,7 @@ type AnimationSystem struct {
 }
 
 func (a *AnimationSystem) New() {
-	a.System = &System{}
+	a.System = NewSystem()
 }
 
 func (AnimationSystem) Type() string {

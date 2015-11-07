@@ -8,20 +8,9 @@ import (
 	"testing"
 )
 
-type Responder interface {
-	Render()
-	Resize(width, height int)
+type CustomGame interface {
 	Preload()
-	Setup()
-	Close()
-	Update(dt float32)
-	Mouse(x, y float32, action Action)
-	Scroll(amount float32)
-	Key(key Key, modifier Modifier, action Action)
-	Type(char rune)
-	AddEntity(e *Entity)
-	Batch(PriorityLevel) *Batch
-	New()
+	Setup(*World)
 }
 
 type Game struct{}
@@ -42,31 +31,30 @@ func (g *Game) Key(key Key, modifier Modifier, action Action) {
 func (g *Game) Type(char rune) {}
 
 type inlineGame struct {
-	World
-	preloadFunc func(*World)
+	preloadFunc func()
 	setupFunc   func(*World)
 }
 
 func (m *inlineGame) Preload() {
-	m.preloadFunc(&m.World)
+	m.preloadFunc()
 }
 
-func (m *inlineGame) Setup() {
-	m.setupFunc(&m.World)
+func (m *inlineGame) Setup(w *World) {
+	m.setupFunc(w)
 }
 
 // NewGame allows you to create a `Responder` using two inline functions `preload` and `setup`.
-func NewGame(preload, setup func(*World)) Responder {
+func NewGame(preload func(), setup func(*World)) CustomGame {
 	g := &inlineGame{preloadFunc: preload, setupFunc: setup}
 	return g
 }
 
 // Bench is a helper-function to easily benchmark one frame, given a preload / setup function
-func Bench(b *testing.B, preload, setup func(w *World)) {
+func Bench(b *testing.B, preload func(), setup func(w *World)) {
 	g := NewGame(preload, setup)
 
-	OpenHeadlessNoRun(g)
-	RunPreparation()
+	OpenHeadlessNoRun()
+	RunPreparation(g)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		RunIteration()

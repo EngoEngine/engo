@@ -8,7 +8,7 @@ import (
 func BenchmarkCollisionSystem10(b *testing.B) {
 	const count = 10
 
-	preload := func(w *World) {}
+	preload := func() {}
 	setup := func(w *World) {
 		w.AddSystem(&CollisionSystem{})
 		for i := 0; i < count; i++ {
@@ -25,7 +25,7 @@ func BenchmarkCollisionSystem10(b *testing.B) {
 func BenchmarkCollisionSystem100(b *testing.B) {
 	const count = 100
 
-	preload := func(w *World) {}
+	preload := func() {}
 	setup := func(w *World) {
 		w.AddSystem(&CollisionSystem{})
 		for i := 0; i < count; i++ {
@@ -42,7 +42,7 @@ func BenchmarkCollisionSystem100(b *testing.B) {
 func BenchmarkCollisionSystem1000(b *testing.B) {
 	const count = 1000
 
-	preload := func(w *World) {}
+	preload := func() {}
 	setup := func(w *World) {
 		w.AddSystem(&CollisionSystem{})
 		for i := 0; i < count; i++ {

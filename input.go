@@ -9,6 +9,8 @@ type Key int
 type Modifier int
 
 var (
+	Mouse mouse
+
 	MOVE    = Action(0)
 	PRESS   = Action(1)
 	RELEASE = Action(2)
@@ -122,3 +124,9 @@ var (
 	NumDecimal   = Key(110)
 	NumEnter     = Key(13)
 )
+
+type mouse struct {
+	X, Y             float32
+	ScrollX, ScrollY float32
+	Action           Action
+}

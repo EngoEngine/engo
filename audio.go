@@ -20,7 +20,7 @@ func (AudioSystem) Type() string {
 }
 
 func (as *AudioSystem) New() {
-	as.System = &System{}
+	as.System = NewSystem()
 
 	if as.HeightModifier == 0 {
 		as.HeightModifier = defaultHeightModifier

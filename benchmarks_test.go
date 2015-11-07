@@ -6,7 +6,7 @@ import (
 
 // BenchmarkEmpty creates the game, and measures the runtime of a single frame, w/o anything set up
 func BenchmarkEmpty(b *testing.B) {
-	preload := func(w *World) {}
+	preload := func() {}
 	setup := func(w *World) {}
 	Bench(b, preload, setup)
 }
@@ -15,7 +15,7 @@ func BenchmarkEmpty(b *testing.B) {
 func BenchmarkSystem10(b *testing.B) {
 	const count = 10
 
-	preload := func(w *World) {}
+	preload := func() {}
 	setup := func(w *World) {
 		for i := 0; i < count; i++ {
 			w.AddSystem(&NilSystem{})
@@ -28,7 +28,7 @@ func BenchmarkSystem10(b *testing.B) {
 func BenchmarkSystem1000(b *testing.B) {
 	const count = 1000
 
-	preload := func(w *World) {}
+	preload := func() {}
 	setup := func(w *World) {
 		for i := 0; i < count; i++ {
 			w.AddSystem(&NilSystem{})
@@ -41,7 +41,7 @@ func BenchmarkSystem1000(b *testing.B) {
 func BenchmarkEntity10(b *testing.B) {
 	const count = 10
 
-	preload := func(w *World) {}
+	preload := func() {}
 	setup := func(w *World) {
 		w.AddSystem(&NilSystem{})
 		for i := 0; i < count; i++ {
@@ -55,7 +55,7 @@ func BenchmarkEntity10(b *testing.B) {
 func BenchmarkEntity1000(b *testing.B) {
 	const count = 1000
 
-	preload := func(w *World) {}
+	preload := func() {}
 	setup := func(w *World) {
 		w.AddSystem(&NilSystem{})
 		for i := 0; i < count; i++ {

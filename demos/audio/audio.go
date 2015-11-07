@@ -13,7 +13,7 @@ func (moveSystem) Type() string {
 }
 
 func (ms *moveSystem) New() {
-	ms.System = &engi.System{}
+	ms.System = engi.NewSystem()
 }
 
 func (ms *moveSystem) Update(entity *engi.Entity, dt float32) {
@@ -37,11 +37,10 @@ func (ms *moveSystem) Update(entity *engi.Entity, dt float32) {
 
 var (
 	zoomSpeed float32 = -0.125
-	World     *GameWorld
+	World     *Game
 )
 
-type GameWorld struct {
-	engi.World
+type Game struct {
 	RUN_ACTION   *engi.AnimationAction
 	WALK_ACTION  *engi.AnimationAction
 	STOP_ACTION  *engi.AnimationAction
@@ -50,8 +49,7 @@ type GameWorld struct {
 	actions      []*engi.AnimationAction
 }
 
-func (game *GameWorld) Preload() {
-	game.New()
+func (game *Game) Preload() {
 	engi.Files.Add("assets/hero.png")
 	engi.Files.Add("assets/326488.wav")
 	engi.Files.Add("assets/326064.wav")
@@ -63,45 +61,41 @@ func (game *GameWorld) Preload() {
 	game.actions = []*engi.AnimationAction{game.DIE_ACTION, game.STOP_ACTION, game.WALK_ACTION, game.RUN_ACTION, game.SKILL_ACTION}
 }
 
-func (game *GameWorld) Setup() {
+func (game *Game) Setup(w *engi.World) {
 	engi.SetBg(0xFFFFFF)
 
-	game.AddSystem(&engi.RenderSystem{})
-	game.AddSystem(&engi.AnimationSystem{})
-	game.AddSystem(&engi.AudioSystem{})
-	game.AddSystem(&moveSystem{})
-	game.AddSystem(engi.NewEdgeScroller(800, 20))
+	w.AddSystem(&engi.RenderSystem{})
+	w.AddSystem(&engi.AnimationSystem{})
+	w.AddSystem(&engi.AudioSystem{})
+	w.AddSystem(&moveSystem{})
+	w.AddSystem(engi.NewEdgeScroller(800, 20))
+	w.AddSystem(engi.NewMouseZoomer(zoomSpeed))
 
 	spriteSheet := engi.NewSpritesheetFromFile("hero.png", 150, 150)
 
-	game.AddEntity(game.CreateEntity(&engi.Point{600, 0}, spriteSheet, game.STOP_ACTION))
+	w.AddEntity(game.CreateEntity(&engi.Point{600, 0}, spriteSheet, game.STOP_ACTION))
 
 	backgroundMusic := engi.NewEntity([]string{"AudioSystem"})
 	backgroundMusic.AddComponent(&engi.AudioComponent{File: "326488.wav", Repeat: true, Background: true})
-	game.AddEntity(backgroundMusic)
+	w.AddEntity(backgroundMusic)
 }
 
-func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Spritesheet, action *engi.AnimationAction) *engi.Entity {
+func (game *Game) CreateEntity(point *engi.Point, spriteSheet *engi.Spritesheet, action *engi.AnimationAction) *engi.Entity {
 	entity := engi.NewEntity([]string{"AudioSystem", "AnimationSystem", "RenderSystem", "moveSystem"})
 
-	space := engi.SpaceComponent{*point, 0, 0}
+	space := &engi.SpaceComponent{*point, 0, 0}
 	render := engi.NewRenderComponent(spriteSheet.Renderable(action.Frames[0]), engi.Point{3, 3}, "hero")
 	animation := engi.NewAnimationComponent(spriteSheet.Renderables(), 0.1)
 	animation.AddAnimationActions(game.actions)
 	animation.SelectAnimationByAction(action)
-	entity.AddComponent(&render)
-	entity.AddComponent(&space)
+	entity.AddComponent(render)
+	entity.AddComponent(space)
 	entity.AddComponent(animation)
 
 	return entity
 }
 
-func (game *GameWorld) Scroll(amount float32) {
-	engi.Mailbox.Dispatch(engi.CameraMessage{Axis: engi.ZAxis, Value: amount * zoomSpeed, Incremental: true})
-
-}
-
 func main() {
-	World = &GameWorld{}
+	World = &Game{}
 	engi.Open("Audio Demo", 1024, 640, false, World)
 }

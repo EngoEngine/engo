@@ -10,7 +10,6 @@ var (
 )
 
 type GameWorld struct {
-	engi.World
 	RUN_ACTION   *engi.AnimationAction
 	WALK_ACTION  *engi.AnimationAction
 	STOP_ACTION  *engi.AnimationAction
@@ -20,7 +19,6 @@ type GameWorld struct {
 }
 
 func (game *GameWorld) Preload() {
-	game.New()
 	engi.Files.Add("assets/hero.png")
 	game.STOP_ACTION = &engi.AnimationAction{Name: "stop", Frames: []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}}
 	game.RUN_ACTION = &engi.AnimationAction{Name: "run", Frames: []int{16, 17, 18, 19, 20, 21}}
@@ -30,19 +28,20 @@ func (game *GameWorld) Preload() {
 	game.actions = []*engi.AnimationAction{game.DIE_ACTION, game.STOP_ACTION, game.WALK_ACTION, game.RUN_ACTION, game.SKILL_ACTION}
 }
 
-func (game *GameWorld) Setup() {
+func (game *GameWorld) Setup(w *engi.World) {
 	engi.SetBg(0xFFFFFF)
 
-	game.AddSystem(&engi.RenderSystem{})
-	game.AddSystem(&engi.AnimationSystem{})
+	w.AddSystem(&engi.RenderSystem{})
+	w.AddSystem(&engi.AnimationSystem{})
+	w.AddSystem(engi.NewMouseZoomer(zoomSpeed))
 
 	spriteSheet := engi.NewSpritesheetFromFile("hero.png", 150, 150)
 
-	game.AddEntity(game.CreateEntity(&engi.Point{0, 0}, spriteSheet, game.RUN_ACTION))
-	game.AddEntity(game.CreateEntity(&engi.Point{300, 0}, spriteSheet, game.WALK_ACTION))
-	game.AddEntity(game.CreateEntity(&engi.Point{600, 0}, spriteSheet, game.STOP_ACTION))
-	game.AddEntity(game.CreateEntity(&engi.Point{900, 0}, spriteSheet, game.SKILL_ACTION))
-	game.AddEntity(game.CreateEntity(&engi.Point{1200, 0}, spriteSheet, game.DIE_ACTION))
+	w.AddEntity(game.CreateEntity(&engi.Point{0, 0}, spriteSheet, game.RUN_ACTION))
+	w.AddEntity(game.CreateEntity(&engi.Point{300, 0}, spriteSheet, game.WALK_ACTION))
+	w.AddEntity(game.CreateEntity(&engi.Point{600, 0}, spriteSheet, game.STOP_ACTION))
+	w.AddEntity(game.CreateEntity(&engi.Point{900, 0}, spriteSheet, game.SKILL_ACTION))
+	w.AddEntity(game.CreateEntity(&engi.Point{1200, 0}, spriteSheet, game.DIE_ACTION))
 }
 
 func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Spritesheet, action *engi.AnimationAction) *engi.Entity {
@@ -58,10 +57,6 @@ func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Sprites
 	entity.AddComponent(animation)
 
 	return entity
-}
-
-func (game *GameWorld) Scroll(amount float32) {
-	engi.Mailbox.Dispatch(engi.CameraMessage{Axis: engi.ZAxis, Value: amount * zoomSpeed, Incremental: true})
 }
 
 func main() {

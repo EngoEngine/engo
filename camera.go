@@ -25,7 +25,7 @@ func (cameraSystem) Type() string {
 }
 
 func (cam *cameraSystem) New() {
-	cam.System = &System{}
+	cam.System = NewSystem()
 
 	cam.x = WorldBounds.Max.X / 2
 	cam.y = WorldBounds.Max.Y / 2
