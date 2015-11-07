@@ -42,7 +42,7 @@ type RenderComponent struct {
 	Display      Renderable
 	Scale        Point
 	Label        string
-	Priority     PriorityLevel
+	priority     PriorityLevel
 	Transparency float32
 	Color        uint32
 }
@@ -52,10 +52,15 @@ func NewRenderComponent(display Renderable, scale Point, label string) *RenderCo
 		Display:      display,
 		Scale:        scale,
 		Label:        label,
-		Priority:     MiddleGround,
+		priority:     MiddleGround,
 		Transparency: 1,
 		Color:        0xffffff,
 	}
+}
+
+func (r *RenderComponent) SetPriority(p PriorityLevel) {
+	Mailbox.Dispatch(renderChangeMessage{})
+	r.priority = p
 }
 
 func (RenderComponent) Type() string {
