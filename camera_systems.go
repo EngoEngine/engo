@@ -23,7 +23,7 @@ func (*KeyboardScroller) Type() string {
 
 func (c *KeyboardScroller) New() {
 	if !c.isSetup {
-		c.System = &System{}
+		c.System = NewSystem()
 		c.isSetup = true
 	}
 }
@@ -96,7 +96,7 @@ func (*EdgeScroller) Type() string {
 
 func (c *EdgeScroller) New() {
 	if !c.isSetup {
-		c.System = &System{}
+		c.System = NewSystem()
 		c.isSetup = true
 	}
 }
@@ -122,6 +122,40 @@ func NewEdgeScroller(scrollSpeed float32, margin float64) *EdgeScroller {
 	es := &EdgeScroller{
 		scrollSpeed: scrollSpeed,
 		margin:      margin,
+	}
+	es.New()
+	es.AddEntity(NewEntity([]string{es.Type()}))
+	return es
+}
+
+// MouseZoomer is a Systemer that allows for zooming when the scroll wheel is used
+type MouseZoomer struct {
+	*System
+	zoomSpeed float32
+
+	isSetup bool
+}
+
+func (*MouseZoomer) Type() string {
+	return "MouseZoomer"
+}
+
+func (c *MouseZoomer) New() {
+	if !c.isSetup {
+		c.System = NewSystem()
+		c.isSetup = true
+	}
+}
+
+func (c *MouseZoomer) Update(entity *Entity, dt float32) {
+	if Mouse.ScrollY != 0 {
+		Mailbox.Dispatch(CameraMessage{ZAxis, Mouse.ScrollY * c.zoomSpeed, true})
+	}
+}
+
+func NewMouseZoomer(zoomSpeed float32) *MouseZoomer {
+	es := &MouseZoomer{
+		zoomSpeed: zoomSpeed,
 	}
 	es.New()
 	es.AddEntity(NewEntity([]string{es.Type()}))

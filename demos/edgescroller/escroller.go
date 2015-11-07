@@ -7,9 +7,7 @@ import (
 	"github.com/paked/engi"
 )
 
-type Game struct {
-	engi.World
-}
+type Game struct{}
 
 var (
 	scrollSpeed float32 = 700
@@ -51,19 +49,20 @@ func generateBackground() *engi.Entity {
 	return field
 }
 
+func (game *Game) Preload() {}
+
 // Setup is called before the main loop is started
-func (game *Game) Setup() {
+func (game *Game) Setup(w *engi.World) {
 	engi.SetBg(0x222222)
-	game.AddSystem(&engi.RenderSystem{})
+	w.AddSystem(&engi.RenderSystem{})
 
 	// The most important line in this whole demo:
-	game.AddSystem(engi.NewEdgeScroller(scrollSpeed, edgeMargin))
+	w.AddSystem(engi.NewEdgeScroller(scrollSpeed, edgeMargin))
 
 	// Create the background; this way we'll see when we actually scroll
-	game.AddEntity(generateBackground())
+	w.AddEntity(generateBackground())
 }
 
 func main() {
-	engi.SetFPSLimit(120)
 	engi.Open("EdgeScroller Demo", 400, 400, false, &Game{})
 }

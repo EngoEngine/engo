@@ -8,27 +8,24 @@ import (
 	"sync"
 )
 
-type PongGame struct {
-	engi.World
-}
+type PongGame struct{}
 
 var (
 	basicFont *engi.Font
 )
 
 func (pong *PongGame) Preload() {
-	pong.New()
 	engi.Files.AddFromDir("assets", true)
 }
 
-func (pong *PongGame) Setup() {
+func (pong *PongGame) Setup(w *engi.World) {
 	engi.SetBg(0x2d3739)
-	pong.AddSystem(&engi.RenderSystem{})
-	pong.AddSystem(&engi.CollisionSystem{})
-	pong.AddSystem(&SpeedSystem{})
-	pong.AddSystem(&ControlSystem{})
-	pong.AddSystem(&BallSystem{})
-	pong.AddSystem(&ScoreSystem{})
+	w.AddSystem(&engi.RenderSystem{})
+	w.AddSystem(&engi.CollisionSystem{})
+	w.AddSystem(&SpeedSystem{})
+	w.AddSystem(&ControlSystem{})
+	w.AddSystem(&BallSystem{})
+	w.AddSystem(&ScoreSystem{})
 
 	basicFont = (&engi.Font{URL: "Roboto-Regular.ttf", Size: 32, FG: engi.Color{255, 255, 255, 255}})
 	if err := basicFont.CreatePreloaded(); err != nil {
@@ -42,19 +39,21 @@ func (pong *PongGame) Setup() {
 	ballCollision := &engi.CollisionComponent{Main: true, Solid: true}
 	ballSpeed := &SpeedComponent{}
 	ballSpeed.Point = engi.Point{300, 100}
+
 	ball.AddComponent(ballRender)
 	ball.AddComponent(ballSpace)
 	ball.AddComponent(ballCollision)
 	ball.AddComponent(ballSpeed)
-	pong.AddEntity(ball)
+	w.AddEntity(ball)
 
 	score := engi.NewEntity([]string{"RenderSystem", "ScoreSystem"})
 
 	scoreRender := engi.NewRenderComponent(basicFont.Render(" "), engi.Point{1, 1}, "YOLO <3")
+
 	scoreSpace := &engi.SpaceComponent{engi.Point{100, 100}, 100, 100}
 	score.AddComponent(scoreRender)
 	score.AddComponent(scoreSpace)
-	pong.AddEntity(score)
+	w.AddEntity(score)
 
 	schemes := []string{"WASD", ""}
 	for i := 0; i < 2; i++ {
@@ -65,6 +64,7 @@ func (pong *PongGame) Setup() {
 		if i != 0 {
 			x = 800 - 16
 		}
+
 		paddleSpace := &engi.SpaceComponent{engi.Point{x, (engi.Height() - paddleTexture.Height()) / 2}, paddleRender.Scale.X * paddleTexture.Width(), paddleRender.Scale.Y * paddleTexture.Height()}
 		paddleControl := &ControlComponent{schemes[i]}
 		paddleCollision := &engi.CollisionComponent{Main: false, Solid: true}
@@ -72,7 +72,7 @@ func (pong *PongGame) Setup() {
 		paddle.AddComponent(paddleSpace)
 		paddle.AddComponent(paddleControl)
 		paddle.AddComponent(paddleCollision)
-		pong.AddEntity(paddle)
+		w.AddEntity(paddle)
 	}
 }
 
@@ -81,7 +81,7 @@ type SpeedSystem struct {
 }
 
 func (ms *SpeedSystem) New() {
-	ms.System = &engi.System{}
+	ms.System = engi.NewSystem()
 	engi.Mailbox.Listen("CollisionMessage", func(message engi.Message) {
 		log.Println("collision")
 		collision, isCollision := message.(engi.CollisionMessage)
@@ -125,7 +125,7 @@ type BallSystem struct {
 }
 
 func (bs *BallSystem) New() {
-	bs.System = &engi.System{}
+	bs.System = engi.NewSystem()
 }
 
 func (BallSystem) Type() string {
@@ -176,7 +176,7 @@ func (ControlSystem) Type() string {
 	return "ControlSystem"
 }
 func (c *ControlSystem) New() {
-	c.System = &engi.System{}
+	c.System = engi.NewSystem()
 }
 
 func (c *ControlSystem) Update(entity *engi.Entity, dt float32) {
@@ -229,7 +229,7 @@ func (ScoreSystem) Type() string {
 
 func (sc *ScoreSystem) New() {
 	sc.upToDate = true
-	sc.System = &engi.System{}
+	sc.System = engi.NewSystem()
 	engi.Mailbox.Listen("ScoreMessage", func(message engi.Message) {
 		scoreMessage, isScore := message.(ScoreMessage)
 		if !isScore {

@@ -44,7 +44,7 @@ func fatalErr(err error) {
 	}
 }
 
-func run(title string, width, height int, fullscreen bool) {
+func run(customGame CustomGame, title string, width, height int, fullscreen bool) {
 
 	err := glfw.Init()
 	fatalErr(err)
@@ -86,25 +86,29 @@ func run(title string, width, height int, fullscreen bool) {
 	window.SetFramebufferSizeCallback(func(window *glfw.Window, w, h int) {
 		width, height = window.GetFramebufferSize()
 		Gl.Viewport(0, 0, width, height)
-		responder.Resize(w, h)
+		// TODO: when do we want to handle resizing? and who should deal with it?
+		// responder.Resize(w, h)
 	})
 
 	window.SetCursorPosCallback(func(window *glfw.Window, x, y float64) {
-		responder.Mouse(float32(x), float32(y), MOVE)
+		Mouse.X, Mouse.Y = float32(x), float32(y)
+		Mouse.Action = MOVE
 	})
 
 	window.SetMouseButtonCallback(func(window *glfw.Window, b glfw.MouseButton, a glfw.Action, m glfw.ModifierKey) {
 		x, y := window.GetCursorPos()
+		Mouse.X, Mouse.Y = float32(x), float32(y)
 
 		if a == glfw.Press {
-			responder.Mouse(float32(x), float32(y), PRESS)
+			Mouse.Action = PRESS
 		} else {
-			responder.Mouse(float32(x), float32(y), RELEASE)
+			Mouse.Action = RELEASE
 		}
 	})
 
 	window.SetScrollCallback(func(window *glfw.Window, xoff, yoff float64) {
-		responder.Scroll(float32(yoff))
+		Mouse.ScrollX = float32(xoff)
+		Mouse.ScrollY = float32(yoff)
 	})
 
 	window.SetKeyCallback(func(window *glfw.Window, k glfw.Key, s int, a glfw.Action, m glfw.ModifierKey) {
@@ -117,19 +121,25 @@ func run(title string, width, height int, fullscreen bool) {
 	})
 
 	window.SetCharCallback(func(window *glfw.Window, char rune) {
-		responder.Type(char)
+		// TODO: what does this do, when can we use it?
+		// it's like KeyCallback, but for specific characters instead of keys...?
+		// responder.Type(char)
 	})
 
-	runLoop(false)
+	runLoop(customGame, false)
 }
 
-func runHeadless() {
-	runLoop(true)
+func SetTitle(title string) {
+	window.SetTitle(title)
+}
+
+func runHeadless(customGame CustomGame) {
+	runLoop(customGame, true)
 }
 
 // RunIteration runs one iteration / frame
 func RunIteration() {
-	responder.Update(Time.Delta())
+	world.update(Time.Delta())
 
 	if !headless {
 		window.SwapBuffers()
@@ -142,16 +152,19 @@ func RunIteration() {
 
 // RunPreparation is called only once, and is called automatically when calling Open
 // It is only here for benchmarking in combination with OpenHeadlessNoRun
-func RunPreparation() {
-	responder.Preload()
-	Files.Load(func() {})
-	responder.Setup()
+func RunPreparation(customGame CustomGame) {
+	customGame.Preload()
 
-	Wo.New()
+	Files.Load(func() {})
+
+	world = &World{}
+	world.new()
+
+	customGame.Setup(world)
 }
 
-func runLoop(headless bool) {
-	RunPreparation()
+func runLoop(customGame CustomGame, headless bool) {
+	RunPreparation(customGame)
 
 	ticker := time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
 Outer:
@@ -168,11 +181,9 @@ Outer:
 		}
 	}
 	ticker.Stop()
-
-	responder.Close()
 }
 
-func width() float32 {
+func Width() float32 {
 	if headless {
 		return float32(headlessWidth)
 	}
@@ -180,7 +191,7 @@ func width() float32 {
 	return float32(width)
 }
 
-func height() float32 {
+func Height() float32 {
 	if headless {
 		return float32(headlessHeight)
 	}
@@ -188,7 +199,7 @@ func height() float32 {
 	return float32(height)
 }
 
-func exit() {
+func Exit() {
 	window.SetShouldClose(true)
 }
 
