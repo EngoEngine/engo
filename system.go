@@ -206,7 +206,7 @@ func (rs *RenderSystem) Post() {
 			var space *SpaceComponent
 
 			if !entity.GetComponent(&render) || !entity.GetComponent(&space) {
-				return
+				continue
 			}
 
 			render.Display.Render(batch, render, space)
