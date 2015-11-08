@@ -314,8 +314,8 @@ varying vec2 var_TexCoords;
 void main() {
   var_Color = in_Color;
   var_TexCoords = in_TexCoords;
-  gl_Position = vec4((4.0*in_Position.x - uf_Projection.x) / uf_Projection.x,
-  					 (4.0*in_Position.y - uf_Projection.y) / -uf_Projection.y, 0, 1.0);
+  gl_Position = vec4((4.0*in_Position.x) / uf_Projection.x - 2.0,
+  					 (4.0*in_Position.y) / -uf_Projection.y + 2.0, 0, 2.0);
 }`
 
 var hudFrag = `
