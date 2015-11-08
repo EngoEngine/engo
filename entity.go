@@ -8,7 +8,6 @@ type Entity struct {
 	id         string
 	components map[string]Component
 	requires   map[string]bool
-	Exists     bool
 	Pattern    string
 }
 
@@ -21,7 +20,6 @@ func NewEntity(requires []string) *Entity {
 	for _, req := range requires {
 		e.requires[req] = true
 	}
-	e.Exists = true
 	return e
 }
 

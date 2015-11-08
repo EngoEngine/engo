@@ -30,6 +30,7 @@ func NewSystem() *System {
 	s.entities = make(map[string]*Entity)
 	return s
 }
+
 func (s System) New()  {}
 func (s System) Pre()  {}
 func (s System) Post() {}
@@ -87,7 +88,7 @@ func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 	var otherCollision *CollisionComponent
 
 	for _, other := range cs.Entities() {
-		if other.ID() != entity.ID() && other.Exists {
+		if other.ID() != entity.ID() {
 			if !other.GetComponent(&otherSpace) || !other.GetComponent(&otherCollision) {
 				return
 			}
@@ -147,6 +148,8 @@ const (
 	ScenicGround PriorityLevel = 10
 	// Background is the lowest PriorityLevel that will be rendered
 	Background PriorityLevel = 0
+	// Hidden indicates that it should not be rendered by the RenderSystem
+	Hidden PriorityLevel = -1
 )
 
 type RenderSystem struct {
@@ -159,6 +162,10 @@ func (rs *RenderSystem) New() {
 	rs.renders = make(map[PriorityLevel][]*Entity)
 	rs.System = NewSystem()
 	rs.ShouldSkipOnHeadless = true
+
+	Mailbox.Listen("renderChangeMessage", func(m Message) {
+		rs.changed = true
+	})
 }
 
 func (rs *RenderSystem) AddEntity(e *Entity) {
@@ -230,7 +237,7 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 		return
 	}
 
-	rs.renders[render.Priority] = append(rs.renders[render.Priority], entity)
+	rs.renders[render.priority] = append(rs.renders[render.priority], entity)
 }
 
 func (*RenderSystem) Type() string {

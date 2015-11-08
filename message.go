@@ -15,6 +15,16 @@ func (collision CollisionMessage) Type() string {
 	return "CollisionMessage"
 }
 
+type renderChangeMessage struct {
+	entity      *Entity
+	oldPriority PriorityLevel
+	newPriority PriorityLevel
+}
+
+func (renderChangeMessage) Type() string {
+	return "renderChangeMessage"
+}
+
 type MessageManager struct {
 	listeners map[string][]MessageHandler
 }

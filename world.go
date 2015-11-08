@@ -94,9 +94,7 @@ func (w *World) update(dt float32) {
 					continue // so skip it
 				}
 			}
-			if entity.Exists {
-				system.Update(entity, dt)
-			}
+			system.Update(entity, dt)
 		}
 		system.Post()
 	}
