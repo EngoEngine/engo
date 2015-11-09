@@ -4,6 +4,20 @@ import (
 	"testing"
 )
 
+type NilSystem struct {
+	*System
+}
+
+func (ns *NilSystem) New() {
+	ns.System = NewSystem()
+}
+
+func (*NilSystem) Update(*Entity, float32) {}
+
+func (*NilSystem) Type() string {
+	return "NilSystem"
+}
+
 // BenchmarkEmpty creates the game, and measures the runtime of a single frame, w/o anything set up
 func BenchmarkEmpty(b *testing.B) {
 	preload := func() {}
