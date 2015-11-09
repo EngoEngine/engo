@@ -310,6 +310,26 @@ func init() {
 	NumEnter = Key(glfw.KeyKPEnter)
 }
 
+func NewImageRGBA(img *image.RGBA) *ImageRGBA {
+	return &ImageRGBA{img}
+}
+
+type ImageRGBA struct {
+	data *image.RGBA
+}
+
+func (i *ImageRGBA) Data() interface{} {
+	return i.data
+}
+
+func (i *ImageRGBA) Width() int {
+	return i.data.Rect.Max.X
+}
+
+func (i *ImageRGBA) Height() int {
+	return i.data.Rect.Max.Y
+}
+
 func NewImageObject(img *image.NRGBA) *ImageObject {
 	return &ImageObject{img}
 }
