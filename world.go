@@ -105,7 +105,7 @@ func (w *World) update(dt float32) {
 func (w *World) batch(prio PriorityLevel) *Batch {
 	if prio >= HUDGround {
 		return w.hudBatch
-	} else {
-		return w.defaultBatch
 	}
+
+	return w.defaultBatch
 }

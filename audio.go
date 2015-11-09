@@ -1,13 +1,26 @@
 package engi
 
 import (
-	"golang.org/x/mobile/exp/audio/al"
 	"log"
+
+	"golang.org/x/mobile/exp/audio/al"
 )
 
 const (
 	defaultHeightModifier float32 = 1
 )
+
+// AudioComponent is a Component which is used by the AudioSystem
+type AudioComponent struct {
+	File       string
+	Repeat     bool
+	Background bool
+	player     *Player
+}
+
+func (AudioComponent) Type() string {
+	return "AudioComponent"
+}
 
 // AudioSystem is a System that allows for sound effects and / or music
 type AudioSystem struct {
@@ -93,16 +106,4 @@ func (as *AudioSystem) Update(entity *Entity, dt float32) {
 				0})
 		}
 	}
-}
-
-// AudioComponent is a Component which is used by the AudioSystem
-type AudioComponent struct {
-	File       string
-	Repeat     bool
-	Background bool
-	player     *Player
-}
-
-func (AudioComponent) Type() string {
-	return "AudioComponent"
 }
