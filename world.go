@@ -56,7 +56,7 @@ func (w *World) AddSystem(system Systemer) {
 }
 
 func (w *World) Entities() []*Entity {
-	entities := make([]*Entity, len(w.entities))
+	entities := make([]*Entity, 0, len(w.entities))
 	for _, v := range w.entities {
 		entities = append(entities, v)
 	}
