@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/paked/engi"
 	"log"
 	"math/rand"
 	"sync"
+
+	"github.com/paked/engi"
 )
 
 type PongGame struct{}
@@ -188,11 +189,11 @@ func (c *ControlSystem) Update(entity *engi.Entity, dt float32) {
 	up := false
 	down := false
 	if control.Scheme == "WASD" {
-		up = engi.Keys.KEY_W.Down()
-		down = engi.Keys.KEY_S.Down()
+		up = engi.Keys.Get(engi.W).Down()
+		down = engi.Keys.Get(engi.S).Down()
 	} else {
-		up = engi.Keys.KEY_UP.Down()
-		down = engi.Keys.KEY_DOWN.Down()
+		up = engi.Keys.Get(engi.ArrowUp).Down()
+		down = engi.Keys.Get(engi.ArrowDown).Down()
 	}
 
 	if up {

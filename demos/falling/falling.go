@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/paked/engi"
 	"log"
 	"math/rand"
+
+	"github.com/paked/engi"
 )
 
 var (
@@ -67,19 +68,19 @@ func (control *ControlSystem) Update(entity *engi.Entity, dt float32) {
 
 	speed := 400 * dt
 
-	if engi.Keys.KEY_A.Down() {
+	if engi.Keys.Get(engi.A).Down() {
 		space.Position.X -= speed
 	}
 
-	if engi.Keys.KEY_D.Down() {
+	if engi.Keys.Get(engi.D).Down() {
 		space.Position.X += speed
 	}
 
-	if engi.Keys.KEY_W.Down() {
+	if engi.Keys.Get(engi.W).Down() {
 		space.Position.Y -= speed
 	}
 
-	if engi.Keys.KEY_S.Down() {
+	if engi.Keys.Get(engi.S).Down() {
 		space.Position.Y += speed
 	}
 }
