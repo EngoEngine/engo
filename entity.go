@@ -37,7 +37,7 @@ func (e *Entity) RemoveComponent(component Component) {
 
 // GetComponent takes a double pointer to a Component,
 // and populates it with the value of the right type.
-func (e *Entity) GetComponent(x interface{}) bool {
+func (e *Entity) Component(x interface{}) bool {
 	v := reflect.ValueOf(x).Elem() // *T
 	c, ok := e.components[v.Type().String()]
 	if !ok {

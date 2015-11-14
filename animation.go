@@ -77,7 +77,7 @@ func (a *AnimationSystem) Update(e *Entity, dt float32) {
 		r  *RenderComponent
 	)
 
-	if !e.GetComponent(&ac) || !e.GetComponent(&r) {
+	if !e.Component(&ac) || !e.Component(&r) {
 		return
 	}
 

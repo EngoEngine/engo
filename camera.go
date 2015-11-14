@@ -66,7 +66,7 @@ func (cam *cameraSystem) New() {
 func (cam *cameraSystem) FollowEntity(entity *Entity) {
 	cam.tracking = entity
 	var space *SpaceComponent
-	if !cam.tracking.GetComponent(&space) {
+	if !cam.tracking.Component(&space) {
 		cam.tracking = nil
 		return
 	}
@@ -114,7 +114,7 @@ func (cam *cameraSystem) Update(entity *Entity, dt float32) {
 	}
 
 	var space *SpaceComponent
-	if !cam.tracking.GetComponent(&space) {
+	if !cam.tracking.Component(&space) {
 		return
 	}
 

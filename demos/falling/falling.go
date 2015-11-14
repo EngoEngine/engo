@@ -62,7 +62,7 @@ func (ControlSystem) Type() string {
 
 func (control *ControlSystem) Update(entity *engi.Entity, dt float32) {
 	var space *engi.SpaceComponent
-	if !entity.GetComponent(&space) {
+	if !entity.Component(&space) {
 		return
 	}
 
@@ -139,7 +139,7 @@ func (FallingSystem) Type() string {
 
 func (fs *FallingSystem) Update(entity *engi.Entity, dt float32) {
 	var space *engi.SpaceComponent
-	if !entity.GetComponent(&space) {
+	if !entity.Component(&space) {
 		return
 	}
 	space.Position.Y += 200 * dt

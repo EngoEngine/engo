@@ -70,7 +70,7 @@ func (c *ControlSystem) New() {
 func (c *ControlSystem) Update(entity *engi.Entity, dt float32) {
 	var a *engi.AnimationComponent
 
-	if !entity.GetComponent(&a) {
+	if !entity.Component(&a) {
 		return
 	}
 

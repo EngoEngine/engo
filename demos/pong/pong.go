@@ -88,7 +88,7 @@ func (ms *SpeedSystem) New() {
 		collision, isCollision := message.(engi.CollisionMessage)
 		if isCollision {
 			var speed *SpeedComponent
-			if !collision.Entity.GetComponent(&speed) {
+			if !collision.Entity.Component(&speed) {
 				return
 			}
 
@@ -104,7 +104,7 @@ func (*SpeedSystem) Type() string {
 func (ms *SpeedSystem) Update(entity *engi.Entity, dt float32) {
 	var speed *SpeedComponent
 	var space *engi.SpaceComponent
-	if !entity.GetComponent(&speed) || !entity.GetComponent(&space) {
+	if !entity.Component(&speed) || !entity.Component(&space) {
 		return
 	}
 	space.Position.X += speed.X * dt
@@ -136,7 +136,7 @@ func (BallSystem) Type() string {
 func (bs *BallSystem) Update(entity *engi.Entity, dt float32) {
 	var space *engi.SpaceComponent
 	var speed *SpeedComponent
-	if !entity.GetComponent(&space) || !entity.GetComponent(&speed) {
+	if !entity.Component(&space) || !entity.Component(&speed) {
 		return
 	}
 
@@ -186,7 +186,7 @@ func (c *ControlSystem) Update(entity *engi.Entity, dt float32) {
 	var control *ControlComponent
 	var space *engi.SpaceComponent
 
-	if !entity.GetComponent(&space) || !entity.GetComponent(&control) {
+	if !entity.Component(&space) || !entity.Component(&control) {
 		return
 	}
 	up := false
@@ -253,7 +253,7 @@ func (c *ScoreSystem) Update(entity *engi.Entity, dt float32) {
 	var render *engi.RenderComponent
 	var space *engi.SpaceComponent
 
-	if !entity.GetComponent(&render) || !entity.GetComponent(&space) {
+	if !entity.Component(&render) || !entity.Component(&space) {
 		return
 	}
 

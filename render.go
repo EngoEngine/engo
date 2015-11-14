@@ -119,7 +119,7 @@ func (rs *RenderSystem) Post() {
 			var render *RenderComponent
 			var space *SpaceComponent
 
-			if !entity.GetComponent(&render) || !entity.GetComponent(&space) {
+			if !entity.Component(&render) || !entity.Component(&space) {
 				continue
 			}
 
@@ -140,7 +140,7 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 	}
 
 	var render *RenderComponent
-	if !entity.GetComponent(&render) {
+	if !entity.Component(&render) {
 		return
 	}
 

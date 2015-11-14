@@ -57,7 +57,7 @@ func (s *ScaleSystem) New() {
 
 func (c *ScaleSystem) Update(e *engi.Entity, dt float32) {
 	var render *engi.RenderComponent
-	if !e.GetComponent(&render) {
+	if !e.Component(&render) {
 		return
 	}
 	var mod float32
