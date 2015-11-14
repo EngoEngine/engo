@@ -58,7 +58,7 @@ func (as *AudioSystem) New() {
 
 func (as *AudioSystem) Update(entity *Entity, dt float32) {
 	var ac *AudioComponent
-	if !entity.GetComponent(&ac) {
+	if !entity.Component(&ac) {
 		return
 	}
 
@@ -96,7 +96,7 @@ func (as *AudioSystem) Update(entity *Entity, dt float32) {
 
 		if !ac.Background {
 			var space *SpaceComponent
-			if !entity.GetComponent(&space) {
+			if !entity.Component(&space) {
 				return
 			}
 

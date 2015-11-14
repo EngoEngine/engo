@@ -89,7 +89,7 @@ func (w *World) update(dt float32) {
 		system.Pre()
 		for _, entity := range system.Entities() {
 			if w.paused {
-				ok := entity.GetComponent(&unp)
+				ok := entity.Component(&unp)
 				if !ok {
 					continue // so skip it
 				}

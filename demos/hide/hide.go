@@ -51,7 +51,7 @@ func (s *HideSystem) New() {
 
 func (c *HideSystem) Update(e *engi.Entity, dt float32) {
 	var render *engi.RenderComponent
-	if !e.GetComponent(&render) {
+	if !e.Component(&render) {
 		return
 	}
 	if rand.Int()%10 == 0 {

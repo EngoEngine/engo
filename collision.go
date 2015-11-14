@@ -67,7 +67,7 @@ func (cs *CollisionSystem) New() {
 func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 	var space *SpaceComponent
 	var collisionComponent *CollisionComponent
-	if !entity.GetComponent(&space) || !entity.GetComponent(&collisionComponent) {
+	if !entity.Component(&space) || !entity.Component(&collisionComponent) {
 		return
 	}
 
@@ -80,7 +80,7 @@ func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 
 	for _, other := range cs.Entities() {
 		if other.ID() != entity.ID() {
-			if !other.GetComponent(&otherSpace) || !other.GetComponent(&otherCollision) {
+			if !other.Component(&otherSpace) || !other.Component(&otherCollision) {
 				return
 			}
 
