@@ -116,7 +116,7 @@ func (b *Batch) flush() {
 	Gl.Uniform2f(b.ufProjection, b.projX, b.projY)
 	Gl.Uniform3f(b.center, cam.x/Width(), cam.y/Height(), cam.z)
 
-	Gl.BufferSubData(Gl.ARRAY_BUFFER, 0, b.vertices)
+	Gl.BufferSubData(Gl.ARRAY_BUFFER, 0, b.vertices[0:b.index*20])
 	Gl.DrawElements(Gl.TRIANGLES, 6*b.index, Gl.UNSIGNED_SHORT, 0)
 
 	b.index = 0
