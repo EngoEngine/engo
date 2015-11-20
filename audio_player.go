@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"encoding/binary"
+
 	"golang.org/x/mobile/exp/audio/al"
 )
 
@@ -173,12 +174,12 @@ func (p *Player) discoverHeader() error {
 	if p.t.format != format {
 		return fmt.Errorf("audio: given format %v does not match header %v", p.t.format, format)
 	}
-	sampleRate := int64(buf[24]) | int64(buf[25])<<8 | int64(buf[26])<<16 | int64(buf[27]<<24)
+	sampleRate := int64(buf[24]) | int64(buf[25])<<8 | int64(buf[26])<<16 | int64(buf[27])<<24
 	if p.t.samplesPerSecond == 0 {
 		p.t.samplesPerSecond = sampleRate
 	}
 	if p.t.samplesPerSecond != sampleRate {
-		return fmt.Errorf("audio: given sample rate %v does not match header", p.t.samplesPerSecond, sampleRate)
+		return fmt.Errorf("audio: given sample rate %v does not match header %v", p.t.samplesPerSecond, sampleRate)
 	}
 	return nil
 }

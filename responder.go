@@ -56,6 +56,7 @@ func Bench(b *testing.B, preload func(), setup func(w *World)) {
 	OpenHeadlessNoRun()
 	RunPreparation(g)
 	b.ResetTimer()
+	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		RunIteration()
 	}
