@@ -91,16 +91,17 @@ func (w *World) update(dt float32) {
 	var unp *UnpauseComponent
 	systemsList := w.Systems()
 
+	complChan := make(chan struct{})
 	for _, system := range systemsList {
 		if headless && system.SkipOnHeadless() {
 			continue // so skip it
 		}
 
 		system.Pre()
-		
+
 		entities := system.Entities()
 		count := len(entities)
-		
+
 		// Concurrency performance maximized at 20+ entities
 		// Performance tuning should be conducted for entity updates
 		if w.serial || count < 20 {
@@ -111,7 +112,6 @@ func (w *World) update(dt float32) {
 				system.Update(entity, dt)
 			}
 		} else {
-			complChan := make(chan struct{})
 			for _, entity := range entities {
 				if w.paused && !entity.Component(&unp) {
 					count--
@@ -122,13 +122,13 @@ func (w *World) update(dt float32) {
 					complChan <- struct{}{}
 				}(entity)
 			}
-			for count > 0 {
+			for ; count > 0; count-- {
 				<-complChan
-				count--
 			}
 		}
 		system.Post()
 	}
+	close(complChan)
 	w.post()
 }
 

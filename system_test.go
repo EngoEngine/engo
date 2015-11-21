@@ -6,7 +6,7 @@ import (
 )
 
 func init() {
-	runtime.GOMAXPROCS(3)
+	runtime.GOMAXPROCS(4)
 }
 
 // BenchmarkCollisionSystem10 creates 10 entities, of which half are solid, and all are Main
