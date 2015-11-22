@@ -7,7 +7,7 @@ func TestPointPointAddition(t *testing.T) {
 	b := Point{3, 1}
 	a.Add(b)
 	if a.X != 5 {
-		t.Errorf("a.X should equal 5 not", a.X)
+		t.Errorf("a.X should equal 5 not %v", a.X)
 	}
 
 	if a.Y != 6 {
@@ -20,7 +20,7 @@ func TestPointPointSubtraction(t *testing.T) {
 	b := Point{5, 2}
 	a.Subtract(b)
 	if a.X != 5 {
-		t.Errorf("a.X should equal 5 not", a.X)
+		t.Errorf("a.X should equal 5 not %v", a.X)
 	}
 
 	if a.Y != 13 {

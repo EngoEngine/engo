@@ -1,6 +1,7 @@
 package engi
 
 import (
+	"log"
 	"testing"
 )
 
@@ -22,11 +23,12 @@ func TestAddEntity(t *testing.T) {
 	headless = true
 	world := World{}
 	world.new()
-	entityOne := Entity{}
-	world.AddEntity(&entityOne)
-	entityTwo := Entity{}
-	world.AddEntity(&entityTwo)
+	entityOne := NewEntity([]string{})
+	world.AddEntity(entityOne)
+	entityTwo := NewEntity([]string{})
+	world.AddEntity(entityTwo)
 	if len(world.Entities()) != 2 {
+		log.Printf("Entities not added.  %d != 2: %+v\n", len(world.Entities()), world.Entities())
 		t.Fail()
 	}
 }

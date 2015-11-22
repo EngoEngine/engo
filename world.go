@@ -1,5 +1,7 @@
 package engi
 
+import "runtime"
+
 type World struct {
 	entities map[string]*Entity
 	systems  []Systemer
@@ -9,25 +11,33 @@ type World struct {
 
 	isSetup bool
 	paused  bool
+	serial  bool
 }
 
 func (w *World) new() {
-	if !w.isSetup {
-		w.entities = make(map[string]*Entity)
-		if !headless {
-			w.defaultBatch = NewBatch(Width(), Height(), batchVert, batchFrag)
-			w.hudBatch = NewBatch(Width(), Height(), hudVert, hudFrag)
-		}
-
-		// Default WorldBounds values
-		WorldBounds.Max = Point{Width(), Height()}
-
-		// Initialize cameraSystem
-		cam = &cameraSystem{}
-		w.AddSystem(cam)
-
-		w.isSetup = true
+	if w.isSetup {
+		return
 	}
+	w.entities = make(map[string]*Entity)
+	if !headless {
+		w.defaultBatch = NewBatch(Width(), Height(), batchVert, batchFrag)
+		w.hudBatch = NewBatch(Width(), Height(), hudVert, hudFrag)
+	}
+
+	// Default WorldBounds values
+	WorldBounds.Max = Point{Width(), Height()}
+
+	// Initialize cameraSystem
+	cam = &cameraSystem{}
+	w.AddSystem(cam)
+
+	// Short-circuit bypass if there's only 1 core
+	if runtime.NumCPU() == 1 {
+		w.serial = true
+	} else {
+		w.serial = false
+	}
+	w.isSetup = true
 }
 
 func (w *World) AddEntity(entity *Entity) {
@@ -60,7 +70,6 @@ func (w *World) Entities() []*Entity {
 	for _, v := range w.entities {
 		entities = append(entities, v)
 	}
-
 	return entities
 }
 
@@ -80,25 +89,46 @@ func (w *World) update(dt float32) {
 	w.pre()
 
 	var unp *UnpauseComponent
+	systemsList := w.Systems()
 
-	for _, system := range w.Systems() {
+	complChan := make(chan struct{})
+	for _, system := range systemsList {
 		if headless && system.SkipOnHeadless() {
 			continue // so skip it
 		}
 
 		system.Pre()
-		for _, entity := range system.Entities() {
-			if w.paused {
-				ok := entity.Component(&unp)
-				if !ok {
+
+		entities := system.Entities()
+		count := len(entities)
+
+		// Concurrency performance maximized at 20+ entities
+		// Performance tuning should be conducted for entity updates
+		if w.serial || count < 20 {
+			for _, entity := range entities {
+				if w.paused && !entity.Component(&unp) {
 					continue // so skip it
 				}
+				system.Update(entity, dt)
 			}
-			system.Update(entity, dt)
+		} else {
+			for _, entity := range entities {
+				if w.paused && !entity.Component(&unp) {
+					count--
+					continue // so skip it
+				}
+				go func(entity *Entity) {
+					system.Update(entity, dt)
+					complChan <- struct{}{}
+				}(entity)
+			}
+			for ; count > 0; count-- {
+				<-complChan
+			}
 		}
 		system.Post()
 	}
-
+	close(complChan)
 	w.post()
 }
 
@@ -106,6 +136,5 @@ func (w *World) batch(prio PriorityLevel) *Batch {
 	if prio >= HUDGround {
 		return w.hudBatch
 	}
-
 	return w.defaultBatch
 }
