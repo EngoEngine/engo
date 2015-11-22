@@ -37,7 +37,6 @@ func (w *World) new() {
 	} else {
 		w.serial = false
 	}
-
 	w.isSetup = true
 }
 
@@ -71,7 +70,6 @@ func (w *World) Entities() []*Entity {
 	for _, v := range w.entities {
 		entities = append(entities, v)
 	}
-
 	return entities
 }
 
@@ -99,10 +97,12 @@ func (w *World) update(dt float32) {
 		}
 
 		system.Pre()
-
-		complChan := make(chan struct{})
+		
 		entities := system.Entities()
 		count := len(entities)
+		
+		// Concurrency performance maximized at 20+ entities
+		// Performance tuning should be conducted for entity updates
 		if w.serial || count < 20 {
 			for _, entity := range entities {
 				if w.paused && !entity.Component(&unp) {
@@ -111,6 +111,7 @@ func (w *World) update(dt float32) {
 				system.Update(entity, dt)
 			}
 		} else {
+			complChan := make(chan struct{})
 			for _, entity := range entities {
 				if w.paused && !entity.Component(&unp) {
 					count--
@@ -128,7 +129,6 @@ func (w *World) update(dt float32) {
 		}
 		system.Post()
 	}
-
 	w.post()
 }
 
@@ -136,6 +136,5 @@ func (w *World) batch(prio PriorityLevel) *Batch {
 	if prio >= HUDGround {
 		return w.hudBatch
 	}
-
 	return w.defaultBatch
 }
