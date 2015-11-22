@@ -27,7 +27,17 @@ Before you read the basic doc, here are a few notes for me (and other contributo
 ##Installation
 ```go get -u github.com/paked/engi```
 
-*TODO* Write about the needed dependencies
+Install Dependencies (Debian/Ubuntu):  
+```
+sudo apt-get install libopenal1 libopenal-dev
+sudo apt-get install libglu1-mesa-dev freeglut3-dev mesa-common-dev
+sudo apt-get install libalut0 libalut-dev
+sudo apt-get install mesa-common-dev xorg-dev libgl1-mesa-dev
+go get
+go get github.com/stretchr/testify/assert
+```
+*TODO* Verify and detail dependencies by development platform
+
 ##Getting Started
 ```
 package main
