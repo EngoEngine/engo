@@ -23,9 +23,9 @@ func TestAddEntity(t *testing.T) {
 	headless = true
 	world := World{}
 	world.new()
-	entityOne := NewEntity([]string{})
+	entityOne := NewEntity(nil)
 	world.AddEntity(entityOne)
-	entityTwo := NewEntity([]string{})
+	entityTwo := NewEntity(nil)
 	world.AddEntity(entityTwo)
 	if len(world.Entities()) != 2 {
 		log.Printf("Entities not added.  %d != 2: %+v\n", len(world.Entities()), world.Entities())
@@ -55,7 +55,7 @@ func TestAddComponent(t *testing.T) {
 	world.AddSystem(&TestSystem{})
 	entity := NewEntity([]string{"TestSystem"})
 	world.AddEntity(entity)
-	component := SpaceComponent{Position: Point{0, 10}, Width: 100, Height: 100}
+	component := &SpaceComponent{Position: Point{0, 10}, Width: 100, Height: 100}
 	entity.AddComponent(component)
 	if len(entity.components) != 1 {
 		t.Fail()

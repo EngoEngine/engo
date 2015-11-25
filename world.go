@@ -89,10 +89,9 @@ func (w *World) update(dt float32) {
 	w.pre()
 
 	var unp *UnpauseComponent
-	systemsList := w.Systems()
 
 	complChan := make(chan struct{})
-	for _, system := range systemsList {
+	for _, system := range w.Systems() {
 		if headless && system.SkipOnHeadless() {
 			continue // so skip it
 		}
@@ -107,7 +106,7 @@ func (w *World) update(dt float32) {
 		if w.serial || count < 20 {
 			for _, entity := range entities {
 				if w.paused && !entity.Component(&unp) {
-					continue // so skip it
+					continue // with other entities
 				}
 				system.Update(entity, dt)
 			}
@@ -115,7 +114,7 @@ func (w *World) update(dt float32) {
 			for _, entity := range entities {
 				if w.paused && !entity.Component(&unp) {
 					count--
-					continue // so skip it
+					continue // with other entities
 				}
 				go func(entity *Entity) {
 					system.Update(entity, dt)

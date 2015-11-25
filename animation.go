@@ -75,9 +75,13 @@ func (a *AnimationSystem) Update(e *Entity, dt float32) {
 	var (
 		ac *AnimationComponent
 		r  *RenderComponent
+		ok bool
 	)
 
-	if !e.Component(&ac) || !e.Component(&r) {
+	if ac, ok = e.ComponentFast(ac).(*AnimationComponent); !ok {
+		return
+	}
+	if r, ok = e.ComponentFast(r).(*RenderComponent); !ok {
 		return
 	}
 
