@@ -4,7 +4,7 @@ package engi
 // system-wide pauses.
 type UnpauseComponent struct{}
 
-func (UnpauseComponent) Type() string {
+func (*UnpauseComponent) Type() string {
 	return "UnpauseComponent"
 }
 

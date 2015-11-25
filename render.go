@@ -59,7 +59,7 @@ func (r *RenderComponent) SetPriority(p PriorityLevel) {
 	r.priority = p
 }
 
-func (RenderComponent) Type() string {
+func (*RenderComponent) Type() string {
 	return "RenderComponent"
 }
 
@@ -116,11 +116,18 @@ func (rs *RenderSystem) Post() {
 		}
 		// Then render everything for this level
 		for _, entity := range rs.renders[i] {
-			var render *RenderComponent
-			var space *SpaceComponent
+			var (
+				render *RenderComponent
+				space  *SpaceComponent
+				ok     bool
+			)
 
-			if !entity.Component(&render) || !entity.Component(&space) {
-				continue
+			if render, ok = entity.ComponentFast(render).(*RenderComponent); !ok {
+				continue // with other entities
+			}
+
+			if space, ok = entity.ComponentFast(space).(*SpaceComponent); !ok {
+				continue // with other entities
 			}
 
 			render.Display.Render(batch, render, space)
@@ -140,7 +147,9 @@ func (rs *RenderSystem) Update(entity *Entity, dt float32) {
 	}
 
 	var render *RenderComponent
-	if !entity.Component(&render) {
+	var ok bool
+
+	if render, ok = entity.ComponentFast(render).(*RenderComponent); !ok {
 		return
 	}
 

@@ -18,7 +18,7 @@ type AudioComponent struct {
 	player     *Player
 }
 
-func (AudioComponent) Type() string {
+func (*AudioComponent) Type() string {
 	return "AudioComponent"
 }
 
@@ -58,7 +58,8 @@ func (as *AudioSystem) New() {
 
 func (as *AudioSystem) Update(entity *Entity, dt float32) {
 	var ac *AudioComponent
-	if !entity.Component(&ac) {
+	var ok bool
+	if ac, ok = entity.ComponentFast(ac).(*AudioComponent); !ok {
 		return
 	}
 
@@ -96,7 +97,8 @@ func (as *AudioSystem) Update(entity *Entity, dt float32) {
 
 		if !ac.Background {
 			var space *SpaceComponent
-			if !entity.Component(&space) {
+			var ok bool
+			if space, ok = entity.ComponentFast(space).(*SpaceComponent); !ok {
 				return
 			}
 

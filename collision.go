@@ -19,7 +19,7 @@ type SpaceComponent struct {
 	Height   float32
 }
 
-func (SpaceComponent) Type() string {
+func (*SpaceComponent) Type() string {
 	return "SpaceComponent"
 }
 
@@ -30,8 +30,12 @@ func (sc SpaceComponent) AABB() AABB {
 type CollisionMasterComponent struct {
 }
 
-func (CollisionMasterComponent) Type() string {
+func (*CollisionMasterComponent) Type() string {
 	return "CollisionMasterComponent"
+}
+
+func (cm CollisionMasterComponent) Is() bool {
+	return true
 }
 
 type CollisionComponent struct {
@@ -39,12 +43,8 @@ type CollisionComponent struct {
 	Extra       Point
 }
 
-func (CollisionComponent) Type() string {
+func (*CollisionComponent) Type() string {
 	return "CollisionComponent"
-}
-
-func (cm CollisionMasterComponent) Is() bool {
-	return true
 }
 
 type CollisionMessage struct {
@@ -65,27 +65,41 @@ func (cs *CollisionSystem) New() {
 }
 
 func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
-	var space *SpaceComponent
-	var collisionComponent *CollisionComponent
-	if !entity.Component(&space) || !entity.Component(&collisionComponent) {
+	var (
+		space     *SpaceComponent
+		collision *CollisionComponent
+		ok        bool
+	)
+
+	if space, ok = entity.ComponentFast(space).(*SpaceComponent); !ok {
 		return
 	}
 
-	if !collisionComponent.Main {
+	if collision, ok = entity.ComponentFast(collision).(*CollisionComponent); !ok {
 		return
 	}
 
-	var otherSpace *SpaceComponent
-	var otherCollision *CollisionComponent
+	if !collision.Main {
+		return
+	}
+
+	var (
+		otherSpace     *SpaceComponent
+		otherCollision *CollisionComponent
+	)
 
 	for _, other := range cs.Entities() {
 		if other.ID() != entity.ID() {
-			if !other.Component(&otherSpace) || !other.Component(&otherCollision) {
+			if otherSpace, ok = other.ComponentFast(otherSpace).(*SpaceComponent); !ok {
+				return
+			}
+
+			if otherCollision, ok = other.ComponentFast(otherCollision).(*CollisionComponent); !ok {
 				return
 			}
 
 			entityAABB := space.AABB()
-			offset := Point{collisionComponent.Extra.X / 2, collisionComponent.Extra.Y / 2}
+			offset := Point{collision.Extra.X / 2, collision.Extra.Y / 2}
 			entityAABB.Min.X -= offset.X
 			entityAABB.Min.Y -= offset.Y
 			entityAABB.Max.X += offset.X
@@ -97,7 +111,7 @@ func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 			otherAABB.Max.X += offset.X
 			otherAABB.Max.Y += offset.Y
 			if IsIntersecting(entityAABB, otherAABB) {
-				if otherCollision.Solid && collisionComponent.Solid {
+				if otherCollision.Solid && collision.Solid {
 					mtd := MinimumTranslation(entityAABB, otherAABB)
 					space.Position.X += mtd.X
 					space.Position.Y += mtd.Y
