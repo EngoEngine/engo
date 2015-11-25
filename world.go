@@ -60,8 +60,8 @@ func (w *World) RemoveEntity(entity *Entity) {
 }
 
 func (w *World) AddSystem(system Systemer) {
-	system.New()
 	system.SetWorld(w)
+	system.New()
 	w.systems = append(w.systems, system)
 }
 
