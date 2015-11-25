@@ -64,6 +64,10 @@ func (cs *CollisionSystem) New() {
 	cs.System = NewSystem()
 }
 
+func (cs *CollisionSystem) RunInParallel() bool {
+	return len(cs.entities) > 40 // turning point for CollisionSystem
+}
+
 func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
 	var (
 		space     *SpaceComponent

@@ -103,7 +103,7 @@ func (w *World) update(dt float32) {
 
 		// Concurrency performance maximized at 20+ entities
 		// Performance tuning should be conducted for entity updates
-		if w.serial || count < 20 {
+		if w.serial || count < 20 || !system.RunInParallel() {
 			for _, entity := range entities {
 				if w.paused && !entity.Component(&unp) {
 					continue // with other entities

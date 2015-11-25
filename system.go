@@ -20,6 +20,7 @@ type Systemer interface {
 	RemoveEntity(entity *Entity)
 	SkipOnHeadless() bool
 	SetWorld(*World)
+	RunInParallel() bool
 }
 
 type System struct {
@@ -42,6 +43,7 @@ func (s System) Post() {}
 func (s System) Priority() int {
 	return 0
 }
+func (s System) RunInParallel() bool { return false }
 
 func (s System) Entities() []*Entity {
 	list := make([]*Entity, len(s.entities))
