@@ -7,6 +7,7 @@ package engi
 import (
 	"github.com/golang/freetype/truetype"
 	"github.com/paked/webgl"
+	"image/color"
 	"io/ioutil"
 	"log"
 	"math"
@@ -252,7 +253,7 @@ type Sprite struct {
 	Scale    *Point
 	Anchor   *Point
 	Rotation float32
-	Color    uint32
+	Color    color.Color
 	Alpha    float32
 	Region   *Region
 }
@@ -263,7 +264,7 @@ func NewSprite(region *Region, x, y float32) *Sprite {
 		Scale:    &Point{1, 1},
 		Anchor:   &Point{0, 0},
 		Rotation: 0,
-		Color:    0xffffff,
+		Color:    color.White,
 		Alpha:    1,
 		Region:   region,
 	}

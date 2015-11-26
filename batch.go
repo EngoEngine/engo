@@ -9,6 +9,7 @@ import (
 	"math"
 
 	"github.com/paked/webgl"
+	"image/color"
 )
 
 const size = 10000
@@ -127,7 +128,7 @@ func (b *Batch) SetProjection(width, height, depth float32) {
 	b.projY = height
 }
 
-func (b *Batch) Draw(r Drawable, x, y, originX, originY, scaleX, scaleY, rotation float32, color uint32, transparency float32) {
+func (b *Batch) Draw(r Drawable, x, y, originX, originY, scaleX, scaleY, rotation float32, color color.Color, transparency float32) {
 	if !b.drawing {
 		log.Fatal("Batch.Begin() must be called first")
 	}
@@ -217,10 +218,13 @@ func (b *Batch) Draw(r Drawable, x, y, originX, originY, scaleX, scaleY, rotatio
 	x4 += worldOriginX
 	y4 += worldOriginY
 
-	red := (color >> 16) & 0xFF
-	green := ((color >> 8) & 0xFF) << 8
-	blue := (color & 0xFF) << 16
+	colorR, colorG, colorB, _ := color.RGBA()
+
+	red := colorR
+	green := colorG << 8
+	blue := colorB << 16
 	alpha := uint32(transparency*255.0) << 24
+
 	tint := math.Float32frombits((alpha | blue | green | red) & 0xfeffffff)
 
 	idx := b.index * 20

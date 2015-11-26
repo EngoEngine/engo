@@ -4,6 +4,8 @@
 
 package engi
 
+import "image/color"
+
 const (
 	// HighestGround is the highest PriorityLevel that will be rendered
 	HighestGround PriorityLevel = 50
@@ -30,7 +32,7 @@ type RenderComponent struct {
 	Label        string
 	priority     PriorityLevel
 	Transparency float32
-	Color        uint32
+	Color        color.Color
 }
 
 type renderChangeMessage struct {
@@ -50,7 +52,7 @@ func NewRenderComponent(display Renderable, scale Point, label string) *RenderCo
 		Label:        label,
 		priority:     MiddleGround,
 		Transparency: 1,
-		Color:        0xffffff,
+		Color:        color.White,
 	}
 }
 
