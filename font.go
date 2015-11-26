@@ -18,16 +18,12 @@ var (
 	dpi = float64(72)
 )
 
-type Color struct {
-	R, G, B, A uint8
-}
-
 // TODO FG and BG color config
 type Font struct {
 	URL  string
 	Size float64
-	BG   Color
-	FG   Color
+	BG   color.Color
+	FG   color.Color
 	ttf  *truetype.Font
 }
 
@@ -98,8 +94,8 @@ func (f *Font) Render(text string) *Texture {
 	size := f.Size
 
 	// Colors
-	fg := image.NewUniform(color.NRGBA{f.FG.R, f.FG.G, f.FG.B, f.FG.A})
-	bg := image.NewUniform(color.NRGBA{f.BG.R, f.BG.G, f.BG.B, f.BG.A})
+	fg := image.NewUniform(f.FG)
+	bg := image.NewUniform(f.BG)
 
 	// Create the font context
 	c := freetype.NewContext()

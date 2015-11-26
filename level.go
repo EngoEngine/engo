@@ -1,5 +1,7 @@
 package engi
 
+import "image/color"
+
 type Level struct {
 	Width      int
 	Height     int
@@ -13,13 +15,13 @@ type Level struct {
 func (lvl *Level) Render(b *Batch, render *RenderComponent, space *SpaceComponent) {
 	for _, img := range lvl.Images {
 		if img.Image != nil {
-			world.batch(render.priority).Draw(img.Image, img.X, img.Y, 0, 0, 1, 1, 0, 0xffffff, 1)
+			world.batch(render.priority).Draw(img.Image, img.X, img.Y, 0, 0, 1, 1, 0, color.White, 1)
 		}
 	}
 
 	for _, tile := range lvl.Tiles {
 		if tile.Image != nil {
-			world.batch(render.priority).Draw(tile.Image, (tile.X + space.Position.X), (tile.Y + space.Position.Y), 0, 0, 1, 1, 0, 0xffffff, 1)
+			world.batch(render.priority).Draw(tile.Image, (tile.X + space.Position.X), (tile.Y + space.Position.Y), 0, 0, 1, 1, 0, color.White, 1)
 		}
 	}
 }
