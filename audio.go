@@ -32,7 +32,7 @@ func (AudioSystem) Type() string {
 	return "AudioSystem"
 }
 
-func (as *AudioSystem) New() {
+func (as *AudioSystem) New(*World) {
 	as.System = NewSystem()
 
 	if as.HeightModifier == 0 {

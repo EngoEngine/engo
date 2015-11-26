@@ -81,7 +81,7 @@ type SpeedSystem struct {
 	*engi.System
 }
 
-func (ms *SpeedSystem) New() {
+func (ms *SpeedSystem) New(*engi.World) {
 	ms.System = engi.NewSystem()
 	engi.Mailbox.Listen("CollisionMessage", func(message engi.Message) {
 		log.Println("collision")
@@ -117,7 +117,7 @@ type SpeedComponent struct {
 	engi.Point
 }
 
-func (SpeedComponent) Type() string {
+func (*SpeedComponent) Type() string {
 	return "SpeedComponent"
 }
 
@@ -125,7 +125,7 @@ type BallSystem struct {
 	*engi.System
 }
 
-func (bs *BallSystem) New() {
+func (bs *BallSystem) New(*engi.World) {
 	bs.System = engi.NewSystem()
 }
 
@@ -176,7 +176,7 @@ type ControlSystem struct {
 func (ControlSystem) Type() string {
 	return "ControlSystem"
 }
-func (c *ControlSystem) New() {
+func (c *ControlSystem) New(*engi.World) {
 	c.System = engi.NewSystem()
 }
 
@@ -213,7 +213,7 @@ type ControlComponent struct {
 	Scheme string
 }
 
-func (ControlComponent) Type() string {
+func (*ControlComponent) Type() string {
 	return "ControlComponent"
 }
 
@@ -228,7 +228,7 @@ func (ScoreSystem) Type() string {
 	return "ScoreSystem"
 }
 
-func (sc *ScoreSystem) New() {
+func (sc *ScoreSystem) New(*engi.World) {
 	sc.upToDate = true
 	sc.System = engi.NewSystem()
 	engi.Mailbox.Listen("ScoreMessage", func(message engi.Message) {

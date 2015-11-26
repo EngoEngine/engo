@@ -60,7 +60,7 @@ type CollisionSystem struct {
 	*System
 }
 
-func (cs *CollisionSystem) New() {
+func (cs *CollisionSystem) New(*World) {
 	cs.System = NewSystem()
 }
 

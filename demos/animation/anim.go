@@ -63,7 +63,7 @@ func (ControlSystem) Type() string {
 	return "ControlSystem"
 }
 
-func (c *ControlSystem) New() {
+func (c *ControlSystem) New(*engi.World) {
 	c.System = engi.NewSystem()
 }
 

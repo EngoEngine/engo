@@ -45,7 +45,7 @@ func (HideSystem) Type() string {
 	return "HideSystem"
 }
 
-func (s *HideSystem) New() {
+func (s *HideSystem) New(*engi.World) {
 	s.System = engi.NewSystem()
 }
 

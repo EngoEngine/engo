@@ -52,7 +52,7 @@ type ControlSystem struct {
 	*engi.System
 }
 
-func (control *ControlSystem) New() {
+func (control *ControlSystem) New(*engi.World) {
 	control.System = engi.NewSystem()
 }
 
@@ -87,14 +87,17 @@ func (control *ControlSystem) Update(entity *engi.Entity, dt float32) {
 
 type RockSpawnSystem struct {
 	*engi.System
+
+	world *engi.World
 }
 
 func (RockSpawnSystem) Type() string {
 	return "RockSpawnSystem"
 }
 
-func (rock *RockSpawnSystem) New() {
+func (rock *RockSpawnSystem) New(w *engi.World) {
 	rock.System = engi.NewSystem()
+	rock.world = w
 }
 
 func (rock *RockSpawnSystem) Update(entity *engi.Entity, dt float32) {
@@ -105,7 +108,7 @@ func (rock *RockSpawnSystem) Update(entity *engi.Entity, dt float32) {
 
 	position := engi.Point{0, -32}
 	position.X = rand.Float32() * (engi.Width())
-	rock.World.AddEntity(NewRock(position))
+	rock.world.AddEntity(NewRock(position))
 }
 
 func NewRock(position engi.Point) *engi.Entity {
@@ -127,7 +130,7 @@ type FallingSystem struct {
 	*engi.System
 }
 
-func (fs *FallingSystem) New() {
+func (fs *FallingSystem) New(*engi.World) {
 	fs.System = engi.NewSystem()
 	//engi.Mailbox.Listen("CollisionMessage", fs)
 
@@ -149,7 +152,7 @@ type DeathSystem struct {
 	*engi.System
 }
 
-func (ds *DeathSystem) New() {
+func (ds *DeathSystem) New(*engi.World) {
 	ds.System = engi.NewSystem()
 	// Subscribe to ScoreMessage
 	engi.Mailbox.Listen("ScoreMessage", func(message engi.Message) {
