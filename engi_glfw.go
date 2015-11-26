@@ -139,12 +139,19 @@ func runHeadless(customGame CustomGame) {
 
 // RunIteration runs one iteration / frame
 func RunIteration() {
-	world.update(Time.Delta())
-
+	// First check for new keypresses
 	if !headless {
-		window.SwapBuffers()
 		glfw.PollEvents()
 		keysUpdate()
+	}
+
+	// Then update the world and all Systems
+	world.update(Time.Delta())
+
+	// Lastly, forget keypresses and swap buffers
+	if !headless {
+		Mouse.ScrollX, Mouse.ScrollY = 0, 0
+		window.SwapBuffers()
 	}
 
 	Time.Tick()

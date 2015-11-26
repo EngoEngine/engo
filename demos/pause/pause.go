@@ -33,6 +33,7 @@ func (game *GameWorld) Setup(w *engi.World) {
 	w.AddSystem(&engi.RenderSystem{})
 	w.AddSystem(&engi.AnimationSystem{})
 	w.AddSystem(&engi.PauseSystem{})
+	w.AddSystem(&ZoomPauseSystem{})
 
 	spriteSheet := engi.NewSpritesheetFromFile("hero.png", 150, 150)
 
@@ -64,10 +65,29 @@ func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Sprites
 	return entity
 }
 
-// TODO: deprecated
-func (game *GameWorld) Scroll(amount float32) {
-	// Pause the game if we're scrolling up; else, unpause
-	engi.Mailbox.Dispatch(engi.PauseMessage{amount > 0})
+type ZoomPauseSystem struct {
+	*engi.System
+}
+
+func (z *ZoomPauseSystem) New() {
+	z.System = engi.NewSystem()
+
+	// Add a dummy Entity to be sure the Update function gets called, even when Paused
+	e := engi.NewEntity([]string{z.Type()})
+	e.AddComponent(&engi.UnpauseComponent{})
+	z.AddEntity(e)
+}
+
+func (*ZoomPauseSystem) Type() string {
+	return "ZoomPauseSystem"
+}
+
+func (z *ZoomPauseSystem) Update(entity *engi.Entity, dt float32) {
+	if engi.Mouse.ScrollY > 0 {
+		engi.Mailbox.Dispatch(engi.PauseMessage{true})
+	} else if engi.Mouse.ScrollY < 0 {
+		engi.Mailbox.Dispatch(engi.PauseMessage{false})
+	}
 }
 
 func main() {
