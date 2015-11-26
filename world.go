@@ -1,10 +1,13 @@
 package engi
 
-import "runtime"
+import (
+	"runtime"
+	"sort"
+)
 
 type World struct {
 	entities map[string]*Entity
-	systems  []Systemer
+	systems  Systemers
 
 	defaultBatch *Batch
 	hudBatch     *Batch
@@ -62,6 +65,7 @@ func (w *World) RemoveEntity(entity *Entity) {
 func (w *World) AddSystem(system Systemer) {
 	system.New(w)
 	w.systems = append(w.systems, system)
+	sort.Sort(w.systems)
 }
 
 func (w *World) Entities() []*Entity {

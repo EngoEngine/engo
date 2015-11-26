@@ -64,3 +64,15 @@ func (s *System) RemoveEntity(entity *Entity) {
 func (s System) SkipOnHeadless() bool {
 	return s.ShouldSkipOnHeadless
 }
+
+type Systemers []Systemer
+
+func (s Systemers) Len() int {
+	return len(s)
+}
+func (s Systemers) Less(i, j int) bool {
+	return s[i].Priority() < s[j].Priority()
+}
+func (s Systemers) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
