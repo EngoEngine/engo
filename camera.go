@@ -26,7 +26,7 @@ func (cameraSystem) Type() string {
 	return "cameraSystem"
 }
 
-func (cam *cameraSystem) New() {
+func (cam *cameraSystem) New(*World) {
 	cam.System = NewSystem()
 
 	cam.x = WorldBounds.Max.X / 2
@@ -167,7 +167,7 @@ func (*KeyboardScroller) Type() string {
 	return "KeyboardScroller"
 }
 
-func (c *KeyboardScroller) New() {
+func (c *KeyboardScroller) New(*World) {
 	if !c.isSetup {
 		c.System = NewSystem()
 		c.isSetup = true
@@ -221,7 +221,7 @@ func NewKeyboardScroller(scrollSpeed float32, up, right, down, left Key) *Keyboa
 	kbs := &KeyboardScroller{
 		scrollSpeed: scrollSpeed,
 	}
-	kbs.New()
+	kbs.New(nil)
 	kbs.BindKeyboard(up, right, down, left)
 	kbs.AddEntity(NewEntity([]string{kbs.Type()}))
 	return kbs
@@ -240,7 +240,7 @@ func (*EdgeScroller) Type() string {
 	return "EdgeScroller"
 }
 
-func (c *EdgeScroller) New() {
+func (c *EdgeScroller) New(*World) {
 	if !c.isSetup {
 		c.System = NewSystem()
 		c.isSetup = true
@@ -269,7 +269,7 @@ func NewEdgeScroller(scrollSpeed float32, margin float64) *EdgeScroller {
 		scrollSpeed: scrollSpeed,
 		margin:      margin,
 	}
-	es.New()
+	es.New(nil)
 	es.AddEntity(NewEntity([]string{es.Type()}))
 	return es
 }
@@ -286,7 +286,7 @@ func (*MouseZoomer) Type() string {
 	return "MouseZoomer"
 }
 
-func (c *MouseZoomer) New() {
+func (c *MouseZoomer) New(*World) {
 	if !c.isSetup {
 		c.System = NewSystem()
 		c.isSetup = true
@@ -303,7 +303,7 @@ func NewMouseZoomer(zoomSpeed float32) *MouseZoomer {
 	es := &MouseZoomer{
 		zoomSpeed: zoomSpeed,
 	}
-	es.New()
+	es.New(nil)
 	es.AddEntity(NewEntity([]string{es.Type()}))
 	return es
 }

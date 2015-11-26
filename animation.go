@@ -63,7 +63,7 @@ type AnimationSystem struct {
 	*System
 }
 
-func (a *AnimationSystem) New() {
+func (a *AnimationSystem) New(*World) {
 	a.System = NewSystem()
 }
 

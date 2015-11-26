@@ -11,16 +11,20 @@ func (*UnpauseComponent) Type() string {
 // PauseSystem is a Systemer that listens for Pause messages, and then pauses the entire world
 type PauseSystem struct {
 	*System
+
+	world *World
 }
 
-func (ps *PauseSystem) New() {
+func (ps *PauseSystem) New(w *World) {
 	ps.System = NewSystem()
+	ps.world = w
+
 	Mailbox.Listen("PauseMessage", func(message Message) {
 		pm, ok := message.(PauseMessage)
 		if !ok {
 			return
 		}
-		ps.World.paused = pm.Pause
+		ps.world.paused = pm.Pause
 	})
 }
 

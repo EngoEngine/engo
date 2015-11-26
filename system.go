@@ -14,12 +14,11 @@ type Systemer interface {
 	Priority() int
 	Pre()
 	Post()
-	New()
+	New(*World)
 	Entities() []*Entity
 	AddEntity(entity *Entity)
 	RemoveEntity(entity *Entity)
 	SkipOnHeadless() bool
-	SetWorld(*World)
 	RunInParallel() bool
 }
 
@@ -27,7 +26,6 @@ type System struct {
 	entities             map[string]*Entity
 	messageQueue         []Message
 	ShouldSkipOnHeadless bool
-	World                *World
 }
 
 func NewSystem() *System {
@@ -65,8 +63,4 @@ func (s *System) RemoveEntity(entity *Entity) {
 
 func (s System) SkipOnHeadless() bool {
 	return s.ShouldSkipOnHeadless
-}
-
-func (s *System) SetWorld(w *World) {
-	s.World = w
 }

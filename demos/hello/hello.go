@@ -51,7 +51,7 @@ func (ScaleSystem) Type() string {
 	return "ScaleSystem"
 }
 
-func (s *ScaleSystem) New() {
+func (s *ScaleSystem) New(*engi.World) {
 	s.System = engi.NewSystem()
 }
 

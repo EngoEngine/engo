@@ -64,14 +64,17 @@ func (*RenderComponent) Type() string {
 }
 
 type RenderSystem struct {
+	*System
+
 	renders map[PriorityLevel][]*Entity
 	changed bool
-	*System
+	world   *World
 }
 
-func (rs *RenderSystem) New() {
+func (rs *RenderSystem) New(w *World) {
 	rs.renders = make(map[PriorityLevel][]*Entity)
 	rs.System = NewSystem()
+	rs.world = w
 	rs.ShouldSkipOnHeadless = true
 
 	Mailbox.Listen("renderChangeMessage", func(m Message) {
@@ -106,7 +109,7 @@ func (rs *RenderSystem) Post() {
 		}
 
 		// Retrieve a batch, may be the default one -- then call .Begin() if we arent already using it
-		batch := world.batch(i)
+		batch := rs.world.batch(i)
 		if batch != currentBatch {
 			if currentBatch != nil {
 				currentBatch.End()
