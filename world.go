@@ -9,9 +9,6 @@ type World struct {
 	entities map[string]*Entity
 	systems  Systemers
 
-	defaultBatch *Batch
-	hudBatch     *Batch
-
 	isSetup bool
 	paused  bool
 	serial  bool
@@ -22,10 +19,6 @@ func (w *World) new() {
 		return
 	}
 	w.entities = make(map[string]*Entity)
-	if !headless {
-		w.defaultBatch = NewBatch(Width(), Height(), batchVert, batchFrag)
-		w.hudBatch = NewBatch(Width(), Height(), hudVert, hudFrag)
-	}
 
 	// Default WorldBounds values
 	WorldBounds.Max = Point{Width(), Height()}
@@ -132,11 +125,4 @@ func (w *World) update(dt float32) {
 	}
 	close(complChan)
 	w.post()
-}
-
-func (w *World) batch(prio PriorityLevel) *Batch {
-	if prio >= HUDGround {
-		return w.hudBatch
-	}
-	return w.defaultBatch
 }

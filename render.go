@@ -68,6 +68,9 @@ func (*RenderComponent) Type() string {
 type RenderSystem struct {
 	*System
 
+	defaultBatch *Batch
+	hudBatch     *Batch
+
 	renders map[PriorityLevel][]*Entity
 	changed bool
 	world   *World
@@ -78,6 +81,11 @@ func (rs *RenderSystem) New(w *World) {
 	rs.System = NewSystem()
 	rs.world = w
 	rs.ShouldSkipOnHeadless = true
+
+	if !headless {
+		rs.defaultBatch = NewBatch(Width(), Height(), batchVert, batchFrag)
+		rs.hudBatch = NewBatch(Width(), Height(), hudVert, hudFrag)
+	}
 
 	Mailbox.Listen("renderChangeMessage", func(m Message) {
 		rs.changed = true
@@ -111,7 +119,7 @@ func (rs *RenderSystem) Post() {
 		}
 
 		// Retrieve a batch, may be the default one -- then call .Begin() if we arent already using it
-		batch := rs.world.batch(i)
+		batch := rs.batch(i)
 		if batch != currentBatch {
 			if currentBatch != nil {
 				currentBatch.End()
@@ -167,4 +175,11 @@ func (*RenderSystem) Type() string {
 
 func (rs *RenderSystem) Priority() int {
 	return 1
+}
+
+func (rs *RenderSystem) batch(prio PriorityLevel) *Batch {
+	if prio >= HUDGround {
+		return rs.hudBatch
+	}
+	return rs.defaultBatch
 }
