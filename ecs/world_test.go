@@ -1,4 +1,4 @@
-package engi
+package ecs
 
 import (
 	"log"
@@ -9,7 +9,7 @@ type TestSystem struct {
 	*System
 }
 
-func (ts *TestSystem) New() {
+func (ts *TestSystem) New(*World) {
 	ts.System = NewSystem()
 }
 
@@ -20,9 +20,8 @@ func (*TestSystem) Type() string {
 func (ts *TestSystem) Update(e *Entity, dt float32) {}
 
 func TestAddEntity(t *testing.T) {
-	headless = true
 	world := World{}
-	world.new()
+	world.New()
 	entityOne := NewEntity(nil)
 	world.AddEntity(entityOne)
 	entityTwo := NewEntity(nil)
@@ -34,9 +33,8 @@ func TestAddEntity(t *testing.T) {
 }
 
 func TestAddSystem(t *testing.T) {
-	headless = true
 	world := World{}
-	world.new()
+	world.New()
 
 	before := len(world.Systems())
 
@@ -49,13 +47,12 @@ func TestAddSystem(t *testing.T) {
 }
 
 func TestAddComponent(t *testing.T) {
-	headless = true
 	world := World{}
-	world.new()
+	world.New()
 	world.AddSystem(&TestSystem{})
 	entity := NewEntity([]string{"TestSystem"})
 	world.AddEntity(entity)
-	component := &SpaceComponent{Position: Point{0, 10}, Width: 100, Height: 100}
+	component := &MyComponent1{5}
 	entity.AddComponent(component)
 	if len(entity.components) != 1 {
 		t.Fail()

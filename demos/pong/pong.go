@@ -7,6 +7,8 @@ import (
 	"sync"
 
 	"github.com/paked/engi"
+	"github.com/paked/engi/ecs"
+	"image/color"
 )
 
 type PongGame struct{}
@@ -19,7 +21,7 @@ func (pong *PongGame) Preload() {
 	engi.Files.AddFromDir("assets", true)
 }
 
-func (pong *PongGame) Setup(w *engi.World) {
+func (pong *PongGame) Setup(w *ecs.World) {
 	engi.SetBg(0x2d3739)
 	w.AddSystem(&engi.RenderSystem{})
 	w.AddSystem(&engi.CollisionSystem{})
@@ -28,12 +30,12 @@ func (pong *PongGame) Setup(w *engi.World) {
 	w.AddSystem(&BallSystem{})
 	w.AddSystem(&ScoreSystem{})
 
-	basicFont = (&engi.Font{URL: "Roboto-Regular.ttf", Size: 32, FG: engi.Color{255, 255, 255, 255}})
+	basicFont = (&engi.Font{URL: "Roboto-Regular.ttf", Size: 32, FG: color.NRGBA{255, 255, 255, 255}})
 	if err := basicFont.CreatePreloaded(); err != nil {
 		log.Fatalln("Could not load font:", err)
 	}
 
-	ball := engi.NewEntity([]string{"RenderSystem", "CollisionSystem", "SpeedSystem", "BallSystem"})
+	ball := ecs.NewEntity([]string{"RenderSystem", "CollisionSystem", "SpeedSystem", "BallSystem"})
 	ballTexture := engi.Files.Image("ball.png")
 	ballRender := engi.NewRenderComponent(ballTexture, engi.Point{2, 2}, "ball")
 	ballSpace := &engi.SpaceComponent{engi.Point{(engi.Width() - ballTexture.Width()) / 2, (engi.Height() - ballTexture.Height()) / 2}, ballTexture.Width() * ballRender.Scale.X, ballTexture.Height() * ballRender.Scale.Y}
@@ -47,7 +49,7 @@ func (pong *PongGame) Setup(w *engi.World) {
 	ball.AddComponent(ballSpeed)
 	w.AddEntity(ball)
 
-	score := engi.NewEntity([]string{"RenderSystem", "ScoreSystem"})
+	score := ecs.NewEntity([]string{"RenderSystem", "ScoreSystem"})
 
 	scoreRender := engi.NewRenderComponent(basicFont.Render(" "), engi.Point{1, 1}, "YOLO <3")
 
@@ -58,7 +60,7 @@ func (pong *PongGame) Setup(w *engi.World) {
 
 	schemes := []string{"WASD", ""}
 	for i := 0; i < 2; i++ {
-		paddle := engi.NewEntity([]string{"RenderSystem", "CollisionSystem", "ControlSystem"})
+		paddle := ecs.NewEntity([]string{"RenderSystem", "CollisionSystem", "ControlSystem"})
 		paddleTexture := engi.Files.Image("paddle.png")
 		paddleRender := engi.NewRenderComponent(paddleTexture, engi.Point{2, 2}, "paddle")
 		x := float32(0)
@@ -78,11 +80,11 @@ func (pong *PongGame) Setup(w *engi.World) {
 }
 
 type SpeedSystem struct {
-	*engi.System
+	*ecs.System
 }
 
-func (ms *SpeedSystem) New(*engi.World) {
-	ms.System = engi.NewSystem()
+func (ms *SpeedSystem) New(*ecs.World) {
+	ms.System = ecs.NewSystem()
 	engi.Mailbox.Listen("CollisionMessage", func(message engi.Message) {
 		log.Println("collision")
 		collision, isCollision := message.(engi.CollisionMessage)
@@ -101,7 +103,7 @@ func (*SpeedSystem) Type() string {
 	return "SpeedSystem"
 }
 
-func (ms *SpeedSystem) Update(entity *engi.Entity, dt float32) {
+func (ms *SpeedSystem) Update(entity *ecs.Entity, dt float32) {
 	var speed *SpeedComponent
 	var space *engi.SpaceComponent
 	if !entity.Component(&speed) || !entity.Component(&space) {
@@ -122,18 +124,18 @@ func (*SpeedComponent) Type() string {
 }
 
 type BallSystem struct {
-	*engi.System
+	*ecs.System
 }
 
-func (bs *BallSystem) New(*engi.World) {
-	bs.System = engi.NewSystem()
+func (bs *BallSystem) New(*ecs.World) {
+	bs.System = ecs.NewSystem()
 }
 
 func (BallSystem) Type() string {
 	return "BallSystem"
 }
 
-func (bs *BallSystem) Update(entity *engi.Entity, dt float32) {
+func (bs *BallSystem) Update(entity *ecs.Entity, dt float32) {
 	var space *engi.SpaceComponent
 	var speed *SpeedComponent
 	if !entity.Component(&space) || !entity.Component(&speed) {
@@ -170,17 +172,17 @@ func (bs *BallSystem) Update(entity *engi.Entity, dt float32) {
 }
 
 type ControlSystem struct {
-	*engi.System
+	*ecs.System
 }
 
 func (ControlSystem) Type() string {
 	return "ControlSystem"
 }
-func (c *ControlSystem) New(*engi.World) {
-	c.System = engi.NewSystem()
+func (c *ControlSystem) New(*ecs.World) {
+	c.System = ecs.NewSystem()
 }
 
-func (c *ControlSystem) Update(entity *engi.Entity, dt float32) {
+func (c *ControlSystem) Update(entity *ecs.Entity, dt float32) {
 	//Check scheme
 	// -Move entity based on that
 	var control *ControlComponent
@@ -218,7 +220,7 @@ func (*ControlComponent) Type() string {
 }
 
 type ScoreSystem struct {
-	*engi.System
+	*ecs.System
 	PlayerOneScore, PlayerTwoScore int
 	upToDate                       bool
 	scoreLock                      sync.RWMutex
@@ -228,9 +230,9 @@ func (ScoreSystem) Type() string {
 	return "ScoreSystem"
 }
 
-func (sc *ScoreSystem) New(*engi.World) {
+func (sc *ScoreSystem) New(*ecs.World) {
 	sc.upToDate = true
-	sc.System = engi.NewSystem()
+	sc.System = ecs.NewSystem()
 	engi.Mailbox.Listen("ScoreMessage", func(message engi.Message) {
 		scoreMessage, isScore := message.(ScoreMessage)
 		if !isScore {
@@ -249,7 +251,7 @@ func (sc *ScoreSystem) New(*engi.World) {
 	})
 }
 
-func (c *ScoreSystem) Update(entity *engi.Entity, dt float32) {
+func (c *ScoreSystem) Update(entity *ecs.Entity, dt float32) {
 	var render *engi.RenderComponent
 	var space *engi.SpaceComponent
 

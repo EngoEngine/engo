@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/paked/engi/ecs"
 )
 
 var (
@@ -17,23 +18,23 @@ var (
 
 // CameraSystem is a System that manages the state of the Camera
 type cameraSystem struct {
-	*System
+	*ecs.System
 	x, y, z  float32
-	tracking *Entity // The entity that is currently being followed
+	tracking *ecs.Entity // The entity that is currently being followed
 }
 
 func (cameraSystem) Type() string {
 	return "cameraSystem"
 }
 
-func (cam *cameraSystem) New(*World) {
-	cam.System = NewSystem()
+func (cam *cameraSystem) New(*ecs.World) {
+	cam.System = ecs.NewSystem()
 
 	cam.x = WorldBounds.Max.X / 2
 	cam.y = WorldBounds.Max.Y / 2
 	cam.z = 1
 
-	cam.AddEntity(NewEntity([]string{cam.Type()}))
+	cam.AddEntity(ecs.NewEntity([]string{cam.Type()}))
 
 	Mailbox.Listen("CameraMessage", func(msg Message) {
 		cammsg, ok := msg.(CameraMessage)
@@ -63,7 +64,7 @@ func (cam *cameraSystem) New(*World) {
 	})
 }
 
-func (cam *cameraSystem) FollowEntity(entity *Entity) {
+func (cam *cameraSystem) FollowEntity(entity *ecs.Entity) {
 	cam.tracking = entity
 	var space *SpaceComponent
 
@@ -109,7 +110,7 @@ func (cam *cameraSystem) Z() float32 {
 	return cam.z
 }
 
-func (cam *cameraSystem) Update(entity *Entity, dt float32) {
+func (cam *cameraSystem) Update(entity *ecs.Entity, dt float32) {
 	if cam.tracking == nil {
 		return
 	}
@@ -152,7 +153,7 @@ func (CameraMessage) Type() string {
 
 // KeyboardScroller is a Systemer that allows for scrolling when certain keys are pressed
 type KeyboardScroller struct {
-	*System
+	*ecs.System
 	scrollSpeed float32
 	upKeys      []Key
 	leftKeys    []Key
@@ -167,14 +168,14 @@ func (*KeyboardScroller) Type() string {
 	return "KeyboardScroller"
 }
 
-func (c *KeyboardScroller) New(*World) {
+func (c *KeyboardScroller) New(*ecs.World) {
 	if !c.isSetup {
-		c.System = NewSystem()
+		c.System = ecs.NewSystem()
 		c.isSetup = true
 	}
 }
 
-func (c *KeyboardScroller) Update(entity *Entity, dt float32) {
+func (c *KeyboardScroller) Update(entity *ecs.Entity, dt float32) {
 	c.keysMu.RLock()
 	defer c.keysMu.RUnlock()
 
@@ -223,13 +224,13 @@ func NewKeyboardScroller(scrollSpeed float32, up, right, down, left Key) *Keyboa
 	}
 	kbs.New(nil)
 	kbs.BindKeyboard(up, right, down, left)
-	kbs.AddEntity(NewEntity([]string{kbs.Type()}))
+	kbs.AddEntity(ecs.NewEntity([]string{kbs.Type()}))
 	return kbs
 }
 
 // EdgeScroller is a Systemer that allows for scrolling when the mouse is near the edges
 type EdgeScroller struct {
-	*System
+	*ecs.System
 	scrollSpeed float32
 	margin      float64
 
@@ -240,14 +241,14 @@ func (*EdgeScroller) Type() string {
 	return "EdgeScroller"
 }
 
-func (c *EdgeScroller) New(*World) {
+func (c *EdgeScroller) New(*ecs.World) {
 	if !c.isSetup {
-		c.System = NewSystem()
+		c.System = ecs.NewSystem()
 		c.isSetup = true
 	}
 }
 
-func (c *EdgeScroller) Update(entity *Entity, dt float32) {
+func (c *EdgeScroller) Update(entity *ecs.Entity, dt float32) {
 	curX, curY := window.GetCursorPos()
 	maxX, maxY := window.GetSize()
 
@@ -270,13 +271,13 @@ func NewEdgeScroller(scrollSpeed float32, margin float64) *EdgeScroller {
 		margin:      margin,
 	}
 	es.New(nil)
-	es.AddEntity(NewEntity([]string{es.Type()}))
+	es.AddEntity(ecs.NewEntity([]string{es.Type()}))
 	return es
 }
 
 // MouseZoomer is a Systemer that allows for zooming when the scroll wheel is used
 type MouseZoomer struct {
-	*System
+	*ecs.System
 	zoomSpeed float32
 
 	isSetup bool
@@ -286,14 +287,14 @@ func (*MouseZoomer) Type() string {
 	return "MouseZoomer"
 }
 
-func (c *MouseZoomer) New(*World) {
+func (c *MouseZoomer) New(*ecs.World) {
 	if !c.isSetup {
-		c.System = NewSystem()
+		c.System = ecs.NewSystem()
 		c.isSetup = true
 	}
 }
 
-func (c *MouseZoomer) Update(entity *Entity, dt float32) {
+func (c *MouseZoomer) Update(entity *ecs.Entity, dt float32) {
 	if Mouse.ScrollY != 0 {
 		Mailbox.Dispatch(CameraMessage{ZAxis, Mouse.ScrollY * c.zoomSpeed, true})
 	}
@@ -304,6 +305,6 @@ func NewMouseZoomer(zoomSpeed float32) *MouseZoomer {
 		zoomSpeed: zoomSpeed,
 	}
 	es.New(nil)
-	es.AddEntity(NewEntity([]string{es.Type()}))
+	es.AddEntity(ecs.NewEntity([]string{es.Type()}))
 	return es
 }

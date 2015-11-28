@@ -20,6 +20,7 @@ import (
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
+	"github.com/paked/engi/ecs"
 	"github.com/paked/webgl"
 )
 
@@ -146,7 +147,7 @@ func RunIteration() {
 	}
 
 	// Then update the world and all Systems
-	world.update(Time.Delta())
+	world.Update(Time.Delta())
 
 	// Lastly, forget keypresses and swap buffers
 	if !headless {
@@ -164,8 +165,8 @@ func RunPreparation(customGame CustomGame) {
 
 	Files.Load(func() {})
 
-	world = &World{}
-	world.new()
+	world = &ecs.World{}
+	world.New()
 
 	customGame.Setup(world)
 }

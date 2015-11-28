@@ -4,12 +4,13 @@ import (
 	"log"
 
 	"github.com/paked/engi"
+	"github.com/paked/engi/ecs"
 )
 
 var World *GameWorld
 
 type GameWorld struct {
-	engi.World
+	ecs.World
 }
 
 func (game *GameWorld) Preload() {
@@ -24,7 +25,7 @@ func (game *GameWorld) Setup() {
 
 	game.AddSystem(&engi.RenderSystem{})
 
-	gameMap := engi.NewEntity([]string{"RenderSystem"})
+	gameMap := ecs.NewEntity([]string{"RenderSystem"})
 	tilemap := engi.NewTilemap(
 		[][]string{
 			{"0", "2", "0"},

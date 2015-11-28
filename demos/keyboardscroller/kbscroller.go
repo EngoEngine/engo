@@ -5,6 +5,7 @@ import (
 	"image/color"
 
 	"github.com/paked/engi"
+	"github.com/paked/engi/ecs"
 )
 
 type Game struct{}
@@ -16,7 +17,7 @@ var (
 )
 
 // generateBackground creates a background of green tiles - might not be the most efficient way to do this
-func generateBackground() *engi.Entity {
+func generateBackground() *ecs.Entity {
 	rect := image.Rect(0, 0, int(worldWidth), int(worldHeight))
 	img := image.NewNRGBA(rect)
 	c1 := color.RGBA{102, 153, 0, 255}
@@ -39,7 +40,7 @@ func generateBackground() *engi.Entity {
 		}
 	}
 	bgTexture := engi.NewImageObject(img)
-	field := engi.NewEntity([]string{"RenderSystem"})
+	field := ecs.NewEntity([]string{"RenderSystem"})
 	fieldRender := engi.NewRenderComponent(engi.NewRegion(engi.NewTexture(bgTexture), 0, 0, int(worldWidth), int(worldHeight)), engi.Point{1, 1}, "Background1")
 	fieldRender.SetPriority(engi.Background)
 	fieldSpace := &engi.SpaceComponent{engi.Point{0, 0}, worldWidth, worldHeight}
@@ -51,7 +52,7 @@ func generateBackground() *engi.Entity {
 func (game *Game) Preload() {}
 
 // Setup is called before the main loop is started
-func (game *Game) Setup(w *engi.World) {
+func (game *Game) Setup(w *ecs.World) {
 	engi.SetBg(0x222222)
 	w.AddSystem(&engi.RenderSystem{})
 

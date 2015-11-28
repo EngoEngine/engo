@@ -2,35 +2,35 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package engi
+package ecs
 
 type Component interface {
 	Type() string
 }
 
 type Systemer interface {
-	Update(entity *Entity, dt float32)
 	Type() string
 	Priority() int
+	RunInParallel() bool
+
+	New(*World)
 	Pre()
 	Post()
-	New(*World)
+	Update(entity *Entity, dt float32)
+
 	Entities() []*Entity
 	AddEntity(entity *Entity)
 	RemoveEntity(entity *Entity)
-	SkipOnHeadless() bool
-	RunInParallel() bool
 }
 
 type System struct {
-	entities             map[string]*Entity
-	messageQueue         []Message
+	EntityMap            map[string]*Entity
 	ShouldSkipOnHeadless bool
 }
 
 func NewSystem() *System {
 	s := &System{}
-	s.entities = make(map[string]*Entity)
+	s.EntityMap = make(map[string]*Entity)
 	return s
 }
 
@@ -44,9 +44,9 @@ func (s System) Priority() int {
 func (s System) RunInParallel() bool { return false }
 
 func (s System) Entities() []*Entity {
-	list := make([]*Entity, len(s.entities))
+	list := make([]*Entity, len(s.EntityMap))
 	i := 0
-	for _, ent := range s.entities {
+	for _, ent := range s.EntityMap {
 		list[i] = ent
 		i++
 	}
@@ -54,15 +54,11 @@ func (s System) Entities() []*Entity {
 }
 
 func (s *System) AddEntity(entity *Entity) {
-	s.entities[entity.ID()] = entity
+	s.EntityMap[entity.ID()] = entity
 }
 
 func (s *System) RemoveEntity(entity *Entity) {
-	delete(s.entities, entity.ID())
-}
-
-func (s System) SkipOnHeadless() bool {
-	return s.ShouldSkipOnHeadless
+	delete(s.EntityMap, entity.ID())
 }
 
 type Systemers []Systemer

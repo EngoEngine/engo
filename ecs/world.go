@@ -1,4 +1,4 @@
-package engi
+package ecs
 
 import (
 	"runtime"
@@ -10,22 +10,19 @@ type World struct {
 	systems  Systemers
 
 	isSetup bool
-	paused  bool
 	serial  bool
 }
 
-func (w *World) new() {
+func (w *World) New() {
 	if w.isSetup {
 		return
 	}
 	w.entities = make(map[string]*Entity)
 
-	// Default WorldBounds values
-	WorldBounds.Max = Point{Width(), Height()}
-
-	// Initialize cameraSystem
-	cam = &cameraSystem{}
-	w.AddSystem(cam)
+	/*
+		// Default WorldBounds values
+		WorldBounds.Max = Point{Width(), Height()}
+	*/
 
 	// Short-circuit bypass if there's only 1 core
 	if runtime.NumCPU() == 1 {
@@ -62,9 +59,11 @@ func (w *World) AddSystem(system Systemer) {
 }
 
 func (w *World) Entities() []*Entity {
-	entities := make([]*Entity, 0, len(w.entities))
+	entities := make([]*Entity, len(w.entities))
+	i := 0
 	for _, v := range w.entities {
-		entities = append(entities, v)
+		entities[i] = v
+		i++
 	}
 	return entities
 }
@@ -73,45 +72,22 @@ func (w *World) Systems() []Systemer {
 	return w.systems
 }
 
-func (w *World) pre() {
-	if !headless {
-		Gl.Clear(Gl.COLOR_BUFFER_BIT)
-	}
-}
-
-func (w *World) post() {}
-
-func (w *World) update(dt float32) {
-	w.pre()
-
-	var unp *UnpauseComponent
-
+// Update is called on each frame, with dt being the time difference in seconds since the last Update call
+func (w *World) Update(dt float32) {
 	complChan := make(chan struct{})
 	for _, system := range w.Systems() {
-		if headless && system.SkipOnHeadless() {
-			continue // so skip it
-		}
-
 		system.Pre()
 
 		entities := system.Entities()
 		count := len(entities)
 
-		// Concurrency performance maximized at 20+ entities
-		// Performance tuning should be conducted for entity updates
-		if w.serial || count < 20 || !system.RunInParallel() {
+		// Calling them serial / in parallel, depending on the settings
+		if w.serial || !system.RunInParallel() {
 			for _, entity := range entities {
-				if w.paused && !entity.Component(&unp) {
-					continue // with other entities
-				}
 				system.Update(entity, dt)
 			}
 		} else {
 			for _, entity := range entities {
-				if w.paused && !entity.Component(&unp) {
-					count--
-					continue // with other entities
-				}
 				go func(entity *Entity) {
 					system.Update(entity, dt)
 					complChan <- struct{}{}
@@ -124,5 +100,4 @@ func (w *World) update(dt float32) {
 		system.Post()
 	}
 	close(complChan)
-	w.post()
 }

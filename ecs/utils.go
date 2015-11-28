@@ -1,4 +1,4 @@
-package engi
+package ecs
 
 import (
 	"fmt"
