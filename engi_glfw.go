@@ -161,6 +161,9 @@ func RunIteration() {
 // RunPreparation is called only once, and is called automatically when calling Open
 // It is only here for benchmarking in combination with OpenHeadlessNoRun
 func RunPreparation(customGame CustomGame) {
+	// Default WorldBounds values
+	WorldBounds.Max = Point{Width(), Height()}
+
 	customGame.Preload()
 
 	Files.Load(func() {})
