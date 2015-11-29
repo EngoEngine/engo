@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/paked/engi"
+	"github.com/paked/engi/ecs"
 )
 
 var (
@@ -27,7 +28,7 @@ func (game *GameWorld) Preload() {
 	actions = []*engi.AnimationAction{DieAction, StopAction, WalkAction, RunAction, SkillAction}
 }
 
-func (game *GameWorld) Setup(w *engi.World) {
+func (game *GameWorld) Setup(w *ecs.World) {
 	engi.SetBg(0xFFFFFF)
 
 	w.AddSystem(&engi.RenderSystem{})
@@ -40,8 +41,8 @@ func (game *GameWorld) Setup(w *engi.World) {
 	w.AddEntity(game.CreateEntity(&engi.Point{0, 0}, spriteSheet, StopAction))
 }
 
-func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Spritesheet, action *engi.AnimationAction) *engi.Entity {
-	entity := engi.NewEntity([]string{"AnimationSystem", "RenderSystem", "ControlSystem"})
+func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Spritesheet, action *engi.AnimationAction) *ecs.Entity {
+	entity := ecs.NewEntity([]string{"AnimationSystem", "RenderSystem", "ControlSystem"})
 
 	space := &engi.SpaceComponent{*point, 150, 150}
 	render := engi.NewRenderComponent(spriteSheet.Cell(action.Frames[0]), engi.Point{3, 3}, "hero")
@@ -56,18 +57,18 @@ func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Sprites
 }
 
 type ControlSystem struct {
-	*engi.System
+	*ecs.System
 }
 
 func (ControlSystem) Type() string {
 	return "ControlSystem"
 }
 
-func (c *ControlSystem) New(*engi.World) {
-	c.System = engi.NewSystem()
+func (c *ControlSystem) New(*ecs.World) {
+	c.System = ecs.NewSystem()
 }
 
-func (c *ControlSystem) Update(entity *engi.Entity, dt float32) {
+func (c *ControlSystem) Update(entity *ecs.Entity, dt float32) {
 	var a *engi.AnimationComponent
 
 	if !entity.Component(&a) {

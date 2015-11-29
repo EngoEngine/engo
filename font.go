@@ -93,6 +93,14 @@ func (f *Font) Render(text string) *Texture {
 	font := f.ttf
 	size := f.Size
 
+	// Default colors
+	if f.FG == nil {
+		f.FG = color.NRGBA{0, 0, 0, 0}
+	}
+	if f.BG == nil {
+		f.BG = color.NRGBA{0, 0, 0, 0}
+	}
+
 	// Colors
 	fg := image.NewUniform(f.FG)
 	bg := image.NewUniform(f.BG)

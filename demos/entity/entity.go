@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/paked/engi"
+	"github.com/paked/engi/ecs"
 )
 
 var World *GameWorld
@@ -17,13 +18,13 @@ func (game *GameWorld) Preload() {
 	log.Println("Preloaded")
 }
 
-func (game *GameWorld) Setup(w *engi.World) {
+func (game *GameWorld) Setup(w *ecs.World) {
 	engi.SetBg(0x2d3739)
 
 	w.AddSystem(&engi.RenderSystem{})
 
 	// Create an entity part of the Render and Scale systems
-	guy := engi.NewEntity([]string{"RenderSystem", "ScaleSystem"})
+	guy := ecs.NewEntity([]string{"RenderSystem", "ScaleSystem"})
 	// Retrieve a texture
 	texture := engi.Files.Image("icon.png")
 

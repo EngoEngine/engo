@@ -5,6 +5,7 @@ import (
 	"math/rand"
 
 	"github.com/paked/engi"
+	"github.com/paked/engi/ecs"
 )
 
 var World *GameWorld
@@ -20,13 +21,13 @@ func (game *GameWorld) Preload() {
 	log.Println("Preloaded")
 }
 
-func (game *GameWorld) Setup(w *engi.World) {
+func (game *GameWorld) Setup(w *ecs.World) {
 	engi.SetBg(0x2d3739)
 
 	w.AddSystem(&engi.RenderSystem{})
 	w.AddSystem(&ScaleSystem{})
 
-	guy := engi.NewEntity([]string{"RenderSystem", "ScaleSystem"})
+	guy := ecs.NewEntity([]string{"RenderSystem", "ScaleSystem"})
 	texture := engi.Files.Image("icon.png")
 	render := engi.NewRenderComponent(texture, engi.Point{8, 8}, "guy")
 	collision := &engi.CollisionComponent{Solid: true, Main: true}
@@ -44,18 +45,18 @@ func (game *GameWorld) Setup(w *engi.World) {
 }
 
 type ScaleSystem struct {
-	*engi.System
+	*ecs.System
 }
 
 func (ScaleSystem) Type() string {
 	return "ScaleSystem"
 }
 
-func (s *ScaleSystem) New(*engi.World) {
-	s.System = engi.NewSystem()
+func (s *ScaleSystem) New(*ecs.World) {
+	s.System = ecs.NewSystem()
 }
 
-func (c *ScaleSystem) Update(e *engi.Entity, dt float32) {
+func (c *ScaleSystem) Update(e *ecs.Entity, dt float32) {
 	var render *engi.RenderComponent
 	if !e.Component(&render) {
 		return

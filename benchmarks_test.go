@@ -1,18 +1,19 @@
 package engi
 
 import (
+	"github.com/paked/engi/ecs"
 	"testing"
 )
 
 type NilSystem struct {
-	*System
+	*ecs.System
 }
 
 func (ns *NilSystem) New() {
-	ns.System = NewSystem()
+	ns.System = ecs.NewSystem()
 }
 
-func (*NilSystem) Update(*Entity, float32) {}
+func (*NilSystem) Update(*ecs.Entity, float32) {}
 
 func (*NilSystem) Type() string {
 	return "NilSystem"
@@ -21,7 +22,7 @@ func (*NilSystem) Type() string {
 // BenchmarkEmpty creates the game, and measures the runtime of a single frame, w/o anything set up
 func BenchmarkEmpty(b *testing.B) {
 	preload := func() {}
-	setup := func(w *World) {}
+	setup := func(w *ecs.World) {}
 	Bench(b, preload, setup)
 }
 
@@ -30,7 +31,7 @@ func BenchmarkSystem10(b *testing.B) {
 	const count = 10
 
 	preload := func() {}
-	setup := func(w *World) {
+	setup := func(w *ecs.World) {
 		for i := 0; i < count; i++ {
 			w.AddSystem(&NilSystem{})
 		}
@@ -43,7 +44,7 @@ func BenchmarkSystem1000(b *testing.B) {
 	const count = 1000
 
 	preload := func() {}
-	setup := func(w *World) {
+	setup := func(w *ecs.World) {
 		for i := 0; i < count; i++ {
 			w.AddSystem(&NilSystem{})
 		}
@@ -56,10 +57,10 @@ func BenchmarkEntity10(b *testing.B) {
 	const count = 10
 
 	preload := func() {}
-	setup := func(w *World) {
+	setup := func(w *ecs.World) {
 		w.AddSystem(&NilSystem{})
 		for i := 0; i < count; i++ {
-			w.AddEntity(NewEntity([]string{"NilSystem"}))
+			w.AddEntity(ecs.NewEntity([]string{"NilSystem"}))
 		}
 	}
 	Bench(b, preload, setup)
@@ -70,10 +71,10 @@ func BenchmarkEntity1000(b *testing.B) {
 	const count = 1000
 
 	preload := func() {}
-	setup := func(w *World) {
+	setup := func(w *ecs.World) {
 		w.AddSystem(&NilSystem{})
 		for i := 0; i < count; i++ {
-			w.AddEntity(NewEntity([]string{"NilSystem"}))
+			w.AddEntity(ecs.NewEntity([]string{"NilSystem"}))
 		}
 	}
 	Bench(b, preload, setup)

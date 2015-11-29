@@ -4,7 +4,10 @@
 
 package engi
 
-import "image/color"
+import (
+	"github.com/paked/engi/ecs"
+	"image/color"
+)
 
 const (
 	// HighestGround is the highest PriorityLevel that will be rendered
@@ -36,7 +39,7 @@ type RenderComponent struct {
 }
 
 type renderChangeMessage struct {
-	entity      *Entity
+	entity      *ecs.Entity
 	oldPriority PriorityLevel
 	newPriority PriorityLevel
 }
@@ -66,43 +69,65 @@ func (*RenderComponent) Type() string {
 }
 
 type RenderSystem struct {
-	*System
+	*ecs.System
 
-	renders map[PriorityLevel][]*Entity
+	defaultBatch *Batch
+	hudBatch     *Batch
+
+	renders map[PriorityLevel][]*ecs.Entity
 	changed bool
-	world   *World
+	world   *ecs.World
 }
 
-func (rs *RenderSystem) New(w *World) {
-	rs.renders = make(map[PriorityLevel][]*Entity)
-	rs.System = NewSystem()
+func (rs *RenderSystem) New(w *ecs.World) {
+	rs.renders = make(map[PriorityLevel][]*ecs.Entity)
+	rs.System = ecs.NewSystem()
 	rs.world = w
 	rs.ShouldSkipOnHeadless = true
+
+	if !headless {
+		rs.defaultBatch = NewBatch(Width(), Height(), batchVert, batchFrag)
+		rs.hudBatch = NewBatch(Width(), Height(), hudVert, hudFrag)
+	}
+
+	// Set cameraSystem if doesn't already exist
+	if cam == nil {
+		cam = &cameraSystem{}
+		w.AddSystem(cam)
+	}
 
 	Mailbox.Listen("renderChangeMessage", func(m Message) {
 		rs.changed = true
 	})
 }
 
-func (rs *RenderSystem) AddEntity(e *Entity) {
+func (rs *RenderSystem) AddEntity(e *ecs.Entity) {
 	rs.changed = true
 	rs.System.AddEntity(e)
 }
 
-func (rs *RenderSystem) RemoveEntity(e *Entity) {
+func (rs *RenderSystem) RemoveEntity(e *ecs.Entity) {
 	rs.changed = true
 	rs.System.RemoveEntity(e)
 }
 
 func (rs *RenderSystem) Pre() {
+	if !headless {
+		Gl.Clear(Gl.COLOR_BUFFER_BIT)
+	}
+
 	if !rs.changed {
 		return
 	}
 
-	rs.renders = make(map[PriorityLevel][]*Entity)
+	rs.renders = make(map[PriorityLevel][]*ecs.Entity)
 }
 
 func (rs *RenderSystem) Post() {
+	if headless {
+		return
+	}
+
 	var currentBatch *Batch
 
 	for i := Background; i <= HighestGround; i++ {
@@ -111,7 +136,7 @@ func (rs *RenderSystem) Post() {
 		}
 
 		// Retrieve a batch, may be the default one -- then call .Begin() if we arent already using it
-		batch := rs.world.batch(i)
+		batch := rs.batch(i)
 		if batch != currentBatch {
 			if currentBatch != nil {
 				currentBatch.End()
@@ -146,7 +171,7 @@ func (rs *RenderSystem) Post() {
 	rs.changed = false
 }
 
-func (rs *RenderSystem) Update(entity *Entity, dt float32) {
+func (rs *RenderSystem) Update(entity *ecs.Entity, dt float32) {
 	if !rs.changed {
 		return
 	}
@@ -167,4 +192,11 @@ func (*RenderSystem) Type() string {
 
 func (rs *RenderSystem) Priority() int {
 	return 1
+}
+
+func (rs *RenderSystem) batch(prio PriorityLevel) *Batch {
+	if prio >= HUDGround {
+		return rs.hudBatch
+	}
+	return rs.defaultBatch
 }

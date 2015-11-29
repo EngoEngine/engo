@@ -5,6 +5,7 @@ import (
 	"math/rand"
 
 	"github.com/paked/engi"
+	"github.com/paked/engi/ecs"
 )
 
 var (
@@ -18,7 +19,7 @@ func (game *Game) Preload() {
 	engi.Files.AddFromDir("data", false)
 }
 
-func (game *Game) Setup(w *engi.World) {
+func (game *Game) Setup(w *ecs.World) {
 	engi.SetBg(0x2d3739)
 
 	// Add all of the systems
@@ -30,7 +31,7 @@ func (game *Game) Setup(w *engi.World) {
 	w.AddSystem(&RockSpawnSystem{})
 
 	// Create new entity subscribed to all the systems!
-	guy := engi.NewEntity([]string{"RenderSystem", "ControlSystem", "RockSpawnSystem", "CollisionSystem", "DeathSystem"})
+	guy := ecs.NewEntity([]string{"RenderSystem", "ControlSystem", "RockSpawnSystem", "CollisionSystem", "DeathSystem"})
 	texture := engi.Files.Image("icon.png")
 	render := engi.NewRenderComponent(texture, engi.Point{4, 4}, "guy")
 	// Tell the collision system that this player is solid
@@ -49,18 +50,18 @@ func (game *Game) Setup(w *engi.World) {
 }
 
 type ControlSystem struct {
-	*engi.System
+	*ecs.System
 }
 
-func (control *ControlSystem) New(*engi.World) {
-	control.System = engi.NewSystem()
+func (control *ControlSystem) New(*ecs.World) {
+	control.System = ecs.NewSystem()
 }
 
 func (ControlSystem) Type() string {
 	return "ControlSystem"
 }
 
-func (control *ControlSystem) Update(entity *engi.Entity, dt float32) {
+func (control *ControlSystem) Update(entity *ecs.Entity, dt float32) {
 	var space *engi.SpaceComponent
 	if !entity.Component(&space) {
 		return
@@ -86,21 +87,21 @@ func (control *ControlSystem) Update(entity *engi.Entity, dt float32) {
 }
 
 type RockSpawnSystem struct {
-	*engi.System
+	*ecs.System
 
-	world *engi.World
+	world *ecs.World
 }
 
 func (RockSpawnSystem) Type() string {
 	return "RockSpawnSystem"
 }
 
-func (rock *RockSpawnSystem) New(w *engi.World) {
-	rock.System = engi.NewSystem()
+func (rock *RockSpawnSystem) New(w *ecs.World) {
+	rock.System = ecs.NewSystem()
 	rock.world = w
 }
 
-func (rock *RockSpawnSystem) Update(entity *engi.Entity, dt float32) {
+func (rock *RockSpawnSystem) Update(entity *ecs.Entity, dt float32) {
 	// 4% change of spawning a rock each frame
 	if rand.Float32() < .96 {
 		return
@@ -111,8 +112,8 @@ func (rock *RockSpawnSystem) Update(entity *engi.Entity, dt float32) {
 	rock.world.AddEntity(NewRock(position))
 }
 
-func NewRock(position engi.Point) *engi.Entity {
-	rock := engi.NewEntity([]string{"RenderSystem", "FallingSystem", "CollisionSystem", "SpeedSystem"})
+func NewRock(position engi.Point) *ecs.Entity {
+	rock := ecs.NewEntity([]string{"RenderSystem", "FallingSystem", "CollisionSystem", "SpeedSystem"})
 
 	texture := engi.Files.Image("rock.png")
 	render := engi.NewRenderComponent(texture, engi.Point{4, 4}, "rock")
@@ -127,11 +128,11 @@ func NewRock(position engi.Point) *engi.Entity {
 }
 
 type FallingSystem struct {
-	*engi.System
+	*ecs.System
 }
 
-func (fs *FallingSystem) New(*engi.World) {
-	fs.System = engi.NewSystem()
+func (fs *FallingSystem) New(*ecs.World) {
+	fs.System = ecs.NewSystem()
 	//engi.Mailbox.Listen("CollisionMessage", fs)
 
 }
@@ -140,7 +141,7 @@ func (FallingSystem) Type() string {
 	return "FallingSystem"
 }
 
-func (fs *FallingSystem) Update(entity *engi.Entity, dt float32) {
+func (fs *FallingSystem) Update(entity *ecs.Entity, dt float32) {
 	var space *engi.SpaceComponent
 	if !entity.Component(&space) {
 		return
@@ -149,11 +150,11 @@ func (fs *FallingSystem) Update(entity *engi.Entity, dt float32) {
 }
 
 type DeathSystem struct {
-	*engi.System
+	*ecs.System
 }
 
-func (ds *DeathSystem) New(*engi.World) {
-	ds.System = engi.NewSystem()
+func (ds *DeathSystem) New(*ecs.World) {
+	ds.System = ecs.NewSystem()
 	// Subscribe to ScoreMessage
 	engi.Mailbox.Listen("ScoreMessage", func(message engi.Message) {
 		collision, isCollision := message.(engi.CollisionMessage)
@@ -169,7 +170,7 @@ func (DeathSystem) Type() string {
 	return "DeathSystem"
 }
 
-func (fs *DeathSystem) Update(entity *engi.Entity, dt float32) {
+func (fs *DeathSystem) Update(entity *ecs.Entity, dt float32) {
 
 }
 

@@ -6,6 +6,7 @@ package engi
 
 import (
 	"fmt"
+	"github.com/paked/engi/ecs"
 	"github.com/paked/webgl"
 )
 
@@ -15,7 +16,7 @@ var (
 	Gl          *webgl.Context
 	Mailbox     MessageManager
 	cam         *cameraSystem
-	world       *World
+	world       *ecs.World
 	WorldBounds AABB
 
 	fpsLimit        = 120

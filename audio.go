@@ -3,6 +3,7 @@ package engi
 import (
 	"log"
 
+	"github.com/paked/engi/ecs"
 	"golang.org/x/mobile/exp/audio/al"
 )
 
@@ -24,7 +25,7 @@ func (*AudioComponent) Type() string {
 
 // AudioSystem is a System that allows for sound effects and / or music
 type AudioSystem struct {
-	*System
+	*ecs.System
 	HeightModifier float32
 }
 
@@ -32,8 +33,8 @@ func (AudioSystem) Type() string {
 	return "AudioSystem"
 }
 
-func (as *AudioSystem) New(*World) {
-	as.System = NewSystem()
+func (as *AudioSystem) New(*ecs.World) {
+	as.System = ecs.NewSystem()
 
 	if as.HeightModifier == 0 {
 		as.HeightModifier = defaultHeightModifier
@@ -56,7 +57,7 @@ func (as *AudioSystem) New(*World) {
 	})
 }
 
-func (as *AudioSystem) Update(entity *Entity, dt float32) {
+func (as *AudioSystem) Update(entity *ecs.Entity, dt float32) {
 	var ac *AudioComponent
 	var ok bool
 	if ac, ok = entity.ComponentFast(ac).(*AudioComponent); !ok {

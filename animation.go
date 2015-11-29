@@ -5,6 +5,7 @@
 package engi
 
 import (
+	"github.com/paked/engi/ecs"
 	"log"
 )
 
@@ -60,18 +61,18 @@ func (*AnimationComponent) Type() string {
 }
 
 type AnimationSystem struct {
-	*System
+	*ecs.System
 }
 
-func (a *AnimationSystem) New(*World) {
-	a.System = NewSystem()
+func (a *AnimationSystem) New(*ecs.World) {
+	a.System = ecs.NewSystem()
 }
 
 func (AnimationSystem) Type() string {
 	return "AnimationSystem"
 }
 
-func (a *AnimationSystem) Update(e *Entity, dt float32) {
+func (a *AnimationSystem) Update(e *ecs.Entity, dt float32) {
 	var (
 		ac *AnimationComponent
 		r  *RenderComponent

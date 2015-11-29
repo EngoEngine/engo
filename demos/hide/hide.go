@@ -4,6 +4,7 @@ import (
 	"math/rand"
 
 	"github.com/paked/engi"
+	"github.com/paked/engi/ecs"
 )
 
 var World *GameWorld
@@ -14,13 +15,13 @@ func (game *GameWorld) Preload() {
 	engi.Files.AddFromDir("assets", false)
 }
 
-func (game *GameWorld) Setup(w *engi.World) {
+func (game *GameWorld) Setup(w *ecs.World) {
 	engi.SetBg(0x2d3739)
 
 	w.AddSystem(&engi.RenderSystem{})
 	w.AddSystem(&HideSystem{})
 
-	guy := engi.NewEntity([]string{"RenderSystem", "HideSystem"})
+	guy := ecs.NewEntity([]string{"RenderSystem", "HideSystem"})
 	texture := engi.Files.Image("rock.png")
 	render := engi.NewRenderComponent(texture, engi.Point{8, 8}, "guy")
 	collision := &engi.CollisionComponent{Solid: true, Main: true}
@@ -38,18 +39,18 @@ func (game *GameWorld) Setup(w *engi.World) {
 }
 
 type HideSystem struct {
-	*engi.System
+	*ecs.System
 }
 
 func (HideSystem) Type() string {
 	return "HideSystem"
 }
 
-func (s *HideSystem) New(*engi.World) {
-	s.System = engi.NewSystem()
+func (s *HideSystem) New(*ecs.World) {
+	s.System = ecs.NewSystem()
 }
 
-func (c *HideSystem) Update(e *engi.Entity, dt float32) {
+func (c *HideSystem) Update(e *ecs.Entity, dt float32) {
 	var render *engi.RenderComponent
 	if !e.Component(&render) {
 		return

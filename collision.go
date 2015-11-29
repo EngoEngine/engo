@@ -5,6 +5,7 @@
 package engi
 
 import (
+	"github.com/paked/engi/ecs"
 	"log"
 	"math"
 )
@@ -48,8 +49,8 @@ func (*CollisionComponent) Type() string {
 }
 
 type CollisionMessage struct {
-	Entity *Entity
-	To     *Entity
+	Entity *ecs.Entity
+	To     *ecs.Entity
 }
 
 func (collision CollisionMessage) Type() string {
@@ -57,18 +58,18 @@ func (collision CollisionMessage) Type() string {
 }
 
 type CollisionSystem struct {
-	*System
+	*ecs.System
 }
 
-func (cs *CollisionSystem) New(*World) {
-	cs.System = NewSystem()
+func (cs *CollisionSystem) New(*ecs.World) {
+	cs.System = ecs.NewSystem()
 }
 
 func (cs *CollisionSystem) RunInParallel() bool {
-	return len(cs.entities) > 40 // turning point for CollisionSystem
+	return len(cs.EntityMap) > 40 // turning point for CollisionSystem
 }
 
-func (cs *CollisionSystem) Update(entity *Entity, dt float32) {
+func (cs *CollisionSystem) Update(entity *ecs.Entity, dt float32) {
 	var (
 		space     *SpaceComponent
 		collision *CollisionComponent

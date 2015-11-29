@@ -221,7 +221,7 @@ func NewTexture(img Image) *Texture {
 }
 
 func (t *Texture) Render(b *Batch, render *RenderComponent, space *SpaceComponent) {
-	world.batch(render.priority).Draw(t,
+	b.Draw(t,
 		space.Position.X, space.Position.Y,
 		0, 0,
 		render.Scale.X, render.Scale.Y,
