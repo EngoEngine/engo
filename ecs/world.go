@@ -5,6 +5,8 @@ import (
 	"sort"
 )
 
+// World contains a bunch of Entitys, and a bunch of Systems. It is
+// the recommended way to run ecs
 type World struct {
 	entities map[string]*Entity
 	systems  Systemers
@@ -13,10 +15,12 @@ type World struct {
 	serial  bool
 }
 
+// New initialises the World
 func (w *World) New() {
 	if w.isSetup {
 		return
 	}
+
 	w.entities = make(map[string]*Entity)
 
 	/*
@@ -30,9 +34,11 @@ func (w *World) New() {
 	} else {
 		w.serial = false
 	}
+
 	w.isSetup = true
 }
 
+// AddEntity adds a new Entity to the World, and its required Systems
 func (w *World) AddEntity(entity *Entity) {
 	w.entities[entity.ID()] = entity
 
@@ -43,21 +49,25 @@ func (w *World) AddEntity(entity *Entity) {
 	}
 }
 
+// RemoveEntity removes an Entity from the World and its required Systems
 func (w *World) RemoveEntity(entity *Entity) {
 	for _, system := range w.systems {
 		if entity.DoesRequire(system.Type()) {
 			system.RemoveEntity(entity)
 		}
 	}
+
 	delete(w.entities, entity.ID())
 }
 
+// AddSystem adds a new System to the World, and then sorts them based on Priority
 func (w *World) AddSystem(system Systemer) {
 	system.New(w)
 	w.systems = append(w.systems, system)
 	sort.Sort(w.systems)
 }
 
+// Entities returns the list of Entities
 func (w *World) Entities() []*Entity {
 	entities := make([]*Entity, len(w.entities))
 	i := 0
@@ -65,9 +75,11 @@ func (w *World) Entities() []*Entity {
 		entities[i] = v
 		i++
 	}
+
 	return entities
 }
 
+// Systems returns a list of Systems
 func (w *World) Systems() []Systemer {
 	return w.systems
 }
