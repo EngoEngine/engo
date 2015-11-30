@@ -5,10 +5,10 @@ import (
 	"log"
 	"math/rand"
 	"sync"
+	"image/color"
 
 	"github.com/paked/engi"
 	"github.com/paked/engi/ecs"
-	"image/color"
 )
 
 type PongGame struct{}
