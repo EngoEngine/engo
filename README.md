@@ -20,5 +20,5 @@ Currently we are active on IRC / Freenode at the `#engi` channel. You can also c
 3. Now, you have two choices:
   1. Read the [Wiki: Getting Started](https://github.com/paked/engi/wiki/Getting-Started), for an explanation on the basics;
   2. Check out some demos in our [demos folder](https://github.com/paked/engi/tree/master/demos). 
-4. Finally, if you run into problems, if you've encounted a bug, or want to request a feature, feel free to shoot 
+4. Finally, if you run into problems, if you've encountered a bug, or want to request a feature, feel free to shoot 
 us a DM or [create an issue](https://github.com/paked/engi/issues/new). 
