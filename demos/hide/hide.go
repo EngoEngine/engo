@@ -38,6 +38,10 @@ func (game *GameWorld) Setup(w *ecs.World) {
 	w.AddEntity(guy)
 }
 
+func (*GameWorld) Hide()        {}
+func (*GameWorld) Show()        {}
+func (*GameWorld) Type() string { return "GameWorld" }
+
 type HideSystem struct {
 	*ecs.System
 }

@@ -51,6 +51,10 @@ func generateBackground() *ecs.Entity {
 
 func (game *Game) Preload() {}
 
+func (*Game) Hide()        {}
+func (*Game) Show()        {}
+func (*Game) Type() string { return "Game" }
+
 // Setup is called before the main loop is started
 func (game *Game) Setup(w *ecs.World) {
 	engi.SetBg(0x222222)

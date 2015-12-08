@@ -20,7 +20,6 @@ import (
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
-	"github.com/paked/engi/ecs"
 	"github.com/paked/webgl"
 )
 
@@ -45,7 +44,7 @@ func fatalErr(err error) {
 	}
 }
 
-func run(customGame CustomGame, title string, width, height int, fullscreen bool) {
+func run(defaultScene Scene, title string, width, height int, fullscreen bool) {
 
 	err := glfw.Init()
 	fatalErr(err)
@@ -127,15 +126,15 @@ func run(customGame CustomGame, title string, width, height int, fullscreen bool
 		// responder.Type(char)
 	})
 
-	runLoop(customGame, false)
+	runLoop(defaultScene, false)
 }
 
 func SetTitle(title string) {
 	window.SetTitle(title)
 }
 
-func runHeadless(customGame CustomGame) {
-	runLoop(customGame, true)
+func runHeadless(defaultScene Scene) {
+	runLoop(defaultScene, true)
 }
 
 // RunIteration runs one iteration / frame
@@ -147,7 +146,7 @@ func RunIteration() {
 	}
 
 	// Then update the world and all Systems
-	world.Update(Time.Delta())
+	currentWorld.Update(Time.Delta())
 
 	// Lastly, forget keypresses and swap buffers
 	if !headless {
@@ -160,22 +159,15 @@ func RunIteration() {
 
 // RunPreparation is called only once, and is called automatically when calling Open
 // It is only here for benchmarking in combination with OpenHeadlessNoRun
-func RunPreparation(customGame CustomGame) {
+func RunPreparation(defaultScene Scene) {
 	// Default WorldBounds values
 	WorldBounds.Max = Point{Width(), Height()}
 
-	customGame.Preload()
-
-	Files.Load(func() {})
-
-	world = &ecs.World{}
-	world.New()
-
-	customGame.Setup(world)
+	SetScene(defaultScene, false)
 }
 
-func runLoop(customGame CustomGame, headless bool) {
-	RunPreparation(customGame)
+func runLoop(defaultScene Scene, headless bool) {
+	RunPreparation(defaultScene)
 
 	ticker := time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
 Outer:
@@ -379,7 +371,7 @@ func loadImage(r Resource) (Image, error) {
 	return &ImageObject{newm}, nil
 }
 
-func loadJson(r Resource) (string, error) {
+func loadJSON(r Resource) (string, error) {
 	file, err := ioutil.ReadFile(r.url)
 	if err != nil {
 		return "", err

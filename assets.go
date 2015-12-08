@@ -105,7 +105,7 @@ func (l *Loader) Load(onFinish func()) {
 				l.images[r.name] = NewTexture(data)
 			}
 		case "json":
-			data, err := loadJson(r)
+			data, err := loadJSON(r)
 			if err == nil {
 				l.jsons[r.name] = data
 			}

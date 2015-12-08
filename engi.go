@@ -16,30 +16,32 @@ var (
 	Gl          *webgl.Context
 	Mailbox     MessageManager
 	cam         *cameraSystem
-	world       *ecs.World
 	WorldBounds AABB
+
+	currentWorld *ecs.World
+	currentScene Scene
 
 	fpsLimit        = 120
 	headless        bool
 	resetLoopTicker = make(chan bool, 1)
 )
 
-func Open(title string, width, height int, fullscreen bool, r CustomGame) {
+func Open(title string, width, height int, fullscreen bool, defaultScene Scene) {
 	keyStates = make(map[Key]bool)
 	Time = NewClock()
 	Files = NewLoader()
 
-	run(r, title, width, height, fullscreen)
+	run(defaultScene, title, width, height, fullscreen)
 }
 
-func OpenHeadless(r CustomGame) {
+func OpenHeadless(defaultScene Scene) {
 	keyStates = make(map[Key]bool)
 	Time = NewClock()
 	Files = NewLoader() // TODO: do we want files in Headless mode?
 
 	headless = true
 
-	runHeadless(r)
+	runHeadless(defaultScene)
 }
 
 func OpenHeadlessNoRun() {

@@ -95,6 +95,10 @@ func (game *Game) Setup(w *ecs.World) {
 	w.AddEntity(hudBg)
 }
 
+func (*Game) Hide()        {}
+func (*Game) Show()        {}
+func (*Game) Type() string { return "Game" }
+
 func main() {
 	engi.Open("HUD Demo", 400, 400, false, &Game{})
 }

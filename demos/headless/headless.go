@@ -76,6 +76,10 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	}
 }
 
+func (*PongGame) Hide()        {}
+func (*PongGame) Show()        {}
+func (*PongGame) Type() string { return "PongGame" }
+
 type SpeedSystem struct {
 	*ecs.System
 }

@@ -27,6 +27,10 @@ func (game *Game) Setup(w *ecs.World) {
 	w.AddEntity(backgroundMusic)
 }
 
+func (*Game) Hide()        {}
+func (*Game) Show()        {}
+func (*Game) Type() string { return "Game" }
+
 func main() {
 	World = &Game{}
 	engi.Open("Audio Demo", 1024, 640, false, World)

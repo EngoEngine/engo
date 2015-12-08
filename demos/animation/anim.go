@@ -41,6 +41,10 @@ func (game *GameWorld) Setup(w *ecs.World) {
 	w.AddEntity(game.CreateEntity(&engi.Point{0, 0}, spriteSheet, StopAction))
 }
 
+func (*GameWorld) Hide()        {}
+func (*GameWorld) Show()        {}
+func (*GameWorld) Type() string { return "GameWorld" }
+
 func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Spritesheet, action *engi.AnimationAction) *ecs.Entity {
 	entity := ecs.NewEntity([]string{"AnimationSystem", "RenderSystem", "ControlSystem"})
 
