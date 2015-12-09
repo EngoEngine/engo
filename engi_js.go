@@ -137,7 +137,7 @@ func run(title string, width, height int, fullscreen bool) {
 		keyStates[key] = false
 		// responder.Key(Key(ev.Get("keyCode").Int()), 0, RELEASE)
 	}, false)
-	Gl = Gl
+
 	Gl.Viewport(0, 0, width, height)
 	Wo.New()
 	responder.Preload()

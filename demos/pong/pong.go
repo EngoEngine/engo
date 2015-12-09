@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 	"log"
 	"math/rand"
 	"sync"
-	"image/color"
 
 	"github.com/paked/engi"
 	"github.com/paked/engi/ecs"
@@ -78,6 +78,10 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		w.AddEntity(paddle)
 	}
 }
+
+func (*PongGame) Hide()        {}
+func (*PongGame) Show()        {}
+func (*PongGame) Type() string { return "PongGame" }
 
 type SpeedSystem struct {
 	*ecs.System

@@ -42,6 +42,10 @@ func (game *GameWorld) Setup(w *ecs.World) {
 	w.AddEntity(guy)
 }
 
+func (*GameWorld) Hide()        {}
+func (*GameWorld) Show()        {}
+func (*GameWorld) Type() string { return "GameWorld" }
+
 func main() {
 	World = &GameWorld{}
 	engi.Open("Hello", 1024, 640, false, World)
