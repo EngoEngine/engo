@@ -33,8 +33,10 @@ var (
 	HResize   *glfw.Cursor
 	VResize   *glfw.Cursor
 
-	headlessWidth  = 800
-	headlessHeight = 800
+	headlessWidth             = 800
+	headlessHeight            = 800
+	gameWidth, gameHeight     float32
+	windowWidth, windowHeight float32
 )
 
 // fatalErr calls log.Fatal with the given error if it is non-nil.
@@ -56,6 +58,9 @@ func run(defaultScene Scene, title string, width, height int, fullscreen bool) {
 
 	monitor := glfw.GetPrimaryMonitor()
 	mode := monitor.GetVideoMode()
+
+	gameWidth = float32(width)
+	gameHeight = float32(height)
 
 	if fullscreen {
 		width = mode.Width
@@ -83,9 +88,11 @@ func run(defaultScene Scene, title string, width, height int, fullscreen bool) {
 
 	Gl = webgl.NewContext()
 	Gl.Viewport(0, 0, width, height)
+
 	window.SetFramebufferSizeCallback(func(window *glfw.Window, w, h int) {
 		width, height = window.GetFramebufferSize()
 		Gl.Viewport(0, 0, width, height)
+
 		// TODO: when do we want to handle resizing? and who should deal with it?
 		// responder.Resize(w, h)
 	})
@@ -117,6 +124,24 @@ func run(defaultScene Scene, title string, width, height int, fullscreen bool) {
 			keyStates[key] = true
 		} else if a == glfw.Release {
 			keyStates[key] = false
+		}
+	})
+
+	window.SetSizeCallback(func(w *glfw.Window, widthInt int, heightInt int) {
+		windowWidth = float32(widthInt)
+		windowHeight = float32(heightInt)
+
+		if !scaleOnResize {
+			gameWidth, gameHeight = float32(widthInt), float32(heightInt)
+
+			// Update default batch
+			for _, world := range worlds {
+				for _, s := range world.Systems() {
+					if render, ok := s.(*RenderSystem); ok {
+						render.defaultBatch.SetProjection(gameWidth, gameHeight)
+					}
+				}
+			}
 		}
 	})
 
@@ -187,23 +212,19 @@ Outer:
 }
 
 func Width() float32 {
-	if headless {
-		return float32(headlessWidth)
-	}
-	width, _ := window.GetSize()
-	return float32(width)
+	return gameWidth
 }
 
 func Height() float32 {
-	if headless {
-		return float32(headlessHeight)
-	}
-	_, height := window.GetSize()
-	return float32(height)
+	return gameHeight
 }
 
 func Exit() {
 	window.SetShouldClose(true)
+}
+
+func SetCursor(c *glfw.Cursor) {
+	window.SetCursor(c)
 }
 
 func init() {

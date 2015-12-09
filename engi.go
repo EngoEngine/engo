@@ -21,8 +21,9 @@ var (
 	currentWorld *ecs.World
 	currentScene Scene
 
+	scaleOnResize   = false
 	fpsLimit        = 120
-	headless        bool
+	headless        = false
 	resetLoopTicker = make(chan bool, 1)
 )
 
@@ -58,6 +59,10 @@ func SetBg(color uint32) {
 		b := float32(color&0xFF) / 255.0
 		Gl.ClearColor(r, g, b, 1.0)
 	}
+}
+
+func SetScaleOnResize(b bool) {
+	scaleOnResize = b
 }
 
 func SetFPSLimit(limit int) error {

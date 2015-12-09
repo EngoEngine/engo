@@ -78,8 +78,7 @@ func NewBatch(width, height float32, vertSrc, fragSrc string) *Batch {
 	Gl.VertexAttribPointer(batch.inTexCoords, 2, Gl.FLOAT, false, 20, 8)
 	Gl.VertexAttribPointer(batch.inColor, 4, Gl.UNSIGNED_BYTE, true, 20, 16)
 
-	batch.projX = width
-	batch.projY = height
+	batch.SetProjection(width, height)
 
 	Gl.Enable(Gl.BLEND)
 	Gl.BlendFunc(Gl.SRC_ALPHA, Gl.ONE_MINUS_SRC_ALPHA)
@@ -115,7 +114,7 @@ func (b *Batch) flush() {
 	Gl.BindTexture(Gl.TEXTURE_2D, b.lastTexture)
 
 	Gl.Uniform2f(b.ufProjection, b.projX, b.projY)
-	Gl.Uniform3f(b.center, cam.x/Width(), cam.y/Height(), cam.z)
+	Gl.Uniform3f(b.center, cam.x/b.projX, cam.y/b.projY, cam.z)
 
 	Gl.BufferSubData(Gl.ARRAY_BUFFER, 0, b.vertices[0:b.index*20])
 	Gl.DrawElements(Gl.TRIANGLES, 6*b.index, Gl.UNSIGNED_SHORT, 0)
@@ -123,9 +122,9 @@ func (b *Batch) flush() {
 	b.index = 0
 }
 
-func (b *Batch) SetProjection(width, height, depth float32) {
-	b.projX = width
-	b.projY = height
+func (b *Batch) SetProjection(width, height float32) {
+	b.projX = width / 2
+	b.projY = height / 2
 }
 
 func (b *Batch) Draw(r Drawable, x, y, originX, originY, scaleX, scaleY, rotation float32, color color.Color, transparency float32) {
