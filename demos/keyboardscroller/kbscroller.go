@@ -68,5 +68,5 @@ func (game *Game) Setup(w *ecs.World) {
 }
 
 func main() {
-	engi.Open("KeyboardScroller Demo", 400, 400, false, &Game{})
+	engi.Open("KeyboardScroller Demo", int(worldWidth), int(worldHeight), false, &Game{})
 }
