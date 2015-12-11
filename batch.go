@@ -5,11 +5,11 @@
 package engi
 
 import (
+	"image/color"
 	"log"
 	"math"
 
 	"github.com/paked/webgl"
-	"image/color"
 )
 
 const size = 10000

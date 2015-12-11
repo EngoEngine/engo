@@ -83,6 +83,7 @@ func run(defaultScene Scene, title string, width, height int, fullscreen bool) {
 	}
 
 	width, height = window.GetFramebufferSize()
+	windowWidth, windowHeight = float32(width), float32(height)
 
 	glfw.SwapInterval(1)
 
@@ -140,6 +141,15 @@ func run(defaultScene Scene, title string, width, height int, fullscreen bool) {
 					if render, ok := s.(*RenderSystem); ok {
 						render.defaultBatch.SetProjection(gameWidth, gameHeight)
 					}
+				}
+			}
+		}
+
+		// Update HUD batch
+		for _, world := range worlds {
+			for _, s := range world.Systems() {
+				if render, ok := s.(*RenderSystem); ok {
+					render.hudBatch.SetProjection(windowWidth, windowHeight)
 				}
 			}
 		}
@@ -217,6 +227,14 @@ func Width() float32 {
 
 func Height() float32 {
 	return gameHeight
+}
+
+func WindowWidth() float32 {
+	return windowWidth
+}
+
+func WindowHeight() float32 {
+	return windowHeight
 }
 
 func Exit() {
