@@ -5,14 +5,15 @@
 package engi
 
 import (
-	"github.com/golang/freetype/truetype"
-	"github.com/paked/webgl"
 	"image/color"
 	"io/ioutil"
 	"log"
 	"math"
 	"os"
 	"path"
+
+	"github.com/golang/freetype/truetype"
+	"github.com/paked/webgl"
 )
 
 type Resource struct {
@@ -320,8 +321,8 @@ varying vec2 var_TexCoords;
 void main() {
   var_Color = in_Color;
   var_TexCoords = in_TexCoords;
-  gl_Position = vec4((4.0*in_Position.x) / uf_Projection.x - 2.0,
-  					 (4.0*in_Position.y) / -uf_Projection.y + 2.0, 0, 2.0);
+  gl_Position = vec4(in_Position.x / uf_Projection.x - 1.0,
+  					 in_Position.y / -uf_Projection.y + 1.0, 0, 1.0);
 }`
 
 var hudFrag = `

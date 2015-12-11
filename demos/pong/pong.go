@@ -285,5 +285,6 @@ func (ScoreMessage) Type() string {
 }
 
 func main() {
+	engi.SetScaleOnResize(true)
 	engi.Open("Pong", 800, 800, false, &PongGame{})
 }
