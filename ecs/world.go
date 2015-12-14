@@ -84,6 +84,15 @@ func (w *World) Systems() []Systemer {
 	return w.systems
 }
 
+func (w *World) HasSystem(systemType string) bool {
+	for _, s := range w.systems {
+		if s.Type() == systemType {
+			return true
+		}
+	}
+	return false
+}
+
 // Update is called on each frame, with dt being the time difference in seconds since the last Update call
 func (w *World) Update(dt float32) {
 	complChan := make(chan struct{})

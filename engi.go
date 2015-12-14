@@ -6,6 +6,7 @@ package engi
 
 import (
 	"fmt"
+
 	"github.com/paked/engi/ecs"
 	"github.com/paked/webgl"
 )
@@ -14,12 +15,12 @@ var (
 	Time        *Clock
 	Files       *Loader
 	Gl          *webgl.Context
-	Mailbox     MessageManager
-	cam         *cameraSystem
 	WorldBounds AABB
 
 	currentWorld *ecs.World
 	currentScene Scene
+	Mailbox      *MessageManager
+	cam          *cameraSystem
 
 	scaleOnResize   = false
 	fpsLimit        = 120

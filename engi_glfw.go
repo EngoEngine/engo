@@ -55,6 +55,8 @@ func run(defaultScene Scene, title string, width, height int, fullscreen bool) {
 
 	Arrow = glfw.CreateStandardCursor(int(glfw.ArrowCursor))
 	Hand = glfw.CreateStandardCursor(int(glfw.HandCursor))
+	IBeam = glfw.CreateStandardCursor(int(glfw.IBeamCursor))
+	Crosshair = glfw.CreateStandardCursor(int(glfw.CrosshairCursor))
 
 	monitor := glfw.GetPrimaryMonitor()
 	mode := monitor.GetVideoMode()
@@ -136,8 +138,12 @@ func run(defaultScene Scene, title string, width, height int, fullscreen bool) {
 			gameWidth, gameHeight = float32(widthInt), float32(heightInt)
 
 			// Update default batch
-			for _, world := range worlds {
-				for _, s := range world.Systems() {
+			for _, scene := range scenes {
+				if scene.world == nil {
+					continue // with other scenes
+				}
+
+				for _, s := range scene.world.Systems() {
 					if render, ok := s.(*RenderSystem); ok {
 						render.defaultBatch.SetProjection(gameWidth, gameHeight)
 					}
@@ -146,8 +152,12 @@ func run(defaultScene Scene, title string, width, height int, fullscreen bool) {
 		}
 
 		// Update HUD batch
-		for _, world := range worlds {
-			for _, s := range world.Systems() {
+		for _, scene := range scenes {
+			if scene.world == nil {
+				continue // with other scenes
+			}
+
+			for _, s := range scene.world.Systems() {
 				if render, ok := s.(*RenderSystem); ok {
 					render.hudBatch.SetProjection(windowWidth, windowHeight)
 				}
