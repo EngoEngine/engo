@@ -2,12 +2,12 @@ package engi
 
 import (
 	"fmt"
+
 	"github.com/paked/engi/ecs"
 )
 
 var (
-	worlds = make(map[string]*ecs.World)
-	scenes = make(map[string]Scene)
+	scenes = make(map[string]*sceneWrapper)
 )
 
 // Scene represents a screen ingame.
@@ -29,6 +29,13 @@ type Scene interface {
 	Type() string
 }
 
+type sceneWrapper struct {
+	scene   Scene
+	world   *ecs.World
+	mailbox *MessageManager
+	camera  *cameraSystem
+}
+
 // CurrentScene returns the SceneWorld that is currently active
 func CurrentScene() Scene {
 	return currentScene
@@ -43,34 +50,49 @@ func SetScene(s Scene, forceNewWorld bool) {
 	}
 
 	// Register Scene if needed
-	_, registered := scenes[s.Type()]
+	wrapper, registered := scenes[s.Type()]
 	if !registered {
 		RegisterScene(s)
+		wrapper = scenes[s.Type()]
 	}
 
 	// Initialize new Scene / World if needed
-	var newWorld *ecs.World
-	if w, ok := worlds[s.Type()]; !ok || forceNewWorld {
-		s.Preload()
-		Files.Load(func() {})
+	var doSetup bool
 
-		newWorld = &ecs.World{}
-		newWorld.New()
-		worlds[s.Type()] = newWorld
+	if wrapper.world == nil || forceNewWorld {
+		wrapper.world = &ecs.World{}
+		wrapper.mailbox = &MessageManager{}
+		wrapper.camera = &cameraSystem{}
 
-		s.Setup(newWorld)
-	} else {
-		newWorld = w
+		doSetup = true
 	}
 
 	// Do the switch
-	currentWorld = newWorld
 	currentScene = s
+	currentWorld = wrapper.world
+	Mailbox = wrapper.mailbox
+	cam = wrapper.camera
+
+	// doSetup is true whenever we're (re)initializing the Scene
+	if doSetup {
+		s.Preload()
+		Files.Load(func() {})
+
+		wrapper.mailbox.listeners = make(map[string][]MessageHandler)
+
+		wrapper.world.New()
+		wrapper.world.AddSystem(wrapper.camera)
+
+		s.Setup(wrapper.world)
+	}
 }
 
 // RegisterScene registers the `Scene`, so it can later be used by `SetSceneByName`
 func RegisterScene(s Scene) {
-	scenes[s.Type()] = s
+	_, ok := scenes[s.Type()]
+	if !ok {
+		scenes[s.Type()] = &sceneWrapper{scene: s}
+	}
 }
 
 // SetSceneByName does a lookup for the `Scene` where its `Type()` equals `name`, and then sets it as current `Scene`
@@ -80,7 +102,7 @@ func SetSceneByName(name string, forceNewWorld bool) error {
 		return fmt.Errorf("scene not registered: %s", name)
 	}
 
-	SetScene(scene, forceNewWorld)
+	SetScene(scene.scene, forceNewWorld)
 
 	return nil
 }

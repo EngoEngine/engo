@@ -5,8 +5,9 @@
 package engi
 
 import (
-	"github.com/paked/engi/ecs"
 	"image/color"
+
+	"github.com/paked/engi/ecs"
 )
 
 const (
@@ -88,12 +89,6 @@ func (rs *RenderSystem) New(w *ecs.World) {
 	if !headless {
 		rs.defaultBatch = NewBatch(Width(), Height(), batchVert, batchFrag)
 		rs.hudBatch = NewBatch(Width(), Height(), hudVert, hudFrag)
-	}
-
-	// Set cameraSystem if doesn't already exist
-	if cam == nil {
-		cam = &cameraSystem{}
-		w.AddSystem(cam)
 	}
 
 	Mailbox.Listen("renderChangeMessage", func(m Message) {
