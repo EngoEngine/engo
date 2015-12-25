@@ -1,7 +1,3 @@
-// Copyright 2014 Joseph Hager. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 // +build !netgo,!android
 
 package engi
@@ -46,12 +42,9 @@ func fatalErr(err error) {
 	}
 }
 
-func run(defaultScene Scene, title string, width, height int, fullscreen bool) {
-
+func CreateWindow(title string, width, height int, fullscreen bool) {
 	err := glfw.Init()
 	fatalErr(err)
-
-	defer glfw.Terminate()
 
 	Arrow = glfw.CreateStandardCursor(int(glfw.ArrowCursor))
 	Hand = glfw.CreateStandardCursor(int(glfw.HandCursor))
@@ -87,7 +80,7 @@ func run(defaultScene Scene, title string, width, height int, fullscreen bool) {
 	width, height = window.GetFramebufferSize()
 	windowWidth, windowHeight = float32(width), float32(height)
 
-	glfw.SwapInterval(1)
+	SetVSync(vsync)
 
 	Gl = webgl.NewContext()
 	Gl.Viewport(0, 0, width, height)
@@ -144,8 +137,8 @@ func run(defaultScene Scene, title string, width, height int, fullscreen bool) {
 				}
 
 				for _, s := range scene.world.Systems() {
-					if render, ok := s.(*RenderSystem); ok {
-						render.defaultBatch.SetProjection(gameWidth, gameHeight)
+					if _, ok := s.(*RenderSystem); ok {
+						Shaders.def.SetProjection(gameWidth, gameHeight)
 					}
 				}
 			}
@@ -158,8 +151,9 @@ func run(defaultScene Scene, title string, width, height int, fullscreen bool) {
 			}
 
 			for _, s := range scene.world.Systems() {
-				if render, ok := s.(*RenderSystem); ok {
-					render.hudBatch.SetProjection(windowWidth, windowHeight)
+				if _, ok := s.(*RenderSystem); ok {
+					// TODO: don't call it directly, but let HUD listen for it
+					//Shaders.HUD.SetProjection(windowWidth, windowHeight)
 				}
 			}
 		}
@@ -170,12 +164,18 @@ func run(defaultScene Scene, title string, width, height int, fullscreen bool) {
 		// it's like KeyCallback, but for specific characters instead of keys...?
 		// responder.Type(char)
 	})
+}
 
-	runLoop(defaultScene, false)
+func DestroyWindow() {
+	glfw.Terminate()
 }
 
 func SetTitle(title string) {
-	window.SetTitle(title)
+	if headless {
+		log.Println("Title set to:", title)
+	} else {
+		window.SetTitle(title)
+	}
 }
 
 func runHeadless(defaultScene Scene) {
@@ -205,6 +205,10 @@ func RunIteration() {
 // RunPreparation is called only once, and is called automatically when calling Open
 // It is only here for benchmarking in combination with OpenHeadlessNoRun
 func RunPreparation(defaultScene Scene) {
+	keyStates = make(map[Key]bool)
+	Time = NewClock()
+	Files = NewLoader()
+
 	// Default WorldBounds values
 	WorldBounds.Max = Point{Width(), Height()}
 
@@ -253,6 +257,15 @@ func Exit() {
 
 func SetCursor(c *glfw.Cursor) {
 	window.SetCursor(c)
+}
+
+func SetVSync(enabled bool) {
+	vsync = enabled
+	if vsync {
+		glfw.SwapInterval(1)
+	} else {
+		glfw.SwapInterval(0)
+	}
 }
 
 func init() {

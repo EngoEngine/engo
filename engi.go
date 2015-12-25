@@ -1,7 +1,3 @@
-// Copyright 2014 Joseph Hager. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 package engi
 
 import (
@@ -25,32 +21,53 @@ var (
 	scaleOnResize   = false
 	fpsLimit        = 120
 	headless        = false
+	vsync           = true
 	resetLoopTicker = make(chan bool, 1)
 )
 
-func Open(title string, width, height int, fullscreen bool, defaultScene Scene) {
-	keyStates = make(map[Key]bool)
-	Time = NewClock()
-	Files = NewLoader()
+type RunOptions struct {
+	// NoRun indicates the Open function should return immediately, without looping
+	NoRun bool
 
-	run(defaultScene, title, width, height, fullscreen)
+	// Title is the Window title
+	Title string
+
+	// HeadlessMode indicates whether or not OpenGL calls should be made
+	HeadlessMode bool
+
+	Fullscreen    bool
+	Width, Height int
+
+	// VSync indicates whether or not OpenGL should wait for the monitor to swp the buffers
+	VSync bool
+
+	// ScaleOnResize indicates whether or not engi should make things larger/smaller whenever the screen resizes
+	ScaleOnResize bool
+
+	// FPSLimit indicates the maximum number of frames per second
+	FPSLimit int
 }
 
-func OpenHeadless(defaultScene Scene) {
-	keyStates = make(map[Key]bool)
-	Time = NewClock()
-	Files = NewLoader() // TODO: do we want files in Headless mode?
+func Open(opts RunOptions, defaultScene Scene) {
+	// Save settings
+	SetScaleOnResize(opts.ScaleOnResize)
+	SetFPSLimit(opts.FPSLimit)
+	vsync = opts.VSync
 
-	headless = true
+	if opts.HeadlessMode {
+		headless = true
 
-	runHeadless(defaultScene)
-}
+		if !opts.NoRun {
+			runHeadless(defaultScene)
+		}
+	} else {
+		CreateWindow(opts.Title, opts.Width, opts.Height, opts.Fullscreen)
+		defer DestroyWindow()
 
-func OpenHeadlessNoRun() {
-	Time = NewClock()
-	Files = NewLoader() // TODO: do we want files in Headless mode?
-
-	headless = true
+		if !opts.NoRun {
+			runLoop(defaultScene, false)
+		}
+	}
 }
 
 func SetBg(color uint32) {

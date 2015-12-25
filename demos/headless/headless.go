@@ -38,7 +38,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	ball := ecs.NewEntity([]string{"RenderSystem", "CollisionSystem", "SpeedSystem", "BallSystem"})
 	ballTexture := engi.Files.Image("ball.png")
 	ballRender := engi.NewRenderComponent(ballTexture, engi.Point{2, 2}, "ball")
-	ballSpace := &engi.SpaceComponent{engi.Point{(engi.Width() - ballTexture.Width()) / 2, (engi.Height() - ballTexture.Height()) / 2}, ballTexture.Width() * ballRender.Scale.X, ballTexture.Height() * ballRender.Scale.Y}
+	ballSpace := &engi.SpaceComponent{engi.Point{(engi.Width() - ballTexture.Width()) / 2, (engi.Height() - ballTexture.Height()) / 2}, ballTexture.Width() * ballRender.Scale().X, ballTexture.Height() * ballRender.Scale().Y}
 	ballCollision := &engi.CollisionComponent{Main: true, Solid: true}
 	ballSpeed := &SpeedComponent{}
 	ballSpeed.Point = engi.Point{300, 100}
@@ -65,7 +65,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		if i != 0 {
 			x = 800 - 16
 		}
-		paddleSpace := &engi.SpaceComponent{engi.Point{x, (engi.Height() - paddleTexture.Height()) / 2}, paddleRender.Scale.X * paddleTexture.Width(), paddleRender.Scale.Y * paddleTexture.Height()}
+		paddleSpace := &engi.SpaceComponent{engi.Point{x, (engi.Height() - paddleTexture.Height()) / 2}, paddleRender.Scale().X * paddleTexture.Width(), paddleRender.Scale().Y * paddleTexture.Height()}
 		paddleControl := &ControlComponent{schemes[i]}
 		paddleCollision := &engi.CollisionComponent{Main: false, Solid: true}
 		paddle.AddComponent(paddleRender)
@@ -266,7 +266,7 @@ func (c *ScoreSystem) Update(entity *ecs.Entity, dt float32) {
 		c.upToDate = true
 		c.scoreLock.RUnlock()
 
-		render.Display = basicFont.Render(render.Label)
+		render.SetDrawable(basicFont.Render(render.Label))
 		width := len(render.Label) * 20
 
 		space.Position.X = float32(400 - (width / 2))
@@ -282,5 +282,8 @@ func (ScoreMessage) Type() string {
 }
 
 func main() {
-	engi.OpenHeadless(&PongGame{})
+	opts := engi.RunOptions{
+		HeadlessMode: true,
+	}
+	engi.Open(opts, &PongGame{})
 }

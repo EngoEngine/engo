@@ -44,7 +44,7 @@ func generateBackground() *ecs.Entity {
 	}
 	bgTexture := engi.NewImageObject(img)
 	field := ecs.NewEntity([]string{"RenderSystem"})
-	fieldRender := engi.NewRenderComponent(engi.NewRegion(engi.NewTexture(bgTexture), 0, 0, int(worldWidth), int(worldHeight)), engi.Point{1, 1}, "Background1")
+	fieldRender := engi.NewRenderComponent(engi.NewTexture(bgTexture), engi.Point{1, 1}, "Background1")
 	fieldRender.SetPriority(engi.Background)
 	fieldSpace := &engi.SpaceComponent{engi.Point{0, 0}, worldWidth, worldHeight}
 	field.AddComponent(fieldRender)
@@ -64,7 +64,7 @@ func generateHUDBackground(width, height float32) *ecs.Entity {
 	}
 	bgTexture := engi.NewImageObject(img)
 	field := ecs.NewEntity([]string{"RenderSystem"})
-	fieldRender := engi.NewRenderComponent(engi.NewRegion(engi.NewTexture(bgTexture), 0, 0, int(width), int(height)), engi.Point{0.5, 0.5}, "HUDBackground1")
+	fieldRender := engi.NewRenderComponent(engi.NewTexture(bgTexture), engi.Point{1, 1}, "HUDBackground1")
 	fieldRender.SetPriority(hudBackgroundPriority)
 	fieldSpace := &engi.SpaceComponent{engi.Point{-1, -1}, width, height}
 	field.AddComponent(fieldRender)
@@ -87,8 +87,8 @@ func (game *Game) Setup(w *ecs.World) {
 	w.AddEntity(generateBackground())
 
 	// Creating the HUD
-	hudWidth := float32(200)   // Can be anything you want
-	hudHeight := engi.Height() // Can be anything you want
+	hudWidth := float32(200)         // Can be anything you want
+	hudHeight := engi.WindowHeight() // Can be anything you want
 
 	// Generate something that uses the PriorityLevel HUDGround or up
 	hudBg := generateHUDBackground(hudWidth, hudHeight)
@@ -100,5 +100,10 @@ func (*Game) Show()        {}
 func (*Game) Type() string { return "Game" }
 
 func main() {
-	engi.Open("HUD Demo", 400, 400, false, &Game{})
+	opts := engi.RunOptions{
+		Title:  "HUD Demo",
+		Width:  1024,
+		Height: 640,
+	}
+	engi.Open(opts, &Game{})
 }

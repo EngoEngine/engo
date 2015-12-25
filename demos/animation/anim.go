@@ -7,7 +7,6 @@ import (
 
 var (
 	zoomSpeed   float32 = -0.125
-	World       *GameWorld
 	RunAction   *engi.AnimationAction
 	WalkAction  *engi.AnimationAction
 	StopAction  *engi.AnimationAction
@@ -50,7 +49,7 @@ func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Sprites
 
 	space := &engi.SpaceComponent{*point, 150, 150}
 	render := engi.NewRenderComponent(spriteSheet.Cell(action.Frames[0]), engi.Point{3, 3}, "hero")
-	animation := engi.NewAnimationComponent(spriteSheet.Renderables(), 0.1)
+	animation := engi.NewAnimationComponent(spriteSheet.Drawables(), 0.1)
 	animation.AddAnimationActions(actions)
 	animation.SelectAnimationByAction(action)
 	entity.AddComponent(render)
@@ -89,6 +88,10 @@ func (c *ControlSystem) Update(entity *ecs.Entity, dt float32) {
 }
 
 func main() {
-	World = &GameWorld{}
-	engi.Open("Animation Demo", 1024, 640, false, World)
+	opts := engi.RunOptions{
+		Title:  "Animation Demo",
+		Width:  1024,
+		Height: 640,
+	}
+	engi.Open(opts, &GameWorld{})
 }

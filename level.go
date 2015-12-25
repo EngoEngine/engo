@@ -1,7 +1,5 @@
 package engi
 
-import "image/color"
-
 type Level struct {
 	Width      int
 	Height     int
@@ -10,20 +8,6 @@ type Level struct {
 	Tiles      []*tile
 	LineBounds []Line
 	Images     []*tile
-}
-
-func (lvl *Level) Render(b *Batch, render *RenderComponent, space *SpaceComponent) {
-	for _, img := range lvl.Images {
-		if img.Image != nil {
-			b.Draw(img.Image, img.X, img.Y, 0, 0, 1, 1, 0, color.White, 1)
-		}
-	}
-
-	for _, tile := range lvl.Tiles {
-		if tile.Image != nil {
-			b.Draw(tile.Image, (tile.X + space.Position.X), (tile.Y + space.Position.Y), 0, 0, 1, 1, 0, color.White, 1)
-		}
-	}
 }
 
 type tile struct {
@@ -87,5 +71,5 @@ func regionFromSheet(sheet *Texture, tw, th int, index int) *Region {
 	setWidth := int(sheet.Width()) / tw
 	x := (index % setWidth) * tw
 	y := (index / setWidth) * th
-	return NewRegion(sheet, x, y, tw, th)
+	return NewRegion(sheet, float32(x), float32(y), float32(tw), float32(th))
 }
