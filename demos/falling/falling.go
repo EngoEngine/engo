@@ -8,10 +8,6 @@ import (
 	"github.com/paked/engi/ecs"
 )
 
-var (
-	W Game
-)
-
 type Game struct{}
 
 func (game *Game) Preload() {
@@ -37,8 +33,8 @@ func (game *Game) Setup(w *ecs.World) {
 	// Tell the collision system that this player is solid
 	collision := &engi.CollisionComponent{Solid: true, Main: true}
 
-	width := texture.Width() * render.Scale.X
-	height := texture.Height() * render.Scale.Y
+	width := texture.Width() * render.Scale().X
+	height := texture.Height() * render.Scale().Y
 
 	space := &engi.SpaceComponent{engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2}, width, height}
 
@@ -121,7 +117,7 @@ func NewRock(position engi.Point) *ecs.Entity {
 
 	texture := engi.Files.Image("rock.png")
 	render := engi.NewRenderComponent(texture, engi.Point{4, 4}, "rock")
-	space := &engi.SpaceComponent{position, texture.Width() * render.Scale.X, texture.Height() * render.Scale.Y}
+	space := &engi.SpaceComponent{position, texture.Width() * render.Scale().X, texture.Height() * render.Scale().Y}
 	collision := &engi.CollisionComponent{Solid: true}
 
 	rock.AddComponent(render)
@@ -187,6 +183,10 @@ func (fs *DeathSystem) Receive(message engi.Message) {
 }
 
 func main() {
-	W = Game{}
-	engi.Open("Falling Demo", 800, 800, false, &W)
+	opts := engi.RunOptions{
+		Title:  "Falling Demo",
+		Width:  1024,
+		Height: 640,
+	}
+	engi.Open(opts, &Game{})
 }

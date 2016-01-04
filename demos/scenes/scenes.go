@@ -33,8 +33,8 @@ func (game *IconScene) Setup(w *ecs.World) {
 	render := engi.NewRenderComponent(texture, engi.Point{8, 8}, "icon")
 	collision := &engi.CollisionComponent{Solid: true, Main: true}
 
-	width := texture.Width() * render.Scale.X
-	height := texture.Height() * render.Scale.Y
+	width := texture.Width() * render.Scale().X
+	height := texture.Height() * render.Scale().Y
 
 	space := &engi.SpaceComponent{engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2}, width, height}
 
@@ -68,8 +68,8 @@ func (game *RockScene) Setup(w *ecs.World) {
 	render := engi.NewRenderComponent(texture, engi.Point{8, 8}, "rock")
 	collision := &engi.CollisionComponent{Solid: true, Main: true}
 
-	width := texture.Width() * render.Scale.X
-	height := texture.Height() * render.Scale.Y
+	width := texture.Width() * render.Scale().X
+	height := texture.Height() * render.Scale().Y
 
 	space := &engi.SpaceComponent{engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2}, width, height}
 
@@ -140,11 +140,13 @@ func (c *ScaleSystem) Update(e *ecs.Entity, dt float32) {
 		mod = -0.1
 	}
 
-	if render.Scale.X+mod >= 15 || render.Scale.X+mod <= 1 {
+	if render.Scale().X+mod >= 15 || render.Scale().X+mod <= 1 {
 		mod *= -1
 	}
 
-	render.Scale.AddScalar(mod)
+	newScale := render.Scale()
+	newScale.AddScalar(mod)
+	render.SetScale(newScale)
 }
 
 func main() {
@@ -155,5 +157,11 @@ func main() {
 	// happens before calling engi.SetSceneByName
 	engi.RegisterScene(rockScene)
 
-	engi.Open("Scenes Demo", 1024, 640, false, iconScene)
+	opts := engi.RunOptions{
+		Title:  "Scenes Demo",
+		Width:  1024,
+		Height: 640,
+	}
+
+	engi.Open(opts, iconScene)
 }

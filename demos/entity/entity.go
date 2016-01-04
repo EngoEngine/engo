@@ -7,8 +7,6 @@ import (
 	"github.com/paked/engi/ecs"
 )
 
-var World *GameWorld
-
 type GameWorld struct{}
 
 func (game *GameWorld) Preload() {
@@ -31,8 +29,8 @@ func (game *GameWorld) Setup(w *ecs.World) {
 	// Create RenderComponent... Set scale to 8x, give lable "guy"
 	render := engi.NewRenderComponent(texture, engi.Point{8, 8}, "guy")
 
-	width := texture.Width() * render.Scale.X
-	height := texture.Height() * render.Scale.Y
+	width := texture.Width() * render.Scale().X
+	height := texture.Height() * render.Scale().Y
 
 	space := &engi.SpaceComponent{engi.Point{0, 0}, width, height}
 
@@ -47,6 +45,10 @@ func (*GameWorld) Show()        {}
 func (*GameWorld) Type() string { return "GameWorld" }
 
 func main() {
-	World = &GameWorld{}
-	engi.Open("Hello", 1024, 640, false, World)
+	opts := engi.RunOptions{
+		Title:  "Hello Demo",
+		Width:  1024,
+		Height: 640,
+	}
+	engi.Open(opts, &GameWorld{})
 }

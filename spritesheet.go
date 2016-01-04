@@ -1,7 +1,3 @@
-// Copyright 2014 Harrison Shoebridge. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 package engi
 
 // Spritesheet is a class that stores a set of tiles from a file, used by tilemaps and animations
@@ -15,13 +11,13 @@ func NewSpritesheetFromTexture(texture *Texture, cellWidth, cellHeight int) *Spr
 	return &Spritesheet{texture: texture, CellWidth: cellWidth, CellHeight: cellHeight, cache: make(map[int]*Region)}
 }
 
-// Simple handler for creating a new spritesheet from a file
+// NewSpritesheetFromFile is a simple handler for creating a new spritesheet from a file
 // textureName is the name of a texture already preloaded with engi.Files.Add
 func NewSpritesheetFromFile(textureName string, cellWidth, cellHeight int) *Spritesheet {
 	return NewSpritesheetFromTexture(Files.Image(textureName), cellWidth, cellHeight)
 }
 
-// Get the region at the index i, updates and pulls from cache if need be
+// Cell gets the region at the index i, updates and pulls from cache if need be
 func (s *Spritesheet) Cell(index int) *Region {
 	if r := s.cache[index]; r != nil {
 		return r
@@ -31,18 +27,18 @@ func (s *Spritesheet) Cell(index int) *Region {
 	return s.cache[index]
 }
 
-func (s *Spritesheet) Renderable(index int) Renderable {
+func (s *Spritesheet) Drawable(index int) Drawable {
 	return s.Cell(index)
 }
 
-func (s *Spritesheet) Renderables() []Renderable {
-	renderables := make([]Renderable, s.CellCount())
+func (s *Spritesheet) Drawables() []Drawable {
+	drawables := make([]Drawable, s.CellCount())
 
 	for i := 0; i < s.CellCount(); i++ {
-		renderables[i] = s.Renderable(i)
+		drawables[i] = s.Drawable(i)
 	}
 
-	return renderables
+	return drawables
 }
 
 func (s *Spritesheet) CellCount() int {
@@ -59,12 +55,12 @@ func (s *Spritesheet) Cells() []*Region {
 	return cells
 }
 
-// The amount of tiles on the x-axis of the spritesheet
+// Width is the amount of tiles on the x-axis of the spritesheet
 func (s Spritesheet) Width() float32 {
 	return s.texture.Width() / float32(s.CellWidth)
 }
 
-// The amount of tiles on the y-axis of the spritesheet
+// Height is the amount of tiles on the y-axis of the spritesheet
 func (s Spritesheet) Height() float32 {
 	return s.texture.Height() / float32(s.CellHeight)
 }

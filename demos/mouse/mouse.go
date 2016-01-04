@@ -1,14 +1,14 @@
 package main
 
 import (
-	"github.com/paked/engi"
-	"github.com/paked/engi/ecs"
 	"image"
 	"image/color"
+
+	"github.com/paked/engi"
+	"github.com/paked/engi/ecs"
 )
 
 var (
-	World     *GameWorld
 	boxWidth  float32 = 150
 	boxHeight float32 = 150
 )
@@ -28,7 +28,7 @@ func generateBackground() *engi.RenderComponent {
 		}
 	}
 	bgTexture := engi.NewImageObject(img)
-	fieldRender := engi.NewRenderComponent(engi.NewRegion(engi.NewTexture(bgTexture), 0, 0, int(boxWidth), int(boxHeight)), engi.Point{1, 1}, "Background1")
+	fieldRender := engi.NewRenderComponent(engi.NewTexture(bgTexture), engi.Point{1, 1}, "Background1")
 	fieldRender.SetPriority(engi.Background)
 	return fieldRender
 }
@@ -84,6 +84,10 @@ func (c *ControlSystem) Update(entity *ecs.Entity, dt float32) {
 }
 
 func main() {
-	World = &GameWorld{}
-	engi.Open("Mouse Demo", 1500, 400, false, World)
+	opts := engi.RunOptions{
+		Title:  "Mouse Demo",
+		Width:  1024,
+		Height: 640,
+	}
+	engi.Open(opts, &GameWorld{})
 }

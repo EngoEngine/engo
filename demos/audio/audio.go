@@ -5,10 +5,6 @@ import (
 	"github.com/paked/engi/ecs"
 )
 
-var (
-	World *Game
-)
-
 type Game struct{}
 
 func (game *Game) Preload() {
@@ -32,6 +28,10 @@ func (*Game) Show()        {}
 func (*Game) Type() string { return "Game" }
 
 func main() {
-	World = &Game{}
-	engi.Open("Audio Demo", 1024, 640, false, World)
+	opts := engi.RunOptions{
+		Title:  "Audio Demo",
+		Width:  1024,
+		Height: 640,
+	}
+	engi.Open(opts, &Game{})
 }

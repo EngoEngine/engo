@@ -1,18 +1,14 @@
-// Copyright 2014 Joseph Hager. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 package engi
 
 import (
 	"image/color"
 	"io/ioutil"
 	"log"
-	"math"
 	"os"
 	"path"
 
 	"github.com/golang/freetype/truetype"
+	"github.com/luxengine/math"
 	"github.com/paked/webgl"
 )
 
@@ -159,20 +155,17 @@ type Region struct {
 	width, height float32
 }
 
-func (r *Region) Render(b *Batch, render *RenderComponent, space *SpaceComponent) {
-	b.Draw(r, space.Position.X, space.Position.Y, 0, 0, render.Scale.X, render.Scale.Y, 0, render.Color, render.Transparency)
-}
+func NewRegion(texture *Texture, x, y, w, h float32) *Region {
+	invTexWidth := 1.0 / texture.Width()
+	invTexHeight := 1.0 / texture.Height()
 
-func NewRegion(texture *Texture, x, y, w, h int) *Region {
-	invTexWidth := 1.0 / float32(texture.Width())
-	invTexHeight := 1.0 / float32(texture.Height())
+	u := x * invTexWidth
+	v := y * invTexHeight
+	u2 := (x + w) * invTexWidth
+	v2 := (y + h) * invTexHeight
 
-	u := float32(x) * invTexWidth
-	v := float32(y) * invTexHeight
-	u2 := float32(x+w) * invTexWidth
-	v2 := float32(y+h) * invTexHeight
-	width := float32(math.Abs(float64(w)))
-	height := float32(math.Abs(float64(h)))
+	width := math.Abs(w)
+	height := math.Abs(h)
 
 	return &Region{texture, u, v, u2, v2, width, height}
 }
@@ -195,8 +188,8 @@ func (r *Region) View() (float32, float32, float32, float32) {
 
 type Texture struct {
 	id     *webgl.Texture
-	width  int
-	height int
+	width  float32
+	height float32
 }
 
 func NewTexture(img Image) *Texture {
@@ -218,27 +211,17 @@ func NewTexture(img Image) *Texture {
 		Gl.TexImage2D(Gl.TEXTURE_2D, 0, Gl.RGBA, Gl.RGBA, Gl.UNSIGNED_BYTE, img.Data())
 	}
 
-	return &Texture{id, img.Width(), img.Height()}
-}
-
-func (t *Texture) Render(b *Batch, render *RenderComponent, space *SpaceComponent) {
-	b.Draw(t,
-		space.Position.X, space.Position.Y,
-		0, 0,
-		render.Scale.X, render.Scale.Y,
-		0,
-		render.Color, render.Transparency)
-
+	return &Texture{id, float32(img.Width()), float32(img.Height())}
 }
 
 // Width returns the width of the texture.
 func (t *Texture) Width() float32 {
-	return float32(t.width)
+	return t.width
 }
 
 // Height returns the height of the texture.
 func (t *Texture) Height() float32 {
-	return float32(t.height)
+	return t.height
 }
 
 func (t *Texture) Texture() *webgl.Texture {
@@ -270,74 +253,3 @@ func NewSprite(region *Region, x, y float32) *Sprite {
 		Region:   region,
 	}
 }
-
-var batchVert = ` 
-attribute vec2 in_Position;
-attribute vec4 in_Color;
-attribute vec2 in_TexCoords;
-
-uniform vec2 uf_Projection;
-uniform vec3 center;
-
-varying vec4 var_Color;
-varying vec2 var_TexCoords;
-
-void main() {
-  var_Color = in_Color;
-  var_TexCoords = in_TexCoords;
-  gl_Position = vec4(in_Position.x /  uf_Projection.x - center.x,
-				 	 in_Position.y / -uf_Projection.y + center.y,
-										 0, center.z);
-}`
-
-var batchFrag = `
-#ifdef GL_ES
-#define LOWP lowp
-precision mediump float;
-#else
-#define LOWP
-#endif
-
-varying vec4 var_Color;
-varying vec2 var_TexCoords;
-
-uniform sampler2D uf_Texture;
-
-void main (void) {
-  gl_FragColor = var_Color * texture2D(uf_Texture, var_TexCoords);
-}`
-
-var hudVert = `
-attribute vec2 in_Position;
-attribute vec4 in_Color;
-attribute vec2 in_TexCoords;
-
-uniform vec2 uf_Projection;
-uniform vec3 center;
-
-varying vec4 var_Color;
-varying vec2 var_TexCoords;
-
-void main() {
-  var_Color = in_Color;
-  var_TexCoords = in_TexCoords;
-  gl_Position = vec4(in_Position.x / uf_Projection.x - 1.0,
-  					 in_Position.y / -uf_Projection.y + 1.0, 0, 1.0);
-}`
-
-var hudFrag = `
-#ifdef GL_ES
-#define LOWP lowp
-precision mediump float;
-#else
-#define LOWP
-#endif
-
-varying vec4 var_Color;
-varying vec2 var_TexCoords;
-
-uniform sampler2D uf_Texture;
-
-void main (void) {
-  gl_FragColor = var_Color * texture2D(uf_Texture, var_TexCoords);
-}`
