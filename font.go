@@ -119,7 +119,7 @@ func (f *Font) Render(text string) *Texture {
 	c.SetSrc(fg)
 
 	// Draw the text.
-	pt := freetype.Pt(0, int(yBearing))
+	pt := fixed.P(0, int(yBearing))
 	_, err := c.DrawString(text, pt)
 	if err != nil {
 		log.Println(err)

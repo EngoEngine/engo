@@ -147,19 +147,13 @@ type HUDShader struct {
 	projX float32
 	projY float32
 
-	lastTexture        *webgl.Texture
-	drawCount          int
-	coordBuffer        *webgl.Buffer
-	coordBufferContent []float32
-	coordIndices       []uint16
-	coordIndicesVBO    *webgl.Buffer
+	lastTexture *webgl.Texture
 
-	inPosition    int
-	inTexCoords   int
-	inColor       int
-	inCoordinates int
-	ufPosition    *webgl.UniformLocation
-	ufProjection  *webgl.UniformLocation
+	inPosition   int
+	inTexCoords  int
+	inColor      int
+	ufPosition   *webgl.UniformLocation
+	ufProjection *webgl.UniformLocation
 }
 
 func (s *HUDShader) Initialize(width, height float32) {
@@ -169,8 +163,8 @@ func (s *HUDShader) Initialize(width, height float32) {
 attribute vec2 in_Position;
 attribute vec2 in_TexCoords;
 attribute vec4 in_Color;
-attribute vec2 in_Coordinates;
 
+uniform vec2 uf_Position;
 uniform vec2 uf_Projection;
 
 varying vec4 var_Color;
@@ -180,8 +174,8 @@ void main() {
   var_Color = in_Color;
   var_TexCoords = in_TexCoords;
 
-  gl_Position = vec4((in_Position.x + in_Coordinates.x)/  uf_Projection.x - 1.0,
-  					 (in_Position.y + in_Coordinates.y)/ -uf_Projection.y + 1.0,
+  gl_Position = vec4((in_Position.x + uf_Position.x)/  uf_Projection.x - 1.0,
+  					 (in_Position.y + uf_Position.y)/ -uf_Projection.y + 1.0,
   					 0.0, 1.0);
 
 }`, `
@@ -202,19 +196,6 @@ void main (void) {
 }`)
 
 	// Create and populate indices buffer
-	s.coordIndices = make([]uint16, 6*bufferSize)
-	for i, j := 0, 0; i < bufferSize*6; i, j = i+6, j+4 {
-		s.coordIndices[i+0] = uint16(j + 0)
-		s.coordIndices[i+1] = uint16(j + 0)
-		s.coordIndices[i+2] = uint16(j + 0)
-		s.coordIndices[i+3] = uint16(j + 0)
-		s.coordIndices[i+4] = uint16(j + 0)
-		s.coordIndices[i+5] = uint16(j + 0)
-	}
-	s.coordIndicesVBO = Gl.CreateBuffer()
-	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, s.coordIndicesVBO)
-	Gl.BufferData(Gl.ELEMENT_ARRAY_BUFFER, s.coordIndices, Gl.STATIC_DRAW)
-
 	s.indices = make([]uint16, 6*bufferSize)
 	for i, j := 0, 0; i < bufferSize*6; i, j = i+6, j+4 {
 		s.indices[i+0] = uint16(j + 0)
@@ -234,7 +215,6 @@ void main (void) {
 	s.inPosition = Gl.GetAttribLocation(s.program, "in_Position")
 	s.inTexCoords = Gl.GetAttribLocation(s.program, "in_TexCoords")
 	s.inColor = Gl.GetAttribLocation(s.program, "in_Color")
-	s.inCoordinates = Gl.GetAttribLocation(s.program, "in_Coordinates")
 
 	// Define things that should be set per draw
 	s.ufPosition = Gl.GetUniformLocation(s.program, "uf_Position")
@@ -244,7 +224,6 @@ void main (void) {
 	Gl.EnableVertexAttribArray(s.inPosition)
 	Gl.EnableVertexAttribArray(s.inTexCoords)
 	Gl.EnableVertexAttribArray(s.inColor)
-	Gl.EnableVertexAttribArray(s.inCoordinates)
 
 	Gl.Enable(Gl.BLEND)
 	Gl.BlendFunc(Gl.SRC_ALPHA, Gl.ONE_MINUS_SRC_ALPHA)
@@ -254,11 +233,7 @@ void main (void) {
 
 func (s *HUDShader) Pre() {
 	Gl.UseProgram(s.program)
-	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, s.indexVBO)
-
 	Gl.Uniform2f(s.ufProjection, s.projX, s.projY)
-
-	s.coordBufferContent = make([]float32, 0)
 }
 
 func (s *HUDShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y, rotation float32) {
@@ -273,25 +248,11 @@ func (s *HUDShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y, rot
 		s.lastTexture = texture
 	}
 
-	s.coordBufferContent = append(s.coordBufferContent, []float32{x, y, rotation}...)
-	s.drawCount++
-
-	if s.drawCount > bufferSize {
-		s.flush()
-	}
-}
-
-func (s *HUDShader) flush() {
-	Gl.BindBuffer(Gl.ARRAY_BUFFER, s.coordBuffer)
-	Gl.BufferData(Gl.ARRAY_BUFFER, s.coordBufferContent, Gl.DYNAMIC_DRAW)
-	Gl.VertexAttribPointer(s.inCoordinates, 3, Gl.FLOAT, false, 12, 0)
-
-	Gl.DrawElements(Gl.TRIANGLES, 6*s.drawCount, Gl.UNSIGNED_SHORT, 0)
-	s.drawCount = 0
+	Gl.Uniform2f(s.ufPosition, x, y)
+	Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
 }
 
 func (s *HUDShader) Post() {
-	s.flush()
 	s.lastTexture = nil
 }
 
