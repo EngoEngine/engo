@@ -103,8 +103,8 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 		Mouse.X, Mouse.Y = float32(x), float32(y)
 		// this is only valid because we use an internal structure that is
 		// 100% compatible with glfw3.h
-		Mouse.Button = MouseButton(int(b))
-		Mouse.Modifer = Modifier(int(m))
+		Mouse.Button = MouseButton(b)
+		Mouse.Modifer = Modifier(m)
 
 		if a == glfw.Press {
 			Mouse.Action = PRESS
