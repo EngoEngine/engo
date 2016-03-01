@@ -4,19 +4,34 @@ import (
 	"github.com/paked/engi/ecs"
 )
 
-// MouseComponent is the location for the MouseSystem to store its results; to be used / viewed by other Systems
+// MouseComponent is the location for the MouseSystem to store its results;
+// to be used / viewed by other Systems
 type MouseComponent struct {
-	// Clicked is true whenever the Mouse was space in this frame
+	// Clicked is true whenever the Mouse was clicked over
+	// the entity space in this frame
 	Clicked bool
-	// Hovered is true whenever the Mouse is hovering the space in this frame
+	// Released is true whenever the left mouse button is released over the
+	// entity space in this frame
+	Released bool
+	// Hovered is true whenever the Mouse is hovering
+	// the entity space in this frame. This does not necessarily imply that
+	// the mouse button was pressed down in your entity space.
 	Hovered bool
-	// Dragged is true whenever the space was clicked, and then the mouse started moving (while holding)
+	// Dragged is true whenever the entity space was clicked,
+	// and then the mouse started moving (while holding)
 	Dragged bool
-	// Rightclicked is true whenever the space was rightclicked in this frame
-	Rightclicked bool
-	// Enter is true whenever the Mouse entered the space in that frame, but wasn't in that space on the previous frame
+	// RightClicked is true whenever the entity space was right-clicked
+	// in this frame
+	RightClicked bool
+	// RightReleased is true whenever the right mouse button is released over
+	// the entity space in this frame. This does not necessarily imply that
+	// the mouse button was pressed down in your entity space.
+	RightReleased bool
+	// Enter is true whenever the Mouse entered the entity space in that frame,
+	// but wasn't in that space during the previous frame
 	Enter bool
-	// Leave is true whenever the Mouse was in the space on the previous frame, but now isn't
+	// Leave is true whenever the Mouse was in the space on the previous frame,
+	// but now isn't
 	Leave bool
 }
 
@@ -100,18 +115,38 @@ func (m *MouseSystem) Update(entity *ecs.Entity, dt float32) {
 		mc.Enter = !mc.Hovered
 		mc.Hovered = true
 
+		mc.Released = false
+
 		switch Mouse.Action {
 		case PRESS:
-			mc.Clicked = true
+			switch Mouse.Button {
+			case MouseButton1:
+				mc.Clicked = true
+			case MouseButton2:
+				mc.RightClicked = true
+			}
 			m.mouseDown = true
 		case RELEASE:
-			m.mouseDown = false
+			switch Mouse.Button {
+			case MouseButton1:
+				mc.Released = true
+			case MouseButton2:
+				mc.RightReleased = true
+			}
+			// dragging stops as soon as one of the currently pressed buttons
+			// is released
 			mc.Dragged = false
+			// mouseDown goes false as soon as one of the pressed buttons is
+			// released. Effectively ending any dragging
+			m.mouseDown = false
 		case MOVE:
 			if m.mouseDown {
 				mc.Dragged = true
 			}
 		}
+		// reset struct value to something meaningless to avoid
+		// catching the same "signal" twice
+		Mouse.Action = 99
 	} else {
 		if mc.Hovered {
 			mc.Leave = true

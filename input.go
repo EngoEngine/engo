@@ -16,6 +16,28 @@ var (
 	SUPER   = Modifier(0x0008)
 )
 
+// MouseButton corresponds to a mouse button.
+type MouseButton int
+
+// Mouse buttons
+const (
+	MouseButton1      MouseButton = 0
+	MouseButton2      MouseButton = 1
+	MouseButton3      MouseButton = 2
+	MouseButton4      MouseButton = 3
+	MouseButton5      MouseButton = 4
+	MouseButton6      MouseButton = 5
+	MouseButton7      MouseButton = 6
+	MouseButton8      MouseButton = 7
+	MouseButtonLast   MouseButton = 7
+	MouseButtonLeft   MouseButton = 1
+	MouseButtonRight  MouseButton = 2
+	MouseButtonMiddle MouseButton = 3
+)
+
+// these values are remapped during engin_glfw init()
+// so I suppose these are the default mappings for engi_js
+// TODO: can someone confirm this by removing this comment and setting a proper one ?
 var (
 	Dash         = Key(189)
 	Apostrophe   = Key(222)
@@ -125,4 +147,6 @@ type mouse struct {
 	X, Y             float32
 	ScrollX, ScrollY float32
 	Action           Action
+	Button           MouseButton
+	Modifer          Modifier
 }

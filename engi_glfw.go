@@ -101,6 +101,10 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 	window.SetMouseButtonCallback(func(window *glfw.Window, b glfw.MouseButton, a glfw.Action, m glfw.ModifierKey) {
 		x, y := window.GetCursorPos()
 		Mouse.X, Mouse.Y = float32(x), float32(y)
+		// this is only valid because we use an internal structure that is
+		// 100% compatible with glfw3.h
+		Mouse.Button = MouseButton(int(b))
+		Mouse.Modifer = Modifier(int(m))
 
 		if a == glfw.Press {
 			Mouse.Action = PRESS
