@@ -117,6 +117,8 @@ func (l *Loader) Load(onFinish func()) {
 			f, err := loadFont(r)
 			if err == nil {
 				l.fonts[r.name] = f
+			} else {
+				log.Printf("Could not load font %s\n", r.name)
 			}
 		}
 	}
