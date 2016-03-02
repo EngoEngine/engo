@@ -33,6 +33,20 @@ type MouseComponent struct {
 	// Leave is true whenever the Mouse was in the space on the previous frame,
 	// but now isn't
 	Leave bool
+	// Position of the mouse at any moment this is generally used
+	// in conjunction with Track = true
+	MouseX float32
+	MouseY float32
+	// Set manually this to true and your mouse component will track the mouse
+	// and your entity will always be able to receive an updated mouse
+	// component even if its space is not under the mouse cursor
+	// WARNING: you MUST know why you want to use this because it will
+	// have serious performance impacts if you have many entities with
+	// a MouseComponent in tracking mode.
+	// This is ideally used for a really small number of entities
+	// that must really be aware of the mouse details event when the
+	// mouse is not hovering them
+	Track bool
 }
 
 // Type returns the string representation of the MouseComponent type
@@ -107,15 +121,22 @@ func (m *MouseSystem) Update(entity *ecs.Entity, dt float32) {
 		my = Mouse.Y
 	}
 
+	// if the Mouse component is a tracker we always update it
 	// Check if the X-value is within range
 	// and if the Y-value is within range
-	if mx > space.Position.X && mx < (space.Position.X+space.Width) &&
-		my > space.Position.Y && my < (space.Position.Y+space.Height) {
+	if mc.Track || ( mx > space.Position.X && mx < (space.Position.X+space.Width) &&
+		my > space.Position.Y && my < (space.Position.Y+space.Height)) {
 
 		mc.Enter = !mc.Hovered
 		mc.Hovered = true
 
 		mc.Released = false
+		// track mouse position so that systems that need to stay on the mouse
+		// position can do it (think an RTS when placing a new building and
+		// you get a ghost building following your mouse until you click to
+		// place it somewhere in your world.
+		mc.MouseX = mx
+		mc.MouseY = my
 
 		switch Mouse.Action {
 		case PRESS:
