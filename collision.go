@@ -16,6 +16,16 @@ type SpaceComponent struct {
 	Height   float32
 }
 
+// Center positions the space component according to its center instead of its
+// top-left point (this avoids doing the same math each time in your systems)
+func (sc *SpaceComponent) Center(p Point) {
+	xDelta := sc.Width / 2
+	yDelta := sc.Height / 2
+	// update position according to point being used as our center
+	sc.Position.X = p.X - xDelta
+	sc.Position.Y = p.Y - yDelta
+}
+
 func (*SpaceComponent) Type() string {
 	return "SpaceComponent"
 }
