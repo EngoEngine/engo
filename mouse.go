@@ -124,8 +124,8 @@ func (m *MouseSystem) Update(entity *ecs.Entity, dt float32) {
 	// if the Mouse component is a tracker we always update it
 	// Check if the X-value is within range
 	// and if the Y-value is within range
-	if mc.Track || ( mx > space.Position.X && mx < (space.Position.X+space.Width) &&
-		my > space.Position.Y && my < (space.Position.Y+space.Height)) {
+	if mc.Track || mx > space.Position.X && mx < (space.Position.X+space.Width) &&
+		my > space.Position.Y && my < (space.Position.Y+space.Height) {
 
 		mc.Enter = !mc.Hovered
 		mc.Hovered = true
@@ -165,13 +165,17 @@ func (m *MouseSystem) Update(entity *ecs.Entity, dt float32) {
 				mc.Dragged = true
 			}
 		}
-		// reset struct value to something meaningless to avoid
-		// catching the same "signal" twice
-		Mouse.Action = 99
 	} else {
 		if mc.Hovered {
 			mc.Leave = true
 		}
 		mc.Hovered = false
 	}
+}
+
+// Post is called after all Update calls, and is used to compute internal values
+func (m *MouseSystem) Post() {
+	// reset mouse.Action value to something meaningless to avoid
+	// catching the same "signal" twice
+	Mouse.Action = NEUTRAL
 }

@@ -10,6 +10,7 @@ var (
 	MOVE    = Action(0)
 	PRESS   = Action(1)
 	RELEASE = Action(2)
+	NEUTRAL = Action(99)
 	SHIFT   = Modifier(0x0001)
 	CONTROL = Modifier(0x0002)
 	ALT     = Modifier(0x0004)
