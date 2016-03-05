@@ -36,9 +36,8 @@ const (
 	MouseButtonMiddle MouseButton = 3
 )
 
-// these values are remapped during engin_glfw init()
-// so I suppose these are the default mappings for engi_js
-// TODO: can someone confirm this by removing this comment and setting a proper one ?
+// those are default values for engi_js defined here
+// engi_glfw redefines the variables it needs to other values during init()
 var (
 	Dash         = Key(189)
 	Apostrophe   = Key(222)
