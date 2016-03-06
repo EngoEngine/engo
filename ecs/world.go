@@ -5,8 +5,8 @@ import (
 	"sort"
 )
 
-// World contains a bunch of Entitys, and a bunch of Systems. It is
-// the recommended way to run ecs
+// World contains a bunch of Entities, and a bunch of Systems.
+// It is the recommended way to run ecs
 type World struct {
 	entities map[string]*Entity
 	systems  Systemers
