@@ -22,22 +22,23 @@ type MouseButton int
 
 // Mouse buttons
 const (
-	MouseButton1      MouseButton = 0
-	MouseButton2      MouseButton = 1
-	MouseButton3      MouseButton = 2
+	MouseButton1      MouseButton = 0 // left button
+	MouseButton2      MouseButton = 1 // right button
+	MouseButton3      MouseButton = 2 // middle button
 	MouseButton4      MouseButton = 3
 	MouseButton5      MouseButton = 4
 	MouseButton6      MouseButton = 5
 	MouseButton7      MouseButton = 6
 	MouseButton8      MouseButton = 7
 	MouseButtonLast   MouseButton = 7
-	MouseButtonLeft   MouseButton = 1
-	MouseButtonRight  MouseButton = 2
-	MouseButtonMiddle MouseButton = 3
+	MouseButtonLeft   MouseButton = 0 // equivalent for MouseButton1
+	MouseButtonRight  MouseButton = 1 // equivalent for MouseButton2
+	MouseButtonMiddle MouseButton = 2 // equivalent for MouseButton3
 )
 
-// those are default values for engi_js defined here
-// engi_glfw redefines the variables it needs to other values during init()
+// those are default values for engi_js defined here because some of them are shared
+// with engi_glfw.
+// engi_glfw redefines the variables it needs to other values during init() so
 var (
 	Dash         = Key(189)
 	Apostrophe   = Key(222)

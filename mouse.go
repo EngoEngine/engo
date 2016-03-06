@@ -141,17 +141,17 @@ func (m *MouseSystem) Update(entity *ecs.Entity, dt float32) {
 		switch Mouse.Action {
 		case PRESS:
 			switch Mouse.Button {
-			case MouseButton1:
+			case MouseButtonLeft:
 				mc.Clicked = true
-			case MouseButton2:
+			case MouseButtonRight:
 				mc.RightClicked = true
 			}
 			m.mouseDown = true
 		case RELEASE:
 			switch Mouse.Button {
-			case MouseButton1:
+			case MouseButtonLeft:
 				mc.Released = true
-			case MouseButton2:
+			case MouseButtonRight:
 				mc.RightReleased = true
 			}
 			// dragging stops as soon as one of the currently pressed buttons
