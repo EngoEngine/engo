@@ -1,6 +1,7 @@
 package ecs
 
 import (
+	"log"
 	"runtime"
 	"sort"
 )
@@ -8,8 +9,9 @@ import (
 // World contains a bunch of Entities, and a bunch of Systems.
 // It is the recommended way to run ecs
 type World struct {
-	entities map[string]*Entity
-	systems  Systemers
+	entities  map[string]*Entity
+	systemMap map[string]Systemer // tracks presence of a system in the world
+	systems   Systemers
 
 	isSetup bool
 	serial  bool
@@ -22,6 +24,7 @@ func (w *World) New() {
 	}
 
 	w.entities = make(map[string]*Entity)
+	w.systemMap = make(map[string]Systemer)
 
 	/*
 		// Default WorldBounds values
@@ -41,6 +44,13 @@ func (w *World) New() {
 // AddEntity adds a new Entity to the World, and its required Systems
 func (w *World) AddEntity(entity *Entity) {
 	w.entities[entity.ID()] = entity
+	reqs := entity.Requirements()
+	for _, req := range reqs {
+		_, ok := w.systemMap[req]
+		if !ok {
+			log.Printf("world adding entity with unmet requirement: %s\n", req)
+		}
+	}
 
 	for _, system := range w.systems {
 		if entity.DoesRequire(system.Type()) {
@@ -64,6 +74,9 @@ func (w *World) RemoveEntity(entity *Entity) {
 func (w *World) AddSystem(system Systemer) {
 	system.New(w)
 	w.systems = append(w.systems, system)
+	// update system map so that we can quickly test if a system is present
+	// in the world
+	w.systemMap[system.Type()] = system
 	sort.Sort(w.systems)
 }
 
@@ -84,13 +97,10 @@ func (w *World) Systems() []Systemer {
 	return w.systems
 }
 
+// HasSystem tests if a given system is present in this world
 func (w *World) HasSystem(systemType string) bool {
-	for _, s := range w.systems {
-		if s.Type() == systemType {
-			return true
-		}
-	}
-	return false
+	_, ok := w.systemMap[systemType]
+	return ok
 }
 
 // Update is called on each frame, with dt being the time difference in seconds since the last Update call
