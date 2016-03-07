@@ -47,6 +47,9 @@ type MouseComponent struct {
 	// that must really be aware of the mouse details event when the
 	// mouse is not hovering them
 	Track bool
+	// Modifier is used to store the eventual modifiers that were pressed during
+	// the same time the different click events occurred
+	Modifier Modifier
 }
 
 // Type returns the string representation of the MouseComponent type
@@ -138,6 +141,10 @@ func (m *MouseSystem) Update(entity *ecs.Entity, dt float32) {
 		mc.MouseX = mx
 		mc.MouseY = my
 
+		// propagate the modifiers to the mouse component so that game
+		// implementers can take different decisions based on those
+		mc.Modifier = Mouse.Modifer
+
 		switch Mouse.Action {
 		case PRESS:
 			switch Mouse.Button {
@@ -168,12 +175,17 @@ func (m *MouseSystem) Update(entity *ecs.Entity, dt float32) {
 	} else {
 		if mc.Hovered {
 			mc.Leave = true
+			// propagate the modifiers to the mouse component so that game
+			// implementers can take different decisions based on those
+			mc.Modifier = Mouse.Modifer
 		}
 		mc.Hovered = false
 	}
 }
 
 // Post is called after all Update calls, and is used to compute internal values
+// NOTE: we do not reset modifiers here because we always set them to meaningful
+// values when a mouse event is propagated to the mouse components
 func (m *MouseSystem) Post() {
 	// reset mouse.Action value to something meaningless to avoid
 	// catching the same "signal" twice
