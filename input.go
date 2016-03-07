@@ -10,12 +10,35 @@ var (
 	MOVE    = Action(0)
 	PRESS   = Action(1)
 	RELEASE = Action(2)
+	NEUTRAL = Action(99)
 	SHIFT   = Modifier(0x0001)
 	CONTROL = Modifier(0x0002)
 	ALT     = Modifier(0x0004)
 	SUPER   = Modifier(0x0008)
 )
 
+// MouseButton corresponds to a mouse button.
+type MouseButton int
+
+// Mouse buttons
+const (
+	MouseButton1      MouseButton = 0 // left button
+	MouseButton2      MouseButton = 1 // right button
+	MouseButton3      MouseButton = 2 // middle button
+	MouseButton4      MouseButton = 3
+	MouseButton5      MouseButton = 4
+	MouseButton6      MouseButton = 5
+	MouseButton7      MouseButton = 6
+	MouseButton8      MouseButton = 7
+	MouseButtonLast   MouseButton = 7
+	MouseButtonLeft   MouseButton = 0 // equivalent for MouseButton1
+	MouseButtonRight  MouseButton = 1 // equivalent for MouseButton2
+	MouseButtonMiddle MouseButton = 2 // equivalent for MouseButton3
+)
+
+// those are default values for engi_js defined here because some of them are shared
+// with engi_glfw.
+// engi_glfw redefines the variables it needs to other values during init() so
 var (
 	Dash         = Key(189)
 	Apostrophe   = Key(222)
@@ -125,4 +148,6 @@ type mouse struct {
 	X, Y             float32
 	ScrollX, ScrollY float32
 	Action           Action
+	Button           MouseButton
+	Modifer          Modifier
 }
