@@ -72,9 +72,17 @@ func (r *RenderComponent) SetPriority(p PriorityLevel) {
 	Mailbox.Dispatch(renderChangeMessage{})
 }
 
+func (r *RenderComponent) Priority() PriorityLevel {
+	return r.priority
+}
+
 func (r *RenderComponent) SetDrawable(d Drawable) {
 	r.drawable = d
 	r.preloadTexture()
+}
+
+func (r *RenderComponent) Drawable() Drawable {
+	return r.drawable
 }
 
 func (r *RenderComponent) SetScale(scale Point) {
