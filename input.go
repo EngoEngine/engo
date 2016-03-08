@@ -1,8 +1,8 @@
 package engi
 
-type Action int
-type Key int
-type Modifier int
+type Action 	int
+type Key 	int
+type Modifier 	int
 
 var (
 	Mouse mouse
