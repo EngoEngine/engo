@@ -1,13 +1,13 @@
 package engi
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
 	"io/ioutil"
 	"log"
 
-	"fmt"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
@@ -24,7 +24,7 @@ type Font struct {
 	Size float64
 	BG   color.Color
 	FG   color.Color
-	ttf  *truetype.Font
+	TTF  *truetype.Font
 }
 
 // Create is for loading fonts from the disk, given a location
@@ -39,7 +39,7 @@ func (f *Font) Create() error {
 	if err != nil {
 		return err
 	}
-	f.ttf = ttf
+	f.TTF = ttf
 
 	return nil
 }
@@ -47,7 +47,7 @@ func (f *Font) Create() error {
 // CreatePreloaded is for loading fonts which have already been defined (and loaded) within Preload
 func (f *Font) CreatePreloaded() error {
 	var ok bool
-	f.ttf, ok = Files.fonts[f.URL]
+	f.TTF, ok = Files.fonts[f.URL]
 	if !ok {
 		return fmt.Errorf("could not find preloaded font: %s", f.URL)
 	}
@@ -56,7 +56,7 @@ func (f *Font) CreatePreloaded() error {
 }
 
 func (f *Font) TextDimensions(text string) (int, int, int) {
-	fnt := f.ttf
+	fnt := f.TTF
 	size := f.Size
 	var (
 		totalWidth  = fixed.Int26_6(0)
@@ -88,9 +88,9 @@ func (f *Font) TextDimensions(text string) (int, int, int) {
 	return int(totalWidth), int(totalHeight), int(maxYBearing)
 }
 
-func (f *Font) Render(text string) *Texture {
+func (f *Font) RenderNRGBA(text string) *image.NRGBA {
 	width, height, yBearing := f.TextDimensions(text)
-	font := f.ttf
+	font := f.TTF
 	size := f.Size
 
 	// Default colors
@@ -125,6 +125,12 @@ func (f *Font) Render(text string) *Texture {
 		log.Println(err)
 		return nil
 	}
+
+	return nrgba
+}
+
+func (f *Font) Render(text string) *Texture {
+	nrgba := f.RenderNRGBA(text)
 
 	// Create texture
 	imObj := &ImageObject{nrgba}
