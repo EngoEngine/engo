@@ -87,7 +87,7 @@ func (cam *cameraSystem) moveToX(location float32) {
 }
 
 func (cam *cameraSystem) moveToY(location float32) {
-	cam.y = mgl32.Clamp(location, WorldBounds.Min.X, WorldBounds.Max.Y)
+	cam.y = mgl32.Clamp(location, WorldBounds.Min.Y, WorldBounds.Max.Y)
 }
 
 func (cam *cameraSystem) zoomTo(zoomLevel float32) {
