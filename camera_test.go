@@ -3,11 +3,15 @@ package engi
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/paked/engi/ecs"
 )
 
 func TestCameraMoveX(t *testing.T) {
+	w := &ecs.World{}
+	w.New()
 	cam := &cameraSystem{}
-	cam.New()
+	cam.New(w)
 	WorldBounds = AABB{Point{0, 0}, Point{300, 300}}
 
 	currentX := cam.X()
@@ -38,8 +42,10 @@ func TestCameraMoveX(t *testing.T) {
 }
 
 func TestCameraMoveY(t *testing.T) {
+	w := &ecs.World{}
+	w.New()
 	cam := &cameraSystem{}
-	cam.New()
+	cam.New(w)
 	WorldBounds = AABB{Point{0, 0}, Point{300, 300}}
 
 	currentY := cam.Y()
@@ -70,8 +76,10 @@ func TestCameraMoveY(t *testing.T) {
 }
 
 func TestCameraZoom(t *testing.T) {
+	w := &ecs.World{}
+	w.New()
 	cam := &cameraSystem{}
-	cam.New()
+	cam.New(w)
 
 	currentZ := cam.Z()
 
@@ -101,8 +109,10 @@ func TestCameraZoom(t *testing.T) {
 }
 
 func TestCameraMoveToX(t *testing.T) {
+	w := &ecs.World{}
+	w.New()
 	cam := &cameraSystem{}
-	cam.New()
+	cam.New(w)
 	WorldBounds = AABB{Point{0, 0}, Point{300, 300}}
 
 	currentX := cam.X()
@@ -118,8 +128,10 @@ func TestCameraMoveToX(t *testing.T) {
 }
 
 func TestCameraMoveToY(t *testing.T) {
+	w := &ecs.World{}
+	w.New()
 	cam := &cameraSystem{}
-	cam.New()
+	cam.New(w)
 	WorldBounds = AABB{Point{0, 0}, Point{300, 300}}
 
 	currentY := cam.Y()
@@ -135,8 +147,10 @@ func TestCameraMoveToY(t *testing.T) {
 }
 
 func TestCameraZoomTo(t *testing.T) {
+	w := &ecs.World{}
+	w.New()
 	cam := &cameraSystem{}
-	cam.New()
+	cam.New(w)
 
 	currentZ := cam.Z()
 
