@@ -37,7 +37,11 @@ func (game *IconScene) Setup(w *ecs.World) {
 	width := texture.Width() * render.Scale().X
 	height := texture.Height() * render.Scale().Y
 
-	space := &engi.SpaceComponent{engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2}, width, height}
+	space := &engi.SpaceComponent{
+		Position: engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2},
+		Width: width,
+		Height: height,
+	}
 
 	guy.AddComponent(render)
 	guy.AddComponent(space)
@@ -75,7 +79,11 @@ func (game *RockScene) Setup(w *ecs.World) {
 	width := texture.Width() * render.Scale().X
 	height := texture.Height() * render.Scale().Y
 
-	space := &engi.SpaceComponent{engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2}, width, height}
+	space := &engi.SpaceComponent{
+		Position: engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2},
+		Width: width,
+		Height: height,
+	}
 
 	guy.AddComponent(render)
 	guy.AddComponent(space)

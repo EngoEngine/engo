@@ -52,7 +52,7 @@ func (*GameWorld) Type() string { return "GameWorld" }
 func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Spritesheet, action *engi.AnimationAction) *ecs.Entity {
 	entity := ecs.NewEntity([]string{"AnimationSystem", "RenderSystem", "ControlSystem"})
 
-	space := &engi.SpaceComponent{*point, 150, 150}
+	space := &engi.SpaceComponent{Position: *point, Width: 150, Height: 150}
 	render := engi.NewRenderComponent(spriteSheet.Cell(action.Frames[0]), engi.Point{3, 3}, "hero")
 	animation := engi.NewAnimationComponent(spriteSheet.Drawables(), 0.1)
 	animation.AddAnimationActions(actions)

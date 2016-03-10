@@ -36,7 +36,11 @@ func (game *Game) Setup(w *ecs.World) {
 	width := texture.Width() * render.Scale().X
 	height := texture.Height() * render.Scale().Y
 
-	space := &engi.SpaceComponent{engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2}, width, height}
+	space := &engi.SpaceComponent{
+		Position: engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2},
+		Width: width,
+		Height: height,
+	}
 
 	guy.AddComponent(render)
 	guy.AddComponent(space)
@@ -119,11 +123,15 @@ func (rock *RockSpawnSystem) Update(entity *ecs.Entity, dt float32) {
 }
 
 func NewRock(position engi.Point) *ecs.Entity {
-	rock := ecs.NewEntity([]string{"RenderSystem", "FallingSystem", "CollisionSystem", "SpeedSystem"})
+	rock := ecs.NewEntity([]string{"RenderSystem", "FallingSystem", "CollisionSystem"})
 
 	texture := engi.Files.Image("rock.png")
 	render := engi.NewRenderComponent(texture, engi.Point{4, 4}, "rock")
-	space := &engi.SpaceComponent{position, texture.Width() * render.Scale().X, texture.Height() * render.Scale().Y}
+	space := &engi.SpaceComponent{
+		Position: position,
+		Width: texture.Width() * render.Scale().X,
+		Height: texture.Height() * render.Scale().Y,
+	}
 	collision := &engi.CollisionComponent{Solid: true}
 
 	rock.AddComponent(render)

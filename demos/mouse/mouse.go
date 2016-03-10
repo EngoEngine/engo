@@ -57,7 +57,7 @@ func (game *GameWorld) CreateEntity() *ecs.Entity {
 
 	entity.AddComponent(generateBackground())
 	entity.AddComponent(&engi.MouseComponent{})
-	entity.AddComponent(&engi.SpaceComponent{engi.Point{0, 0}, boxWidth, boxHeight})
+	entity.AddComponent(&engi.SpaceComponent{Position: engi.Point{0, 0}, Width: boxWidth, Height: boxHeight})
 
 	return entity
 }
