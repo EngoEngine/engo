@@ -39,7 +39,10 @@ func (game *GameWorld) Setup() {
 	gameMap.AddComponent(mapRender)
 	gameMap.AddComponent(mapSpace)
 
-	game.AddEntity(gameMap)
+	err := game.AddEntity(gameMap)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func main() {

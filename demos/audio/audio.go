@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/paked/engi"
 	"github.com/paked/engi/ecs"
 )
@@ -20,7 +22,10 @@ func (game *Game) Setup(w *ecs.World) {
 	backgroundMusic := ecs.NewEntity([]string{"AudioSystem"})
 	backgroundMusic.AddComponent(&engi.AudioComponent{File: "326488.wav", Repeat: true, Background: true})
 
-	w.AddEntity(backgroundMusic)
+	err := w.AddEntity(backgroundMusic)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (*Game) Hide()        {}

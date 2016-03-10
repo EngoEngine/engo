@@ -1,10 +1,20 @@
 package ecs
 
 import (
-	"log"
 	"runtime"
 	"sort"
 )
+
+// UnmetRequirement is an error that can be raise by ecs.(*World).AddEntity()
+// when said entity requires a system this world does not know of.
+type UnmetRequirement struct {
+	Msg string
+}
+
+// Error just implements the error interface for our missing requirement
+func (e UnmetRequirement) Error() string {
+	return "world cannot add entity with unmet requirement: " + e.Msg
+}
 
 // World contains a bunch of Entities, and a bunch of Systems.
 // It is the recommended way to run ecs
@@ -42,13 +52,18 @@ func (w *World) New() {
 }
 
 // AddEntity adds a new Entity to the World, and its required Systems
-func (w *World) AddEntity(entity *Entity) {
+// In case the entity you are trying to add is requiring an System that this
+// world does not know this method will return an UnmetRequirement error
+func (w *World) AddEntity(entity *Entity) error {
 	w.entities[entity.ID()] = entity
 	reqs := entity.Requirements()
 	for _, req := range reqs {
 		_, ok := w.systemMap[req]
 		if !ok {
-			log.Printf("world adding entity with unmet requirement: %s\n", req)
+			// return an error with info about the first missing req
+			// WARNING this will not compile a list of all your missing requirements
+			// and will just fail on the first missing one.
+			return UnmetRequirement{Msg: req}
 		}
 	}
 
@@ -57,6 +72,7 @@ func (w *World) AddEntity(entity *Entity) {
 			system.AddEntity(entity)
 		}
 	}
+	return nil
 }
 
 // RemoveEntity removes an Entity from the World and its required Systems

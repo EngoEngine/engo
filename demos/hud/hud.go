@@ -3,6 +3,7 @@ package main
 import (
 	"image"
 	"image/color"
+	"log"
 
 	"github.com/paked/engi"
 	"github.com/paked/engi/ecs"
@@ -84,7 +85,10 @@ func (game *Game) Setup(w *ecs.World) {
 	w.AddSystem(engi.NewMouseZoomer(zoomSpeed))
 
 	// Create background, so we can see difference between this and HUD
-	w.AddEntity(generateBackground())
+	err := w.AddEntity(generateBackground())
+	if err != nil {
+		log.Println(err)
+	}
 
 	// Creating the HUD
 	hudWidth := float32(200)         // Can be anything you want
@@ -92,7 +96,10 @@ func (game *Game) Setup(w *ecs.World) {
 
 	// Generate something that uses the PriorityLevel HUDGround or up
 	hudBg := generateHUDBackground(hudWidth, hudHeight)
-	w.AddEntity(hudBg)
+	err = w.AddEntity(hudBg)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (*Game) Hide()        {}

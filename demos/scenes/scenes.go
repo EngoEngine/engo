@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"time"
 
@@ -42,7 +43,10 @@ func (game *IconScene) Setup(w *ecs.World) {
 	guy.AddComponent(space)
 	guy.AddComponent(collision)
 
-	w.AddEntity(guy)
+	err := w.AddEntity(guy)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (*IconScene) Hide()        {}
@@ -77,7 +81,10 @@ func (game *RockScene) Setup(w *ecs.World) {
 	guy.AddComponent(space)
 	guy.AddComponent(collision)
 
-	w.AddEntity(guy)
+	err := w.AddEntity(guy)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (*RockScene) Hide()        {}
