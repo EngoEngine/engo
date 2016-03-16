@@ -3,6 +3,7 @@ package main
 import (
 	"image"
 	"image/color"
+	"log"
 
 	"github.com/paked/engi"
 	"github.com/paked/engi/ecs"
@@ -41,7 +42,10 @@ func (game *GameWorld) Setup(w *ecs.World) {
 	w.AddSystem(&ControlSystem{})
 	w.AddSystem(engi.NewMouseZoomer(-0.125))
 
-	w.AddEntity(game.CreateEntity())
+	err := w.AddEntity(game.CreateEntity())
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (*GameWorld) Hide()        {}

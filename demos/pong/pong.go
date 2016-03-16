@@ -47,7 +47,10 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	ball.AddComponent(ballSpace)
 	ball.AddComponent(ballCollision)
 	ball.AddComponent(ballSpeed)
-	w.AddEntity(ball)
+	err := w.AddEntity(ball)
+	if err != nil {
+		log.Println(err)
+	}
 
 	score := ecs.NewEntity([]string{"RenderSystem", "ScoreSystem"})
 
@@ -56,7 +59,10 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	scoreSpace := &engi.SpaceComponent{engi.Point{100, 100}, 100, 100}
 	score.AddComponent(scoreRender)
 	score.AddComponent(scoreSpace)
-	w.AddEntity(score)
+	err = w.AddEntity(score)
+	if err != nil {
+		log.Println(err)
+	}
 
 	schemes := []string{"WASD", ""}
 	for i := 0; i < 2; i++ {
@@ -75,7 +81,10 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		paddle.AddComponent(paddleSpace)
 		paddle.AddComponent(paddleControl)
 		paddle.AddComponent(paddleCollision)
-		w.AddEntity(paddle)
+		err = w.AddEntity(paddle)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }
 

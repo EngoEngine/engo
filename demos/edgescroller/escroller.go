@@ -3,6 +3,7 @@ package main
 import (
 	"image"
 	"image/color"
+	"log"
 
 	"github.com/paked/engi"
 	"github.com/paked/engi/ecs"
@@ -61,7 +62,10 @@ func (game *Game) Setup(w *ecs.World) {
 	w.AddSystem(engi.NewEdgeScroller(scrollSpeed, edgeMargin))
 
 	// Create the background; this way we'll see when we actually scroll
-	w.AddEntity(generateBackground())
+	err := w.AddEntity(generateBackground())
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (*Game) Hide()        {}

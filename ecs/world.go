@@ -5,11 +5,23 @@ import (
 	"sort"
 )
 
-// World contains a bunch of Entitys, and a bunch of Systems. It is
-// the recommended way to run ecs
+// UnmetRequirement is an error that can be raise by ecs.(*World).AddEntity()
+// when said entity requires a system this world does not know of.
+type UnmetRequirement struct {
+	Msg string
+}
+
+// Error just implements the error interface for our missing requirement
+func (e UnmetRequirement) Error() string {
+	return "world cannot add entity with unmet requirement: " + e.Msg
+}
+
+// World contains a bunch of Entities, and a bunch of Systems.
+// It is the recommended way to run ecs
 type World struct {
-	entities map[string]*Entity
-	systems  Systemers
+	entities  map[string]*Entity
+	systemMap map[string]Systemer // tracks presence of a system in the world
+	systems   Systemers
 
 	isSetup bool
 	serial  bool
@@ -22,6 +34,7 @@ func (w *World) New() {
 	}
 
 	w.entities = make(map[string]*Entity)
+	w.systemMap = make(map[string]Systemer)
 
 	/*
 		// Default WorldBounds values
@@ -39,14 +52,27 @@ func (w *World) New() {
 }
 
 // AddEntity adds a new Entity to the World, and its required Systems
-func (w *World) AddEntity(entity *Entity) {
+// In case the entity you are trying to add is requiring an System that this
+// world does not know this method will return an UnmetRequirement error
+func (w *World) AddEntity(entity *Entity) error {
 	w.entities[entity.ID()] = entity
+	reqs := entity.Requirements()
+	for _, req := range reqs {
+		_, ok := w.systemMap[req]
+		if !ok {
+			// return an error with info about the first missing req
+			// WARNING this will not compile a list of all your missing requirements
+			// and will just fail on the first missing one.
+			return UnmetRequirement{Msg: req}
+		}
+	}
 
 	for _, system := range w.systems {
 		if entity.DoesRequire(system.Type()) {
 			system.AddEntity(entity)
 		}
 	}
+	return nil
 }
 
 // RemoveEntity removes an Entity from the World and its required Systems
@@ -64,6 +90,9 @@ func (w *World) RemoveEntity(entity *Entity) {
 func (w *World) AddSystem(system Systemer) {
 	system.New(w)
 	w.systems = append(w.systems, system)
+	// update system map so that we can quickly test if a system is present
+	// in the world
+	w.systemMap[system.Type()] = system
 	sort.Sort(w.systems)
 }
 
@@ -84,13 +113,10 @@ func (w *World) Systems() []Systemer {
 	return w.systems
 }
 
+// HasSystem tests if a given system is present in this world
 func (w *World) HasSystem(systemType string) bool {
-	for _, s := range w.systems {
-		if s.Type() == systemType {
-			return true
-		}
-	}
-	return false
+	_, ok := w.systemMap[systemType]
+	return ok
 }
 
 // Update is called on each frame, with dt being the time difference in seconds since the last Update call

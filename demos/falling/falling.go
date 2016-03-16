@@ -42,7 +42,10 @@ func (game *Game) Setup(w *ecs.World) {
 	guy.AddComponent(space)
 	guy.AddComponent(collision)
 
-	w.AddEntity(guy)
+	err := w.AddEntity(guy)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (*Game) Hide()        {}
@@ -109,7 +112,10 @@ func (rock *RockSpawnSystem) Update(entity *ecs.Entity, dt float32) {
 
 	position := engi.Point{0, -32}
 	position.X = rand.Float32() * (engi.Width())
-	rock.world.AddEntity(NewRock(position))
+	err := rock.world.AddEntity(NewRock(position))
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func NewRock(position engi.Point) *ecs.Entity {

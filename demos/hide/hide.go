@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"math/rand"
 
 	"github.com/paked/engi"
@@ -33,7 +34,10 @@ func (game *GameWorld) Setup(w *ecs.World) {
 	guy.AddComponent(space)
 	guy.AddComponent(collision)
 
-	w.AddEntity(guy)
+	err := w.AddEntity(guy)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (*GameWorld) Hide()        {}

@@ -32,6 +32,18 @@ func (e *Entity) DoesRequire(name string) bool {
 	return e.requires[name]
 }
 
+// Requirements returns a list of all system requirements for this entity
+func (e *Entity) Requirements() []string {
+	keys := make([]string, len(e.requires))
+
+	i := 0
+	for k := range e.requires {
+		keys[i] = k
+		i++
+	}
+	return keys
+}
+
 // AddComponent adds a new Component to the Entity
 func (e *Entity) AddComponent(component Component) {
 	e.components[component.Type()] = component

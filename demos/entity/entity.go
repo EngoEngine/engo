@@ -37,7 +37,10 @@ func (game *GameWorld) Setup(w *ecs.World) {
 	guy.AddComponent(render)
 	guy.AddComponent(space)
 
-	w.AddEntity(guy)
+	err := w.AddEntity(guy)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (*GameWorld) Hide()        {}

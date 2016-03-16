@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/paked/engi"
 	"github.com/paked/engi/ecs"
 )
@@ -37,7 +39,10 @@ func (game *GameWorld) Setup(w *ecs.World) {
 
 	spriteSheet := engi.NewSpritesheetFromFile("hero.png", 150, 150)
 
-	w.AddEntity(game.CreateEntity(&engi.Point{0, 0}, spriteSheet, StopAction))
+	err := w.AddEntity(game.CreateEntity(&engi.Point{0, 0}, spriteSheet, StopAction))
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (*GameWorld) Hide()        {}

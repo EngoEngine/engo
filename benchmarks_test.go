@@ -1,15 +1,16 @@
 package engi
 
 import (
-	"github.com/paked/engi/ecs"
 	"testing"
+
+	"github.com/paked/engi/ecs"
 )
 
 type NilSystem struct {
 	*ecs.System
 }
 
-func (ns *NilSystem) New() {
+func (ns *NilSystem) New(*ecs.World) {
 	ns.System = ecs.NewSystem()
 }
 
