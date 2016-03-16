@@ -38,8 +38,8 @@ func (game *Game) Setup(w *ecs.World) {
 
 	space := &engi.SpaceComponent{
 		Position: engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2},
-		Width: width,
-		Height: height,
+		Width:    width,
+		Height:   height,
 	}
 
 	guy.AddComponent(render)
@@ -129,8 +129,8 @@ func NewRock(position engi.Point) *ecs.Entity {
 	render := engi.NewRenderComponent(texture, engi.Point{4, 4}, "rock")
 	space := &engi.SpaceComponent{
 		Position: position,
-		Width: texture.Width() * render.Scale().X,
-		Height: texture.Height() * render.Scale().Y,
+		Width:    texture.Width() * render.Scale().X,
+		Height:   texture.Height() * render.Scale().Y,
 	}
 	collision := &engi.CollisionComponent{Solid: true}
 

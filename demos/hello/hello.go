@@ -35,8 +35,8 @@ func (game *GameWorld) Setup(w *ecs.World) {
 
 	space := &engi.SpaceComponent{
 		Position: engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2},
-		Width: width,
-		Height: height,
+		Width:    width,
+		Height:   height,
 	}
 
 	guy.AddComponent(render)

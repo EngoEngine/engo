@@ -40,8 +40,8 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	ballRender := engi.NewRenderComponent(ballTexture, engi.Point{2, 2}, "ball")
 	ballSpace := &engi.SpaceComponent{
 		Position: engi.Point{(engi.Width() - ballTexture.Width()) / 2, (engi.Height() - ballTexture.Height()) / 2},
-		Width: ballTexture.Width() * ballRender.Scale().X,
-		Height: ballTexture.Height() * ballRender.Scale().Y,
+		Width:    ballTexture.Width() * ballRender.Scale().X,
+		Height:   ballTexture.Height() * ballRender.Scale().Y,
 	}
 	ballCollision := &engi.CollisionComponent{Main: true, Solid: true}
 	ballSpeed := &SpeedComponent{}
@@ -77,8 +77,8 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		}
 		paddleSpace := &engi.SpaceComponent{
 			Position: engi.Point{x, (engi.Height() - paddleTexture.Height()) / 2},
-			Width: paddleRender.Scale().X * paddleTexture.Width(),
-			Height: paddleRender.Scale().Y * paddleTexture.Height(),
+			Width:    paddleRender.Scale().X * paddleTexture.Width(),
+			Height:   paddleRender.Scale().Y * paddleTexture.Height(),
 		}
 		paddleControl := &ControlComponent{schemes[i]}
 		paddleCollision := &engi.CollisionComponent{Main: false, Solid: true}
