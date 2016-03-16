@@ -26,9 +26,9 @@ type DefaultShader struct {
 
 	lastTexture *webgl.Texture
 
-	inPosition   int
-	inTexCoords  int
-	inColor      int
+	inPosition  int
+	inTexCoords int
+	inColor     int
 
 	ufCamera     *webgl.UniformLocation
 	ufPosition   *webgl.UniformLocation
