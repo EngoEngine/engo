@@ -1,6 +1,9 @@
 package engi
 
 import (
+	"log"
+	"math"
+
 	"github.com/paked/webgl"
 )
 
@@ -9,7 +12,7 @@ const bufferSize = 10000
 type Shader interface {
 	Initialize(width, height float32)
 	Pre()
-	Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y, rotation float32)
+	Draw(texture *webgl.Texture, buffer *webgl.Buffer, width, height, x, y, rotation float32)
 	Post()
 }
 
@@ -26,9 +29,13 @@ type DefaultShader struct {
 	inPosition   int
 	inTexCoords  int
 	inColor      int
+
 	ufCamera     *webgl.UniformLocation
 	ufPosition   *webgl.UniformLocation
 	ufProjection *webgl.UniformLocation
+	ufAngle      *webgl.UniformLocation
+	ufWidth      *webgl.UniformLocation
+	ufHeight     *webgl.UniformLocation
 }
 
 func (s *DefaultShader) Initialize(width, height float32) {
@@ -42,19 +49,61 @@ attribute vec4 in_Color;
 uniform vec2 uf_Position;
 uniform vec3 uf_Camera;
 uniform vec2 uf_Projection;
+uniform float uf_Angle;
+uniform float uf_Width;
+uniform float uf_Height;
 
 varying vec4 var_Color;
 varying vec2 var_TexCoords;
+
+mat4 rotationMatrix();
+mat4 rotationMatrix(vec3 axis, float angle)
+{
+    axis = normalize(axis);
+    float s = sin(angle);
+    float c = cos(angle);
+    float oc = 1.0 - c;
+
+    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
+                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
+                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
+                0.0,                                0.0,                                0.0,                                1.0);
+}
 
 void main() {
   var_Color = in_Color;
   var_TexCoords = in_TexCoords;
 
-  gl_Position = vec4((in_Position.x + uf_Position.x - uf_Camera.x)/  uf_Projection.x,
-  					 (in_Position.y + uf_Position.y - uf_Camera.y)/ -uf_Projection.y,
-  					 0.0, uf_Camera.z);
+  /* rotation around the z axis */
+  vec3 axis = vec3(0.0, 0.0, 1.0);
+  mat4 rotation = rotationMatrix(axis, uf_Angle);
 
-}`, `
+  /* translation to origin translation matrix */
+  mat4 origin = mat4(1, 0, 0, 0,
+                     0, 1, 0, 0,
+                     0, 0, 1, 0,
+                     in_Position.x - uf_Width/2, in_Position.y - uf_Height /2, 0, 1);
+  /* back to where we came from translation matrix */
+  mat4 back = mat4(1, 0, 0, 0,
+                     0, 1, 0, 0,
+                     0, 0, 1, 0,
+                     in_Position.x + uf_Width/2, in_Position.y + uf_Height/2, 0, 1);
+
+  /* this is the initial position */
+  vec4 pos = vec4(
+       in_Position.x,
+       in_Position.y,
+       0.0,
+       0.0);
+
+  /* apply transformation */
+  gl_Position = back * rotation * origin * pos;
+  /* apply positional corrections */
+  gl_Position = vec4((gl_Position.x + uf_Position.x - uf_Camera.x)/  uf_Projection.x,
+                     (gl_Position.y + uf_Position.y - uf_Camera.y)/ -uf_Projection.y,
+                     0.0, uf_Camera.z);
+}
+`, `
 /* Fragment Shader */
 #ifdef GL_ES
 #define LOWP lowp
@@ -97,6 +146,9 @@ void main (void) {
 	s.ufCamera = Gl.GetUniformLocation(s.program, "uf_Camera")
 	s.ufPosition = Gl.GetUniformLocation(s.program, "uf_Position")
 	s.ufProjection = Gl.GetUniformLocation(s.program, "uf_Projection")
+	s.ufAngle = Gl.GetUniformLocation(s.program, "uf_Angle")
+	s.ufWidth = Gl.GetUniformLocation(s.program, "uf_Width")
+	s.ufHeight = Gl.GetUniformLocation(s.program, "uf_Height")
 
 	// Enable those things
 	Gl.EnableVertexAttribArray(s.inPosition)
@@ -113,7 +165,7 @@ func (s *DefaultShader) Pre() {
 	Gl.Uniform3f(s.ufCamera, cam.x, cam.y, cam.z)
 }
 
-func (s *DefaultShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y, rotation float32) {
+func (s *DefaultShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, width, height, x, y, rotation float32) {
 	if s.lastTexture != texture {
 		Gl.BindTexture(Gl.TEXTURE_2D, texture)
 		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)
@@ -125,8 +177,10 @@ func (s *DefaultShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y,
 		s.lastTexture = texture
 	}
 
-	// TODO: add rotation
+	Gl.Uniform1f(s.ufAngle, rotation*math.Pi/180)
 	Gl.Uniform2f(s.ufPosition, x, y)
+	Gl.Uniform1f(s.ufWidth, width)
+	Gl.Uniform1f(s.ufHeight, height)
 	Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
 }
 
@@ -137,6 +191,7 @@ func (s *DefaultShader) Post() {
 func (s *DefaultShader) SetProjection(width, height float32) {
 	s.projX = width / 2
 	s.projY = height / 2
+	log.Println("Projection set to", s.projX, s.projY)
 }
 
 type HUDShader struct {
@@ -236,7 +291,7 @@ func (s *HUDShader) Pre() {
 	Gl.Uniform2f(s.ufProjection, s.projX, s.projY)
 }
 
-func (s *HUDShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y, rotation float32) {
+func (s *HUDShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, width, height, x, y, rotation float32) {
 	if s.lastTexture != texture {
 		Gl.BindTexture(Gl.TEXTURE_2D, texture)
 		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)

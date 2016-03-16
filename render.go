@@ -283,7 +283,7 @@ func (rs *RenderSystem) Post() {
 				continue // with other entities
 			}
 
-			s.Draw(render.drawable.Texture(), render.buffer, space.Position.X, space.Position.Y, 0) // TODO: add rotation
+			s.Draw(render.drawable.Texture(), render.buffer, render.drawable.Width(), render.drawable.Height(), space.Position.X, space.Position.Y, space.Rotation)
 		}
 	}
 

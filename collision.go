@@ -14,6 +14,7 @@ type SpaceComponent struct {
 	Position Point
 	Width    float32
 	Height   float32
+	Rotation float32 // angle in degrees for the rotation to apply clockwise
 }
 
 // Center positions the space component according to its center instead of its
