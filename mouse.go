@@ -59,7 +59,7 @@ func (*MouseComponent) Type() string {
 
 // MouseSystem listens for mouse events, and changes value for MouseComponent accordingly
 type MouseSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 
 	mouseX    float32
 	mouseY    float32
@@ -67,14 +67,10 @@ type MouseSystem struct {
 }
 
 // Type returns the string representation of the MouseSystem type
-func (*MouseSystem) Type() string {
-	return "MouseSystem"
-}
+func (*MouseSystem) Type() string { return "MouseSystem" }
 
 // New initializes the MouseSystem
-func (m *MouseSystem) New(*ecs.World) {
-	m.System = ecs.NewSystem()
-}
+func (m *MouseSystem) New(*ecs.World) {}
 
 // Priority returns a priority of 10 (higher than most) to ensure that this System runs before all others
 func (m *MouseSystem) Priority() int {
@@ -88,8 +84,17 @@ func (m *MouseSystem) Pre() {
 	m.mouseY = Mouse.Y*cam.z*(gameHeight/windowHeight) + cam.y - (gameHeight/2)*cam.z
 }
 
-// Update sets the MouseComponent values for each Entity
-func (m *MouseSystem) Update(entity *ecs.Entity, dt float32) {
+// Post is called after all Update calls, and is used to compute internal values
+// NOTE: we do not reset modifiers here because we always set them to meaningful
+// values when a mouse event is propagated to the mouse components
+func (m *MouseSystem) Post() {
+	// reset mouse.Action value to something meaningless to avoid
+	// catching the same "signal" twice
+	Mouse.Action = NEUTRAL
+}
+
+// EUpdate sets the MouseComponent values for each Entity
+func (m *MouseSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	var (
 		mc     *MouseComponent
 		space  *SpaceComponent
@@ -181,13 +186,4 @@ func (m *MouseSystem) Update(entity *ecs.Entity, dt float32) {
 		}
 		mc.Hovered = false
 	}
-}
-
-// Post is called after all Update calls, and is used to compute internal values
-// NOTE: we do not reset modifiers here because we always set them to meaningful
-// values when a mouse event is propagated to the mouse components
-func (m *MouseSystem) Post() {
-	// reset mouse.Action value to something meaningless to avoid
-	// catching the same "signal" twice
-	Mouse.Action = NEUTRAL
 }

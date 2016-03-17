@@ -24,7 +24,7 @@ func (*AudioComponent) Type() string {
 
 // AudioSystem is a System that allows for sound effects and / or music
 type AudioSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 	HeightModifier float32
 }
 
@@ -33,9 +33,7 @@ func (AudioSystem) Type() string {
 }
 
 func (as *AudioSystem) New(*ecs.World) {
-	as.System = ecs.NewSystem()
-
 	log.Println("Warning: audio is not yet implemented on Windows")
 }
 
-func (as *AudioSystem) Update(entity *ecs.Entity, dt float32) {}
+func (as *AudioSystem) UpdateEntity(entity *ecs.Entity, dt float32) {}

@@ -14,23 +14,19 @@ var (
 
 // CameraSystem is a System that manages the state of the Camera
 type cameraSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 	x, y, z  float32
 	tracking *ecs.Entity // The entity that is currently being followed
 }
 
-func (cameraSystem) Type() string {
-	return "cameraSystem"
-}
+func (*cameraSystem) Type() string { return "cameraSystem" }
+func (*cameraSystem) Pre()         {}
+func (*cameraSystem) Post()        {}
 
 func (cam *cameraSystem) New(*ecs.World) {
-	cam.System = ecs.NewSystem()
-
 	cam.x = WorldBounds.Max.X / 2
 	cam.y = WorldBounds.Max.Y / 2
 	cam.z = 1
-
-	cam.AddEntity(ecs.NewEntity([]string{cam.Type()}))
 
 	Mailbox.Listen("CameraMessage", func(msg Message) {
 		cammsg, ok := msg.(CameraMessage)
@@ -106,7 +102,7 @@ func (cam *cameraSystem) Z() float32 {
 	return cam.z
 }
 
-func (cam *cameraSystem) Update(entity *ecs.Entity, dt float32) {
+func (cam *cameraSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	if cam.tracking == nil {
 		return
 	}
@@ -147,58 +143,51 @@ func (CameraMessage) Type() string {
 	return "CameraMessage"
 }
 
-// KeyboardScroller is a Systemer that allows for scrolling when certain keys are pressed
+// KeyboardScroller is a System that allows for scrolling when certain keys are pressed
 type KeyboardScroller struct {
-	*ecs.System
-	scrollSpeed float32
+	ScrollSpeed float32
 	upKeys      []Key
 	leftKeys    []Key
 	downKeys    []Key
 	rightKeys   []Key
 
-	keysMu  sync.RWMutex
-	isSetup bool
+	keysMu sync.RWMutex
 }
 
-func (*KeyboardScroller) Type() string {
-	return "KeyboardScroller"
-}
+func (*KeyboardScroller) Type() string             { return "KeyboardScroller" }
+func (*KeyboardScroller) Priority() int            { return 10 }
+func (*KeyboardScroller) AddEntity(*ecs.Entity)    {}
+func (*KeyboardScroller) RemoveEntity(*ecs.Entity) {}
+func (*KeyboardScroller) New(*ecs.World)           {}
 
-func (c *KeyboardScroller) New(*ecs.World) {
-	if !c.isSetup {
-		c.System = ecs.NewSystem()
-		c.isSetup = true
-	}
-}
-
-func (c *KeyboardScroller) Update(entity *ecs.Entity, dt float32) {
+func (c *KeyboardScroller) Update(dt float32) {
 	c.keysMu.RLock()
 	defer c.keysMu.RUnlock()
 
 	for _, upKey := range c.upKeys {
 		if Keys.Get(upKey).Down() {
-			Mailbox.Dispatch(CameraMessage{YAxis, -c.scrollSpeed * dt, true})
+			Mailbox.Dispatch(CameraMessage{YAxis, -c.ScrollSpeed * dt, true})
 			break
 		}
 	}
 
 	for _, rightKey := range c.rightKeys {
 		if Keys.Get(rightKey).Down() {
-			Mailbox.Dispatch(CameraMessage{XAxis, c.scrollSpeed * dt, true})
+			Mailbox.Dispatch(CameraMessage{XAxis, c.ScrollSpeed * dt, true})
 			break
 		}
 	}
 
 	for _, downKey := range c.downKeys {
 		if Keys.Get(downKey).Down() {
-			Mailbox.Dispatch(CameraMessage{YAxis, c.scrollSpeed * dt, true})
+			Mailbox.Dispatch(CameraMessage{YAxis, c.ScrollSpeed * dt, true})
 			break
 		}
 	}
 
 	for _, leftKey := range c.leftKeys {
 		if Keys.Get(leftKey).Down() {
-			Mailbox.Dispatch(CameraMessage{XAxis, -c.scrollSpeed * dt, true})
+			Mailbox.Dispatch(CameraMessage{XAxis, -c.ScrollSpeed * dt, true})
 			break
 		}
 	}
@@ -216,91 +205,55 @@ func (c *KeyboardScroller) BindKeyboard(up, right, down, left Key) {
 
 func NewKeyboardScroller(scrollSpeed float32, up, right, down, left Key) *KeyboardScroller {
 	kbs := &KeyboardScroller{
-		scrollSpeed: scrollSpeed,
+		ScrollSpeed: scrollSpeed,
 	}
-	kbs.New(nil)
 	kbs.BindKeyboard(up, right, down, left)
-	kbs.AddEntity(ecs.NewEntity([]string{kbs.Type()}))
 	return kbs
 }
 
-// EdgeScroller is a Systemer that allows for scrolling when the mouse is near the edges
+// EdgeScroller is a System that allows for scrolling when the cursor is near the edges of
+// the window
 type EdgeScroller struct {
-	*ecs.System
-	scrollSpeed float32
-	margin      float64
-
-	isSetup bool
+	ScrollSpeed float32
+	EdgeMargin  float64
 }
 
-func (*EdgeScroller) Type() string {
-	return "EdgeScroller"
-}
+func (*EdgeScroller) Type() string             { return "EdgeScroller" }
+func (*EdgeScroller) Priority() int            { return 10 }
+func (*EdgeScroller) AddEntity(*ecs.Entity)    {}
+func (*EdgeScroller) RemoveEntity(*ecs.Entity) {}
+func (*EdgeScroller) New(*ecs.World)           {}
 
-func (c *EdgeScroller) New(*ecs.World) {
-	if !c.isSetup {
-		c.System = ecs.NewSystem()
-		c.isSetup = true
-	}
-}
-
-func (c *EdgeScroller) Update(entity *ecs.Entity, dt float32) {
+func (c *EdgeScroller) Update(dt float32) {
 	curX, curY := window.GetCursorPos()
 	maxX, maxY := window.GetSize()
 
-	if curX < c.margin {
-		Mailbox.Dispatch(CameraMessage{XAxis, -c.scrollSpeed * dt, true})
-	} else if curX > float64(maxX)-c.margin {
-		Mailbox.Dispatch(CameraMessage{XAxis, c.scrollSpeed * dt, true})
+	if curX < c.EdgeMargin {
+		Mailbox.Dispatch(CameraMessage{XAxis, -c.ScrollSpeed * dt, true})
+	} else if curX > float64(maxX)-c.EdgeMargin {
+		Mailbox.Dispatch(CameraMessage{XAxis, c.ScrollSpeed * dt, true})
 	}
 
-	if curY < c.margin {
-		Mailbox.Dispatch(CameraMessage{YAxis, -c.scrollSpeed * dt, true})
-	} else if curY > float64(maxY)-c.margin {
-		Mailbox.Dispatch(CameraMessage{YAxis, c.scrollSpeed * dt, true})
+	if curY < c.EdgeMargin {
+		Mailbox.Dispatch(CameraMessage{YAxis, -c.ScrollSpeed * dt, true})
+	} else if curY > float64(maxY)-c.EdgeMargin {
+		Mailbox.Dispatch(CameraMessage{YAxis, c.ScrollSpeed * dt, true})
 	}
 }
 
-func NewEdgeScroller(scrollSpeed float32, margin float64) *EdgeScroller {
-	es := &EdgeScroller{
-		scrollSpeed: scrollSpeed,
-		margin:      margin,
-	}
-	es.New(nil)
-	es.AddEntity(ecs.NewEntity([]string{es.Type()}))
-	return es
-}
-
-// MouseZoomer is a Systemer that allows for zooming when the scroll wheel is used
+// MouseZoomer is a System that allows for zooming when the scroll wheel is used
 type MouseZoomer struct {
-	*ecs.System
-	zoomSpeed float32
-
-	isSetup bool
+	ZoomSpeed float32
 }
 
-func (*MouseZoomer) Type() string {
-	return "MouseZoomer"
-}
+func (*MouseZoomer) Type() string             { return "MouseZoomer" }
+func (*MouseZoomer) Priority() int            { return 10 }
+func (*MouseZoomer) AddEntity(*ecs.Entity)    {}
+func (*MouseZoomer) RemoveEntity(*ecs.Entity) {}
+func (*MouseZoomer) New(*ecs.World)           {}
 
-func (c *MouseZoomer) New(*ecs.World) {
-	if !c.isSetup {
-		c.System = ecs.NewSystem()
-		c.isSetup = true
-	}
-}
-
-func (c *MouseZoomer) Update(entity *ecs.Entity, dt float32) {
+func (c *MouseZoomer) Update(dt float32) {
 	if Mouse.ScrollY != 0 {
-		Mailbox.Dispatch(CameraMessage{ZAxis, Mouse.ScrollY * c.zoomSpeed, true})
+		Mailbox.Dispatch(CameraMessage{ZAxis, Mouse.ScrollY * c.ZoomSpeed, true})
 	}
-}
-
-func NewMouseZoomer(zoomSpeed float32) *MouseZoomer {
-	es := &MouseZoomer{
-		zoomSpeed: zoomSpeed,
-	}
-	es.New(nil)
-	es.AddEntity(ecs.NewEntity([]string{es.Type()}))
-	return es
 }

@@ -40,7 +40,7 @@ func (game *GameWorld) Setup(w *ecs.World) {
 	w.AddSystem(&engi.MouseSystem{})
 	w.AddSystem(&engi.RenderSystem{})
 	w.AddSystem(&ControlSystem{})
-	w.AddSystem(engi.NewMouseZoomer(-0.125))
+	w.AddSystem(&engi.MouseZoomer{-0.125})
 
 	err := w.AddEntity(game.CreateEntity())
 	if err != nil {
@@ -63,18 +63,16 @@ func (game *GameWorld) CreateEntity() *ecs.Entity {
 }
 
 type ControlSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 }
 
-func (ControlSystem) Type() string {
-	return "ControlSystem"
-}
+func (*ControlSystem) Type() string { return "ControlSystem" }
+func (*ControlSystem) Pre()         {}
+func (*ControlSystem) Post()        {}
 
-func (c *ControlSystem) New(*ecs.World) {
-	c.System = ecs.NewSystem()
-}
+func (c *ControlSystem) New(*ecs.World) {}
 
-func (c *ControlSystem) Update(entity *ecs.Entity, dt float32) {
+func (c *ControlSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	var mouse *engi.MouseComponent
 	if !entity.Component(&mouse) {
 		return
@@ -83,7 +81,7 @@ func (c *ControlSystem) Update(entity *ecs.Entity, dt float32) {
 	if mouse.Enter {
 		engi.SetCursor(engi.Hand)
 	} else if mouse.Leave {
-		engi.SetCursor(engi.Arrow)
+		engi.SetCursor(nil)
 	}
 }
 

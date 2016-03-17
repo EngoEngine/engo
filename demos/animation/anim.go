@@ -65,18 +65,16 @@ func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Sprites
 }
 
 type ControlSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 }
 
-func (ControlSystem) Type() string {
-	return "ControlSystem"
-}
+func (*ControlSystem) Type() string { return "ControlSystem" }
+func (*ControlSystem) Pre()         {}
+func (*ControlSystem) Post()        {}
 
-func (c *ControlSystem) New(*ecs.World) {
-	c.System = ecs.NewSystem()
-}
+func (c *ControlSystem) New(*ecs.World) {}
 
-func (c *ControlSystem) Update(entity *ecs.Entity, dt float32) {
+func (c *ControlSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	var a *engi.AnimationComponent
 
 	if !entity.Component(&a) {

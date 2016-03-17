@@ -45,20 +45,18 @@ func (*GameWorld) Show()        {}
 func (*GameWorld) Type() string { return "GameWorld" }
 
 type HideSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 }
 
-func (HideSystem) Type() string {
-	return "HideSystem"
-}
+func (*HideSystem) Type() string { return "HideSystem" }
+func (*HideSystem) Pre()         {}
+func (*HideSystem) Post()        {}
 
-func (s *HideSystem) New(*ecs.World) {
-	s.System = ecs.NewSystem()
-}
+func (s *HideSystem) New(*ecs.World) {}
 
-func (c *HideSystem) Update(e *ecs.Entity, dt float32) {
+func (c *HideSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	var render *engi.RenderComponent
-	if !e.Component(&render) {
+	if !entity.Component(&render) {
 		return
 	}
 	if rand.Int()%10 == 0 {

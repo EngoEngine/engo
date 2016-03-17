@@ -82,7 +82,7 @@ func (game *Game) Setup(w *ecs.World) {
 
 	// Adding KeyboardScroller so we can actually see the difference between background and HUD when scrolling
 	w.AddSystem(engi.NewKeyboardScroller(scrollSpeed, engi.W, engi.D, engi.S, engi.A))
-	w.AddSystem(engi.NewMouseZoomer(zoomSpeed))
+	w.AddSystem(&engi.MouseZoomer{zoomSpeed})
 
 	// Create background, so we can see difference between this and HUD
 	err := w.AddEntity(generateBackground())
