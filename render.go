@@ -126,54 +126,14 @@ func (ren *RenderComponent) generateBufferContent() []float32 {
 		fy2 *= scaleY
 	}
 
-	p1x := fx
-	p1y := fy
-	p2x := fx
-	p2y := fy2
-	p3x := fx2
-	p3y := fy2
-	p4x := fx2
-	p4y := fy
-
-	var x1 float32
-	var y1 float32
-	var x2 float32
-	var y2 float32
-	var x3 float32
-	var y3 float32
-	var x4 float32
-	var y4 float32
-
-	if rotation != 0 {
-		rot := float64(rotation * (math.Pi / 180.0))
-
-		cos := float32(math.Cos(rot))
-		sin := float32(math.Sin(rot))
-
-		x1 = cos*p1x - sin*p1y
-		y1 = sin*p1x + cos*p1y
-
-		x2 = cos*p2x - sin*p2y
-		y2 = sin*p2x + cos*p2y
-
-		x3 = cos*p3x - sin*p3y
-		y3 = sin*p3x + cos*p3y
-
-		x4 = x1 + (x3 - x2)
-		y4 = y3 - (y2 - y1)
-	} else {
-		x1 = p1x
-		y1 = p1y
-
-		x2 = p2x
-		y2 = p2y
-
-		x3 = p3x
-		y3 = p3y
-
-		x4 = p4x
-		y4 = p4y
-	}
+	x1 := fx
+	y1 := fy
+	x2 := fx
+	y2 := fy2
+	x3 := fx2
+	y3 := fy2
+	x4 := fx2
+	y4 := fy
 
 	colorR, colorG, colorB, _ := c.RGBA()
 
