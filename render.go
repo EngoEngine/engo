@@ -111,7 +111,6 @@ func (ren *RenderComponent) preloadTexture() {
 func (ren *RenderComponent) generateBufferContent() []float32 {
 	scaleX := ren.scale.X
 	scaleY := ren.scale.Y
-	rotation := float32(0.0)
 	transparency := float32(1.0)
 	c := ren.Color
 
