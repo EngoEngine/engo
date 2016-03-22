@@ -4,6 +4,11 @@ import (
 	"reflect"
 )
 
+// Component is a piece of data which belongs to an Entity
+type Component interface {
+	Type() string
+}
+
 // Entity is the E in Entity Component System. It belongs to any amount of
 // Systems, and has a number of Components
 type Entity struct {

@@ -6,18 +6,13 @@ import (
 )
 
 type TestSystem struct {
-	*System
+	LinearSystem
 }
 
-func (ts *TestSystem) New(*World) {
-	ts.System = NewSystem()
-}
+func (ts *TestSystem) New(*World) {}
+func (*TestSystem) Type() string  { return "TestSystem" }
 
-func (*TestSystem) Type() string {
-	return "TestSystem"
-}
-
-func (ts *TestSystem) Update(e *Entity, dt float32) {}
+func (ts *TestSystem) UpdateEntity(e *Entity, dt float32) {}
 
 func TestAddEntity(t *testing.T) {
 	world := World{}

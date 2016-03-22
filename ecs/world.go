@@ -1,6 +1,7 @@
 package ecs
 
 import (
+	"log"
 	"runtime"
 	"sort"
 )
@@ -20,8 +21,8 @@ func (e UnmetRequirement) Error() string {
 // It is the recommended way to run ecs
 type World struct {
 	entities  map[string]*Entity
-	systemMap map[string]Systemer // tracks presence of a system in the world
-	systems   Systemers
+	systemMap map[string]System // tracks presence of a system in the world
+	systems   Systems
 
 	isSetup bool
 	serial  bool
@@ -34,7 +35,7 @@ func (w *World) New() {
 	}
 
 	w.entities = make(map[string]*Entity)
-	w.systemMap = make(map[string]Systemer)
+	w.systemMap = make(map[string]System)
 
 	/*
 		// Default WorldBounds values
@@ -87,7 +88,16 @@ func (w *World) RemoveEntity(entity *Entity) {
 }
 
 // AddSystem adds a new System to the World, and then sorts them based on Priority
-func (w *World) AddSystem(system Systemer) {
+func (w *World) AddSystem(system System) {
+	// Special checks for LinearSystem
+	if linSys, ok := (system).(basicSystemSetter); ok {
+		if basic, ok := (system).(LinearSystemFunctions); ok {
+			linSys.setLinearSystemFunctions(basic)
+		} else {
+			log.Println("Warning: Linear System", system.Type(), "does not implement ecs.BasicSystem")
+		}
+	}
+
 	system.New(w)
 	w.systems = append(w.systems, system)
 	// update system map so that we can quickly test if a system is present
@@ -109,7 +119,7 @@ func (w *World) Entities() []*Entity {
 }
 
 // Systems returns a list of Systems
-func (w *World) Systems() []Systemer {
+func (w *World) Systems() []System {
 	return w.systems
 }
 
@@ -119,32 +129,9 @@ func (w *World) HasSystem(systemType string) bool {
 	return ok
 }
 
-// Update is called on each frame, with dt being the time difference in seconds since the last Update call
+// Update is called on each frame, with `dt` being the time difference in seconds since the last `Update` call
 func (w *World) Update(dt float32) {
-	complChan := make(chan struct{})
 	for _, system := range w.Systems() {
-		system.Pre()
-
-		entities := system.Entities()
-		count := len(entities)
-
-		// Calling them serial / in parallel, depending on the settings
-		if w.serial || !system.RunInParallel() {
-			for _, entity := range entities {
-				system.Update(entity, dt)
-			}
-		} else {
-			for _, entity := range entities {
-				go func(entity *Entity) {
-					system.Update(entity, dt)
-					complChan <- struct{}{}
-				}(entity)
-			}
-			for ; count > 0; count-- {
-				<-complChan
-			}
-		}
-		system.Post()
+		system.Update(dt)
 	}
-	close(complChan)
 }

@@ -56,7 +56,7 @@ func (game *Game) Preload() {}
 func (game *Game) Setup(w *ecs.World) {
 	engi.SetBg(0x222222)
 	w.AddSystem(&engi.RenderSystem{})
-	w.AddSystem(engi.NewMouseZoomer(zoomSpeed))
+	w.AddSystem(&engi.MouseZoomer{zoomSpeed})
 
 	// Create the background; this way we'll see when we actually zoom
 	err := w.AddEntity(generateBackground())

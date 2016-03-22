@@ -26,17 +26,15 @@ func (*AudioComponent) Type() string {
 
 // AudioSystem is a System that allows for sound effects and / or music
 type AudioSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 	HeightModifier float32
 }
 
-func (AudioSystem) Type() string {
-	return "AudioSystem"
-}
+func (*AudioSystem) Type() string { return "AudioSystem" }
+func (*AudioSystem) Pre()         {}
+func (*AudioSystem) Post()        {}
 
 func (as *AudioSystem) New(*ecs.World) {
-	as.System = ecs.NewSystem()
-
 	if as.HeightModifier == 0 {
 		as.HeightModifier = defaultHeightModifier
 	}
@@ -58,7 +56,7 @@ func (as *AudioSystem) New(*ecs.World) {
 	})
 }
 
-func (as *AudioSystem) Update(entity *ecs.Entity, dt float32) {
+func (as *AudioSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	var ac *AudioComponent
 	var ok bool
 	if ac, ok = entity.ComponentFast(ac).(*AudioComponent); !ok {

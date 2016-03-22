@@ -57,18 +57,16 @@ func (*Game) Show()        {}
 func (*Game) Type() string { return "Game" }
 
 type ControlSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 }
 
-func (control *ControlSystem) New(*ecs.World) {
-	control.System = ecs.NewSystem()
-}
+func (*ControlSystem) Type() string { return "ControlSystem" }
+func (*ControlSystem) Pre()         {}
+func (*ControlSystem) Post()        {}
 
-func (ControlSystem) Type() string {
-	return "ControlSystem"
-}
+func (control *ControlSystem) New(*ecs.World) {}
 
-func (control *ControlSystem) Update(entity *ecs.Entity, dt float32) {
+func (control *ControlSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	var space *engi.SpaceComponent
 	if !entity.Component(&space) {
 		return
@@ -94,21 +92,20 @@ func (control *ControlSystem) Update(entity *ecs.Entity, dt float32) {
 }
 
 type RockSpawnSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 
 	world *ecs.World
 }
 
-func (RockSpawnSystem) Type() string {
-	return "RockSpawnSystem"
-}
+func (*RockSpawnSystem) Type() string { return "RockSpawnSystem" }
+func (*RockSpawnSystem) Pre()         {}
+func (*RockSpawnSystem) Post()        {}
 
 func (rock *RockSpawnSystem) New(w *ecs.World) {
-	rock.System = ecs.NewSystem()
 	rock.world = w
 }
 
-func (rock *RockSpawnSystem) Update(entity *ecs.Entity, dt float32) {
+func (rock *RockSpawnSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	// 4% change of spawning a rock each frame
 	if rand.Float32() < .96 {
 		return
@@ -142,20 +139,18 @@ func NewRock(position engi.Point) *ecs.Entity {
 }
 
 type FallingSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 }
+
+func (*FallingSystem) Type() string { return "FallingSystem" }
+func (*FallingSystem) Pre()         {}
+func (*FallingSystem) Post()        {}
 
 func (fs *FallingSystem) New(*ecs.World) {
-	fs.System = ecs.NewSystem()
 	//engi.Mailbox.Listen("CollisionMessage", fs)
-
 }
 
-func (FallingSystem) Type() string {
-	return "FallingSystem"
-}
-
-func (fs *FallingSystem) Update(entity *ecs.Entity, dt float32) {
+func (fs *FallingSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	var space *engi.SpaceComponent
 	if !entity.Component(&space) {
 		return
@@ -164,11 +159,14 @@ func (fs *FallingSystem) Update(entity *ecs.Entity, dt float32) {
 }
 
 type DeathSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 }
 
+func (*DeathSystem) Type() string { return "DeathSystem" }
+func (*DeathSystem) Pre()         {}
+func (*DeathSystem) Post()        {}
+
 func (ds *DeathSystem) New(*ecs.World) {
-	ds.System = ecs.NewSystem()
 	// Subscribe to ScoreMessage
 	engi.Mailbox.Listen("ScoreMessage", func(message engi.Message) {
 		collision, isCollision := message.(engi.CollisionMessage)
@@ -177,14 +175,9 @@ func (ds *DeathSystem) New(*ecs.World) {
 			log.Println("DEAD")
 		}
 	})
-
 }
 
-func (DeathSystem) Type() string {
-	return "DeathSystem"
-}
-
-func (fs *DeathSystem) Update(entity *ecs.Entity, dt float32) {
+func (fs *DeathSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 
 }
 

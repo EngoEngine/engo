@@ -71,28 +71,26 @@ func (*AnimationComponent) Type() string {
 }
 
 type AnimationSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 }
 
-func (a *AnimationSystem) New(*ecs.World) {
-	a.System = ecs.NewSystem()
-}
+func (a *AnimationSystem) New(*ecs.World) {}
 
-func (AnimationSystem) Type() string {
-	return "AnimationSystem"
-}
+func (*AnimationSystem) Type() string { return "AnimationSystem" }
+func (*AnimationSystem) Pre()         {}
+func (*AnimationSystem) Post()        {}
 
-func (a *AnimationSystem) Update(e *ecs.Entity, dt float32) {
+func (a *AnimationSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	var (
 		ac *AnimationComponent
 		r  *RenderComponent
 		ok bool
 	)
 
-	if ac, ok = e.ComponentFast(ac).(*AnimationComponent); !ok {
+	if ac, ok = entity.ComponentFast(ac).(*AnimationComponent); !ok {
 		return
 	}
-	if r, ok = e.ComponentFast(r).(*RenderComponent); !ok {
+	if r, ok = entity.ComponentFast(r).(*RenderComponent); !ok {
 		return
 	}
 

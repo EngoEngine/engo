@@ -54,20 +54,18 @@ func (*GameWorld) Show()        {}
 func (*GameWorld) Type() string { return "GameWorld" }
 
 type ScaleSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 }
 
-func (ScaleSystem) Type() string {
-	return "ScaleSystem"
-}
+func (*ScaleSystem) Type() string { return "ScaleSystem" }
+func (*ScaleSystem) Pre()         {}
+func (*ScaleSystem) Post()        {}
 
-func (s *ScaleSystem) New(*ecs.World) {
-	s.System = ecs.NewSystem()
-}
+func (s *ScaleSystem) New(*ecs.World) {}
 
-func (c *ScaleSystem) Update(e *ecs.Entity, dt float32) {
+func (c *ScaleSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	var render *engi.RenderComponent
-	if !e.Component(&render) {
+	if !entity.Component(&render) {
 		return
 	}
 	var mod float32

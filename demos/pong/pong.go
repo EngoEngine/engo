@@ -101,11 +101,14 @@ func (*PongGame) Show()        {}
 func (*PongGame) Type() string { return "PongGame" }
 
 type SpeedSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 }
 
+func (*SpeedSystem) Type() string { return "SpeedSystem" }
+func (*SpeedSystem) Pre()         {}
+func (*SpeedSystem) Post()        {}
+
 func (ms *SpeedSystem) New(*ecs.World) {
-	ms.System = ecs.NewSystem()
 	engi.Mailbox.Listen("CollisionMessage", func(message engi.Message) {
 		log.Println("collision")
 		collision, isCollision := message.(engi.CollisionMessage)
@@ -120,11 +123,7 @@ func (ms *SpeedSystem) New(*ecs.World) {
 	})
 }
 
-func (*SpeedSystem) Type() string {
-	return "SpeedSystem"
-}
-
-func (ms *SpeedSystem) Update(entity *ecs.Entity, dt float32) {
+func (ms *SpeedSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	var speed *SpeedComponent
 	var space *engi.SpaceComponent
 	if !entity.Component(&speed) || !entity.Component(&space) {
@@ -145,18 +144,16 @@ func (*SpeedComponent) Type() string {
 }
 
 type BallSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 }
 
-func (bs *BallSystem) New(*ecs.World) {
-	bs.System = ecs.NewSystem()
-}
+func (*BallSystem) Type() string { return "BallSystem" }
+func (*BallSystem) Pre()         {}
+func (*BallSystem) Post()        {}
 
-func (BallSystem) Type() string {
-	return "BallSystem"
-}
+func (bs *BallSystem) New(*ecs.World) {}
 
-func (bs *BallSystem) Update(entity *ecs.Entity, dt float32) {
+func (bs *BallSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	var space *engi.SpaceComponent
 	var speed *SpeedComponent
 	if !entity.Component(&space) || !entity.Component(&speed) {
@@ -193,17 +190,16 @@ func (bs *BallSystem) Update(entity *ecs.Entity, dt float32) {
 }
 
 type ControlSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 }
 
-func (ControlSystem) Type() string {
-	return "ControlSystem"
-}
-func (c *ControlSystem) New(*ecs.World) {
-	c.System = ecs.NewSystem()
-}
+func (*ControlSystem) Type() string { return "ControlSystem" }
+func (*ControlSystem) Pre()         {}
+func (*ControlSystem) Post()        {}
 
-func (c *ControlSystem) Update(entity *ecs.Entity, dt float32) {
+func (c *ControlSystem) New(*ecs.World) {}
+
+func (c *ControlSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	//Check scheme
 	// -Move entity based on that
 	var control *ControlComponent
@@ -241,19 +237,18 @@ func (*ControlComponent) Type() string {
 }
 
 type ScoreSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 	PlayerOneScore, PlayerTwoScore int
 	upToDate                       bool
 	scoreLock                      sync.RWMutex
 }
 
-func (ScoreSystem) Type() string {
-	return "ScoreSystem"
-}
+func (*ScoreSystem) Type() string { return "ScoreSystem" }
+func (*ScoreSystem) Pre()         {}
+func (*ScoreSystem) Post()        {}
 
 func (sc *ScoreSystem) New(*ecs.World) {
 	sc.upToDate = true
-	sc.System = ecs.NewSystem()
 	engi.Mailbox.Listen("ScoreMessage", func(message engi.Message) {
 		scoreMessage, isScore := message.(ScoreMessage)
 		if !isScore {
@@ -272,7 +267,7 @@ func (sc *ScoreSystem) New(*ecs.World) {
 	})
 }
 
-func (c *ScoreSystem) Update(entity *ecs.Entity, dt float32) {
+func (c *ScoreSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	var render *engi.RenderComponent
 	var space *engi.SpaceComponent
 

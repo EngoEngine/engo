@@ -59,7 +59,7 @@ func (game *Game) Setup(w *ecs.World) {
 	w.AddSystem(&engi.RenderSystem{})
 
 	// The most important line in this whole demo:
-	w.AddSystem(engi.NewEdgeScroller(scrollSpeed, edgeMargin))
+	w.AddSystem(&engi.EdgeScroller{scrollSpeed, edgeMargin})
 
 	// Create the background; this way we'll see when we actually scroll
 	err := w.AddEntity(generateBackground())
