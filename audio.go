@@ -54,7 +54,7 @@ func (as *AudioSystem) New(*ecs.World) {
 
 		// Hopefully not that much of an issue, when we receive it before the CameraSystem does
 		// TODO: but it is when the CameraMessage is not Incremental (i.e. the changes are big)
-		al.SetListenerPosition(al.Vector{cam.X() / Width(), cam.Y() / Height(), cam.Z() * as.HeightModifier})
+		al.SetListenerPosition(al.Vector{Cam.X() / Width(), Cam.Y() / Height(), Cam.Z() * as.HeightModifier})
 	})
 }
 

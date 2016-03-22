@@ -61,6 +61,7 @@ varying vec4 var_Color;
 varying vec2 var_TexCoords;
 
 mat4 rotationMatrix();
+/* c is cos(angle), s is sin(angle), oc is 1 - cos(angle) */
 mat4 rotationMatrix(vec3 axis, float c, float s, float oc)
 {
     axis = normalize(axis);
@@ -165,7 +166,7 @@ void main (void) {
 func (s *DefaultShader) Pre() {
 	Gl.UseProgram(s.program)
 	Gl.Uniform2f(s.ufProjection, s.projX, s.projY)
-	Gl.Uniform3f(s.ufCamera, cam.x, cam.y, cam.z)
+	Gl.Uniform3f(s.ufCamera, Cam.x, Cam.y, Cam.z)
 }
 
 func (s *DefaultShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, width, height, x, y float32, rotation float64) {
