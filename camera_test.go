@@ -1,18 +1,31 @@
 package engi
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"github.com/paked/engi/ecs"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestCameraMoveX(t *testing.T) {
-	w := &ecs.World{}
-	w.New()
-	cam := &cameraSystem{}
-	cam.New(w)
+func initialize() {
+	Mailbox = &MessageManager{}
 	WorldBounds = AABB{Point{0, 0}, Point{300, 300}}
+	currentWorld = &ecs.World{}
+
+	cam = &cameraSystem{}
+	cam.New(currentWorld)
+}
+
+type CameraTestScene struct{}
+
+func (*CameraTestScene) Preload()         {}
+func (*CameraTestScene) Setup(*ecs.World) {}
+func (*CameraTestScene) Show()            {}
+func (*CameraTestScene) Hide()            {}
+func (*CameraTestScene) Type() string     { return "CameraTestScene" }
+
+func TestCameraMoveX(t *testing.T) {
+	initialize()
 
 	currentX := cam.X()
 
@@ -42,11 +55,7 @@ func TestCameraMoveX(t *testing.T) {
 }
 
 func TestCameraMoveY(t *testing.T) {
-	w := &ecs.World{}
-	w.New()
-	cam := &cameraSystem{}
-	cam.New(w)
-	WorldBounds = AABB{Point{0, 0}, Point{300, 300}}
+	initialize()
 
 	currentY := cam.Y()
 
@@ -76,10 +85,7 @@ func TestCameraMoveY(t *testing.T) {
 }
 
 func TestCameraZoom(t *testing.T) {
-	w := &ecs.World{}
-	w.New()
-	cam := &cameraSystem{}
-	cam.New(w)
+	initialize()
 
 	currentZ := cam.Z()
 
@@ -109,11 +115,7 @@ func TestCameraZoom(t *testing.T) {
 }
 
 func TestCameraMoveToX(t *testing.T) {
-	w := &ecs.World{}
-	w.New()
-	cam := &cameraSystem{}
-	cam.New(w)
-	WorldBounds = AABB{Point{0, 0}, Point{300, 300}}
+	initialize()
 
 	currentX := cam.X()
 
@@ -128,11 +130,7 @@ func TestCameraMoveToX(t *testing.T) {
 }
 
 func TestCameraMoveToY(t *testing.T) {
-	w := &ecs.World{}
-	w.New()
-	cam := &cameraSystem{}
-	cam.New(w)
-	WorldBounds = AABB{Point{0, 0}, Point{300, 300}}
+	initialize()
 
 	currentY := cam.Y()
 
@@ -147,10 +145,7 @@ func TestCameraMoveToY(t *testing.T) {
 }
 
 func TestCameraZoomTo(t *testing.T) {
-	w := &ecs.World{}
-	w.New()
-	cam := &cameraSystem{}
-	cam.New(w)
+	initialize()
 
 	currentZ := cam.Z()
 

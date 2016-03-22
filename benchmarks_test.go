@@ -7,14 +7,14 @@ import (
 )
 
 type NilSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 }
 
-func (ns *NilSystem) New(*ecs.World) {
-	ns.System = ecs.NewSystem()
-}
+func (ns *NilSystem) New(*ecs.World) {}
 
-func (*NilSystem) Update(*ecs.Entity, float32) {}
+func (*NilSystem) Pre()                              {}
+func (*NilSystem) Post()                             {}
+func (*NilSystem) UpdateEntity(*ecs.Entity, float32) {}
 
 func (*NilSystem) Type() string {
 	return "NilSystem"

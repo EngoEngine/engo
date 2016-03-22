@@ -25,7 +25,9 @@ func (getComponentSystem) Type() string {
 	return "getComponentSystem"
 }
 
-func (g *getComponentSystem) New(*World) {}
+func (*getComponentSystem) New(*World) {}
+func (*getComponentSystem) Pre()       {}
+func (*getComponentSystem) Post()      {}
 
 func (g *getComponentSystem) UpdateEntity(entity *Entity, dt float32) {
 	var sp *MyComponent1
@@ -86,7 +88,9 @@ func (getComponentSystemFast) Type() string {
 	return "getComponentSystemFast"
 }
 
-func (g *getComponentSystemFast) New(*World) {}
+func (*getComponentSystemFast) New(*World) {}
+func (*getComponentSystemFast) Pre()       {}
+func (*getComponentSystemFast) Post()      {}
 
 func (g *getComponentSystemFast) UpdateEntity(entity *Entity, dt float32) {
 	var sp *MyComponent1
