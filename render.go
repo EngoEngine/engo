@@ -123,7 +123,6 @@ func (ren *RenderComponent) preloadTexture() {
 func (ren *RenderComponent) generateBufferContent() []float32 {
 	scaleX := ren.scale.X
 	scaleY := ren.scale.Y
-	transparency := float32(1.0)
 	c := ren.Color
 
 	fx := float32(0)
@@ -152,7 +151,7 @@ func (ren *RenderComponent) generateBufferContent() []float32 {
 	red := colorR
 	green := colorG << 8
 	blue := colorB << 16
-	alpha := uint32(transparency*255.0) << 24
+	alpha := uint32(ren.Transparency*255.0) << 24
 
 	tint := math.Float32frombits((alpha | blue | green | red) & 0xfeffffff)
 
