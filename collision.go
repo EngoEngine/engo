@@ -50,6 +50,7 @@ func (cm CollisionMasterComponent) Is() bool {
 type CollisionComponent struct {
 	Solid, Main bool
 	Extra       Point
+	Collides    bool // Collides is true if the component is colliding with something during this pass
 }
 
 func (*CollisionComponent) Type() string {
@@ -104,6 +105,7 @@ func (cs *CollisionSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 		otherCollision *CollisionComponent
 	)
 
+	collided := false
 	for _, other := range cs.Entities {
 		if other.ID() != entity.ID() {
 			if otherSpace, ok = other.ComponentFast(otherSpace).(*SpaceComponent); !ok {
@@ -134,9 +136,13 @@ func (cs *CollisionSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 				}
 
 				Mailbox.Dispatch(CollisionMessage{Entity: entity, To: other})
+				collision.Collides = true
+				collided = true
 			}
 		}
 	}
+	// if no one collided reset to false
+	collision.Collides = collided
 }
 
 func IsIntersecting(rect1 AABB, rect2 AABB) bool {
