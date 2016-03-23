@@ -168,7 +168,7 @@ func (*DeathSystem) Post()        {}
 
 func (ds *DeathSystem) New(*ecs.World) {
 	// Subscribe to ScoreMessage
-	engi.Mailbox.Listen("ScoreMessage", func(message engi.Message) {
+	engi.Mailbox.Listen("CollisionMessage", func(message engi.Message) {
 		collision, isCollision := message.(engi.CollisionMessage)
 		if isCollision {
 			log.Println(collision, message)
