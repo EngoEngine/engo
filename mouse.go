@@ -93,8 +93,11 @@ func (m *MouseSystem) Post() {
 	Mouse.Action = NEUTRAL
 }
 
-// EUpdate sets the MouseComponent values for each Entity
-func (m *MouseSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
+// Update sets the MouseComponent values for each Entity
+func (m *MouseSystem) Update(entity *ecs.Entity, dt float32) {
+	mx := m.mouseX
+	my := m.mouseY
+
 	var (
 		mc     *MouseComponent
 		space  *SpaceComponent
@@ -107,6 +110,21 @@ func (m *MouseSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 		return
 	}
 
+	// Reset all values except these
+	*mc = MouseComponent{
+		Track:   mc.Track,
+		Hovered: mc.Hovered,
+	}
+
+	if mc.Track {
+		// track mouse position so that systems that need to stay on the mouse
+		// position can do it (think an RTS when placing a new building and
+		// you get a ghost building following your mouse until you click to
+		// place it somewhere in your world.
+		mc.MouseX = mx
+		mc.MouseY = my
+	}
+
 	// We need SpaceComponent for the location
 	if space, ok = entity.ComponentFast(space).(*SpaceComponent); !ok {
 		return
@@ -116,12 +134,6 @@ func (m *MouseSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	if render, ok = entity.ComponentFast(render).(*RenderComponent); !ok {
 		return
 	}
-
-	// Reset some values
-	mc.Leave = false
-
-	mx := m.mouseX
-	my := m.mouseY
 
 	// Special case: HUD
 	if render.priority >= HUDGround {
@@ -137,14 +149,13 @@ func (m *MouseSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 
 		mc.Enter = !mc.Hovered
 		mc.Hovered = true
-
 		mc.Released = false
-		// track mouse position so that systems that need to stay on the mouse
-		// position can do it (think an RTS when placing a new building and
-		// you get a ghost building following your mouse until you click to
-		// place it somewhere in your world.
-		mc.MouseX = mx
-		mc.MouseY = my
+
+		if !mc.Track {
+			// If we're tracking, we've already set these
+			mc.MouseX = mx
+			mc.MouseY = my
+		}
 
 		// propagate the modifiers to the mouse component so that game
 		// implementers can take different decisions based on those
