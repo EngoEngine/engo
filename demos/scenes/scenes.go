@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 	"log"
 	"math/rand"
 	"time"
@@ -23,7 +24,7 @@ func (game *IconScene) Preload() {
 }
 
 func (game *IconScene) Setup(w *ecs.World) {
-	engi.SetBg(0x2d3739)
+	engi.SetBg(color.White)
 
 	w.AddSystem(&engi.RenderSystem{})
 	w.AddSystem(&ScaleSystem{})
@@ -61,7 +62,7 @@ func (*RockScene) Preload() {
 }
 
 func (game *RockScene) Setup(w *ecs.World) {
-	engi.SetBg(0x2d3739)
+	engi.SetBg(color.White)
 
 	w.AddSystem(&engi.RenderSystem{})
 	w.AddSystem(&ScaleSystem{})
