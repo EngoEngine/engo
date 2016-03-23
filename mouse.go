@@ -93,8 +93,8 @@ func (m *MouseSystem) Post() {
 	Mouse.Action = NEUTRAL
 }
 
-// Update sets the MouseComponent values for each Entity
-func (m *MouseSystem) Update(entity *ecs.Entity, dt float32) {
+// UpdateEntity sets the MouseComponent values for each Entity
+func (m *MouseSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	mx := m.mouseX
 	my := m.mouseY
 
