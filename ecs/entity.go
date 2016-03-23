@@ -77,3 +77,14 @@ func (e *Entity) ComponentFast(c Component) interface{} {
 func (e *Entity) ID() string {
 	return e.id
 }
+
+// Duplicate creates an array of entities the size of amount, each with the same components and requirements. They will not be in the same systems
+func (e Entity) Duplicate(amount int) []Entity {
+	var entities []Entity
+
+	for i := 0; i < amount; i++ {
+		entities = append(entities, e)
+	}
+
+	return entities
+}
