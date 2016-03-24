@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image/color"
 	"log"
 	"math/rand"
 
@@ -16,7 +17,7 @@ func (game *Game) Preload() {
 }
 
 func (game *Game) Setup(w *ecs.World) {
-	engi.SetBg(0x2d3739)
+	engi.SetBg(color.White)
 
 	// Add all of the systems
 	w.AddSystem(&engi.RenderSystem{})

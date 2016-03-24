@@ -58,7 +58,7 @@ func (*Game) Type() string { return "Game" }
 
 // Setup is called before the main loop is started
 func (game *Game) Setup(w *ecs.World) {
-	engi.SetBg(0x222222)
+	engi.SetBg(color.White)
 	w.AddSystem(&engi.RenderSystem{})
 
 	// The most important line in this whole demo:
