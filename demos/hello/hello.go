@@ -55,8 +55,6 @@ type ScaleSystem struct {
 }
 
 func (*ScaleSystem) Type() string { return "ScaleSystem" }
-func (*ScaleSystem) Pre()         {}
-func (*ScaleSystem) Post()        {}
 
 func (s *ScaleSystem) New(*ecs.World) {}
 

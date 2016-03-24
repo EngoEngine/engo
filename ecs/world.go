@@ -90,11 +90,22 @@ func (w *World) RemoveEntity(entity *Entity) {
 // AddSystem adds a new System to the World, and then sorts them based on Priority
 func (w *World) AddSystem(system System) {
 	// Special checks for LinearSystem
-	if linSys, ok := (system).(basicSystemSetter); ok {
-		if basic, ok := (system).(LinearSystemFunctions); ok {
-			linSys.setLinearSystemFunctions(basic)
+	if linSys, ok := (system).(linearSystemSetter); ok {
+		var pre LinearSystemPre
+		var post LinearSystemPost
+
+		if preFunc, ok := (system).(LinearSystemPre); ok {
+			pre = preFunc
+		}
+
+		if postFunc, ok := (system).(LinearSystemPost); ok {
+			post = postFunc
+		}
+
+		if update, ok := (system).(LinearSystemUpdate); ok {
+			linSys.setLinearSystemFunctions(pre, update, post)
 		} else {
-			log.Println("Warning: Linear System", system.Type(), "does not implement ecs.BasicSystem")
+			log.Println("Warning: Linear System", system.Type(), "does not implement ecs.LinearSystemUpdate")
 		}
 	}
 

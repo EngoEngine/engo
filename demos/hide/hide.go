@@ -50,8 +50,6 @@ type HideSystem struct {
 }
 
 func (*HideSystem) Type() string { return "HideSystem" }
-func (*HideSystem) Pre()         {}
-func (*HideSystem) Post()        {}
 
 func (s *HideSystem) New(*ecs.World) {}
 

@@ -67,8 +67,6 @@ type ControlSystem struct {
 }
 
 func (*ControlSystem) Type() string { return "ControlSystem" }
-func (*ControlSystem) Pre()         {}
-func (*ControlSystem) Post()        {}
 
 func (c *ControlSystem) New(*ecs.World) {}
 
