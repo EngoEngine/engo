@@ -2,6 +2,7 @@ package engi
 
 import (
 	"fmt"
+	"image/color"
 
 	"github.com/paked/engi/ecs"
 	"github.com/paked/webgl"
@@ -70,12 +71,11 @@ func Open(opts RunOptions, defaultScene Scene) {
 	}
 }
 
-func SetBg(color uint32) {
+func SetBg(c color.Color) {
 	if !headless {
-		r := float32((color>>16)&0xFF) / 255.0
-		g := float32((color>>8)&0xFF) / 255.0
-		b := float32(color&0xFF) / 255.0
-		Gl.ClearColor(r, g, b, 1.0)
+		r, g, b, a := c.RGBA()
+
+		Gl.ClearColor(float32(r), float32(g), float32(b), float32(a))
 	}
 }
 

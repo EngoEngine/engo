@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image/color"
 	"log"
 
 	"github.com/paked/engi"
@@ -30,7 +31,7 @@ func (game *GameWorld) Preload() {
 }
 
 func (game *GameWorld) Setup(w *ecs.World) {
-	engi.SetBg(0xFFFFFF)
+	engi.SetBg(color.White)
 
 	w.AddSystem(&engi.RenderSystem{})
 	w.AddSystem(&engi.AnimationSystem{})
