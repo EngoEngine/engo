@@ -136,7 +136,6 @@ func (cs *CollisionSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 				}
 
 				Mailbox.Dispatch(CollisionMessage{Entity: entity, To: other})
-				collision.Collides = true
 				collided = true
 			}
 		}
