@@ -22,7 +22,7 @@ func (pong *PongGame) Preload() {
 }
 
 func (pong *PongGame) Setup(w *ecs.World) {
-	engi.SetBg(0x2d3739)
+	engi.SetBg(color.Black)
 	w.AddSystem(&engi.RenderSystem{})
 	w.AddSystem(&engi.CollisionSystem{})
 	w.AddSystem(&SpeedSystem{})
@@ -219,11 +219,15 @@ func (c *ControlSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	}
 
 	if up {
-		space.Position.Y -= 800 * dt
+		if space.Position.Y > 0 {
+			space.Position.Y -= 800 * dt
+		}
 	}
 
 	if down {
-		space.Position.Y += 800 * dt
+		if (space.Height + space.Position.Y) < 800 {
+			space.Position.Y += 800 * dt
+		}
 	}
 
 }

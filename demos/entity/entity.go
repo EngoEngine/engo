@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image/color"
 	"log"
 
 	"github.com/paked/engi"
@@ -17,11 +18,11 @@ func (game *GameWorld) Preload() {
 }
 
 func (game *GameWorld) Setup(w *ecs.World) {
-	engi.SetBg(0x2d3739)
+	engi.SetBg(color.White)
 
 	w.AddSystem(&engi.RenderSystem{})
 
-	// Create an entity part of the Render and Scale systems
+	// Create an entity part of the Render
 	guy := ecs.NewEntity([]string{"RenderSystem"})
 	// Retrieve a texture
 	texture := engi.Files.Image("icon.png")
