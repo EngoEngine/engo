@@ -215,11 +215,15 @@ func (c *ControlSystem) Update(entity *ecs.Entity, dt float32) {
 	}
 
 	if up {
-		space.Position.Y -= 800 * dt
+		if space.Position.Y > 0 {
+			space.Position.Y -= 800 * dt
+		}
 	}
 
 	if down {
-		space.Position.Y += 800 * dt
+		if (space.Height + space.Position.Y) < 800 {
+			space.Position.Y += 800 * dt
+		}
 	}
 
 }
