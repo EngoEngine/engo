@@ -162,5 +162,5 @@ func main() {
 		Height: 640,
 	}
 
-	engi.Open(opts, iconScene)
+	engi.Run(opts, iconScene)
 }

@@ -77,5 +77,5 @@ func main() {
 		Width:  int(worldWidth),
 		Height: int(worldHeight),
 	}
-	engi.Open(opts, &Game{})
+	engi.Run(opts, &Game{})
 }

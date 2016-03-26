@@ -89,5 +89,5 @@ func main() {
 		Width:  1024,
 		Height: 640,
 	}
-	engi.Open(opts, &GameWorld{})
+	engi.Run(opts, &GameWorld{})
 }
