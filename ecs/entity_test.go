@@ -18,18 +18,18 @@ type MyComponent2 struct{ an int }
 func (*MyComponent2) Type() string { return "MyComponent2" }
 
 type getComponentSystem struct {
-	*System
+	LinearSystem
 }
 
 func (getComponentSystem) Type() string {
 	return "getComponentSystem"
 }
 
-func (g *getComponentSystem) New(*World) {
-	g.System = NewSystem()
-}
+func (*getComponentSystem) New(*World) {}
+func (*getComponentSystem) Pre()       {}
+func (*getComponentSystem) Post()      {}
 
-func (g *getComponentSystem) Update(entity *Entity, dt float32) {
+func (g *getComponentSystem) UpdateEntity(entity *Entity, dt float32) {
 	var sp *MyComponent1
 	if !entity.Component(&sp) {
 		return
@@ -81,18 +81,18 @@ func BenchmarkComponentDouble(b *testing.B) {
 }
 
 type getComponentSystemFast struct {
-	*System
+	LinearSystem
 }
 
 func (getComponentSystemFast) Type() string {
 	return "getComponentSystemFast"
 }
 
-func (g *getComponentSystemFast) New(*World) {
-	g.System = NewSystem()
-}
+func (*getComponentSystemFast) New(*World) {}
+func (*getComponentSystemFast) Pre()       {}
+func (*getComponentSystemFast) Post()      {}
 
-func (g *getComponentSystemFast) Update(entity *Entity, dt float32) {
+func (g *getComponentSystemFast) UpdateEntity(entity *Entity, dt float32) {
 	var sp *MyComponent1
 	var ok bool
 	if sp, ok = entity.ComponentFast(sp).(*MyComponent1); !ok {

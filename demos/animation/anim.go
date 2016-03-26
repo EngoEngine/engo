@@ -36,7 +36,7 @@ func (game *GameWorld) Setup(w *ecs.World) {
 	w.AddSystem(&engi.RenderSystem{})
 	w.AddSystem(&engi.AnimationSystem{})
 	w.AddSystem(&ControlSystem{})
-	w.AddSystem(engi.NewMouseZoomer(zoomSpeed))
+	w.AddSystem(&engi.MouseZoomer{zoomSpeed})
 
 	spriteSheet := engi.NewSpritesheetFromFile("hero.png", 150, 150)
 
@@ -66,18 +66,16 @@ func (game *GameWorld) CreateEntity(point *engi.Point, spriteSheet *engi.Sprites
 }
 
 type ControlSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 }
 
-func (ControlSystem) Type() string {
-	return "ControlSystem"
-}
+func (*ControlSystem) Type() string { return "ControlSystem" }
+func (*ControlSystem) Pre()         {}
+func (*ControlSystem) Post()        {}
 
-func (c *ControlSystem) New(*ecs.World) {
-	c.System = ecs.NewSystem()
-}
+func (c *ControlSystem) New(*ecs.World) {}
 
-func (c *ControlSystem) Update(entity *ecs.Entity, dt float32) {
+func (c *ControlSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	var a *engi.AnimationComponent
 
 	if !entity.Component(&a) {

@@ -94,23 +94,18 @@ func (*RockScene) Type() string { return "RockScene" }
 
 // SceneSwitcherSystem is a System that actually calls SetScene
 type SceneSwitcherSystem struct {
-	*ecs.System
-
 	NextScene     string
 	WaitTime      time.Duration
 	secondsWaited float32
 }
 
-func (*SceneSwitcherSystem) Type() string {
-	return "SceneSwitcherSystem"
-}
+func (*SceneSwitcherSystem) Type() string             { return "SceneSwitcherSystem" }
+func (*SceneSwitcherSystem) Priority() int            { return 1 }
+func (*SceneSwitcherSystem) AddEntity(*ecs.Entity)    {}
+func (*SceneSwitcherSystem) RemoveEntity(*ecs.Entity) {}
+func (*SceneSwitcherSystem) New(*ecs.World)           {}
 
-func (s *SceneSwitcherSystem) New(*ecs.World) {
-	s.System = ecs.NewSystem()
-	s.System.AddEntity(ecs.NewEntity([]string{s.Type()}))
-}
-
-func (s *SceneSwitcherSystem) Update(e *ecs.Entity, dt float32) {
+func (s *SceneSwitcherSystem) Update(dt float32) {
 	s.secondsWaited += dt
 	if float64(s.secondsWaited) > s.WaitTime.Seconds() {
 		s.secondsWaited = 0
@@ -124,20 +119,16 @@ func (s *SceneSwitcherSystem) Update(e *ecs.Entity, dt float32) {
 
 // ScaleSystem is the System which scales the Entities inside
 type ScaleSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 }
 
-func (ScaleSystem) Type() string {
-	return "ScaleSystem"
-}
+func (*ScaleSystem) Type() string { return "ScaleSystem" }
 
-func (s *ScaleSystem) New(*ecs.World) {
-	s.System = ecs.NewSystem()
-}
+func (s *ScaleSystem) New(*ecs.World) {}
 
-func (c *ScaleSystem) Update(e *ecs.Entity, dt float32) {
+func (c *ScaleSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	var render *engi.RenderComponent
-	if !e.Component(&render) {
+	if !entity.Component(&render) {
 		return
 	}
 	var mod float32

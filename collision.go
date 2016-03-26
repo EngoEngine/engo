@@ -1,9 +1,10 @@
 package engi
 
 import (
-	"github.com/paked/engi/ecs"
 	"log"
 	"math"
+
+	"github.com/paked/engi/ecs"
 )
 
 type AABB struct {
@@ -64,18 +65,21 @@ func (collision CollisionMessage) Type() string {
 }
 
 type CollisionSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 }
 
-func (cs *CollisionSystem) New(*ecs.World) {
-	cs.System = ecs.NewSystem()
-}
+func (*CollisionSystem) Type() string { return "CollisionSystem" }
+func (*CollisionSystem) Pre()         {}
+func (*CollisionSystem) Post()        {}
+
+func (cs *CollisionSystem) New(*ecs.World) {}
 
 func (cs *CollisionSystem) RunInParallel() bool {
-	return len(cs.Entities()) > 40 // turning point for CollisionSystem
+	// TODO: this function isn't called/used any more ...
+	return len(cs.Entities) > 40 // turning point for CollisionSystem
 }
 
-func (cs *CollisionSystem) Update(entity *ecs.Entity, dt float32) {
+func (cs *CollisionSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	var (
 		space     *SpaceComponent
 		collision *CollisionComponent
@@ -99,7 +103,7 @@ func (cs *CollisionSystem) Update(entity *ecs.Entity, dt float32) {
 		otherCollision *CollisionComponent
 	)
 
-	for _, other := range cs.Entities() {
+	for _, other := range cs.Entities {
 		if other.ID() != entity.ID() {
 			if otherSpace, ok = other.ComponentFast(otherSpace).(*SpaceComponent); !ok {
 				return
@@ -132,10 +136,6 @@ func (cs *CollisionSystem) Update(entity *ecs.Entity, dt float32) {
 			}
 		}
 	}
-}
-
-func (*CollisionSystem) Type() string {
-	return "CollisionSystem"
 }
 
 func IsIntersecting(rect1 AABB, rect2 AABB) bool {

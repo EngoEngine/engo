@@ -22,6 +22,10 @@ const (
 	Hidden PriorityLevel = -1
 )
 
+const (
+	RenderSystemPriority = -1000
+)
+
 type PriorityLevel int
 
 type Drawable interface {
@@ -199,7 +203,7 @@ func (ren *RenderComponent) generateBufferContent() []float32 {
 }
 
 type RenderSystem struct {
-	*ecs.System
+	ecs.LinearSystem
 
 	renders map[PriorityLevel][]*ecs.Entity
 	changed bool
@@ -208,9 +212,7 @@ type RenderSystem struct {
 
 func (rs *RenderSystem) New(w *ecs.World) {
 	rs.renders = make(map[PriorityLevel][]*ecs.Entity)
-	rs.System = ecs.NewSystem()
 	rs.world = w
-	rs.ShouldSkipOnHeadless = true
 
 	if !headless {
 		if !Shaders.setup {
@@ -233,12 +235,12 @@ func (rs *RenderSystem) New(w *ecs.World) {
 
 func (rs *RenderSystem) AddEntity(e *ecs.Entity) {
 	rs.changed = true
-	rs.System.AddEntity(e)
+	rs.LinearSystem.AddEntity(e)
 }
 
 func (rs *RenderSystem) RemoveEntity(e *ecs.Entity) {
 	rs.changed = true
-	rs.System.RemoveEntity(e)
+	rs.LinearSystem.RemoveEntity(e)
 }
 
 func (rs *RenderSystem) Pre() {
@@ -302,7 +304,7 @@ func (rs *RenderSystem) Post() {
 	rs.changed = false
 }
 
-func (rs *RenderSystem) Update(entity *ecs.Entity, dt float32) {
+func (rs *RenderSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	if !rs.changed {
 		return
 	}
@@ -321,6 +323,6 @@ func (*RenderSystem) Type() string {
 	return "RenderSystem"
 }
 
-func (rs *RenderSystem) Priority() int {
-	return 1
+func (*RenderSystem) Priority() int {
+	return RenderSystemPriority
 }
