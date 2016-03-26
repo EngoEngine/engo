@@ -26,6 +26,7 @@ func (sc *SpaceComponent) Center(p Point) {
 	sc.Position.Y = p.Y - yDelta
 }
 
+// Returns the type of this component (Space)
 func (*SpaceComponent) Type() string {
 	return "SpaceComponent"
 }
@@ -37,6 +38,7 @@ func (sc SpaceComponent) AABB() AABB {
 type CollisionMasterComponent struct {
 }
 
+// Returns the type of this component (CollisionMaster)
 func (*CollisionMasterComponent) Type() string {
 	return "CollisionMasterComponent"
 }
@@ -75,6 +77,7 @@ func (cs *CollisionSystem) RunInParallel() bool {
 	return len(cs.Entities()) > 40 // turning point for CollisionSystem
 }
 
+// Collision system update, called according to the FPS
 func (cs *CollisionSystem) Update(entity *ecs.Entity, dt float32) {
 	var (
 		space     *SpaceComponent
@@ -134,10 +137,12 @@ func (cs *CollisionSystem) Update(entity *ecs.Entity, dt float32) {
 	}
 }
 
+// Returns the type of this System (Collision)
 func (*CollisionSystem) Type() string {
 	return "CollisionSystem"
 }
 
+// Returns whether the specified rectangles intersect
 func IsIntersecting(rect1 AABB, rect2 AABB) bool {
 	if rect1.Max.X > rect2.Min.X && rect1.Min.X < rect2.Max.X && rect1.Max.Y > rect2.Min.Y && rect1.Min.Y < rect2.Max.Y {
 		return true

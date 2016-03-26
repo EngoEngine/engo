@@ -18,6 +18,7 @@ type Resource struct {
 	url  string
 }
 
+// Asset Loader
 type Loader struct {
 	resources []Resource
 	images    map[string]*Texture
@@ -27,6 +28,7 @@ type Loader struct {
 	fonts     map[string]*truetype.Font
 }
 
+// Creates a new Asset Loader
 func NewLoader() *Loader {
 	return &Loader{
 		resources: make([]Resource, 1),
@@ -38,6 +40,7 @@ func NewLoader() *Loader {
 	}
 }
 
+// Creates a new resource from it's url
 func NewResource(url string) Resource {
 	kind := path.Ext(url)
 	//name := strings.TrimSuffix(path.Base(url), kind)
@@ -45,6 +48,7 @@ func NewResource(url string) Resource {
 	return Resource{name: name, url: url, kind: kind[1:]}
 }
 
+// Add all resources from a specified directory
 func (l *Loader) AddFromDir(url string, recurse bool) {
 	files, err := ioutil.ReadDir(url)
 	if err != nil {
@@ -60,6 +64,7 @@ func (l *Loader) AddFromDir(url string, recurse bool) {
 	}
 }
 
+// Add resources from url(s)
 func (l *Loader) Add(urls ...string) {
 	for _, u := range urls {
 		r := NewResource(u)
@@ -68,18 +73,22 @@ func (l *Loader) Add(urls ...string) {
 	}
 }
 
+// Returns a texture from the specified name
 func (l *Loader) Image(name string) *Texture {
 	return l.images[name]
 }
 
+// Returns a JSON string from a specified name
 func (l *Loader) Json(name string) string {
 	return l.jsons[name]
 }
 
+// Returns a level from a specified name
 func (l *Loader) Level(name string) *Level {
 	return l.levels[name]
 }
 
+// Returns audio from a specified name
 func (l *Loader) Sound(name string) ReadSeekCloser {
 	f, err := os.Open(l.sounds[name])
 	if err != nil {
@@ -88,6 +97,8 @@ func (l *Loader) Sound(name string) ReadSeekCloser {
 	return f
 }
 
+// Loads all the loader resources and calls the
+// specified callback when done
 func (l *Loader) Load(onFinish func()) {
 	for _, r := range l.resources {
 		switch r.kind {
@@ -131,6 +142,7 @@ type Image interface {
 	Height() int
 }
 
+// LoadShader loads a shader and returns a *webgl.Program
 func LoadShader(vertSrc, fragSrc string) *webgl.Program {
 	vertShader := Gl.CreateShader(Gl.VERTEX_SHADER)
 	Gl.ShaderSource(vertShader, vertSrc)
@@ -157,6 +169,8 @@ type Region struct {
 	width, height float32
 }
 
+// NewRegion Creates  new region from
+// a texture, coordinates, and dimensions
 func NewRegion(texture *Texture, x, y, w, h float32) *Region {
 	invTexWidth := 1.0 / texture.Width()
 	invTexHeight := 1.0 / texture.Height()
@@ -172,14 +186,17 @@ func NewRegion(texture *Texture, x, y, w, h float32) *Region {
 	return &Region{texture, u, v, u2, v2, width, height}
 }
 
+// Width Returns the current region width
 func (r *Region) Width() float32 {
 	return float32(r.width)
 }
 
+// Height Returns the current region height
 func (r *Region) Height() float32 {
 	return float32(r.height)
 }
 
+// Texture Returns the current region texture
 func (r *Region) Texture() *webgl.Texture {
 	return r.texture.id
 }
@@ -194,6 +211,7 @@ type Texture struct {
 	height float32
 }
 
+// NewTexture returns a new texture from an image
 func NewTexture(img Image) *Texture {
 	var id *webgl.Texture
 	if !headless {
@@ -226,6 +244,7 @@ func (t *Texture) Height() float32 {
 	return t.height
 }
 
+// Texture returns the webgl texture of the current texture
 func (t *Texture) Texture() *webgl.Texture {
 	return t.id
 }
@@ -244,6 +263,7 @@ type Sprite struct {
 	Region   *Region
 }
 
+// NewSprite creates and returns a new sprite from a region and coordinates
 func NewSprite(region *Region, x, y float32) *Sprite {
 	return &Sprite{
 		Position: &Point{x, y},
