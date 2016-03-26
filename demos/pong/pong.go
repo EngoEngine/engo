@@ -291,5 +291,5 @@ func main() {
 		Height:        800,
 		ScaleOnResize: true,
 	}
-	engi.Open(opts, &PongGame{})
+	engi.Run(opts, &PongGame{})
 }

@@ -49,7 +49,7 @@ type RunOptions struct {
 	FPSLimit int
 }
 
-func Open(opts RunOptions, defaultScene Scene) {
+func Run(opts RunOptions, defaultScene Scene) {
 	// Save settings
 	SetScaleOnResize(opts.ScaleOnResize)
 	SetFPSLimit(opts.FPSLimit)

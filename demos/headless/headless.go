@@ -282,5 +282,5 @@ func main() {
 	opts := engi.RunOptions{
 		HeadlessMode: true,
 	}
-	engi.Open(opts, &PongGame{})
+	engi.Run(opts, &PongGame{})
 }
