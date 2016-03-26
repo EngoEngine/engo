@@ -1,3 +1,7 @@
+// A cross-platform game engine written in Go following an interpretation
+// of the Entity Component System paradigm. Engi is currently compilable for Mac OSX,
+// Linux and Windows. Mobile and web(gopherjs) support are also in the works
+
 package engi
 
 import (
@@ -49,6 +53,7 @@ type RunOptions struct {
 	FPSLimit int
 }
 
+// Start up the engine with the specified configuration
 func Open(opts RunOptions, defaultScene Scene) {
 	// Save settings
 	SetScaleOnResize(opts.ScaleOnResize)
@@ -71,6 +76,7 @@ func Open(opts RunOptions, defaultScene Scene) {
 	}
 }
 
+// Set the background color of the current scene to the specified color
 func SetBg(c color.Color) {
 	if !headless {
 		r, g, b, a := c.RGBA()
@@ -79,10 +85,12 @@ func SetBg(c color.Color) {
 	}
 }
 
+// When true, engi will automatically scale resources on screen resize
 func SetScaleOnResize(b bool) {
 	scaleOnResize = b
 }
 
+// Set the maximum frames per second (defaults to 120)
 func SetFPSLimit(limit int) error {
 	if limit <= 0 {
 		return fmt.Errorf("FPS Limit out of bounds. Requires > 0")

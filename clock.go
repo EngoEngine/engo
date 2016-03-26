@@ -42,10 +42,12 @@ func (c *Clock) Delta() float32 {
 	return float32(c.delta)
 }
 
+// Returns the current frame rate
 func (c *Clock) Fps() float32 {
 	return float32(c.fps)
 }
 
+// Returns elapsed time since clock creation
 func (c *Clock) Time() float32 {
 	return float32(time.Now().Sub(c.start).Seconds())
 }
