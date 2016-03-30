@@ -49,7 +49,7 @@ type RenderComponent struct {
 	scale        Point
 	Label        string
 	priority     PriorityLevel
-	Transparency float32
+	transparency float32
 	Color        color.Color
 
 	drawable      Drawable
@@ -60,7 +60,7 @@ type RenderComponent struct {
 func NewRenderComponent(d Drawable, scale Point, label string) *RenderComponent {
 	rc := &RenderComponent{
 		Label:        label,
-		Transparency: 1,
+		transparency: 1,
 		Color:        color.White,
 
 		scale:    scale,
@@ -74,6 +74,13 @@ func NewRenderComponent(d Drawable, scale Point, label string) *RenderComponent 
 func (r *RenderComponent) SetPriority(p PriorityLevel) {
 	r.priority = p
 	Mailbox.Dispatch(renderChangeMessage{})
+}
+
+func (r *RenderComponent) SetTransparency(t float32) {
+	r.transparency = t
+	// regen buffer content as we just changed transparency for the whole
+	// sprite
+	r.generateBufferContent()
 }
 
 func (r *RenderComponent) Priority() PriorityLevel {
@@ -151,7 +158,7 @@ func (ren *RenderComponent) generateBufferContent() []float32 {
 	red := colorR
 	green := colorG << 8
 	blue := colorB << 16
-	alpha := uint32(ren.Transparency*255.0) << 24
+	alpha := uint32(ren.transparency*255.0) << 24
 
 	tint := math.Float32frombits((alpha | blue | green | red) & 0xfeffffff)
 
