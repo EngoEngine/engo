@@ -2,9 +2,9 @@ package engi
 
 import (
 	"log"
-	"math"
 
 	"github.com/paked/webgl"
+	"github.com/luxengine/math"
 )
 
 const bufferSize = 10000
@@ -12,7 +12,7 @@ const bufferSize = 10000
 type Shader interface {
 	Initialize(width, height float32)
 	Pre()
-	Draw(texture *webgl.Texture, buffer *webgl.Buffer, width, height, x, y float32, rotation float64)
+	Draw(texture *webgl.Texture, buffer *webgl.Buffer, width, height, x, y, rotation float32)
 	Post()
 }
 
@@ -169,7 +169,7 @@ func (s *DefaultShader) Pre() {
 	Gl.Uniform3f(s.ufCamera, Cam.x, Cam.y, Cam.z)
 }
 
-func (s *DefaultShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, width, height, x, y float32, rotation float64) {
+func (s *DefaultShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, width, height, x, y, rotation float32) {
 	if s.lastTexture != texture {
 		Gl.BindTexture(Gl.TEXTURE_2D, texture)
 		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)
@@ -185,9 +185,9 @@ func (s *DefaultShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, width
 	angle := rotation*math.Pi/180
 	c := math.Cos(angle)
 
-	Gl.Uniform1f(s.ufC, float32(c))
-	Gl.Uniform1f(s.ufS, float32(math.Sin(angle)))
-	Gl.Uniform1f(s.ufOC, float32(1-c))
+	Gl.Uniform1f(s.ufC, c)
+	Gl.Uniform1f(s.ufS, math.Sin(angle))
+	Gl.Uniform1f(s.ufOC, 1-c)
 
 	Gl.Uniform2f(s.ufPosition, x, y)
 	Gl.Uniform1f(s.ufWidth, width)
@@ -302,7 +302,7 @@ func (s *HUDShader) Pre() {
 	Gl.Uniform2f(s.ufProjection, s.projX, s.projY)
 }
 
-func (s *HUDShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, width, height, x, y float32, rotation float64) {
+func (s *HUDShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, width, height, x, y, rotation float32) {
 	if s.lastTexture != texture {
 		Gl.BindTexture(Gl.TEXTURE_2D, texture)
 		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)
