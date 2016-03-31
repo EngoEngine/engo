@@ -54,8 +54,6 @@ type HideSystem struct {
 }
 
 func (*HideSystem) Type() string { return "HideSystem" }
-func (*HideSystem) Pre()         {}
-func (*HideSystem) Post()        {}
 
 func (s *HideSystem) New(*ecs.World) {}
 
@@ -77,5 +75,5 @@ func main() {
 		Width:  1024,
 		Height: 640,
 	}
-	engi.Open(opts, &GameWorld{})
+	engi.Run(opts, &GameWorld{})
 }

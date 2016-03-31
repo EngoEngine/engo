@@ -157,10 +157,6 @@ func (m *MouseSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 			mc.MouseY = my
 		}
 
-		// propagate the modifiers to the mouse component so that game
-		// implementers can take different decisions based on those
-		mc.Modifier = Mouse.Modifer
-
 		switch Mouse.Action {
 		case PRESS:
 			switch Mouse.Button {
@@ -191,10 +187,11 @@ func (m *MouseSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	} else {
 		if mc.Hovered {
 			mc.Leave = true
-			// propagate the modifiers to the mouse component so that game
-			// implementers can take different decisions based on those
-			mc.Modifier = Mouse.Modifer
 		}
 		mc.Hovered = false
 	}
+
+	// propagate the modifiers to the mouse component so that game
+	// implementers can take different decisions based on those
+	mc.Modifier = Mouse.Modifer
 }

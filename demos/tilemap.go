@@ -47,5 +47,5 @@ func (game *GameWorld) Setup() {
 
 func main() {
 	World = &GameWorld{}
-	engi.Open("Hello", 1024, 640, false, World)
+	engi.Run("Hello", 1024, 640, false, World)
 }

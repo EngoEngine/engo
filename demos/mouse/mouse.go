@@ -67,8 +67,6 @@ type ControlSystem struct {
 }
 
 func (*ControlSystem) Type() string { return "ControlSystem" }
-func (*ControlSystem) Pre()         {}
-func (*ControlSystem) Post()        {}
 
 func (c *ControlSystem) New(*ecs.World) {}
 
@@ -91,5 +89,5 @@ func main() {
 		Width:  1024,
 		Height: 640,
 	}
-	engi.Open(opts, &GameWorld{})
+	engi.Run(opts, &GameWorld{})
 }

@@ -36,7 +36,7 @@ func (game *GameWorld) Setup(w *ecs.World) {
 	w.AddSystem(&engi.RenderSystem{})
 	w.AddSystem(&engi.AnimationSystem{})
 	w.AddSystem(&ControlSystem{})
-	w.AddSystem(engi.NewMouseZoomer(zoomSpeed))
+	w.AddSystem(&engi.MouseZoomer{zoomSpeed})
 
 	spriteSheet := engi.NewSpritesheetFromFile("hero.png", 150, 150)
 
@@ -97,5 +97,5 @@ func main() {
 		Width:  1024,
 		Height: 640,
 	}
-	engi.Open(opts, &GameWorld{})
+	engi.Run(opts, &GameWorld{})
 }

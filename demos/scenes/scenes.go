@@ -131,8 +131,6 @@ type ScaleSystem struct {
 }
 
 func (*ScaleSystem) Type() string { return "ScaleSystem" }
-func (*ScaleSystem) Pre()         {}
-func (*ScaleSystem) Post()        {}
 
 func (s *ScaleSystem) New(*ecs.World) {}
 
@@ -172,5 +170,5 @@ func main() {
 		Height: 640,
 	}
 
-	engi.Open(opts, iconScene)
+	engi.Run(opts, iconScene)
 }

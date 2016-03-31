@@ -7,7 +7,9 @@ import (
 )
 
 // LinearSystem is the default implementation of the System interface, which handles Entities in a linear fashion
-// Implement `LinearSystemFunctions` and inherit this, in order to use it
+// Implement `LinearSystemUpdate` and inherit this, in order to use it
+// You may optionally also implement `LinearSystemPre` and `LinearSystemPost`, for
+// handlers before and after updating all Entities (per frame)
 type LinearSystem struct {
 	// Entities holds the Entity-references as given by the World
 	Entities []*Entity
@@ -17,12 +19,20 @@ type LinearSystem struct {
 	// sooner it will be processed by the `World`.
 	Prio int
 
-	functions LinearSystemFunctions
+	pre    LinearSystemPre
+	update LinearSystemUpdate
+	post   LinearSystemPost
 }
 
-type LinearSystemFunctions interface {
+type LinearSystemPre interface {
 	Pre()
+}
+
+type LinearSystemUpdate interface {
 	UpdateEntity(entity *Entity, dt float32)
+}
+
+type LinearSystemPost interface {
 	Post()
 }
 
@@ -32,20 +42,22 @@ func (LinearSystem) Type() string  { return "generic LinearSystem" }
 
 // Update is called by the `World`
 func (s *LinearSystem) Update(dt float32) {
-	s.functions.Pre()
+	if s.pre != nil {
+		s.pre.Pre()
+	}
 
 	count := len(s.Entities)
 
 	// Calling them serial / in parallel, depending on the settings
 	if processSystemInSerial || !s.RunInParallel {
 		for _, entity := range s.Entities {
-			s.functions.UpdateEntity(entity, dt)
+			s.update.UpdateEntity(entity, dt)
 		}
 	} else {
 		complChan := make(chan struct{})
 		for _, entity := range s.Entities {
 			go func(entity *Entity) {
-				s.functions.UpdateEntity(entity, dt)
+				s.update.UpdateEntity(entity, dt)
 				complChan <- struct{}{}
 			}(entity)
 		}
@@ -54,14 +66,15 @@ func (s *LinearSystem) Update(dt float32) {
 		}
 		close(complChan)
 	}
-	s.functions.Post()
+	if s.post != nil {
+		s.post.Post()
+	}
 }
 
 func (s *LinearSystem) AddEntity(entity *Entity) {
 	s.Entities = append(s.Entities, entity)
 }
 
-// TODO: not sure if one can still override this?
 func (s *LinearSystem) RemoveEntity(entity *Entity) {
 	for index, e := range s.Entities {
 		if e.ID() == entity.ID() {
@@ -75,16 +88,18 @@ func (s *LinearSystem) Priority() int {
 	return s.Prio
 }
 
-func (s *LinearSystem) setLinearSystemFunctions(funcs LinearSystemFunctions) {
+func (s *LinearSystem) setLinearSystemFunctions(pre LinearSystemPre, update LinearSystemUpdate, post LinearSystemPost) {
 	if s != nil {
-		s.functions = funcs
+		s.pre = pre
+		s.update = update
+		s.post = post
 	} else {
-		log.Println("Warning:", reflect.TypeOf(funcs).String(), "has a pointer-reference to LinearSystem (*ecs.LinearSystem). ")
+		log.Println("Warning:", reflect.TypeOf(update).String(), "has a pointer-reference to LinearSystem (*ecs.LinearSystem). ")
 	}
 }
 
-type basicSystemSetter interface {
-	setLinearSystemFunctions(LinearSystemFunctions)
+type linearSystemSetter interface {
+	setLinearSystemFunctions(pre LinearSystemPre, update LinearSystemUpdate, post LinearSystemPost)
 }
 
 var (

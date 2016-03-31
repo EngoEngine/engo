@@ -112,5 +112,5 @@ func main() {
 		Width:  1024,
 		Height: 640,
 	}
-	engi.Open(opts, &Game{})
+	engi.Run(opts, &Game{})
 }

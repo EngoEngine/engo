@@ -103,8 +103,6 @@ type SpeedSystem struct {
 }
 
 func (*SpeedSystem) Type() string { return "SpeedSystem" }
-func (*SpeedSystem) Pre()         {}
-func (*SpeedSystem) Post()        {}
 
 func (ms *SpeedSystem) New(*ecs.World) {
 	engi.Mailbox.Listen("CollisionMessage", func(message engi.Message) {
@@ -148,8 +146,6 @@ type BallSystem struct {
 func (bs *BallSystem) New(*ecs.World) {}
 
 func (*BallSystem) Type() string { return "BallSystem" }
-func (*BallSystem) Pre()         {}
-func (*BallSystem) Post()        {}
 
 func (bs *BallSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	var space *engi.SpaceComponent
@@ -192,8 +188,6 @@ type ControlSystem struct {
 }
 
 func (*ControlSystem) Type() string { return "ControlSystem" }
-func (*ControlSystem) Pre()         {}
-func (*ControlSystem) Post()        {}
 
 func (c *ControlSystem) New(*ecs.World) {}
 
@@ -242,8 +236,6 @@ type ScoreSystem struct {
 }
 
 func (*ScoreSystem) Type() string { return "ScoreSystem" }
-func (*ScoreSystem) Pre()         {}
-func (*ScoreSystem) Post()        {}
 
 func (sc *ScoreSystem) New(*ecs.World) {
 	sc.upToDate = true
@@ -298,5 +290,5 @@ func main() {
 	opts := engi.RunOptions{
 		HeadlessMode: true,
 	}
-	engi.Open(opts, &PongGame{})
+	engi.Run(opts, &PongGame{})
 }

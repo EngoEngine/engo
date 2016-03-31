@@ -144,12 +144,8 @@ type FallingSystem struct {
 }
 
 func (*FallingSystem) Type() string { return "FallingSystem" }
-func (*FallingSystem) Pre()         {}
-func (*FallingSystem) Post()        {}
 
-func (fs *FallingSystem) New(*ecs.World) {
-	//engi.Mailbox.Listen("CollisionMessage", fs)
-}
+func (fs *FallingSystem) New(*ecs.World) {}
 
 func (fs *FallingSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	var space *engi.SpaceComponent
@@ -164,8 +160,6 @@ type DeathSystem struct {
 }
 
 func (*DeathSystem) Type() string { return "DeathSystem" }
-func (*DeathSystem) Pre()         {}
-func (*DeathSystem) Post()        {}
 
 func (ds *DeathSystem) New(*ecs.World) {
 	// Subscribe to ScoreMessage
@@ -178,9 +172,7 @@ func (ds *DeathSystem) New(*ecs.World) {
 	})
 }
 
-func (fs *DeathSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-
-}
+func (fs *DeathSystem) UpdateEntity(entity *ecs.Entity, dt float32) {}
 
 func (fs *DeathSystem) Receive(message engi.Message) {
 	collision, isCollision := message.(engi.CollisionMessage)
@@ -196,5 +188,5 @@ func main() {
 		Width:  1024,
 		Height: 640,
 	}
-	engi.Open(opts, &Game{})
+	engi.Run(opts, &Game{})
 }
