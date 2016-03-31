@@ -44,7 +44,7 @@ func generateBackground() *ecs.Entity {
 	field := ecs.NewEntity([]string{"RenderSystem"})
 	fieldRender := engi.NewRenderComponent(engi.NewTexture(bgTexture), engi.Point{1, 1}, "Background1")
 	fieldRender.SetPriority(engi.Background)
-	fieldSpace := &engi.SpaceComponent{engi.Point{0, 0}, worldWidth, worldHeight}
+	fieldSpace := &engi.SpaceComponent{Position: engi.Point{0, 0}, Width: worldWidth, Height: worldHeight}
 	field.AddComponent(fieldRender)
 	field.AddComponent(fieldSpace)
 	return field

@@ -135,6 +135,16 @@ func LoadShader(vertSrc, fragSrc string) *webgl.Program {
 	vertShader := Gl.CreateShader(Gl.VERTEX_SHADER)
 	Gl.ShaderSource(vertShader, vertSrc)
 	Gl.CompileShader(vertShader)
+	var success int32
+	Gl.GetShaderiv(vertShader, Gl.COMPILE_STATUS, &success)
+	if success != int32(Gl.TRUE) {
+		var maxLength int32
+		Gl.GetShaderiv(vertShader, Gl.INFO_LOG_LENGTH, &maxLength)
+		log.Println("Error during vertex shader compilation")
+		errorLog := make([]byte, maxLength)
+		Gl.GetShaderInfoLog(vertShader, maxLength, &maxLength, (*uint8)(Gl.Ptr(errorLog)))
+		log.Print(string(errorLog))
+	}
 	defer Gl.DeleteShader(vertShader)
 
 	fragShader := Gl.CreateShader(Gl.FRAGMENT_SHADER)

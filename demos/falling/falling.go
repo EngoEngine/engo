@@ -37,7 +37,11 @@ func (game *Game) Setup(w *ecs.World) {
 	width := texture.Width() * render.Scale().X
 	height := texture.Height() * render.Scale().Y
 
-	space := &engi.SpaceComponent{engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2}, width, height}
+	space := &engi.SpaceComponent{
+		Position: engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2},
+		Width:    width,
+		Height:   height,
+	}
 
 	guy.AddComponent(render)
 	guy.AddComponent(space)
@@ -121,7 +125,11 @@ func NewRock(position engi.Point) *ecs.Entity {
 
 	texture := engi.Files.Image("rock.png")
 	render := engi.NewRenderComponent(texture, engi.Point{4, 4}, "rock")
-	space := &engi.SpaceComponent{position, texture.Width() * render.Scale().X, texture.Height() * render.Scale().Y}
+	space := &engi.SpaceComponent{
+		Position: position,
+		Width:    texture.Width() * render.Scale().X,
+		Height:   texture.Height() * render.Scale().Y,
+	}
 	collision := &engi.CollisionComponent{Solid: true}
 
 	rock.AddComponent(render)
@@ -155,7 +163,7 @@ func (*DeathSystem) Type() string { return "DeathSystem" }
 
 func (ds *DeathSystem) New(*ecs.World) {
 	// Subscribe to ScoreMessage
-	engi.Mailbox.Listen("ScoreMessage", func(message engi.Message) {
+	engi.Mailbox.Listen("CollisionMessage", func(message engi.Message) {
 		collision, isCollision := message.(engi.CollisionMessage)
 		if isCollision {
 			log.Println(collision, message)

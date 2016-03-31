@@ -17,7 +17,7 @@ var (
 	currentWorld *ecs.World
 	currentScene Scene
 	Mailbox      *MessageManager
-	cam          *cameraSystem
+	Cam          *cameraSystem
 
 	scaleOnResize   = false
 	fpsLimit        = 120

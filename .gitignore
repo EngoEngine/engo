@@ -169,6 +169,7 @@ pip-log.txt
 .DS_Store
 
 # demo build artifacts
+demos/audio/audio
 demos/animation/animation
 demos/edgescroller/edgescroller
 demos/entity/entity
@@ -180,3 +181,5 @@ demos/hud/hud
 demos/keyboardscroller/keyboardscroller
 demos/mouse/mouse
 demos/pong/pong
+demos/scenes/scenes
+demos/zoom/zoom
