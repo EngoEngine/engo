@@ -1,4 +1,6 @@
 # Engi 
+
+[![Join the chat at https://gitter.im/EngoEngine/engo](https://badges.gitter.im/EngoEngine/engo.svg)](https://gitter.im/EngoEngine/engo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 A cross-platform game engine written in Go following an interpretation of the Entity Component System paradigm. Engi is
  currently compilable for Mac OSX, Linux and Windows. With the release of Go 1.4, sporting Android and the inception of 
  iOS compatibility, mobile will [soon](https://github.com/paked/engi/issues/63) be added as a release target. Web 
