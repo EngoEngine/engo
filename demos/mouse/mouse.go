@@ -35,7 +35,7 @@ func generateBackground() *engo.RenderComponent {
 }
 
 func (game *GameWorld) Setup(w *ecs.World) {
-	engo.SetBg(color.White)
+	engo.SetBackground(color.White)
 
 	w.AddSystem(&engo.MouseSystem{})
 	w.AddSystem(&engo.RenderSystem{})

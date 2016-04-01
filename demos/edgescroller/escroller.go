@@ -55,7 +55,7 @@ func (game *Game) Preload() {}
 
 // Setup is called before the main loop is started
 func (game *Game) Setup(w *ecs.World) {
-	engo.SetBg(color.White)
+	engo.SetBackground(color.White)
 	w.AddSystem(&engo.RenderSystem{})
 
 	// The most important line in this whole demo:
