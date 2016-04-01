@@ -53,6 +53,32 @@ func (g *getComponentSystem) UpdateEntity(entity *Entity, dt float32) {
 	}
 }
 
+func TestEntityDuplication(t *testing.T) {
+	requirements := []string{"a", "aa", "aaa"}
+	amount := 20
+
+	e := NewEntity(requirements)
+	e.AddComponent(&MyComponent1{})
+
+	es := e.Duplicate(amount)
+
+	fmt.Println(len(es))
+
+	if len(es) != amount {
+		t.Error("Not correct amount of entities in duplicated array")
+	}
+
+	for _, e2 := range es {
+		if len(e.requires) != len(e2.requires) {
+			t.Error("Not the same requirements")
+		}
+
+		if len(e.components) != len(e2.components) {
+			t.Error("Not the samr components")
+		}
+	}
+}
+
 func BenchmarkComponent(b *testing.B) {
 	preload := func() {}
 	setup := func(w *World) {
