@@ -1,11 +1,11 @@
-package engi
+package engo
 
 import (
 	"image/color"
 	"math"
 
-	"github.com/paked/engi/ecs"
-	"github.com/paked/webgl"
+	"github.com/engoengine/engo/ecs"
+	"github.com/engoengine/webgl"
 )
 
 const (

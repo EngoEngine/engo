@@ -1,6 +1,6 @@
 // +build !windows
 
-package engi
+package engo
 
 // Taken from golang.org/x/mobile/exp/audio
 

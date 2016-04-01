@@ -9,5 +9,5 @@ For doing so, it created a green background -- which will be affected, and a vio
 These lines are key in this demo:
 
 * `fieldRender.SetPriority(hudBackgroundPriority)`, to make sure the violet sidebar is rendered as HUD; 
-* `hudBackgroundPriority = engi.PriorityLevel(engi.HUDGround)`, which defined `hudBackgroundPriority`. 
-    * any value between `engi.HUDGround` and `engi.HighestGround` is rendered as HUD. 
+* `hudBackgroundPriority = engo.PriorityLevel(engo.HUDGround)`, which defined `hudBackgroundPriority`. 
+    * any value between `engo.HUDGround` and `engo.HighestGround` is rendered as HUD. 

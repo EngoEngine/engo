@@ -1,4 +1,4 @@
-package engi
+package engo
 
 type Level struct {
 	Width      int

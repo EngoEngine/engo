@@ -12,8 +12,8 @@ These things are key in this demo:
 
 ```go
 if rand.Int()%10 == 0 {
-  render.SetPriority(engi.Hidden)
+  render.SetPriority(engo.Hidden)
 } else {
-  render.SetPriority(engi.MiddleGround)
+  render.SetPriority(engo.MiddleGround)
 }
 ```

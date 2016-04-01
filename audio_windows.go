@@ -1,9 +1,9 @@
-package engi
+package engo
 
 import (
 	"log"
 
-	"github.com/paked/engi/ecs"
+	"github.com/engoengine/engo/ecs"
 	"io"
 )
 

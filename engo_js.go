@@ -1,6 +1,6 @@
 // +build netgo
 
-package engi
+package engo
 
 import (
 	"log"
@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gopherjs/gopherjs/js"
-	"github.com/paked/webgl"
+	"github.com/engoengine/webgl"
 )
 
 func init() {

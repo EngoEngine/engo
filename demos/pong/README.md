@@ -1,7 +1,7 @@
 # Pong Demo
 
 ## What does it do?
-It combines a lot of features of `engi`, to demonstrate the playing of a game of pong. 
+It combines a lot of features of `engo`, to demonstrate the playing of a game of pong. 
 
 ## What are important aspects of the code?
 These things are key in this demo:

@@ -1,6 +1,6 @@
 # Demos
 
-Each of these demos showcases a small concept or feature of `engi`, or even a more sizable sample game. They have been sorted into categories below.
+Each of these demos showcases a small concept or feature of `engo`, or even a more sizable sample game. They have been sorted into categories below.
 
 ## Conceptual
 
@@ -10,7 +10,7 @@ Learn how entities are represented and what they do.
 
 ### [Headless](headless)
 
-Run `engi` without a graphical display. Useful for servers and testing.
+Run `engo` without a graphical display. Useful for servers and testing.
 
 ## Graphics
 

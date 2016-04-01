@@ -1,4 +1,4 @@
-package engi
+package engo
 
 // Spritesheet is a class that stores a set of tiles from a file, used by tilemaps and animations
 type Spritesheet struct {
@@ -12,7 +12,7 @@ func NewSpritesheetFromTexture(texture *Texture, cellWidth, cellHeight int) *Spr
 }
 
 // NewSpritesheetFromFile is a simple handler for creating a new spritesheet from a file
-// textureName is the name of a texture already preloaded with engi.Files.Add
+// textureName is the name of a texture already preloaded with engo.Files.Add
 func NewSpritesheetFromFile(textureName string, cellWidth, cellHeight int) *Spritesheet {
 	return NewSpritesheetFromTexture(Files.Image(textureName), cellWidth, cellHeight)
 }

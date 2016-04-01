@@ -1,4 +1,4 @@
-package engi
+package engo
 
 type Action int
 type Key int
@@ -36,9 +36,9 @@ const (
 	MouseButtonMiddle MouseButton = 2 // equivalent for MouseButton3
 )
 
-// those are default values for engi_js defined here because some of them are shared
-// with engi_glfw.
-// engi_glfw redefines the variables it needs to other values during init() so
+// those are default values for engo_js defined here because some of them are shared
+// with engo_glfw.
+// engo_glfw redefines the variables it needs to other values during init() so
 var (
 	Dash         = Key(189)
 	Apostrophe   = Key(222)

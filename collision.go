@@ -1,10 +1,10 @@
-package engi
+package engo
 
 import (
 	"log"
 	"math"
 
-	"github.com/paked/engi/ecs"
+	"github.com/engoengine/engo/ecs"
 )
 
 type AABB struct {

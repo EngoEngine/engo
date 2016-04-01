@@ -1,4 +1,4 @@
-package engi
+package engo
 
 import (
 	"image/color"
@@ -7,9 +7,9 @@ import (
 	"os"
 	"path"
 
+	"github.com/engoengine/webgl"
 	"github.com/golang/freetype/truetype"
 	"github.com/luxengine/math"
-	"github.com/paked/webgl"
 )
 
 type Resource struct {
