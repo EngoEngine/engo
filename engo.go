@@ -71,7 +71,7 @@ func Run(opts RunOptions, defaultScene Scene) {
 	}
 }
 
-func SetBg(c color.Color) {
+func SetBackground(c color.Color) {
 	if !headless {
 		r, g, b, a := c.RGBA()
 

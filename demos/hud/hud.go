@@ -77,7 +77,7 @@ func (game *Game) Preload() {}
 
 // Setup is called before the main loop is started
 func (game *Game) Setup(w *ecs.World) {
-	engo.SetBg(color.White)
+	engo.SetBackground(color.White)
 	w.AddSystem(&engo.RenderSystem{})
 
 	// Adding KeyboardScroller so we can actually see the difference between background and HUD when scrolling

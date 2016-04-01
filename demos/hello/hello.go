@@ -21,7 +21,7 @@ func (game *GameWorld) Preload() {
 }
 
 func (game *GameWorld) Setup(w *ecs.World) {
-	engo.SetBg(color.White)
+	engo.SetBackground(color.White)
 
 	w.AddSystem(&engo.RenderSystem{})
 	w.AddSystem(&ScaleSystem{})

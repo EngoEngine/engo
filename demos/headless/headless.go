@@ -27,7 +27,7 @@ func (pong *PongGame) Preload() {
 }
 
 func (pong *PongGame) Setup(w *ecs.World) {
-	engo.SetBg(color.White)
+	engo.SetBackground(color.White)
 
 	w.AddSystem(&engo.RenderSystem{})
 	w.AddSystem(&engo.CollisionSystem{})
