@@ -6,7 +6,7 @@ import (
 	"math/rand"
 
 	"github.com/engoengine/engo"
-	"github.com/engoengine/engo/ecs"
+	"github.com/engoengine/ecs"
 )
 
 type GameWorld struct{}

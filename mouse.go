@@ -1,7 +1,7 @@
 package engo
 
 import (
-	"github.com/engoengine/engo/ecs"
+	"github.com/engoengine/ecs"
 )
 
 // MouseComponent is the location for the MouseSystem to store its results;

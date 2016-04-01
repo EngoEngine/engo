@@ -4,7 +4,7 @@ import (
 	"log"
 	"math"
 
-	"github.com/engoengine/engo/ecs"
+	"github.com/engoengine/ecs"
 )
 
 type AABB struct {

@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/engoengine/engo/ecs"
+	"github.com/engoengine/ecs"
 )
 
 var (

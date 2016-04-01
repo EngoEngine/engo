@@ -5,7 +5,7 @@ package engo
 import (
 	"log"
 
-	"github.com/engoengine/engo/ecs"
+	"github.com/engoengine/ecs"
 	"golang.org/x/mobile/exp/audio/al"
 )
 

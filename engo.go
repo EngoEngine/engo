@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"image/color"
 
-	"github.com/engoengine/engo/ecs"
+	"github.com/engoengine/ecs"
 	"github.com/engoengine/webgl"
 )
 
