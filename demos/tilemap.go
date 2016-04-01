@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/engoengine/engo"
-	"github.com/engoengine/engo/ecs"
+	"github.com/engoengine/ecs"
 )
 
 var World *GameWorld

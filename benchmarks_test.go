@@ -3,7 +3,7 @@ package engo
 import (
 	"testing"
 
-	"github.com/engoengine/engo/ecs"
+	"github.com/engoengine/ecs"
 )
 
 type NilSystem struct {

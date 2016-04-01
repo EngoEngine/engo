@@ -3,7 +3,7 @@ package engo
 import (
 	"log"
 
-	"github.com/engoengine/engo/ecs"
+	"github.com/engoengine/ecs"
 )
 
 type AnimationAction struct {
