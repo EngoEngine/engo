@@ -11,7 +11,8 @@ go through a "prettification" process in order to increase elegance and usabilit
 most features, look at the demos.
 
 ## Getting in touch / Contributing
-Currently we are active on IRC / Freenode at the `#engo` channel. You can also create an issue to start a discussion. 
+
+We have a [gitter](https://gitter.im/EngoEngine/engo) chat for people to join who want to further discuss `engo`. We are happy to discuss bugs, feature requests and would love to hear about the projects you are building!
 
 ## Getting Started
 
