@@ -1,6 +1,6 @@
 // +build !netgo,!android
 
-package engi
+package engo
 
 import (
 	"image"
@@ -16,7 +16,7 @@ import (
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
-	"github.com/paked/webgl"
+	"github.com/engoengine/webgl"
 )
 
 var (

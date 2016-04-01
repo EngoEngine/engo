@@ -5,8 +5,8 @@ import (
 	"image/color"
 	"log"
 
-	"github.com/paked/engi"
-	"github.com/paked/engi/ecs"
+	"github.com/engoengine/engo"
+	"github.com/engoengine/engo/ecs"
 )
 
 type Game struct{}
@@ -41,11 +41,11 @@ func generateBackground() *ecs.Entity {
 			}
 		}
 	}
-	bgTexture := engi.NewImageObject(img)
+	bgTexture := engo.NewImageObject(img)
 	field := ecs.NewEntity([]string{"RenderSystem"})
-	fieldRender := engi.NewRenderComponent(engi.NewTexture(bgTexture), engi.Point{1, 1}, "Background1")
-	fieldRender.SetPriority(engi.Background)
-	fieldSpace := &engi.SpaceComponent{engi.Point{0, 0}, worldWidth, worldHeight}
+	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1}, "Background1")
+	fieldRender.SetPriority(engo.Background)
+	fieldSpace := &engo.SpaceComponent{engo.Point{0, 0}, worldWidth, worldHeight}
 	field.AddComponent(fieldRender)
 	field.AddComponent(fieldSpace)
 	return field
@@ -55,11 +55,11 @@ func (game *Game) Preload() {}
 
 // Setup is called before the main loop is started
 func (game *Game) Setup(w *ecs.World) {
-	engi.SetBg(color.White)
-	w.AddSystem(&engi.RenderSystem{})
+	engo.SetBg(color.White)
+	w.AddSystem(&engo.RenderSystem{})
 
 	// The most important line in this whole demo:
-	w.AddSystem(&engi.EdgeScroller{scrollSpeed, edgeMargin})
+	w.AddSystem(&engo.EdgeScroller{scrollSpeed, edgeMargin})
 
 	// Create the background; this way we'll see when we actually scroll
 	err := w.AddEntity(generateBackground())
@@ -73,10 +73,10 @@ func (*Game) Show()        {}
 func (*Game) Type() string { return "Game" }
 
 func main() {
-	opts := engi.RunOptions{
+	opts := engo.RunOptions{
 		Title:  "EdgeScroller Demo",
 		Width:  1024,
 		Height: 640,
 	}
-	engi.Run(opts, &Game{})
+	engo.Run(opts, &Game{})
 }

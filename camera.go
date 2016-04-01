@@ -1,10 +1,10 @@
-package engi
+package engo
 
 import (
 	"sync"
 
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/paked/engi/ecs"
+	"github.com/engoengine/engo/ecs"
 )
 
 var (

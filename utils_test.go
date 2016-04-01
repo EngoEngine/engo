@@ -1,9 +1,9 @@
-package engi
+package engo
 
 import (
 	"testing"
 
-	"github.com/paked/engi/ecs"
+	"github.com/engoengine/engo/ecs"
 )
 
 type inlineGame struct {

@@ -1,9 +1,9 @@
-package engi
+package engo
 
 import (
 	"fmt"
 
-	"github.com/paked/engi/ecs"
+	"github.com/engoengine/engo/ecs"
 )
 
 var (

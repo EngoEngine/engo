@@ -7,41 +7,41 @@ import (
 	"math/rand"
 	"sync"
 
-	"github.com/paked/engi"
-	"github.com/paked/engi/ecs"
+	"github.com/engoengine/engo"
+	"github.com/engoengine/engo/ecs"
 )
 
 type PongGame struct{}
 
 var (
-	basicFont *engi.Font
+	basicFont *engo.Font
 )
 
 func (pong *PongGame) Preload() {
-	engi.Files.AddFromDir("assets", true)
+	engo.Files.AddFromDir("assets", true)
 }
 
 func (pong *PongGame) Setup(w *ecs.World) {
-	engi.SetBg(color.Black)
-	w.AddSystem(&engi.RenderSystem{})
-	w.AddSystem(&engi.CollisionSystem{})
+	engo.SetBg(color.Black)
+	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&engo.CollisionSystem{})
 	w.AddSystem(&SpeedSystem{})
 	w.AddSystem(&ControlSystem{})
 	w.AddSystem(&BallSystem{})
 	w.AddSystem(&ScoreSystem{})
 
-	basicFont = (&engi.Font{URL: "Roboto-Regular.ttf", Size: 32, FG: color.NRGBA{255, 255, 255, 255}})
+	basicFont = (&engo.Font{URL: "Roboto-Regular.ttf", Size: 32, FG: color.NRGBA{255, 255, 255, 255}})
 	if err := basicFont.CreatePreloaded(); err != nil {
 		log.Fatalln("Could not load font:", err)
 	}
 
 	ball := ecs.NewEntity([]string{"RenderSystem", "CollisionSystem", "SpeedSystem", "BallSystem"})
-	ballTexture := engi.Files.Image("ball.png")
-	ballRender := engi.NewRenderComponent(ballTexture, engi.Point{2, 2}, "ball")
-	ballSpace := &engi.SpaceComponent{engi.Point{(engi.Width() - ballTexture.Width()) / 2, (engi.Height() - ballTexture.Height()) / 2}, ballTexture.Width() * ballRender.Scale().X, ballTexture.Height() * ballRender.Scale().Y}
-	ballCollision := &engi.CollisionComponent{Main: true, Solid: true}
+	ballTexture := engo.Files.Image("ball.png")
+	ballRender := engo.NewRenderComponent(ballTexture, engo.Point{2, 2}, "ball")
+	ballSpace := &engo.SpaceComponent{engo.Point{(engo.Width() - ballTexture.Width()) / 2, (engo.Height() - ballTexture.Height()) / 2}, ballTexture.Width() * ballRender.Scale().X, ballTexture.Height() * ballRender.Scale().Y}
+	ballCollision := &engo.CollisionComponent{Main: true, Solid: true}
 	ballSpeed := &SpeedComponent{}
-	ballSpeed.Point = engi.Point{300, 100}
+	ballSpeed.Point = engo.Point{300, 100}
 
 	ball.AddComponent(ballRender)
 	ball.AddComponent(ballSpace)
@@ -54,9 +54,9 @@ func (pong *PongGame) Setup(w *ecs.World) {
 
 	score := ecs.NewEntity([]string{"RenderSystem", "ScoreSystem"})
 
-	scoreRender := engi.NewRenderComponent(basicFont.Render(" "), engi.Point{1, 1}, "YOLO <3")
+	scoreRender := engo.NewRenderComponent(basicFont.Render(" "), engo.Point{1, 1}, "YOLO <3")
 
-	scoreSpace := &engi.SpaceComponent{engi.Point{100, 100}, 100, 100}
+	scoreSpace := &engo.SpaceComponent{engo.Point{100, 100}, 100, 100}
 	score.AddComponent(scoreRender)
 	score.AddComponent(scoreSpace)
 	err = w.AddEntity(score)
@@ -67,16 +67,16 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	schemes := []string{"WASD", ""}
 	for i := 0; i < 2; i++ {
 		paddle := ecs.NewEntity([]string{"RenderSystem", "CollisionSystem", "ControlSystem"})
-		paddleTexture := engi.Files.Image("paddle.png")
-		paddleRender := engi.NewRenderComponent(paddleTexture, engi.Point{2, 2}, "paddle")
+		paddleTexture := engo.Files.Image("paddle.png")
+		paddleRender := engo.NewRenderComponent(paddleTexture, engo.Point{2, 2}, "paddle")
 		x := float32(0)
 		if i != 0 {
 			x = 800 - 16
 		}
 
-		paddleSpace := &engi.SpaceComponent{engi.Point{x, (engi.Height() - paddleTexture.Height()) / 2}, paddleRender.Scale().X * paddleTexture.Width(), paddleRender.Scale().Y * paddleTexture.Height()}
+		paddleSpace := &engo.SpaceComponent{engo.Point{x, (engo.Height() - paddleTexture.Height()) / 2}, paddleRender.Scale().X * paddleTexture.Width(), paddleRender.Scale().Y * paddleTexture.Height()}
 		paddleControl := &ControlComponent{schemes[i]}
-		paddleCollision := &engi.CollisionComponent{Main: false, Solid: true}
+		paddleCollision := &engo.CollisionComponent{Main: false, Solid: true}
 		paddle.AddComponent(paddleRender)
 		paddle.AddComponent(paddleSpace)
 		paddle.AddComponent(paddleControl)
@@ -99,9 +99,9 @@ type SpeedSystem struct {
 func (*SpeedSystem) Type() string { return "SpeedSystem" }
 
 func (ms *SpeedSystem) New(*ecs.World) {
-	engi.Mailbox.Listen("CollisionMessage", func(message engi.Message) {
+	engo.Mailbox.Listen("CollisionMessage", func(message engo.Message) {
 		log.Println("collision")
-		collision, isCollision := message.(engi.CollisionMessage)
+		collision, isCollision := message.(engo.CollisionMessage)
 		if isCollision {
 			var speed *SpeedComponent
 			if !collision.Entity.Component(&speed) {
@@ -115,7 +115,7 @@ func (ms *SpeedSystem) New(*ecs.World) {
 
 func (ms *SpeedSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	var speed *SpeedComponent
-	var space *engi.SpaceComponent
+	var space *engo.SpaceComponent
 	if !entity.Component(&speed) || !entity.Component(&space) {
 		return
 	}
@@ -123,10 +123,10 @@ func (ms *SpeedSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	space.Position.Y += speed.Y * dt
 }
 
-func (ms *SpeedSystem) Receive(message engi.Message) {}
+func (ms *SpeedSystem) Receive(message engo.Message) {}
 
 type SpeedComponent struct {
-	engi.Point
+	engo.Point
 }
 
 func (*SpeedComponent) Type() string {
@@ -142,14 +142,14 @@ func (*BallSystem) Type() string { return "BallSystem" }
 func (bs *BallSystem) New(*ecs.World) {}
 
 func (bs *BallSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-	var space *engi.SpaceComponent
+	var space *engo.SpaceComponent
 	var speed *SpeedComponent
 	if !entity.Component(&space) || !entity.Component(&speed) {
 		return
 	}
 
 	if space.Position.X < 0 {
-		engi.Mailbox.Dispatch(ScoreMessage{1})
+		engo.Mailbox.Dispatch(ScoreMessage{1})
 
 		space.Position.X = 400 - 16
 		space.Position.Y = 400 - 16
@@ -163,7 +163,7 @@ func (bs *BallSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	}
 
 	if space.Position.X > (800 - 16) {
-		engi.Mailbox.Dispatch(ScoreMessage{2})
+		engo.Mailbox.Dispatch(ScoreMessage{2})
 
 		space.Position.X = 400 - 16
 		space.Position.Y = 400 - 16
@@ -189,7 +189,7 @@ func (c *ControlSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	//Check scheme
 	// -Move entity based on that
 	var control *ControlComponent
-	var space *engi.SpaceComponent
+	var space *engo.SpaceComponent
 
 	if !entity.Component(&space) || !entity.Component(&control) {
 		return
@@ -197,11 +197,11 @@ func (c *ControlSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	up := false
 	down := false
 	if control.Scheme == "WASD" {
-		up = engi.Keys.Get(engi.W).Down()
-		down = engi.Keys.Get(engi.S).Down()
+		up = engo.Keys.Get(engo.W).Down()
+		down = engo.Keys.Get(engo.S).Down()
 	} else {
-		up = engi.Keys.Get(engi.ArrowUp).Down()
-		down = engi.Keys.Get(engi.ArrowDown).Down()
+		up = engo.Keys.Get(engo.ArrowUp).Down()
+		down = engo.Keys.Get(engo.ArrowDown).Down()
 	}
 
 	if up {
@@ -237,7 +237,7 @@ func (*ScoreSystem) Type() string { return "ScoreSystem" }
 
 func (sc *ScoreSystem) New(*ecs.World) {
 	sc.upToDate = true
-	engi.Mailbox.Listen("ScoreMessage", func(message engi.Message) {
+	engo.Mailbox.Listen("ScoreMessage", func(message engo.Message) {
 		scoreMessage, isScore := message.(ScoreMessage)
 		if !isScore {
 			return
@@ -256,8 +256,8 @@ func (sc *ScoreSystem) New(*ecs.World) {
 }
 
 func (c *ScoreSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-	var render *engi.RenderComponent
-	var space *engi.SpaceComponent
+	var render *engo.RenderComponent
+	var space *engo.SpaceComponent
 
 	if !entity.Component(&render) || !entity.Component(&space) {
 		return
@@ -285,11 +285,11 @@ func (ScoreMessage) Type() string {
 }
 
 func main() {
-	opts := engi.RunOptions{
+	opts := engo.RunOptions{
 		Title:         "Pong Demo",
 		Width:         800,
 		Height:        800,
 		ScaleOnResize: true,
 	}
-	engi.Run(opts, &PongGame{})
+	engo.Run(opts, &PongGame{})
 }

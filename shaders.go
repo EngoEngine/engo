@@ -1,7 +1,7 @@
-package engi
+package engo
 
 import (
-	"github.com/paked/webgl"
+	"github.com/engoengine/webgl"
 )
 
 const bufferSize = 10000

@@ -5,23 +5,23 @@ import (
 	"log"
 	"math/rand"
 
-	"github.com/paked/engi"
-	"github.com/paked/engi/ecs"
+	"github.com/engoengine/engo"
+	"github.com/engoengine/engo/ecs"
 )
 
 type Game struct{}
 
 func (game *Game) Preload() {
 	// Add all the files in the data directory non recursively
-	engi.Files.AddFromDir("data", false)
+	engo.Files.AddFromDir("data", false)
 }
 
 func (game *Game) Setup(w *ecs.World) {
-	engi.SetBg(color.White)
+	engo.SetBg(color.White)
 
 	// Add all of the systems
-	w.AddSystem(&engi.RenderSystem{})
-	w.AddSystem(&engi.CollisionSystem{})
+	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&engo.CollisionSystem{})
 	w.AddSystem(&DeathSystem{})
 	w.AddSystem(&FallingSystem{})
 	w.AddSystem(&ControlSystem{})
@@ -29,15 +29,15 @@ func (game *Game) Setup(w *ecs.World) {
 
 	// Create new entity subscribed to all the systems!
 	guy := ecs.NewEntity([]string{"RenderSystem", "ControlSystem", "RockSpawnSystem", "CollisionSystem", "DeathSystem"})
-	texture := engi.Files.Image("icon.png")
-	render := engi.NewRenderComponent(texture, engi.Point{4, 4}, "guy")
+	texture := engo.Files.Image("icon.png")
+	render := engo.NewRenderComponent(texture, engo.Point{4, 4}, "guy")
 	// Tell the collision system that this player is solid
-	collision := &engi.CollisionComponent{Solid: true, Main: true}
+	collision := &engo.CollisionComponent{Solid: true, Main: true}
 
 	width := texture.Width() * render.Scale().X
 	height := texture.Height() * render.Scale().Y
 
-	space := &engi.SpaceComponent{engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2}, width, height}
+	space := &engo.SpaceComponent{engo.Point{(engo.Width() - width) / 2, (engo.Height() - height) / 2}, width, height}
 
 	guy.AddComponent(render)
 	guy.AddComponent(space)
@@ -64,26 +64,26 @@ func (*ControlSystem) Post()        {}
 func (control *ControlSystem) New(*ecs.World) {}
 
 func (control *ControlSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-	var space *engi.SpaceComponent
+	var space *engo.SpaceComponent
 	if !entity.Component(&space) {
 		return
 	}
 
 	speed := 400 * dt
 
-	if engi.Keys.Get(engi.A).Down() {
+	if engo.Keys.Get(engo.A).Down() {
 		space.Position.X -= speed
 	}
 
-	if engi.Keys.Get(engi.D).Down() {
+	if engo.Keys.Get(engo.D).Down() {
 		space.Position.X += speed
 	}
 
-	if engi.Keys.Get(engi.W).Down() {
+	if engo.Keys.Get(engo.W).Down() {
 		space.Position.Y -= speed
 	}
 
-	if engi.Keys.Get(engi.S).Down() {
+	if engo.Keys.Get(engo.S).Down() {
 		space.Position.Y += speed
 	}
 }
@@ -108,21 +108,21 @@ func (rock *RockSpawnSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 		return
 	}
 
-	position := engi.Point{0, -32}
-	position.X = rand.Float32() * (engi.Width())
+	position := engo.Point{0, -32}
+	position.X = rand.Float32() * (engo.Width())
 	err := rock.world.AddEntity(NewRock(position))
 	if err != nil {
 		log.Println(err)
 	}
 }
 
-func NewRock(position engi.Point) *ecs.Entity {
+func NewRock(position engo.Point) *ecs.Entity {
 	rock := ecs.NewEntity([]string{"RenderSystem", "FallingSystem", "CollisionSystem"})
 
-	texture := engi.Files.Image("rock.png")
-	render := engi.NewRenderComponent(texture, engi.Point{4, 4}, "rock")
-	space := &engi.SpaceComponent{position, texture.Width() * render.Scale().X, texture.Height() * render.Scale().Y}
-	collision := &engi.CollisionComponent{Solid: true}
+	texture := engo.Files.Image("rock.png")
+	render := engo.NewRenderComponent(texture, engo.Point{4, 4}, "rock")
+	space := &engo.SpaceComponent{position, texture.Width() * render.Scale().X, texture.Height() * render.Scale().Y}
+	collision := &engo.CollisionComponent{Solid: true}
 
 	rock.AddComponent(render)
 	rock.AddComponent(space)
@@ -140,7 +140,7 @@ func (*FallingSystem) Type() string { return "FallingSystem" }
 func (fs *FallingSystem) New(*ecs.World) {}
 
 func (fs *FallingSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-	var space *engi.SpaceComponent
+	var space *engo.SpaceComponent
 	if !entity.Component(&space) {
 		return
 	}
@@ -155,8 +155,8 @@ func (*DeathSystem) Type() string { return "DeathSystem" }
 
 func (ds *DeathSystem) New(*ecs.World) {
 	// Subscribe to ScoreMessage
-	engi.Mailbox.Listen("ScoreMessage", func(message engi.Message) {
-		collision, isCollision := message.(engi.CollisionMessage)
+	engo.Mailbox.Listen("ScoreMessage", func(message engo.Message) {
+		collision, isCollision := message.(engo.CollisionMessage)
 		if isCollision {
 			log.Println(collision, message)
 			log.Println("DEAD")
@@ -166,8 +166,8 @@ func (ds *DeathSystem) New(*ecs.World) {
 
 func (fs *DeathSystem) UpdateEntity(entity *ecs.Entity, dt float32) {}
 
-func (fs *DeathSystem) Receive(message engi.Message) {
-	collision, isCollision := message.(engi.CollisionMessage)
+func (fs *DeathSystem) Receive(message engo.Message) {
+	collision, isCollision := message.(engo.CollisionMessage)
 	if isCollision {
 		log.Println(collision, message)
 		log.Println("DEAD")
@@ -175,10 +175,10 @@ func (fs *DeathSystem) Receive(message engi.Message) {
 }
 
 func main() {
-	opts := engi.RunOptions{
+	opts := engo.RunOptions{
 		Title:  "Falling Demo",
 		Width:  1024,
 		Height: 640,
 	}
-	engi.Run(opts, &Game{})
+	engo.Run(opts, &Game{})
 }

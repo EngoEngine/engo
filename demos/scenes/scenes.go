@@ -7,8 +7,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/paked/engi"
-	"github.com/paked/engi/ecs"
+	"github.com/engoengine/engo"
+	"github.com/engoengine/engo/ecs"
 )
 
 var (
@@ -20,25 +20,25 @@ var (
 type IconScene struct{}
 
 func (game *IconScene) Preload() {
-	engi.Files.Add("data/icon.png")
+	engo.Files.Add("data/icon.png")
 }
 
 func (game *IconScene) Setup(w *ecs.World) {
-	engi.SetBg(color.White)
+	engo.SetBg(color.White)
 
-	w.AddSystem(&engi.RenderSystem{})
+	w.AddSystem(&engo.RenderSystem{})
 	w.AddSystem(&ScaleSystem{})
 	w.AddSystem(&SceneSwitcherSystem{NextScene: "RockScene", WaitTime: time.Second * 3})
 
 	guy := ecs.NewEntity([]string{"RenderSystem", "ScaleSystem"})
-	texture := engi.Files.Image("icon.png")
-	render := engi.NewRenderComponent(texture, engi.Point{8, 8}, "icon")
-	collision := &engi.CollisionComponent{Solid: true, Main: true}
+	texture := engo.Files.Image("icon.png")
+	render := engo.NewRenderComponent(texture, engo.Point{8, 8}, "icon")
+	collision := &engo.CollisionComponent{Solid: true, Main: true}
 
 	width := texture.Width() * render.Scale().X
 	height := texture.Height() * render.Scale().Y
 
-	space := &engi.SpaceComponent{engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2}, width, height}
+	space := &engo.SpaceComponent{engo.Point{(engo.Width() - width) / 2, (engo.Height() - height) / 2}, width, height}
 
 	guy.AddComponent(render)
 	guy.AddComponent(space)
@@ -58,25 +58,25 @@ func (*IconScene) Type() string { return "IconScene" }
 type RockScene struct{}
 
 func (*RockScene) Preload() {
-	engi.Files.Add("data/rock.png")
+	engo.Files.Add("data/rock.png")
 }
 
 func (game *RockScene) Setup(w *ecs.World) {
-	engi.SetBg(color.White)
+	engo.SetBg(color.White)
 
-	w.AddSystem(&engi.RenderSystem{})
+	w.AddSystem(&engo.RenderSystem{})
 	w.AddSystem(&ScaleSystem{})
 	w.AddSystem(&SceneSwitcherSystem{NextScene: "IconScene", WaitTime: time.Second * 3})
 
 	guy := ecs.NewEntity([]string{"RenderSystem", "ScaleSystem"})
-	texture := engi.Files.Image("rock.png")
-	render := engi.NewRenderComponent(texture, engi.Point{8, 8}, "rock")
-	collision := &engi.CollisionComponent{Solid: true, Main: true}
+	texture := engo.Files.Image("rock.png")
+	render := engo.NewRenderComponent(texture, engo.Point{8, 8}, "rock")
+	collision := &engo.CollisionComponent{Solid: true, Main: true}
 
 	width := texture.Width() * render.Scale().X
 	height := texture.Height() * render.Scale().Y
 
-	space := &engi.SpaceComponent{engi.Point{(engi.Width() - width) / 2, (engi.Height() - height) / 2}, width, height}
+	space := &engo.SpaceComponent{engo.Point{(engo.Width() - width) / 2, (engo.Height() - height) / 2}, width, height}
 
 	guy.AddComponent(render)
 	guy.AddComponent(space)
@@ -111,7 +111,7 @@ func (s *SceneSwitcherSystem) Update(dt float32) {
 		s.secondsWaited = 0
 
 		// Change the world to s.NextScene, and don't override / force World re-creation
-		engi.SetSceneByName(s.NextScene, false)
+		engo.SetSceneByName(s.NextScene, false)
 
 		fmt.Println("Switched to", s.NextScene)
 	}
@@ -127,7 +127,7 @@ func (*ScaleSystem) Type() string { return "ScaleSystem" }
 func (s *ScaleSystem) New(*ecs.World) {}
 
 func (c *ScaleSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-	var render *engi.RenderComponent
+	var render *engo.RenderComponent
 	if !entity.Component(&render) {
 		return
 	}
@@ -153,14 +153,14 @@ func main() {
 	rockScene = &RockScene{}
 
 	// Register other Scenes for later use, this can be done from anywhere, as long as it
-	// happens before calling engi.SetSceneByName
-	engi.RegisterScene(rockScene)
+	// happens before calling engo.SetSceneByName
+	engo.RegisterScene(rockScene)
 
-	opts := engi.RunOptions{
+	opts := engo.RunOptions{
 		Title:  "Scenes Demo",
 		Width:  1024,
 		Height: 640,
 	}
 
-	engi.Run(opts, iconScene)
+	engo.Run(opts, iconScene)
 }

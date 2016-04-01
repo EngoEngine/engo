@@ -5,8 +5,8 @@ import (
 	"image/color"
 	"log"
 
-	"github.com/paked/engi"
-	"github.com/paked/engi/ecs"
+	"github.com/engoengine/engo"
+	"github.com/engoengine/engo/ecs"
 )
 
 var (
@@ -19,7 +19,7 @@ type GameWorld struct{}
 func (game *GameWorld) Preload() {}
 
 // generateBackground creates a background of green tiles - might not be the most efficient way to do this
-func generateBackground() *engi.RenderComponent {
+func generateBackground() *engo.RenderComponent {
 	rect := image.Rect(0, 0, int(boxWidth), int(boxHeight))
 	img := image.NewNRGBA(rect)
 	c1 := color.RGBA{102, 153, 0, 255}
@@ -28,19 +28,19 @@ func generateBackground() *engi.RenderComponent {
 			img.Set(i, j, c1)
 		}
 	}
-	bgTexture := engi.NewImageObject(img)
-	fieldRender := engi.NewRenderComponent(engi.NewTexture(bgTexture), engi.Point{1, 1}, "Background1")
-	fieldRender.SetPriority(engi.Background)
+	bgTexture := engo.NewImageObject(img)
+	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1}, "Background1")
+	fieldRender.SetPriority(engo.Background)
 	return fieldRender
 }
 
 func (game *GameWorld) Setup(w *ecs.World) {
-	engi.SetBg(color.White)
+	engo.SetBg(color.White)
 
-	w.AddSystem(&engi.MouseSystem{})
-	w.AddSystem(&engi.RenderSystem{})
+	w.AddSystem(&engo.MouseSystem{})
+	w.AddSystem(&engo.RenderSystem{})
 	w.AddSystem(&ControlSystem{})
-	w.AddSystem(&engi.MouseZoomer{-0.125})
+	w.AddSystem(&engo.MouseZoomer{-0.125})
 
 	err := w.AddEntity(game.CreateEntity())
 	if err != nil {
@@ -56,8 +56,8 @@ func (game *GameWorld) CreateEntity() *ecs.Entity {
 	entity := ecs.NewEntity([]string{"MouseSystem", "RenderSystem", "ControlSystem"})
 
 	entity.AddComponent(generateBackground())
-	entity.AddComponent(&engi.MouseComponent{})
-	entity.AddComponent(&engi.SpaceComponent{engi.Point{0, 0}, boxWidth, boxHeight})
+	entity.AddComponent(&engo.MouseComponent{})
+	entity.AddComponent(&engo.SpaceComponent{engo.Point{0, 0}, boxWidth, boxHeight})
 
 	return entity
 }
@@ -71,23 +71,23 @@ func (*ControlSystem) Type() string { return "ControlSystem" }
 func (c *ControlSystem) New(*ecs.World) {}
 
 func (c *ControlSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-	var mouse *engi.MouseComponent
+	var mouse *engo.MouseComponent
 	if !entity.Component(&mouse) {
 		return
 	}
 
 	if mouse.Enter {
-		engi.SetCursor(engi.Hand)
+		engo.SetCursor(engo.Hand)
 	} else if mouse.Leave {
-		engi.SetCursor(nil)
+		engo.SetCursor(nil)
 	}
 }
 
 func main() {
-	opts := engi.RunOptions{
+	opts := engo.RunOptions{
 		Title:  "Mouse Demo",
 		Width:  1024,
 		Height: 640,
 	}
-	engi.Run(opts, &GameWorld{})
+	engo.Run(opts, &GameWorld{})
 }

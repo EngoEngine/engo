@@ -1,11 +1,11 @@
 // +build !windows
 
-package engi
+package engo
 
 import (
 	"log"
 
-	"github.com/paked/engi/ecs"
+	"github.com/engoengine/engo/ecs"
 	"golang.org/x/mobile/exp/audio/al"
 )
 

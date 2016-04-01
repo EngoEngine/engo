@@ -12,6 +12,6 @@ These lines are key in this demo:
 // Scroll is called whenever the mouse wheel scrolls
 func (game *Game) Scroll(amount float32) {
 	// Adding this line, allows for zooming on scrolling the mouse wheel
-	engi.Mailbox.Dispatch(engi.CameraMessage{Axis: engi.ZAxis, Value: amount * zoomSpeed, Incremental: true})
+	engo.Mailbox.Dispatch(engo.CameraMessage{Axis: engo.ZAxis, Value: amount * zoomSpeed, Incremental: true})
 }
 ```

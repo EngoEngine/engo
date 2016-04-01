@@ -1,11 +1,11 @@
-package engi
+package engo
 
 import (
 	"fmt"
 	"image/color"
 
-	"github.com/paked/engi/ecs"
-	"github.com/paked/webgl"
+	"github.com/engoengine/engo/ecs"
+	"github.com/engoengine/webgl"
 )
 
 var (
@@ -42,7 +42,7 @@ type RunOptions struct {
 	// VSync indicates whether or not OpenGL should wait for the monitor to swp the buffers
 	VSync bool
 
-	// ScaleOnResize indicates whether or not engi should make things larger/smaller whenever the screen resizes
+	// ScaleOnResize indicates whether or not engo should make things larger/smaller whenever the screen resizes
 	ScaleOnResize bool
 
 	// FPSLimit indicates the maximum number of frames per second

@@ -5,8 +5,8 @@ import (
 	"image/color"
 	"log"
 
-	"github.com/paked/engi"
-	"github.com/paked/engi/ecs"
+	"github.com/engoengine/engo"
+	"github.com/engoengine/engo/ecs"
 )
 
 type Game struct{}
@@ -17,7 +17,7 @@ var (
 	worldWidth  float32 = 800
 	worldHeight float32 = 800
 
-	hudBackgroundPriority = engi.PriorityLevel(engi.HUDGround)
+	hudBackgroundPriority = engo.PriorityLevel(engo.HUDGround)
 )
 
 // generateBackground creates a background of green tiles - might not be the most efficient way to do this
@@ -43,11 +43,11 @@ func generateBackground() *ecs.Entity {
 			}
 		}
 	}
-	bgTexture := engi.NewImageObject(img)
+	bgTexture := engo.NewImageObject(img)
 	field := ecs.NewEntity([]string{"RenderSystem"})
-	fieldRender := engi.NewRenderComponent(engi.NewTexture(bgTexture), engi.Point{1, 1}, "Background1")
-	fieldRender.SetPriority(engi.Background)
-	fieldSpace := &engi.SpaceComponent{engi.Point{0, 0}, worldWidth, worldHeight}
+	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1}, "Background1")
+	fieldRender.SetPriority(engo.Background)
+	fieldSpace := &engo.SpaceComponent{engo.Point{0, 0}, worldWidth, worldHeight}
 	field.AddComponent(fieldRender)
 	field.AddComponent(fieldSpace)
 	return field
@@ -63,11 +63,11 @@ func generateHUDBackground(width, height float32) *ecs.Entity {
 			img.Set(i, j, c1)
 		}
 	}
-	bgTexture := engi.NewImageObject(img)
+	bgTexture := engo.NewImageObject(img)
 	field := ecs.NewEntity([]string{"RenderSystem"})
-	fieldRender := engi.NewRenderComponent(engi.NewTexture(bgTexture), engi.Point{1, 1}, "HUDBackground1")
+	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1}, "HUDBackground1")
 	fieldRender.SetPriority(hudBackgroundPriority)
-	fieldSpace := &engi.SpaceComponent{engi.Point{-1, -1}, width, height}
+	fieldSpace := &engo.SpaceComponent{engo.Point{-1, -1}, width, height}
 	field.AddComponent(fieldRender)
 	field.AddComponent(fieldSpace)
 	return field
@@ -77,12 +77,12 @@ func (game *Game) Preload() {}
 
 // Setup is called before the main loop is started
 func (game *Game) Setup(w *ecs.World) {
-	engi.SetBg(color.White)
-	w.AddSystem(&engi.RenderSystem{})
+	engo.SetBg(color.White)
+	w.AddSystem(&engo.RenderSystem{})
 
 	// Adding KeyboardScroller so we can actually see the difference between background and HUD when scrolling
-	w.AddSystem(engi.NewKeyboardScroller(scrollSpeed, engi.W, engi.D, engi.S, engi.A))
-	w.AddSystem(&engi.MouseZoomer{zoomSpeed})
+	w.AddSystem(engo.NewKeyboardScroller(scrollSpeed, engo.W, engo.D, engo.S, engo.A))
+	w.AddSystem(&engo.MouseZoomer{zoomSpeed})
 
 	// Create background, so we can see difference between this and HUD
 	err := w.AddEntity(generateBackground())
@@ -92,7 +92,7 @@ func (game *Game) Setup(w *ecs.World) {
 
 	// Creating the HUD
 	hudWidth := float32(200)         // Can be anything you want
-	hudHeight := engi.WindowHeight() // Can be anything you want
+	hudHeight := engo.WindowHeight() // Can be anything you want
 
 	// Generate something that uses the PriorityLevel HUDGround or up
 	hudBg := generateHUDBackground(hudWidth, hudHeight)
@@ -107,10 +107,10 @@ func (*Game) Show()        {}
 func (*Game) Type() string { return "Game" }
 
 func main() {
-	opts := engi.RunOptions{
+	opts := engo.RunOptions{
 		Title:  "HUD Demo",
 		Width:  1024,
 		Height: 640,
 	}
-	engi.Run(opts, &Game{})
+	engo.Run(opts, &Game{})
 }
