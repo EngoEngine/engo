@@ -5,8 +5,8 @@ import (
 	"image/color"
 	"log"
 
-	"github.com/engoengine/engo"
 	"github.com/engoengine/ecs"
+	"github.com/engoengine/engo"
 )
 
 type Game struct{}
@@ -16,8 +16,6 @@ var (
 	scrollSpeed float32 = 700
 	worldWidth  float32 = 800
 	worldHeight float32 = 800
-
-	hudBackgroundPriority = engo.PriorityLevel(engo.HUDGround)
 )
 
 // generateBackground creates a background of green tiles - might not be the most efficient way to do this
@@ -46,7 +44,6 @@ func generateBackground() *ecs.Entity {
 	bgTexture := engo.NewImageObject(img)
 	field := ecs.NewEntity([]string{"RenderSystem"})
 	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1}, "Background1")
-	fieldRender.SetPriority(engo.Background)
 	fieldSpace := &engo.SpaceComponent{engo.Point{0, 0}, worldWidth, worldHeight}
 	field.AddComponent(fieldRender)
 	field.AddComponent(fieldSpace)
@@ -66,7 +63,8 @@ func generateHUDBackground(width, height float32) *ecs.Entity {
 	bgTexture := engo.NewImageObject(img)
 	field := ecs.NewEntity([]string{"RenderSystem"})
 	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1}, "HUDBackground1")
-	fieldRender.SetPriority(hudBackgroundPriority)
+	fieldRender.SetShader(engo.HUDShader)
+	fieldRender.SetZIndex(1) // A value larger than 0 (default), to ensure being drawn on top of the background
 	fieldSpace := &engo.SpaceComponent{engo.Point{-1, -1}, width, height}
 	field.AddComponent(fieldRender)
 	field.AddComponent(fieldSpace)

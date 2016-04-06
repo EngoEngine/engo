@@ -20,7 +20,7 @@ var (
 	cam          *cameraSystem
 
 	scaleOnResize   = false
-	fpsLimit        = 120
+	fpsLimit        = 60
 	headless        = false
 	vsync           = true
 	resetLoopTicker = make(chan bool, 1)
