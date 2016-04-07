@@ -1,32 +1,25 @@
 package engo
 
 import (
+	"fmt"
 	"image/color"
 	"math"
+	"sort"
+	"strings"
 
 	"github.com/engoengine/ecs"
 	"github.com/engoengine/webgl"
 )
 
 const (
-	// HighestGround is the highest PriorityLevel that will be rendered
-	HighestGround PriorityLevel = 50
-	// HUDGround is a PriorityLevel from which everything isn't being affected by the Camera
-	HUDGround    PriorityLevel = 40
-	Foreground   PriorityLevel = 30
-	MiddleGround PriorityLevel = 20
-	ScenicGround PriorityLevel = 10
-	// Background is the lowest PriorityLevel that will be rendered
-	Background PriorityLevel = 0
-	// Hidden indicates that it should not be rendered by the RenderSystem
-	Hidden PriorityLevel = -1
-)
-
-const (
 	RenderSystemPriority = -1000
 )
 
-type PriorityLevel int
+type renderChangeMessage struct{}
+
+func (renderChangeMessage) Type() string {
+	return "renderChangeMessage"
+}
 
 type Drawable interface {
 	Texture() *webgl.Texture
@@ -35,22 +28,13 @@ type Drawable interface {
 	View() (float32, float32, float32, float32)
 }
 
-type renderChangeMessage struct {
-	entity      *ecs.Entity
-	oldPriority PriorityLevel
-	newPriority PriorityLevel
-}
-
-func (renderChangeMessage) Type() string {
-	return "renderChangeMessage"
-}
-
 type RenderComponent struct {
 	scale        Point
 	Label        string
-	priority     PriorityLevel
 	Transparency float32
 	Color        color.Color
+	shader       Shader
+	zIndex       float32
 
 	drawable      Drawable
 	buffer        *webgl.Buffer
@@ -63,21 +47,11 @@ func NewRenderComponent(d Drawable, scale Point, label string) *RenderComponent 
 		Transparency: 1,
 		Color:        color.White,
 
-		scale:    scale,
-		priority: MiddleGround,
+		scale: scale,
 	}
 	rc.SetDrawable(d)
 
 	return rc
-}
-
-func (r *RenderComponent) SetPriority(p PriorityLevel) {
-	r.priority = p
-	Mailbox.Dispatch(renderChangeMessage{})
-}
-
-func (r *RenderComponent) Priority() PriorityLevel {
-	return r.priority
 }
 
 func (r *RenderComponent) SetDrawable(d Drawable) {
@@ -96,6 +70,16 @@ func (r *RenderComponent) SetScale(scale Point) {
 
 func (r *RenderComponent) Scale() Point {
 	return r.scale
+}
+
+func (r *RenderComponent) SetShader(s Shader) {
+	r.shader = s
+	Mailbox.Dispatch(&renderChangeMessage{})
+}
+
+func (r *RenderComponent) SetZIndex(index float32) {
+	r.zIndex = index
+	Mailbox.Dispatch(&renderChangeMessage{})
 }
 
 func (*RenderComponent) Type() string {
@@ -202,121 +186,127 @@ func (ren *RenderComponent) generateBufferContent() []float32 {
 	return []float32{x1, y1, u, v, tint, x4, y4, u2, v, tint, x3, y3, u2, v2, tint, x2, y2, u, v2, tint}
 }
 
-type RenderSystem struct {
-	ecs.LinearSystem
+type renderEntityList []*ecs.Entity
 
-	renders map[PriorityLevel][]*ecs.Entity
-	changed bool
+func (r renderEntityList) Len() int {
+	return len(r)
+}
+
+func (r renderEntityList) Less(i, j int) bool {
+	var (
+		rc1 *RenderComponent
+		rc2 *RenderComponent
+		ok  bool
+	)
+	if rc1, ok = r[i].ComponentFast(rc1).(*RenderComponent); !ok {
+		return false // those without render component go last
+	}
+	if rc2, ok = r[i].ComponentFast(rc1).(*RenderComponent); !ok {
+		return true // those without render component go last
+	}
+
+	// Sort by shader-pointer if they have the same zIndex
+	if rc1.zIndex == rc2.zIndex {
+		// TODO: optimize this for performance
+		return strings.Compare(fmt.Sprintf("%p", rc1.shader), fmt.Sprintf("%p", rc2.shader)) < 0
+	}
+
+	return rc1.zIndex < rc2.zIndex
+}
+
+func (r renderEntityList) Swap(i, j int) {
+	r[i], r[j] = r[j], r[i]
+}
+
+type RenderSystem struct {
+	renders renderEntityList
 	world   *ecs.World
+
+	sortingNeeded bool
+	currentShader Shader
 }
 
 func (rs *RenderSystem) New(w *ecs.World) {
-	rs.renders = make(map[PriorityLevel][]*ecs.Entity)
 	rs.world = w
 
 	if !headless {
-		if !Shaders.setup {
-			Shaders.def.Initialize(Width(), Height())
-
-			hud := &HUDShader{}
-			hud.Initialize(Width(), Height())
-			for i := HUDGround; i <= HighestGround; i++ {
-				Shaders.Register(i, hud)
-			}
-
-			Shaders.setup = true
-		}
+		initShaders(Width(), Height())
 	}
 
-	Mailbox.Listen("renderChangeMessage", func(m Message) {
-		rs.changed = true
+	Mailbox.Listen("renderChangeMessage", func(Message) {
+		rs.sortingNeeded = true
 	})
 }
 
 func (rs *RenderSystem) AddEntity(e *ecs.Entity) {
-	rs.changed = true
-	rs.LinearSystem.AddEntity(e)
+	rs.renders = append(rs.renders, e)
+	rs.sortingNeeded = true
 }
 
 func (rs *RenderSystem) RemoveEntity(e *ecs.Entity) {
-	rs.changed = true
-	rs.LinearSystem.RemoveEntity(e)
+	var removeIndex int = -1
+	for index, entity := range rs.renders {
+		if entity.ID() == e.ID() {
+			removeIndex = index
+			break
+		}
+	}
+	if removeIndex >= 0 {
+		rs.renders = append(rs.renders[:removeIndex], rs.renders[removeIndex+1:]...) // TODO: test for edge cases
+		rs.sortingNeeded = true
+	}
 }
 
-func (rs *RenderSystem) Pre() {
-	if !headless {
-		Gl.Clear(Gl.COLOR_BUFFER_BIT)
-	}
-
-	if !rs.changed {
-		return
-	}
-
-	rs.renders = make(map[PriorityLevel][]*ecs.Entity)
-}
-
-func (rs *RenderSystem) Post() {
+func (rs *RenderSystem) Update(dt float32) {
 	if headless {
 		return
 	}
 
-	var currentShader Shader
+	if rs.sortingNeeded {
+		sort.Sort(rs.renders)
+		rs.sortingNeeded = false
+	}
 
-	for i := Background; i <= HighestGround; i++ {
-		if len(rs.renders[i]) == 0 {
-			continue
+	Gl.Clear(Gl.COLOR_BUFFER_BIT)
+
+	// TODO: it's linear for now, but that might very well be a bad idea
+	for _, entity := range rs.renders {
+		var (
+			render *RenderComponent
+			space  *SpaceComponent
+			ok     bool
+		)
+
+		if render, ok = entity.ComponentFast(render).(*RenderComponent); !ok {
+			continue // with other entities
 		}
 
-		// Retrieve a batch, may be the default one -- then use it if we arent already using it
-		s := Shaders.Get(i)
-		if s != currentShader {
-			if currentShader != nil {
-				currentShader.Post()
-			}
-			s.Pre()
-			currentShader = s
+		if space, ok = entity.ComponentFast(space).(*SpaceComponent); !ok {
+			continue // with other entities
 		}
 
-		// Then render everything for this level
-		for _, entity := range rs.renders[i] {
-			var (
-				render *RenderComponent
-				space  *SpaceComponent
-				ok     bool
-			)
-
-			if render, ok = entity.ComponentFast(render).(*RenderComponent); !ok {
-				continue // with other entities
-			}
-
-			if space, ok = entity.ComponentFast(space).(*SpaceComponent); !ok {
-				continue // with other entities
-			}
-
-			s.Draw(render.drawable.Texture(), render.buffer, space.Position.X, space.Position.Y, 0) // TODO: add rotation
+		// Retrieve a shader, may be the default one -- then use it if we aren't already using it
+		shader := render.shader
+		if shader == nil {
+			shader = DefaultShader
 		}
+
+		// Change Shader if we have to
+		if shader != rs.currentShader {
+			if rs.currentShader != nil {
+				rs.currentShader.Post()
+			}
+			shader.Pre()
+			rs.currentShader = shader
+		}
+
+		rs.currentShader.Draw(render.drawable.Texture(), render.buffer, space.Position.X, space.Position.Y, 0) // TODO: add rotation
 	}
 
-	if currentShader != nil {
-		currentShader.Post()
+	if rs.currentShader != nil {
+		rs.currentShader.Post()
+		rs.currentShader = nil
 	}
-
-	rs.changed = false
-}
-
-func (rs *RenderSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-	if !rs.changed {
-		return
-	}
-
-	var render *RenderComponent
-	var ok bool
-
-	if render, ok = entity.ComponentFast(render).(*RenderComponent); !ok {
-		return
-	}
-
-	rs.renders[render.priority] = append(rs.renders[render.priority], entity)
 }
 
 func (*RenderSystem) Type() string {

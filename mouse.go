@@ -136,7 +136,7 @@ func (m *MouseSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	}
 
 	// Special case: HUD
-	if render.priority >= HUDGround {
+	if render.shader == HUDShader {
 		mx = Mouse.X
 		my = Mouse.Y
 	}

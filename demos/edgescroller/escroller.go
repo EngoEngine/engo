@@ -5,8 +5,8 @@ import (
 	"image/color"
 	"log"
 
-	"github.com/engoengine/engo"
 	"github.com/engoengine/ecs"
+	"github.com/engoengine/engo"
 )
 
 type Game struct{}
@@ -44,7 +44,6 @@ func generateBackground() *ecs.Entity {
 	bgTexture := engo.NewImageObject(img)
 	field := ecs.NewEntity([]string{"RenderSystem"})
 	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1}, "Background1")
-	fieldRender.SetPriority(engo.Background)
 	fieldSpace := &engo.SpaceComponent{engo.Point{0, 0}, worldWidth, worldHeight}
 	field.AddComponent(fieldRender)
 	field.AddComponent(fieldSpace)

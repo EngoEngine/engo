@@ -1,6 +1,7 @@
 package engo
 
 import (
+	"fmt"
 	"github.com/engoengine/webgl"
 )
 
@@ -13,7 +14,7 @@ type Shader interface {
 	Post()
 }
 
-type DefaultShader struct {
+type defaultShader struct {
 	indices  []uint16
 	indexVBO *webgl.Buffer
 	program  *webgl.Program
@@ -31,7 +32,7 @@ type DefaultShader struct {
 	ufProjection *webgl.UniformLocation
 }
 
-func (s *DefaultShader) Initialize(width, height float32) {
+func (s *defaultShader) Initialize(width, height float32) {
 	s.program = LoadShader(`
 #version 120
 
@@ -107,13 +108,13 @@ void main (void) {
 	Gl.BlendFunc(Gl.SRC_ALPHA, Gl.ONE_MINUS_SRC_ALPHA)
 }
 
-func (s *DefaultShader) Pre() {
+func (s *defaultShader) Pre() {
 	Gl.UseProgram(s.program)
 	Gl.Uniform2f(s.ufProjection, s.projX, s.projY)
 	Gl.Uniform3f(s.ufCamera, cam.x, cam.y, cam.z)
 }
 
-func (s *DefaultShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y, rotation float32) {
+func (s *defaultShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y, rotation float32) {
 	if s.lastTexture != texture {
 		Gl.BindTexture(Gl.TEXTURE_2D, texture)
 		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)
@@ -130,16 +131,16 @@ func (s *DefaultShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y,
 	Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
 }
 
-func (s *DefaultShader) Post() {
+func (s *defaultShader) Post() {
 	s.lastTexture = nil
 }
 
-func (s *DefaultShader) SetProjection(width, height float32) {
+func (s *defaultShader) SetProjection(width, height float32) {
 	s.projX = width / 2
 	s.projY = height / 2
 }
 
-type HUDShader struct {
+type hudShader struct {
 	indices  []uint16
 	indexVBO *webgl.Buffer
 	program  *webgl.Program
@@ -156,7 +157,7 @@ type HUDShader struct {
 	ufProjection *webgl.UniformLocation
 }
 
-func (s *HUDShader) Initialize(width, height float32) {
+func (s *hudShader) Initialize(width, height float32) {
 	s.program = LoadShader(`
 #version 120
 
@@ -231,12 +232,12 @@ void main (void) {
 	// TODO: listen for Projection changes
 }
 
-func (s *HUDShader) Pre() {
+func (s *hudShader) Pre() {
 	Gl.UseProgram(s.program)
 	Gl.Uniform2f(s.ufProjection, s.projX, s.projY)
 }
 
-func (s *HUDShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y, rotation float32) {
+func (s *hudShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y, rotation float32) {
 	if s.lastTexture != texture {
 		Gl.BindTexture(Gl.TEXTURE_2D, texture)
 		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)
@@ -252,37 +253,27 @@ func (s *HUDShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y, rot
 	Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
 }
 
-func (s *HUDShader) Post() {
+func (s *hudShader) Post() {
 	s.lastTexture = nil
 }
 
-func (s *HUDShader) SetProjection(width, height float32) {
+func (s *hudShader) SetProjection(width, height float32) {
 	s.projX = width / 2
 	s.projY = height / 2
 }
 
-// ShadersLibrary is the manager for the Shaders
-type ShadersLibrary struct {
-	setup bool
+var (
+	DefaultShader = &defaultShader{}
+	HUDShader     = &hudShader{}
+	shadersSet    bool
+)
 
-	def     DefaultShader
-	shaders []Shader
-}
+func initShaders(width, height float32) {
+	if !shadersSet {
+		fmt.Println("Initialized shaders", width, height)
+		DefaultShader.Initialize(width, height)
+		HUDShader.Initialize(width, height)
 
-var Shaders = ShadersLibrary{
-	shaders: make([]Shader, HighestGround+1),
-}
-
-// Registers the `Shader` for the given `PriorityLevel`; possibly overwriting previously registered Shaders
-// It does no initialization whatsoever
-func (s *ShadersLibrary) Register(prio PriorityLevel, sh Shader) {
-	s.shaders[prio] = sh
-}
-
-// Get returns the `Shader` that should be used for the given `PriorityLevel`
-func (s *ShadersLibrary) Get(prio PriorityLevel) Shader {
-	if sh := s.shaders[prio]; sh != nil {
-		return sh
+		shadersSet = true
 	}
-	return &s.def
 }

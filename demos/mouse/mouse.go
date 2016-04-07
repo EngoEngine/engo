@@ -5,8 +5,8 @@ import (
 	"image/color"
 	"log"
 
-	"github.com/engoengine/engo"
 	"github.com/engoengine/ecs"
+	"github.com/engoengine/engo"
 )
 
 var (
@@ -30,7 +30,6 @@ func generateBackground() *engo.RenderComponent {
 	}
 	bgTexture := engo.NewImageObject(img)
 	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1}, "Background1")
-	fieldRender.SetPriority(engo.Background)
 	return fieldRender
 }
 
