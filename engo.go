@@ -1,4 +1,4 @@
-package engo
+package engo // import "engo.io/engo"
 
 import (
 	"fmt"
