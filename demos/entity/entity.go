@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"engo.io/engo"
-	"github.com/engoengine/ecs"
+	"engo.io/ecs"
 )
 
 type GameWorld struct{}

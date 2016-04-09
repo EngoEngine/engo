@@ -6,8 +6,8 @@ currently compilable for Mac OSX, Linux and Windows. With the release of Go 1.4,
 iOS compatibility, mobile will [soon](https://github.com/EngoEngine/engo/issues/63) be added as a release target. Web
 support  ([gopherjs](https://github.com/gopherjs/gopherjs)) is also [planned](https://github.com/EngoEngine/engo/issues/71).
 
-Currently documentation is pretty scarce, this is because we have not *completely* finalized the API and are about to
-go through a "prettification" process in order to increase elegance and usability. For a basic up-to-date example of
+Currently documentation is pretty scarce, this is because we have not *completely* finalized the API and are about to 
+go through a "prettification" process in order to increase elegance and usability. For a basic up-to-date example of 
 most features, look at the demos.
 
 ## Getting in touch / Contributing
@@ -16,15 +16,15 @@ We have a [gitter](https://gitter.im/EngoEngine/engo) chat for people to join wh
 
 ## Getting Started
 
-1. First, you have to install some dependencies if you're running on Debian/Ubuntu:
+1. First, you have to install some dependencies if you're running on Debian/Ubuntu: 
 `sudo apt-get install libopenal-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev xorg-dev libgl1-mesa-dev`
 2. Then, you can go get it:
 `go get -u engo.io/engo`
 3. Now, you have two choices:
   1. Read the [Wiki: Getting Started](https://github.com/EngoEngine/engo/wiki/Getting-Started), for an explanation on the basics;
-  2. Check out some demos in our [demos folder](https://github.com/EngoEngine/engo/tree/master/demos).
-4. Finally, if you run into problems, if you've encountered a bug, or want to request a feature, feel free to shoot
-us a DM or [create an issue](https://github.com/EngoEngine/engo/issues/new).
+  2. Check out some demos in our [demos folder](https://github.com/EngoEngine/engo/tree/master/demos). 
+4. Finally, if you run into problems, if you've encountered a bug, or want to request a feature, feel free to shoot 
+us a DM or [create an issue](https://github.com/EngoEngine/engo/issues/new). 
 
 ## History
 

@@ -2,7 +2,7 @@ package engo
 
 import (
 	"fmt"
-	"github.com/engoengine/webgl"
+	"engo.io/webgl"
 )
 
 const bufferSize = 10000

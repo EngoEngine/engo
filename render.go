@@ -7,8 +7,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/engoengine/ecs"
-	"github.com/engoengine/webgl"
+	"engo.io/ecs"
+	"engo.io/webgl"
 )
 
 const (

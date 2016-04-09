@@ -3,7 +3,7 @@ package engo
 import (
 	"log"
 
-	"github.com/engoengine/ecs"
+	"engo.io/ecs"
 	"io"
 )
 
