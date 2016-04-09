@@ -3,7 +3,7 @@ package engo
 import (
 	"testing"
 
-	"github.com/engoengine/ecs"
+	"engo.io/ecs"
 )
 
 type inlineGame struct {

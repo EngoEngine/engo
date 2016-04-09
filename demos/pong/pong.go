@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	"engo.io/engo"
-	"github.com/engoengine/ecs"
+	"engo.io/ecs"
 )
 
 type PongGame struct{}

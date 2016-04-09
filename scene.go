@@ -3,7 +3,7 @@ package engo
 import (
 	"fmt"
 
-	"github.com/engoengine/ecs"
+	"engo.io/ecs"
 )
 
 var (

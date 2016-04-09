@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gopherjs/gopherjs/js"
-	"github.com/engoengine/webgl"
+	"engo.io/webgl"
 )
 
 func init() {

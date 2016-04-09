@@ -7,7 +7,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/engoengine/webgl"
+	"engo.io/webgl"
 	"github.com/golang/freetype/truetype"
 	"github.com/luxengine/math"
 )
