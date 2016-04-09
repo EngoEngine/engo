@@ -7,7 +7,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/engoengine/engo"
+	"engo.io/engo"
 	"github.com/engoengine/ecs"
 )
 

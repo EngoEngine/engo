@@ -4,7 +4,7 @@ import (
 	"image/color"
 	"log"
 
-	"github.com/engoengine/engo"
+	"engo.io/engo"
 	"github.com/engoengine/ecs"
 )
 

@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/engoengine/ecs"
-	"github.com/engoengine/engo"
+	"engo.io/engo"
 )
 
 var (

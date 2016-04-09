@@ -5,7 +5,7 @@ import (
 	"log"
 	"math/rand"
 
-	"github.com/engoengine/engo"
+	"engo.io/engo"
 	"github.com/engoengine/ecs"
 )
 
