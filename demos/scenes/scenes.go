@@ -30,7 +30,7 @@ func (game *IconScene) Setup(w *ecs.World) {
 	w.AddSystem(&ScaleSystem{})
 	w.AddSystem(&SceneSwitcherSystem{NextScene: "RockScene", WaitTime: time.Second * 3})
 
-	guy := ecs.NewEntity({"RenderSystem", "ScaleSystem")
+	guy := ecs.NewEntity("RenderSystem", "ScaleSystem")
 	texture := engo.Files.Image("icon.png")
 	render := engo.NewRenderComponent(texture, engo.Point{8, 8}, "icon")
 	collision := &engo.CollisionComponent{Solid: true, Main: true}
@@ -68,7 +68,7 @@ func (game *RockScene) Setup(w *ecs.World) {
 	w.AddSystem(&ScaleSystem{})
 	w.AddSystem(&SceneSwitcherSystem{NextScene: "IconScene", WaitTime: time.Second * 3})
 
-	guy := ecs.NewEntity({"RenderSystem", "ScaleSystem")
+	guy := ecs.NewEntity("RenderSystem", "ScaleSystem")
 	texture := engo.Files.Image("rock.png")
 	render := engo.NewRenderComponent(texture, engo.Point{8, 8}, "rock")
 	collision := &engo.CollisionComponent{Solid: true, Main: true}

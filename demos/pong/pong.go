@@ -35,7 +35,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		log.Fatalln("Could not load font:", err)
 	}
 
-	ball := ecs.NewEntity({"RenderSystem", "CollisionSystem", "SpeedSystem", "BallSystem")
+	ball := ecs.NewEntity("RenderSystem", "CollisionSystem", "SpeedSystem", "BallSystem")
 	ballTexture := engo.Files.Image("ball.png")
 	ballRender := engo.NewRenderComponent(ballTexture, engo.Point{2, 2}, "ball")
 	ballSpace := &engo.SpaceComponent{engo.Point{(engo.Width() - ballTexture.Width()) / 2, (engo.Height() - ballTexture.Height()) / 2}, ballTexture.Width() * ballRender.Scale().X, ballTexture.Height() * ballRender.Scale().Y}
@@ -52,7 +52,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		log.Println(err)
 	}
 
-	score := ecs.NewEntity({"RenderSystem", "ScoreSystem")
+	score := ecs.NewEntity("RenderSystem", "ScoreSystem")
 
 	scoreRender := engo.NewRenderComponent(basicFont.Render(" "), engo.Point{1, 1}, "YOLO <3")
 

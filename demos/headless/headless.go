@@ -36,7 +36,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	w.AddSystem(&BallSystem{})
 	w.AddSystem(&ScoreSystem{})
 
-	ball := ecs.NewEntity({"RenderSystem", "CollisionSystem", "SpeedSystem", "BallSystem")
+	ball := ecs.NewEntity("RenderSystem", "CollisionSystem", "SpeedSystem", "BallSystem")
 	ballTexture := engo.Files.Image("ball.png")
 	ballRender := engo.NewRenderComponent(ballTexture, engo.Point{2, 2}, "ball")
 	ballSpace := &engo.SpaceComponent{engo.Point{(engo.Width() - ballTexture.Width()) / 2, (engo.Height() - ballTexture.Height()) / 2}, ballTexture.Width() * ballRender.Scale().X, ballTexture.Height() * ballRender.Scale().Y}
