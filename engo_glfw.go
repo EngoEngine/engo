@@ -31,7 +31,6 @@ var (
 	HResize   *glfw.Cursor
 	VResize   *glfw.Cursor
 	defaultCloseAction bool
-	game Scene
 	close bool
 
 
@@ -224,12 +223,14 @@ func RunPreparation(defaultScene Scene) {
 	WorldBounds.Max = Point{Width(), Height()}
 
 	SetScene(defaultScene, false)
-	game = defaultScene
 }
 
 func closeEvent() {
 	log.Println("Got close event")
-	game.Exit()
+	for _ , scenes := range scenes {
+		scenes.scene.Exit()
+	}
+
 	if defaultCloseAction {
 		log.Println("Closing")
 		Exit()
@@ -255,7 +256,7 @@ func runLoop(defaultScene Scene, headless bool) {
 		case <-ticker.C:
 			RunIteration()
 			if close {
-				log.Println("Got close message grom os signal")
+				log.Println("Got close message from os signal")
 				break Outer
 			}
 			if !headless && window.ShouldClose() {
