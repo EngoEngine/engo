@@ -3,10 +3,11 @@ package main
 import (
 	"image/color"
 	"log"
+	"fmt"
 	"math/rand"
 
-	"engo.io/engo"
 	"engo.io/ecs"
+	"engo.io/engo"
 )
 
 type GameWorld struct{}
@@ -48,6 +49,7 @@ func (game *GameWorld) Setup(w *ecs.World) {
 
 func (*GameWorld) Hide()        {}
 func (*GameWorld) Show()        {}
+func (*GameWorld) Exit() 		{}
 func (*GameWorld) Type() string { return "GameWorld" }
 
 type ScaleSystem struct {
@@ -85,6 +87,7 @@ func main() {
 		Title:  "Hello Demo",
 		Width:  1024,
 		Height: 640,
+		DefaultCloseAction: true,
 	}
 	engo.Run(opts, &GameWorld{})
 }

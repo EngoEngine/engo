@@ -48,6 +48,7 @@ func (game *GameWorld) Setup(w *ecs.World) {
 
 func (*GameWorld) Hide()        {}
 func (*GameWorld) Show()        {}
+func (*GameWorld) Exit() 	 	{}
 func (*GameWorld) Type() string { return "GameWorld" }
 
 func (game *GameWorld) CreateEntity(point *engo.Point, spriteSheet *engo.Spritesheet, action *engo.AnimationAction) *ecs.Entity {
@@ -96,6 +97,7 @@ func main() {
 		Title:  "Animation Demo",
 		Width:  1024,
 		Height: 640,
+		DefaultCloseAction,
 	}
 	engo.Run(opts, &GameWorld{})
 }

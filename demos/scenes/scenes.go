@@ -52,6 +52,7 @@ func (game *IconScene) Setup(w *ecs.World) {
 
 func (*IconScene) Hide()        {}
 func (*IconScene) Show()        {}
+func (*IconScene) Exit()		{}
 func (*IconScene) Type() string { return "IconScene" }
 
 // RockScene is responsible for managing the rock
@@ -90,6 +91,7 @@ func (game *RockScene) Setup(w *ecs.World) {
 
 func (*RockScene) Hide()        {}
 func (*RockScene) Show()        {}
+func (*RockScene) Exit() 		{}
 func (*RockScene) Type() string { return "RockScene" }
 
 // SceneSwitcherSystem is a System that actually calls SetScene
@@ -160,6 +162,7 @@ func main() {
 		Title:  "Scenes Demo",
 		Width:  1024,
 		Height: 640,
+		DefaultCloseAction: true,
 	}
 
 	engo.Run(opts, iconScene)

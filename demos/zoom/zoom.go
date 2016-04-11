@@ -66,6 +66,7 @@ func (game *Game) Setup(w *ecs.World) {
 
 func (*Game) Hide()        {}
 func (*Game) Show()        {}
+func (*Game) Exit()   	   {}
 func (*Game) Type() string { return "Game" }
 
 func main() {
@@ -73,6 +74,7 @@ func main() {
 		Title:  "Zoom Demo",
 		Width:  900,
 		Height: 900,
+		DefaultCloseAction: true,
 	}
 	engo.Run(opts, &Game{})
 }

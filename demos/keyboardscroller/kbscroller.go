@@ -53,6 +53,7 @@ func (game *Game) Preload() {}
 
 func (*Game) Hide()        {}
 func (*Game) Show()        {}
+func (*Game) Exit()		   {}
 func (*Game) Type() string { return "Game" }
 
 // Setup is called before the main loop is started
@@ -75,6 +76,7 @@ func main() {
 		Title:  "KeyboardScroller Demo",
 		Width:  int(worldWidth),
 		Height: int(worldHeight),
+		DefaultCloseAction: true,
 	}
 	engo.Run(opts, &Game{})
 }
