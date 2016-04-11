@@ -28,7 +28,7 @@ func (game *Game) Setup(w *ecs.World) {
 	w.AddSystem(&RockSpawnSystem{})
 
 	// Create new entity subscribed to all the systems!
-	guy := ecs.NewEntity([]string{"RenderSystem", "ControlSystem", "RockSpawnSystem", "CollisionSystem", "DeathSystem"})
+	guy := ecs.NewEntity({"RenderSystem", "ControlSystem", "RockSpawnSystem", "CollisionSystem", "DeathSystem")
 	texture := engo.Files.Image("icon.png")
 	render := engo.NewRenderComponent(texture, engo.Point{4, 4}, "guy")
 	// Tell the collision system that this player is solid
@@ -117,7 +117,7 @@ func (rock *RockSpawnSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 }
 
 func NewRock(position engo.Point) *ecs.Entity {
-	rock := ecs.NewEntity([]string{"RenderSystem", "FallingSystem", "CollisionSystem"})
+	rock := ecs.NewEntity({"RenderSystem", "FallingSystem", "CollisionSystem")
 
 	texture := engo.Files.Image("rock.png")
 	render := engo.NewRenderComponent(texture, engo.Point{4, 4}, "rock")

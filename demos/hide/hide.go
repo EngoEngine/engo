@@ -21,7 +21,7 @@ func (game *GameWorld) Setup(w *ecs.World) {
 	w.AddSystem(&engo.RenderSystem{})
 	w.AddSystem(&HideSystem{})
 
-	guy := ecs.NewEntity([]string{"RenderSystem", "HideSystem"})
+	guy := ecs.NewEntity("RenderSystem", "HideSystem")
 	texture := engo.Files.Image("rock.png")
 	render := engo.NewRenderComponent(texture, engo.Point{8, 8}, "guy")
 	collision := &engo.CollisionComponent{Solid: true, Main: true}

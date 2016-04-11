@@ -36,7 +36,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	w.AddSystem(&BallSystem{})
 	w.AddSystem(&ScoreSystem{})
 
-	ball := ecs.NewEntity([]string{"RenderSystem", "CollisionSystem", "SpeedSystem", "BallSystem"})
+	ball := ecs.NewEntity({"RenderSystem", "CollisionSystem", "SpeedSystem", "BallSystem")
 	ballTexture := engo.Files.Image("ball.png")
 	ballRender := engo.NewRenderComponent(ballTexture, engo.Point{2, 2}, "ball")
 	ballSpace := &engo.SpaceComponent{engo.Point{(engo.Width() - ballTexture.Width()) / 2, (engo.Height() - ballTexture.Height()) / 2}, ballTexture.Width() * ballRender.Scale().X, ballTexture.Height() * ballRender.Scale().Y}
@@ -52,7 +52,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		log.Println(err)
 	}
 
-	score := ecs.NewEntity([]string{"RenderSystem", "ScoreSystem"})
+	score := ecs.NewEntity("RenderSystem", "ScoreSystem")
 
 	scoreRender := engo.NewRenderComponent(basicFont.Render(" "), engo.Point{1, 1}, "YOLO <3")
 	scoreSpace := &engo.SpaceComponent{engo.Point{100, 100}, 100, 100}
@@ -65,7 +65,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 
 	schemes := []string{"WASD", ""}
 	for i := 0; i < 2; i++ {
-		paddle := ecs.NewEntity([]string{"RenderSystem", "CollisionSystem", "ControlSystem"})
+		paddle := ecs.NewEntity("RenderSystem", "CollisionSystem", "ControlSystem")
 		paddleTexture := engo.Files.Image("paddle.png")
 		paddleRender := engo.NewRenderComponent(paddleTexture, engo.Point{2, 2}, "paddle")
 		x := float32(0)

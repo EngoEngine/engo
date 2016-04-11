@@ -61,7 +61,7 @@ func BenchmarkEntity10(b *testing.B) {
 	setup := func(w *ecs.World) {
 		w.AddSystem(&NilSystem{})
 		for i := 0; i < count; i++ {
-			w.AddEntity(ecs.NewEntity([]string{"NilSystem"}))
+			w.AddEntity(ecs.NewEntity("NilSystem"))
 		}
 	}
 	Bench(b, preload, setup)
@@ -75,7 +75,7 @@ func BenchmarkEntity1000(b *testing.B) {
 	setup := func(w *ecs.World) {
 		w.AddSystem(&NilSystem{})
 		for i := 0; i < count; i++ {
-			w.AddEntity(ecs.NewEntity([]string{"NilSystem"}))
+			w.AddEntity(ecs.NewEntity("NilSystem"))
 		}
 	}
 	Bench(b, preload, setup)
