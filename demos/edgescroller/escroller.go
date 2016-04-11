@@ -77,7 +77,7 @@ func main() {
 		Title:  "EdgeScroller Demo",
 		Width:  1024,
 		Height: 640,
-		DefaultCloseAction: true,
+		
 	}
 	engo.Run(opts, &Game{})
 }

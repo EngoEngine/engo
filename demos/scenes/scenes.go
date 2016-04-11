@@ -162,7 +162,7 @@ func main() {
 		Title:  "Scenes Demo",
 		Width:  1024,
 		Height: 640,
-		DefaultCloseAction: true,
+		
 	}
 
 	engo.Run(opts, iconScene)

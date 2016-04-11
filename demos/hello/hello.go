@@ -86,7 +86,6 @@ func main() {
 		Title:  "Hello Demo",
 		Width:  1024,
 		Height: 640,
-		DefaultCloseAction: true,
 	}
 	engo.Run(opts, &GameWorld{})
 }

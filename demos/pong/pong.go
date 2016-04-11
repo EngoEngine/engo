@@ -291,7 +291,7 @@ func main() {
 		Width:         800,
 		Height:        800,
 		ScaleOnResize: true,
-		DefaultCloseAction: true,
+		
 	}
 	engo.Run(opts, &PongGame{})
 }

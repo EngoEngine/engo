@@ -282,7 +282,7 @@ func (ScoreMessage) Type() string {
 func main() {
 	opts := engo.RunOptions{
 		HeadlessMode: true,
-		DefaultCloseAction: true,
+		
 	}
 	engo.Run(opts, &PongGame{})
 }

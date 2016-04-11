@@ -76,7 +76,7 @@ func main() {
 		Title:  "KeyboardScroller Demo",
 		Width:  int(worldWidth),
 		Height: int(worldHeight),
-		DefaultCloseAction: true,
+		
 	}
 	engo.Run(opts, &Game{})
 }

@@ -27,9 +27,9 @@ type Scene interface {
 
 	// Exit is called when the user or the system requests to close the game
 	// This should be used to cleanup or prompt user if they're sure they want to close
-	// To prevent the default action (close/exit) make sure you set DefaultCloseAction in
-	// your game options to false and MAKE SURE to handle the exiting of the program by calling
-	//     engo.Exit()
+	// To prevent the default action (close/exit) make sure you call engo.OverrideDefaultAction() in
+	// your game options to false you should handle the exiting of the program by calling
+	//    engo.Exit()
 	Exit()
 
 	// Type returns a unique string representation of the Scene, used to identify it

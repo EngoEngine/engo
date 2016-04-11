@@ -71,7 +71,7 @@ func main() {
 		Title:  "Show and Hide Demo",
 		Width:  1024,
 		Height: 640,
-		DefaultCloseAction: true,
+		
 	}
 	engo.Run(opts, &GameWorld{})
 }

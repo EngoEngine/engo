@@ -74,7 +74,7 @@ func main() {
 		Title:  "Zoom Demo",
 		Width:  900,
 		Height: 900,
-		DefaultCloseAction: true,
+		
 	}
 	engo.Run(opts, &Game{})
 }
