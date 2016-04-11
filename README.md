@@ -1,5 +1,5 @@
 # Engo
-[![Join the chat at https://gitter.im/EngoEngine/engo](https://badges.gitter.im/EngoEngine/engo.svg)](https://gitter.im/EngoEngine/engo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![License](https://img.shields.io/badge/License-MIT-blue.svg)[![Build Status](https://travis-ci.org/EngoEngine/engo.png)](https://travis-ci.org/EngoEngine/engo)
+[![Join the chat at https://gitter.im/EngoEngine/engo](https://badges.gitter.im/EngoEngine/engo.svg)](https://gitter.im/EngoEngine/engo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![License](https://img.shields.io/badge/License-MIT-blue.svg) [![Build Status](https://travis-ci.org/EngoEngine/engo.png)](https://travis-ci.org/EngoEngine/engo)
 
 
 A cross-platform game engine written in Go following an interpretation of the Entity Component System paradigm. Engo is
