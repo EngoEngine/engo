@@ -7,5 +7,4 @@ It demonstrates how one can detect the exit event and modify the default action
 These things are key in this demo:
 
 * `func (*game) Exit() {}` Is called when the exit event is fired
-* `
-manual handling and closing
+* `engo.OverrideCloseAction()` overrides default close action for manual closing
