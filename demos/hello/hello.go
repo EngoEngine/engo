@@ -3,7 +3,6 @@ package main
 import (
 	"image/color"
 	"log"
-	"fmt"
 	"math/rand"
 
 	"engo.io/ecs"

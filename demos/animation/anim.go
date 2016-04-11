@@ -97,7 +97,7 @@ func main() {
 		Title:  "Animation Demo",
 		Width:  1024,
 		Height: 640,
-		DefaultCloseAction,
+		DefaultCloseAction: true,
 	}
 	engo.Run(opts, &GameWorld{})
 }
