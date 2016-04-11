@@ -5,24 +5,29 @@ import (
 	"log"
 	"math/rand"
 
-	"engo.io/engo"
 	"engo.io/ecs"
+	"engo.io/engo"
 )
 
 type GameWorld struct{}
 
 func (game *GameWorld) Preload() {
-	engo.Files.AddFromDir("assets", false)
+
+	// This could be done individually: engo.Files.Add("data/icon.png"), etc
+	// Second value (false) says whether to check recursively or not
+	engo.Files.AddFromDir("data", false)
+
+	log.Println("Preloaded")
 }
 
 func (game *GameWorld) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 
 	w.AddSystem(&engo.RenderSystem{})
-	w.AddSystem(&HideSystem{})
+	w.AddSystem(&ScaleSystem{})
 
-	guy := ecs.NewEntity("RenderSystem", "HideSystem")
-	texture := engo.Files.Image("rock.png")
+	guy := ecs.NewEntity("RenderSystem", "ScaleSystem")
+	texture := engo.Files.Image("icon.png")
 	render := engo.NewRenderComponent(texture, engo.Point{8, 8}, "guy")
 	collision := &engo.CollisionComponent{Solid: true, Main: true}
 
@@ -43,35 +48,50 @@ func (game *GameWorld) Setup(w *ecs.World) {
 
 func (*GameWorld) Hide()        {}
 func (*GameWorld) Show()        {}
-func (*GameWorld) Exit() 		{}
+func (*GameWorld) Exit() 		{
+	log.Println("[GAME] Exit event called")
+	//Here if you want you can prompt the user if they're sure they want to close
+	log.Println("[GAME] Manually closing")
+	engo.Exit()
+}
 func (*GameWorld) Type() string { return "GameWorld" }
 
-type HideSystem struct {
+type ScaleSystem struct {
 	ecs.LinearSystem
 }
 
-func (*HideSystem) Type() string { return "HideSystem" }
+func (*ScaleSystem) Type() string { return "ScaleSystem" }
 
-func (s *HideSystem) New(*ecs.World) {}
+func (s *ScaleSystem) New(*ecs.World) {}
 
-func (c *HideSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
+func (c *ScaleSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	var render *engo.RenderComponent
 	if !entity.Component(&render) {
 		return
 	}
-	if rand.Int()%10 == 0 {
-		render.SetPriority(engo.Hidden)
+	var mod float32
+
+	if rand.Int()%2 == 0 {
+		mod = 0.1
 	} else {
-		render.SetPriority(engo.MiddleGround)
+		mod = -0.1
 	}
+
+	if render.Scale().X+mod >= 15 || render.Scale().X+mod <= 1 {
+		mod *= -1
+	}
+
+	newScale := render.Scale()
+	newScale.AddScalar(mod)
+	render.SetScale(newScale)
 }
 
 func main() {
 	opts := engo.RunOptions{
-		Title:  "Show and Hide Demo",
+		Title:  "Hello Demo",
 		Width:  1024,
 		Height: 640,
-		
 	}
+	engo.OverridetAction()
 	engo.Run(opts, &GameWorld{})
 }

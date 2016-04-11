@@ -10,13 +10,15 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 	"runtime"
 	"time"
 
+	"engo.io/webgl"
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
-	"engo.io/webgl"
 )
 
 var (
@@ -28,11 +30,15 @@ var (
 	Hand      *glfw.Cursor
 	HResize   *glfw.Cursor
 	VResize   *glfw.Cursor
+	defaultCloseAction bool
+	close bool
+
 
 	headlessWidth             = 800
 	headlessHeight            = 800
 	gameWidth, gameHeight     float32
 	windowWidth, windowHeight float32
+
 )
 
 // fatalErr calls log.Fatal with the given error if it is non-nil.
@@ -219,17 +225,43 @@ func RunPreparation(defaultScene Scene) {
 	SetScene(defaultScene, false)
 }
 
+func closeEvent() {
+	log.Println("Got close event")
+	for _ , scenes := range scenes {
+		scenes.scene.Exit()
+	}
+
+	if defaultCloseAction {
+		log.Println("Closing")
+		Exit()
+	} else {
+		log.Println("Warning: default close action set to false, please make sure you manually handle this")
+	}
+}
+
 func runLoop(defaultScene Scene, headless bool) {
+	c := make(chan os.Signal, 1)
+    signal.Notify(c, os.Interrupt)
+    signal.Notify(c, syscall.SIGTERM)
+    go func() {
+        <-c
+		closeEvent()
+    }()
+
 	RunPreparation(defaultScene)
 
 	ticker := time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
-Outer:
-	for {
+	Outer: for {
 		select {
 		case <-ticker.C:
 			RunIteration()
-			if !headless && window.ShouldClose() {
+			if close {
+				log.Println("Got close message from os signal")
 				break Outer
+			}
+			if !headless && window.ShouldClose() {
+				closeEvent()
+				log.Println("Got close message from window.ShouldClose")
 			}
 		case <-resetLoopTicker:
 			ticker.Stop()
@@ -256,7 +288,7 @@ func WindowHeight() float32 {
 }
 
 func Exit() {
-	window.SetShouldClose(true)
+	close = true
 }
 
 func SetCursor(c *glfw.Cursor) {

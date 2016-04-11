@@ -88,6 +88,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 
 func (*PongGame) Hide()        {}
 func (*PongGame) Show()        {}
+func (*PongGame) Exit() 	   {}
 func (*PongGame) Type() string { return "PongGame" }
 
 type SpeedSystem struct {
@@ -281,6 +282,7 @@ func (ScoreMessage) Type() string {
 func main() {
 	opts := engo.RunOptions{
 		HeadlessMode: true,
+		
 	}
 	engo.Run(opts, &PongGame{})
 }
