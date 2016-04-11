@@ -51,7 +51,7 @@ func (*GameWorld) Show()        {}
 func (*GameWorld) Type() string { return "GameWorld" }
 
 func (game *GameWorld) CreateEntity(point *engo.Point, spriteSheet *engo.Spritesheet, action *engo.AnimationAction) *ecs.Entity {
-	entity := ecs.NewEntity([]string{"AnimationSystem", "RenderSystem", "ControlSystem"})
+	entity := ecs.NewEntity("AnimationSystem", "RenderSystem", "ControlSystem")
 
 	space := &engo.SpaceComponent{*point, 150, 150}
 	render := engo.NewRenderComponent(spriteSheet.Cell(action.Frames[0]), engo.Point{3, 3}, "hero")

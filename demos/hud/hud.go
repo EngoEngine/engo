@@ -42,7 +42,7 @@ func generateBackground() *ecs.Entity {
 		}
 	}
 	bgTexture := engo.NewImageObject(img)
-	field := ecs.NewEntity([]string{"RenderSystem"})
+	field := ecs.NewEntity("RenderSystem")
 	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1}, "Background1")
 	fieldSpace := &engo.SpaceComponent{engo.Point{0, 0}, worldWidth, worldHeight}
 	field.AddComponent(fieldRender)
@@ -61,7 +61,7 @@ func generateHUDBackground(width, height float32) *ecs.Entity {
 		}
 	}
 	bgTexture := engo.NewImageObject(img)
-	field := ecs.NewEntity([]string{"RenderSystem"})
+	field := ecs.NewEntity("RenderSystem")
 	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1}, "HUDBackground1")
 	fieldRender.SetShader(engo.HUDShader)
 	fieldRender.SetZIndex(1) // A value larger than 0 (default), to ensure being drawn on top of the background

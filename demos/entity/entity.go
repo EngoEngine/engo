@@ -23,7 +23,7 @@ func (game *GameWorld) Setup(w *ecs.World) {
 	w.AddSystem(&engo.RenderSystem{})
 
 	// Create an entity part of the Render
-	guy := ecs.NewEntity([]string{"RenderSystem"})
+	guy := ecs.NewEntity("RenderSystem")
 	// Retrieve a texture
 	texture := engo.Files.Image("icon.png")
 

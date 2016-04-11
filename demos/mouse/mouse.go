@@ -52,7 +52,7 @@ func (*GameWorld) Show()        {}
 func (*GameWorld) Type() string { return "GameWorld" }
 
 func (game *GameWorld) CreateEntity() *ecs.Entity {
-	entity := ecs.NewEntity([]string{"MouseSystem", "RenderSystem", "ControlSystem"})
+	entity := ecs.NewEntity("MouseSystem", "RenderSystem", "ControlSystem")
 
 	entity.AddComponent(generateBackground())
 	entity.AddComponent(&engo.MouseComponent{})

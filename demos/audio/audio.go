@@ -20,7 +20,7 @@ func (game *Game) Setup(w *ecs.World) {
 	w.AddSystem(&engo.RenderSystem{})
 	w.AddSystem(&engo.AudioSystem{})
 
-	backgroundMusic := ecs.NewEntity([]string{"AudioSystem"})
+	backgroundMusic := ecs.NewEntity("AudioSystem")
 	backgroundMusic.AddComponent(&engo.AudioComponent{File: "326488.wav", Repeat: true, Background: true})
 
 	err := w.AddEntity(backgroundMusic)
