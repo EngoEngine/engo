@@ -36,7 +36,7 @@ type RunOptions struct {
 	// HeadlessMode indicates whether or not OpenGL calls should be made
 	HeadlessMode bool
 
-	Fullscreen    bool
+	Fullscreen bool
 
 	Width, Height int
 
@@ -55,8 +55,6 @@ func Run(opts RunOptions, defaultScene Scene) {
 	SetScaleOnResize(opts.ScaleOnResize)
 	SetFPSLimit(opts.FPSLimit)
 	vsync = opts.VSync
-
-	defaultCloseAction = opts.DefaultCloseAction
 
 	if opts.HeadlessMode {
 		headless = true
