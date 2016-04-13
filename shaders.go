@@ -1,8 +1,8 @@
 package engo
 
 import (
-	"fmt"
 	"engo.io/webgl"
+	"fmt"
 )
 
 const bufferSize = 10000
