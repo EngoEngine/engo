@@ -8,8 +8,8 @@ import (
 	"math/rand"
 	"strconv"
 
-	"github.com/gopherjs/gopherjs/js"
 	"engo.io/webgl"
+	"github.com/gopherjs/gopherjs/js"
 )
 
 func init() {

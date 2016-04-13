@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"engo.io/engo"
 	"engo.io/ecs"
+	"engo.io/engo"
 )
 
 var World *GameWorld

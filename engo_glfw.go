@@ -10,24 +10,28 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/signal"
 	"runtime"
+	"syscall"
 	"time"
 
+	"engo.io/webgl"
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
-	"engo.io/webgl"
 )
 
 var (
 	window *glfw.Window
 
-	Arrow     *glfw.Cursor
-	IBeam     *glfw.Cursor
-	Crosshair *glfw.Cursor
-	Hand      *glfw.Cursor
-	HResize   *glfw.Cursor
-	VResize   *glfw.Cursor
+	Arrow              *glfw.Cursor
+	IBeam              *glfw.Cursor
+	Crosshair          *glfw.Cursor
+	Hand               *glfw.Cursor
+	HResize            *glfw.Cursor
+	VResize            *glfw.Cursor
+	defaultCloseAction bool
+	close              bool
 
 	headlessWidth             = 800
 	headlessHeight            = 800
@@ -219,7 +223,27 @@ func RunPreparation(defaultScene Scene) {
 	SetScene(defaultScene, false)
 }
 
+func closeEvent() {
+	for _, scenes := range scenes {
+		scenes.scene.Exit()
+	}
+
+	if defaultCloseAction {
+		Exit()
+	} else {
+		log.Println("Warning: default close action set to false, please make sure you manually handle this")
+	}
+}
+
 func runLoop(defaultScene Scene, headless bool) {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	signal.Notify(c, syscall.SIGTERM)
+	go func() {
+		<-c
+		closeEvent()
+	}()
+
 	RunPreparation(defaultScene)
 
 	ticker := time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
@@ -228,8 +252,11 @@ Outer:
 		select {
 		case <-ticker.C:
 			RunIteration()
-			if !headless && window.ShouldClose() {
+			if close {
 				break Outer
+			}
+			if !headless && window.ShouldClose() {
+				closeEvent()
 			}
 		case <-resetLoopTicker:
 			ticker.Stop()
@@ -256,7 +283,7 @@ func WindowHeight() float32 {
 }
 
 func Exit() {
-	window.SetShouldClose(true)
+	close = true
 }
 
 func SetCursor(c *glfw.Cursor) {

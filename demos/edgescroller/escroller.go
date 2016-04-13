@@ -69,6 +69,7 @@ func (game *Game) Setup(w *ecs.World) {
 
 func (*Game) Hide()        {}
 func (*Game) Show()        {}
+func (*Game) Exit()		   {}
 func (*Game) Type() string { return "Game" }
 
 func main() {
@@ -76,6 +77,7 @@ func main() {
 		Title:  "EdgeScroller Demo",
 		Width:  1024,
 		Height: 640,
+		
 	}
 	engo.Run(opts, &Game{})
 }

@@ -43,6 +43,7 @@ func (game *GameWorld) Setup(w *ecs.World) {
 
 func (*GameWorld) Hide()        {}
 func (*GameWorld) Show()        {}
+func (*GameWorld) Exit() 		{}
 func (*GameWorld) Type() string { return "GameWorld" }
 
 type HideSystem struct {
@@ -70,6 +71,7 @@ func main() {
 		Title:  "Show and Hide Demo",
 		Width:  1024,
 		Height: 640,
+		
 	}
 	engo.Run(opts, &GameWorld{})
 }
