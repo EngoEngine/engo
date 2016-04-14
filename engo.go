@@ -55,6 +55,7 @@ func Run(opts RunOptions, defaultScene Scene) {
 	SetScaleOnResize(opts.ScaleOnResize)
 	SetFPSLimit(opts.FPSLimit)
 	vsync = opts.VSync
+	defaultCloseAction = true
 
 	if opts.HeadlessMode {
 		headless = true
