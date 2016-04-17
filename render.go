@@ -5,7 +5,6 @@ import (
 	"image/color"
 	"math"
 	"sort"
-	"strings"
 
 	"engo.io/ecs"
 	"engo.io/webgl"
@@ -29,12 +28,16 @@ type Drawable interface {
 }
 
 type RenderComponent struct {
-	scale        Point
-	Label        string
+	// Visible indicates whether or not it should be visually drawn by OpenGL
+	Visible bool
+
+	// Transparency is the level of transparency that is used to draw the texture
 	Transparency float32
-	Color        color.Color
-	shader       Shader
-	zIndex       float32
+
+	scale  Point
+	Color  color.Color
+	shader Shader
+	zIndex float32
 
 	drawable      Drawable
 	buffer        *webgl.Buffer
@@ -43,7 +46,6 @@ type RenderComponent struct {
 
 func NewRenderComponent(d Drawable, scale Point, label string) *RenderComponent {
 	rc := &RenderComponent{
-		Label:        label,
 		Transparency: 1,
 		Color:        color.White,
 
@@ -278,6 +280,10 @@ func (rs *RenderSystem) Update(dt float32) {
 		)
 
 		if render, ok = entity.ComponentFast(render).(*RenderComponent); !ok {
+			continue // with other entities
+		}
+
+		if !render.Visible {
 			continue // with other entities
 		}
 
