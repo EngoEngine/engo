@@ -3,6 +3,7 @@
 package engo
 
 import (
+	"fmt"
 	"log"
 
 	"engo.io/ecs"
@@ -13,22 +14,32 @@ const (
 	defaultHeightModifier float32 = 1
 )
 
+var MasterVolume float64 = 1
+
 // AudioComponent is a Component which is used by the AudioSystem
 type AudioComponent struct {
 	File       string
 	Repeat     bool
 	Background bool
 	player     *Player
+	RawVolume  float64
 }
 
 func (*AudioComponent) Type() string {
 	return "AudioComponent"
 }
 
+func (ac *AudioComponent) SetVolume(volume float64) {
+	ac.RawVolume = volume
+	ac.player.SetVolume(volume * MasterVolume)
+}
+
 // AudioSystem is a System that allows for sound effects and / or music
 type AudioSystem struct {
 	ecs.LinearSystem
 	HeightModifier float32
+
+	cachedVolume float64
 }
 
 func (*AudioSystem) Type() string { return "AudioSystem" }
@@ -36,6 +47,8 @@ func (*AudioSystem) Pre()         {}
 func (*AudioSystem) Post()        {}
 
 func (as *AudioSystem) New(*ecs.World) {
+	as.cachedVolume = MasterVolume
+
 	if as.HeightModifier == 0 {
 		as.HeightModifier = defaultHeightModifier
 	}
@@ -76,6 +89,12 @@ func (as *AudioSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 			log.Println("Error initializing AudioSystem:", err)
 			return
 		}
+	}
+
+	if MasterVolume != as.cachedVolume {
+		fmt.Println("Recalculating!", MasterVolume, as.cachedVolume)
+		ac.SetVolume(ac.RawVolume)
+		fmt.Println(ac.RawVolume)
 	}
 
 	if ac.player.State() != Playing {
