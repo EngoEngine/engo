@@ -329,6 +329,7 @@ func (p *Player) Volume() float64 {
 	if p == nil {
 		return 0
 	}
+
 	return float64(p.source.Gain())
 }
 
