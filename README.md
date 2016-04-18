@@ -16,8 +16,11 @@ We have a [gitter](https://gitter.im/EngoEngine/engo) chat for people to join wh
 
 ## Getting Started
 
-1. First, you have to install some dependencies if you're running on Debian/Ubuntu: 
-`sudo apt-get install libopenal-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev xorg-dev libgl1-mesa-dev`
+1. First, you have to install some dependencies:
+  1. If you're running on Debian/Ubuntu:
+    `sudo apt-get install libopenal-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev xorg-dev libgl1-mesa-dev`
+  2. If you're running on Windows: download all above packages using [win-builds](http://win-builds.org/doku.php) (Open an issue to let us know about other methods)
+  3. If you're on OSX, you should be OK. [Open an issue if you are not](https://github.com/EngoEngine/engo/issues/new)
 2. Then, you can go get it:
 `go get -u engo.io/engo`
 3. Now, you have two choices:
