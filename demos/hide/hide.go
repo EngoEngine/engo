@@ -61,9 +61,9 @@ func (c *HideSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	}
 
 	if rand.Int()%10 == 0 {
-		render.Visible = false
+		render.Hidden = true
 	} else {
-		render.Visible = true
+		render.Hidden = false
 	}
 }
 
