@@ -28,16 +28,16 @@ type Drawable interface {
 }
 
 type RenderComponent struct {
-	// Visible indicates whether or not it should be visually drawn by OpenGL
-	Visible bool
+	// Hidden is used to prevent drawing by OpenGL
+	Hidden        bool
 
 	// Transparency is the level of transparency that is used to draw the texture
-	Transparency float32
+	Transparency  float32
 
-	scale  Point
-	Color  color.Color
-	shader Shader
-	zIndex float32
+	scale         Point
+	Color         color.Color
+	shader        Shader
+	zIndex        float32
 
 	drawable      Drawable
 	buffer        *webgl.Buffer
@@ -283,7 +283,7 @@ func (rs *RenderSystem) Update(dt float32) {
 			continue // with other entities
 		}
 
-		if !render.Visible {
+		if render.Hidden {
 			continue // with other entities
 		}
 
