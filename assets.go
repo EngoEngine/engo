@@ -92,34 +92,67 @@ func (l *Loader) Load(onFinish func()) {
 	for _, r := range l.resources {
 		switch r.kind {
 		case "png":
-			data, err := loadImage(r)
-			if err == nil {
-				l.images[r.name] = NewTexture(data)
+			if _, ok := l.images[r.name]; ok {
+				continue // with other resources
 			}
+
+			data, err := loadImage(r)
+			if err != nil {
+				log.Println("Error loading resource:", err)
+				continue // with other resources
+			}
+
+			l.images[r.name] = NewTexture(data)
 		case "jpg":
+			if _, ok := l.images[r.name]; ok {
+				continue // with other resources
+			}
+
 			data, err := loadImage(r)
-			if err == nil {
-				l.images[r.name] = NewTexture(data)
+			if err != nil {
+				log.Println("Error loading resource:", err)
+				continue // with other resources
 			}
+
+			l.images[r.name] = NewTexture(data)
 		case "json":
+			if _, ok := l.jsons[r.name]; ok {
+				continue // with other resources
+			}
+
 			data, err := loadJSON(r)
-			if err == nil {
-				l.jsons[r.name] = data
+			if err != nil {
+				log.Println("Error loading resource:", err)
+				continue // with other resources
 			}
+
+			l.jsons[r.name] = data
 		case "tmx":
-			data, err := createLevelFromTmx(r)
-			if err == nil {
-				l.levels[r.name] = data
+			if _, ok := l.levels[r.name]; ok {
+				continue // with other resources
 			}
+
+			data, err := createLevelFromTmx(r)
+			if err != nil {
+				log.Println("Error loading resource:", err)
+				continue // with other resources
+			}
+
+			l.levels[r.name] = data
 		case "wav":
 			l.sounds[r.name] = r.url
 		case "ttf":
-			f, err := loadFont(r)
-			if err == nil {
-				l.fonts[r.name] = f
-			} else {
-				log.Printf("Could not load font %s\n", r.name)
+			if _, ok := l.fonts[r.name]; ok {
+				continue // with other resources
 			}
+
+			f, err := loadFont(r)
+			if err != nil {
+				log.Println("Error loading resource:", err)
+				continue // with other resources
+			}
+
+			l.fonts[r.name] = f
 		}
 	}
 	onFinish()
