@@ -5,8 +5,8 @@ import (
 	"log"
 	"math/rand"
 
-	"engo.io/engo"
 	"engo.io/ecs"
+	"engo.io/engo"
 )
 
 type GameWorld struct{}
@@ -43,7 +43,7 @@ func (game *GameWorld) Setup(w *ecs.World) {
 
 func (*GameWorld) Hide()        {}
 func (*GameWorld) Show()        {}
-func (*GameWorld) Exit() 		{}
+func (*GameWorld) Exit()        {}
 func (*GameWorld) Type() string { return "GameWorld" }
 
 type HideSystem struct {
@@ -59,10 +59,11 @@ func (c *HideSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	if !entity.Component(&render) {
 		return
 	}
+
 	if rand.Int()%10 == 0 {
-		render.SetPriority(engo.Hidden)
+		render.Hidden = true
 	} else {
-		render.SetPriority(engo.MiddleGround)
+		render.Hidden = false
 	}
 }
 
@@ -71,7 +72,6 @@ func main() {
 		Title:  "Show and Hide Demo",
 		Width:  1024,
 		Height: 640,
-		
 	}
 	engo.Run(opts, &GameWorld{})
 }

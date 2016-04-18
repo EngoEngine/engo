@@ -7,8 +7,8 @@ import (
 	"math/rand"
 	"sync"
 
-	"engo.io/engo"
 	"engo.io/ecs"
+	"engo.io/engo"
 )
 
 type PongGame struct{}
@@ -90,7 +90,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 
 func (*PongGame) Hide()        {}
 func (*PongGame) Show()        {}
-func (*PongGame) Exit()		   {}
+func (*PongGame) Exit()        {}
 func (*PongGame) Type() string { return "PongGame" }
 
 type SpeedSystem struct {
@@ -266,12 +266,12 @@ func (c *ScoreSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 
 	if !c.upToDate {
 		c.scoreLock.RLock()
-		render.Label = fmt.Sprintf("%v vs %v", c.PlayerOneScore, c.PlayerTwoScore)
+		label := fmt.Sprintf("%v vs %v", c.PlayerOneScore, c.PlayerTwoScore)
 		c.upToDate = true
 		c.scoreLock.RUnlock()
 
-		render.SetDrawable(basicFont.Render(render.Label))
-		width := len(render.Label) * 20
+		render.SetDrawable(basicFont.Render(label))
+		width := len(label) * 20
 
 		space.Position.X = float32(400 - (width / 2))
 	}
@@ -291,7 +291,6 @@ func main() {
 		Width:         800,
 		Height:        800,
 		ScaleOnResize: true,
-		
 	}
 	engo.Run(opts, &PongGame{})
 }
