@@ -1,5 +1,5 @@
 # Engo
-[![Join the chat at https://gitter.im/EngoEngine/engo](https://badges.gitter.im/EngoEngine/engo.svg)](https://gitter.im/EngoEngine/engo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![License](https://img.shields.io/badge/License-MIT-blue.svg) [![Build Status](https://travis-ci.org/EngoEngine/engo.png)](https://travis-ci.org/EngoEngine/engo)
+[![Join the chat at https://gitter.im/EngoEngine/engo](https://badges.gitter.im/EngoEngine/engo.svg)](https://gitter.im/EngoEngine/engo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![License](https://img.shields.io/badge/License-MIT-blue.svg) [![Build Status](https://travis-ci.org/EngoEngine/engo.svg?branch=master)](https://travis-ci.org/EngoEngine/engo)
 
 A cross-platform game engine written in Go following an interpretation of the Entity Component System paradigm. Engo is
 currently compilable for Mac OSX, Linux and Windows. With the release of Go 1.4, sporting Android and the inception of
@@ -16,12 +16,15 @@ We have a [gitter](https://gitter.im/EngoEngine/engo) chat for people to join wh
 
 ## Getting Started
 
-1. First, you have to install some dependencies if you're running on Debian/Ubuntu: 
-`sudo apt-get install libopenal-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev xorg-dev libgl1-mesa-dev`
+1. First, you have to install some dependencies:
+  1. If you're running on Debian/Ubuntu:
+    `sudo apt-get install libopenal-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev xorg-dev libgl1-mesa-dev`
+  2. If you're running on Windows: download all above packages using [win-builds](http://win-builds.org/doku.php) (Open an issue to let us know about other methods)
+  3. If you're on OSX, you should be OK. [Open an issue if you are not](https://github.com/EngoEngine/engo/issues/new)
 2. Then, you can go get it:
 `go get -u engo.io/engo`
 3. Now, you have two choices:
-  1. Read the [Wiki: Getting Started](https://github.com/EngoEngine/engo/wiki/Getting-Started), for an explanation on the basics;
+  1. Visit [our website](https://engo.io/), which hosts a full-blown toturial series on how to create your own game, and on top of that, has some conceptual explanations;
   2. Check out some demos in our [demos folder](https://github.com/EngoEngine/engo/tree/master/demos). 
 4. Finally, if you run into problems, if you've encountered a bug, or want to request a feature, feel free to shoot 
 us a DM or [create an issue](https://github.com/EngoEngine/engo/issues/new). 
