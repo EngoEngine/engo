@@ -42,8 +42,13 @@ func NewLoader() *Loader {
 
 func NewResource(url string) Resource {
 	kind := path.Ext(url)
-	//name := strings.TrimSuffix(path.Base(url), kind)
 	name := path.Base(url)
+
+	if len(kind) == 0 {
+		log.Println("WARNING: Cannot laod extensionless resource.")
+		return Resource{}
+	}
+
 	return Resource{name: name, url: url, kind: kind[1:]}
 }
 
