@@ -37,9 +37,14 @@ func (pong *PongGame) Setup(w *ecs.World) {
 
 	ball := ecs.NewEntity("RenderSystem", "CollisionSystem", "SpeedSystem", "BallSystem")
 	ballTexture := engo.Files.Image("ball.png")
-	ballRender := engo.NewRenderComponent(ballTexture, engo.Point{2, 2}, "ball")
-	ballSpace := &engo.SpaceComponent{engo.Point{(engo.Width() - ballTexture.Width()) / 2, (engo.Height() - ballTexture.Height()) / 2}, ballTexture.Width() * ballRender.Scale().X, ballTexture.Height() * ballRender.Scale().Y}
+	ballRender := engo.NewRenderComponent(ballTexture, engo.Point{2, 2})
+	ballSpace := &engo.SpaceComponent{
+		Position: engo.Point{(engo.Width() - ballTexture.Width()) / 2, (engo.Height() - ballTexture.Height()) / 2},
+		Width:    ballTexture.Width() * ballRender.Scale().X,
+		Height:   ballTexture.Height() * ballRender.Scale().Y,
+	}
 	ballCollision := &engo.CollisionComponent{Main: true, Solid: true}
+
 	ballSpeed := &SpeedComponent{}
 	ballSpeed.Point = engo.Point{300, 100}
 
@@ -54,9 +59,13 @@ func (pong *PongGame) Setup(w *ecs.World) {
 
 	score := ecs.NewEntity("RenderSystem", "ScoreSystem")
 
-	scoreRender := engo.NewRenderComponent(basicFont.Render(" "), engo.Point{1, 1}, "YOLO <3")
+	scoreRender := engo.NewRenderComponent(basicFont.Render(" "), engo.Point{1, 1})
+	scoreSpace := &engo.SpaceComponent{
+		Position: engo.Point{100, 100},
+		Width:    100,
+		Height:   100,
+	}
 
-	scoreSpace := &engo.SpaceComponent{engo.Point{100, 100}, 100, 100}
 	score.AddComponent(scoreRender)
 	score.AddComponent(scoreSpace)
 	err = w.AddEntity(score)
@@ -68,13 +77,18 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	for i := 0; i < 2; i++ {
 		paddle := ecs.NewEntity("RenderSystem", "CollisionSystem", "ControlSystem")
 		paddleTexture := engo.Files.Image("paddle.png")
-		paddleRender := engo.NewRenderComponent(paddleTexture, engo.Point{2, 2}, "paddle")
+		paddleRender := engo.NewRenderComponent(paddleTexture, engo.Point{2, 2})
 		x := float32(0)
 		if i != 0 {
 			x = 800 - 16
 		}
 
-		paddleSpace := &engo.SpaceComponent{engo.Point{x, (engo.Height() - paddleTexture.Height()) / 2}, paddleRender.Scale().X * paddleTexture.Width(), paddleRender.Scale().Y * paddleTexture.Height()}
+		paddleSpace := &engo.SpaceComponent{
+			Position: engo.Point{x, (engo.Height() - paddleTexture.Height()) / 2},
+			Width:    paddleRender.Scale().X * paddleTexture.Width(),
+			Height:   paddleRender.Scale().Y * paddleTexture.Height(),
+		}
+
 		paddleControl := &ControlComponent{schemes[i]}
 		paddleCollision := &engo.CollisionComponent{Main: false, Solid: true}
 		paddle.AddComponent(paddleRender)

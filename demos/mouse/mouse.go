@@ -29,7 +29,7 @@ func generateBackground() *engo.RenderComponent {
 		}
 	}
 	bgTexture := engo.NewImageObject(img)
-	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1}, "Background1")
+	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1})
 	return fieldRender
 }
 
@@ -49,7 +49,7 @@ func (game *GameWorld) Setup(w *ecs.World) {
 
 func (*GameWorld) Hide()        {}
 func (*GameWorld) Show()        {}
-func (*GameWorld) Exit()		{}
+func (*GameWorld) Exit()        {}
 func (*GameWorld) Type() string { return "GameWorld" }
 
 func (game *GameWorld) CreateEntity() *ecs.Entity {
@@ -57,7 +57,11 @@ func (game *GameWorld) CreateEntity() *ecs.Entity {
 
 	entity.AddComponent(generateBackground())
 	entity.AddComponent(&engo.MouseComponent{})
-	entity.AddComponent(&engo.SpaceComponent{engo.Point{0, 0}, boxWidth, boxHeight})
+	entity.AddComponent(&engo.SpaceComponent{
+		Position: engo.Point{0, 0},
+		Width:    boxWidth,
+		Height:   boxHeight,
+	})
 
 	return entity
 }
@@ -88,7 +92,6 @@ func main() {
 		Title:  "Mouse Demo",
 		Width:  1024,
 		Height: 640,
-		
 	}
 	engo.Run(opts, &GameWorld{})
 }

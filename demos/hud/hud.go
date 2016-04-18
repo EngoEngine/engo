@@ -41,10 +41,16 @@ func generateBackground() *ecs.Entity {
 			}
 		}
 	}
+
 	bgTexture := engo.NewImageObject(img)
 	field := ecs.NewEntity("RenderSystem")
-	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1}, "Background1")
-	fieldSpace := &engo.SpaceComponent{engo.Point{0, 0}, worldWidth, worldHeight}
+	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1})
+	fieldSpace := &engo.SpaceComponent{
+		Position: engo.Point{0, 0},
+		Width:    worldWidth,
+		Height:   worldHeight,
+	}
+
 	field.AddComponent(fieldRender)
 	field.AddComponent(fieldSpace)
 	return field
@@ -60,12 +66,18 @@ func generateHUDBackground(width, height float32) *ecs.Entity {
 			img.Set(i, j, c1)
 		}
 	}
+
 	bgTexture := engo.NewImageObject(img)
 	field := ecs.NewEntity("RenderSystem")
-	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1}, "HUDBackground1")
+	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1})
 	fieldRender.SetShader(engo.HUDShader)
 	fieldRender.SetZIndex(1) // A value larger than 0 (default), to ensure being drawn on top of the background
-	fieldSpace := &engo.SpaceComponent{engo.Point{-1, -1}, width, height}
+	fieldSpace := &engo.SpaceComponent{
+		Position: engo.Point{-1, -1},
+		Width:    width,
+		Height:   height,
+	}
+
 	field.AddComponent(fieldRender)
 	field.AddComponent(fieldSpace)
 	return field
@@ -102,7 +114,7 @@ func (game *Game) Setup(w *ecs.World) {
 
 func (*Game) Hide()        {}
 func (*Game) Show()        {}
-func (*Game) Exit() 	   {}
+func (*Game) Exit()        {}
 func (*Game) Type() string { return "Game" }
 
 func main() {
@@ -110,7 +122,6 @@ func main() {
 		Title:  "HUD Demo",
 		Width:  1024,
 		Height: 640,
-		
 	}
 	engo.Run(opts, &Game{})
 }

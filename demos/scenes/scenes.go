@@ -7,8 +7,8 @@ import (
 	"math/rand"
 	"time"
 
-	"engo.io/engo"
 	"engo.io/ecs"
+	"engo.io/engo"
 )
 
 var (
@@ -32,13 +32,17 @@ func (game *IconScene) Setup(w *ecs.World) {
 
 	guy := ecs.NewEntity("RenderSystem", "ScaleSystem")
 	texture := engo.Files.Image("icon.png")
-	render := engo.NewRenderComponent(texture, engo.Point{8, 8}, "icon")
+	render := engo.NewRenderComponent(texture, engo.Point{8, 8})
 	collision := &engo.CollisionComponent{Solid: true, Main: true}
 
 	width := texture.Width() * render.Scale().X
 	height := texture.Height() * render.Scale().Y
 
-	space := &engo.SpaceComponent{engo.Point{(engo.Width() - width) / 2, (engo.Height() - height) / 2}, width, height}
+	space := &engo.SpaceComponent{
+		Position: engo.Point{(engo.Width() - width) / 2, (engo.Height() - height) / 2},
+		Width:    width,
+		Height:   height,
+	}
 
 	guy.AddComponent(render)
 	guy.AddComponent(space)
@@ -52,7 +56,7 @@ func (game *IconScene) Setup(w *ecs.World) {
 
 func (*IconScene) Hide()        {}
 func (*IconScene) Show()        {}
-func (*IconScene) Exit()		{}
+func (*IconScene) Exit()        {}
 func (*IconScene) Type() string { return "IconScene" }
 
 // RockScene is responsible for managing the rock
@@ -71,14 +75,17 @@ func (game *RockScene) Setup(w *ecs.World) {
 
 	guy := ecs.NewEntity("RenderSystem", "ScaleSystem")
 	texture := engo.Files.Image("rock.png")
-	render := engo.NewRenderComponent(texture, engo.Point{8, 8}, "rock")
+	render := engo.NewRenderComponent(texture, engo.Point{8, 8})
 	collision := &engo.CollisionComponent{Solid: true, Main: true}
 
 	width := texture.Width() * render.Scale().X
 	height := texture.Height() * render.Scale().Y
 
-	space := &engo.SpaceComponent{engo.Point{(engo.Width() - width) / 2, (engo.Height() - height) / 2}, width, height}
-
+	space := &engo.SpaceComponent{
+		Position: engo.Point{(engo.Width() - width) / 2, (engo.Height() - height) / 2},
+		Width:    width,
+		Height:   height,
+	}
 	guy.AddComponent(render)
 	guy.AddComponent(space)
 	guy.AddComponent(collision)
@@ -91,7 +98,7 @@ func (game *RockScene) Setup(w *ecs.World) {
 
 func (*RockScene) Hide()        {}
 func (*RockScene) Show()        {}
-func (*RockScene) Exit() 		{}
+func (*RockScene) Exit()        {}
 func (*RockScene) Type() string { return "RockScene" }
 
 // SceneSwitcherSystem is a System that actually calls SetScene
@@ -162,7 +169,6 @@ func main() {
 		Title:  "Scenes Demo",
 		Width:  1024,
 		Height: 640,
-		
 	}
 
 	engo.Run(opts, iconScene)

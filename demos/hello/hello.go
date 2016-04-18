@@ -28,13 +28,17 @@ func (game *GameWorld) Setup(w *ecs.World) {
 
 	guy := ecs.NewEntity("RenderSystem", "ScaleSystem")
 	texture := engo.Files.Image("icon.png")
-	render := engo.NewRenderComponent(texture, engo.Point{8, 8}, "guy")
+	render := engo.NewRenderComponent(texture, engo.Point{8, 8})
 	collision := &engo.CollisionComponent{Solid: true, Main: true}
 
 	width := texture.Width() * render.Scale().X
 	height := texture.Height() * render.Scale().Y
 
-	space := &engo.SpaceComponent{engo.Point{(engo.Width() - width) / 2, (engo.Height() - height) / 2}, width, height}
+	space := &engo.SpaceComponent{
+		Position: engo.Point{(engo.Width() - width) / 2, (engo.Height() - height) / 2},
+		Width:    width,
+		Height:   height,
+	}
 
 	guy.AddComponent(render)
 	guy.AddComponent(space)

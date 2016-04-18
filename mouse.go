@@ -80,8 +80,8 @@ func (m *MouseSystem) Priority() int {
 // Pre is called before all Update calls, and is used to compute internal values
 func (m *MouseSystem) Pre() {
 	// Translate Mouse.X and Mouse.Y into "game coordinates"
-	m.mouseX = Mouse.X*cam.z*(gameWidth/windowWidth) + cam.x - (gameWidth/2)*cam.z
-	m.mouseY = Mouse.Y*cam.z*(gameHeight/windowHeight) + cam.y - (gameHeight/2)*cam.z
+	m.mouseX = Mouse.X* cam.z*(gameWidth/windowWidth) + cam.x - (gameWidth/2)* cam.z
+	m.mouseY = Mouse.Y* cam.z*(gameHeight/windowHeight) + cam.y - (gameHeight/2)* cam.z
 }
 
 // Post is called after all Update calls, and is used to compute internal values

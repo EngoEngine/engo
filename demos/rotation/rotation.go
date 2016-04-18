@@ -6,7 +6,10 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"github.com/luxengine/math"
 )
+
+var globalGuy *ecs.Entity
 
 type GameWorld struct{}
 
@@ -20,10 +23,11 @@ func (game *GameWorld) Preload() {
 func (game *GameWorld) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 
+	w.AddSystem(&RotationSystem{})
 	w.AddSystem(&engo.RenderSystem{})
 
 	// Create an entity part of the Render
-	guy := ecs.NewEntity("RenderSystem")
+	globalGuy = ecs.NewEntity("RenderSystem")
 	// Retrieve a texture
 	texture := engo.Files.Image("icon.png")
 
@@ -34,18 +38,41 @@ func (game *GameWorld) Setup(w *ecs.World) {
 	height := texture.Height() * render.Scale().Y
 
 	space := &engo.SpaceComponent{
-		Position: engo.Point{0, 0},
+		Position: engo.Point{400, 400},
 		Width:    width,
 		Height:   height,
 	}
 
-	guy.AddComponent(render)
-	guy.AddComponent(space)
+	globalGuy.AddComponent(render)
+	globalGuy.AddComponent(space)
 
-	err := w.AddEntity(guy)
+	err := w.AddEntity(globalGuy)
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+type RotationSystem struct{}
+
+func (*RotationSystem) Type() string             { return "RotationSytem" }
+func (*RotationSystem) Priority() int            { return 0 }
+func (*RotationSystem) New(*ecs.World)           {}
+func (*RotationSystem) AddEntity(*ecs.Entity)    {}
+func (*RotationSystem) RemoveEntity(*ecs.Entity) {}
+
+func (*RotationSystem) Update(dt float32) {
+	var space *engo.SpaceComponent
+	if !globalGuy.Component(&space) {
+		return
+	}
+
+	// speed in radians per second
+	var speed float32 = math.Pi
+	// speed in degrees per second
+	var speedDegrees float32 = speed * (360 / (2 * math.Pi))
+
+	space.Rotation += speedDegrees * dt
+	space.Rotation = math.Mod(space.Rotation, 360)
 }
 
 func (*GameWorld) Hide()        {}
@@ -55,7 +82,7 @@ func (*GameWorld) Type() string { return "GameWorld" }
 
 func main() {
 	opts := engo.RunOptions{
-		Title:  "Hello Demo",
+		Title:  "Rotation Demo",
 		Width:  1024,
 		Height: 640,
 	}

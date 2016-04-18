@@ -2,7 +2,7 @@ package engo
 
 import (
 	"engo.io/webgl"
-	"fmt"
+	"github.com/luxengine/math"
 )
 
 const bufferSize = 10000
@@ -19,17 +19,16 @@ type defaultShader struct {
 	indexVBO *webgl.Buffer
 	program  *webgl.Program
 
-	projX float32
-	projY float32
-
 	lastTexture *webgl.Texture
 
-	inPosition   int
-	inTexCoords  int
-	inColor      int
+	inPosition  int
+	inTexCoords int
+	inColor     int
+
 	ufCamera     *webgl.UniformLocation
 	ufPosition   *webgl.UniformLocation
 	ufProjection *webgl.UniformLocation
+	ufRotation   *webgl.UniformLocation
 }
 
 func (s *defaultShader) Initialize(width, height float32) {
@@ -40,9 +39,13 @@ attribute vec2 in_Position;
 attribute vec2 in_TexCoords;
 attribute vec4 in_Color;
 
-uniform vec2 uf_Position;
+// Uniform across everything
 uniform vec3 uf_Camera;
 uniform vec2 uf_Projection;
+
+// Uniform across this texture / draw call
+uniform vec2 uf_Position;
+uniform mat2 uf_Rotation;
 
 varying vec4 var_Color;
 varying vec2 var_TexCoords;
@@ -51,11 +54,9 @@ void main() {
   var_Color = in_Color;
   var_TexCoords = in_TexCoords;
 
-  gl_Position = vec4((in_Position.x + uf_Position.x - uf_Camera.x)/  uf_Projection.x,
-  					 (in_Position.y + uf_Position.y - uf_Camera.y)/ -uf_Projection.y,
-  					 0.0, uf_Camera.z);
-
-}`, `
+  gl_Position = vec4((uf_Rotation * in_Position + uf_Position - uf_Camera.xy) / uf_Projection, 0.0, uf_Camera.z);
+}
+`, `
 /* Fragment Shader */
 #ifdef GL_ES
 #define LOWP lowp
@@ -87,8 +88,6 @@ void main (void) {
 	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, s.indexVBO)
 	Gl.BufferData(Gl.ELEMENT_ARRAY_BUFFER, s.indices, Gl.STATIC_DRAW)
 
-	s.SetProjection(width, height)
-
 	// Define things that should be read from the texture buffer
 	s.inPosition = Gl.GetAttribLocation(s.program, "in_Position")
 	s.inTexCoords = Gl.GetAttribLocation(s.program, "in_TexCoords")
@@ -98,6 +97,7 @@ void main (void) {
 	s.ufCamera = Gl.GetUniformLocation(s.program, "uf_Camera")
 	s.ufPosition = Gl.GetUniformLocation(s.program, "uf_Position")
 	s.ufProjection = Gl.GetUniformLocation(s.program, "uf_Projection")
+	s.ufRotation = Gl.GetUniformLocation(s.program, "uf_Rotation")
 
 	// Enable those things
 	Gl.EnableVertexAttribArray(s.inPosition)
@@ -110,7 +110,11 @@ void main (void) {
 
 func (s *defaultShader) Pre() {
 	Gl.UseProgram(s.program)
-	Gl.Uniform2f(s.ufProjection, s.projX, s.projY)
+	if scaleOnResize {
+		Gl.Uniform2f(s.ufProjection, gameWidth/2, -gameHeight/2)
+	} else {
+		Gl.Uniform2f(s.ufProjection, windowWidth/2, -windowHeight/2)
+	}
 	Gl.Uniform3f(s.ufCamera, cam.x, cam.y, cam.z)
 }
 
@@ -126,8 +130,17 @@ func (s *defaultShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y,
 		s.lastTexture = texture
 	}
 
-	// TODO: add rotation
+	// precomputed trigo on CPU to avoid GPU trigo for each vertex
+	angle := rotation * math.Pi / 180
+	c := math.Cos(angle)
+	sine := math.Sin(angle)
+
+	Gl.UniformMatrix2fv(s.ufRotation, false, []float32{
+		c, -sine,
+		sine, c,
+	})
 	Gl.Uniform2f(s.ufPosition, x, y)
+
 	Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
 }
 
@@ -135,18 +148,10 @@ func (s *defaultShader) Post() {
 	s.lastTexture = nil
 }
 
-func (s *defaultShader) SetProjection(width, height float32) {
-	s.projX = width / 2
-	s.projY = height / 2
-}
-
 type hudShader struct {
 	indices  []uint16
 	indexVBO *webgl.Buffer
 	program  *webgl.Program
-
-	projX float32
-	projY float32
 
 	lastTexture *webgl.Texture
 
@@ -175,8 +180,9 @@ void main() {
   var_Color = in_Color;
   var_TexCoords = in_TexCoords;
 
-  gl_Position = vec4((in_Position.x + uf_Position.x)/  uf_Projection.x - 1.0,
-  					 (in_Position.y + uf_Position.y)/ -uf_Projection.y + 1.0,
+  vec2 standardTranslation = vec2(-1.0, 1.0);
+
+  gl_Position = vec4((in_Position + uf_Position)/ uf_Projection + standardTranslation,
   					 0.0, 1.0);
 
 }`, `
@@ -210,8 +216,6 @@ void main (void) {
 	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, s.indexVBO)
 	Gl.BufferData(Gl.ELEMENT_ARRAY_BUFFER, s.indices, Gl.STATIC_DRAW)
 
-	s.SetProjection(width, height)
-
 	// Define things that should be read from the texture buffer
 	s.inPosition = Gl.GetAttribLocation(s.program, "in_Position")
 	s.inTexCoords = Gl.GetAttribLocation(s.program, "in_TexCoords")
@@ -228,13 +232,11 @@ void main (void) {
 
 	Gl.Enable(Gl.BLEND)
 	Gl.BlendFunc(Gl.SRC_ALPHA, Gl.ONE_MINUS_SRC_ALPHA)
-
-	// TODO: listen for Projection changes
 }
 
 func (s *hudShader) Pre() {
 	Gl.UseProgram(s.program)
-	Gl.Uniform2f(s.ufProjection, s.projX, s.projY)
+	Gl.Uniform2f(s.ufProjection, windowWidth/2, -windowHeight/2)
 }
 
 func (s *hudShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y, rotation float32) {
@@ -257,11 +259,6 @@ func (s *hudShader) Post() {
 	s.lastTexture = nil
 }
 
-func (s *hudShader) SetProjection(width, height float32) {
-	s.projX = width / 2
-	s.projY = height / 2
-}
-
 var (
 	DefaultShader = &defaultShader{}
 	HUDShader     = &hudShader{}
@@ -270,7 +267,6 @@ var (
 
 func initShaders(width, height float32) {
 	if !shadersSet {
-		fmt.Println("Initialized shaders", width, height)
 		DefaultShader.Initialize(width, height)
 		HUDShader.Initialize(width, height)
 

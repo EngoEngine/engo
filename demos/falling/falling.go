@@ -5,8 +5,8 @@ import (
 	"log"
 	"math/rand"
 
-	"engo.io/engo"
 	"engo.io/ecs"
+	"engo.io/engo"
 )
 
 type Game struct{}
@@ -30,14 +30,18 @@ func (game *Game) Setup(w *ecs.World) {
 	// Create new entity subscribed to all the systems!
 	guy := ecs.NewEntity("RenderSystem", "ControlSystem", "RockSpawnSystem", "CollisionSystem", "DeathSystem")
 	texture := engo.Files.Image("icon.png")
-	render := engo.NewRenderComponent(texture, engo.Point{4, 4}, "guy")
+	render := engo.NewRenderComponent(texture, engo.Point{4, 4})
 	// Tell the collision system that this player is solid
 	collision := &engo.CollisionComponent{Solid: true, Main: true}
 
 	width := texture.Width() * render.Scale().X
 	height := texture.Height() * render.Scale().Y
 
-	space := &engo.SpaceComponent{engo.Point{(engo.Width() - width) / 2, (engo.Height() - height) / 2}, width, height}
+	space := &engo.SpaceComponent{
+		Position: engo.Point{(engo.Width() - width) / 2, (engo.Height() - height) / 2},
+		Width:    width,
+		Height:   height,
+	}
 
 	guy.AddComponent(render)
 	guy.AddComponent(space)
@@ -51,7 +55,7 @@ func (game *Game) Setup(w *ecs.World) {
 
 func (*Game) Hide()        {}
 func (*Game) Show()        {}
-func (*Game) Exit() 	   {}
+func (*Game) Exit()        {}
 func (*Game) Type() string { return "Game" }
 
 type ControlSystem struct {
@@ -121,8 +125,12 @@ func NewRock(position engo.Point) *ecs.Entity {
 	rock := ecs.NewEntity("RenderSystem", "FallingSystem", "CollisionSystem")
 
 	texture := engo.Files.Image("rock.png")
-	render := engo.NewRenderComponent(texture, engo.Point{4, 4}, "rock")
-	space := &engo.SpaceComponent{position, texture.Width() * render.Scale().X, texture.Height() * render.Scale().Y}
+	render := engo.NewRenderComponent(texture, engo.Point{4, 4})
+	space := &engo.SpaceComponent{
+		Position: position,
+		Width:    texture.Width() * render.Scale().X,
+		Height:   texture.Height() * render.Scale().Y,
+	}
 	collision := &engo.CollisionComponent{Solid: true}
 
 	rock.AddComponent(render)
@@ -156,8 +164,9 @@ func (*DeathSystem) Type() string { return "DeathSystem" }
 
 func (ds *DeathSystem) New(*ecs.World) {
 	// Subscribe to ScoreMessage
-	engo.Mailbox.Listen("ScoreMessage", func(message engo.Message) {
+	engo.Mailbox.Listen("CollisionMessage", func(message engo.Message) {
 		collision, isCollision := message.(engo.CollisionMessage)
+
 		if isCollision {
 			log.Println(collision, message)
 			log.Println("DEAD")

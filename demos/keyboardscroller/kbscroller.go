@@ -40,10 +40,16 @@ func generateBackground() *ecs.Entity {
 			}
 		}
 	}
+
 	bgTexture := engo.NewImageObject(img)
 	field := ecs.NewEntity("RenderSystem")
-	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1}, "Background1")
-	fieldSpace := &engo.SpaceComponent{engo.Point{0, 0}, worldWidth, worldHeight}
+	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1})
+	fieldSpace := &engo.SpaceComponent{
+		Position: engo.Point{0, 0},
+		Width:    worldWidth,
+		Height:   worldHeight,
+	}
+
 	field.AddComponent(fieldRender)
 	field.AddComponent(fieldSpace)
 	return field
@@ -53,7 +59,7 @@ func (game *Game) Preload() {}
 
 func (*Game) Hide()        {}
 func (*Game) Show()        {}
-func (*Game) Exit()		   {}
+func (*Game) Exit()        {}
 func (*Game) Type() string { return "Game" }
 
 // Setup is called before the main loop is started
@@ -76,7 +82,6 @@ func main() {
 		Title:  "KeyboardScroller Demo",
 		Width:  int(worldWidth),
 		Height: int(worldHeight),
-		
 	}
 	engo.Run(opts, &Game{})
 }

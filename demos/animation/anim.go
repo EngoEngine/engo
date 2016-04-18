@@ -4,8 +4,8 @@ import (
 	"image/color"
 	"log"
 
-	"engo.io/engo"
 	"engo.io/ecs"
+	"engo.io/engo"
 )
 
 var (
@@ -48,15 +48,16 @@ func (game *GameWorld) Setup(w *ecs.World) {
 
 func (*GameWorld) Hide()        {}
 func (*GameWorld) Show()        {}
-func (*GameWorld) Exit() 	 	{}
+func (*GameWorld) Exit()        {}
 func (*GameWorld) Type() string { return "GameWorld" }
 
 func (game *GameWorld) CreateEntity(point *engo.Point, spriteSheet *engo.Spritesheet, action *engo.AnimationAction) *ecs.Entity {
 	entity := ecs.NewEntity("AnimationSystem", "RenderSystem", "ControlSystem")
 
-	space := &engo.SpaceComponent{*point, 150, 150}
-	render := engo.NewRenderComponent(spriteSheet.Cell(action.Frames[0]), engo.Point{3, 3}, "hero")
+	space := &engo.SpaceComponent{Position: *point, Width: 150, Height: 150}
+	render := engo.NewRenderComponent(spriteSheet.Cell(action.Frames[0]), engo.Point{3, 3})
 	animation := engo.NewAnimationComponent(spriteSheet.Drawables(), 0.1)
+
 	animation.AddAnimationActions(actions)
 	animation.SelectAnimationByAction(action)
 	entity.AddComponent(render)

@@ -137,33 +137,6 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 
 		if !scaleOnResize {
 			gameWidth, gameHeight = float32(widthInt), float32(heightInt)
-
-			// Update default batch
-			for _, scene := range scenes {
-				if scene.world == nil {
-					continue // with other scenes
-				}
-
-				for _, s := range scene.world.Systems() {
-					if _, ok := s.(*RenderSystem); ok {
-						DefaultShader.SetProjection(gameWidth, gameHeight)
-					}
-				}
-			}
-		}
-
-		// Update HUD batch
-		for _, scene := range scenes {
-			if scene.world == nil {
-				continue // with other scenes
-			}
-
-			for _, s := range scene.world.Systems() {
-				if _, ok := s.(*RenderSystem); ok {
-					// TODO: don't call it directly, but let HUD listen for it
-					//Shaders.HUD.SetProjection(windowWidth, windowHeight)
-				}
-			}
 		}
 	})
 

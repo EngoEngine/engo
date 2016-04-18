@@ -43,8 +43,12 @@ func generateBackground() *ecs.Entity {
 	}
 	bgTexture := engo.NewImageObject(img)
 	field := ecs.NewEntity("RenderSystem")
-	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1}, "Background1")
-	fieldSpace := &engo.SpaceComponent{engo.Point{0, 0}, worldWidth, worldHeight}
+	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1})
+	fieldSpace := &engo.SpaceComponent{
+		Position: engo.Point{0, 0},
+		Width:    worldWidth,
+		Height:   worldHeight,
+	}
 	field.AddComponent(fieldRender)
 	field.AddComponent(fieldSpace)
 	return field
