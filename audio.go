@@ -3,7 +3,6 @@
 package engo
 
 import (
-	"fmt"
 	"log"
 
 	"engo.io/ecs"
