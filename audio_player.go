@@ -335,7 +335,6 @@ func (p *Player) Volume() float64 {
 
 // SetVolume sets the volume of the player. The range of the volume is [0, 1].
 func (p *Player) SetVolume(vol float64) {
-	fmt.Println("changing volume")
 	if p == nil {
 		return
 	}

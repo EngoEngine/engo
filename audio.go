@@ -91,9 +91,7 @@ func (as *AudioSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 	}
 
 	if MasterVolume != as.cachedVolume {
-		fmt.Println("Recalculating!", MasterVolume, as.cachedVolume)
 		ac.SetVolume(ac.RawVolume)
-		fmt.Println(ac.RawVolume)
 	}
 
 	if ac.player.State() != Playing {
