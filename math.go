@@ -86,7 +86,7 @@ func (l *Line) PointSide(point Point) bool {
 	one := (point.X - l.P1.X) * (l.P2.Y - l.P1.Y)
 	two := (point.Y - l.P1.Y) * (l.P2.X - l.P1.X)
 
-	return math.Signbit(float64(one - two))
+	return math.Signbit(one - two)
 }
 
 // Returns the line's angle relative to Y = 0

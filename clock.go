@@ -26,14 +26,14 @@ func (c *Clock) Tick() {
 	now := time.Now()
 	c.frames += 1
 	if !c.frame.IsZero() {
-		c.delta = now.Sub(c.frame).Seconds()
+		c.delta = float32(now.Sub(c.frame).Seconds())
 	}
 
 	c.elapsed += c.delta
 	c.frame = now
 
 	if c.elapsed >= 1 {
-		c.fps = c.frames
+		c.fps = float32(c.frames)
 		c.elapsed = math.Mod(c.elapsed, 1)
 		c.frames = 0
 	}
