@@ -106,6 +106,18 @@ void main (void) {
 
 	Gl.Enable(Gl.BLEND)
 	Gl.BlendFunc(Gl.SRC_ALPHA, Gl.ONE_MINUS_SRC_ALPHA)
+
+	// We sometimes have to change our projection matrix
+	Mailbox.Listen("WindowResizeMessage", func(m Message) {
+		wrm, ok := m.(WindowResizeMessage)
+		if !ok {
+			return
+		}
+
+		if !scaleOnResize {
+			s.SetProjection(float32(wrm.NewWidth), float32(wrm.NewHeight))
+		}
+	})
 }
 
 func (s *defaultShader) Pre() {
