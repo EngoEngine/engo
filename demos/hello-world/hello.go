@@ -11,7 +11,6 @@ type DefaultScene struct{}
 
 type Guy struct {
 	ecs.BasicEntity
-	engo.MouseComponent
 	engo.RenderComponent
 	engo.SpaceComponent
 }
@@ -24,10 +23,7 @@ func (*DefaultScene) Preload() {
 func (*DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 
-	w.AddSystem(&engo.MouseSystem{})
 	w.AddSystem(&engo.RenderSystem{})
-	w.AddSystem(&ControlSystem{})
-	w.AddSystem(&engo.MouseZoomer{-0.125})
 
 	// Retrieve a texture
 	texture := engo.Files.Image("icon.png")
@@ -42,17 +38,12 @@ func (*DefaultScene) Setup(w *ecs.World) {
 		Width:    texture.Width() * guy.RenderComponent.Scale().X,
 		Height:   texture.Height() * guy.RenderComponent.Scale().Y,
 	}
-	// guy.MouseComponent doesn't have to be set, because its default values will do
 
-	// Add our guy to appropriate systems
+	// Add it to appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
 		case *engo.RenderSystem:
 			sys.Add(&guy.BasicEntity, &guy.RenderComponent, &guy.SpaceComponent)
-		case *engo.MouseSystem:
-			sys.Add(&guy.BasicEntity, &guy.MouseComponent, &guy.SpaceComponent, &guy.RenderComponent)
-		case *ControlSystem:
-			sys.Add(&guy.BasicEntity, &guy.MouseComponent)
 		}
 	}
 }
@@ -62,44 +53,9 @@ func (*DefaultScene) Show()        {}
 func (*DefaultScene) Exit()        {}
 func (*DefaultScene) Type() string { return "GameWorld" }
 
-type controlEntity struct {
-	*ecs.BasicEntity
-	*engo.MouseComponent
-}
-
-type ControlSystem struct {
-	entities []controlEntity
-}
-
-func (c *ControlSystem) Add(basic *ecs.BasicEntity, mouse *engo.MouseComponent) {
-	c.entities = append(c.entities, controlEntity{basic, mouse})
-}
-
-func (c *ControlSystem) Remove(basic ecs.BasicEntity) {
-	delete := -1
-	for index, e := range c.entities {
-		if e.BasicEntity.ID() == basic.ID() {
-			delete = index
-		}
-	}
-	if delete >= 0 {
-		c.entities = append(c.entities[:delete], c.entities[delete+1:]...)
-	}
-}
-
-func (c *ControlSystem) Update(dt float32) {
-	for _, e := range c.entities {
-		if e.MouseComponent.Enter {
-			engo.SetCursor(engo.Hand)
-		} else if e.MouseComponent.Leave {
-			engo.SetCursor(nil)
-		}
-	}
-}
-
 func main() {
 	opts := engo.RunOptions{
-		Title:  "Mouse Demo",
+		Title:  "Hello World Demo",
 		Width:  1024,
 		Height: 640,
 	}
