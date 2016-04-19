@@ -1,13 +1,15 @@
 package engo
 
 import (
+	"image"
 	"image/color"
+	"image/draw"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
 
-	"engo.io/webgl"
+	"engo.io/gl"
 	"github.com/golang/freetype/truetype"
 	"github.com/luxengine/math"
 )
@@ -169,7 +171,7 @@ type Image interface {
 	Height() int
 }
 
-func LoadShader(vertSrc, fragSrc string) *webgl.Program {
+func LoadShader(vertSrc, fragSrc string) *gl.Program {
 	vertShader := Gl.CreateShader(Gl.VERTEX_SHADER)
 	Gl.ShaderSource(vertShader, vertSrc)
 	Gl.CompileShader(vertShader)
@@ -218,7 +220,7 @@ func (r *Region) Height() float32 {
 	return float32(r.height)
 }
 
-func (r *Region) Texture() *webgl.Texture {
+func (r *Region) Texture() *gl.Texture {
 	return r.texture.id
 }
 
@@ -227,13 +229,13 @@ func (r *Region) View() (float32, float32, float32, float32) {
 }
 
 type Texture struct {
-	id     *webgl.Texture
+	id     *gl.Texture
 	width  float32
 	height float32
 }
 
 func NewTexture(img Image) *Texture {
-	var id *webgl.Texture
+	var id *gl.Texture
 	if !headless {
 		id = Gl.CreateTexture()
 
@@ -264,7 +266,7 @@ func (t *Texture) Height() float32 {
 	return t.height
 }
 
-func (t *Texture) Texture() *webgl.Texture {
+func (t *Texture) Texture() *gl.Texture {
 	return t.id
 }
 
@@ -292,4 +294,11 @@ func NewSprite(region *Region, x, y float32) *Sprite {
 		Alpha:    1,
 		Region:   region,
 	}
+}
+
+func ImageToNRGBA(img image.Image, width, height int) *image.NRGBA {
+	newm := image.NewNRGBA(image.Rect(0, 0, width, height))
+	draw.Draw(newm, newm.Bounds(), img, image.Point{0, 0}, draw.Src)
+
+	return newm
 }
