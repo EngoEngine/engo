@@ -2,12 +2,9 @@ package main
 
 import (
 	"image/color"
-	"log"
 
 	"engo.io/ecs"
 	"engo.io/engo"
-	"github.com/jimstudt/http-authentication/basic"
-	"golang.org/x/tools/go/gcimporter15/testdata"
 )
 
 type DefaultScene struct{}
