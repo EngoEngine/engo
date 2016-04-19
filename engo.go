@@ -5,13 +5,13 @@ import (
 	"image/color"
 
 	"engo.io/ecs"
-	"engo.io/webgl"
+	"engo.io/gl"
 )
 
 var (
 	Time        *Clock
 	Files       *Loader
-	Gl          *webgl.Context
+	Gl          *gl.Context
 	WorldBounds AABB
 
 	currentWorld *ecs.World
