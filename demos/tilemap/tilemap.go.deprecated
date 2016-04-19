@@ -23,7 +23,7 @@ func (game *GameWorld) Preload() {
 func (game *GameWorld) Setup() {
 	engo.SetBackground(0x2d3739)
 
-	game.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&engo.RenderSystem{})
 
 	gameMap := ecs.NewEntity("RenderSystem")
 	tilemap := engo.NewTilemap(
@@ -39,7 +39,7 @@ func (game *GameWorld) Setup() {
 	gameMap.AddComponent(mapRender)
 	gameMap.AddComponent(mapSpace)
 
-	err := game.AddEntity(gameMap)
+	err := w.AddEntity(gameMap)
 	if err != nil {
 		log.Println(err)
 	}

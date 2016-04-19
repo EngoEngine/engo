@@ -26,7 +26,7 @@ type Animation struct {
 	engo.SpaceComponent
 }
 
-func (game *DefaultScene) Preload() {
+func (*DefaultScene) Preload() {
 	engo.Files.Add("assets/hero.png")
 	StopAction = &engo.AnimationAction{Name: "stop", Frames: []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}}
 	RunAction = &engo.AnimationAction{Name: "run", Frames: []int{16, 17, 18, 19, 20, 21}}
@@ -36,7 +36,7 @@ func (game *DefaultScene) Preload() {
 	actions = []*engo.AnimationAction{DieAction, StopAction, WalkAction, RunAction, SkillAction}
 }
 
-func (game *DefaultScene) Setup(w *ecs.World) {
+func (scene *DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 
 	w.AddSystem(&engo.RenderSystem{})
@@ -46,7 +46,7 @@ func (game *DefaultScene) Setup(w *ecs.World) {
 
 	spriteSheet := engo.NewSpritesheetFromFile("hero.png", 150, 150)
 
-	hero := game.CreateEntity(&engo.Point{0, 0}, spriteSheet, StopAction)
+	hero := scene.CreateEntity(&engo.Point{0, 0}, spriteSheet, StopAction)
 
 	// Add our hero to the appropriate systems
 	for _, system := range w.Systems() {
@@ -66,7 +66,7 @@ func (*DefaultScene) Show()        {}
 func (*DefaultScene) Exit()        {}
 func (*DefaultScene) Type() string { return "GameWorld" }
 
-func (game *DefaultScene) CreateEntity(point *engo.Point, spriteSheet *engo.Spritesheet, action *engo.AnimationAction) *Animation {
+func (*DefaultScene) CreateEntity(point *engo.Point, spriteSheet *engo.Spritesheet, action *engo.AnimationAction) *Animation {
 	entity := &Animation{BasicEntity: ecs.NewBasic()}
 
 	entity.SpaceComponent = engo.SpaceComponent{*point, 150, 150}

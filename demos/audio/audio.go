@@ -17,11 +17,11 @@ type Whoop struct {
 	engo.AudioComponent
 }
 
-func (scene *DefaultScene) Preload() {
+func (*DefaultScene) Preload() {
 	engo.Files.Add("assets/326488.wav")
 }
 
-func (scene *DefaultScene) Setup(w *ecs.World) {
+func (*DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 
 	w.AddSystem(&engo.AudioSystem{})

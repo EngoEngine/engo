@@ -12,7 +12,7 @@ These lines are key in this demo:
 * You can walk right (Right Arrow)
 * Use a skill action (Space)
 
-* `game.AddSystem(&engo.AnimationSystem{})`, to add/enable animations;
+* `w.AddSystem(&engo.AnimationSystem{})`, to add/enable animations;
 * `RunAction = &engo.AnimationAction{Name: "run", Frames: []int{16, 17, 18, 19, 20, 21}}`, for defining which frames were responsible for the `run` animation;
 * `animation := engo.NewAnimationComponent(spriteSheet.Renderables(), 0.1)`, to create the animation component;
 * `animation.AddAnimationActions(actions)`, to define the possible animations;

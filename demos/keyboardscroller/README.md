@@ -8,4 +8,4 @@ For doing so, it created a green background. This way, you'll notice the moving.
 ## What are important aspects of the code?
 This line is key in this demo:
 
-* `game.AddSystem(engo.NewKeyboardScroller(scrollSpeed, engo.W, engo.D, engo.S, engo.A))`, to enable moving the camera by using the keyboard.
+* `w.AddSystem(engo.NewKeyboardScroller(scrollSpeed, engo.W, engo.D, engo.S, engo.A))`, to enable moving the camera by using the keyboard.

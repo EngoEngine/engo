@@ -8,6 +8,5 @@ For doing so, it created a green background -- which will be affected, and a vio
 ## What are important aspects of the code?
 These lines are key in this demo:
 
-* `fieldRender.SetPriority(hudBackgroundPriority)`, to make sure the violet sidebar is rendered as HUD; 
-* `hudBackgroundPriority = engo.PriorityLevel(engo.HUDGround)`, which defined `hudBackgroundPriority`. 
-    * any value between `engo.HUDGround` and `engo.HighestGround` is rendered as HUD. 
+* `hudBg.RenderComponent.SetZIndex(1)`, to ensure it's rendered on top of the default background (with z-index 0)
+* `hudBg.RenderComponent.SetShader(engo.HUDShader)`, to enable the HUDShader instead of the DefaultShader
