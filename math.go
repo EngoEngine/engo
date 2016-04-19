@@ -1,7 +1,7 @@
 package engo
 
 import (
-	"math"
+	"github.com/luxengine/math"
 )
 
 type Point struct {
@@ -50,7 +50,7 @@ func (p *Point) Multiply(p2 Point) {
 }
 
 func (p *Point) PointDistance(p2 Point) float32 {
-	return float32(math.Sqrt(float64(p.PointDistanceSquared(p2))))
+	return math.Sqrt(p.PointDistanceSquared(p2))
 }
 
 func (p *Point) PointDistanceSquared(p2 Point) float32 {
@@ -69,7 +69,7 @@ func (a *Point) ProjectOnto(b Point) Point {
 
 // Returns the unit vector from a, and it's magnitude
 func (a *Point) Normalize() (Point, float32) {
-	mag := float32(math.Sqrt(float64(a.X*a.X + a.Y*a.Y)))
+	mag := math.Sqrt(a.X*a.X + a.Y*a.Y)
 	unit := Point{a.X / mag, a.Y / mag}
 
 	return unit, mag
@@ -91,12 +91,12 @@ func (l *Line) PointSide(point Point) bool {
 
 // Returns the line's angle relative to Y = 0
 func (l *Line) Angle() float32 {
-	return float32(math.Atan2(float64(l.P1.X-l.P2.X), float64(l.P1.Y-l.P2.Y)))
+	return math.Atan2(l.P1.X-l.P2.X, l.P1.Y-l.P2.Y)
 }
 
 // Returns the squared euclidean distance from a point to a line *segment*
 func (l *Line) PointDistance(point Point) float32 {
-	return float32(math.Sqrt(float64(l.PointDistanceSquared(point))))
+	return math.Sqrt(l.PointDistanceSquared(point))
 }
 
 // Returns the squared euclidean distance from a point to a line *segment*

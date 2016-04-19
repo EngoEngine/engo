@@ -1,14 +1,15 @@
 package engo
 
 import (
-	"math"
 	"time"
+
+	"github.com/luxengine/math"
 )
 
 type Clock struct {
-	elapsed float64
-	delta   float64
-	fps     float64
+	elapsed float32
+	delta   float32
+	fps     float32
 	frames  uint64
 	start   time.Time
 	frame   time.Time
@@ -32,14 +33,14 @@ func (c *Clock) Tick() {
 	c.frame = now
 
 	if c.elapsed >= 1 {
-		c.fps = float64(c.frames)
+		c.fps = c.frames
 		c.elapsed = math.Mod(c.elapsed, 1)
 		c.frames = 0
 	}
 }
 
 func (c *Clock) Delta() float32 {
-	return float32(c.delta)
+	return c.delta
 }
 
 func (c *Clock) Fps() float32 {
