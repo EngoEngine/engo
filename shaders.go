@@ -1,8 +1,10 @@
 package engo
 
 import (
-	"engo.io/webgl"
+	"fmt"
+	
 	"github.com/luxengine/math"
+	"engo.io/gl"
 )
 
 const bufferSize = 10000
@@ -10,25 +12,25 @@ const bufferSize = 10000
 type Shader interface {
 	Initialize(width, height float32)
 	Pre()
-	Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y, rotation float32)
+	Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotation float32)
 	Post()
 }
 
 type defaultShader struct {
 	indices  []uint16
-	indexVBO *webgl.Buffer
-	program  *webgl.Program
+	indexVBO *gl.Buffer
+	program  *gl.Program
 
-	lastTexture *webgl.Texture
+	lastTexture *gl.Texture
 
 	inPosition  int
 	inTexCoords int
 	inColor     int
 
-	ufCamera     *webgl.UniformLocation
-	ufPosition   *webgl.UniformLocation
-	ufProjection *webgl.UniformLocation
-	ufRotation   *webgl.UniformLocation
+	ufCamera     *gl.UniformLocation
+	ufPosition   *gl.UniformLocation
+	ufProjection *gl.UniformLocation
+	ufRotation   *gl.UniformLocation
 }
 
 func (s *defaultShader) Initialize(width, height float32) {
@@ -106,6 +108,14 @@ void main (void) {
 
 	Gl.Enable(Gl.BLEND)
 	Gl.BlendFunc(Gl.SRC_ALPHA, Gl.ONE_MINUS_SRC_ALPHA)
+
+	// We sometimes have to change our projection matrix
+	Mailbox.Listen("WindowResizeMessage", func(m Message) {
+		wrm, ok := m.(WindowResizeMessage)
+		if !ok {
+			return
+		}
+	})
 }
 
 func (s *defaultShader) Pre() {
@@ -118,7 +128,7 @@ func (s *defaultShader) Pre() {
 	Gl.Uniform3f(s.ufCamera, cam.x, cam.y, cam.z)
 }
 
-func (s *defaultShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y, rotation float32) {
+func (s *defaultShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotation float32) {
 	if s.lastTexture != texture {
 		Gl.BindTexture(Gl.TEXTURE_2D, texture)
 		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)
@@ -150,16 +160,16 @@ func (s *defaultShader) Post() {
 
 type hudShader struct {
 	indices  []uint16
-	indexVBO *webgl.Buffer
-	program  *webgl.Program
+	indexVBO *gl.Buffer
+	program  *gl.Program
 
-	lastTexture *webgl.Texture
+	lastTexture *gl.Texture
 
 	inPosition   int
 	inTexCoords  int
 	inColor      int
-	ufPosition   *webgl.UniformLocation
-	ufProjection *webgl.UniformLocation
+	ufPosition   *gl.UniformLocation
+	ufProjection *gl.UniformLocation
 }
 
 func (s *hudShader) Initialize(width, height float32) {
@@ -239,7 +249,7 @@ func (s *hudShader) Pre() {
 	Gl.Uniform2f(s.ufProjection, windowWidth/2, -windowHeight/2)
 }
 
-func (s *hudShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y, rotation float32) {
+func (s *hudShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotation float32) {
 	if s.lastTexture != texture {
 		Gl.BindTexture(Gl.TEXTURE_2D, texture)
 		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)

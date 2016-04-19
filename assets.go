@@ -1,13 +1,15 @@
 package engo
 
 import (
+	"image"
 	"image/color"
+	"image/draw"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
 
-	"engo.io/webgl"
+	"engo.io/gl"
 	"github.com/golang/freetype/truetype"
 	"github.com/luxengine/math"
 )
@@ -40,8 +42,13 @@ func NewLoader() *Loader {
 
 func NewResource(url string) Resource {
 	kind := path.Ext(url)
-	//name := strings.TrimSuffix(path.Base(url), kind)
 	name := path.Base(url)
+
+	if len(kind) == 0 {
+		log.Println("WARNING: Cannot laod extensionless resource.")
+		return Resource{}
+	}
+
 	return Resource{name: name, url: url, kind: kind[1:]}
 }
 
@@ -92,34 +99,67 @@ func (l *Loader) Load(onFinish func()) {
 	for _, r := range l.resources {
 		switch r.kind {
 		case "png":
-			data, err := loadImage(r)
-			if err == nil {
-				l.images[r.name] = NewTexture(data)
+			if _, ok := l.images[r.name]; ok {
+				continue // with other resources
 			}
+
+			data, err := loadImage(r)
+			if err != nil {
+				log.Println("Error loading resource:", err)
+				continue // with other resources
+			}
+
+			l.images[r.name] = NewTexture(data)
 		case "jpg":
+			if _, ok := l.images[r.name]; ok {
+				continue // with other resources
+			}
+
 			data, err := loadImage(r)
-			if err == nil {
-				l.images[r.name] = NewTexture(data)
+			if err != nil {
+				log.Println("Error loading resource:", err)
+				continue // with other resources
 			}
+
+			l.images[r.name] = NewTexture(data)
 		case "json":
+			if _, ok := l.jsons[r.name]; ok {
+				continue // with other resources
+			}
+
 			data, err := loadJSON(r)
-			if err == nil {
-				l.jsons[r.name] = data
+			if err != nil {
+				log.Println("Error loading resource:", err)
+				continue // with other resources
 			}
+
+			l.jsons[r.name] = data
 		case "tmx":
-			data, err := createLevelFromTmx(r)
-			if err == nil {
-				l.levels[r.name] = data
+			if _, ok := l.levels[r.name]; ok {
+				continue // with other resources
 			}
+
+			data, err := createLevelFromTmx(r)
+			if err != nil {
+				log.Println("Error loading resource:", err)
+				continue // with other resources
+			}
+
+			l.levels[r.name] = data
 		case "wav":
 			l.sounds[r.name] = r.url
 		case "ttf":
-			f, err := loadFont(r)
-			if err == nil {
-				l.fonts[r.name] = f
-			} else {
-				log.Printf("Could not load font %s\n", r.name)
+			if _, ok := l.fonts[r.name]; ok {
+				continue // with other resources
 			}
+
+			f, err := loadFont(r)
+			if err != nil {
+				log.Println("Error loading resource:", err)
+				continue // with other resources
+			}
+
+			l.fonts[r.name] = f
 		}
 	}
 	onFinish()
@@ -131,7 +171,7 @@ type Image interface {
 	Height() int
 }
 
-func LoadShader(vertSrc, fragSrc string) *webgl.Program {
+func LoadShader(vertSrc, fragSrc string) *gl.Program {
 	vertShader := Gl.CreateShader(Gl.VERTEX_SHADER)
 	Gl.ShaderSource(vertShader, vertSrc)
 	Gl.CompileShader(vertShader)
@@ -190,7 +230,7 @@ func (r *Region) Height() float32 {
 	return float32(r.height)
 }
 
-func (r *Region) Texture() *webgl.Texture {
+func (r *Region) Texture() *gl.Texture {
 	return r.texture.id
 }
 
@@ -199,13 +239,13 @@ func (r *Region) View() (float32, float32, float32, float32) {
 }
 
 type Texture struct {
-	id     *webgl.Texture
+	id     *gl.Texture
 	width  float32
 	height float32
 }
 
 func NewTexture(img Image) *Texture {
-	var id *webgl.Texture
+	var id *gl.Texture
 	if !headless {
 		id = Gl.CreateTexture()
 
@@ -236,7 +276,7 @@ func (t *Texture) Height() float32 {
 	return t.height
 }
 
-func (t *Texture) Texture() *webgl.Texture {
+func (t *Texture) Texture() *gl.Texture {
 	return t.id
 }
 
@@ -264,4 +304,11 @@ func NewSprite(region *Region, x, y float32) *Sprite {
 		Alpha:    1,
 		Region:   region,
 	}
+}
+
+func ImageToNRGBA(img image.Image, width, height int) *image.NRGBA {
+	newm := image.NewNRGBA(image.Rect(0, 0, width, height))
+	draw.Draw(newm, newm.Bounds(), img, image.Point{0, 0}, draw.Src)
+
+	return newm
 }

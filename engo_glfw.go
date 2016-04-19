@@ -15,7 +15,7 @@ import (
 	"syscall"
 	"time"
 
-	"engo.io/webgl"
+	"engo.io/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
@@ -86,7 +86,7 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 
 	SetVSync(vsync)
 
-	Gl = webgl.NewContext()
+	Gl = gl.NewContext()
 	Gl.Viewport(0, 0, width, height)
 
 	window.SetFramebufferSizeCallback(func(window *glfw.Window, w, h int) {
@@ -132,12 +132,21 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 	})
 
 	window.SetSizeCallback(func(w *glfw.Window, widthInt int, heightInt int) {
+		message := WindowResizeMessage{
+			OldWidth:  int(windowWidth),
+			OldHeight: int(windowHeight),
+			NewWidth:  widthInt,
+			NewHeight: heightInt,
+		}
+
 		windowWidth = float32(widthInt)
 		windowHeight = float32(heightInt)
 
 		if !scaleOnResize {
 			gameWidth, gameHeight = float32(widthInt), float32(heightInt)
 		}
+
+		Mailbox.Dispatch(message)
 	})
 
 	window.SetCharCallback(func(window *glfw.Window, char rune) {
