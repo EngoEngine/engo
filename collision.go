@@ -27,23 +27,8 @@ func (sc *SpaceComponent) Center(p Point) {
 	sc.Position.Y = p.Y - yDelta
 }
 
-func (*SpaceComponent) Type() string {
-	return "SpaceComponent"
-}
-
 func (sc SpaceComponent) AABB() AABB {
 	return AABB{Min: sc.Position, Max: Point{sc.Position.X + sc.Width, sc.Position.Y + sc.Height}}
-}
-
-type CollisionMasterComponent struct {
-}
-
-func (*CollisionMasterComponent) Type() string {
-	return "CollisionMasterComponent"
-}
-
-func (cm CollisionMasterComponent) Is() bool {
-	return true
 }
 
 type CollisionComponent struct {
@@ -51,88 +36,74 @@ type CollisionComponent struct {
 	Extra       Point
 }
 
-func (*CollisionComponent) Type() string {
-	return "CollisionComponent"
-}
-
 type CollisionMessage struct {
-	Entity *ecs.Entity
-	To     *ecs.Entity
+	Entity collisionEntity
+	To     collisionEntity
 }
 
 func (collision CollisionMessage) Type() string {
 	return "CollisionMessage"
 }
 
+type collisionEntity struct {
+	*ecs.BasicEntity
+	*CollisionComponent
+	*SpaceComponent
+}
+
 type CollisionSystem struct {
-	ecs.LinearSystem
+	entities []collisionEntity
 }
 
-func (*CollisionSystem) Type() string { return "CollisionSystem" }
-func (*CollisionSystem) Pre()         {}
-func (*CollisionSystem) Post()        {}
-
-func (cs *CollisionSystem) New(*ecs.World) {}
-
-func (cs *CollisionSystem) RunInParallel() bool {
-	// TODO: this function isn't called/used any more ...
-	return len(cs.Entities) > 40 // turning point for CollisionSystem
+func (c *CollisionSystem) Add(basic *ecs.BasicEntity, collision *CollisionComponent, space *SpaceComponent) {
+	c.entities = append(c.entities, collisionEntity{basic, collision, space})
 }
 
-func (cs *CollisionSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-	var (
-		space     *SpaceComponent
-		collision *CollisionComponent
-		ok        bool
-	)
-
-	if space, ok = entity.ComponentFast(space).(*SpaceComponent); !ok {
-		return
+func (c *CollisionSystem) Remove(basic ecs.BasicEntity) {
+	delete := -1
+	for index, e := range c.entities {
+		if e.BasicEntity.ID() == basic.ID() {
+			delete = index
+		}
 	}
-
-	if collision, ok = entity.ComponentFast(collision).(*CollisionComponent); !ok {
-		return
+	if delete >= 0 {
+		c.entities = append(c.entities[:delete], c.entities[delete+1:]...)
 	}
+}
 
-	if !collision.Main {
-		return
-	}
+func (cs *CollisionSystem) Update(dt float32) {
+	for i1, e1 := range cs.entities {
+		if !e1.CollisionComponent.Main {
+			continue // with other entities
+		}
 
-	var (
-		otherSpace     *SpaceComponent
-		otherCollision *CollisionComponent
-	)
+		entityAABB := e1.SpaceComponent.AABB()
+		offset := Point{e1.CollisionComponent.Extra.X / 2, e1.CollisionComponent.Extra.Y / 2}
+		entityAABB.Min.X -= offset.X
+		entityAABB.Min.Y -= offset.Y
+		entityAABB.Max.X += offset.X
+		entityAABB.Max.Y += offset.Y
 
-	for _, other := range cs.Entities {
-		if other.ID() != entity.ID() {
-			if otherSpace, ok = other.ComponentFast(otherSpace).(*SpaceComponent); !ok {
-				return
+		for i2, e2 := range cs.entities {
+			if i1 == i2 {
+				continue // with other entities, because we won't collide with ourselves
 			}
 
-			if otherCollision, ok = other.ComponentFast(otherCollision).(*CollisionComponent); !ok {
-				return
-			}
-
-			entityAABB := space.AABB()
-			offset := Point{collision.Extra.X / 2, collision.Extra.Y / 2}
-			entityAABB.Min.X -= offset.X
-			entityAABB.Min.Y -= offset.Y
-			entityAABB.Max.X += offset.X
-			entityAABB.Max.Y += offset.Y
-			otherAABB := otherSpace.AABB()
-			offset = Point{otherCollision.Extra.X / 2, otherCollision.Extra.Y / 2}
+			otherAABB := e2.SpaceComponent.AABB()
+			offset = Point{e2.CollisionComponent.Extra.X / 2, e2.CollisionComponent.Extra.Y / 2}
 			otherAABB.Min.X -= offset.X
 			otherAABB.Min.Y -= offset.Y
 			otherAABB.Max.X += offset.X
 			otherAABB.Max.Y += offset.Y
+
 			if IsIntersecting(entityAABB, otherAABB) {
-				if otherCollision.Solid && collision.Solid {
+				if e1.CollisionComponent.Solid && e2.CollisionComponent.Solid {
 					mtd := MinimumTranslation(entityAABB, otherAABB)
-					space.Position.X += mtd.X
-					space.Position.Y += mtd.Y
+					e1.SpaceComponent.Position.X += mtd.X
+					e1.SpaceComponent.Position.Y += mtd.Y
 				}
 
-				Mailbox.Dispatch(CollisionMessage{Entity: entity, To: other})
+				Mailbox.Dispatch(CollisionMessage{Entity: e1, To: e2})
 			}
 		}
 	}

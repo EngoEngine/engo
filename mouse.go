@@ -52,146 +52,140 @@ type MouseComponent struct {
 	Modifier Modifier
 }
 
-// Type returns the string representation of the MouseComponent type
-func (*MouseComponent) Type() string {
-	return "MouseComponent"
+type mouseEntity struct {
+	*ecs.BasicEntity
+	*MouseComponent
+	*SpaceComponent
+	*RenderComponent
 }
 
 // MouseSystem listens for mouse events, and changes value for MouseComponent accordingly
 type MouseSystem struct {
-	ecs.LinearSystem
+	entities []mouseEntity
 
 	mouseX    float32
 	mouseY    float32
 	mouseDown bool
 }
 
-// Type returns the string representation of the MouseSystem type
-func (*MouseSystem) Type() string { return "MouseSystem" }
-
-// New initializes the MouseSystem
-func (m *MouseSystem) New(*ecs.World) {}
-
 // Priority returns a priority of 10 (higher than most) to ensure that this System runs before all others
-func (m *MouseSystem) Priority() int {
-	return 10
+func (m *MouseSystem) Priority() int { return 10 }
+
+// Add adds a new entity to the MouseSystem.
+// * RenderComponent is only required if you're using the HUDShader on this Entity.
+// * SpaceComponent is required whenever you want to know specific mouse-events on this Entity (like hover,
+//   click, etc.). If you don't need those, then you can omit the SpaceComponent.
+// * MouseComponent is always required.
+// * BasicEntity is always required.
+func (m *MouseSystem) Add(basic *ecs.BasicEntity, mouse *MouseComponent, space *SpaceComponent, render *RenderComponent) {
+	m.entities = append(m.entities, mouseEntity{basic, mouse, space, render})
 }
 
-// Pre is called before all Update calls, and is used to compute internal values
-func (m *MouseSystem) Pre() {
+func (m *MouseSystem) Remove(basic ecs.BasicEntity) {
+	var delete int = -1
+	for index, entity := range m.entities {
+		if entity.ID() == basic.ID() {
+			delete = index
+		}
+	}
+	if delete >= 0 {
+		m.entities = append(m.entities[:delete], m.entities[delete+1:]...)
+	}
+}
+
+func (m *MouseSystem) Update(dt float32) {
 	// Translate Mouse.X and Mouse.Y into "game coordinates"
 	m.mouseX = Mouse.X*cam.z*(gameWidth/windowWidth) + cam.x - (gameWidth/2)*cam.z
 	m.mouseY = Mouse.Y*cam.z*(gameHeight/windowHeight) + cam.y - (gameHeight/2)*cam.z
-}
 
-// Post is called after all Update calls, and is used to compute internal values
-// NOTE: we do not reset modifiers here because we always set them to meaningful
-// values when a mouse event is propagated to the mouse components
-func (m *MouseSystem) Post() {
+	for _, e := range m.entities {
+		// Reset all values except these
+		*e.MouseComponent = MouseComponent{
+			Track:   e.MouseComponent.Track,
+			Hovered: e.MouseComponent.Hovered,
+		}
+
+		if e.MouseComponent.Track {
+			// track mouse position so that systems that need to stay on the mouse
+			// position can do it (think an RTS when placing a new building and
+			// you get a ghost building following your mouse until you click to
+			// place it somewhere in your world.
+			e.MouseComponent.MouseX = m.mouseX
+			e.MouseComponent.MouseY = m.mouseY
+		}
+
+		mx := m.mouseX
+		my := m.mouseY
+
+		if e.SpaceComponent == nil {
+			continue // with other entities
+		}
+
+		if e.RenderComponent != nil {
+			// Hardcoded special case for the HUD | TODO: make generic instead of hardcoding
+			if e.RenderComponent.shader == HUDShader {
+				mx = Mouse.X
+				my = Mouse.Y
+			}
+		}
+
+		// if the Mouse component is a tracker we always update it
+		// Check if the X-value is within range
+		// and if the Y-value is within range
+		if e.MouseComponent.Track ||
+			mx > e.SpaceComponent.Position.X && mx < (e.SpaceComponent.Position.X+e.SpaceComponent.Width) &&
+				my > e.SpaceComponent.Position.Y && my < (e.SpaceComponent.Position.Y+e.SpaceComponent.Height) {
+
+			e.MouseComponent.Enter = !e.MouseComponent.Hovered
+			e.MouseComponent.Hovered = true
+			e.MouseComponent.Released = false
+
+			if !e.MouseComponent.Track {
+				// If we're tracking, we've already set these
+				e.MouseComponent.MouseX = mx
+				e.MouseComponent.MouseY = my
+			}
+
+			switch Mouse.Action {
+			case PRESS:
+				switch Mouse.Button {
+				case MouseButtonLeft:
+					e.MouseComponent.Clicked = true
+				case MouseButtonRight:
+					e.MouseComponent.RightClicked = true
+				}
+				m.mouseDown = true
+			case RELEASE:
+				switch Mouse.Button {
+				case MouseButtonLeft:
+					e.MouseComponent.Released = true
+				case MouseButtonRight:
+					e.MouseComponent.RightReleased = true
+				}
+				// dragging stops as soon as one of the currently pressed buttons
+				// is released
+				e.MouseComponent.Dragged = false
+				// mouseDown goes false as soon as one of the pressed buttons is
+				// released. Effectively ending any dragging
+				m.mouseDown = false
+			case MOVE:
+				if m.mouseDown {
+					e.MouseComponent.Dragged = true
+				}
+			}
+		} else {
+			if e.MouseComponent.Hovered {
+				e.MouseComponent.Leave = true
+			}
+			e.MouseComponent.Hovered = false
+		}
+
+		// propagate the modifiers to the mouse component so that game
+		// implementers can take different decisions based on those
+		e.MouseComponent.Modifier = Mouse.Modifer
+	}
+
 	// reset mouse.Action value to something meaningless to avoid
 	// catching the same "signal" twice
 	Mouse.Action = NEUTRAL
-}
-
-// UpdateEntity sets the MouseComponent values for each Entity
-func (m *MouseSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-	mx := m.mouseX
-	my := m.mouseY
-
-	var (
-		mc     *MouseComponent
-		space  *SpaceComponent
-		render *RenderComponent
-		ok     bool
-	)
-
-	// We need MouseComponent to save our findings
-	if mc, ok = entity.ComponentFast(mc).(*MouseComponent); !ok {
-		return
-	}
-
-	// Reset all values except these
-	*mc = MouseComponent{
-		Track:   mc.Track,
-		Hovered: mc.Hovered,
-	}
-
-	if mc.Track {
-		// track mouse position so that systems that need to stay on the mouse
-		// position can do it (think an RTS when placing a new building and
-		// you get a ghost building following your mouse until you click to
-		// place it somewhere in your world.
-		mc.MouseX = mx
-		mc.MouseY = my
-	}
-
-	// We need SpaceComponent for the location
-	if space, ok = entity.ComponentFast(space).(*SpaceComponent); !ok {
-		return
-	}
-
-	// We need RenderComponent for the Priority
-	if render, ok = entity.ComponentFast(render).(*RenderComponent); !ok {
-		return
-	}
-
-	// Special case: HUD
-	if render.shader == HUDShader {
-		mx = Mouse.X
-		my = Mouse.Y
-	}
-
-	// if the Mouse component is a tracker we always update it
-	// Check if the X-value is within range
-	// and if the Y-value is within range
-	if mc.Track || mx > space.Position.X && mx < (space.Position.X+space.Width) &&
-		my > space.Position.Y && my < (space.Position.Y+space.Height) {
-
-		mc.Enter = !mc.Hovered
-		mc.Hovered = true
-		mc.Released = false
-
-		if !mc.Track {
-			// If we're tracking, we've already set these
-			mc.MouseX = mx
-			mc.MouseY = my
-		}
-
-		switch Mouse.Action {
-		case PRESS:
-			switch Mouse.Button {
-			case MouseButtonLeft:
-				mc.Clicked = true
-			case MouseButtonRight:
-				mc.RightClicked = true
-			}
-			m.mouseDown = true
-		case RELEASE:
-			switch Mouse.Button {
-			case MouseButtonLeft:
-				mc.Released = true
-			case MouseButtonRight:
-				mc.RightReleased = true
-			}
-			// dragging stops as soon as one of the currently pressed buttons
-			// is released
-			mc.Dragged = false
-			// mouseDown goes false as soon as one of the pressed buttons is
-			// released. Effectively ending any dragging
-			m.mouseDown = false
-		case MOVE:
-			if m.mouseDown {
-				mc.Dragged = true
-			}
-		}
-	} else {
-		if mc.Hovered {
-			mc.Leave = true
-		}
-		mc.Hovered = false
-	}
-
-	// propagate the modifiers to the mouse component so that game
-	// implementers can take different decisions based on those
-	mc.Modifier = Mouse.Modifer
 }

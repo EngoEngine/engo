@@ -66,37 +66,38 @@ func (ac *AnimationComponent) NextFrame() {
 	ac.change = 0
 }
 
-func (*AnimationComponent) Type() string {
-	return "AnimationComponent"
+type animationEntity struct {
+	*ecs.BasicEntity
+	*AnimationComponent
+	*RenderComponent
 }
 
 type AnimationSystem struct {
-	ecs.LinearSystem
+	entities []animationEntity
 }
 
-func (a *AnimationSystem) New(*ecs.World) {}
+func (a *AnimationSystem) Add(basic *ecs.BasicEntity, anim *AnimationComponent, render *RenderComponent) {
+	a.entities = append(a.entities, animationEntity{basic, anim, render})
+}
 
-func (*AnimationSystem) Type() string { return "AnimationSystem" }
-func (*AnimationSystem) Pre()         {}
-func (*AnimationSystem) Post()        {}
-
-func (a *AnimationSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-	var (
-		ac *AnimationComponent
-		r  *RenderComponent
-		ok bool
-	)
-
-	if ac, ok = entity.ComponentFast(ac).(*AnimationComponent); !ok {
-		return
+func (a *AnimationSystem) Remove(basic ecs.BasicEntity) {
+	delete := -1
+	for index, e := range a.entities {
+		if e.BasicEntity.ID() == basic.ID() {
+			delete = index
+		}
 	}
-	if r, ok = entity.ComponentFast(r).(*RenderComponent); !ok {
-		return
+	if delete >= 0 {
+		a.entities = append(a.entities[:delete], a.entities[delete+1:]...)
 	}
+}
 
-	ac.change += dt
-	if ac.change >= ac.Rate {
-		ac.NextFrame()
-		r.SetDrawable(ac.Cell())
+func (a *AnimationSystem) Update(dt float32) {
+	for _, e := range a.entities {
+		e.AnimationComponent.change += dt
+		if e.AnimationComponent.change >= e.AnimationComponent.Rate {
+			e.AnimationComponent.NextFrame()
+			e.RenderComponent.SetDrawable(e.AnimationComponent.Cell())
+		}
 	}
 }

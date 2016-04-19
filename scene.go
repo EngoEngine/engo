@@ -87,7 +87,6 @@ func SetScene(s Scene, forceNewWorld bool) {
 
 		wrapper.mailbox.listeners = make(map[string][]MessageHandler)
 
-		wrapper.world.New()
 		wrapper.world.AddSystem(wrapper.camera)
 
 		s.Setup(wrapper.world)
