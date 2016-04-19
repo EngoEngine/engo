@@ -1,10 +1,8 @@
 package engo
 
 import (
-	"fmt"
-	
-	"github.com/luxengine/math"
 	"engo.io/gl"
+	"github.com/luxengine/math"
 )
 
 const bufferSize = 10000
@@ -108,14 +106,6 @@ void main (void) {
 
 	Gl.Enable(Gl.BLEND)
 	Gl.BlendFunc(Gl.SRC_ALPHA, Gl.ONE_MINUS_SRC_ALPHA)
-
-	// We sometimes have to change our projection matrix
-	Mailbox.Listen("WindowResizeMessage", func(m Message) {
-		wrm, ok := m.(WindowResizeMessage)
-		if !ok {
-			return
-		}
-	})
 }
 
 func (s *defaultShader) Pre() {
