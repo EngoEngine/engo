@@ -6,7 +6,7 @@ import (
 	"sort"
 
 	"engo.io/ecs"
-	"engo.io/webgl"
+	"engo.io/gl"
 	"github.com/luxengine/math"
 )
 
@@ -21,7 +21,7 @@ func (renderChangeMessage) Type() string {
 }
 
 type Drawable interface {
-	Texture() *webgl.Texture
+	Texture() *gl.Texture
 	Width() float32
 	Height() float32
 	View() (float32, float32, float32, float32)
@@ -40,7 +40,7 @@ type RenderComponent struct {
 	zIndex float32
 
 	drawable      Drawable
-	buffer        *webgl.Buffer
+	buffer        *gl.Buffer
 	bufferContent []float32
 }
 
