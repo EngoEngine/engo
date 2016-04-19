@@ -1,7 +1,9 @@
 package engo
 
 import (
+	"image"
 	"image/color"
+	"image/draw"
 	"io/ioutil"
 	"log"
 	"os"
@@ -259,4 +261,11 @@ func NewSprite(region *Region, x, y float32) *Sprite {
 		Alpha:    1,
 		Region:   region,
 	}
+}
+
+func ImageToNRGBA(img image.Image, width, height int) *image.NRGBA {
+	newm := image.NewNRGBA(image.Rect(0, 0, width, height))
+	draw.Draw(newm, newm.Bounds(), img, image.Point{0, 0}, draw.Src)
+
+	return newm
 }

@@ -29,15 +29,15 @@ type Drawable interface {
 
 type RenderComponent struct {
 	// Hidden is used to prevent drawing by OpenGL
-	Hidden        bool
+	Hidden bool
 
 	// Transparency is the level of transparency that is used to draw the texture
-	Transparency  float32
+	Transparency float32
 
-	scale         Point
-	Color         color.Color
-	shader        Shader
-	zIndex        float32
+	scale  Point
+	Color  color.Color
+	shader Shader
+	zIndex float32
 
 	drawable      Drawable
 	buffer        *webgl.Buffer
