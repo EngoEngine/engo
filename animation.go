@@ -21,8 +21,8 @@ type AnimationComponent struct {
 	CurrentAnimation []int            // The current animation
 }
 
-func NewAnimationComponent(drawables []Drawable, rate float32) *AnimationComponent {
-	return &AnimationComponent{
+func NewAnimationComponent(drawables []Drawable, rate float32) AnimationComponent {
+	return AnimationComponent{
 		Animations: make(map[string][]int),
 		Drawables:  drawables,
 		Rate:       rate,
