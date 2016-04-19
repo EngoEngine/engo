@@ -1,7 +1,7 @@
 package engo
 
 import (
-	"engo.io/webgl"
+	"engo.io/gl"
 	"fmt"
 )
 
@@ -10,26 +10,26 @@ const bufferSize = 10000
 type Shader interface {
 	Initialize(width, height float32)
 	Pre()
-	Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y, rotation float32)
+	Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotation float32)
 	Post()
 }
 
 type defaultShader struct {
 	indices  []uint16
-	indexVBO *webgl.Buffer
-	program  *webgl.Program
+	indexVBO *gl.Buffer
+	program  *gl.Program
 
 	projX float32
 	projY float32
 
-	lastTexture *webgl.Texture
+	lastTexture *gl.Texture
 
 	inPosition   int
 	inTexCoords  int
 	inColor      int
-	ufCamera     *webgl.UniformLocation
-	ufPosition   *webgl.UniformLocation
-	ufProjection *webgl.UniformLocation
+	ufCamera     *gl.UniformLocation
+	ufPosition   *gl.UniformLocation
+	ufProjection *gl.UniformLocation
 }
 
 func (s *defaultShader) Initialize(width, height float32) {
@@ -126,7 +126,7 @@ func (s *defaultShader) Pre() {
 	Gl.Uniform3f(s.ufCamera, cam.x, cam.y, cam.z)
 }
 
-func (s *defaultShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y, rotation float32) {
+func (s *defaultShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotation float32) {
 	if s.lastTexture != texture {
 		Gl.BindTexture(Gl.TEXTURE_2D, texture)
 		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)
@@ -154,19 +154,19 @@ func (s *defaultShader) SetProjection(width, height float32) {
 
 type hudShader struct {
 	indices  []uint16
-	indexVBO *webgl.Buffer
-	program  *webgl.Program
+	indexVBO *gl.Buffer
+	program  *gl.Program
 
 	projX float32
 	projY float32
 
-	lastTexture *webgl.Texture
+	lastTexture *gl.Texture
 
 	inPosition   int
 	inTexCoords  int
 	inColor      int
-	ufPosition   *webgl.UniformLocation
-	ufProjection *webgl.UniformLocation
+	ufPosition   *gl.UniformLocation
+	ufProjection *gl.UniformLocation
 }
 
 func (s *hudShader) Initialize(width, height float32) {
@@ -249,7 +249,7 @@ func (s *hudShader) Pre() {
 	Gl.Uniform2f(s.ufProjection, s.projX, s.projY)
 }
 
-func (s *hudShader) Draw(texture *webgl.Texture, buffer *webgl.Buffer, x, y, rotation float32) {
+func (s *hudShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotation float32) {
 	if s.lastTexture != texture {
 		Gl.BindTexture(Gl.TEXTURE_2D, texture)
 		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)
