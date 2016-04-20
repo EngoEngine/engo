@@ -24,32 +24,50 @@ type AudioComponent struct {
 	RawVolume  float64
 }
 
-func (*AudioComponent) Type() string {
-	return "AudioComponent"
-}
-
 func (ac *AudioComponent) SetVolume(volume float64) {
 	ac.RawVolume = volume
 	ac.player.SetVolume(volume * MasterVolume)
 }
 
+type audioEntity struct {
+	*ecs.BasicEntity
+	*AudioComponent
+	*SpaceComponent
+}
+
 // AudioSystem is a System that allows for sound effects and / or music
 type AudioSystem struct {
-	ecs.LinearSystem
+	entities       []audioEntity
 	HeightModifier float32
 
 	cachedVolume float64
 }
 
-func (*AudioSystem) Type() string { return "AudioSystem" }
-func (*AudioSystem) Pre()         {}
-func (*AudioSystem) Post()        {}
+// Add adds a new entity to the AudioSystem. AudioComponent is always required, and the SpaceComponent is
+// required as soon as AudioComponent.Background is false. (So if it's not a background noise, we want to know
+// where it's originated from)
+func (a *AudioSystem) Add(basic *ecs.BasicEntity, audio *AudioComponent, space *SpaceComponent) {
+	a.entities = append(a.entities, audioEntity{basic, audio, space})
+}
 
-func (as *AudioSystem) New(*ecs.World) {
-	as.cachedVolume = MasterVolume
+func (a *AudioSystem) Remove(basic ecs.BasicEntity) {
+	delete := -1
+	for index, e := range a.entities {
+		if e.BasicEntity.ID() == basic.ID() {
+			delete = index
+			break
+		}
+	}
+	if delete >= 0 {
+		a.entities = append(a.entities[:delete], a.entities[delete+1:]...)
+	}
+}
 
-	if as.HeightModifier == 0 {
-		as.HeightModifier = defaultHeightModifier
+func (a *AudioSystem) New(*ecs.World) {
+	a.cachedVolume = MasterVolume
+
+	if a.HeightModifier == 0 {
+		a.HeightModifier = defaultHeightModifier
 	}
 
 	if err := al.OpenDevice(); err != nil {
@@ -65,64 +83,58 @@ func (as *AudioSystem) New(*ecs.World) {
 
 		// Hopefully not that much of an issue, when we receive it before the CameraSystem does
 		// TODO: but it is when the CameraMessage is not Incremental (i.e. the changes are big)
-		al.SetListenerPosition(al.Vector{cam.X() / Width(), cam.Y() / Height(), cam.Z() * as.HeightModifier})
+		al.SetListenerPosition(al.Vector{cam.X() / Width(), cam.Y() / Height(), cam.Z() * a.HeightModifier})
 	})
 }
 
-func (as *AudioSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-	var ac *AudioComponent
-	var ok bool
-	if ac, ok = entity.ComponentFast(ac).(*AudioComponent); !ok {
-		return
-	}
+func (a *AudioSystem) Update(dt float32) {
+	for _, e := range a.entities {
+		if e.AudioComponent.player == nil {
+			f := Files.Sound(e.AudioComponent.File)
+			if f == nil {
+				log.Println("Audio file not loaded:", e.AudioComponent.File)
+				continue
+			}
 
-	if ac.player == nil {
-		f := Files.Sound(ac.File)
-		if f == nil {
-			return
-		}
-
-		var err error
-		ac.player, err = NewPlayer(f, 0, 0)
-		if err != nil {
-			log.Println("Error initializing AudioSystem:", err)
-			return
-		}
-	}
-
-	if MasterVolume != as.cachedVolume {
-		ac.SetVolume(ac.RawVolume)
-	}
-
-	if ac.player.State() != Playing {
-		if ac.player.State() == Stopped {
-			if !ac.Repeat {
-				al.RewindSources(ac.player.source)
-				al.StopSources(ac.player.source)
-				entity.RemoveComponent(ac)
-				return
+			var err error
+			e.AudioComponent.player, err = NewPlayer(f, 0, 0)
+			if err != nil {
+				log.Println("Error initializing AudioComponent:", err)
+				continue
 			}
 		}
 
-		// Prepares if the track hasn't been buffered before.
-		if err := ac.player.prepare(ac.Background, 0, false); err != nil {
-			log.Println("Error initializing AudioSystem:", err)
-			return
+		if MasterVolume != a.cachedVolume {
+			e.AudioComponent.SetVolume(e.AudioComponent.RawVolume)
 		}
 
-		al.PlaySources(ac.player.source)
-
-		if !ac.Background {
-			var space *SpaceComponent
-			var ok bool
-			if space, ok = entity.ComponentFast(space).(*SpaceComponent); !ok {
-				return
+		if e.AudioComponent.player.State() != Playing {
+			if e.AudioComponent.player.State() == Stopped {
+				if !e.AudioComponent.Repeat {
+					al.RewindSources(e.AudioComponent.player.source)
+					al.StopSources(e.AudioComponent.player.source)
+					// Remove it from this system, defer because we want to be sure it doesn't interfere with
+					// looping over a.entities
+					defer a.Remove(*e.BasicEntity)
+					continue
+				}
 			}
 
-			ac.player.source.SetPosition(al.Vector{
-				(space.Position.X + space.Width/2) / Width(),
-				(space.Position.Y + space.Height/2) / Height(),
-				0})
+			// Prepares if the track hasn't been buffered before.
+			if err := e.AudioComponent.player.prepare(e.AudioComponent.Background, 0, false); err != nil {
+				log.Println("Error initializing AudioComponent:", err)
+				continue
+			}
+
+			al.PlaySources(e.AudioComponent.player.source)
+
+			if !e.AudioComponent.Background {
+				e.AudioComponent.player.source.SetPosition(al.Vector{
+					(e.SpaceComponent.Position.X + e.SpaceComponent.Width/2) / Width(), // TODO: ensure we're using correct Width/Height()
+					(e.SpaceComponent.Position.Y + e.SpaceComponent.Height/2) / Height(),
+					0,
+				})
+			}
 		}
 	}
 }

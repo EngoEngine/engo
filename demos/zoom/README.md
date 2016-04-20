@@ -8,10 +8,4 @@ For doing so, it created a green background. This way, you'll notice the zooming
 ## What are important aspects of the code?
 These lines are key in this demo:
 
-```go
-// Scroll is called whenever the mouse wheel scrolls
-func (game *Game) Scroll(amount float32) {
-	// Adding this line, allows for zooming on scrolling the mouse wheel
-	engo.Mailbox.Dispatch(engo.CameraMessage{Axis: engo.ZAxis, Value: amount * zoomSpeed, Incremental: true})
-}
-```
+* `w.AddSystem(&engo.MouseZoomer{zoomSpeed})`, to enable the scrolling with the mouse wheel. 
