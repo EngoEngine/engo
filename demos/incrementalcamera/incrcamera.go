@@ -14,8 +14,8 @@ type Game struct{}
 
 var (
 	scrollSpeed float32 = 700
-	worldWidth  float32 = 800
-	worldHeight float32 = 800
+	worldWidth  float32 = 200
+	worldHeight float32 = 200
 )
 
 // generateBackground creates a background of green tiles - might not be the most efficient way to do this

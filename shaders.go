@@ -1,6 +1,8 @@
 package engo
 
 import (
+	"fmt"
+
 	"engo.io/gl"
 	"github.com/luxengine/math"
 )
@@ -29,6 +31,10 @@ type defaultShader struct {
 	ufPosition   *gl.UniformLocation
 	ufProjection *gl.UniformLocation
 	ufRotation   *gl.UniformLocation
+
+	matrixProjection *gl.UniformLocation
+	matrixView       *gl.UniformLocation
+	matrixSprite     *gl.UniformLocation
 }
 
 func (s *defaultShader) Initialize(width, height float32) {
@@ -38,6 +44,10 @@ func (s *defaultShader) Initialize(width, height float32) {
 attribute vec2 in_Position;
 attribute vec2 in_TexCoords;
 attribute vec4 in_Color;
+
+uniform mat3 matrixProjection;
+uniform mat3 matrixView;
+uniform mat3 matrixSprite;
 
 // Uniform across everything
 uniform vec3 uf_Camera;
@@ -54,7 +64,10 @@ void main() {
   var_Color = in_Color;
   var_TexCoords = in_TexCoords;
 
-  gl_Position = vec4((uf_Rotation * in_Position + uf_Position - uf_Camera.xy) / uf_Projection, 0.0, uf_Camera.z);
+  vec3 matr = matrixProjection * matrixView * matrixSprite * vec3(in_Position, 1.0);
+  gl_Position = vec4(matr.xy, 0.0, matr.z);
+
+//  gl_Position = vec4((uf_Rotation * in_Position + uf_Position - uf_Camera.xy) / uf_Projection, 0.0, uf_Camera.z);
 }
 `, `
 /* Fragment Shader */
@@ -94,6 +107,10 @@ void main (void) {
 	s.inColor = Gl.GetAttribLocation(s.program, "in_Color")
 
 	// Define things that should be set per draw
+	s.matrixProjection = Gl.GetUniformLocation(s.program, "matrixProjection")
+	s.matrixView = Gl.GetUniformLocation(s.program, "matrixView")
+	s.matrixSprite = Gl.GetUniformLocation(s.program, "matrixSprite")
+
 	s.ufCamera = Gl.GetUniformLocation(s.program, "uf_Camera")
 	s.ufPosition = Gl.GetUniformLocation(s.program, "uf_Position")
 	s.ufProjection = Gl.GetUniformLocation(s.program, "uf_Projection")
@@ -116,6 +133,27 @@ func (s *defaultShader) Pre() {
 		Gl.Uniform2f(s.ufProjection, windowWidth/2, -windowHeight/2)
 	}
 	Gl.Uniform3f(s.ufCamera, cam.x, cam.y, cam.z)
+
+	projMatrix := []float32{
+		1 / (windowWidth / 2), 0, 0,
+		0, 1 / (-windowHeight / 2), 0,
+		0, 0, 1,
+	}
+	fmt.Println("projMatrix", projMatrix)
+
+	//cam.x = 0
+	//cam.y = 0
+	//cam.z = 0
+
+	viewMatrix := []float32{
+		1, 0.0, -cam.x,
+		0.0, 1, -cam.y,
+		0, 0, cam.z,
+	}
+	fmt.Println("viewMatrix", viewMatrix)
+
+	Gl.UniformMatrix3fv(s.matrixProjection, true, projMatrix)
+	Gl.UniformMatrix3fv(s.matrixView, true, viewMatrix)
 }
 
 func (s *defaultShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotation float32) {
@@ -140,6 +178,22 @@ func (s *defaultShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotat
 		sine, c,
 	})
 	Gl.Uniform2f(s.ufPosition, x, y)
+
+	//x = 0
+	//y = 0
+
+	var scaleX float32 = 2
+	var scaleY float32 = 4
+
+	spriteMatrix := []float32{
+		c, -sine, x,
+		sine, c, y,
+		0, 0, 1,
+	}
+
+	Gl.UniformMatrix3fv(s.matrixSprite, true, spriteMatrix)
+
+	fmt.Println("spriteMatrix", spriteMatrix)
 
 	Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
 }
