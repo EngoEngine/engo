@@ -2,9 +2,9 @@ package engo
 
 import (
 	"log"
-	"math"
 
 	"engo.io/ecs"
+	"github.com/luxengine/math"
 )
 
 type AABB struct {
@@ -119,10 +119,10 @@ func IsIntersecting(rect1 AABB, rect2 AABB) bool {
 func MinimumTranslation(rect1 AABB, rect2 AABB) Point {
 	mtd := Point{}
 
-	left := float64(rect2.Min.X - rect1.Max.X)
-	right := float64(rect2.Max.X - rect1.Min.X)
-	top := float64(rect2.Min.Y - rect1.Max.Y)
-	bottom := float64(rect2.Max.Y - rect1.Min.Y)
+	left := rect2.Min.X - rect1.Max.X
+	right := rect2.Max.X - rect1.Min.X
+	top := rect2.Min.Y - rect1.Max.Y
+	bottom := rect2.Max.Y - rect1.Min.Y
 
 	if left > 0 || right < 0 {
 		log.Println("Box aint intercepting")
@@ -136,18 +136,18 @@ func MinimumTranslation(rect1 AABB, rect2 AABB) Point {
 		//box doesnt intercept
 	}
 	if math.Abs(left) < right {
-		mtd.X = float32(left)
+		mtd.X = left
 	} else {
-		mtd.X = float32(right)
+		mtd.X = right
 	}
 
 	if math.Abs(top) < bottom {
-		mtd.Y = float32(top)
+		mtd.Y = top
 	} else {
-		mtd.Y = float32(bottom)
+		mtd.Y = bottom
 	}
 
-	if math.Abs(float64(mtd.X)) < math.Abs(float64(mtd.Y)) {
+	if math.Abs(mtd.X) < math.Abs(mtd.Y) {
 		mtd.Y = 0
 	} else {
 		mtd.X = 0
