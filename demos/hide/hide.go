@@ -26,8 +26,8 @@ func (game *GameWorld) Setup(w *ecs.World) {
 	render := engo.NewRenderComponent(texture, engo.Point{8, 8})
 	collision := &engo.CollisionComponent{Solid: true, Main: true}
 
-	width := texture.Width() * render.Scale().X
-	height := texture.Height() * render.Scale().Y
+	width := texture.Width() * render.Scale.X
+	height := texture.Height() * render.Scale.Y
 
 	space := &engo.SpaceComponent{
 		Position: engo.Point{(engo.Width() - width) / 2, (engo.Height() - height) / 2},

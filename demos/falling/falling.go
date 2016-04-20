@@ -34,8 +34,8 @@ func (game *Game) Setup(w *ecs.World) {
 	// Tell the collision system that this player is solid
 	collision := &engo.CollisionComponent{Solid: true, Main: true}
 
-	width := texture.Width() * render.Scale().X
-	height := texture.Height() * render.Scale().Y
+	width := texture.Width() * render.Scale.X
+	height := texture.Height() * render.Scale.Y
 
 	space := &engo.SpaceComponent{
 		Position: engo.Point{(engo.Width() - width) / 2, (engo.Height() - height) / 2},
@@ -128,8 +128,8 @@ func NewRock(position engo.Point) *ecs.Entity {
 	render := engo.NewRenderComponent(texture, engo.Point{4, 4})
 	space := &engo.SpaceComponent{
 		Position: position,
-		Width:    texture.Width() * render.Scale().X,
-		Height:   texture.Height() * render.Scale().Y,
+		Width:    texture.Width() * render.Scale.X,
+		Height:   texture.Height() * render.Scale.Y,
 	}
 	collision := &engo.CollisionComponent{Solid: true}
 

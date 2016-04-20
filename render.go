@@ -34,7 +34,7 @@ type RenderComponent struct {
 	// transparency is the level of transparency that is used to draw the texture
 	transparency float32
 
-	scale  Point
+	Scale  Point
 	Color  color.Color
 	shader Shader
 	zIndex float32
@@ -48,7 +48,7 @@ func NewRenderComponent(d Drawable, scale Point) *RenderComponent {
 	rc := &RenderComponent{
 		transparency: 1,
 		Color:        color.White,
-		scale:        scale,
+		Scale:        scale,
 	}
 	rc.SetDrawable(d)
 
@@ -69,15 +69,6 @@ func (r *RenderComponent) SetDrawable(d Drawable) {
 
 func (r *RenderComponent) Drawable() Drawable {
 	return r.drawable
-}
-
-func (r *RenderComponent) SetScale(scale Point) {
-	r.scale = scale
-	r.preloadTexture()
-}
-
-func (r *RenderComponent) Scale() Point {
-	return r.scale
 }
 
 func (r *RenderComponent) SetShader(s Shader) {
@@ -113,32 +104,10 @@ func (ren *RenderComponent) preloadTexture() {
 // generateBufferContent computes information about the 4 vertices needed to draw the texture, which should
 // be stored in the buffer
 func (ren *RenderComponent) generateBufferContent() []float32 {
-	scaleX := ren.scale.X
-	scaleY := ren.scale.Y
-	c := ren.Color
+	w := ren.drawable.Width()
+	h := ren.drawable.Height()
 
-	fx := float32(0)
-	fy := float32(0)
-	fx2 := ren.drawable.Width()
-	fy2 := ren.drawable.Height()
-
-	if scaleX != 1 || scaleY != 1 {
-		//fx *= scaleX
-		//fy *= scaleY
-		fx2 *= scaleX
-		fy2 *= scaleY
-	}
-
-	x1 := fx
-	y1 := fy
-	x2 := fx
-	y2 := fy2
-	x3 := fx2
-	y3 := fy2
-	x4 := fx2
-	y4 := fy
-
-	colorR, colorG, colorB, _ := c.RGBA()
+	colorR, colorG, colorB, _ := ren.Color.RGBA()
 
 	red := colorR
 	green := colorG << 8
@@ -149,7 +118,7 @@ func (ren *RenderComponent) generateBufferContent() []float32 {
 
 	u, v, u2, v2 := ren.drawable.View()
 
-	return []float32{x1, y1, u, v, tint, x4, y4, u2, v, tint, x3, y3, u2, v2, tint, x2, y2, u, v2, tint}
+	return []float32{0, 0, u, v, tint, w, 0, u2, v, tint, w, h, u2, v2, tint, 0, h, u, v2, tint}
 }
 
 type renderEntityList []*ecs.Entity
@@ -270,7 +239,7 @@ func (rs *RenderSystem) Update(dt float32) {
 			rs.currentShader = shader
 		}
 
-		rs.currentShader.Draw(render.drawable.Texture(), render.buffer, space.Position.X, space.Position.Y, space.Rotation)
+		rs.currentShader.Draw(render.drawable.Texture(), render.buffer, space.Position.X, space.Position.Y, render.Scale.X, render.Scale.Y, space.Rotation)
 	}
 
 	if rs.currentShader != nil {

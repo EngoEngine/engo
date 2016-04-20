@@ -1,8 +1,6 @@
 package engo
 
 import (
-	"fmt"
-
 	"engo.io/gl"
 	"github.com/luxengine/math"
 )
@@ -12,7 +10,7 @@ const bufferSize = 10000
 type Shader interface {
 	Initialize(width, height float32)
 	Pre()
-	Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotation float32)
+	Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, scaleX, scaleY, rotation float32)
 	Post()
 }
 
@@ -27,14 +25,13 @@ type defaultShader struct {
 	inTexCoords int
 	inColor     int
 
-	ufCamera     *gl.UniformLocation
-	ufPosition   *gl.UniformLocation
-	ufProjection *gl.UniformLocation
-	ufRotation   *gl.UniformLocation
-
 	matrixProjection *gl.UniformLocation
 	matrixView       *gl.UniformLocation
-	matrixSprite     *gl.UniformLocation
+	matrixModel      *gl.UniformLocation
+
+	projectionMatrix []float32
+	viewMatrix       []float32
+	modelMatrix      []float32
 }
 
 func (s *defaultShader) Initialize(width, height float32) {
@@ -47,15 +44,7 @@ attribute vec4 in_Color;
 
 uniform mat3 matrixProjection;
 uniform mat3 matrixView;
-uniform mat3 matrixSprite;
-
-// Uniform across everything
-uniform vec3 uf_Camera;
-uniform vec2 uf_Projection;
-
-// Uniform across this texture / draw call
-uniform vec2 uf_Position;
-uniform mat2 uf_Rotation;
+uniform mat3 matrixModel;
 
 varying vec4 var_Color;
 varying vec2 var_TexCoords;
@@ -64,7 +53,7 @@ void main() {
   var_Color = in_Color;
   var_TexCoords = in_TexCoords;
 
-  vec3 matr = matrixProjection * matrixView * matrixSprite * vec3(in_Position, 1.0);
+  vec3 matr = matrixProjection * matrixView * matrixModel * vec3(in_Position, 1.0);
   gl_Position = vec4(matr.xy, 0.0, matr.z);
 
 //  gl_Position = vec4((uf_Rotation * in_Position + uf_Position - uf_Camera.xy) / uf_Projection, 0.0, uf_Camera.z);
@@ -109,12 +98,7 @@ void main (void) {
 	// Define things that should be set per draw
 	s.matrixProjection = Gl.GetUniformLocation(s.program, "matrixProjection")
 	s.matrixView = Gl.GetUniformLocation(s.program, "matrixView")
-	s.matrixSprite = Gl.GetUniformLocation(s.program, "matrixSprite")
-
-	s.ufCamera = Gl.GetUniformLocation(s.program, "uf_Camera")
-	s.ufPosition = Gl.GetUniformLocation(s.program, "uf_Position")
-	s.ufProjection = Gl.GetUniformLocation(s.program, "uf_Projection")
-	s.ufRotation = Gl.GetUniformLocation(s.program, "uf_Rotation")
+	s.matrixModel = Gl.GetUniformLocation(s.program, "matrixModel")
 
 	// Enable those things
 	Gl.EnableVertexAttribArray(s.inPosition)
@@ -123,40 +107,42 @@ void main (void) {
 
 	Gl.Enable(Gl.BLEND)
 	Gl.BlendFunc(Gl.SRC_ALPHA, Gl.ONE_MINUS_SRC_ALPHA)
+
+	s.projectionMatrix = make([]float32, 9)
+	s.projectionMatrix[8] = 1
+
+	s.viewMatrix = make([]float32, 9)
+
+	s.modelMatrix = make([]float32, 9)
+	s.modelMatrix[8] = 1
 }
 
 func (s *defaultShader) Pre() {
 	Gl.UseProgram(s.program)
+
 	if scaleOnResize {
-		Gl.Uniform2f(s.ufProjection, gameWidth/2, -gameHeight/2)
+		s.projectionMatrix[0] = 1 / (gameWidth / 2)
+		s.projectionMatrix[4] = 1 / (-gameHeight / 2)
 	} else {
-		Gl.Uniform2f(s.ufProjection, windowWidth/2, -windowHeight/2)
+		s.projectionMatrix[0] = 1 / (windowWidth / 2)
+		s.projectionMatrix[4] = 1 / (-windowHeight / 2)
 	}
-	Gl.Uniform3f(s.ufCamera, cam.x, cam.y, cam.z)
 
-	projMatrix := []float32{
-		1 / (windowWidth / 2), 0, 0,
-		0, 1 / (-windowHeight / 2), 0,
-		0, 0, 1,
-	}
-	fmt.Println("projMatrix", projMatrix)
+	angle := cam.angle * math.Pi / 180
 
-	//cam.x = 0
-	//cam.y = 0
-	//cam.z = 0
+	s.viewMatrix[0] = math.Cos(angle)
+	s.viewMatrix[1] = math.Sin(angle)
+	s.viewMatrix[3] = -s.viewMatrix[1]
+	s.viewMatrix[4] = s.viewMatrix[0]
+	s.viewMatrix[6] = -cam.x
+	s.viewMatrix[7] = -cam.y
+	s.viewMatrix[8] = cam.z
 
-	viewMatrix := []float32{
-		1, 0.0, -cam.x,
-		0.0, 1, -cam.y,
-		0, 0, cam.z,
-	}
-	fmt.Println("viewMatrix", viewMatrix)
-
-	Gl.UniformMatrix3fv(s.matrixProjection, true, projMatrix)
-	Gl.UniformMatrix3fv(s.matrixView, true, viewMatrix)
+	Gl.UniformMatrix3fv(s.matrixProjection, false, s.projectionMatrix)
+	Gl.UniformMatrix3fv(s.matrixView, false, s.viewMatrix)
 }
 
-func (s *defaultShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotation float32) {
+func (s *defaultShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, scaleX, scaleY, rotation float32) {
 	if s.lastTexture != texture {
 		Gl.BindTexture(Gl.TEXTURE_2D, texture)
 		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)
@@ -168,32 +154,18 @@ func (s *defaultShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotat
 		s.lastTexture = texture
 	}
 
-	// precomputed trigo on CPU to avoid GPU trigo for each vertex
 	angle := rotation * math.Pi / 180
-	c := math.Cos(angle)
-	sine := math.Sin(angle)
+	cos := math.Cos(angle)
+	sin := math.Sin(angle)
 
-	Gl.UniformMatrix2fv(s.ufRotation, false, []float32{
-		c, -sine,
-		sine, c,
-	})
-	Gl.Uniform2f(s.ufPosition, x, y)
+	s.modelMatrix[0] = scaleX * cos
+	s.modelMatrix[1] = scaleX * sin
+	s.modelMatrix[3] = scaleY * -sin
+	s.modelMatrix[4] = scaleY * cos
+	s.modelMatrix[6] = x
+	s.modelMatrix[7] = y
 
-	//x = 0
-	//y = 0
-
-	var scaleX float32 = 2
-	var scaleY float32 = 4
-
-	spriteMatrix := []float32{
-		c, -sine, x,
-		sine, c, y,
-		0, 0, 1,
-	}
-
-	Gl.UniformMatrix3fv(s.matrixSprite, true, spriteMatrix)
-
-	fmt.Println("spriteMatrix", spriteMatrix)
+	Gl.UniformMatrix3fv(s.matrixModel, false, s.modelMatrix)
 
 	Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
 }
@@ -293,7 +265,7 @@ func (s *hudShader) Pre() {
 	Gl.Uniform2f(s.ufProjection, windowWidth/2, -windowHeight/2)
 }
 
-func (s *hudShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotation float32) {
+func (s *hudShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, scaleX, scaleY, rotation float32) {
 	if s.lastTexture != texture {
 		Gl.BindTexture(Gl.TEXTURE_2D, texture)
 		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)

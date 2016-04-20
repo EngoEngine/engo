@@ -30,8 +30,8 @@ func (game *GameWorld) Setup(w *ecs.World) {
 	// Create RenderComponent... Set scale to 8x, give lable "guy"
 	render := engo.NewRenderComponent(texture, engo.Point{8, 8})
 
-	width := texture.Width() * render.Scale().X
-	height := texture.Height() * render.Scale().Y
+	width := texture.Width() * render.Scale.X
+	height := texture.Height() * render.Scale.Y
 
 	space := &engo.SpaceComponent{
 		Position: engo.Point{0, 0},

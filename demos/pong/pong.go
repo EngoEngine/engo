@@ -40,8 +40,8 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	ballRender := engo.NewRenderComponent(ballTexture, engo.Point{2, 2})
 	ballSpace := &engo.SpaceComponent{
 		Position: engo.Point{(engo.Width() - ballTexture.Width()) / 2, (engo.Height() - ballTexture.Height()) / 2},
-		Width:    ballTexture.Width() * ballRender.Scale().X,
-		Height:   ballTexture.Height() * ballRender.Scale().Y,
+		Width:    ballTexture.Width() * ballRender.Scale.X,
+		Height:   ballTexture.Height() * ballRender.Scale.Y,
 	}
 	ballCollision := &engo.CollisionComponent{Main: true, Solid: true}
 
@@ -85,8 +85,8 @@ func (pong *PongGame) Setup(w *ecs.World) {
 
 		paddleSpace := &engo.SpaceComponent{
 			Position: engo.Point{x, (engo.Height() - paddleTexture.Height()) / 2},
-			Width:    paddleRender.Scale().X * paddleTexture.Width(),
-			Height:   paddleRender.Scale().Y * paddleTexture.Height(),
+			Width:    paddleRender.Scale.X * paddleTexture.Width(),
+			Height:   paddleRender.Scale.Y * paddleTexture.Height(),
 		}
 
 		paddleControl := &ControlComponent{schemes[i]}

@@ -35,8 +35,8 @@ func (game *IconScene) Setup(w *ecs.World) {
 	render := engo.NewRenderComponent(texture, engo.Point{8, 8})
 	collision := &engo.CollisionComponent{Solid: true, Main: true}
 
-	width := texture.Width() * render.Scale().X
-	height := texture.Height() * render.Scale().Y
+	width := texture.Width() * render.Scale.X
+	height := texture.Height() * render.Scale.Y
 
 	space := &engo.SpaceComponent{
 		Position: engo.Point{(engo.Width() - width) / 2, (engo.Height() - height) / 2},
@@ -78,8 +78,8 @@ func (game *RockScene) Setup(w *ecs.World) {
 	render := engo.NewRenderComponent(texture, engo.Point{8, 8})
 	collision := &engo.CollisionComponent{Solid: true, Main: true}
 
-	width := texture.Width() * render.Scale().X
-	height := texture.Height() * render.Scale().Y
+	width := texture.Width() * render.Scale.X
+	height := texture.Height() * render.Scale.Y
 
 	space := &engo.SpaceComponent{
 		Position: engo.Point{(engo.Width() - width) / 2, (engo.Height() - height) / 2},
@@ -148,13 +148,13 @@ func (c *ScaleSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
 		mod = -0.1
 	}
 
-	if render.Scale().X+mod >= 15 || render.Scale().X+mod <= 1 {
+	if render.Scale.X+mod >= 15 || render.Scale.X+mod <= 1 {
 		mod *= -1
 	}
 
-	newScale := render.Scale()
+	newScale := render.Scale
 	newScale.AddScalar(mod)
-	render.SetScale(newScale)
+	render.Scale = newScale
 }
 
 func main() {

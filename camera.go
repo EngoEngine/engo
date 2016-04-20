@@ -15,7 +15,7 @@ var (
 
 // CameraSystem is a System that manages the state of the Camera
 type cameraSystem struct {
-	x, y, z  float32
+	x, y, z, angle  float32
 	tracking *ecs.Entity // The entity that is currently being followed
 
 	longTasks map[CameraAxis]*CameraMessage
