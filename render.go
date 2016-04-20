@@ -3,11 +3,11 @@ package engo
 import (
 	"fmt"
 	"image/color"
-	"math"
 	"sort"
 
 	"engo.io/ecs"
 	"engo.io/gl"
+	"github.com/luxengine/math"
 )
 
 const (
@@ -137,10 +137,10 @@ func (ren *RenderComponent) generateBufferContent() []float32 {
 	var y4 float32
 
 	if rotation != 0 {
-		rot := float64(rotation * (math.Pi / 180.0))
+		rot := rotation * (math.Pi / 180.0)
 
-		cos := float32(math.Cos(rot))
-		sin := float32(math.Sin(rot))
+		cos := math.Cos(rot)
+		sin := math.Sin(rot)
 
 		x1 = cos*p1x - sin*p1y
 		y1 = sin*p1x + cos*p1y
