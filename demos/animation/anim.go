@@ -61,9 +61,6 @@ func (scene *DefaultScene) Setup(w *ecs.World) {
 	}
 }
 
-func (*DefaultScene) Hide()        {}
-func (*DefaultScene) Show()        {}
-func (*DefaultScene) Exit()        {}
 func (*DefaultScene) Type() string { return "GameWorld" }
 
 func (*DefaultScene) CreateEntity(point *engo.Point, spriteSheet *engo.Spritesheet, action *engo.AnimationAction) *Animation {

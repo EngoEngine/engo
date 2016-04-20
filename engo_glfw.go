@@ -207,7 +207,9 @@ func RunPreparation(defaultScene Scene) {
 
 func closeEvent() {
 	for _, scenes := range scenes {
-		scenes.scene.Exit()
+		if exiter, ok := scenes.scene.(Exiter); ok {
+			exiter.Exit()
+		}
 	}
 
 	if defaultCloseAction {

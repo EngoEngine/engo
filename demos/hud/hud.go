@@ -45,9 +45,6 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	hudBg.RenderComponent.SetShader(engo.HUDShader)
 }
 
-func (*DefaultScene) Hide()        {}
-func (*DefaultScene) Show()        {}
-func (*DefaultScene) Exit()        {}
 func (*DefaultScene) Type() string { return "Game" }
 
 func main() {

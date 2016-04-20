@@ -11,8 +11,6 @@ type DefaultScene struct{}
 
 func (*DefaultScene) Preload()           {}
 func (*DefaultScene) Setup(w *ecs.World) {}
-func (*DefaultScene) Hide()              {}
-func (*DefaultScene) Show()              {}
 
 func (*DefaultScene) Exit() {
 	log.Println("Exit event called; we can do whatever we want now")
@@ -25,10 +23,10 @@ func (*DefaultScene) Type() string { return "Game" }
 
 func main() {
 	opts := engo.RunOptions{
-		Title:  "Exit Demo",
-		Width:  1024,
-		Height: 640,
+		Title:               "Exit Demo",
+		Width:               1024,
+		Height:              640,
+		OverrideCloseAction: true,
 	}
-	engo.OverrideCloseAction()
 	engo.Run(opts, &DefaultScene{})
 }

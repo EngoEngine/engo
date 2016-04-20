@@ -131,9 +131,6 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	}
 }
 
-func (*PongGame) Hide()        {}
-func (*PongGame) Show()        {}
-func (*PongGame) Exit()        {}
 func (*PongGame) Type() string { return "PongGame" }
 
 type SpeedComponent struct {
