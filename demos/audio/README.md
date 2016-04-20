@@ -10,7 +10,7 @@ One can zoom in/out, and hear the sound effect increase/decrease in volume. This
 ## What are important aspects of the code?
 These things are key in this demo:
 
-* `game.AddSystem(&engo.AudioSystem{})`, to add/enable the `AudioSystem`;
+* `w.AddSystem(&engo.AudioSystem{})`, to add/enable the `AudioSystem`;
 * The `moveSystem`, to enable the sound effects / graphical effects;
-* `entity.AddComponent(&engo.AudioComponent{File: "326064.wav", Repeat: false})`, to add the audio component as a sound effect;
-* `backgroundMusic.AddComponent(&engo.AudioComponent{File: "326488.wav", Repeat: true, Background: true})`, to dd the audio component as background music.
+* `whoop.AudioComponent = engo.AudioComponent{File: "326064.wav", Repeat: false})`, to add the audio component as a sound effect;
+* `whoop.AudioComponent = engo.AudioComponent{File: "326488.wav", Repeat: true, Background: true})`, to dd the audio component as background music.

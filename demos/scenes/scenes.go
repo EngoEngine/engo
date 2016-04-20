@@ -1,14 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 	"log"
 	"math/rand"
 	"time"
 
-	"engo.io/engo"
 	"engo.io/ecs"
+	"engo.io/engo"
 )
 
 var (
@@ -16,43 +15,60 @@ var (
 	rockScene *RockScene
 )
 
+type Guy struct {
+	ecs.BasicEntity
+	engo.RenderComponent
+	engo.SpaceComponent
+}
+
+type Rock struct {
+	ecs.BasicEntity
+	engo.RenderComponent
+	engo.SpaceComponent
+}
+
 // IconScene is responsible for managing the icon
 type IconScene struct{}
 
-func (game *IconScene) Preload() {
+func (*IconScene) Preload() {
 	engo.Files.Add("data/icon.png")
 }
 
-func (game *IconScene) Setup(w *ecs.World) {
+func (*IconScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 
 	w.AddSystem(&engo.RenderSystem{})
 	w.AddSystem(&ScaleSystem{})
 	w.AddSystem(&SceneSwitcherSystem{NextScene: "RockScene", WaitTime: time.Second * 3})
 
-	guy := ecs.NewEntity("RenderSystem", "ScaleSystem")
+	// Retrieve a texture
 	texture := engo.Files.Image("icon.png")
-	render := engo.NewRenderComponent(texture, engo.Point{8, 8}, "icon")
-	collision := &engo.CollisionComponent{Solid: true, Main: true}
 
-	width := texture.Width() * render.Scale().X
-	height := texture.Height() * render.Scale().Y
+	// Create an entity
+	guy := Guy{BasicEntity: ecs.NewBasic()}
 
-	space := &engo.SpaceComponent{engo.Point{(engo.Width() - width) / 2, (engo.Height() - height) / 2}, width, height}
+	// Initialize the components, set scale to 8x
+	guy.RenderComponent = engo.NewRenderComponent(texture, engo.Point{8, 8}, "guy")
+	guy.SpaceComponent = engo.SpaceComponent{
+		Position: engo.Point{0, 0},
+		Width:    texture.Width() * guy.RenderComponent.Scale().X,
+		Height:   texture.Height() * guy.RenderComponent.Scale().Y,
+	}
 
-	guy.AddComponent(render)
-	guy.AddComponent(space)
-	guy.AddComponent(collision)
-
-	err := w.AddEntity(guy)
-	if err != nil {
-		log.Println(err)
+	// Add it to appropriate systems
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *engo.RenderSystem:
+			sys.Add(&guy.BasicEntity, &guy.RenderComponent, &guy.SpaceComponent)
+		case *ScaleSystem:
+			sys.Add(&guy.BasicEntity, &guy.RenderComponent)
+		}
 	}
 }
 
 func (*IconScene) Hide()        {}
 func (*IconScene) Show()        {}
-func (*IconScene) Exit()		{}
+func (*IconScene) Exit()        {}
 func (*IconScene) Type() string { return "IconScene" }
 
 // RockScene is responsible for managing the rock
@@ -69,29 +85,34 @@ func (game *RockScene) Setup(w *ecs.World) {
 	w.AddSystem(&ScaleSystem{})
 	w.AddSystem(&SceneSwitcherSystem{NextScene: "IconScene", WaitTime: time.Second * 3})
 
-	guy := ecs.NewEntity("RenderSystem", "ScaleSystem")
+	// Retrieve a texture
 	texture := engo.Files.Image("rock.png")
-	render := engo.NewRenderComponent(texture, engo.Point{8, 8}, "rock")
-	collision := &engo.CollisionComponent{Solid: true, Main: true}
 
-	width := texture.Width() * render.Scale().X
-	height := texture.Height() * render.Scale().Y
+	// Create an entity
+	rock := Rock{BasicEntity: ecs.NewBasic()}
 
-	space := &engo.SpaceComponent{engo.Point{(engo.Width() - width) / 2, (engo.Height() - height) / 2}, width, height}
+	// Initialize the components, set scale to 8x
+	rock.RenderComponent = engo.NewRenderComponent(texture, engo.Point{8, 8}, "rock")
+	rock.SpaceComponent = engo.SpaceComponent{
+		Position: engo.Point{0, 0},
+		Width:    texture.Width() * rock.RenderComponent.Scale().X,
+		Height:   texture.Height() * rock.RenderComponent.Scale().Y,
+	}
 
-	guy.AddComponent(render)
-	guy.AddComponent(space)
-	guy.AddComponent(collision)
-
-	err := w.AddEntity(guy)
-	if err != nil {
-		log.Println(err)
+	// Add it to appropriate systems
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *engo.RenderSystem:
+			sys.Add(&rock.BasicEntity, &rock.RenderComponent, &rock.SpaceComponent)
+		case *ScaleSystem:
+			sys.Add(&rock.BasicEntity, &rock.RenderComponent)
+		}
 	}
 }
 
 func (*RockScene) Hide()        {}
 func (*RockScene) Show()        {}
-func (*RockScene) Exit() 		{}
+func (*RockScene) Exit()        {}
 func (*RockScene) Type() string { return "RockScene" }
 
 // SceneSwitcherSystem is a System that actually calls SetScene
@@ -101,11 +122,8 @@ type SceneSwitcherSystem struct {
 	secondsWaited float32
 }
 
-func (*SceneSwitcherSystem) Type() string             { return "SceneSwitcherSystem" }
-func (*SceneSwitcherSystem) Priority() int            { return 1 }
-func (*SceneSwitcherSystem) AddEntity(*ecs.Entity)    {}
-func (*SceneSwitcherSystem) RemoveEntity(*ecs.Entity) {}
-func (*SceneSwitcherSystem) New(*ecs.World)           {}
+func (*SceneSwitcherSystem) Priority() int          { return 1 }
+func (*SceneSwitcherSystem) Remove(ecs.BasicEntity) {}
 
 func (s *SceneSwitcherSystem) Update(dt float32) {
 	s.secondsWaited += dt
@@ -115,39 +133,54 @@ func (s *SceneSwitcherSystem) Update(dt float32) {
 		// Change the world to s.NextScene, and don't override / force World re-creation
 		engo.SetSceneByName(s.NextScene, false)
 
-		fmt.Println("Switched to", s.NextScene)
+		log.Println("Switched to", s.NextScene)
 	}
 }
 
-// ScaleSystem is the System which scales the Entities inside
+type scaleEntity struct {
+	*ecs.BasicEntity
+	*engo.RenderComponent
+}
+
 type ScaleSystem struct {
-	ecs.LinearSystem
+	entities []scaleEntity
 }
 
-func (*ScaleSystem) Type() string { return "ScaleSystem" }
+func (s *ScaleSystem) Add(basic *ecs.BasicEntity, render *engo.RenderComponent) {
+	s.entities = append(s.entities, scaleEntity{basic, render})
+}
 
-func (s *ScaleSystem) New(*ecs.World) {}
-
-func (c *ScaleSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-	var render *engo.RenderComponent
-	if !entity.Component(&render) {
-		return
+func (s *ScaleSystem) Remove(basic ecs.BasicEntity) {
+	delete := -1
+	for index, e := range s.entities {
+		if e.BasicEntity.ID() == basic.ID() {
+			delete = index
+			break
+		}
 	}
-	var mod float32
-
-	if rand.Int()%2 == 0 {
-		mod = 0.1
-	} else {
-		mod = -0.1
+	if delete >= 0 {
+		s.entities = append(s.entities[:delete], s.entities[delete+1:]...)
 	}
+}
 
-	if render.Scale().X+mod >= 15 || render.Scale().X+mod <= 1 {
-		mod *= -1
+func (s *ScaleSystem) Update(dt float32) {
+	for _, e := range s.entities {
+		var mod float32
+
+		if rand.Int()%2 == 0 {
+			mod = 0.1
+		} else {
+			mod = -0.1
+		}
+
+		if e.RenderComponent.Scale().X+mod >= 15 || e.RenderComponent.Scale().X+mod <= 1 {
+			mod *= -1
+		}
+
+		newScale := e.RenderComponent.Scale()
+		newScale.AddScalar(mod)
+		e.RenderComponent.SetScale(newScale)
 	}
-
-	newScale := render.Scale()
-	newScale.AddScalar(mod)
-	render.SetScale(newScale)
 }
 
 func main() {
@@ -162,7 +195,6 @@ func main() {
 		Title:  "Scenes Demo",
 		Width:  1024,
 		Height: 640,
-		
 	}
 
 	engo.Run(opts, iconScene)

@@ -5,6 +5,7 @@ import (
 
 	"engo.io/ecs"
 	"github.com/go-gl/mathgl/mgl32"
+	"log"
 	"time"
 )
 
@@ -13,15 +14,18 @@ var (
 	MaxZoom float32 = 3
 )
 
+type cameraEntity struct {
+	*ecs.BasicEntity
+	*SpaceComponent
+}
+
 // CameraSystem is a System that manages the state of the Camera
 type cameraSystem struct {
 	x, y, z  float32
-	tracking *ecs.Entity // The entity that is currently being followed
+	tracking cameraEntity // The entity that is currently being followed
 
 	longTasks map[CameraAxis]*CameraMessage
 }
-
-func (*cameraSystem) Type() string { return "cameraSystem" }
 
 func (cam *cameraSystem) New(*ecs.World) {
 	cam.x = WorldBounds.Max.X / 2
@@ -67,9 +71,7 @@ func (cam *cameraSystem) New(*ecs.World) {
 	})
 }
 
-func (cam *cameraSystem) Priority() int            { return 0 }
-func (cam *cameraSystem) AddEntity(*ecs.Entity)    {}
-func (cam *cameraSystem) RemoveEntity(*ecs.Entity) {}
+func (cam *cameraSystem) Remove(basic ecs.BasicEntity) {}
 
 func (cam *cameraSystem) Update(dt float32) {
 	for axis, longTask := range cam.longTasks {
@@ -107,28 +109,24 @@ func (cam *cameraSystem) Update(dt float32) {
 		}
 	}
 
-	if cam.tracking == nil {
+	if cam.tracking.BasicEntity == nil {
 		return
 	}
 
-	var space *SpaceComponent
-	var ok bool
-
-	if space, ok = cam.tracking.ComponentFast(space).(*SpaceComponent); !ok {
+	if cam.tracking.SpaceComponent == nil {
+		log.Println("Should be tracking", cam.tracking.BasicEntity.ID(), "but SpaceComponent is nil")
+		cam.tracking.BasicEntity = nil
 		return
 	}
 
-	cam.centerCam(space.Position.X+space.Width/2, space.Position.Y+space.Height/2, cam.z)
+	cam.centerCam(cam.tracking.SpaceComponent.Position.X+cam.tracking.SpaceComponent.Width/2,
+		cam.tracking.SpaceComponent.Position.Y+cam.tracking.SpaceComponent.Height/2,
+		cam.z,
+	)
 }
 
-func (cam *cameraSystem) FollowEntity(entity *ecs.Entity) {
-	cam.tracking = entity
-	var space *SpaceComponent
-
-	if _, ok := cam.tracking.ComponentFast(space).(*SpaceComponent); !ok {
-		cam.tracking = nil
-		return
-	}
+func (cam *cameraSystem) FollowEntity(basic *ecs.BasicEntity, space *SpaceComponent) {
+	cam.tracking = cameraEntity{basic, space}
 }
 
 func (cam *cameraSystem) X() float32 {
@@ -206,11 +204,8 @@ type KeyboardScroller struct {
 	keysMu sync.RWMutex
 }
 
-func (*KeyboardScroller) Type() string             { return "KeyboardScroller" }
-func (*KeyboardScroller) Priority() int            { return 10 }
-func (*KeyboardScroller) AddEntity(*ecs.Entity)    {}
-func (*KeyboardScroller) RemoveEntity(*ecs.Entity) {}
-func (*KeyboardScroller) New(*ecs.World)           {}
+func (*KeyboardScroller) Priority() int          { return 10 }
+func (*KeyboardScroller) Remove(ecs.BasicEntity) {}
 
 func (c *KeyboardScroller) Update(dt float32) {
 	c.keysMu.RLock()
@@ -270,11 +265,8 @@ type EdgeScroller struct {
 	EdgeMargin  float64
 }
 
-func (*EdgeScroller) Type() string             { return "EdgeScroller" }
-func (*EdgeScroller) Priority() int            { return 10 }
-func (*EdgeScroller) AddEntity(*ecs.Entity)    {}
-func (*EdgeScroller) RemoveEntity(*ecs.Entity) {}
-func (*EdgeScroller) New(*ecs.World)           {}
+func (*EdgeScroller) Priority() int          { return 10 }
+func (*EdgeScroller) Remove(ecs.BasicEntity) {}
 
 func (c *EdgeScroller) Update(dt float32) {
 	curX, curY := window.GetCursorPos()
@@ -298,11 +290,8 @@ type MouseZoomer struct {
 	ZoomSpeed float32
 }
 
-func (*MouseZoomer) Type() string             { return "MouseZoomer" }
-func (*MouseZoomer) Priority() int            { return 10 }
-func (*MouseZoomer) AddEntity(*ecs.Entity)    {}
-func (*MouseZoomer) RemoveEntity(*ecs.Entity) {}
-func (*MouseZoomer) New(*ecs.World)           {}
+func (*MouseZoomer) Priority() int          { return 10 }
+func (*MouseZoomer) Remove(ecs.BasicEntity) {}
 
 func (c *MouseZoomer) Update(dt float32) {
 	if Mouse.ScrollY != 0 {

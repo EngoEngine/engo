@@ -12,9 +12,13 @@ Learn how entities are represented and what they do.
 
 Run `engo` without a graphical display. Useful for servers and testing.
 
+### [Exit](exit)
+
+Run some code, just before the window is actually closed (whenever the user presses the close button, for example). 
+
 ## Graphics
 
-### [Hello World](hello)
+### [Hello World](hello-world)
 
 Render and display a single sprite.
 
@@ -53,6 +57,10 @@ Scroll by using mouse movement.
 ### [Keyboard Scroller](keyboardscroller)
 
 Scroll using the keyboard.
+
+### [Zoom](zoom)
+
+Use the mouse to scroll in and out. (zooming) 
 
 ## Games
 

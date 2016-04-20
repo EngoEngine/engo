@@ -24,22 +24,15 @@ type AudioComponent struct {
 	Background bool
 }
 
-func (*AudioComponent) Type() string {
-	return "AudioComponent"
-}
-
 // AudioSystem is a System that allows for sound effects and / or music
 type AudioSystem struct {
-	ecs.LinearSystem
 	HeightModifier float32
-}
-
-func (AudioSystem) Type() string {
-	return "AudioSystem"
 }
 
 func (as *AudioSystem) New(*ecs.World) {
 	log.Println("Warning: audio is not yet implemented on Windows")
 }
 
-func (as *AudioSystem) UpdateEntity(entity *ecs.Entity, dt float32) {}
+func (as *AudioSystem) Add(*ecs.BasicEntity, *AudioComponent, *SpaceComponent) {}
+func (as *AudioSystem) Remove(basic ecs.BasicEntity)                           {}
+func (as *AudioSystem) Update(dt float32)                                      {}

@@ -17,18 +17,34 @@ var (
 	basicFont *engo.Font
 )
 
-func (pong *PongGame) Preload() {
-	engo.Files.Add("assets/ball.png", "assets/paddle.png")
+type Ball struct {
+	ecs.BasicEntity
+	engo.RenderComponent
+	engo.SpaceComponent
+	engo.CollisionComponent
+	SpeedComponent
+}
 
-	basicFont = (&engo.Font{URL: "assets/Roboto-Regular.ttf", Size: 32, FG: color.RGBA{255, 255, 255, 255}})
-	if err := basicFont.Create(); err != nil {
-		log.Fatalln("Could not load font:", err)
-	}
+type Score struct {
+	ecs.BasicEntity
+	engo.RenderComponent
+	engo.SpaceComponent
+}
+
+type Paddle struct {
+	ecs.BasicEntity
+	ControlComponent
+	engo.CollisionComponent
+	engo.RenderComponent
+	engo.SpaceComponent
+}
+
+func (pong *PongGame) Preload() {
+	engo.Files.AddFromDir("assets", true)
 }
 
 func (pong *PongGame) Setup(w *ecs.World) {
-	engo.SetBackground(color.White)
-
+	engo.SetBackground(color.Black)
 	w.AddSystem(&engo.RenderSystem{})
 	w.AddSystem(&engo.CollisionSystem{})
 	w.AddSystem(&SpeedSystem{})
@@ -36,52 +52,81 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	w.AddSystem(&BallSystem{})
 	w.AddSystem(&ScoreSystem{})
 
-	ball := ecs.NewEntity("RenderSystem", "CollisionSystem", "SpeedSystem", "BallSystem")
-	ballTexture := engo.Files.Image("ball.png")
-	ballRender := engo.NewRenderComponent(ballTexture, engo.Point{2, 2}, "ball")
-	ballSpace := &engo.SpaceComponent{engo.Point{(engo.Width() - ballTexture.Width()) / 2, (engo.Height() - ballTexture.Height()) / 2}, ballTexture.Width() * ballRender.Scale().X, ballTexture.Height() * ballRender.Scale().Y}
-	ballCollision := &engo.CollisionComponent{Main: true, Solid: true}
-	ballSpeed := &SpeedComponent{}
-	ballSpeed.Point = engo.Point{300, 100}
-	ball.AddComponent(ballRender)
-	ball.AddComponent(ballSpace)
-	ball.AddComponent(ballCollision)
-	ball.AddComponent(ballSpeed)
-	err := w.AddEntity(ball)
-	if err != nil {
-		log.Println(err)
+	basicFont = (&engo.Font{URL: "Roboto-Regular.ttf", Size: 32, FG: color.NRGBA{255, 255, 255, 255}})
+	if err := basicFont.CreatePreloaded(); err != nil {
+		log.Fatalln("Could not load font:", err)
 	}
 
-	score := ecs.NewEntity("RenderSystem", "ScoreSystem")
+	ballTexture := engo.Files.Image("ball.png")
 
-	scoreRender := engo.NewRenderComponent(basicFont.Render(" "), engo.Point{1, 1}, "YOLO <3")
-	scoreSpace := &engo.SpaceComponent{engo.Point{100, 100}, 100, 100}
-	score.AddComponent(scoreRender)
-	score.AddComponent(scoreSpace)
-	err = w.AddEntity(score)
-	if err != nil {
-		log.Println(err)
+	ball := Ball{BasicEntity: ecs.NewBasic()}
+	ball.RenderComponent = engo.NewRenderComponent(ballTexture, engo.Point{2, 2}, "ball")
+	ball.SpaceComponent = engo.SpaceComponent{
+		Position: engo.Point{(engo.Width() - ballTexture.Width()) / 2, (engo.Height() - ballTexture.Height()) / 2},
+		Width:    ballTexture.Width() * ball.RenderComponent.Scale().X,
+		Height:   ballTexture.Height() * ball.RenderComponent.Scale().Y,
+	}
+	ball.CollisionComponent = engo.CollisionComponent{Main: true, Solid: true}
+	ball.SpeedComponent = SpeedComponent{Point: engo.Point{300, 1000}}
+
+	// Add our entity to the appropriate systems
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *engo.RenderSystem:
+			sys.Add(&ball.BasicEntity, &ball.RenderComponent, &ball.SpaceComponent)
+		case *engo.CollisionSystem:
+			sys.Add(&ball.BasicEntity, &ball.CollisionComponent, &ball.SpaceComponent)
+		case *SpeedSystem:
+			sys.Add(&ball.BasicEntity, &ball.SpeedComponent, &ball.SpaceComponent)
+		case *BallSystem:
+			sys.Add(&ball.BasicEntity, &ball.SpeedComponent, &ball.SpaceComponent)
+		}
+	}
+
+	score := Score{BasicEntity: ecs.NewBasic()}
+	score.RenderComponent = engo.NewRenderComponent(basicFont.Render(" "), engo.Point{1, 1}, "YOLO <3")
+	score.SpaceComponent = engo.SpaceComponent{engo.Point{100, 100}, 100, 100}
+
+	// Add our entity to the appropriate systems
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *engo.RenderSystem:
+			sys.Add(&score.BasicEntity, &score.RenderComponent, &score.SpaceComponent)
+		case *ScoreSystem:
+			sys.Add(&score.BasicEntity, &score.RenderComponent, &score.SpaceComponent)
+		}
 	}
 
 	schemes := []string{"WASD", ""}
+	paddleTexture := engo.Files.Image("paddle.png")
+
 	for i := 0; i < 2; i++ {
-		paddle := ecs.NewEntity("RenderSystem", "CollisionSystem", "ControlSystem")
-		paddleTexture := engo.Files.Image("paddle.png")
-		paddleRender := engo.NewRenderComponent(paddleTexture, engo.Point{2, 2}, "paddle")
+		paddle := Paddle{BasicEntity: ecs.NewBasic()}
+		paddle.RenderComponent = engo.NewRenderComponent(paddleTexture, engo.Point{2, 2}, "paddle")
+
 		x := float32(0)
 		if i != 0 {
 			x = 800 - 16
 		}
-		paddleSpace := &engo.SpaceComponent{engo.Point{x, (engo.Height() - paddleTexture.Height()) / 2}, paddleRender.Scale().X * paddleTexture.Width(), paddleRender.Scale().Y * paddleTexture.Height()}
-		paddleControl := &ControlComponent{schemes[i]}
-		paddleCollision := &engo.CollisionComponent{Main: false, Solid: true}
-		paddle.AddComponent(paddleRender)
-		paddle.AddComponent(paddleSpace)
-		paddle.AddComponent(paddleControl)
-		paddle.AddComponent(paddleCollision)
-		err = w.AddEntity(paddle)
-		if err != nil {
-			log.Println(err)
+
+		paddle.SpaceComponent = engo.SpaceComponent{
+			Position: engo.Point{x, (engo.Height() - paddleTexture.Height()) / 2},
+			Width:    paddle.RenderComponent.Scale().X * paddleTexture.Width(),
+			Height:   paddle.RenderComponent.Scale().Y * paddleTexture.Height(),
+		}
+		paddle.ControlComponent = ControlComponent{schemes[i]}
+		paddle.CollisionComponent = engo.CollisionComponent{Main: false, Solid: true}
+
+		// Add our entity to the appropriate systems
+		for _, system := range w.Systems() {
+			switch sys := system.(type) {
+			case *engo.RenderSystem:
+				sys.Add(&paddle.BasicEntity, &paddle.RenderComponent, &paddle.SpaceComponent)
+			case *engo.CollisionSystem:
+				sys.Add(&paddle.BasicEntity, &paddle.CollisionComponent, &paddle.SpaceComponent)
+			case *ControlSystem:
+				sys.Add(&paddle.BasicEntity, &paddle.ControlComponent, &paddle.SpaceComponent)
+			}
 		}
 	}
 }
@@ -91,183 +136,240 @@ func (*PongGame) Show()        {}
 func (*PongGame) Exit()        {}
 func (*PongGame) Type() string { return "PongGame" }
 
-type SpeedSystem struct {
-	ecs.LinearSystem
-}
-
-func (*SpeedSystem) Type() string { return "SpeedSystem" }
-
-func (ms *SpeedSystem) New(*ecs.World) {
-	engo.Mailbox.Listen("CollisionMessage", func(message engo.Message) {
-		log.Println("collision")
-		collision, isCollision := message.(engo.CollisionMessage)
-		if isCollision {
-			var speed *SpeedComponent
-			if !collision.Entity.Component(&speed) {
-				return
-			}
-
-			speed.X *= -1
-		}
-	})
-}
-
-func (ms *SpeedSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-	var speed *SpeedComponent
-	var space *engo.SpaceComponent
-	if !entity.Component(&speed) || !entity.Component(&space) {
-		return
-	}
-	space.Position.X += speed.X * dt
-	space.Position.Y += speed.Y * dt
-}
-
-func (ms *SpeedSystem) Receive(message engo.Message) {}
-
 type SpeedComponent struct {
 	engo.Point
-}
-
-func (*SpeedComponent) Type() string {
-	return "SpeedComponent"
-}
-
-type BallSystem struct {
-	ecs.LinearSystem
-}
-
-func (bs *BallSystem) New(*ecs.World) {}
-
-func (*BallSystem) Type() string { return "BallSystem" }
-
-func (bs *BallSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-	var space *engo.SpaceComponent
-	var speed *SpeedComponent
-	if !entity.Component(&space) || !entity.Component(&speed) {
-		return
-	}
-
-	if space.Position.X < 0 {
-		engo.Mailbox.Dispatch(ScoreMessage{1})
-
-		space.Position.X = 400 - 16
-		space.Position.Y = 400 - 16
-		speed.X = 800 * rand.Float32()
-		speed.Y = 800 * rand.Float32()
-	}
-
-	if space.Position.Y < 0 {
-		space.Position.Y = 0
-		speed.Y *= -1
-	}
-
-	if space.Position.X > (800 - 16) {
-		engo.Mailbox.Dispatch(ScoreMessage{2})
-
-		space.Position.X = 400 - 16
-		space.Position.Y = 400 - 16
-		speed.X = 800 * rand.Float32()
-		speed.Y = 800 * rand.Float32()
-	}
-
-	if space.Position.Y > (800 - 16) {
-		space.Position.Y = 800 - 16
-		speed.Y *= -1
-	}
-}
-
-type ControlSystem struct {
-	ecs.LinearSystem
-}
-
-func (*ControlSystem) Type() string { return "ControlSystem" }
-
-func (c *ControlSystem) New(*ecs.World) {}
-
-func (c *ControlSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-	//Check scheme
-	// -Move entity based on that
-	var control *ControlComponent
-	var space *engo.SpaceComponent
-
-	if !entity.Component(&space) || !entity.Component(&control) {
-		return
-	}
-	up := false
-	down := false
-	if control.Scheme == "WASD" {
-		up = engo.Keys.Get(engo.W).Down()
-		down = engo.Keys.Get(engo.S).Down()
-	} else {
-		up = engo.Keys.Get(engo.ArrowUp).Down()
-		down = engo.Keys.Get(engo.ArrowDown).Down()
-	}
-
-	if up {
-		space.Position.Y -= 800 * dt
-	}
-
-	if down {
-		space.Position.Y += 800 * dt
-	}
-
 }
 
 type ControlComponent struct {
 	Scheme string
 }
 
-func (*ControlComponent) Type() string {
-	return "ControlComponent"
+type speedEntity struct {
+	*ecs.BasicEntity
+	*SpeedComponent
+	*engo.SpaceComponent
+}
+
+type SpeedSystem struct {
+	entities []speedEntity
+}
+
+func (s *SpeedSystem) New(*ecs.World) {
+	engo.Mailbox.Listen("CollisionMessage", func(message engo.Message) {
+		log.Println("collision")
+
+		collision, isCollision := message.(engo.CollisionMessage)
+		if isCollision {
+			// See if we also have that Entity, and if so, change the speed
+			for _, e := range s.entities {
+				if e.ID() == collision.Entity.BasicEntity.ID() {
+					e.SpeedComponent.X *= -1
+				}
+			}
+		}
+	})
+}
+
+func (s *SpeedSystem) Add(basic *ecs.BasicEntity, speed *SpeedComponent, space *engo.SpaceComponent) {
+	s.entities = append(s.entities, speedEntity{basic, speed, space})
+}
+
+func (s *SpeedSystem) Remove(basic ecs.BasicEntity) {
+	delete := -1
+	for index, e := range s.entities {
+		if e.BasicEntity.ID() == basic.ID() {
+			delete = index
+			break
+		}
+	}
+	if delete >= 0 {
+		s.entities = append(s.entities[:delete], s.entities[delete+1:]...)
+	}
+}
+
+func (s *SpeedSystem) Update(dt float32) {
+	for _, e := range s.entities {
+		e.SpaceComponent.Position.X += e.SpeedComponent.X * dt
+		e.SpaceComponent.Position.Y += e.SpeedComponent.Y * dt
+	}
+}
+
+type ballEntity struct {
+	*ecs.BasicEntity
+	*SpeedComponent
+	*engo.SpaceComponent
+}
+
+type BallSystem struct {
+	entities []ballEntity
+}
+
+func (b *BallSystem) Add(basic *ecs.BasicEntity, speed *SpeedComponent, space *engo.SpaceComponent) {
+	b.entities = append(b.entities, ballEntity{basic, speed, space})
+}
+
+func (b *BallSystem) Remove(basic ecs.BasicEntity) {
+	delete := -1
+	for index, e := range b.entities {
+		if e.BasicEntity.ID() == basic.ID() {
+			delete = index
+			break
+		}
+	}
+	if delete >= 0 {
+		b.entities = append(b.entities[:delete], b.entities[delete+1:]...)
+	}
+}
+
+func (b *BallSystem) Update(dt float32) {
+	for _, e := range b.entities {
+		if e.SpaceComponent.Position.X < 0 {
+			engo.Mailbox.Dispatch(ScoreMessage{1})
+
+			e.SpaceComponent.Position.X = 400 - 16
+			e.SpaceComponent.Position.Y = 400 - 16
+			e.SpeedComponent.X = 800 * rand.Float32()
+			e.SpeedComponent.Y = 800 * rand.Float32()
+		}
+
+		if e.SpaceComponent.Position.Y < 0 {
+			e.SpaceComponent.Position.Y = 0
+			e.SpeedComponent.Y *= -1
+		}
+
+		if e.SpaceComponent.Position.X > (800 - 16) {
+			engo.Mailbox.Dispatch(ScoreMessage{2})
+
+			e.SpaceComponent.Position.X = 400 - 16
+			e.SpaceComponent.Position.Y = 400 - 16
+			e.SpeedComponent.X = 800 * rand.Float32()
+			e.SpeedComponent.Y = 800 * rand.Float32()
+		}
+
+		if e.SpaceComponent.Position.Y > (800 - 16) {
+			e.SpaceComponent.Position.Y = 800 - 16
+			e.SpeedComponent.Y *= -1
+		}
+	}
+}
+
+type controlEntity struct {
+	*ecs.BasicEntity
+	*ControlComponent
+	*engo.SpaceComponent
+}
+
+type ControlSystem struct {
+	entities []controlEntity
+}
+
+func (c *ControlSystem) Add(basic *ecs.BasicEntity, control *ControlComponent, space *engo.SpaceComponent) {
+	c.entities = append(c.entities, controlEntity{basic, control, space})
+}
+
+func (c *ControlSystem) Remove(basic ecs.BasicEntity) {
+	delete := -1
+	for index, e := range c.entities {
+		if e.BasicEntity.ID() == basic.ID() {
+			delete = index
+			break
+		}
+	}
+	if delete >= 0 {
+		c.entities = append(c.entities[:delete], c.entities[delete+1:]...)
+	}
+}
+
+func (c *ControlSystem) Update(dt float32) {
+	for _, e := range c.entities {
+		up := false
+		down := false
+		if e.ControlComponent.Scheme == "WASD" {
+			up = engo.Keys.Get(engo.W).Down()
+			down = engo.Keys.Get(engo.S).Down()
+		} else {
+			up = engo.Keys.Get(engo.ArrowUp).Down()
+			down = engo.Keys.Get(engo.ArrowDown).Down()
+		}
+
+		if up {
+			if e.SpaceComponent.Position.Y > 0 {
+				e.SpaceComponent.Position.Y -= 800 * dt
+			}
+		}
+
+		if down {
+			if (e.SpaceComponent.Height + e.SpaceComponent.Position.Y) < 800 {
+				e.SpaceComponent.Position.Y += 800 * dt
+			}
+		}
+	}
+}
+
+type scoreEntity struct {
+	*ecs.BasicEntity
+	*engo.RenderComponent
+	*engo.SpaceComponent
 }
 
 type ScoreSystem struct {
-	ecs.LinearSystem
+	entities []scoreEntity
+
 	PlayerOneScore, PlayerTwoScore int
 	upToDate                       bool
 	scoreLock                      sync.RWMutex
 }
 
-func (*ScoreSystem) Type() string { return "ScoreSystem" }
-
-func (sc *ScoreSystem) New(*ecs.World) {
-	sc.upToDate = true
+func (s *ScoreSystem) New(*ecs.World) {
+	s.upToDate = true
 	engo.Mailbox.Listen("ScoreMessage", func(message engo.Message) {
 		scoreMessage, isScore := message.(ScoreMessage)
 		if !isScore {
 			return
 		}
 
-		sc.scoreLock.Lock()
+		s.scoreLock.Lock()
 		if scoreMessage.Player != 1 {
-			sc.PlayerOneScore += 1
+			s.PlayerOneScore += 1
 		} else {
-			sc.PlayerTwoScore += 1
+			s.PlayerTwoScore += 1
 		}
-		log.Println("The score is now", sc.PlayerOneScore, "vs", sc.PlayerTwoScore)
-		sc.upToDate = false
-		sc.scoreLock.Unlock()
+		log.Println("The score is now", s.PlayerOneScore, "vs", s.PlayerTwoScore)
+		s.upToDate = false
+		s.scoreLock.Unlock()
 	})
 }
 
-func (c *ScoreSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-	var render *engo.RenderComponent
-	var space *engo.SpaceComponent
+func (c *ScoreSystem) Add(basic *ecs.BasicEntity, render *engo.RenderComponent, space *engo.SpaceComponent) {
+	c.entities = append(c.entities, scoreEntity{basic, render, space})
+}
 
-	if !entity.Component(&render) || !entity.Component(&space) {
-		return
+func (s *ScoreSystem) Remove(basic ecs.BasicEntity) {
+	delete := -1
+	for index, e := range s.entities {
+		if e.BasicEntity.ID() == basic.ID() {
+			delete = index
+			break
+		}
 	}
+	if delete >= 0 {
+		s.entities = append(s.entities[:delete], s.entities[delete+1:]...)
+	}
+}
 
-	if !c.upToDate {
-		c.scoreLock.RLock()
-		label := fmt.Sprintf("%v vs %v", c.PlayerOneScore, c.PlayerTwoScore)
-		c.upToDate = true
-		c.scoreLock.RUnlock()
+func (s *ScoreSystem) Update(dt float32) {
+	for _, e := range s.entities {
+		if !s.upToDate {
+			s.scoreLock.RLock()
+			label := fmt.Sprintf("%v vs %v", s.PlayerOneScore, s.PlayerTwoScore)
+			s.upToDate = true
+			s.scoreLock.RUnlock()
 
-		render.SetDrawable(basicFont.Render(label))
-		width := len(label) * 20
+			e.RenderComponent.SetDrawable(basicFont.Render(label))
+			width := len(label) * 20
 
-		space.Position.X = float32(400 - (width / 2))
+			e.SpaceComponent.Position.X = float32(400 - (width / 2))
+		}
 	}
 }
 
