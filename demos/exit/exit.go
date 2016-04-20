@@ -15,9 +15,9 @@ func (*DefaultScene) Hide()              {}
 func (*DefaultScene) Show()              {}
 
 func (*DefaultScene) Exit() {
-	log.Println("[GAME] Exit event called")
+	log.Println("Exit event called; we can do whatever we want now")
 	// Here if you want you can prompt the user if they're sure they want to close
-	log.Println("[GAME] Manually closing")
+	log.Println("Manually closing")
 	engo.Exit()
 }
 
