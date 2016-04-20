@@ -91,6 +91,7 @@ func (c *ControlSystem) Remove(basic ecs.BasicEntity) {
 	for index, e := range c.entities {
 		if e.BasicEntity.ID() == basic.ID() {
 			delete = index
+			break
 		}
 	}
 	if delete >= 0 {
@@ -185,6 +186,7 @@ func (f *FallingSystem) Remove(basic ecs.BasicEntity) {
 	for index, e := range f.entities {
 		if e.BasicEntity.ID() == basic.ID() {
 			delete = index
+			break
 		}
 	}
 	if delete >= 0 {

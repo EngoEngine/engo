@@ -86,6 +86,7 @@ func (m *MouseSystem) Remove(basic ecs.BasicEntity) {
 	for index, entity := range m.entities {
 		if entity.ID() == basic.ID() {
 			delete = index
+			break
 		}
 	}
 	if delete >= 0 {

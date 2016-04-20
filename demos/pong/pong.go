@@ -179,6 +179,7 @@ func (s *SpeedSystem) Remove(basic ecs.BasicEntity) {
 	for index, e := range s.entities {
 		if e.BasicEntity.ID() == basic.ID() {
 			delete = index
+			break
 		}
 	}
 	if delete >= 0 {
@@ -212,6 +213,7 @@ func (b *BallSystem) Remove(basic ecs.BasicEntity) {
 	for index, e := range b.entities {
 		if e.BasicEntity.ID() == basic.ID() {
 			delete = index
+			break
 		}
 	}
 	if delete >= 0 {
@@ -270,6 +272,7 @@ func (c *ControlSystem) Remove(basic ecs.BasicEntity) {
 	for index, e := range c.entities {
 		if e.BasicEntity.ID() == basic.ID() {
 			delete = index
+			break
 		}
 	}
 	if delete >= 0 {
@@ -346,6 +349,7 @@ func (s *ScoreSystem) Remove(basic ecs.BasicEntity) {
 	for index, e := range s.entities {
 		if e.BasicEntity.ID() == basic.ID() {
 			delete = index
+			break
 		}
 	}
 	if delete >= 0 {

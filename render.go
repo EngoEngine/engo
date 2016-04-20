@@ -239,6 +239,7 @@ func (rs *RenderSystem) Remove(basic ecs.BasicEntity) {
 	for index, entity := range rs.entities {
 		if entity.ID() == basic.ID() {
 			delete = index
+			break
 		}
 	}
 	if delete >= 0 {

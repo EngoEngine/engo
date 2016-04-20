@@ -74,6 +74,7 @@ func (h *HideSystem) Remove(basic ecs.BasicEntity) {
 	for index, e := range h.entities {
 		if e.BasicEntity.ID() == basic.ID() {
 			delete = index
+			break
 		}
 	}
 	if delete >= 0 {

@@ -55,6 +55,7 @@ func (a *AudioSystem) Remove(basic ecs.BasicEntity) {
 	for index, e := range a.entities {
 		if e.BasicEntity.ID() == basic.ID() {
 			delete = index
+			break
 		}
 	}
 	if delete >= 0 {
