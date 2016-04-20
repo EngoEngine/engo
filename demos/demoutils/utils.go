@@ -40,7 +40,7 @@ func NewBackground(world *ecs.World, width, height int, colorA, colorB color.Col
 
 	bgTexture := engo.NewImageObject(img)
 
-	bg := &Background{BasicEntity: ecs.NewBasic()} // TODO; this being another package; I hope it won't interfere with the incremental counter? It might?
+	bg := &Background{BasicEntity: ecs.NewBasic()}
 	bg.RenderComponent = engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1}, "Background")
 	bg.SpaceComponent = engo.SpaceComponent{engo.Point{0, 0}, float32(width), float32(height)}
 
