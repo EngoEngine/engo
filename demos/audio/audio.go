@@ -40,9 +40,6 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	}
 }
 
-func (*DefaultScene) Hide()        {}
-func (*DefaultScene) Show()        {}
-func (*DefaultScene) Exit()        {}
 func (*DefaultScene) Type() string { return "Game" }
 
 type WhoopSystem struct {

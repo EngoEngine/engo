@@ -57,9 +57,6 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	}
 }
 
-func (*DefaultScene) Hide()        {}
-func (*DefaultScene) Show()        {}
-func (*DefaultScene) Exit()        {}
 func (*DefaultScene) Type() string { return "GameWorld" }
 
 type controlEntity struct {

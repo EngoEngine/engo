@@ -66,9 +66,14 @@ func (*IconScene) Setup(w *ecs.World) {
 	}
 }
 
-func (*IconScene) Hide()        {}
-func (*IconScene) Show()        {}
-func (*IconScene) Exit()        {}
+func (*IconScene) Hide() {
+	log.Println("IconScene is now hidden")
+}
+
+func (*IconScene) Show() {
+	log.Println("IconScene is now shown")
+}
+
 func (*IconScene) Type() string { return "IconScene" }
 
 // RockScene is responsible for managing the rock
@@ -110,9 +115,14 @@ func (game *RockScene) Setup(w *ecs.World) {
 	}
 }
 
-func (*RockScene) Hide()        {}
-func (*RockScene) Show()        {}
-func (*RockScene) Exit()        {}
+func (*RockScene) Hide() {
+	log.Println("RockScene is now hidden")
+}
+
+func (*RockScene) Show() {
+	log.Println("RockScens is now shown")
+}
+
 func (*RockScene) Type() string { return "RockScene" }
 
 // SceneSwitcherSystem is a System that actually calls SetScene

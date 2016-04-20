@@ -32,9 +32,6 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	demoutils.NewBackground(w, worldWidth, worldHeight, color.RGBA{102, 153, 0, 255}, color.RGBA{102, 173, 0, 255})
 }
 
-func (*DefaultScene) Hide()        {}
-func (*DefaultScene) Show()        {}
-func (*DefaultScene) Exit()        {}
 func (*DefaultScene) Type() string { return "Game" }
 
 func main() {
