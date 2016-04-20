@@ -41,9 +41,7 @@ type CollisionMessage struct {
 	To     collisionEntity
 }
 
-func (collision CollisionMessage) Type() string {
-	return "CollisionMessage"
-}
+func (CollisionMessage) Type() string { return "CollisionMessage" }
 
 type collisionEntity struct {
 	*ecs.BasicEntity
