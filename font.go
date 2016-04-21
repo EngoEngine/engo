@@ -93,6 +93,10 @@ func (f *Font) RenderNRGBA(text string) *image.NRGBA {
 	font := f.TTF
 	size := f.Size
 
+	if size <= 0 {
+		panic("Font size cannot be <= 0")
+	}
+
 	// Default colors
 	if f.FG == nil {
 		f.FG = color.NRGBA{0, 0, 0, 0}
