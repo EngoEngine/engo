@@ -8,8 +8,10 @@ import (
 	"math/rand"
 	"strconv"
 
-	"engo.io/webgl"
+	"engo.io/gl"
 	"github.com/gopherjs/gopherjs/js"
+	"github.com/gopherjs/webgl"
+	"honnef.co/go/js/dom"
 )
 
 func init() {
@@ -17,130 +19,163 @@ func init() {
 }
 
 var canvas js.Object
+var document = dom.GetWindow().Document().(dom.HTMLDocument)
 
 func run(title string, width, height int, fullscreen bool) {
-	document := js.Global.Get("document")
-	canvas = document.Call("createElement", "canvas")
+	canvas := document.CreateElement("canvas").(*dom.HTMLCanvasElement)
+	devicePixelRatio := js.Global.Get("devicePixelRatio").Float()
+	canvas.Width = int(float64(width)*devicePixelRatio + 0.5)   // Nearest non-negative int.
+	canvas.Height = int(float64(height)*devicePixelRatio + 0.5) // Nearest non-negative int.
+	canvas.Style().SetProperty("width", fmt.Sprintf("%vpx", width), "")
+	canvas.Style().SetProperty("height", fmt.Sprintf("%vpx", height), "")
 
-	target := document.Call("getElementById", title)
-	if target.IsNull() {
-		target = document.Get("body")
+	if js.Global.Get("document").Get("body") == nil {
+		body := js.Global.Get("document").Call("createElement", "body")
+		js.Global.Get("document").Set("body", body)
+		log.Println("Creating body, since it doesn't exist.")
 	}
-	target.Call("appendChild", canvas)
+	document.Body().Style().SetProperty("margin", "0", "")
+	document.Body().AppendChild(canvas)
+
+	document.SetTitle(title)
 
 	attrs := webgl.DefaultAttributes()
 	attrs.Alpha = false
-	attrs.Depth = false
-	attrs.PremultipliedAlpha = false
-	attrs.PreserveDrawingBuffer = false
-	attrs.Antialias = false
-
 	var err error
-	Gl, err = webgl.NewContext(canvas, attrs)
+	gl, err = webgl.NewContext(canvas.Underlying(), attrs)
 	if err != nil {
-		log.Fatal(err)
+		dom.GetWindow().Alert("Error: " + err.Error())
 	}
 
-	js.Global.Set("onunload", func() {
-		responder.Close()
-	})
-
-	canvas.Get("style").Set("display", "block")
-	winWidth := js.Global.Get("innerWidth").Int()
-	winHeight := js.Global.Get("innerHeight").Int()
-	if fullscreen {
-		canvas.Set("width", winWidth)
-		canvas.Set("height", winHeight)
-	} else {
-		canvas.Set("width", width)
-		canvas.Set("height", height)
-		canvas.Get("style").Set("marginLeft", toPx((winWidth-width)/2))
-		canvas.Get("style").Set("marginTop", toPx((winHeight-height)/2))
+	// DEBUG: Add framebuffer information div.
+	if false {
+		//canvas.Height -= 30
+		text := document.CreateElement("div")
+		textContent := fmt.Sprintf("%v %v (%v) @%v", dom.GetWindow().InnerWidth(), canvas.Width, float64(width)*devicePixelRatio, devicePixelRatio)
+		text.SetTextContent(textContent)
+		document.Body().AppendChild(text)
 	}
+	log.Println("Hello Web")
 
-	canvas.Call("addEventListener", "mousemove", func(ev js.Object) {
-		rect := canvas.Call("getBoundingClientRect")
-		x := float32((ev.Get("clientX").Int() - rect.Get("left").Int()))
-		y := float32((ev.Get("clientY").Int() - rect.Get("top").Int()))
-		responder.Mouse(x, y, MOVE)
-	}, false)
+	// target := document.Call("getElementById", title)
+	// if target.IsNull() {
+	// 	target = document.Get("body")
+	// }
+	// target.Call("appendChild", canvas)
 
-	canvas.Call("addEventListener", "mousedown", func(ev js.Object) {
-		rect := canvas.Call("getBoundingClientRect")
-		x := float32((ev.Get("clientX").Int() - rect.Get("left").Int()))
-		y := float32((ev.Get("clientY").Int() - rect.Get("top").Int()))
-		responder.Mouse(x, y, PRESS)
-	}, false)
+	// attrs := webgl.DefaultAttributes()
+	// attrs.Alpha = false
+	// attrs.Depth = false
+	// attrs.PremultipliedAlpha = false
+	// attrs.PreserveDrawingBuffer = false
+	// attrs.Antialias = false
 
-	canvas.Call("addEventListener", "mouseup", func(ev js.Object) {
-		rect := canvas.Call("getBoundingClientRect")
-		x := float32((ev.Get("clientX").Int() - rect.Get("left").Int()))
-		y := float32((ev.Get("clientY").Int() - rect.Get("top").Int()))
-		responder.Mouse(x, y, RELEASE)
-	}, false)
+	// var err error
+	// Gl, err = webgl.NewContext(canvas, attrs)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	canvas.Call("addEventListener", "touchstart", func(ev js.Object) {
-		rect := canvas.Call("getBoundingClientRect")
-		for i := 0; i < ev.Get("changedTouches").Get("length").Int(); i++ {
-			touch := ev.Get("changedTouches").Index(i)
-			x := float32((touch.Get("clientX").Int() - rect.Get("left").Int()))
-			y := float32((touch.Get("clientY").Int() - rect.Get("top").Int()))
-			responder.Mouse(x, y, PRESS)
-		}
-	}, false)
+	// js.Global.Set("onunload", func() {
+	// 	responder.Close()
+	// })
 
-	canvas.Call("addEventListener", "touchcancel", func(ev js.Object) {
-		rect := canvas.Call("getBoundingClientRect")
-		for i := 0; i < ev.Get("changedTouches").Get("length").Int(); i++ {
-			touch := ev.Get("changedTouches").Index(i)
-			x := float32((touch.Get("clientX").Int() - rect.Get("left").Int()))
-			y := float32((touch.Get("clientY").Int() - rect.Get("top").Int()))
-			responder.Mouse(x, y, RELEASE)
-		}
-	}, false)
+	// canvas.Get("style").Set("display", "block")
+	// winWidth := js.Global.Get("innerWidth").Int()
+	// winHeight := js.Global.Get("innerHeight").Int()
+	// if fullscreen {
+	// 	canvas.Set("width", winWidth)
+	// 	canvas.Set("height", winHeight)
+	// } else {
+	// 	canvas.Set("width", width)
+	// 	canvas.Set("height", height)
+	// 	canvas.Get("style").Set("marginLeft", toPx((winWidth-width)/2))
+	// 	canvas.Get("style").Set("marginTop", toPx((winHeight-height)/2))
+	// }
 
-	canvas.Call("addEventListener", "touchend", func(ev js.Object) {
-		rect := canvas.Call("getBoundingClientRect")
-		for i := 0; i < ev.Get("changedTouches").Get("length").Int(); i++ {
-			touch := ev.Get("changedTouches").Index(i)
-			x := float32((touch.Get("clientX").Int() - rect.Get("left").Int()))
-			y := float32((touch.Get("clientY").Int() - rect.Get("top").Int()))
-			responder.Mouse(x, y, PRESS)
-		}
-	}, false)
+	// canvas.Call("addEventListener", "mousemove", func(ev js.Object) {
+	// 	rect := canvas.Call("getBoundingClientRect")
+	// 	x := float32((ev.Get("clientX").Int() - rect.Get("left").Int()))
+	// 	y := float32((ev.Get("clientY").Int() - rect.Get("top").Int()))
+	// 	responder.Mouse(x, y, MOVE)
+	// }, false)
 
-	canvas.Call("addEventListener", "touchmove", func(ev js.Object) {
-		rect := canvas.Call("getBoundingClientRect")
-		for i := 0; i < ev.Get("changedTouches").Get("length").Int(); i++ {
-			touch := ev.Get("changedTouches").Index(i)
-			x := float32((touch.Get("clientX").Int() - rect.Get("left").Int()))
-			y := float32((touch.Get("clientY").Int() - rect.Get("top").Int()))
-			responder.Mouse(x, y, MOVE)
-		}
-	}, false)
+	// canvas.Call("addEventListener", "mousedown", func(ev js.Object) {
+	// 	rect := canvas.Call("getBoundingClientRect")
+	// 	x := float32((ev.Get("clientX").Int() - rect.Get("left").Int()))
+	// 	y := float32((ev.Get("clientY").Int() - rect.Get("top").Int()))
+	// 	responder.Mouse(x, y, PRESS)
+	// }, false)
 
-	js.Global.Call("addEventListener", "keypress", func(ev js.Object) {
-		responder.Type(rune(ev.Get("charCode").Int()))
-	}, false)
+	// canvas.Call("addEventListener", "mouseup", func(ev js.Object) {
+	// 	rect := canvas.Call("getBoundingClientRect")
+	// 	x := float32((ev.Get("clientX").Int() - rect.Get("left").Int()))
+	// 	y := float32((ev.Get("clientY").Int() - rect.Get("top").Int()))
+	// 	responder.Mouse(x, y, RELEASE)
+	// }, false)
 
-	js.Global.Call("addEventListener", "keydown", func(ev js.Object) {
-		key := Key(ev.Get("keyCode").Int())
-		keyStates[key] = true
-	}, false)
+	// canvas.Call("addEventListener", "touchstart", func(ev js.Object) {
+	// 	rect := canvas.Call("getBoundingClientRect")
+	// 	for i := 0; i < ev.Get("changedTouches").Get("length").Int(); i++ {
+	// 		touch := ev.Get("changedTouches").Index(i)
+	// 		x := float32((touch.Get("clientX").Int() - rect.Get("left").Int()))
+	// 		y := float32((touch.Get("clientY").Int() - rect.Get("top").Int()))
+	// 		responder.Mouse(x, y, PRESS)
+	// 	}
+	// }, false)
 
-	js.Global.Call("addEventListener", "keyup", func(ev js.Object) {
-		key := Key(ev.Get("keyCode").Int())
-		keyStates[key] = false
-		// responder.Key(Key(ev.Get("keyCode").Int()), 0, RELEASE)
-	}, false)
+	// canvas.Call("addEventListener", "touchcancel", func(ev js.Object) {
+	// 	rect := canvas.Call("getBoundingClientRect")
+	// 	for i := 0; i < ev.Get("changedTouches").Get("length").Int(); i++ {
+	// 		touch := ev.Get("changedTouches").Index(i)
+	// 		x := float32((touch.Get("clientX").Int() - rect.Get("left").Int()))
+	// 		y := float32((touch.Get("clientY").Int() - rect.Get("top").Int()))
+	// 		responder.Mouse(x, y, RELEASE)
+	// 	}
+	// }, false)
 
-	Gl.Viewport(0, 0, width, height)
-	Wo.New()
-	responder.Preload()
-	Files.Load(func() {
-		responder.Setup()
-		RequestAnimationFrame(animate)
-	})
+	// canvas.Call("addEventListener", "touchend", func(ev js.Object) {
+	// 	rect := canvas.Call("getBoundingClientRect")
+	// 	for i := 0; i < ev.Get("changedTouches").Get("length").Int(); i++ {
+	// 		touch := ev.Get("changedTouches").Index(i)
+	// 		x := float32((touch.Get("clientX").Int() - rect.Get("left").Int()))
+	// 		y := float32((touch.Get("clientY").Int() - rect.Get("top").Int()))
+	// 		responder.Mouse(x, y, PRESS)
+	// 	}
+	// }, false)
+
+	// canvas.Call("addEventListener", "touchmove", func(ev js.Object) {
+	// 	rect := canvas.Call("getBoundingClientRect")
+	// 	for i := 0; i < ev.Get("changedTouches").Get("length").Int(); i++ {
+	// 		touch := ev.Get("changedTouches").Index(i)
+	// 		x := float32((touch.Get("clientX").Int() - rect.Get("left").Int()))
+	// 		y := float32((touch.Get("clientY").Int() - rect.Get("top").Int()))
+	// 		responder.Mouse(x, y, MOVE)
+	// 	}
+	// }, false)
+
+	// js.Global.Call("addEventListener", "keypress", func(ev js.Object) {
+	// 	responder.Type(rune(ev.Get("charCode").Int()))
+	// }, false)
+
+	// js.Global.Call("addEventListener", "keydown", func(ev js.Object) {
+	// 	key := Key(ev.Get("keyCode").Int())
+	// 	keyStates[key] = true
+	// }, false)
+
+	// js.Global.Call("addEventListener", "keyup", func(ev js.Object) {
+	// 	key := Key(ev.Get("keyCode").Int())
+	// 	keyStates[key] = false
+	// 	// responder.Key(Key(ev.Get("keyCode").Int()), 0, RELEASE)
+	// }, false)
+
+	// Gl.Viewport(0, 0, width, height)
+	// Wo.New()
+	// responder.Preload()
+	// Files.Load(func() {
+	// 	responder.Setup()
+	// 	RequestAnimationFrame(animate)
+	// })
 }
 
 func width() float32 {
