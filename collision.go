@@ -2,9 +2,9 @@ package engo
 
 import (
 	"log"
-	"math"
 
 	"engo.io/ecs"
+	"github.com/luxengine/math"
 )
 
 type AABB struct {
@@ -27,23 +27,8 @@ func (sc *SpaceComponent) Center(p Point) {
 	sc.Position.Y = p.Y - yDelta
 }
 
-func (*SpaceComponent) Type() string {
-	return "SpaceComponent"
-}
-
 func (sc SpaceComponent) AABB() AABB {
 	return AABB{Min: sc.Position, Max: Point{sc.Position.X + sc.Width, sc.Position.Y + sc.Height}}
-}
-
-type CollisionMasterComponent struct {
-}
-
-func (*CollisionMasterComponent) Type() string {
-	return "CollisionMasterComponent"
-}
-
-func (cm CollisionMasterComponent) Is() bool {
-	return true
 }
 
 type CollisionComponent struct {
@@ -51,88 +36,73 @@ type CollisionComponent struct {
 	Extra       Point
 }
 
-func (*CollisionComponent) Type() string {
-	return "CollisionComponent"
-}
-
 type CollisionMessage struct {
-	Entity *ecs.Entity
-	To     *ecs.Entity
+	Entity collisionEntity
+	To     collisionEntity
 }
 
-func (collision CollisionMessage) Type() string {
-	return "CollisionMessage"
+func (CollisionMessage) Type() string { return "CollisionMessage" }
+
+type collisionEntity struct {
+	*ecs.BasicEntity
+	*CollisionComponent
+	*SpaceComponent
 }
 
 type CollisionSystem struct {
-	ecs.LinearSystem
+	entities []collisionEntity
 }
 
-func (*CollisionSystem) Type() string { return "CollisionSystem" }
-func (*CollisionSystem) Pre()         {}
-func (*CollisionSystem) Post()        {}
-
-func (cs *CollisionSystem) New(*ecs.World) {}
-
-func (cs *CollisionSystem) RunInParallel() bool {
-	// TODO: this function isn't called/used any more ...
-	return len(cs.Entities) > 40 // turning point for CollisionSystem
+func (c *CollisionSystem) Add(basic *ecs.BasicEntity, collision *CollisionComponent, space *SpaceComponent) {
+	c.entities = append(c.entities, collisionEntity{basic, collision, space})
 }
 
-func (cs *CollisionSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-	var (
-		space     *SpaceComponent
-		collision *CollisionComponent
-		ok        bool
-	)
-
-	if space, ok = entity.ComponentFast(space).(*SpaceComponent); !ok {
-		return
+func (c *CollisionSystem) Remove(basic ecs.BasicEntity) {
+	delete := -1
+	for index, e := range c.entities {
+		if e.BasicEntity.ID() == basic.ID() {
+			delete = index
+			break
+		}
 	}
-
-	if collision, ok = entity.ComponentFast(collision).(*CollisionComponent); !ok {
-		return
+	if delete >= 0 {
+		c.entities = append(c.entities[:delete], c.entities[delete+1:]...)
 	}
+}
 
-	if !collision.Main {
-		return
-	}
+func (cs *CollisionSystem) Update(dt float32) {
+	for i1, e1 := range cs.entities {
+		if !e1.CollisionComponent.Main {
+			continue // with other entities
+		}
 
-	var (
-		otherSpace     *SpaceComponent
-		otherCollision *CollisionComponent
-	)
+		entityAABB := e1.SpaceComponent.AABB()
+		offset := Point{e1.CollisionComponent.Extra.X / 2, e1.CollisionComponent.Extra.Y / 2}
+		entityAABB.Min.X -= offset.X
+		entityAABB.Min.Y -= offset.Y
+		entityAABB.Max.X += offset.X
+		entityAABB.Max.Y += offset.Y
 
-	for _, other := range cs.Entities {
-		if other.ID() != entity.ID() {
-			if otherSpace, ok = other.ComponentFast(otherSpace).(*SpaceComponent); !ok {
-				return
+		for i2, e2 := range cs.entities {
+			if i1 == i2 {
+				continue // with other entities, because we won't collide with ourselves
 			}
 
-			if otherCollision, ok = other.ComponentFast(otherCollision).(*CollisionComponent); !ok {
-				return
-			}
-
-			entityAABB := space.AABB()
-			offset := Point{collision.Extra.X / 2, collision.Extra.Y / 2}
-			entityAABB.Min.X -= offset.X
-			entityAABB.Min.Y -= offset.Y
-			entityAABB.Max.X += offset.X
-			entityAABB.Max.Y += offset.Y
-			otherAABB := otherSpace.AABB()
-			offset = Point{otherCollision.Extra.X / 2, otherCollision.Extra.Y / 2}
+			otherAABB := e2.SpaceComponent.AABB()
+			offset = Point{e2.CollisionComponent.Extra.X / 2, e2.CollisionComponent.Extra.Y / 2}
 			otherAABB.Min.X -= offset.X
 			otherAABB.Min.Y -= offset.Y
 			otherAABB.Max.X += offset.X
 			otherAABB.Max.Y += offset.Y
+
 			if IsIntersecting(entityAABB, otherAABB) {
-				if otherCollision.Solid && collision.Solid {
+				if e1.CollisionComponent.Solid && e2.CollisionComponent.Solid {
 					mtd := MinimumTranslation(entityAABB, otherAABB)
-					space.Position.X += mtd.X
-					space.Position.Y += mtd.Y
+					e1.SpaceComponent.Position.X += mtd.X
+					e1.SpaceComponent.Position.Y += mtd.Y
 				}
 
-				Mailbox.Dispatch(CollisionMessage{Entity: entity, To: other})
+				Mailbox.Dispatch(CollisionMessage{Entity: e1, To: e2})
 			}
 		}
 	}
@@ -149,10 +119,10 @@ func IsIntersecting(rect1 AABB, rect2 AABB) bool {
 func MinimumTranslation(rect1 AABB, rect2 AABB) Point {
 	mtd := Point{}
 
-	left := float64(rect2.Min.X - rect1.Max.X)
-	right := float64(rect2.Max.X - rect1.Min.X)
-	top := float64(rect2.Min.Y - rect1.Max.Y)
-	bottom := float64(rect2.Max.Y - rect1.Min.Y)
+	left := rect2.Min.X - rect1.Max.X
+	right := rect2.Max.X - rect1.Min.X
+	top := rect2.Min.Y - rect1.Max.Y
+	bottom := rect2.Max.Y - rect1.Min.Y
 
 	if left > 0 || right < 0 {
 		log.Println("Box aint intercepting")
@@ -166,18 +136,18 @@ func MinimumTranslation(rect1 AABB, rect2 AABB) Point {
 		//box doesnt intercept
 	}
 	if math.Abs(left) < right {
-		mtd.X = float32(left)
+		mtd.X = left
 	} else {
-		mtd.X = float32(right)
+		mtd.X = right
 	}
 
 	if math.Abs(top) < bottom {
-		mtd.Y = float32(top)
+		mtd.Y = top
 	} else {
-		mtd.Y = float32(bottom)
+		mtd.Y = bottom
 	}
 
-	if math.Abs(float64(mtd.X)) < math.Abs(float64(mtd.Y)) {
+	if math.Abs(mtd.X) < math.Abs(mtd.Y) {
 		mtd.Y = 0
 	} else {
 		mtd.X = 0

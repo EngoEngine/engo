@@ -15,7 +15,7 @@ import (
 	"syscall"
 	"time"
 
-	"engo.io/webgl"
+	"engo.io/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
@@ -86,7 +86,7 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 
 	SetVSync(vsync)
 
-	Gl = webgl.NewContext()
+	Gl = gl.NewContext()
 	Gl.Viewport(0, 0, width, height)
 
 	window.SetFramebufferSizeCallback(func(window *glfw.Window, w, h int) {
@@ -207,7 +207,9 @@ func RunPreparation(defaultScene Scene) {
 
 func closeEvent() {
 	for _, scenes := range scenes {
-		scenes.scene.Exit()
+		if exiter, ok := scenes.scene.(Exiter); ok {
+			exiter.Exit()
+		}
 	}
 
 	if defaultCloseAction {

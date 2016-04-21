@@ -29,6 +29,16 @@ We have a [gitter](https://gitter.im/EngoEngine/engo) chat for people to join wh
 4. Finally, if you run into problems, if you've encountered a bug, or want to request a feature, feel free to shoot 
 us a DM or [create an issue](https://github.com/EngoEngine/engo/issues/new). 
 
+## Breaking Changes
+Engo is currently undergoing a lot of optimizations and constantly gets new features. However, this sometimes means things break. In order to make transitioning easier for you, 
+we have a list of those changes, with the most recent being at the top. If you run into any problems, please contact us at [gitter](https://gitter.im/EngoEngine/engo). 
+
+* `ecs.Entity` changed to `ecs.BasicEntity`, `world.AddEntity` is gone - **a lot** has changed here. The entire issue is described [here](https://github.com/EngoEngine/ecs/issues/13), while [this comment](https://github.com/EngoEngine/ecs/issues/13#issuecomment-210887914) in particular, should help you migrate your code. 
+* Renamed `engo.io/webgl` to `engo.io/gl`, because the package handles more than only *web*gl. 
+* `scene.Exit()` - a `Scene` now also requires an `Exit()` function, alongside the `Hide()` and `Show()` it already required. 
+* `github.com/EngoEngine/engo` -> `engo.io/engo` - Our packages `engo`, `ecs` and `webgl` should now be imported using the `engo.io` path. 
+* `engi.XXX` -> `engo.XXX` - We renamed our package `engi` to `engo`. 
+
 ## History
 
 Engo, originally known as `Engi` was written by [ajhager](https://github.com/ajhager) as a general purpose Go game engine. With a desire to build it into an "ECS" game engine, it was forked to `github.com/paked/engi`. After passing through several iterations, it was decided that the project would be rebranded and rereleased as Engo on its own GitHub organisation.

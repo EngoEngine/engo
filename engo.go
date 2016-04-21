@@ -5,13 +5,13 @@ import (
 	"image/color"
 
 	"engo.io/ecs"
-	"engo.io/webgl"
+	"engo.io/gl"
 )
 
 var (
 	Time        *Clock
 	Files       *Loader
-	Gl          *webgl.Context
+	Gl          *gl.Context
 	WorldBounds AABB
 
 	currentWorld *ecs.World
@@ -48,6 +48,10 @@ type RunOptions struct {
 
 	// FPSLimit indicates the maximum number of frames per second
 	FPSLimit int
+
+	// OverrideCloseAction indicates that (when true) engo will never close whenever the gamer wants to close the
+	// game - that will be your responsibility
+	OverrideCloseAction bool
 }
 
 func Run(opts RunOptions, defaultScene Scene) {
@@ -55,7 +59,7 @@ func Run(opts RunOptions, defaultScene Scene) {
 	SetScaleOnResize(opts.ScaleOnResize)
 	SetFPSLimit(opts.FPSLimit)
 	vsync = opts.VSync
-	defaultCloseAction = true
+	defaultCloseAction = !opts.OverrideCloseAction
 
 	if opts.HeadlessMode {
 		headless = true
@@ -85,8 +89,8 @@ func SetScaleOnResize(b bool) {
 	scaleOnResize = b
 }
 
-func OverrideCloseAction() {
-	defaultCloseAction = false
+func SetOverrideCloseAction(value bool) {
+	defaultCloseAction = !value
 }
 
 func SetFPSLimit(limit int) error {
