@@ -97,7 +97,7 @@ func (game *RockScene) Setup(w *ecs.World) {
 	rock := Rock{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	rock.RenderComponent = engo.NewRenderComponent(texture, engo.Point{8, 8}, "rock")
+	rock.RenderComponent = engo.NewRenderComponent(texture, engo.Point{8, 8})
 	rock.SpaceComponent = engo.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    texture.Width() * rock.RenderComponent.Scale().X,
