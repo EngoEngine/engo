@@ -47,7 +47,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 4x
-	guy.RenderComponent = engo.NewRenderComponent(texture, engo.Point{4, 4}, "guy")
+	guy.RenderComponent = engo.NewRenderComponent(texture, engo.Point{4, 4})
 	guy.SpaceComponent = engo.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    texture.Width() * guy.RenderComponent.Scale().X,
@@ -145,7 +145,7 @@ func NewRock(world *ecs.World, position engo.Point) {
 	texture := engo.Files.Image("rock.png")
 
 	rock := Rock{BasicEntity: ecs.NewBasic()}
-	rock.RenderComponent = engo.NewRenderComponent(texture, engo.Point{4, 4}, "rock")
+	rock.RenderComponent = engo.NewRenderComponent(texture, engo.Point{4, 4})
 	rock.SpaceComponent = engo.SpaceComponent{
 		Position: position,
 		Width:    texture.Width() * rock.RenderComponent.Scale().X,

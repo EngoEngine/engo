@@ -32,7 +32,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	guy.RenderComponent = engo.NewRenderComponent(texture, engo.Point{8, 8}, "guy")
+	guy.RenderComponent = engo.NewRenderComponent(texture, engo.Point{8, 8})
 	guy.SpaceComponent = engo.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    texture.Width() * guy.RenderComponent.Scale().X,
