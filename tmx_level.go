@@ -139,8 +139,8 @@ func createLevelFromTmx(r Resource) (*Level, error) {
 		tlvl.Tilesets[k] = ts
 	}
 
-	lvl.Width = tlvl.Width
-	lvl.Height = tlvl.Height
+	lvl.width = tlvl.Width
+	lvl.height = tlvl.Height
 	lvl.TileWidth = tlvl.TileWidth
 	lvl.TileHeight = tlvl.TileHeight
 
@@ -170,7 +170,7 @@ func createLevelFromTmx(r Resource) (*Level, error) {
 		curX := float32(tlvl.ImgLayers[i].X)
 		curY := float32(tlvl.ImgLayers[i].Y)
 		reg := NewRegion(curImg, 0, 0, curImg.width, curImg.height)
-		lvl.Images = append(lvl.Images, &tile{Point{curX, curY}, reg})
+		lvl.Images = append(lvl.Images, &tile{Point{curX, curY}, tlvl.TileWidth, tlvl.TileHeight, reg})
 	}
 
 	return lvl, nil
