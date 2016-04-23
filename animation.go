@@ -6,24 +6,26 @@ import (
 	"engo.io/ecs"
 )
 
-type AnimationAction struct {
+type Animation struct {
 	Name   string
 	Frames []int
+	Loop   bool
 }
 
 // Component that controls animation in rendering entities
 type AnimationComponent struct {
-	index            int              // What frame in the is being used
-	Rate             float32          // How often frames should increment, in seconds.
-	change           float32          // The time since the last incrementation
-	Drawables        []Drawable       // Renderables
-	Animations       map[string][]int // All possible animations
-	CurrentAnimation []int            // The current animation
+	Drawables        []Drawable            // Renderables
+	Animations       map[string]*Animation // All possible animations
+	CurrentAnimation *Animation            // The current animation
+	Rate             float32               // How often frames should increment, in seconds.
+	index            int                   // What frame in the is being used
+	change           float32               // The time since the last incrementation
+	def              string                // The default animation to play when nothing else is playing
 }
 
 func NewAnimationComponent(drawables []Drawable, rate float32) AnimationComponent {
 	return AnimationComponent{
-		Animations: make(map[string][]int),
+		Animations: make(map[string]*Animation),
 		Drawables:  drawables,
 		Rate:       rate,
 	}
@@ -31,39 +33,53 @@ func NewAnimationComponent(drawables []Drawable, rate float32) AnimationComponen
 
 func (ac *AnimationComponent) SelectAnimationByName(name string) {
 	ac.CurrentAnimation = ac.Animations[name]
+	ac.index = 0
 }
 
-func (ac *AnimationComponent) SelectAnimationByAction(action *AnimationAction) {
-	ac.CurrentAnimation = ac.Animations[action.Name]
+func (ac *AnimationComponent) SelectAnimationByAction(action *Animation) {
+	ac.SelectAnimationByName(action.Name)
 }
 
-func (ac *AnimationComponent) AddAnimationAction(action *AnimationAction) {
-	ac.Animations[action.Name] = action.Frames
+func (ac *AnimationComponent) AddDefaultAnimation(action *Animation) {
+	ac.def = action.Name
+
+	ac.AddAnimation(action)
 }
 
-func (ac *AnimationComponent) AddAnimationActions(actions []*AnimationAction) {
+func (ac *AnimationComponent) AddAnimation(action *Animation) {
+	ac.Animations[action.Name] = action
+}
+
+func (ac *AnimationComponent) AddAnimations(actions []*Animation) {
 	for _, action := range actions {
-		ac.Animations[action.Name] = action.Frames
+		ac.AddAnimation(action)
 	}
 }
 
 func (ac *AnimationComponent) Cell() Drawable {
-	idx := ac.CurrentAnimation[ac.index]
+	log.Println(ac.index)
+
+	idx := ac.CurrentAnimation.Frames[ac.index]
 
 	return ac.Drawables[idx]
 }
 
 func (ac *AnimationComponent) NextFrame() {
-	if len(ac.CurrentAnimation) == 0 {
+	if len(ac.CurrentAnimation.Frames) == 0 {
 		log.Println("No data for this animation")
 		return
 	}
 
 	ac.index += 1
-	if ac.index >= len(ac.CurrentAnimation) {
-		ac.index = 0
-	}
 	ac.change = 0
+	if ac.index >= len(ac.CurrentAnimation.Frames) {
+		ac.index = 0
+
+		if !ac.CurrentAnimation.Loop {
+			ac.CurrentAnimation = nil
+			return
+		}
+	}
 }
 
 type animationEntity struct {
@@ -95,10 +111,18 @@ func (a *AnimationSystem) Remove(basic ecs.BasicEntity) {
 
 func (a *AnimationSystem) Update(dt float32) {
 	for _, e := range a.entities {
+		if e.AnimationComponent.CurrentAnimation == nil {
+			if e.AnimationComponent.def == "" {
+				return
+			}
+
+			e.AnimationComponent.SelectAnimationByName(e.AnimationComponent.def)
+		}
+
 		e.AnimationComponent.change += dt
 		if e.AnimationComponent.change >= e.AnimationComponent.Rate {
-			e.AnimationComponent.NextFrame()
 			e.RenderComponent.SetDrawable(e.AnimationComponent.Cell())
+			e.AnimationComponent.NextFrame()
 		}
 	}
 }
