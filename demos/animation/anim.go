@@ -65,7 +65,7 @@ func (*DefaultScene) CreateEntity(point *engo.Point, spriteSheet *engo.Spriteshe
 	entity.AnimationComponent = engo.NewAnimationComponent(spriteSheet.Drawables(), 0.1)
 
 	entity.AnimationComponent.AddAnimations(actions)
-	entity.AnimationComponent.AddDefaultAnimationAction(StopAction)
+	entity.AnimationComponent.AddDefaultAnimation(StopAction)
 
 	return entity
 }
@@ -102,9 +102,7 @@ func (c *ControlSystem) Update(dt float32) {
 			e.AnimationComponent.SelectAnimationByAction(WalkAction)
 		} else if engo.Keys.Get(engo.Space).Down() {
 			e.AnimationComponent.SelectAnimationByAction(SkillAction)
-		} /* else {
-			e.AnimationComponent.SelectAnimationByAction(StopAction)
-		}*/
+		}
 	}
 }
 
