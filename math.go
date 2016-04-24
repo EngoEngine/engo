@@ -8,6 +8,21 @@ type Point struct {
 	X, Y float32
 }
 
+// Abs returns the absolute value of x.
+//
+// Special cases are:
+//	Abs(±Inf) = +Inf
+//	Abs(NaN) = NaN
+func Abs(x float32) float32 {
+	if x < 0 {
+		return -x
+	}
+	if x == 0 {
+		return 0 // return correctly abs(-0)
+	}
+	return x
+}
+
 func (p *Point) Set(x, y float32) {
 	p.X = x
 	p.Y = y

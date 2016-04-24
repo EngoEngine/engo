@@ -1,17 +1,17 @@
-// +build !netgo
+// +build netgo
 
 package engo
 
+//TODO go generate to convert fonts to ones readable by engo
 import (
 	"fmt"
-	"image"
 	"image/color"
-	"image/draw"
 	"io/ioutil"
 	"log"
 
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
+	"github.com/gopherjs/gopherjs/js"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
@@ -90,48 +90,13 @@ func (f *Font) TextDimensions(text string) (int, int, int) {
 	return int(totalWidth), int(totalHeight), int(maxYBearing)
 }
 
-func (f *Font) RenderNRGBA(text string) *image.NRGBA {
-	width, height, yBearing := f.TextDimensions(text)
-	font := f.TTF
-	size := f.Size
-
-	// Default colors
-	if f.FG == nil {
-		f.FG = color.NRGBA{0, 0, 0, 0}
-	}
-	if f.BG == nil {
-		f.BG = color.NRGBA{0, 0, 0, 0}
-	}
-
-	// Colors
-	fg := image.NewUniform(f.FG)
-	bg := image.NewUniform(f.BG)
-
-	// Create the font context
-	c := freetype.NewContext()
-
-	nrgba := image.NewNRGBA(image.Rect(0, 0, width, height))
-	draw.Draw(nrgba, nrgba.Bounds(), bg, image.ZP, draw.Src)
-
-	c.SetDPI(dpi)
-	c.SetFont(font)
-	c.SetFontSize(size)
-	c.SetClip(nrgba.Bounds())
-	c.SetDst(nrgba)
-	c.SetSrc(fg)
-
-	// Draw the text.
-	pt := fixed.P(0, int(yBearing))
-	_, err := c.DrawString(text, pt)
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
-
-	return nrgba
+func (f *Font) RenderNRGBA(text string) *js.Object {
+	log.Println("[WARNING] RenderNRGBA not implemented on Gopherjs")
+	return &js.Object{}
 }
 
 func (f *Font) Render(text string) *Texture {
+	log.Println("render called")
 	nrgba := f.RenderNRGBA(text)
 
 	// Create texture

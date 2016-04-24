@@ -40,7 +40,7 @@ type Paddle struct {
 }
 
 func (pong *PongGame) Preload() {
-	engo.Files.AddFromDir("assets", true)
+	engo.Files.Add("assets/ball.png", "assets/paddle.png", "assets/Roboto-Regular.ttf")
 }
 
 func (pong *PongGame) Setup(w *ecs.World) {
@@ -84,14 +84,14 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	}
 
 	score := Score{BasicEntity: ecs.NewBasic()}
-	score.RenderComponent = engo.NewRenderComponent(basicFont.Render(" "), engo.Point{1, 1}, "YOLO <3")
+	//score.RenderComponent = engo.NewRenderComponent(basicFont.Render(" "), engo.Point{1, 1}, "YOLO <3")
 	score.SpaceComponent = engo.SpaceComponent{engo.Point{100, 100}, 100, 100}
 
 	// Add our entity to the appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
 		case *engo.RenderSystem:
-			sys.Add(&score.BasicEntity, &score.RenderComponent, &score.SpaceComponent)
+		//sys.Add(&score.BasicEntity, &score.RenderComponent, &score.SpaceComponent)
 		case *ScoreSystem:
 			sys.Add(&score.BasicEntity, &score.RenderComponent, &score.SpaceComponent)
 		}

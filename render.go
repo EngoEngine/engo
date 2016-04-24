@@ -6,7 +6,6 @@ import (
 	"sort"
 
 	"engo.io/ecs"
-	"engo.io/gl"
 	"github.com/luxengine/math"
 )
 
@@ -18,30 +17,6 @@ type renderChangeMessage struct{}
 
 func (renderChangeMessage) Type() string {
 	return "renderChangeMessage"
-}
-
-type Drawable interface {
-	Texture() *gl.Texture
-	Width() float32
-	Height() float32
-	View() (float32, float32, float32, float32)
-}
-
-type RenderComponent struct {
-	// Hidden is used to prevent drawing by OpenGL
-	Hidden bool
-
-	// Transparency is the level of transparency that is used to draw the texture
-	Transparency float32
-
-	scale  Point
-	Color  color.Color
-	shader Shader
-	zIndex float32
-
-	drawable      Drawable
-	buffer        *gl.Buffer
-	bufferContent []float32
 }
 
 func NewRenderComponent(d Drawable, scale Point, label string) RenderComponent {

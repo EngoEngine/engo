@@ -17,7 +17,7 @@ type Guy struct {
 
 func (*DefaultScene) Preload() {
 	// Load all files from the data directory. `false` means: do not do it recursively.
-	engo.Files.AddFromDir("data", false)
+	engo.Files.Add("data/icon.png")
 }
 
 func (*DefaultScene) Setup(w *ecs.World) {

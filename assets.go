@@ -9,7 +9,6 @@ import (
 	"os"
 	"path"
 
-	"engo.io/gl"
 	"github.com/golang/freetype/truetype"
 	"github.com/luxengine/math"
 )
@@ -45,7 +44,7 @@ func NewResource(url string) Resource {
 	name := path.Base(url)
 
 	if len(kind) == 0 {
-		log.Println("WARNING: Cannot laod extensionless resource.")
+		log.Println("WARNING: Cannot load extensionless resource.")
 		return Resource{}
 	}
 
@@ -165,31 +164,6 @@ func (l *Loader) Load(onFinish func()) {
 	onFinish()
 }
 
-type Image interface {
-	Data() interface{}
-	Width() int
-	Height() int
-}
-
-func LoadShader(vertSrc, fragSrc string) *gl.Program {
-	vertShader := Gl.CreateShader(Gl.VERTEX_SHADER)
-	Gl.ShaderSource(vertShader, vertSrc)
-	Gl.CompileShader(vertShader)
-	defer Gl.DeleteShader(vertShader)
-
-	fragShader := Gl.CreateShader(Gl.FRAGMENT_SHADER)
-	Gl.ShaderSource(fragShader, fragSrc)
-	Gl.CompileShader(fragShader)
-	defer Gl.DeleteShader(fragShader)
-
-	program := Gl.CreateProgram()
-	Gl.AttachShader(program, vertShader)
-	Gl.AttachShader(program, fragShader)
-	Gl.LinkProgram(program)
-
-	return program
-}
-
 type Region struct {
 	texture       *Texture
 	u, v          float32
@@ -220,40 +194,8 @@ func (r *Region) Height() float32 {
 	return float32(r.height)
 }
 
-func (r *Region) Texture() *gl.Texture {
-	return r.texture.id
-}
-
 func (r *Region) View() (float32, float32, float32, float32) {
 	return r.u, r.v, r.u2, r.v2
-}
-
-type Texture struct {
-	id     *gl.Texture
-	width  float32
-	height float32
-}
-
-func NewTexture(img Image) *Texture {
-	var id *gl.Texture
-	if !headless {
-		id = Gl.CreateTexture()
-
-		Gl.BindTexture(Gl.TEXTURE_2D, id)
-
-		Gl.TexParameteri(Gl.TEXTURE_2D, Gl.TEXTURE_WRAP_S, Gl.CLAMP_TO_EDGE)
-		Gl.TexParameteri(Gl.TEXTURE_2D, Gl.TEXTURE_WRAP_T, Gl.CLAMP_TO_EDGE)
-		Gl.TexParameteri(Gl.TEXTURE_2D, Gl.TEXTURE_MIN_FILTER, Gl.LINEAR)
-		Gl.TexParameteri(Gl.TEXTURE_2D, Gl.TEXTURE_MAG_FILTER, Gl.NEAREST)
-
-		if img.Data() == nil {
-			panic("Texture image data is nil.")
-		}
-
-		Gl.TexImage2D(Gl.TEXTURE_2D, 0, Gl.RGBA, Gl.RGBA, Gl.UNSIGNED_BYTE, img.Data())
-	}
-
-	return &Texture{id, float32(img.Width()), float32(img.Height())}
 }
 
 // Width returns the width of the texture.
@@ -264,10 +206,6 @@ func (t *Texture) Width() float32 {
 // Height returns the height of the texture.
 func (t *Texture) Height() float32 {
 	return t.height
-}
-
-func (t *Texture) Texture() *gl.Texture {
-	return t.id
 }
 
 func (r *Texture) View() (float32, float32, float32, float32) {

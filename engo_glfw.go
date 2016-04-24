@@ -4,6 +4,7 @@ package engo
 
 import (
 	"image"
+	"image/color"
 	"image/draw"
 	_ "image/png"
 	"io"
@@ -23,15 +24,15 @@ import (
 
 var (
 	window *glfw.Window
+	Gl     *gl.Context
 
-	Arrow              *glfw.Cursor
-	IBeam              *glfw.Cursor
-	Crosshair          *glfw.Cursor
-	Hand               *glfw.Cursor
-	HResize            *glfw.Cursor
-	VResize            *glfw.Cursor
-	defaultCloseAction bool
-	close              bool
+	Arrow     *glfw.Cursor
+	IBeam     *glfw.Cursor
+	Crosshair *glfw.Cursor
+	Hand      *glfw.Cursor
+	HResize   *glfw.Cursor
+	VResize   *glfw.Cursor
+	close     bool
 
 	headlessWidth             = 800
 	headlessHeight            = 800
@@ -192,6 +193,14 @@ func RunIteration() {
 	Time.Tick()
 }
 
+func SetBackground(c color.Color) {
+	if !headless {
+		r, g, b, a := c.RGBA()
+
+		Gl.ClearColor(float32(r), float32(g), float32(b), float32(a))
+	}
+}
+
 // RunPreparation is called only once, and is called automatically when calling Open
 // It is only here for benchmarking in combination with OpenHeadlessNoRun
 func RunPreparation(defaultScene Scene) {
@@ -229,8 +238,8 @@ func runLoop(defaultScene Scene, headless bool) {
 	}()
 
 	RunPreparation(defaultScene)
-
 	ticker := time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
+
 Outer:
 	for {
 		select {

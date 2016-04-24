@@ -2,17 +2,15 @@ package engo // import "engo.io/engo"
 
 import (
 	"fmt"
-	"image/color"
 
 	"engo.io/ecs"
-	"engo.io/gl"
 )
 
 var (
-	Time        *Clock
-	Files       *Loader
-	Gl          *gl.Context
-	WorldBounds AABB
+	Time               *Clock
+	Files              *Loader
+	defaultCloseAction bool
+	WorldBounds        AABB
 
 	currentWorld *ecs.World
 	currentScene Scene
@@ -74,14 +72,6 @@ func Run(opts RunOptions, defaultScene Scene) {
 		if !opts.NoRun {
 			runLoop(defaultScene, false)
 		}
-	}
-}
-
-func SetBackground(c color.Color) {
-	if !headless {
-		r, g, b, a := c.RGBA()
-
-		Gl.ClearColor(float32(r), float32(g), float32(b), float32(a))
 	}
 }
 
