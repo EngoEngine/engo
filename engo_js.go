@@ -2,6 +2,7 @@ package engo
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/base64"
 	"fmt"
 	"image/color"
@@ -12,7 +13,6 @@ import (
 	"strconv"
 	"time"
 
-	"compress/gzip"
 	"engo.io/gl"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"

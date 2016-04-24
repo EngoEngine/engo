@@ -3,10 +3,10 @@
 package engo
 
 import (
+	"io"
 	"log"
 
 	"engo.io/ecs"
-	"io"
 )
 
 const (
