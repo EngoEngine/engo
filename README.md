@@ -50,7 +50,7 @@ Thank you to everyone who has worked on, or with `Engo`. None of this would be p
 - [ajhager](https://github.com/ajhager): Building the original `engi`, which engo was based off of
 - [paked](https://github.com/paked): Adding ECS element, project maintenance and management
 - [EtienneBruines](https://github.com/EtienneBruines): Rewriting the OpenGL code, maintenance and helping redesign the API
-- [otraore](https://github.com/otraore): Adding in GopherJs support, mantenance
+- [otraore](https://github.com/otraore): Adding in GopherJs support, maintenance
 - [Everyone else who has submitted PRs over the years, to any iteration of the project](https://github.com/EngoEngine/engo/graphs/contributors)
 
 These are 3rd party projects that have made `Engo` possible.
