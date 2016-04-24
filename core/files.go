@@ -8,7 +8,7 @@ import (
 
 // Files manages global resource handling of registered file formats for game
 // assets.
-var Files *Formats
+var Files = &Formats{formats: make(map[string]FileLoader)}
 
 // FileLoader implements support for loading and releasing file resources.
 type FileLoader interface {
