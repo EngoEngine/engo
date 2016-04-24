@@ -12,20 +12,6 @@ type Image interface {
 	Height() int
 }
 
-type Texture struct {
-	id     *gl.Texture
-	width  float32
-	height float32
-}
-
-func (r *Region) Texture() *gl.Texture {
-	return r.texture.id
-}
-
-func (t *Texture) Texture() *gl.Texture {
-	return t.id
-}
-
 func LoadShader(vertSrc, fragSrc string) *gl.Program {
 	vertShader := Gl.CreateShader(Gl.VERTEX_SHADER)
 	Gl.ShaderSource(vertShader, vertSrc)
@@ -43,6 +29,20 @@ func LoadShader(vertSrc, fragSrc string) *gl.Program {
 	Gl.LinkProgram(program)
 
 	return program
+}
+
+type Texture struct {
+	id     *gl.Texture
+	width  float32
+	height float32
+}
+
+func (r *Region) Texture() *gl.Texture {
+	return r.texture.id
+}
+
+func (t *Texture) Texture() *gl.Texture {
+	return t.id
 }
 
 func NewTexture(img Image) *Texture {
