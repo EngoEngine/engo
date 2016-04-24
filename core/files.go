@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"log"
 	"path/filepath"
 )
 
@@ -53,4 +54,15 @@ func (formats *Formats) Unload(url string) error {
 		return loader.Unload(url)
 	}
 	return fmt.Errorf("no resource loader registered for file format %q", ext)
+}
+
+// Resource returns the given resource, and a boolean indicating whether the
+// resource was loaded.
+func (formats *Formats) Resource(url string) (Resource, bool) {
+	ext := filepath.Ext(url)
+	if loader, ok := Files.formats[ext]; ok {
+		return loader.Resource(url)
+	}
+	log.Printf("no resource loader registered for file format %q", ext)
+	return nil, false
 }
