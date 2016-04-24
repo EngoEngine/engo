@@ -87,11 +87,6 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 
 	Files = NewLoader()
 	WorldBounds.Max = Point{Width(), Height()}
-	Files.Load(func() {
-		log.Println("Assets loaded")
-	})
-
-	log.Println("Hello Web")
 }
 
 func SetBackground(c color.Color) {
