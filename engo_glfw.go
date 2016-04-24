@@ -32,7 +32,6 @@ var (
 	Hand      *glfw.Cursor
 	HResize   *glfw.Cursor
 	VResize   *glfw.Cursor
-	close     bool
 
 	headlessWidth             = 800
 	headlessHeight            = 800

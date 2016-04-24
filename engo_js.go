@@ -24,7 +24,6 @@ import (
 
 var (
 	Gl                        *webgl.Context
-	close                     bool
 	gameWidth, gameHeight     float32
 	windowWidth, windowHeight float32
 )
