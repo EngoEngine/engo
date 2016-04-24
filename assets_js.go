@@ -41,6 +41,10 @@ type Texture struct {
 	height float32
 }
 
+func (t *Texture) Texture() *js.Object {
+	return t.id
+}
+
 func NewTexture(img Image) *Texture {
 	var id *js.Object
 	if !headless {
@@ -61,8 +65,4 @@ func NewTexture(img Image) *Texture {
 	}
 
 	return &Texture{id, float32(img.Width()), float32(img.Height())}
-}
-
-func (t *Texture) Texture() *js.Object {
-	return t.id
 }

@@ -31,14 +31,14 @@ func LoadShader(vertSrc, fragSrc string) *gl.Program {
 	return program
 }
 
+func (r *Region) Texture() *gl.Texture {
+	return r.texture.id
+}
+
 type Texture struct {
 	id     *gl.Texture
 	width  float32
 	height float32
-}
-
-func (r *Region) Texture() *gl.Texture {
-	return r.texture.id
 }
 
 func (t *Texture) Texture() *gl.Texture {
