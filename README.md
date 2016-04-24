@@ -45,9 +45,14 @@ Engo, originally known as `Engi` was written by [ajhager](https://github.com/ajh
 
 ## Credits
 
-Thank you to everyone who has worked on, or with `Engo`. Non of this would be possible without you, and your help has been truly amazing.
+Thank you to everyone who has worked on, or with `Engo`. None of this would be possible without you, and your help has been truly amazing.
 
 - [ajhager](https://github.com/ajhager): Building the original `engi`, which engo was based off of
 - [paked](https://github.com/paked): Adding ECS element, project maintenance and management
 - [EtienneBruines](https://github.com/EtienneBruines): Rewriting the OpenGL code, maintenance and helping redesign the API
+- [otraore](https://github.com/otraore): Adding in GopherJs support, mantenance
 - [Everyone else who has submitted PRs over the years, to any iteration of the project](https://github.com/EngoEngine/engo/graphs/contributors)
+
+These are 3rd party projects that have made `Engo` possible.
+- The Lux engine, which provides a `float32` [math](https://godoc.org/github.com/luxengine/math) package ([MIT license](https://github.com/luxengine/math/blob/master/LICENSE))
+- The original [engi](https://github.com/aljhager/engi) game engine which engo was based off of [BSD license](https://github.com/ajhager/engi/blob/master/LICENSE)
