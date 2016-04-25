@@ -1,12 +1,13 @@
 package engo
 
 import (
+	"log"
 	"sync"
+	"time"
 
 	"engo.io/ecs"
 	"github.com/go-gl/mathgl/mgl32"
-	"log"
-	"time"
+	"github.com/luxengine/math"
 )
 
 var (
@@ -60,6 +61,8 @@ func (cam *cameraSystem) New(*ecs.World) {
 				cam.moveY(cammsg.Value)
 			case ZAxis:
 				cam.zoom(cammsg.Value)
+			case Angle:
+				cam.rotate(cammsg.Value)
 			}
 		} else {
 			switch cammsg.Axis {
@@ -69,12 +72,14 @@ func (cam *cameraSystem) New(*ecs.World) {
 				cam.moveToY(cammsg.Value)
 			case ZAxis:
 				cam.zoomTo(cammsg.Value)
+			case Angle:
+				cam.rotateTo(cammsg.Value)
 			}
 		}
 	})
 }
 
-func (cam *cameraSystem) Remove(basic ecs.BasicEntity) {}
+func (cam *cameraSystem) Remove(ecs.BasicEntity) {}
 
 func (cam *cameraSystem) Update(dt float32) {
 	for axis, longTask := range cam.longTasks {
@@ -83,11 +88,13 @@ func (cam *cameraSystem) Update(dt float32) {
 
 			switch axis {
 			case XAxis:
-				longTask.Value -= cam.X()
+				longTask.Value -= cam.x
 			case YAxis:
-				longTask.Value -= cam.Y()
+				longTask.Value -= cam.y
 			case ZAxis:
-				longTask.Value -= cam.Z()
+				longTask.Value -= cam.z
+			case Angle:
+				longTask.Value -= cam.angle
 			}
 		}
 
@@ -104,6 +111,8 @@ func (cam *cameraSystem) Update(dt float32) {
 			cam.moveY(dAxis)
 		case ZAxis:
 			cam.zoom(dAxis)
+		case Angle:
+			cam.rotate(dAxis)
 		}
 
 		longTask.Duration -= time.Duration(dt)
@@ -144,6 +153,10 @@ func (cam *cameraSystem) Z() float32 {
 	return cam.z
 }
 
+func (cam *cameraSystem) Angle() float32 {
+	return cam.angle
+}
+
 func (cam *cameraSystem) moveX(value float32) {
 	cam.moveToX(cam.x + value)
 }
@@ -156,6 +169,10 @@ func (cam *cameraSystem) zoom(value float32) {
 	cam.zoomTo(cam.z + value)
 }
 
+func (cam *cameraSystem) rotate(value float32) {
+	cam.rotateTo(cam.angle + value)
+}
+
 func (cam *cameraSystem) moveToX(location float32) {
 	cam.x = mgl32.Clamp(location, WorldBounds.Min.X, WorldBounds.Max.X)
 }
@@ -166,6 +183,10 @@ func (cam *cameraSystem) moveToY(location float32) {
 
 func (cam *cameraSystem) zoomTo(zoomLevel float32) {
 	cam.z = mgl32.Clamp(zoomLevel, MinZoom, MaxZoom)
+}
+
+func (cam *cameraSystem) rotateTo(rotation float32) {
+	cam.angle = math.Mod(rotation, 360)
 }
 
 func (cam *cameraSystem) centerCam(x, y, z float32) {
@@ -181,6 +202,7 @@ const (
 	XAxis CameraAxis = iota
 	YAxis
 	ZAxis
+	Angle
 )
 
 // CameraMessage is a message that can be sent to the Camera (and other Systemers), to indicate movement
@@ -301,4 +323,31 @@ func (c *MouseZoomer) Update(float32) {
 		// TODO: not sure if we have to use dt here, since we already use the "amount" of zooming
 		Mailbox.Dispatch(CameraMessage{Axis: ZAxis, Value: Mouse.ScrollY * c.ZoomSpeed, Incremental: true})
 	}
+}
+
+// MouseRotator is a System that allows for zooming when the scroll wheel is used
+type MouseRotator struct {
+	RotationSpeed float32
+
+	oldX    float32
+	pressed bool
+}
+
+func (*MouseRotator) Priority() int          { return 10 }
+func (*MouseRotator) Remove(ecs.BasicEntity) {}
+
+func (c *MouseRotator) Update(dt float32) {
+	if Mouse.Button == MouseButtonMiddle && Mouse.Action == PRESS {
+		c.pressed = true
+	}
+
+	if Mouse.Action == RELEASE {
+		c.pressed = false
+	}
+
+	if c.pressed {
+		Mailbox.Dispatch(CameraMessage{Axis: Angle, Value: dt * (c.oldX - Mouse.X) * -c.RotationSpeed, Incremental: true})
+	}
+
+	c.oldX = Mouse.X
 }
