@@ -56,7 +56,9 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 
 	document.SetTitle(title)
 
-	Gl, err := gl.NewContext(canvas.Underlying(), nil) // TODO: we can add arguments here
+	var err error
+
+	Gl, err = gl.NewContext(canvas.Underlying(), nil) // TODO: we can add arguments here
 	if err != nil {
 		log.Println("Could not create context:", err)
 		return
