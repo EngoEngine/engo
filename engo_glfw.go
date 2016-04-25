@@ -185,7 +185,10 @@ func RunIteration() {
 
 	// Lastly, forget keypresses and swap buffers
 	if !headless {
+		// reset values to avoid catching the same "signal" twice
 		Mouse.ScrollX, Mouse.ScrollY = 0, 0
+		Mouse.Action = NEUTRAL
+
 		window.SwapBuffers()
 	}
 

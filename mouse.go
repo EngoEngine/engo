@@ -195,8 +195,4 @@ func (m *MouseSystem) Update(dt float32) {
 		// implementers can take different decisions based on those
 		e.MouseComponent.Modifier = Mouse.Modifer
 	}
-
-	// reset mouse.Action value to something meaningless to avoid
-	// catching the same "signal" twice
-	//Mouse.Action = NEUTRAL
 }
