@@ -6,5 +6,6 @@ It demonstrates how one can use mouse events in `engo`.
 ## What are important aspects of the code?
 These lines are key in this demo:
 
-* `entity.AddComponent(&engo.MouseComponent{})` which adds a `MouseComponent` to the `Entity` of which we want to know mouse stuff; 
-* `w.AddSystem(&engo.MouseSystem{})` which adds the `MouseSystem` to this `Scene`;
+* `engo.MouseComponent` within the definition of `type Guy`, which adds a `MouseComponent` which stores information (such as hover events). 
+* `w.AddSystem(&engo.MouseSystem{})`, which adds the `MouseSystem` to this `Scene`;
+

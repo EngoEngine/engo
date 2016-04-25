@@ -1,18 +1,18 @@
 package main
 
 import (
-	"image"
 	"image/color"
-	"log"
+	"time"
 
 	"engo.io/ecs"
 	"engo.io/engo"
-	"time"
+	"engo.io/engo/demos/demoutils"
 )
 
-type Game struct{}
+type DefaultScene struct{}
 
 var (
+<<<<<<< HEAD
 	scrollSpeed float32 = 700
 	worldWidth  float32 = 200
 	worldHeight float32 = 200
@@ -60,17 +60,20 @@ func (*Game) Hide()        {}
 func (*Game) Show()        {}
 func (*Game) Exit()        {}
 func (*Game) Type() string { return "Game" }
+=======
+	worldWidth  int = 800
+	worldHeight int = 800
+)
+
+func (*DefaultScene) Preload() {}
+>>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 
 // Setup is called before the main loop is started
-func (game *Game) Setup(w *ecs.World) {
+func (*DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 	w.AddSystem(&engo.RenderSystem{})
 
-	// Create the background; this way we'll see when we actually scroll
-	err := w.AddEntity(generateBackground())
-	if err != nil {
-		log.Println(err)
-	}
+	demoutils.NewBackground(w, worldWidth, worldHeight, color.RGBA{102, 153, 0, 255}, color.RGBA{102, 173, 0, 255})
 
 	// We issue one camera zoom command at the start, but it takes a while to process because we set a duration
 	engo.Mailbox.Dispatch(engo.CameraMessage{
@@ -81,11 +84,13 @@ func (game *Game) Setup(w *ecs.World) {
 	})
 }
 
+func (*DefaultScene) Type() string { return "Game" }
+
 func main() {
 	opts := engo.RunOptions{
 		Title:  "IncrementalCamera Demo",
-		Width:  int(worldWidth),
-		Height: int(worldHeight),
+		Width:  worldWidth,
+		Height: worldHeight,
 	}
-	engo.Run(opts, &Game{})
+	engo.Run(opts, &DefaultScene{})
 }

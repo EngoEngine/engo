@@ -1,23 +1,20 @@
 package main
 
 import (
-	"image"
 	"image/color"
-	"log"
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/demos/demoutils"
 )
 
-type Game struct{}
+type DefaultScene struct{}
 
 var (
 	zoomSpeed   float32 = -0.125
 	scrollSpeed float32 = 700
-	worldWidth  float32 = 800
-	worldHeight float32 = 800
-)
 
+<<<<<<< HEAD
 // generateBackground creates a background of green tiles - might not be the most efficient way to do this
 func generateBackground() *ecs.Entity {
 	rect := image.Rect(0, 0, int(worldWidth), int(worldHeight))
@@ -82,11 +79,16 @@ func generateHUDBackground(width, height float32) *ecs.Entity {
 	field.AddComponent(fieldSpace)
 	return field
 }
+=======
+	worldWidth  int = 800
+	worldHeight int = 800
+)
+>>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 
-func (game *Game) Preload() {}
+func (*DefaultScene) Preload() {}
 
 // Setup is called before the main loop is started
-func (game *Game) Setup(w *ecs.World) {
+func (*DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 	w.AddSystem(&engo.RenderSystem{})
 
@@ -95,33 +97,40 @@ func (game *Game) Setup(w *ecs.World) {
 	w.AddSystem(&engo.MouseZoomer{zoomSpeed})
 
 	// Create background, so we can see difference between this and HUD
-	err := w.AddEntity(generateBackground())
-	if err != nil {
-		log.Println(err)
-	}
+	demoutils.NewBackground(w, worldWidth, worldHeight, color.RGBA{102, 153, 0, 255}, color.RGBA{102, 173, 0, 255})
 
-	// Creating the HUD
-	hudWidth := float32(200)         // Can be anything you want
-	hudHeight := engo.WindowHeight() // Can be anything you want
+	// Define parameters for the hud
+	hudWidth := 200                       // Can be anything you want
+	hudHeight := int(engo.WindowHeight()) // Can be anything you want
 
-	// Generate something that uses the PriorityLevel HUDGround or up
-	hudBg := generateHUDBackground(hudWidth, hudHeight)
-	err = w.AddEntity(hudBg)
-	if err != nil {
-		log.Println(err)
-	}
+	// Generate something that uses the PriorityLevel HUDGround or up. We're giving the same color twice,
+	// so it'll create one solid color.
+	hudBg := demoutils.NewBackground(w, hudWidth, hudHeight, color.RGBA{255, 0, 255, 180}, color.RGBA{255, 0, 255, 180})
+
+	// These adjustments are needed to transform it into a HUD:
+	hudBg.RenderComponent.SetZIndex(1) // something bigger than default (0), so it'll be on top of the regular background
+	hudBg.RenderComponent.SetShader(engo.HUDShader)
 }
 
+<<<<<<< HEAD
 func (*Game) Hide()        {}
 func (*Game) Show()        {}
 func (*Game) Exit()        {}
 func (*Game) Type() string { return "Game" }
+=======
+func (*DefaultScene) Type() string { return "Game" }
+>>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 
 func main() {
 	opts := engo.RunOptions{
 		Title:  "HUD Demo",
+<<<<<<< HEAD
 		Width:  1024,
 		Height: 640,
+=======
+		Width:  worldWidth,
+		Height: worldHeight,
+>>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 	}
-	engo.Run(opts, &Game{})
+	engo.Run(opts, &DefaultScene{})
 }

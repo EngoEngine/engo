@@ -3,11 +3,11 @@ package engo
 import (
 	"fmt"
 	"image/color"
-	"math"
 	"sort"
 
 	"engo.io/ecs"
 	"engo.io/gl"
+	"github.com/luxengine/math"
 )
 
 const (
@@ -44,8 +44,8 @@ type RenderComponent struct {
 	bufferContent []float32
 }
 
-func NewRenderComponent(d Drawable, scale Point) *RenderComponent {
-	rc := &RenderComponent{
+func NewRenderComponent(d Drawable, scale Point) RenderComponent {
+	rc := RenderComponent{
 		transparency: 1,
 		Color:        color.White,
 		Scale:        scale,
@@ -81,10 +81,6 @@ func (r *RenderComponent) SetZIndex(index float32) {
 	Mailbox.Dispatch(&renderChangeMessage{})
 }
 
-func (*RenderComponent) Type() string {
-	return "RenderComponent"
-}
-
 // Init is called to initialize the RenderElement
 func (ren *RenderComponent) preloadTexture() {
 	if ren.drawable == nil || headless {
@@ -96,9 +92,6 @@ func (ren *RenderComponent) preloadTexture() {
 	ren.buffer = Gl.CreateBuffer()
 	Gl.BindBuffer(Gl.ARRAY_BUFFER, ren.buffer)
 	Gl.BufferData(Gl.ARRAY_BUFFER, ren.bufferContent, Gl.STATIC_DRAW)
-
-	// TODO: ask why this doesn't work
-	// ren.bufferContent = make([]float32, 0)
 }
 
 // generateBufferContent computes information about the 4 vertices needed to draw the texture, which should
@@ -121,32 +114,26 @@ func (ren *RenderComponent) generateBufferContent() []float32 {
 	return []float32{0, 0, u, v, tint, w, 0, u2, v, tint, w, h, u2, v2, tint, 0, h, u, v2, tint}
 }
 
-type renderEntityList []*ecs.Entity
+type renderEntity struct {
+	*ecs.BasicEntity
+	*RenderComponent
+	*SpaceComponent
+}
+
+type renderEntityList []renderEntity
 
 func (r renderEntityList) Len() int {
 	return len(r)
 }
 
 func (r renderEntityList) Less(i, j int) bool {
-	var (
-		rc1 *RenderComponent
-		rc2 *RenderComponent
-		ok  bool
-	)
-	if rc1, ok = r[i].ComponentFast(rc1).(*RenderComponent); !ok {
-		return false // those without render component go last
-	}
-	if rc2, ok = r[i].ComponentFast(rc1).(*RenderComponent); !ok {
-		return true // those without render component go last
-	}
-
 	// Sort by shader-pointer if they have the same zIndex
-	if rc1.zIndex == rc2.zIndex {
+	if r[i].RenderComponent.zIndex == r[j].RenderComponent.zIndex {
 		// TODO: optimize this for performance
-		return fmt.Sprintf("%p", rc1.shader) < fmt.Sprintf("%p", rc2.shader)
+		return fmt.Sprintf("%p", r[i].RenderComponent.shader) < fmt.Sprintf("%p", r[j].RenderComponent.shader)
 	}
 
-	return rc1.zIndex < rc2.zIndex
+	return r[i].RenderComponent.zIndex < r[j].RenderComponent.zIndex
 }
 
 func (r renderEntityList) Swap(i, j int) {
@@ -154,12 +141,14 @@ func (r renderEntityList) Swap(i, j int) {
 }
 
 type RenderSystem struct {
-	renders renderEntityList
-	world   *ecs.World
+	entities renderEntityList
+	world    *ecs.World
 
 	sortingNeeded bool
 	currentShader Shader
 }
+
+func (*RenderSystem) Priority() int { return RenderSystemPriority }
 
 func (rs *RenderSystem) New(w *ecs.World) {
 	rs.world = w
@@ -173,21 +162,21 @@ func (rs *RenderSystem) New(w *ecs.World) {
 	})
 }
 
-func (rs *RenderSystem) AddEntity(e *ecs.Entity) {
-	rs.renders = append(rs.renders, e)
+func (rs *RenderSystem) Add(basic *ecs.BasicEntity, render *RenderComponent, space *SpaceComponent) {
+	rs.entities = append(rs.entities, renderEntity{basic, render, space})
 	rs.sortingNeeded = true
 }
 
-func (rs *RenderSystem) RemoveEntity(e *ecs.Entity) {
-	var removeIndex int = -1
-	for index, entity := range rs.renders {
-		if entity.ID() == e.ID() {
-			removeIndex = index
+func (rs *RenderSystem) Remove(basic ecs.BasicEntity) {
+	var delete int = -1
+	for index, entity := range rs.entities {
+		if entity.ID() == basic.ID() {
+			delete = index
 			break
 		}
 	}
-	if removeIndex >= 0 {
-		rs.renders = append(rs.renders[:removeIndex], rs.renders[removeIndex+1:]...) // TODO: test for edge cases
+	if delete >= 0 {
+		rs.entities = append(rs.entities[:delete], rs.entities[delete+1:]...)
 		rs.sortingNeeded = true
 	}
 }
@@ -198,34 +187,20 @@ func (rs *RenderSystem) Update(dt float32) {
 	}
 
 	if rs.sortingNeeded {
-		sort.Sort(rs.renders)
+		sort.Sort(rs.entities)
 		rs.sortingNeeded = false
 	}
 
 	Gl.Clear(Gl.COLOR_BUFFER_BIT)
 
 	// TODO: it's linear for now, but that might very well be a bad idea
-	for _, entity := range rs.renders {
-		var (
-			render *RenderComponent
-			space  *SpaceComponent
-			ok     bool
-		)
-
-		if render, ok = entity.ComponentFast(render).(*RenderComponent); !ok {
-			continue // with other entities
-		}
-
-		if render.Hidden {
-			continue // with other entities
-		}
-
-		if space, ok = entity.ComponentFast(space).(*SpaceComponent); !ok {
+	for _, e := range rs.entities {
+		if e.RenderComponent.Hidden {
 			continue // with other entities
 		}
 
 		// Retrieve a shader, may be the default one -- then use it if we aren't already using it
-		shader := render.shader
+		shader := e.RenderComponent.shader
 		if shader == nil {
 			shader = DefaultShader
 		}
@@ -239,19 +214,14 @@ func (rs *RenderSystem) Update(dt float32) {
 			rs.currentShader = shader
 		}
 
-		rs.currentShader.Draw(render.drawable.Texture(), render.buffer, space.Position.X, space.Position.Y, render.Scale.X, render.Scale.Y, space.Rotation)
+		rs.currentShader.Draw(e.RenderComponent.drawable.Texture(), e.RenderComponent.buffer,
+			e.SpaceComponent.Position.X, e.SpaceComponent.Position.Y,
+			e.RenderComponent.Scale.X, e.RenderComponent.Scale.Y,
+			e.SpaceComponent.Rotation)
 	}
 
 	if rs.currentShader != nil {
 		rs.currentShader.Post()
 		rs.currentShader = nil
 	}
-}
-
-func (*RenderSystem) Type() string {
-	return "RenderSystem"
-}
-
-func (*RenderSystem) Priority() int {
-	return RenderSystemPriority
 }

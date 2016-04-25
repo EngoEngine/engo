@@ -9,76 +9,91 @@ import (
 	"github.com/luxengine/math"
 )
 
-var globalGuy *ecs.Entity
+type Guy struct {
+	ecs.BasicEntity
+	engo.RenderComponent
+	engo.SpaceComponent
+}
 
-type GameWorld struct{}
+type DefaultScene struct{}
 
-func (game *GameWorld) Preload() {
+func (game *DefaultScene) Preload() {
 	// Load all files from the data directory. Do not do it recursively.
 	engo.Files.AddFromDir("data", false)
 
 	log.Println("Preloaded")
 }
 
-func (game *GameWorld) Setup(w *ecs.World) {
+func (game *DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 
 	w.AddSystem(&RotationSystem{})
 	w.AddSystem(&engo.RenderSystem{})
 
-	// Create an entity part of the Render
-	globalGuy = ecs.NewEntity("RenderSystem")
 	// Retrieve a texture
 	texture := engo.Files.Image("icon.png")
 
-	// Create RenderComponent... Set scale to 8x, give lable "guy"
-	render := engo.NewRenderComponent(texture, engo.Point{8, 8})
+	// Create an entity
+	guy := Guy{BasicEntity: ecs.NewBasic()}
 
-	width := texture.Width() * render.Scale.X
-	height := texture.Height() * render.Scale.Y
-
-	space := &engo.SpaceComponent{
-		Position: engo.Point{400, 400},
-		Width:    width,
-		Height:   height,
+	// Initialize the components, set scale to 8x
+	guy.RenderComponent = engo.NewRenderComponent(texture, engo.Point{8, 8})
+	guy.SpaceComponent = engo.SpaceComponent{
+		Position: engo.Point{200, 200},
+		Width:    texture.Width() * guy.RenderComponent.Scale.X,
+		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
 	}
 
-	globalGuy.AddComponent(render)
-	globalGuy.AddComponent(space)
-
-	err := w.AddEntity(globalGuy)
-	if err != nil {
-		log.Println(err)
+	// Add it to appropriate systems
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *engo.RenderSystem:
+			sys.Add(&guy.BasicEntity, &guy.RenderComponent, &guy.SpaceComponent)
+		case *RotationSystem:
+			sys.Add(&guy.BasicEntity, &guy.SpaceComponent)
+		}
 	}
 }
 
-type RotationSystem struct{}
+type rotationEntity struct {
+	*ecs.BasicEntity
+	*engo.SpaceComponent
+}
 
-func (*RotationSystem) Type() string             { return "RotationSytem" }
-func (*RotationSystem) Priority() int            { return 0 }
-func (*RotationSystem) New(*ecs.World)           {}
-func (*RotationSystem) AddEntity(*ecs.Entity)    {}
-func (*RotationSystem) RemoveEntity(*ecs.Entity) {}
+type RotationSystem struct {
+	entities []rotationEntity
+}
 
-func (*RotationSystem) Update(dt float32) {
-	var space *engo.SpaceComponent
-	if !globalGuy.Component(&space) {
-		return
+func (r *RotationSystem) Add(basic *ecs.BasicEntity, space *engo.SpaceComponent) {
+	r.entities = append(r.entities, rotationEntity{basic, space})
+}
+
+func (r *RotationSystem) Remove(basic ecs.BasicEntity) {
+	delete := -1
+	for index, e := range r.entities {
+		if e.BasicEntity.ID() == basic.ID() {
+			delete = index
+			break
+		}
 	}
+	if delete >= 0 {
+		r.entities = append(r.entities[:delete], r.entities[delete+1:]...)
+	}
+}
 
+func (r *RotationSystem) Update(dt float32) {
 	// speed in radians per second
 	var speed float32 = math.Pi
 	// speed in degrees per second
-	var speedDegrees float32 = speed * (360 / (2 * math.Pi))
+	var speedDegrees float32 = speed * 180 / math.Pi
 
-	space.Rotation += speedDegrees * dt
-	space.Rotation = math.Mod(space.Rotation, 360)
+	for _, e := range r.entities {
+		e.SpaceComponent.Rotation += speedDegrees * dt
+		e.SpaceComponent.Rotation = math.Mod(e.SpaceComponent.Rotation, 360)
+	}
 }
 
-func (*GameWorld) Hide()        {}
-func (*GameWorld) Show()        {}
-func (*GameWorld) Exit()        {}
-func (*GameWorld) Type() string { return "GameWorld" }
+func (*DefaultScene) Type() string { return "GameWorld" }
 
 func main() {
 	opts := engo.RunOptions{
@@ -86,5 +101,5 @@ func main() {
 		Width:  1024,
 		Height: 640,
 	}
-	engo.Run(opts, &GameWorld{})
+	engo.Run(opts, &DefaultScene{})
 }

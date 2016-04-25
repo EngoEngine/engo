@@ -7,28 +7,26 @@ import (
 	"engo.io/engo"
 )
 
-type Game struct{}
+type DefaultScene struct{}
 
-func (game *Game) Preload()           {}
-func (game *Game) Setup(w *ecs.World) {}
-func (*Game) Hide()                   {}
-func (*Game) Show()                   {}
+func (*DefaultScene) Preload()           {}
+func (*DefaultScene) Setup(w *ecs.World) {}
 
-func (*Game) Exit() {
-	log.Println("[GAME] Exit event called")
-	//Here if you want you can prompt the user if they're sure they want to close
-	log.Println("[GAME] Manually closing")
+func (*DefaultScene) Exit() {
+	log.Println("Exit event called; we can do whatever we want now")
+	// Here if you want you can prompt the user if they're sure they want to close
+	log.Println("Manually closing")
 	engo.Exit()
 }
 
-func (*Game) Type() string { return "Game" }
+func (*DefaultScene) Type() string { return "Game" }
 
 func main() {
 	opts := engo.RunOptions{
-		Title:  "Exit Demo",
-		Width:  1024,
-		Height: 640,
+		Title:               "Exit Demo",
+		Width:               1024,
+		Height:              640,
+		OverrideCloseAction: true,
 	}
-	engo.OverrideCloseAction()
-	engo.Run(opts, &Game{})
+	engo.Run(opts, &DefaultScene{})
 }

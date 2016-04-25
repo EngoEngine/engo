@@ -1,18 +1,18 @@
 package main
 
 import (
-	"image"
 	"image/color"
-	"log"
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/demos/demoutils"
 )
 
-type Game struct{}
+type DefaultScene struct{}
 
 var (
 	scrollSpeed float32 = 700
+<<<<<<< HEAD
 	worldWidth  float32 = 800
 	worldHeight float32 = 800
 )
@@ -54,16 +54,24 @@ func generateBackground() *ecs.Entity {
 	field.AddComponent(fieldSpace)
 	return field
 }
+=======
+>>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 
-func (game *Game) Preload() {}
+	worldWidth  int = 800
+	worldHeight int = 800
+)
 
+<<<<<<< HEAD
 func (*Game) Hide()        {}
 func (*Game) Show()        {}
 func (*Game) Exit()        {}
 func (*Game) Type() string { return "Game" }
+=======
+func (*DefaultScene) Preload() {}
+>>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 
 // Setup is called before the main loop is started
-func (game *Game) Setup(w *ecs.World) {
+func (*DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 	w.AddSystem(&engo.RenderSystem{})
 
@@ -71,17 +79,21 @@ func (game *Game) Setup(w *ecs.World) {
 	w.AddSystem(engo.NewKeyboardScroller(scrollSpeed, engo.W, engo.D, engo.S, engo.A))
 
 	// Create the background; this way we'll see when we actually scroll
-	err := w.AddEntity(generateBackground())
-	if err != nil {
-		log.Println(err)
-	}
+	demoutils.NewBackground(w, worldWidth, worldHeight, color.RGBA{102, 153, 0, 255}, color.RGBA{102, 173, 0, 255})
 }
+
+func (*DefaultScene) Type() string { return "Game" }
 
 func main() {
 	opts := engo.RunOptions{
 		Title:  "KeyboardScroller Demo",
+<<<<<<< HEAD
 		Width:  int(worldWidth),
 		Height: int(worldHeight),
+=======
+		Width:  worldWidth,
+		Height: worldHeight,
+>>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 	}
-	engo.Run(opts, &Game{})
+	engo.Run(opts, &DefaultScene{})
 }

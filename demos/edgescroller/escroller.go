@@ -1,23 +1,20 @@
 package main
 
 import (
-	"image"
 	"image/color"
-	"log"
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/demos/demoutils"
 )
 
-type Game struct{}
+type DefaultScene struct{}
 
 var (
-	scrollSpeed float32 = 700
-	worldWidth  float32 = 800
-	worldHeight float32 = 800
 	edgeMargin  float64 = 20
-)
+	scrollSpeed float32 = 700
 
+<<<<<<< HEAD
 // generateBackground creates a background of green tiles - might not be the most efficient way to do this
 func generateBackground() *ecs.Entity {
 	rect := image.Rect(0, 0, int(worldWidth), int(worldHeight))
@@ -55,11 +52,16 @@ func generateBackground() *ecs.Entity {
 	field.AddComponent(fieldSpace)
 	return field
 }
+=======
+	worldWidth  int = 800
+	worldHeight int = 800
+)
+>>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 
-func (game *Game) Preload() {}
+func (*DefaultScene) Preload() {}
 
 // Setup is called before the main loop is started
-func (game *Game) Setup(w *ecs.World) {
+func (*DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 	w.AddSystem(&engo.RenderSystem{})
 
@@ -67,22 +69,28 @@ func (game *Game) Setup(w *ecs.World) {
 	w.AddSystem(&engo.EdgeScroller{scrollSpeed, edgeMargin})
 
 	// Create the background; this way we'll see when we actually scroll
-	err := w.AddEntity(generateBackground())
-	if err != nil {
-		log.Println(err)
-	}
+	demoutils.NewBackground(w, worldWidth, worldHeight, color.RGBA{102, 153, 0, 255}, color.RGBA{102, 173, 0, 255})
 }
 
+<<<<<<< HEAD
 func (*Game) Hide()        {}
 func (*Game) Show()        {}
 func (*Game) Exit()        {}
 func (*Game) Type() string { return "Game" }
+=======
+func (*DefaultScene) Type() string { return "Game" }
+>>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 
 func main() {
 	opts := engo.RunOptions{
 		Title:  "EdgeScroller Demo",
+<<<<<<< HEAD
 		Width:  1024,
 		Height: 640,
+=======
+		Width:  worldWidth,
+		Height: worldHeight,
+>>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 	}
-	engo.Run(opts, &Game{})
+	engo.Run(opts, &DefaultScene{})
 }

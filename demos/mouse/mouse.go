@@ -1,23 +1,22 @@
 package main
 
 import (
-	"image"
 	"image/color"
-	"log"
 
 	"engo.io/ecs"
 	"engo.io/engo"
 )
 
-var (
-	boxWidth  float32 = 150
-	boxHeight float32 = 150
-)
+type DefaultScene struct{}
 
-type GameWorld struct{}
+type Guy struct {
+	ecs.BasicEntity
+	engo.MouseComponent
+	engo.RenderComponent
+	engo.SpaceComponent
+}
 
-func (game *GameWorld) Preload() {}
-
+<<<<<<< HEAD
 // generateBackground creates a background of green tiles - might not be the most efficient way to do this
 func generateBackground() *engo.RenderComponent {
 	rect := image.Rect(0, 0, int(boxWidth), int(boxHeight))
@@ -31,9 +30,14 @@ func generateBackground() *engo.RenderComponent {
 	bgTexture := engo.NewImageObject(img)
 	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1})
 	return fieldRender
+=======
+func (*DefaultScene) Preload() {
+	// Load all files from the data directory. `false` means: do not do it recursively.
+	engo.Files.AddFromDir("data", false)
+>>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 }
 
-func (game *GameWorld) Setup(w *ecs.World) {
+func (*DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 
 	w.AddSystem(&engo.MouseSystem{})
@@ -41,20 +45,42 @@ func (game *GameWorld) Setup(w *ecs.World) {
 	w.AddSystem(&ControlSystem{})
 	w.AddSystem(&engo.MouseZoomer{-0.125})
 
-	err := w.AddEntity(game.CreateEntity())
-	if err != nil {
-		log.Println(err)
-	}
-}
+	// Retrieve a texture
+	texture := engo.Files.Image("icon.png")
 
+<<<<<<< HEAD
 func (*GameWorld) Hide()        {}
 func (*GameWorld) Show()        {}
 func (*GameWorld) Exit()        {}
 func (*GameWorld) Type() string { return "GameWorld" }
+=======
+	// Create an entity
+	guy := Guy{BasicEntity: ecs.NewBasic()}
+>>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 
-func (game *GameWorld) CreateEntity() *ecs.Entity {
-	entity := ecs.NewEntity("MouseSystem", "RenderSystem", "ControlSystem")
+	// Initialize the components, set scale to 8x
+	guy.RenderComponent = engo.NewRenderComponent(texture, engo.Point{8, 8})
+	guy.SpaceComponent = engo.SpaceComponent{
+		Position: engo.Point{0, 0},
+		Width:    texture.Width() * guy.RenderComponent.Scale.X,
+		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
+	}
+	// guy.MouseComponent doesn't have to be set, because its default values will do
 
+	// Add our guy to appropriate systems
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *engo.RenderSystem:
+			sys.Add(&guy.BasicEntity, &guy.RenderComponent, &guy.SpaceComponent)
+		case *engo.MouseSystem:
+			sys.Add(&guy.BasicEntity, &guy.MouseComponent, &guy.SpaceComponent, &guy.RenderComponent)
+		case *ControlSystem:
+			sys.Add(&guy.BasicEntity, &guy.MouseComponent)
+		}
+	}
+}
+
+<<<<<<< HEAD
 	entity.AddComponent(generateBackground())
 	entity.AddComponent(&engo.MouseComponent{})
 	entity.AddComponent(&engo.SpaceComponent{
@@ -62,28 +88,43 @@ func (game *GameWorld) CreateEntity() *ecs.Entity {
 		Width:    boxWidth,
 		Height:   boxHeight,
 	})
+=======
+func (*DefaultScene) Type() string { return "GameWorld" }
+>>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 
-	return entity
+type controlEntity struct {
+	*ecs.BasicEntity
+	*engo.MouseComponent
 }
 
 type ControlSystem struct {
-	ecs.LinearSystem
+	entities []controlEntity
 }
 
-func (*ControlSystem) Type() string { return "ControlSystem" }
+func (c *ControlSystem) Add(basic *ecs.BasicEntity, mouse *engo.MouseComponent) {
+	c.entities = append(c.entities, controlEntity{basic, mouse})
+}
 
-func (c *ControlSystem) New(*ecs.World) {}
-
-func (c *ControlSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-	var mouse *engo.MouseComponent
-	if !entity.Component(&mouse) {
-		return
+func (c *ControlSystem) Remove(basic ecs.BasicEntity) {
+	delete := -1
+	for index, e := range c.entities {
+		if e.BasicEntity.ID() == basic.ID() {
+			delete = index
+			break
+		}
 	}
+	if delete >= 0 {
+		c.entities = append(c.entities[:delete], c.entities[delete+1:]...)
+	}
+}
 
-	if mouse.Enter {
-		engo.SetCursor(engo.Hand)
-	} else if mouse.Leave {
-		engo.SetCursor(nil)
+func (c *ControlSystem) Update(dt float32) {
+	for _, e := range c.entities {
+		if e.MouseComponent.Enter {
+			engo.SetCursor(engo.Hand)
+		} else if e.MouseComponent.Leave {
+			engo.SetCursor(nil)
+		}
 	}
 }
 
@@ -93,5 +134,5 @@ func main() {
 		Width:  1024,
 		Height: 640,
 	}
-	engo.Run(opts, &GameWorld{})
+	engo.Run(opts, &DefaultScene{})
 }

@@ -2,27 +2,33 @@ package main
 
 import (
 	"image/color"
-	"log"
 	"math/rand"
 
 	"engo.io/ecs"
 	"engo.io/engo"
 )
 
-type GameWorld struct{}
+type DefaultScene struct{}
 
-func (game *GameWorld) Preload() {
+type Rock struct {
+	ecs.BasicEntity
+	engo.RenderComponent
+	engo.SpaceComponent
+}
+
+func (*DefaultScene) Preload() {
 	engo.Files.AddFromDir("assets", false)
 }
 
-func (game *GameWorld) Setup(w *ecs.World) {
+func (*DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 
 	w.AddSystem(&engo.RenderSystem{})
 	w.AddSystem(&HideSystem{})
 
-	guy := ecs.NewEntity("RenderSystem", "HideSystem")
+	// Retrieve a texture
 	texture := engo.Files.Image("rock.png")
+<<<<<<< HEAD
 	render := engo.NewRenderComponent(texture, engo.Point{8, 8})
 	collision := &engo.CollisionComponent{Solid: true, Main: true}
 
@@ -34,40 +40,66 @@ func (game *GameWorld) Setup(w *ecs.World) {
 		Width:    width,
 		Height:   height,
 	}
+=======
 
-	guy.AddComponent(render)
-	guy.AddComponent(space)
-	guy.AddComponent(collision)
+	// Create an entity
+	rock := Rock{BasicEntity: ecs.NewBasic()}
+>>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 
-	err := w.AddEntity(guy)
-	if err != nil {
-		log.Println(err)
+	// Initialize the components, set scale to 8x
+	rock.RenderComponent = engo.NewRenderComponent(texture, engo.Point{8, 8})
+	rock.SpaceComponent = engo.SpaceComponent{
+		Position: engo.Point{0, 0},
+		Width:    texture.Width() * rock.RenderComponent.Scale.X,
+		Height:   texture.Height() * rock.RenderComponent.Scale.Y,
+	}
+
+	// Add it to appropriate systems
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *engo.RenderSystem:
+			sys.Add(&rock.BasicEntity, &rock.RenderComponent, &rock.SpaceComponent)
+		case *HideSystem:
+			sys.Add(&rock.BasicEntity, &rock.RenderComponent)
+		}
 	}
 }
 
-func (*GameWorld) Hide()        {}
-func (*GameWorld) Show()        {}
-func (*GameWorld) Exit()        {}
-func (*GameWorld) Type() string { return "GameWorld" }
+func (*DefaultScene) Type() string { return "GameWorld" }
+
+type hideEntity struct {
+	*ecs.BasicEntity
+	*engo.RenderComponent
+}
 
 type HideSystem struct {
-	ecs.LinearSystem
+	entities []hideEntity
 }
 
-func (*HideSystem) Type() string { return "HideSystem" }
+func (h *HideSystem) Add(basic *ecs.BasicEntity, render *engo.RenderComponent) {
+	h.entities = append(h.entities, hideEntity{basic, render})
+}
 
-func (s *HideSystem) New(*ecs.World) {}
-
-func (c *HideSystem) UpdateEntity(entity *ecs.Entity, dt float32) {
-	var render *engo.RenderComponent
-	if !entity.Component(&render) {
-		return
+func (h *HideSystem) Remove(basic ecs.BasicEntity) {
+	delete := -1
+	for index, e := range h.entities {
+		if e.BasicEntity.ID() == basic.ID() {
+			delete = index
+			break
+		}
 	}
+	if delete >= 0 {
+		h.entities = append(h.entities[:delete], h.entities[delete+1:]...)
+	}
+}
 
-	if rand.Int()%10 == 0 {
-		render.Hidden = true
-	} else {
-		render.Hidden = false
+func (h *HideSystem) Update(dt float32) {
+	for _, e := range h.entities {
+		if rand.Int()%10 == 0 {
+			e.RenderComponent.Hidden = true
+		} else {
+			e.RenderComponent.Hidden = false
+		}
 	}
 }
 
@@ -77,5 +109,5 @@ func main() {
 		Width:  1024,
 		Height: 640,
 	}
-	engo.Run(opts, &GameWorld{})
+	engo.Run(opts, &DefaultScene{})
 }
