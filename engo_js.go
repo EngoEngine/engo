@@ -1,3 +1,5 @@
+//+build netgo
+
 package engo
 
 import (
