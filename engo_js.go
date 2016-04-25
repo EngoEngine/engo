@@ -19,13 +19,12 @@ import (
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
 	"github.com/gopherjs/gopherjs/js"
-	"github.com/gopherjs/webgl"
 	"honnef.co/go/js/dom"
 	"honnef.co/go/js/xhr"
 )
 
 var (
-	Gl                        *webgl.Context
+	Gl                        *gl.Context
 	gameWidth, gameHeight     float32
 	windowWidth, windowHeight float32
 )
@@ -57,7 +56,11 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 
 	document.SetTitle(title)
 
-	Gl = gl.NewContext(canvas.Underlying())
+	Gl, err := gl.NewContext(canvas.Underlying(), nil) // TODO: we can add arguments here
+	if err != nil {
+		log.Println("Could not create context:", err)
+		return
+	}
 	Gl.Viewport(0, 0, width, height)
 
 	// DEBUG: Add framebuffer information div.

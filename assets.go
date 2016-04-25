@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 
+	"engo.io/gl"
 	"github.com/golang/freetype/truetype"
 	"github.com/luxengine/math"
 )
@@ -239,4 +240,37 @@ func ImageToNRGBA(img image.Image, width, height int) *image.NRGBA {
 	draw.Draw(newm, newm.Bounds(), img, image.Point{0, 0}, draw.Src)
 
 	return newm
+}
+
+func (r *Region) Texture() *gl.Texture {
+	return r.texture.id
+}
+
+type Texture struct {
+	id     *gl.Texture
+	width  float32
+	height float32
+}
+
+func (t *Texture) Texture() *gl.Texture {
+	return t.id
+}
+
+func LoadShader(vertSrc, fragSrc string) *gl.Program {
+	vertShader := Gl.CreateShader(Gl.VERTEX_SHADER)
+	Gl.ShaderSource(vertShader, vertSrc)
+	Gl.CompileShader(vertShader)
+	defer Gl.DeleteShader(vertShader)
+
+	fragShader := Gl.CreateShader(Gl.FRAGMENT_SHADER)
+	Gl.ShaderSource(fragShader, fragSrc)
+	Gl.CompileShader(fragShader)
+	defer Gl.DeleteShader(fragShader)
+
+	program := Gl.CreateProgram()
+	Gl.AttachShader(program, vertShader)
+	Gl.AttachShader(program, fragShader)
+	Gl.LinkProgram(program)
+
+	return program
 }
