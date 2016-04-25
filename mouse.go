@@ -71,7 +71,7 @@ type MouseSystem struct {
 	mouseDown bool
 }
 
-// Priority returns a priority of 10 (higher than most) to ensure that this System runs before all others
+// Priority returns a priority higher than most, to ensure that this System runs before all others
 func (m *MouseSystem) Priority() int { return MouseSystemPriority }
 
 // Add adds a new entity to the MouseSystem.
