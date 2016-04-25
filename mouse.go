@@ -3,7 +3,6 @@ package engo
 import (
 	"engo.io/ecs"
 	"github.com/luxengine/math"
-	"log"
 )
 
 const MouseSystemPriority = 100
