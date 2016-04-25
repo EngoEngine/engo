@@ -29,7 +29,40 @@ func (sc *SpaceComponent) Center(p Point) {
 }
 
 func (sc SpaceComponent) AABB() AABB {
-	return AABB{Min: sc.Position, Max: Point{sc.Position.X + sc.Width, sc.Position.Y + sc.Height}}
+	if sc.Rotation == 0 {
+		return AABB{
+			Min: sc.Position,
+			Max: Point{sc.Position.X + sc.Width, sc.Position.Y + sc.Height},
+		}
+	}
+
+	sin, cos := math.Sincos(sc.Rotation * math.Pi / 180)
+	xmin := sc.Position.X
+	xmax := sc.Position.X + sc.Width*cos + sc.Height*sin
+	ymin := sc.Position.Y
+	ymax := sc.Position.Y + sc.Height*cos - sc.Width*sin
+
+	var (
+		X_MIN, X_MAX, Y_MIN, Y_MAX float32
+	)
+
+	if xmin < xmax {
+		X_MIN = xmin
+		X_MAX = xmax
+	} else {
+		X_MIN = xmax
+		X_MAX = xmin
+	}
+
+	if ymin < ymax {
+		Y_MIN = ymin
+		Y_MAX = ymax
+	} else {
+		Y_MIN = ymax
+		Y_MAX = ymin
+	}
+
+	return AABB{Point{X_MIN, Y_MIN}, Point{X_MAX, Y_MAX}}
 }
 
 type CollisionComponent struct {

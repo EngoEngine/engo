@@ -134,10 +134,7 @@ func (s *basicShader) Pre() {
 	}
 
 	if s.cameraEnabled {
-		angle := cam.angle * math.Pi / 180
-
-		s.viewMatrix[0] = math.Cos(angle)
-		s.viewMatrix[1] = math.Sin(angle)
+		s.viewMatrix[1], s.viewMatrix[0] = math.Sincos(cam.angle * math.Pi / 180)
 		s.viewMatrix[3] = -s.viewMatrix[1]
 		s.viewMatrix[4] = s.viewMatrix[0]
 		s.viewMatrix[6] = -cam.x
@@ -164,14 +161,20 @@ func (s *basicShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, scaleX,
 		s.lastTexture = texture
 	}
 
-	angle := rotation * math.Pi / 180
-	cos := math.Cos(angle)
-	sin := math.Sin(angle)
+	if rotation != 0 {
+		sin, cos := math.Sincos(rotation * math.Pi / 180)
 
-	s.modelMatrix[0] = scaleX * cos
-	s.modelMatrix[1] = scaleX * sin
-	s.modelMatrix[3] = scaleY * -sin
-	s.modelMatrix[4] = scaleY * cos
+		s.modelMatrix[0] = scaleX * cos
+		s.modelMatrix[1] = scaleX * sin
+		s.modelMatrix[3] = scaleY * -sin
+		s.modelMatrix[4] = scaleY * cos
+	} else {
+		s.modelMatrix[0] = scaleX
+		s.modelMatrix[1] = 0
+		s.modelMatrix[3] = 0
+		s.modelMatrix[4] = scaleY
+	}
+
 	s.modelMatrix[6] = x
 	s.modelMatrix[7] = y
 

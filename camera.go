@@ -35,6 +35,11 @@ func (cam *cameraSystem) New(*ecs.World) {
 	cam.x = WorldBounds.Max.X / 2
 	cam.y = WorldBounds.Max.Y / 2
 	cam.z = 1
+
+	// TODO : remove
+	cam.x = 0
+	cam.y = 0
+
 	cam.longTasks = make(map[CameraAxis]*CameraMessage)
 
 	Mailbox.Listen("CameraMessage", func(msg Message) {
@@ -336,7 +341,7 @@ type MouseRotator struct {
 func (*MouseRotator) Priority() int          { return 10 }
 func (*MouseRotator) Remove(ecs.BasicEntity) {}
 
-func (c *MouseRotator) Update(dt float32) {
+func (c *MouseRotator) Update(float32) {
 	if Mouse.Button == MouseButtonMiddle && Mouse.Action == PRESS {
 		c.pressed = true
 	}
@@ -346,7 +351,7 @@ func (c *MouseRotator) Update(dt float32) {
 	}
 
 	if c.pressed {
-		Mailbox.Dispatch(CameraMessage{Axis: Angle, Value: dt * (c.oldX - Mouse.X) * -c.RotationSpeed, Incremental: true})
+		Mailbox.Dispatch(CameraMessage{Axis: Angle, Value: (c.oldX - Mouse.X) * -c.RotationSpeed, Incremental: true})
 	}
 
 	c.oldX = Mouse.X
