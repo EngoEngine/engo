@@ -38,9 +38,9 @@ func (sc SpaceComponent) AABB() AABB {
 
 	sin, cos := math.Sincos(sc.Rotation * math.Pi / 180)
 	xmin := sc.Position.X
-	xmax := sc.Position.X + sc.Width*cos + sc.Height*sin
+	xmax := sc.Position.X + sc.Width*cos - sc.Height*sin
 	ymin := sc.Position.Y
-	ymax := sc.Position.Y + sc.Height*cos - sc.Width*sin
+	ymax := sc.Position.Y + sc.Height*cos + sc.Width*sin
 
 	var (
 		X_MIN, X_MAX, Y_MIN, Y_MAX float32
