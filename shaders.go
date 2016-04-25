@@ -32,23 +32,6 @@ type defaultShader struct {
 	ufProjection *gl.UniformLocation
 }
 
-func (s *defaultShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotation float32) {
-	if s.lastTexture != texture {
-		Gl.BindTexture(Gl.TEXTURE_2D, texture)
-		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)
-
-		Gl.VertexAttribPointer(s.inPosition, 2, Gl.FLOAT, false, 20, 0)
-		Gl.VertexAttribPointer(s.inTexCoords, 2, Gl.FLOAT, false, 20, 8)
-		Gl.VertexAttribPointer(s.inColor, 4, Gl.UNSIGNED_BYTE, true, 20, 16)
-
-		s.lastTexture = texture
-	}
-
-	// TODO: add rotation
-	Gl.Uniform2f(s.ufPosition, x, y)
-	Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
-}
-
 func (s *defaultShader) Initialize(width, height float32) {
 	s.program = LoadShader(`
 attribute vec2 in_Position;
@@ -86,8 +69,7 @@ uniform sampler2D uf_Texture;
 
 void main (void) {
   gl_FragColor = var_Color * texture2D(uf_Texture, var_TexCoords);
-}
-`)
+}`)
 
 	// Create and populate indices buffer
 	s.indices = make([]uint16, 6*bufferSize)
@@ -140,6 +122,23 @@ func (s *defaultShader) Pre() {
 	Gl.UseProgram(s.program)
 	Gl.Uniform2f(s.ufProjection, s.projX, s.projY)
 	Gl.Uniform3f(s.ufCamera, cam.x, cam.y, cam.z)
+}
+
+func (s *defaultShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotation float32) {
+	if s.lastTexture != texture {
+		Gl.BindTexture(Gl.TEXTURE_2D, texture)
+		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)
+
+		Gl.VertexAttribPointer(s.inPosition, 2, Gl.FLOAT, false, 20, 0)
+		Gl.VertexAttribPointer(s.inTexCoords, 2, Gl.FLOAT, false, 20, 8)
+		Gl.VertexAttribPointer(s.inColor, 4, Gl.UNSIGNED_BYTE, true, 20, 16)
+
+		s.lastTexture = texture
+	}
+
+	// TODO: add rotation
+	Gl.Uniform2f(s.ufPosition, x, y)
+	Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
 }
 
 func (s *defaultShader) Post() {
@@ -203,8 +202,7 @@ uniform sampler2D uf_Texture;
 
 void main (void) {
   gl_FragColor = var_Color * texture2D(uf_Texture, var_TexCoords);
-}
-`)
+}`)
 
 	// Create and populate indices buffer
 	s.indices = make([]uint16, 6*bufferSize)
