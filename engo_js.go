@@ -291,7 +291,7 @@ type ImageObject struct {
 	data *js.Object
 }
 
-func (i *ImageObject) Data() *js.Object {
+func (i *ImageObject) Data() interface{} {
 	return i.data
 }
 

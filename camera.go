@@ -1,13 +1,13 @@
 package engo
 
 import (
+	"log"
 	"sync"
+	"time"
 
 	"engo.io/ecs"
 	"github.com/go-gl/mathgl/mgl32"
 	"honnef.co/go/js/dom"
-	"log"
-	"time"
 )
 
 var (
