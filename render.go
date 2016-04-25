@@ -44,12 +44,11 @@ func (renderChangeMessage) Type() string {
 	return "renderChangeMessage"
 }
 
-func NewRenderComponent(d Drawable, scale Point, label string) RenderComponent {
+func NewRenderComponent(d Drawable, scale Point) RenderComponent {
 	rc := RenderComponent{
 		Transparency: 1,
 		Color:        color.White,
-
-		scale: scale,
+		scale:        scale,
 	}
 	rc.SetDrawable(d)
 
