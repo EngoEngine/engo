@@ -144,16 +144,6 @@ func (rock *RockSpawnSystem) Update(dt float32) {
 
 func NewRock(world *ecs.World, position engo.Point) {
 	texture := engo.Files.Image("rock.png")
-<<<<<<< HEAD
-	render := engo.NewRenderComponent(texture, engo.Point{4, 4})
-	space := &engo.SpaceComponent{
-		Position: position,
-		Width:    texture.Width() * render.Scale.X,
-		Height:   texture.Height() * render.Scale.Y,
-	}
-	collision := &engo.CollisionComponent{Solid: true}
-=======
->>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 
 	rock := Rock{BasicEntity: ecs.NewBasic()}
 	rock.RenderComponent = engo.NewRenderComponent(texture, engo.Point{4, 4})
@@ -213,12 +203,8 @@ type DeathSystem struct{}
 func (*DeathSystem) New(*ecs.World) {
 	// Subscribe to ScoreMessage
 	engo.Mailbox.Listen("CollisionMessage", func(message engo.Message) {
-<<<<<<< HEAD
-		collision, isCollision := message.(engo.CollisionMessage)
-
-=======
 		_, isCollision := message.(engo.CollisionMessage)
->>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
+
 		if isCollision {
 			log.Println("DEAD")
 		}

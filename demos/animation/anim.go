@@ -55,36 +55,17 @@ func (scene *DefaultScene) Setup(w *ecs.World) {
 	}
 }
 
-<<<<<<< HEAD
-func (*GameWorld) Hide()        {}
-func (*GameWorld) Show()        {}
-func (*GameWorld) Exit()        {}
-func (*GameWorld) Type() string { return "GameWorld" }
-=======
 func (*DefaultScene) Type() string { return "GameWorld" }
 
 func (*DefaultScene) CreateEntity(point *engo.Point, spriteSheet *engo.Spritesheet) *Animation {
 	entity := &Animation{BasicEntity: ecs.NewBasic()}
->>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 
 	entity.SpaceComponent = engo.SpaceComponent{*point, 150, 150}
 	entity.RenderComponent = engo.NewRenderComponent(spriteSheet.Cell(0), engo.Point{3, 3})
 	entity.AnimationComponent = engo.NewAnimationComponent(spriteSheet.Drawables(), 0.1)
 
-<<<<<<< HEAD
-	space := &engo.SpaceComponent{Position: *point, Width: 150, Height: 150}
-	render := engo.NewRenderComponent(spriteSheet.Cell(action.Frames[0]), engo.Point{3, 3})
-	animation := engo.NewAnimationComponent(spriteSheet.Drawables(), 0.1)
-
-	animation.AddAnimationActions(actions)
-	animation.SelectAnimationByAction(action)
-	entity.AddComponent(render)
-	entity.AddComponent(space)
-	entity.AddComponent(animation)
-=======
 	entity.AnimationComponent.AddAnimations(actions)
 	entity.AnimationComponent.AddDefaultAnimation(StopAction)
->>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 
 	return entity
 }

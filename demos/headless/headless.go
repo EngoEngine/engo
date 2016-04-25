@@ -52,31 +52,9 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	w.AddSystem(&BallSystem{})
 	w.AddSystem(&ScoreSystem{})
 
-<<<<<<< HEAD
-	ball := ecs.NewEntity("RenderSystem", "CollisionSystem", "SpeedSystem", "BallSystem")
-	ballTexture := engo.Files.Image("ball.png")
-	ballRender := engo.NewRenderComponent(ballTexture, engo.Point{2, 2})
-	ballSpace := &engo.SpaceComponent{
-		Position: engo.Point{(engo.Width() - ballTexture.Width()) / 2, (engo.Height() - ballTexture.Height()) / 2},
-		Width:    ballTexture.Width() * ballRender.Scale.X,
-		Height:   ballTexture.Height() * ballRender.Scale.Y,
-	}
-	ballCollision := &engo.CollisionComponent{Main: true, Solid: true}
-
-	ballSpeed := &SpeedComponent{}
-	ballSpeed.Point = engo.Point{300, 100}
-	ball.AddComponent(ballRender)
-	ball.AddComponent(ballSpace)
-	ball.AddComponent(ballCollision)
-	ball.AddComponent(ballSpeed)
-	err := w.AddEntity(ball)
-	if err != nil {
-		log.Println(err)
-=======
 	basicFont = (&engo.Font{URL: "Roboto-Regular.ttf", Size: 32, FG: color.NRGBA{255, 255, 255, 255}})
 	if err := basicFont.CreatePreloaded(); err != nil {
 		log.Fatalln("Could not load font:", err)
->>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 	}
 
 	ballTexture := engo.Files.Image("ball.png")
@@ -105,20 +83,6 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		}
 	}
 
-<<<<<<< HEAD
-	scoreRender := engo.NewRenderComponent(basicFont.Render(" "), engo.Point{1, 1})
-	scoreSpace := &engo.SpaceComponent{
-		Position: engo.Point{100, 100},
-		Width:    100,
-		Height:   100,
-	}
-
-	score.AddComponent(scoreRender)
-	score.AddComponent(scoreSpace)
-	err = w.AddEntity(score)
-	if err != nil {
-		log.Println(err)
-=======
 	score := Score{BasicEntity: ecs.NewBasic()}
 	score.RenderComponent = engo.NewRenderComponent(basicFont.Render(" "), engo.Point{1, 1})
 	score.SpaceComponent = engo.SpaceComponent{engo.Point{100, 100}, 100, 100}
@@ -131,44 +95,20 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		case *ScoreSystem:
 			sys.Add(&score.BasicEntity, &score.RenderComponent, &score.SpaceComponent)
 		}
->>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 	}
 
 	schemes := []string{"WASD", ""}
 	paddleTexture := engo.Files.Image("paddle.png")
 
 	for i := 0; i < 2; i++ {
-<<<<<<< HEAD
-		paddle := ecs.NewEntity("RenderSystem", "CollisionSystem", "ControlSystem")
-		paddleTexture := engo.Files.Image("paddle.png")
-		paddleRender := engo.NewRenderComponent(paddleTexture, engo.Point{2, 2})
-=======
 		paddle := Paddle{BasicEntity: ecs.NewBasic()}
 		paddle.RenderComponent = engo.NewRenderComponent(paddleTexture, engo.Point{2, 2})
 
->>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 		x := float32(0)
 		if i != 0 {
 			x = 800 - 16
 		}
 
-<<<<<<< HEAD
-		paddleSpace := &engo.SpaceComponent{
-			Position: engo.Point{x, (engo.Height() - paddleTexture.Height()) / 2},
-			Width:    paddleRender.Scale.X * paddleTexture.Width(),
-			Height:   paddleRender.Scale.Y * paddleTexture.Height(),
-		}
-
-		paddleControl := &ControlComponent{schemes[i]}
-		paddleCollision := &engo.CollisionComponent{Main: false, Solid: true}
-		paddle.AddComponent(paddleRender)
-		paddle.AddComponent(paddleSpace)
-		paddle.AddComponent(paddleControl)
-		paddle.AddComponent(paddleCollision)
-		err = w.AddEntity(paddle)
-		if err != nil {
-			log.Println(err)
-=======
 		paddle.SpaceComponent = engo.SpaceComponent{
 			Position: engo.Point{x, (engo.Height() - paddleTexture.Height()) / 2},
 			Width:    paddle.RenderComponent.Scale.X * paddleTexture.Width(),
@@ -187,7 +127,6 @@ func (pong *PongGame) Setup(w *ecs.World) {
 			case *ControlSystem:
 				sys.Add(&paddle.BasicEntity, &paddle.ControlComponent, &paddle.SpaceComponent)
 			}
->>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 		}
 	}
 }

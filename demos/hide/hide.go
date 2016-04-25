@@ -28,23 +28,9 @@ func (*DefaultScene) Setup(w *ecs.World) {
 
 	// Retrieve a texture
 	texture := engo.Files.Image("rock.png")
-<<<<<<< HEAD
-	render := engo.NewRenderComponent(texture, engo.Point{8, 8})
-	collision := &engo.CollisionComponent{Solid: true, Main: true}
-
-	width := texture.Width() * render.Scale.X
-	height := texture.Height() * render.Scale.Y
-
-	space := &engo.SpaceComponent{
-		Position: engo.Point{(engo.Width() - width) / 2, (engo.Height() - height) / 2},
-		Width:    width,
-		Height:   height,
-	}
-=======
 
 	// Create an entity
 	rock := Rock{BasicEntity: ecs.NewBasic()}
->>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 
 	// Initialize the components, set scale to 8x
 	rock.RenderComponent = engo.NewRenderComponent(texture, engo.Point{8, 8})

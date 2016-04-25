@@ -16,25 +16,9 @@ type Guy struct {
 	engo.SpaceComponent
 }
 
-<<<<<<< HEAD
-// generateBackground creates a background of green tiles - might not be the most efficient way to do this
-func generateBackground() *engo.RenderComponent {
-	rect := image.Rect(0, 0, int(boxWidth), int(boxHeight))
-	img := image.NewNRGBA(rect)
-	c1 := color.RGBA{102, 153, 0, 255}
-	for i := rect.Min.X; i < rect.Max.X; i++ {
-		for j := rect.Min.Y; j < rect.Max.Y; j++ {
-			img.Set(i, j, c1)
-		}
-	}
-	bgTexture := engo.NewImageObject(img)
-	fieldRender := engo.NewRenderComponent(engo.NewTexture(bgTexture), engo.Point{1, 1})
-	return fieldRender
-=======
 func (*DefaultScene) Preload() {
 	// Load all files from the data directory. `false` means: do not do it recursively.
 	engo.Files.AddFromDir("data", false)
->>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 }
 
 func (*DefaultScene) Setup(w *ecs.World) {
@@ -48,15 +32,8 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	// Retrieve a texture
 	texture := engo.Files.Image("icon.png")
 
-<<<<<<< HEAD
-func (*GameWorld) Hide()        {}
-func (*GameWorld) Show()        {}
-func (*GameWorld) Exit()        {}
-func (*GameWorld) Type() string { return "GameWorld" }
-=======
 	// Create an entity
 	guy := Guy{BasicEntity: ecs.NewBasic()}
->>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 
 	// Initialize the components, set scale to 8x
 	guy.RenderComponent = engo.NewRenderComponent(texture, engo.Point{8, 8})
@@ -80,17 +57,7 @@ func (*GameWorld) Type() string { return "GameWorld" }
 	}
 }
 
-<<<<<<< HEAD
-	entity.AddComponent(generateBackground())
-	entity.AddComponent(&engo.MouseComponent{})
-	entity.AddComponent(&engo.SpaceComponent{
-		Position: engo.Point{0, 0},
-		Width:    boxWidth,
-		Height:   boxHeight,
-	})
-=======
 func (*DefaultScene) Type() string { return "GameWorld" }
->>>>>>> 28393c45ef7ce198babe3c6854931398faaba25c
 
 type controlEntity struct {
 	*ecs.BasicEntity
