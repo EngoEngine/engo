@@ -14,6 +14,12 @@ const (
 	RenderSystemPriority = -1000
 )
 
+type renderChangeMessage struct{}
+
+func (renderChangeMessage) Type() string {
+	return "renderChangeMessage"
+}
+
 type Drawable interface {
 	Texture() *gl.Texture
 	Width() float32
@@ -36,12 +42,6 @@ type RenderComponent struct {
 	drawable      Drawable
 	buffer        *gl.Buffer
 	bufferContent []float32
-}
-
-type renderChangeMessage struct{}
-
-func (renderChangeMessage) Type() string {
-	return "renderChangeMessage"
 }
 
 func NewRenderComponent(d Drawable, scale Point) RenderComponent {

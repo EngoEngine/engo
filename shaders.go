@@ -6,46 +6,6 @@ import (
 )
 
 const bufferSize = 10000
-const vertSrc = `
-attribute vec2 in_Position;
-attribute vec2 in_TexCoords;
-attribute vec4 in_Color;
-
-uniform vec2 uf_Position;
-uniform vec3 uf_Camera;
-uniform vec2 uf_Projection;
-
-varying vec4 var_Color;
-varying vec2 var_TexCoords;
-
-void main() {
-  var_Color = in_Color;
-  var_TexCoords = in_TexCoords;
-
-  gl_Position = vec4((in_Position.x + uf_Position.x - uf_Camera.x)/  uf_Projection.x,
-  					 (in_Position.y + uf_Position.y - uf_Camera.y)/ -uf_Projection.y,
-  					 0.0, uf_Camera.z);
-
-}
-`
-
-var fragSrc = `
-#ifdef GL_ES
-#define LOWP lowp
-precision mediump float;
-#else
-#define LOWP
-#endif
-
-varying vec4 var_Color;
-varying vec2 var_TexCoords;
-
-uniform sampler2D uf_Texture;
-
-void main (void) {
-  gl_FragColor = var_Color * texture2D(uf_Texture, var_TexCoords);
-}
-`
 
 type Shader interface {
 	Initialize(width, height float32)
@@ -72,23 +32,6 @@ type defaultShader struct {
 	ufProjection *gl.UniformLocation
 }
 
-type hudShader struct {
-	indices  []uint16
-	indexVBO *gl.Buffer
-	program  *gl.Program
-
-	projX float32
-	projY float32
-
-	lastTexture *gl.Texture
-
-	inPosition   int
-	inTexCoords  int
-	inColor      int
-	ufPosition   *gl.UniformLocation
-	ufProjection *gl.UniformLocation
-}
-
 func (s *defaultShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotation float32) {
 	if s.lastTexture != texture {
 		Gl.BindTexture(Gl.TEXTURE_2D, texture)
@@ -106,24 +49,45 @@ func (s *defaultShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotat
 	Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
 }
 
-func (s *hudShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotation float32) {
-	if s.lastTexture != texture {
-		Gl.BindTexture(Gl.TEXTURE_2D, texture)
-		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)
-
-		Gl.VertexAttribPointer(s.inPosition, 2, Gl.FLOAT, false, 20, 0)
-		Gl.VertexAttribPointer(s.inTexCoords, 2, Gl.FLOAT, false, 20, 8)
-		Gl.VertexAttribPointer(s.inColor, 4, Gl.UNSIGNED_BYTE, true, 20, 16)
-
-		s.lastTexture = texture
-	}
-
-	Gl.Uniform2f(s.ufPosition, x, y)
-	Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
-}
-
 func (s *defaultShader) Initialize(width, height float32) {
-	s.program = LoadShader(vertSrc, fragSrc)
+	s.program = LoadShader(`
+attribute vec2 in_Position;
+attribute vec2 in_TexCoords;
+attribute vec4 in_Color;
+
+uniform vec2 uf_Position;
+uniform vec3 uf_Camera;
+uniform vec2 uf_Projection;
+
+varying vec4 var_Color;
+varying vec2 var_TexCoords;
+
+void main() {
+  var_Color = in_Color;
+  var_TexCoords = in_TexCoords;
+
+  gl_Position = vec4((in_Position.x + uf_Position.x - uf_Camera.x)/  uf_Projection.x,
+  					 (in_Position.y + uf_Position.y - uf_Camera.y)/ -uf_Projection.y,
+  					 0.0, uf_Camera.z);
+
+}
+`, `
+#ifdef GL_ES
+#define LOWP lowp
+precision mediump float;
+#else
+#define LOWP
+#endif
+
+varying vec4 var_Color;
+varying vec2 var_TexCoords;
+
+uniform sampler2D uf_Texture;
+
+void main (void) {
+  gl_FragColor = var_Color * texture2D(uf_Texture, var_TexCoords);
+}
+`)
 
 	// Create and populate indices buffer
 	s.indices = make([]uint16, 6*bufferSize)
@@ -187,8 +151,60 @@ func (s *defaultShader) SetProjection(width, height float32) {
 	s.projY = height / 2
 }
 
+type hudShader struct {
+	indices  []uint16
+	indexVBO *gl.Buffer
+	program  *gl.Program
+
+	projX float32
+	projY float32
+
+	lastTexture *gl.Texture
+
+	inPosition   int
+	inTexCoords  int
+	inColor      int
+	ufPosition   *gl.UniformLocation
+	ufProjection *gl.UniformLocation
+}
+
 func (s *hudShader) Initialize(width, height float32) {
-	s.program = LoadShader(vertSrc, fragSrc)
+	s.program = LoadShader(`
+attribute vec2 in_Position;
+attribute vec2 in_TexCoords;
+attribute vec4 in_Color;
+
+uniform vec2 uf_Position;
+uniform vec2 uf_Projection;
+
+varying vec4 var_Color;
+varying vec2 var_TexCoords;
+
+void main() {
+  var_Color = in_Color;
+  var_TexCoords = in_TexCoords;
+
+  gl_Position = vec4((in_Position.x + uf_Position.x)/  uf_Projection.x - 1.0,
+   					 (in_Position.y + uf_Position.y)/ -uf_Projection.y + 1.0,
+   					 0.0, 1.0);
+
+}`, `
+#ifdef GL_ES
+#define LOWP lowp
+precision mediump float;
+#else
+#define LOWP
+#endif
+
+varying vec4 var_Color;
+varying vec2 var_TexCoords;
+
+uniform sampler2D uf_Texture;
+
+void main (void) {
+  gl_FragColor = var_Color * texture2D(uf_Texture, var_TexCoords);
+}
+`)
 
 	// Create and populate indices buffer
 	s.indices = make([]uint16, 6*bufferSize)
@@ -229,6 +245,22 @@ func (s *hudShader) Initialize(width, height float32) {
 func (s *hudShader) Pre() {
 	Gl.UseProgram(s.program)
 	Gl.Uniform2f(s.ufProjection, s.projX, s.projY)
+}
+
+func (s *hudShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotation float32) {
+	if s.lastTexture != texture {
+		Gl.BindTexture(Gl.TEXTURE_2D, texture)
+		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)
+
+		Gl.VertexAttribPointer(s.inPosition, 2, Gl.FLOAT, false, 20, 0)
+		Gl.VertexAttribPointer(s.inTexCoords, 2, Gl.FLOAT, false, 20, 8)
+		Gl.VertexAttribPointer(s.inColor, 4, Gl.UNSIGNED_BYTE, true, 20, 16)
+
+		s.lastTexture = texture
+	}
+
+	Gl.Uniform2f(s.ufPosition, x, y)
+	Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
 }
 
 func (s *hudShader) Post() {
