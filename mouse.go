@@ -144,7 +144,6 @@ func (m *MouseSystem) Update(dt float32) {
 		// Check if the X-value is within range
 		// and if the Y-value is within range
 		pos := e.SpaceComponent.AABB()
-		log.Println(pos)
 
 		if e.MouseComponent.Track ||
 			mx > pos.Min.X && mx < pos.Max.X && my > pos.Min.Y && my < pos.Max.Y {
