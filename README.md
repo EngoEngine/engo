@@ -55,4 +55,4 @@ Thank you to everyone who has worked on, or with `Engo`. None of this would be p
 
 These are 3rd party projects that have made `Engo` possible.
 - The Lux engine, which provides a `float32` [math](https://godoc.org/github.com/luxengine/math) package ([MIT license](https://github.com/luxengine/math/blob/master/LICENSE))
-- The original [engi](https://github.com/aljhager/engi) game engine which engo was based off of [BSD license](https://github.com/ajhager/engi/blob/master/LICENSE)
+- The original [engi](https://github.com/aljhager/engi) game engine which engo was based off of ([BSD license](https://github.com/ajhager/engi/blob/master/LICENSE))
