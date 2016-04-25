@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"engo.io/ecs"
+	"github.com/luxengine/math"
 )
 
 type AABB struct {
@@ -134,19 +135,19 @@ func MinimumTranslation(rect1 AABB, rect2 AABB) Point {
 		return mtd
 		//box doesnt intercept
 	}
-	if Abs(left) < right {
+	if math.Abs(left) < right {
 		mtd.X = left
 	} else {
 		mtd.X = right
 	}
 
-	if Abs(top) < bottom {
+	if math.Abs(top) < bottom {
 		mtd.Y = top
 	} else {
 		mtd.Y = bottom
 	}
 
-	if Abs(mtd.X) < Abs(mtd.Y) {
+	if math.Abs(mtd.X) < math.Abs(mtd.Y) {
 		mtd.Y = 0
 	} else {
 		mtd.X = 0

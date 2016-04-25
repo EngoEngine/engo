@@ -102,5 +102,4 @@ func (f *Font) Render(text string) *Texture {
 	// Create texture
 	imObj := &ImageObject{nrgba}
 	return NewTexture(imObj)
-
 }

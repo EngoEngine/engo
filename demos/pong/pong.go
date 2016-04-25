@@ -84,7 +84,8 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	}
 
 	score := Score{BasicEntity: ecs.NewBasic()}
-	score.RenderComponent = engo.NewRenderComponent(basicFont.Render(" "), engo.Point{1, 1})
+	// Removed for the sake of testing gopherjs
+	//score.RenderComponent = engo.NewRenderComponent(basicFont.Render(" "), engo.Point{1, 1})
 	score.SpaceComponent = engo.SpaceComponent{engo.Point{100, 100}, 100, 100}
 
 	// Add our entity to the appropriate systems
