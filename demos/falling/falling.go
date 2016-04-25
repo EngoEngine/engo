@@ -7,7 +7,6 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
-	"golang.org/x/text/message"
 )
 
 type Guy struct {

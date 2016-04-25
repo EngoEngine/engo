@@ -85,7 +85,11 @@ func (pong *PongGame) Setup(w *ecs.World) {
 
 	score := Score{BasicEntity: ecs.NewBasic()}
 	score.RenderComponent = engo.NewRenderComponent(basicFont.Render(" "), engo.Point{1, 1})
-	score.SpaceComponent = engo.SpaceComponent{engo.Point{100, 100}, 100, 100}
+	score.SpaceComponent = engo.SpaceComponent{
+		Position: engo.Point{100, 100},
+		Width:    100,
+		Height:   100,
+	}
 
 	// Add our entity to the appropriate systems
 	for _, system := range w.Systems() {
