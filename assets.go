@@ -238,6 +238,10 @@ func (r *Region) View() (float32, float32, float32, float32) {
 	return r.u, r.v, r.u2, r.v2
 }
 
+func (r *Region) Close() {
+	r.texture.Close()
+}
+
 type Texture struct {
 	id     *gl.Texture
 	width  float32
@@ -282,6 +286,12 @@ func (t *Texture) Texture() *gl.Texture {
 
 func (r *Texture) View() (float32, float32, float32, float32) {
 	return 0.0, 0.0, 1.0, 1.0
+}
+
+func (r *Texture) Close() {
+	if !headless {
+		Gl.DeleteTexture(r.id)
+	}
 }
 
 type Sprite struct {

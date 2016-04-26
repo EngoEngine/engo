@@ -366,6 +366,9 @@ func (s *ScoreSystem) Update(dt float32) {
 			s.upToDate = true
 			s.scoreLock.RUnlock()
 
+			// Clean up old one to prevent data leakage
+			e.RenderComponent.Drawable.Close()
+
 			e.RenderComponent.Drawable = basicFont.Render(label)
 			width := len(label) * 20
 

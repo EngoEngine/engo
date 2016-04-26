@@ -24,6 +24,7 @@ type Drawable interface {
 	Width() float32
 	Height() float32
 	View() (float32, float32, float32, float32)
+	Close()
 }
 
 type RenderComponent struct {
