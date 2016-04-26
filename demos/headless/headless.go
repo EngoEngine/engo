@@ -60,7 +60,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	ballTexture := engo.Files.Image("ball.png")
 
 	ball := Ball{BasicEntity: ecs.NewBasic()}
-	ball.RenderComponent = engo.NewRenderComponent(ballTexture, engo.Point{2, 2})
+	ball.RenderComponent = engo.RenderComponent{Drawable: ballTexture, Scale: engo.Point{2, 2}}
 	ball.SpaceComponent = engo.SpaceComponent{
 		Position: engo.Point{(engo.Width() - ballTexture.Width()) / 2, (engo.Height() - ballTexture.Height()) / 2},
 		Width:    ballTexture.Width() * ball.RenderComponent.Scale.X,
@@ -84,7 +84,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	}
 
 	score := Score{BasicEntity: ecs.NewBasic()}
-	score.RenderComponent = engo.NewRenderComponent(basicFont.Render(" "), engo.Point{1, 1})
+	score.RenderComponent = engo.RenderComponent{Drawable: basicFont.Render(" ")}
 	score.SpaceComponent = engo.SpaceComponent{
 		Position: engo.Point{100, 100},
 		Width:    100,
@@ -106,7 +106,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 
 	for i := 0; i < 2; i++ {
 		paddle := Paddle{BasicEntity: ecs.NewBasic()}
-		paddle.RenderComponent = engo.NewRenderComponent(paddleTexture, engo.Point{2, 2})
+		paddle.RenderComponent = engo.RenderComponent{Drawable: paddleTexture, Scale: engo.Point{2, 2}}
 
 		x := float32(0)
 		if i != 0 {
@@ -366,7 +366,7 @@ func (s *ScoreSystem) Update(dt float32) {
 			s.upToDate = true
 			s.scoreLock.RUnlock()
 
-			e.RenderComponent.SetDrawable(basicFont.Render(label))
+			e.RenderComponent.Drawable = basicFont.Render(label)
 			width := len(label) * 20
 
 			e.SpaceComponent.Position.X = float32(400 - (width / 2))

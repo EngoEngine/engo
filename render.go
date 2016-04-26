@@ -29,9 +29,9 @@ type Drawable interface {
 type RenderComponent struct {
 	// Hidden is used to prevent drawing by OpenGL
 	Hidden bool
-	// Scale is the scale at which to render, in the X and Y axis
+	// Scale is the scale at which to render, in the X and Y axis. Not defining Scale, will default to Point{1, 1}
 	Scale Point
-	// Color is not tested at the moment - TODO: make sure it works, and document what it does
+	// Color defines how much of the color-components of the texture get used
 	Color color.Color
 	// Drawable refers to the Texture that should be drawn
 	Drawable Drawable
@@ -41,16 +41,6 @@ type RenderComponent struct {
 
 	buffer        *gl.Buffer
 	bufferContent []float32
-}
-
-func NewRenderComponent(d Drawable, scale Point) RenderComponent {
-	rc := RenderComponent{
-		Color:    color.White,
-		Scale:    scale,
-		Drawable: d,
-	}
-
-	return rc
 }
 
 func (r *RenderComponent) SetShader(s Shader) {
@@ -161,6 +151,16 @@ func (rs *RenderSystem) Update(dt float32) {
 			}
 			shader.Pre()
 			rs.currentShader = shader
+		}
+
+		// Setting default scale to 1
+		if e.RenderComponent.Scale.X == 0 && e.RenderComponent.Scale.Y == 0 {
+			e.RenderComponent.Scale = Point{1, 1}
+		}
+
+		// Setting default to white
+		if e.RenderComponent.Color == nil {
+			e.RenderComponent.Color = color.White
 		}
 
 		rs.currentShader.UpdateBuffer(e.RenderComponent)
