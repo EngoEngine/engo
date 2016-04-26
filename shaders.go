@@ -20,6 +20,7 @@ type basicShader struct {
 	program  *gl.Program
 
 	lastTexture *gl.Texture
+	lastBuffer  *gl.Buffer
 
 	inPosition  int
 	inTexCoords int
@@ -150,13 +151,17 @@ func (s *basicShader) Pre() {
 }
 
 func (s *basicShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, scaleX, scaleY, rotation float32) {
-	if s.lastTexture != texture {
-		Gl.BindTexture(Gl.TEXTURE_2D, texture)
+	if s.lastBuffer != buffer {
 		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)
-
 		Gl.VertexAttribPointer(s.inPosition, 2, Gl.FLOAT, false, 20, 0)
 		Gl.VertexAttribPointer(s.inTexCoords, 2, Gl.FLOAT, false, 20, 8)
 		Gl.VertexAttribPointer(s.inColor, 4, Gl.UNSIGNED_BYTE, true, 20, 16)
+
+		s.lastBuffer = buffer
+	}
+
+	if s.lastTexture != texture {
+		Gl.BindTexture(Gl.TEXTURE_2D, texture)
 
 		s.lastTexture = texture
 	}
@@ -185,6 +190,7 @@ func (s *basicShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, scaleX,
 
 func (s *basicShader) Post() {
 	s.lastTexture = nil
+	s.lastBuffer = nil
 }
 
 var (
