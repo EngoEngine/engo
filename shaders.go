@@ -23,6 +23,7 @@ type defaultShader struct {
 	projY float32
 
 	lastTexture *gl.Texture
+	lastBuffer  *gl.Buffer
 
 	inPosition   int
 	inTexCoords  int
@@ -127,13 +128,17 @@ func (s *defaultShader) Pre() {
 }
 
 func (s *defaultShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotation float32) {
-	if s.lastTexture != texture {
-		Gl.BindTexture(Gl.TEXTURE_2D, texture)
+	if s.lastBuffer != buffer {
 		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)
-
 		Gl.VertexAttribPointer(s.inPosition, 2, Gl.FLOAT, false, 20, 0)
 		Gl.VertexAttribPointer(s.inTexCoords, 2, Gl.FLOAT, false, 20, 8)
 		Gl.VertexAttribPointer(s.inColor, 4, Gl.UNSIGNED_BYTE, true, 20, 16)
+
+		s.lastBuffer = buffer
+	}
+
+	if s.lastTexture != texture {
+		Gl.BindTexture(Gl.TEXTURE_2D, texture)
 
 		s.lastTexture = texture
 	}
@@ -145,6 +150,7 @@ func (s *defaultShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotat
 
 func (s *defaultShader) Post() {
 	s.lastTexture = nil
+	s.lastBuffer = nil
 }
 
 func (s *defaultShader) SetProjection(width, height float32) {
@@ -161,6 +167,7 @@ type hudShader struct {
 	projY float32
 
 	lastTexture *gl.Texture
+	lastBuffer  *gl.Buffer
 
 	inPosition   int
 	inTexCoords  int
@@ -250,13 +257,17 @@ func (s *hudShader) Pre() {
 }
 
 func (s *hudShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotation float32) {
-	if s.lastTexture != texture {
-		Gl.BindTexture(Gl.TEXTURE_2D, texture)
+	if s.lastBuffer != buffer {
 		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)
-
 		Gl.VertexAttribPointer(s.inPosition, 2, Gl.FLOAT, false, 20, 0)
 		Gl.VertexAttribPointer(s.inTexCoords, 2, Gl.FLOAT, false, 20, 8)
 		Gl.VertexAttribPointer(s.inColor, 4, Gl.UNSIGNED_BYTE, true, 20, 16)
+
+		s.lastBuffer = buffer
+	}
+
+	if s.lastTexture != texture {
+		Gl.BindTexture(Gl.TEXTURE_2D, texture)
 
 		s.lastTexture = texture
 	}
@@ -267,6 +278,7 @@ func (s *hudShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, rotation 
 
 func (s *hudShader) Post() {
 	s.lastTexture = nil
+	s.lastBuffer = nil
 }
 
 func (s *hudShader) SetProjection(width, height float32) {
