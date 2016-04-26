@@ -27,6 +27,15 @@ type Drawable interface {
 	Close()
 }
 
+type TextureRepeating uint8
+
+const (
+	CLAMP_TO_EDGE TextureRepeating = iota
+	CLAMP_TO_BORDER
+	REPEAT
+	MIRRORED_REPEAT
+)
+
 type RenderComponent struct {
 	// Hidden is used to prevent drawing by OpenGL
 	Hidden bool
@@ -36,6 +45,8 @@ type RenderComponent struct {
 	Color color.Color
 	// Drawable refers to the Texture that should be drawn
 	Drawable Drawable
+	// Repeat defines how to repeat the Texture if the viewport of the texture is larger than the texture itself
+	Repeat TextureRepeating
 
 	shader Shader
 	zIndex float32

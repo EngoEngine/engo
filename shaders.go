@@ -22,8 +22,9 @@ type basicShader struct {
 	indexVBO *gl.Buffer
 	program  *gl.Program
 
-	lastTexture *gl.Texture
-	lastBuffer  *gl.Buffer
+	lastTexture   *gl.Texture
+	lastBuffer    *gl.Buffer
+	lastRepeating TextureRepeating
 
 	inPosition  int
 	inTexCoords int
@@ -170,6 +171,23 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		Gl.BindTexture(Gl.TEXTURE_2D, ren.Drawable.Texture())
 
 		s.lastTexture = ren.Drawable.Texture()
+	}
+
+	if s.lastRepeating != ren.Repeat {
+		var val int
+		switch ren.Repeat {
+		case CLAMP_TO_EDGE:
+			val = Gl.CLAMP_TO_EDGE
+		case CLAMP_TO_BORDER:
+			val = Gl.CLAMP_TO_EDGE
+		case REPEAT:
+			val = Gl.REPEAT
+		case MIRRORED_REPEAT:
+			val = Gl.MIRRORED_REPEAT
+		}
+
+		Gl.TexParameteri(Gl.TEXTURE_2D, Gl.TEXTURE_WRAP_S, val)
+		Gl.TexParameteri(Gl.TEXTURE_2D, Gl.TEXTURE_WRAP_T, val)
 	}
 
 	if space.Rotation != 0 {
