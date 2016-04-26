@@ -7,7 +7,6 @@ import (
 
 	"engo.io/ecs"
 	"github.com/go-gl/mathgl/mgl32"
-	"honnef.co/go/js/dom"
 )
 
 var (
@@ -271,10 +270,8 @@ func (*EdgeScroller) Remove(ecs.BasicEntity) {}
 
 // TODO: Warning doesn't get the cursor position
 func (c *EdgeScroller) Update(dt float32) {
-	curX, curY := 0.0, 0.0
-	maxX := dom.GetWindow().InnerHeight()
-	maxY := dom.GetWindow().InnerWidth()
-
+	curX, curY := CursorPos()
+	maxX, maxY := WindowSize()
 	if curX < c.EdgeMargin {
 		Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: -c.ScrollSpeed * dt, Incremental: true})
 	} else if curX > float64(maxX)-c.EdgeMargin {

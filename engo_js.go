@@ -116,6 +116,16 @@ func Height() float32 {
 	return gameHeight
 }
 
+func CursorPos() (x, y float64) {
+	return 0.0, 0.0
+}
+
+func WindowSize() (w, h float64) {
+	w = float64(WindowWidth())
+	h = float64(WindowHeight())
+	return
+}
+
 func WindowWidth() float32 {
 	return float32(dom.GetWindow().InnerWidth())
 }
@@ -289,6 +299,10 @@ func loadFont(r Resource) (*truetype.Font, error) {
 
 type ImageObject struct {
 	data *js.Object
+}
+
+func NewImageObject(img *js.Object) *ImageObject {
+	return &ImageObject{img}
 }
 
 func (i *ImageObject) Data() interface{} {

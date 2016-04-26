@@ -266,6 +266,10 @@ func Height() float32 {
 	return gameHeight
 }
 
+func WindowSize() (w, h, float32) {
+	return window.GetSize()
+}
+
 func WindowWidth() float32 {
 	return windowWidth
 }
