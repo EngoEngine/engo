@@ -7,7 +7,6 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/gl"
-	"github.com/luxengine/math"
 )
 
 const (
@@ -30,45 +29,28 @@ type Drawable interface {
 type RenderComponent struct {
 	// Hidden is used to prevent drawing by OpenGL
 	Hidden bool
+	// Scale is the scale at which to render, in the X and Y axis
+	Scale Point
+	// Color is not tested at the moment - TODO: make sure it works, and document what it does
+	Color color.Color
+	// Drawable refers to the Texture that should be drawn
+	Drawable Drawable
 
-	// transparency is the level of transparency that is used to draw the texture
-	transparency float32
-
-	Scale  Point
-	Color  color.Color
 	shader Shader
 	zIndex float32
 
-	drawable      Drawable
 	buffer        *gl.Buffer
 	bufferContent []float32
 }
 
 func NewRenderComponent(d Drawable, scale Point) RenderComponent {
 	rc := RenderComponent{
-		transparency: 1,
-		Color:        color.White,
-		Scale:        scale,
+		Color:    color.White,
+		Scale:    scale,
+		Drawable: d,
 	}
-	rc.SetDrawable(d)
 
 	return rc
-}
-
-func (r *RenderComponent) SetTransparency(t float32) {
-	r.transparency = t
-	// regen buffer content as we just changed transparency for the whole
-	// sprite
-	r.generateBufferContent()
-}
-
-func (r *RenderComponent) SetDrawable(d Drawable) {
-	r.drawable = d
-	r.preloadTexture()
-}
-
-func (r *RenderComponent) Drawable() Drawable {
-	return r.drawable
 }
 
 func (r *RenderComponent) SetShader(s Shader) {
@@ -79,39 +61,6 @@ func (r *RenderComponent) SetShader(s Shader) {
 func (r *RenderComponent) SetZIndex(index float32) {
 	r.zIndex = index
 	Mailbox.Dispatch(&renderChangeMessage{})
-}
-
-// Init is called to initialize the RenderElement
-func (ren *RenderComponent) preloadTexture() {
-	if ren.drawable == nil || headless {
-		return
-	}
-
-	ren.bufferContent = ren.generateBufferContent()
-
-	ren.buffer = Gl.CreateBuffer()
-	Gl.BindBuffer(Gl.ARRAY_BUFFER, ren.buffer)
-	Gl.BufferData(Gl.ARRAY_BUFFER, ren.bufferContent, Gl.STATIC_DRAW)
-}
-
-// generateBufferContent computes information about the 4 vertices needed to draw the texture, which should
-// be stored in the buffer
-func (ren *RenderComponent) generateBufferContent() []float32 {
-	w := ren.drawable.Width()
-	h := ren.drawable.Height()
-
-	colorR, colorG, colorB, _ := ren.Color.RGBA()
-
-	red := colorR
-	green := colorG << 8
-	blue := colorB << 16
-	alpha := uint32(ren.transparency*255.0) << 24
-
-	tint := math.Float32frombits((alpha | blue | green | red) & 0xfeffffff)
-
-	u, v, u2, v2 := ren.drawable.View()
-
-	return []float32{0, 0, u, v, tint, w, 0, u2, v, tint, w, h, u2, v2, tint, 0, h, u, v2, tint}
 }
 
 type renderEntity struct {
@@ -214,7 +163,9 @@ func (rs *RenderSystem) Update(dt float32) {
 			rs.currentShader = shader
 		}
 
-		rs.currentShader.Draw(e.RenderComponent.drawable.Texture(), e.RenderComponent.buffer,
+		rs.currentShader.UpdateBuffer(e.RenderComponent)
+
+		rs.currentShader.Draw(e.RenderComponent.Drawable.Texture(), e.RenderComponent.buffer,
 			e.SpaceComponent.Position.X, e.SpaceComponent.Position.Y,
 			e.RenderComponent.Scale.X, e.RenderComponent.Scale.Y,
 			e.SpaceComponent.Rotation)

@@ -12,6 +12,8 @@ type Shader interface {
 	Pre()
 	Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, scaleX, scaleY, rotation float32)
 	Post()
+
+	UpdateBuffer(*RenderComponent)
 }
 
 type basicShader struct {
@@ -191,6 +193,74 @@ func (s *basicShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, scaleX,
 func (s *basicShader) Post() {
 	s.lastTexture = nil
 	s.lastBuffer = nil
+}
+
+func (s *basicShader) UpdateBuffer(ren *RenderComponent) {
+	if len(ren.bufferContent) == 0 {
+		ren.bufferContent = make([]float32, 20) // because we add 20 elements to it
+	}
+
+	// TODO: very inefficient in terms of performance
+	if changed := s.generateBufferContent(ren, ren.bufferContent); !changed {
+		return
+	}
+
+	if ren.buffer == nil {
+		ren.buffer = Gl.CreateBuffer()
+	}
+	Gl.BindBuffer(Gl.ARRAY_BUFFER, ren.buffer)
+	Gl.BufferData(Gl.ARRAY_BUFFER, ren.bufferContent, Gl.DYNAMIC_DRAW)
+}
+
+func (s *basicShader) generateBufferContent(ren *RenderComponent, buffer []float32) bool {
+	w := ren.Drawable.Width()
+	h := ren.Drawable.Height()
+
+	colorR, colorG, colorB, colorA := ren.Color.RGBA()
+
+	red := colorR
+	green := colorG << 8
+	blue := colorB << 16
+	alpha := colorA << 24
+
+	tint := math.Float32frombits((alpha | blue | green | red) & 0xfeffffff)
+
+	u, v, u2, v2 := ren.Drawable.View()
+
+	var changed bool
+
+	//setValue(buffer, 0, 0, &changed)
+	//setValue(buffer, 1, 0, &changed)
+	setBufferValue(buffer, 2, u, &changed)
+	setBufferValue(buffer, 3, v, &changed)
+	setBufferValue(buffer, 4, tint, &changed)
+
+	setBufferValue(buffer, 5, w, &changed)
+	//setValue(buffer, 6, 0, &changed)
+	setBufferValue(buffer, 7, u2, &changed)
+	setBufferValue(buffer, 8, v, &changed)
+	setBufferValue(buffer, 9, tint, &changed)
+
+	setBufferValue(buffer, 10, w, &changed)
+	setBufferValue(buffer, 11, h, &changed)
+	setBufferValue(buffer, 12, u2, &changed)
+	setBufferValue(buffer, 13, v2, &changed)
+	setBufferValue(buffer, 14, tint, &changed)
+
+	//setValue(buffer, 15, 0, &changed)
+	setBufferValue(buffer, 16, h, &changed)
+	setBufferValue(buffer, 17, u, &changed)
+	setBufferValue(buffer, 18, v2, &changed)
+	setBufferValue(buffer, 19, tint, &changed)
+
+	return changed
+}
+
+func setBufferValue(buffer []float32, index int, value float32, changed *bool) {
+	if buffer[index] != value {
+		buffer[index] = value
+		*changed = true
+	}
 }
 
 var (
