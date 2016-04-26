@@ -49,7 +49,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	w.AddSystem(&engo.CollisionSystem{})
 	w.AddSystem(&SpeedSystem{})
 	w.AddSystem(&ControlSystem{})
-	w.AddSystem(&BallSystem{})
+	w.AddSystem(&BounceSystem{})
 	w.AddSystem(&ScoreSystem{})
 
 	basicFont = (&engo.Font{URL: "Roboto-Regular.ttf", Size: 32, FG: color.NRGBA{255, 255, 255, 255}})
@@ -78,7 +78,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 			sys.Add(&ball.BasicEntity, &ball.CollisionComponent, &ball.SpaceComponent)
 		case *SpeedSystem:
 			sys.Add(&ball.BasicEntity, &ball.SpeedComponent, &ball.SpaceComponent)
-		case *BallSystem:
+		case *BounceSystem:
 			sys.Add(&ball.BasicEntity, &ball.SpeedComponent, &ball.SpaceComponent)
 		}
 	}
@@ -192,21 +192,21 @@ func (s *SpeedSystem) Update(dt float32) {
 	}
 }
 
-type ballEntity struct {
+type bounceEntity struct {
 	*ecs.BasicEntity
 	*SpeedComponent
 	*engo.SpaceComponent
 }
 
-type BallSystem struct {
-	entities []ballEntity
+type BounceSystem struct {
+	entities []bounceEntity
 }
 
-func (b *BallSystem) Add(basic *ecs.BasicEntity, speed *SpeedComponent, space *engo.SpaceComponent) {
-	b.entities = append(b.entities, ballEntity{basic, speed, space})
+func (b *BounceSystem) Add(basic *ecs.BasicEntity, speed *SpeedComponent, space *engo.SpaceComponent) {
+	b.entities = append(b.entities, bounceEntity{basic, speed, space})
 }
 
-func (b *BallSystem) Remove(basic ecs.BasicEntity) {
+func (b *BounceSystem) Remove(basic ecs.BasicEntity) {
 	delete := -1
 	for index, e := range b.entities {
 		if e.BasicEntity.ID() == basic.ID() {
@@ -219,7 +219,7 @@ func (b *BallSystem) Remove(basic ecs.BasicEntity) {
 	}
 }
 
-func (b *BallSystem) Update(dt float32) {
+func (b *BounceSystem) Update(dt float32) {
 	for _, e := range b.entities {
 		if e.SpaceComponent.Position.X < 0 {
 			engo.Mailbox.Dispatch(ScoreMessage{1})
