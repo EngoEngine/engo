@@ -10,10 +10,11 @@ const bufferSize = 10000
 type Shader interface {
 	Initialize()
 	Pre()
-	Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, scaleX, scaleY, rotation float32)
+	Draw(*RenderComponent, *SpaceComponent)
+	//Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, scaleX, scaleY, rotation float32)
 	Post()
 
-	UpdateBuffer(*RenderComponent)
+	//UpdateBuffer(*RenderComponent)
 }
 
 type basicShader struct {
@@ -152,38 +153,41 @@ func (s *basicShader) Pre() {
 	Gl.UniformMatrix3fv(s.matrixView, false, s.viewMatrix)
 }
 
-func (s *basicShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, scaleX, scaleY, rotation float32) {
-	if s.lastBuffer != buffer {
-		Gl.BindBuffer(Gl.ARRAY_BUFFER, buffer)
+//func (s *basicShader) Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, scaleX, scaleY, rotation float32) {
+func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
+	if s.lastBuffer != ren.buffer || ren.buffer == nil {
+		s.updateBuffer(ren)
+
+		Gl.BindBuffer(Gl.ARRAY_BUFFER, ren.buffer)
 		Gl.VertexAttribPointer(s.inPosition, 2, Gl.FLOAT, false, 20, 0)
 		Gl.VertexAttribPointer(s.inTexCoords, 2, Gl.FLOAT, false, 20, 8)
 		Gl.VertexAttribPointer(s.inColor, 4, Gl.UNSIGNED_BYTE, true, 20, 16)
 
-		s.lastBuffer = buffer
+		s.lastBuffer = ren.buffer
 	}
 
-	if s.lastTexture != texture {
-		Gl.BindTexture(Gl.TEXTURE_2D, texture)
+	if s.lastTexture != ren.Drawable.Texture() {
+		Gl.BindTexture(Gl.TEXTURE_2D, ren.Drawable.Texture())
 
-		s.lastTexture = texture
+		s.lastTexture = ren.Drawable.Texture()
 	}
 
-	if rotation != 0 {
-		sin, cos := math.Sincos(rotation * math.Pi / 180)
+	if space.Rotation != 0 {
+		sin, cos := math.Sincos(space.Rotation * math.Pi / 180)
 
-		s.modelMatrix[0] = scaleX * cos
-		s.modelMatrix[1] = scaleX * sin
-		s.modelMatrix[3] = scaleY * -sin
-		s.modelMatrix[4] = scaleY * cos
+		s.modelMatrix[0] = ren.Scale.X * cos
+		s.modelMatrix[1] = ren.Scale.X * sin
+		s.modelMatrix[3] = ren.Scale.Y * -sin
+		s.modelMatrix[4] = ren.Scale.Y * cos
 	} else {
-		s.modelMatrix[0] = scaleX
+		s.modelMatrix[0] = ren.Scale.X
 		s.modelMatrix[1] = 0
 		s.modelMatrix[3] = 0
-		s.modelMatrix[4] = scaleY
+		s.modelMatrix[4] = ren.Scale.Y
 	}
 
-	s.modelMatrix[6] = x
-	s.modelMatrix[7] = y
+	s.modelMatrix[6] = space.Position.X
+	s.modelMatrix[7] = space.Position.Y
 
 	Gl.UniformMatrix3fv(s.matrixModel, false, s.modelMatrix)
 
@@ -195,12 +199,11 @@ func (s *basicShader) Post() {
 	s.lastBuffer = nil
 }
 
-func (s *basicShader) UpdateBuffer(ren *RenderComponent) {
+func (s *basicShader) updateBuffer(ren *RenderComponent) {
 	if len(ren.bufferContent) == 0 {
 		ren.bufferContent = make([]float32, 20) // because we add 20 elements to it
 	}
 
-	// TODO: very inefficient in terms of performance
 	if changed := s.generateBufferContent(ren, ren.bufferContent); !changed {
 		return
 	}
@@ -209,7 +212,7 @@ func (s *basicShader) UpdateBuffer(ren *RenderComponent) {
 		ren.buffer = Gl.CreateBuffer()
 	}
 	Gl.BindBuffer(Gl.ARRAY_BUFFER, ren.buffer)
-	Gl.BufferData(Gl.ARRAY_BUFFER, ren.bufferContent, Gl.DYNAMIC_DRAW)
+	Gl.BufferData(Gl.ARRAY_BUFFER, ren.bufferContent, Gl.STATIC_DRAW)
 }
 
 func (s *basicShader) generateBufferContent(ren *RenderComponent, buffer []float32) bool {

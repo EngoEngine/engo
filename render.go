@@ -164,12 +164,7 @@ func (rs *RenderSystem) Update(dt float32) {
 			e.RenderComponent.Color = color.White
 		}
 
-		rs.currentShader.UpdateBuffer(e.RenderComponent)
-
-		rs.currentShader.Draw(e.RenderComponent.Drawable.Texture(), e.RenderComponent.buffer,
-			e.SpaceComponent.Position.X, e.SpaceComponent.Position.Y,
-			e.RenderComponent.Scale.X, e.RenderComponent.Scale.Y,
-			e.SpaceComponent.Rotation)
+		rs.currentShader.Draw(e.RenderComponent, e.SpaceComponent)
 	}
 
 	if rs.currentShader != nil {
