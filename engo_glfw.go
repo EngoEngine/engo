@@ -168,10 +168,6 @@ func SetTitle(title string) {
 	}
 }
 
-func runHeadless(defaultScene Scene) {
-	runLoop(defaultScene, true)
-}
-
 // RunIteration runs one iteration / frame
 func RunIteration() {
 	// First check for new keypresses

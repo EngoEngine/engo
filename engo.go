@@ -92,3 +92,7 @@ func SetFPSLimit(limit int) error {
 	resetLoopTicker <- true
 	return nil
 }
+
+func runHeadless(defaultScene Scene) {
+	runLoop(defaultScene, true)
+}

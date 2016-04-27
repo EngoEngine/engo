@@ -204,10 +204,6 @@ func RunPreparation() {
 	})
 }
 
-func runHeadless(defaultScene Scene) {
-	runLoop(defaultScene, true)
-}
-
 func runLoop(defaultScene Scene, headless bool) {
 	SetScene(defaultScene, false)
 	RunPreparation()
