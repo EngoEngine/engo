@@ -240,7 +240,7 @@ Outer:
 		select {
 		case <-ticker.C:
 			RunIteration()
-			if close {
+			if closeGame {
 				break Outer
 			}
 			if !headless && window.ShouldClose() {
@@ -279,7 +279,7 @@ func WindowHeight() float32 {
 }
 
 func Exit() {
-	close = true
+	closeGame = true
 }
 
 func SetCursor(c *glfw.Cursor) {

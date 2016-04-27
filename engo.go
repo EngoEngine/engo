@@ -9,7 +9,7 @@ import (
 var (
 	Time               *Clock
 	Files              *Loader
-	close              bool
+	closeGame          bool
 	defaultCloseAction bool
 	WorldBounds        AABB
 

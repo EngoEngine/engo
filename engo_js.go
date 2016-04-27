@@ -212,7 +212,7 @@ Outer:
 	for {
 		select {
 		case <-ticker.C:
-			if close {
+			if closeGame {
 				break Outer
 			}
 			RunIteration()
