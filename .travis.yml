@@ -8,3 +8,6 @@ before_install:
 go_import_path: engo.io/engo
 go:
 - 1.6.2
+script:
+    - go test -v ./..
+    - go build -v ./...
