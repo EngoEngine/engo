@@ -9,8 +9,10 @@ import (
 
 type DefaultScene struct{}
 
-func (*DefaultScene) Preload()           {}
-func (*DefaultScene) Setup(w *ecs.World) {}
+func (*DefaultScene) Preload() {}
+func (*DefaultScene) Setup(w *ecs.World) {
+	w.AddSystem(&engo.RenderSystem{})
+}
 
 func (*DefaultScene) Exit() {
 	log.Println("Exit event called; we can do whatever we want now")
