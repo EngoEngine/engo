@@ -36,10 +36,6 @@ func (cam *cameraSystem) New(*ecs.World) {
 	cam.y = WorldBounds.Max.Y / 2
 	cam.z = 1
 
-	// TODO : remove
-	cam.x = 0
-	cam.y = 0
-
 	cam.longTasks = make(map[CameraAxis]*CameraMessage)
 
 	Mailbox.Listen("CameraMessage", func(msg Message) {

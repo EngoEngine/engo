@@ -92,20 +92,15 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		Height:   100,
 	}
 
-	// Removed for the sake of testing gopherjs
-	//score.RenderComponent = engo.NewRenderComponent(basicFont.Render(" "), engo.Point{1, 1})
-
 	// Add our entity to the appropriate systems
-
-	//Removed for testing gopherjs and ensuring the demo runs on the desktop
-	// for _, system := range w.Systems() {
-	// 	switch sys := system.(type) {
-	// 	case *engo.RenderSystem:
-	// 		sys.Add(&score.BasicEntity, &score.RenderComponent, &score.SpaceComponent)
-	// 	case *ScoreSystem:
-	// 		sys.Add(&score.BasicEntity, &score.RenderComponent, &score.SpaceComponent)
-	// 	}
-	// }
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *engo.RenderSystem:
+			sys.Add(&score.BasicEntity, &score.RenderComponent, &score.SpaceComponent)
+		case *ScoreSystem:
+			sys.Add(&score.BasicEntity, &score.RenderComponent, &score.SpaceComponent)
+		}
+	}
 
 	schemes := []string{"WASD", ""}
 	paddleTexture := engo.Files.Image("paddle.png")
