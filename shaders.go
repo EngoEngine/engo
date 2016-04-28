@@ -35,8 +35,6 @@ type defaultShader struct {
 
 func (s *defaultShader) Initialize(width, height float32) {
 	s.program = LoadShader(`
-#version 120
-
 attribute vec2 in_Position;
 attribute vec2 in_TexCoords;
 attribute vec4 in_Color;
@@ -56,8 +54,8 @@ void main() {
   					 (in_Position.y + uf_Position.y - uf_Camera.y)/ -uf_Projection.y,
   					 0.0, uf_Camera.z);
 
-}`, `
-/* Fragment Shader */
+}
+`, `
 #ifdef GL_ES
 #define LOWP lowp
 precision mediump float;
@@ -178,8 +176,6 @@ type hudShader struct {
 
 func (s *hudShader) Initialize(width, height float32) {
 	s.program = LoadShader(`
-#version 120
-
 attribute vec2 in_Position;
 attribute vec2 in_TexCoords;
 attribute vec4 in_Color;
@@ -195,8 +191,8 @@ void main() {
   var_TexCoords = in_TexCoords;
 
   gl_Position = vec4((in_Position.x + uf_Position.x)/  uf_Projection.x - 1.0,
-  					 (in_Position.y + uf_Position.y)/ -uf_Projection.y + 1.0,
-  					 0.0, 1.0);
+   					 (in_Position.y + uf_Position.y)/ -uf_Projection.y + 1.0,
+   					 0.0, 1.0);
 
 }`, `
 #ifdef GL_ES
