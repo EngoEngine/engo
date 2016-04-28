@@ -120,9 +120,9 @@ func CursorPos() (x, y float64) {
 	return 0.0, 0.0
 }
 
-func WindowSize() (w, h float64) {
-	w = float64(WindowWidth())
-	h = float64(WindowHeight())
+func WindowSize() (w, h int) {
+	w = int(WindowWidth())
+	h = int(WindowHeight())
 	return
 }
 
