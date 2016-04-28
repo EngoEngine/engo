@@ -2,17 +2,16 @@ package engo // import "engo.io/engo"
 
 import (
 	"fmt"
-	"image/color"
 
 	"engo.io/ecs"
-	"engo.io/gl"
 )
 
 var (
-	Time        *Clock
-	Files       *Loader
-	Gl          *gl.Context
-	WorldBounds AABB
+	Time               *Clock
+	Files              *Loader
+	closeGame          bool
+	defaultCloseAction bool
+	WorldBounds        AABB
 
 	currentWorld *ecs.World
 	currentScene Scene
@@ -77,14 +76,6 @@ func Run(opts RunOptions, defaultScene Scene) {
 	}
 }
 
-func SetBackground(c color.Color) {
-	if !headless {
-		r, g, b, a := c.RGBA()
-
-		Gl.ClearColor(float32(r), float32(g), float32(b), float32(a))
-	}
-}
-
 func SetScaleOnResize(b bool) {
 	scaleOnResize = b
 }
@@ -100,4 +91,8 @@ func SetFPSLimit(limit int) error {
 	fpsLimit = limit
 	resetLoopTicker <- true
 	return nil
+}
+
+func runHeadless(defaultScene Scene) {
+	runLoop(defaultScene, true)
 }

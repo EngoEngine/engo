@@ -11,10 +11,7 @@ type Shader interface {
 	Initialize()
 	Pre()
 	Draw(*RenderComponent, *SpaceComponent)
-	//Draw(texture *gl.Texture, buffer *gl.Buffer, x, y, scaleX, scaleY, rotation float32)
 	Post()
-
-	//UpdateBuffer(*RenderComponent)
 }
 
 type basicShader struct {
@@ -43,8 +40,6 @@ type basicShader struct {
 
 func (s *basicShader) Initialize() {
 	s.program = LoadShader(`
-#version 120
-
 attribute vec2 in_Position;
 attribute vec2 in_TexCoords;
 attribute vec4 in_Color;
@@ -64,7 +59,6 @@ void main() {
   gl_Position = vec4(matr.xy, 0, matr.z);
 }
 `, `
-/* Fragment Shader */
 #ifdef GL_ES
 #define LOWP lowp
 precision mediump float;

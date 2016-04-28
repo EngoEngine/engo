@@ -4,6 +4,7 @@ package engo
 
 import (
 	"image"
+	"image/color"
 	"image/draw"
 	_ "image/png"
 	"io"
@@ -23,15 +24,14 @@ import (
 
 var (
 	window *glfw.Window
+	Gl     *gl.Context
 
-	Arrow              *glfw.Cursor
-	IBeam              *glfw.Cursor
-	Crosshair          *glfw.Cursor
-	Hand               *glfw.Cursor
-	HResize            *glfw.Cursor
-	VResize            *glfw.Cursor
-	defaultCloseAction bool
-	close              bool
+	Arrow     *glfw.Cursor
+	IBeam     *glfw.Cursor
+	Crosshair *glfw.Cursor
+	Hand      *glfw.Cursor
+	HResize   *glfw.Cursor
+	VResize   *glfw.Cursor
 
 	headlessWidth             = 800
 	headlessHeight            = 800
@@ -168,10 +168,6 @@ func SetTitle(title string) {
 	}
 }
 
-func runHeadless(defaultScene Scene) {
-	runLoop(defaultScene, true)
-}
-
 // RunIteration runs one iteration / frame
 func RunIteration() {
 	// First check for new keypresses
@@ -193,6 +189,14 @@ func RunIteration() {
 	}
 
 	Time.Tick()
+}
+
+func SetBackground(c color.Color) {
+	if !headless {
+		r, g, b, a := c.RGBA()
+
+		Gl.ClearColor(float32(r), float32(g), float32(b), float32(a))
+	}
 }
 
 // RunPreparation is called only once, and is called automatically when calling Open
@@ -232,14 +236,14 @@ func runLoop(defaultScene Scene, headless bool) {
 	}()
 
 	RunPreparation(defaultScene)
-
 	ticker := time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
+
 Outer:
 	for {
 		select {
 		case <-ticker.C:
 			RunIteration()
-			if close {
+			if closeGame {
 				break Outer
 			}
 			if !headless && window.ShouldClose() {
@@ -261,6 +265,14 @@ func Height() float32 {
 	return gameHeight
 }
 
+func CursorPos() (x, y float64) {
+	return window.GetCursorPos()
+}
+
+func WindowSize() (w, h int) {
+	return window.GetSize()
+}
+
 func WindowWidth() float32 {
 	return windowWidth
 }
@@ -270,7 +282,7 @@ func WindowHeight() float32 {
 }
 
 func Exit() {
-	close = true
+	closeGame = true
 }
 
 func SetCursor(c *glfw.Cursor) {

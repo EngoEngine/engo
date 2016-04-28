@@ -298,10 +298,10 @@ type EdgeScroller struct {
 func (*EdgeScroller) Priority() int          { return 10 }
 func (*EdgeScroller) Remove(ecs.BasicEntity) {}
 
+// TODO: Warning doesn't get the cursor position
 func (c *EdgeScroller) Update(dt float32) {
-	curX, curY := window.GetCursorPos()
-	maxX, maxY := window.GetSize()
-
+	curX, curY := CursorPos()
+	maxX, maxY := WindowSize()
 	if curX < c.EdgeMargin {
 		Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: -c.ScrollSpeed * dt, Incremental: true})
 	} else if curX > float64(maxX)-c.EdgeMargin {
