@@ -10,6 +10,13 @@ import (
 	"github.com/luxengine/math"
 )
 
+const (
+	MouseRotatorPriority     = 100
+	MouseZoomerPriority      = 110
+	EdgeScrollerPriority     = 120
+	KeyboardScrollerPriority = 130
+)
+
 var (
 	MinZoom float32 = 0.25
 	MaxZoom float32 = 3
@@ -142,18 +149,22 @@ func (cam *cameraSystem) FollowEntity(basic *ecs.BasicEntity, space *SpaceCompon
 	cam.tracking = cameraEntity{basic, space}
 }
 
+// X returns the X-coordinate of the location of the Camera
 func (cam *cameraSystem) X() float32 {
 	return cam.x
 }
 
+// Y returns the Y-coordinate of the location of the Camera
 func (cam *cameraSystem) Y() float32 {
 	return cam.y
 }
 
+// Z returns the Z-coordinate of the location of the Camera
 func (cam *cameraSystem) Z() float32 {
 	return cam.z
 }
 
+// Angle returns the angle (in degrees) at which the Camera is rotated
 func (cam *cameraSystem) Angle() float32 {
 	return cam.angle
 }
@@ -230,7 +241,7 @@ type KeyboardScroller struct {
 	keysMu sync.RWMutex
 }
 
-func (*KeyboardScroller) Priority() int          { return 10 }
+func (*KeyboardScroller) Priority() int          { return KeyboardScrollerPriority }
 func (*KeyboardScroller) Remove(ecs.BasicEntity) {}
 
 func (c *KeyboardScroller) Update(dt float32) {
@@ -291,7 +302,7 @@ type EdgeScroller struct {
 	EdgeMargin  float64
 }
 
-func (*EdgeScroller) Priority() int          { return 10 }
+func (*EdgeScroller) Priority() int          { return EdgeScrollerPriority }
 func (*EdgeScroller) Remove(ecs.BasicEntity) {}
 
 // TODO: Warning doesn't get the cursor position
@@ -316,25 +327,26 @@ type MouseZoomer struct {
 	ZoomSpeed float32
 }
 
-func (*MouseZoomer) Priority() int          { return 10 }
+func (*MouseZoomer) Priority() int          { return MouseZoomerPriority }
 func (*MouseZoomer) Remove(ecs.BasicEntity) {}
 
 func (c *MouseZoomer) Update(float32) {
 	if Mouse.ScrollY != 0 {
-		// TODO: not sure if we have to use dt here, since we already use the "amount" of zooming
 		Mailbox.Dispatch(CameraMessage{Axis: ZAxis, Value: Mouse.ScrollY * c.ZoomSpeed, Incremental: true})
 	}
 }
 
 // MouseRotator is a System that allows for zooming when the scroll wheel is used
 type MouseRotator struct {
+	// RotationSpeed indicates the speed at which the rotation should happen. This is being used together with the
+	// movement by the mouse on the X-axis, to compute the actual rotation.
 	RotationSpeed float32
 
 	oldX    float32
 	pressed bool
 }
 
-func (*MouseRotator) Priority() int          { return 10 }
+func (*MouseRotator) Priority() int          { return MouseRotatorPriority }
 func (*MouseRotator) Remove(ecs.BasicEntity) {}
 
 func (c *MouseRotator) Update(float32) {

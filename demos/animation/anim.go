@@ -65,7 +65,10 @@ func (*DefaultScene) CreateEntity(point *engo.Point, spriteSheet *engo.Spriteshe
 		Width:    150,
 		Height:   150,
 	}
-	entity.RenderComponent = engo.RenderComponent{Drawable: spriteSheet.Cell(0), Scale: engo.Point{3, 3}}
+	entity.RenderComponent = engo.RenderComponent{
+		Drawable: spriteSheet.Cell(0),
+		Scale:    engo.Point{3, 3},
+	}
 	entity.AnimationComponent = engo.NewAnimationComponent(spriteSheet.Drawables(), 0.1)
 
 	entity.AnimationComponent.AddAnimations(actions)

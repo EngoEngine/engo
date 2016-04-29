@@ -28,6 +28,10 @@ func (sc *SpaceComponent) Center(p Point) {
 	sc.Position.Y = p.Y - yDelta
 }
 
+// AABB returns the minimum and maximum point for the given SpaceComponent. It hereby takes into account the
+// rotation of the Component - it may very well be that the Minimum as given by AABB, is smaller than the Position
+// of the object (i.e. when rotated). As this method takes into account the rotation, it should be used only when
+// required.
 func (sc SpaceComponent) AABB() AABB {
 	if sc.Rotation == 0 {
 		return AABB{
@@ -144,7 +148,6 @@ func (cs *CollisionSystem) Update(dt float32) {
 			}
 		}
 
-		// if no one collided reset to false
 		e1.CollisionComponent.Collides = collided
 	}
 }

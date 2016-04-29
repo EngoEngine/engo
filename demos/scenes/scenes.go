@@ -48,7 +48,10 @@ func (*IconScene) Setup(w *ecs.World) {
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	guy.RenderComponent = engo.RenderComponent{Drawable: texture, Scale: engo.Point{8, 8}}
+	guy.RenderComponent = engo.RenderComponent{
+		Drawable: texture,
+		Scale: engo.Point{8, 8},
+	}
 	guy.SpaceComponent = engo.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    texture.Width() * guy.RenderComponent.Scale.X,
@@ -97,7 +100,10 @@ func (game *RockScene) Setup(w *ecs.World) {
 	rock := Rock{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	rock.RenderComponent = engo.RenderComponent{Drawable: texture, Scale: engo.Point{8, 8}}
+	rock.RenderComponent = engo.RenderComponent{
+		Drawable: texture,
+		Scale: engo.Point{8, 8},
+	}
 	rock.SpaceComponent = engo.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    texture.Width() * rock.RenderComponent.Scale.X,

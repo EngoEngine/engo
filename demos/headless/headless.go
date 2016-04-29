@@ -60,13 +60,19 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	ballTexture := engo.Files.Image("ball.png")
 
 	ball := Ball{BasicEntity: ecs.NewBasic()}
-	ball.RenderComponent = engo.RenderComponent{Drawable: ballTexture, Scale: engo.Point{2, 2}}
+	ball.RenderComponent = engo.RenderComponent{
+		Drawable: ballTexture,
+		Scale:    engo.Point{2, 2},
+	}
 	ball.SpaceComponent = engo.SpaceComponent{
 		Position: engo.Point{(engo.Width() - ballTexture.Width()) / 2, (engo.Height() - ballTexture.Height()) / 2},
 		Width:    ballTexture.Width() * ball.RenderComponent.Scale.X,
 		Height:   ballTexture.Height() * ball.RenderComponent.Scale.Y,
 	}
-	ball.CollisionComponent = engo.CollisionComponent{Main: true, Solid: true}
+	ball.CollisionComponent = engo.CollisionComponent{
+		Main:  true,
+		Solid: true,
+	}
 	ball.SpeedComponent = SpeedComponent{Point: engo.Point{300, 1000}}
 
 	// Add our entity to the appropriate systems
@@ -106,7 +112,10 @@ func (pong *PongGame) Setup(w *ecs.World) {
 
 	for i := 0; i < 2; i++ {
 		paddle := Paddle{BasicEntity: ecs.NewBasic()}
-		paddle.RenderComponent = engo.RenderComponent{Drawable: paddleTexture, Scale: engo.Point{2, 2}}
+		paddle.RenderComponent = engo.RenderComponent{
+			Drawable: paddleTexture,
+			Scale:    engo.Point{2, 2},
+		}
 
 		x := float32(0)
 		if i != 0 {
@@ -119,7 +128,10 @@ func (pong *PongGame) Setup(w *ecs.World) {
 			Height:   paddle.RenderComponent.Scale.Y * paddleTexture.Height(),
 		}
 		paddle.ControlComponent = ControlComponent{schemes[i]}
-		paddle.CollisionComponent = engo.CollisionComponent{Main: false, Solid: true}
+		paddle.CollisionComponent = engo.CollisionComponent{
+			Main:  false,
+			Solid: true,
+		}
 
 		// Add our entity to the appropriate systems
 		for _, system := range w.Systems() {
