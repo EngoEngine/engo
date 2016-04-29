@@ -150,3 +150,25 @@ func (l *Line) LineIntersection(l2 Line) Point {
 
 	return Point{px, py}
 }
+
+// Returns the trace through the input line
+// 1 if no intersection 0 if origin lies on input line
+func (l *Line) LineTrace(l2 Line) float32 {
+	pt := l.LineIntersection(l2)
+	if pt.X == -1 && pt.Y == -1 {
+		return 1
+	}
+
+	traceMag := l.P1.PointDistance(pt)
+	lineMag := l.P1.PointDistance(l.P2)
+
+	if traceMag > lineMag {
+		return 1
+	}
+
+	if lineMag == 0 {
+		return 0
+	}
+
+	return  traceMag/lineMag
+}
