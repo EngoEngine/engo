@@ -62,7 +62,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	ball := Ball{BasicEntity: ecs.NewBasic()}
 	ball.RenderComponent = engo.NewRenderComponent(ballTexture, engo.Point{2, 2})
 	ball.SpaceComponent = engo.SpaceComponent{
-		Position: engo.Point{(engo.Width() - ballTexture.Width()) / 2, (engo.Height() - ballTexture.Height()) / 2},
+		Position: engo.Point{(engo.GameWidth() - ballTexture.Width()) / 2, (engo.GameHeight() - ballTexture.Height()) / 2},
 		Width:    ballTexture.Width() * ball.RenderComponent.Scale().X,
 		Height:   ballTexture.Height() * ball.RenderComponent.Scale().Y,
 	}

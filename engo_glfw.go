@@ -204,7 +204,7 @@ func RunPreparation(defaultScene Scene) {
 	Files = NewLoader()
 
 	// Default WorldBounds values
-	WorldBounds.Max = Point{Width(), Height()}
+	WorldBounds.Max = Point{GameWidth(), GameHeight()}
 
 	SetScene(defaultScene, false)
 }
