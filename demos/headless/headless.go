@@ -110,7 +110,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		}
 
 		paddle.SpaceComponent = engo.SpaceComponent{
-			Position: engo.Point{x, (engo.Height() - paddleTexture.Height()) / 2},
+			Position: engo.Point{x, (engo.GameHeight() - paddleTexture.Height()) / 2},
 			Width:    paddle.RenderComponent.Scale().X * paddleTexture.Width(),
 			Height:   paddle.RenderComponent.Scale().Y * paddleTexture.Height(),
 		}
