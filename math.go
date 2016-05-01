@@ -4,6 +4,12 @@ import (
 	"github.com/luxengine/math"
 )
 
+type Trace struct {
+	Fraction float32
+	Line
+	EndPosition Point
+}
+
 type Point struct {
 	X, Y float32
 }
@@ -12,6 +18,15 @@ func (p *Point) Set(x, y float32) {
 	p.X = x
 	p.Y = y
 
+}
+
+func (p *Point) Dot(other Point) float32 {
+	return p.X*other.X + p.Y*other.Y
+}
+
+// 2D cross product is magnitude of 3D cross product
+func (p *Point) Cross(other Point) float32 {
+	return p.X*other.Y - p.Y*other.X
 }
 
 func (p *Point) SetTo(v float32) {
@@ -47,6 +62,11 @@ func (p *Point) Subtract(p2 Point) {
 func (p *Point) Multiply(p2 Point) {
 	p.X *= p2.X
 	p.Y *= p2.Y
+}
+
+func (p *Point) Divide(p2 Point) {
+	p.X /= p2.X
+	p.Y /= p2.Y
 }
 
 func (p *Point) PointDistance(p2 Point) float32 {
@@ -128,32 +148,64 @@ func (l *Line) PointDistanceSquared(point Point) float32 {
 		(y0-(y1+t*(y2-y1)))*(y0-(y1+t*(y2-y1)))
 }
 
-// Returns the point where the two lines intersect
+// Returns the point where the two line *segments* intersect
 func (l *Line) LineIntersection(l2 Line) Point {
-	x1 := l.P1.X
-	x2 := l.P2.X
-	x3 := l2.P1.X
-	x4 := l2.P2.X
+	p := l.P1
+	q := l2.P1
 
-	y1 := l.P1.Y
-	y2 := l.P2.Y
-	y3 := l2.P1.Y
-	y4 := l2.P2.Y
+	r := l.P2
+	r.Subtract(p)
+	s := l2.P2
+	s.Subtract(q)
 
-	denom := ((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4))
-	if denom == 0 {
+	// t = (q − p) × s / (r × s)
+	// u = (q − p) × r / (r × s)
+	// So then we define
+	// qmp = (q - p)
+	// rcs = (r × s)
+	// and we get simply:
+	// t = qmp × s / rcs
+	// u = qmp × r / rcs
+	qmp := q
+	qmp.Subtract(p)
+	qmpcs := qmp.Cross(s)
+	qmpcr := qmp.Cross(r)
+	rcs := r.Cross(s)
+
+	// Collinear
+	if rcs == 0 && qmpcr == 0 {
 		return Point{-1, -1}
 	}
 
-	px := ((x1*y2-y1*x2)*(x3-x4) - (x1-x2)*(x3*y4-y3*x4)) / denom
-	py := ((x1*y2-y1*x2)*(y3-y4) - (y1-y2)*(x3*y4-y3*x4)) / denom
+	// Parallel
+	if rcs == 0 && qmpcr != 0 {
+		return Point{-1, -1}
+	}
 
-	return Point{px, py}
+	t := qmpcs / rcs
+	u := qmpcr / rcs
+	// rcs != 0 at this point
+	if t >= 0 && t <= 1 && u >= 0 && u <= 1 {
+		// the two line segments meet at the point p + t r = q + u s.
+		return Point{p.X + t*r.X, p.Y + t*r.Y}
+	}
+
+	return Point{-1, -1}
+}
+
+func (l *Line) Normal() Point {
+	dx := l.P2.X - l.P1.X
+	dy := l.P2.Y - l.P1.Y
+	inverse := Point{dy, -dx}
+	unit, _ := inverse.Normalize()
+
+	return unit
 }
 
 // Returns the trace through the input line
 // 1 if no intersection 0 if origin lies on input line
 func (l *Line) LineTrace(l2 Line) float32 {
+
 	pt := l.LineIntersection(l2)
 	if pt.X == -1 && pt.Y == -1 {
 		return 1
@@ -170,5 +222,21 @@ func (l *Line) LineTrace(l2 Line) float32 {
 		return 0
 	}
 
-	return  traceMag/lineMag
+	return traceMag / lineMag
+}
+
+//TODO
+func (l *Line) GetTrace(lines []*Line) Trace {
+	var t Trace
+
+	t.Fraction = l.LineTrace(*lines[0])
+	t.Line = *lines[0]
+
+	moveVector := l.P2
+	moveVector.Subtract(l.P1)
+	moveVector.MultiplyScalar(t.Fraction)
+	t.EndPosition = l.P1
+	t.EndPosition.Add(moveVector)
+
+	return t
 }
