@@ -220,7 +220,7 @@ func (rs *RenderSystem) New(w *ecs.World) {
 	rs.world = w
 
 	if !headless {
-		initShaders(Width(), Height())
+		initShaders(GameWidth(), GameHeight())
 	}
 
 	Mailbox.Listen("renderChangeMessage", func(Message) {

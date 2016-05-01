@@ -204,7 +204,7 @@ func RunPreparation(defaultScene Scene) {
 	Files = NewLoader()
 
 	// Default WorldBounds values
-	WorldBounds.Max = Point{Width(), Height()}
+	WorldBounds.Max = Point{GameWidth(), GameHeight()}
 
 	SetScene(defaultScene, false)
 }
@@ -254,11 +254,11 @@ Outer:
 	ticker.Stop()
 }
 
-func Width() float32 {
+func GameWidth() float32 {
 	return gameWidth
 }
 
-func Height() float32 {
+func GameHeight() float32 {
 	return gameHeight
 }
 
