@@ -254,11 +254,11 @@ Outer:
 	ticker.Stop()
 }
 
-func Width() float32 {
+func GameWidth() float32 {
 	return gameWidth
 }
 
-func Height() float32 {
+func GameHeight() float32 {
 	return gameHeight
 }
 
