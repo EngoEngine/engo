@@ -125,9 +125,9 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 	window.SetKeyCallback(func(window *glfw.Window, k glfw.Key, s int, a glfw.Action, m glfw.ModifierKey) {
 		key := Key(k)
 		if a == glfw.Press {
-			keyStates[key] = true
+			Input.keys.Set(key, true)
 		} else if a == glfw.Release {
-			keyStates[key] = false
+			Input.keys.Set(key, false)
 		}
 	})
 
@@ -172,8 +172,8 @@ func SetTitle(title string) {
 func RunIteration() {
 	// First check for new keypresses
 	if !headless {
+		Input.update()
 		glfw.PollEvents()
-		keysUpdate()
 	}
 
 	// Then update the world and all Systems
@@ -202,7 +202,6 @@ func SetBackground(c color.Color) {
 // RunPreparation is called only once, and is called automatically when calling Open
 // It is only here for benchmarking in combination with OpenHeadlessNoRun
 func RunPreparation(defaultScene Scene) {
-	keyStates = make(map[Key]bool)
 	Time = NewClock()
 	Files = NewLoader()
 

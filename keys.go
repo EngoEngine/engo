@@ -1,35 +1,64 @@
 package engo
 
-import (
-	"sync"
+import "sync"
+
+const (
+	KeyStateUp = iota
+	KeyStateDown
+	KeyStateJustDown
+	KeyStateJustUp
 )
 
-var (
-	KEY_STATE_UP        string = "up"
-	KEY_STATE_DOWN      string = "down"
-	KEY_STATE_JUST_DOWN string = "justdown"
-	KEY_STATE_JUST_UP   string = "justup"
+// NewKeyManager creates a new KeyManager.
+func NewKeyManager() *KeyManager {
+	return &KeyManager{
+		mapper: make(map[Key]KeyState),
+	}
+}
 
-	keyStates map[Key]bool
-
-	Keys KeyManager
-)
-
+// KeyManager tracks which keys are pressed and released at the current point of time.
 type KeyManager struct {
 	mapper map[Key]KeyState
 	mutex  sync.RWMutex
 }
 
+// Set is used for updating whether or not a key is held down, or not held down.
+func (km *KeyManager) Set(k Key, state bool) {
+	km.mutex.Lock()
+
+	ks := km.mapper[k]
+	ks.set(state)
+	km.mapper[k] = ks
+
+	km.mutex.Unlock()
+}
+
+// Get retrieves a keys state.
 func (km *KeyManager) Get(k Key) KeyState {
 	km.mutex.RLock()
 	defer km.mutex.RUnlock()
+
 	ks, ok := km.mapper[k]
 	if !ok {
 		return KeyState{false, false}
 	}
+
 	return ks
 }
 
+func (km *KeyManager) update() {
+	km.mutex.Lock()
+
+	// Set all keys to their current states
+	for key, state := range km.mapper {
+		state.set(state.currentState)
+		km.mapper[key] = state
+	}
+
+	km.mutex.Unlock()
+}
+
+// KeyState is used for detecting the state of a key press.
 type KeyState struct {
 	lastState    bool
 	currentState bool
@@ -40,47 +69,33 @@ func (key *KeyState) set(state bool) {
 	key.currentState = state
 }
 
-func (key *KeyState) State() string {
+// State returns the raw state of a key.
+func (key *KeyState) State() int {
 	if !key.lastState && key.currentState {
-		return KEY_STATE_JUST_DOWN
+		return KeyStateJustDown
 	} else if key.lastState && !key.currentState {
-		return KEY_STATE_JUST_UP
+		return KeyStateJustUp
 	} else if key.lastState && key.currentState {
-		return KEY_STATE_DOWN
+		return KeyStateDown
 	} else if !key.lastState && !key.currentState {
-		return KEY_STATE_UP
+		return KeyStateUp
 	}
 
-	return KEY_STATE_UP
+	return KeyStateUp
 }
 
 func (key KeyState) JustPressed() bool {
-	return key.State() == KEY_STATE_JUST_DOWN
+	return key.State() == KeyStateJustDown
 }
 
 func (key KeyState) JustReleased() bool {
-	return key.State() == KEY_STATE_JUST_UP
+	return key.State() == KeyStateJustUp
 }
 
 func (key KeyState) Up() bool {
-	return key.State() == KEY_STATE_UP
+	return key.State() == KeyStateUp
 }
 
 func (key KeyState) Down() bool {
-	return key.State() == KEY_STATE_DOWN
-}
-
-func keysUpdate() {
-	Keys.mutex.Lock()
-	for key, down := range keyStates {
-		ks := Keys.mapper[key]
-		ks.set(down)
-		Keys.mapper[key] = ks
-	}
-
-	Keys.mutex.Unlock()
-}
-
-func init() {
-	Keys.mapper = make(map[Key]KeyState)
+	return key.State() == KeyStateDown
 }

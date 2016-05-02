@@ -108,6 +108,28 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		}
 	}
 
+	engo.Input.RegisterAxis("wasd", engo.AxisKeyPair{engo.W, engo.S})
+	engo.Input.RegisterAxis("arrows", engo.AxisKeyPair{engo.ArrowUp, engo.ArrowDown})
+
+	schemes := []string{"wasd", "arrows"}
+
+	score.RenderComponent = engo.RenderComponent{Drawable: basicFont.Render(" ")}
+	score.SpaceComponent = engo.SpaceComponent{
+		Position: engo.Point{100, 100},
+		Width:    100,
+		Height:   100,
+	}
+
+	// Add our entity to the appropriate systems
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *engo.RenderSystem:
+			sys.Add(&score.BasicEntity, &score.RenderComponent, &score.SpaceComponent)
+		case *ScoreSystem:
+			sys.Add(&score.BasicEntity, &score.RenderComponent, &score.SpaceComponent)
+		}
+	}
+
 	schemes := []string{"WASD", ""}
 	paddleTexture := engo.Files.Image("paddle.png")
 
@@ -296,26 +318,15 @@ func (c *ControlSystem) Remove(basic ecs.BasicEntity) {
 
 func (c *ControlSystem) Update(dt float32) {
 	for _, e := range c.entities {
-		up := false
-		down := false
-		if e.ControlComponent.Scheme == "WASD" {
-			up = engo.Keys.Get(engo.W).Down()
-			down = engo.Keys.Get(engo.S).Down()
-		} else {
-			up = engo.Keys.Get(engo.ArrowUp).Down()
-			down = engo.Keys.Get(engo.ArrowDown).Down()
-		}
+		speed := 800 * dt
 
-		if up {
-			if e.SpaceComponent.Position.Y > 0 {
-				e.SpaceComponent.Position.Y -= 800 * dt
-			}
-		}
+		vert := engo.Input.Axis(e.ControlComponent.Scheme)
+		e.SpaceComponent.Position.Y += speed * vert.Value()
 
-		if down {
-			if (e.SpaceComponent.Height + e.SpaceComponent.Position.Y) < 800 {
-				e.SpaceComponent.Position.Y += 800 * dt
-			}
+		if (e.SpaceComponent.Height + e.SpaceComponent.Position.Y) > 800 {
+			e.SpaceComponent.Position.Y = 800
+		} else if e.SpaceComponent.Position.Y < 0 {
+			e.SpaceComponent.Position.Y = 0
 		}
 	}
 }
