@@ -1,7 +1,6 @@
 package engo
 
 import (
-	"log"
 	"sync"
 )
 
