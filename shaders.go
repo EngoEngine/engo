@@ -94,11 +94,6 @@ void main (void) {
 	s.inTexCoords = Gl.GetAttribLocation(s.program, "in_TexCoords")
 	s.inColor = Gl.GetAttribLocation(s.program, "in_Color")
 
-	// Enable those things
-	Gl.EnableVertexAttribArray(s.inPosition)
-	Gl.EnableVertexAttribArray(s.inTexCoords)
-	Gl.EnableVertexAttribArray(s.inColor)
-
 	// Define things that should be set per draw
 	s.matrixProjection = Gl.GetUniformLocation(s.program, "matrixProjection")
 	s.matrixView = Gl.GetUniformLocation(s.program, "matrixView")
@@ -122,7 +117,12 @@ void main (void) {
 }
 
 func (s *basicShader) Pre() {
+	// Enable shader and buffer, enable attributes in shader
 	Gl.UseProgram(s.program)
+	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, s.indexVBO)
+	Gl.EnableVertexAttribArray(s.inPosition)
+	Gl.EnableVertexAttribArray(s.inTexCoords)
+	Gl.EnableVertexAttribArray(s.inColor)
 
 	if scaleOnResize {
 		s.projectionMatrix[0] = 1 / (gameWidth / 2)
@@ -209,8 +209,11 @@ func (s *basicShader) Post() {
 	s.lastTexture = nil
 	s.lastBuffer = nil
 
-	// Unbind any textures
+	// Cleanup
 	Gl.BindTexture(Gl.TEXTURE_2D, nil)
+	Gl.DisableVertexAttribArray(s.inPosition)
+	Gl.DisableVertexAttribArray(s.inTexCoords)
+	Gl.DisableVertexAttribArray(s.inColor)
 }
 
 func (s *basicShader) updateBuffer(ren *RenderComponent) {
@@ -346,10 +349,6 @@ void main (void) {
 	l.inPosition = Gl.GetAttribLocation(l.program, "in_Position")
 	l.inColor = Gl.GetAttribLocation(l.program, "in_Color")
 
-	// Enable those things
-	Gl.EnableVertexAttribArray(l.inPosition)
-	Gl.EnableVertexAttribArray(l.inColor)
-
 	// Define things that should be set per draw
 	l.matrixProjection = Gl.GetUniformLocation(l.program, "matrixProjection")
 	l.matrixView = Gl.GetUniformLocation(l.program, "matrixView")
@@ -374,7 +373,11 @@ void main (void) {
 }
 
 func (l *legacyShader) Pre() {
+	// Bind shader and buffer, enable attributes
 	Gl.UseProgram(l.program)
+	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indexVBO)
+	Gl.EnableVertexAttribArray(l.inPosition)
+	Gl.EnableVertexAttribArray(l.inColor)
 
 	if scaleOnResize {
 		l.projectionMatrix[0] = 1 / (gameWidth / 2)
@@ -488,6 +491,10 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 
 func (l *legacyShader) Post() {
 	l.lastBuffer = nil
+
+	// Cleanup
+	Gl.DisableVertexAttribArray(l.inPosition)
+	Gl.DisableVertexAttribArray(l.inColor)
 }
 
 var (
@@ -499,8 +506,8 @@ var (
 
 func initShaders() {
 	if !shadersSet {
-		//DefaultShader.Initialize()
-		//HUDShader.Initialize()
+		DefaultShader.Initialize()
+		HUDShader.Initialize()
 		LegacyShader.Initialize()
 
 		shadersSet = true
