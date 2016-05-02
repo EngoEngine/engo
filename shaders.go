@@ -208,6 +208,9 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 func (s *basicShader) Post() {
 	s.lastTexture = nil
 	s.lastBuffer = nil
+
+	// Unbind any textures
+	Gl.BindTexture(Gl.TEXTURE_2D, nil)
 }
 
 func (s *basicShader) updateBuffer(ren *RenderComponent) {
@@ -231,6 +234,10 @@ func (s *basicShader) generateBufferContent(ren *RenderComponent, buffer []float
 	h := ren.Drawable.Height()
 
 	colorR, colorG, colorB, colorA := ren.Color.RGBA()
+	colorR >>= 8
+	colorG >>= 8
+	colorB >>= 8
+	colorA >>= 8
 
 	red := colorR
 	green := colorG << 8
@@ -280,6 +287,9 @@ func setBufferValue(buffer []float32, index int, value float32, changed *bool) {
 type legacyShader struct {
 	program *gl.Program
 
+	indices  []uint16
+	indexVBO *gl.Buffer
+
 	inPosition int
 	inColor    int
 
@@ -324,6 +334,13 @@ varying vec4 var_Color;
 void main (void) {
   gl_FragColor = var_Color;
 }`)
+
+	// Create and populate indices buffer
+	l.indices = []uint16{0, 1, 2}
+
+	l.indexVBO = Gl.CreateBuffer()
+	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indexVBO)
+	Gl.BufferData(Gl.ELEMENT_ARRAY_BUFFER, l.indices, Gl.STATIC_DRAW)
 
 	// Define things that should be read from the texture buffer
 	l.inPosition = Gl.GetAttribLocation(l.program, "in_Position")
@@ -404,6 +421,10 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 	h := space.Height
 
 	colorR, colorG, colorB, colorA := ren.Color.RGBA()
+	colorR >>= 8
+	colorG >>= 8
+	colorB >>= 8
+	colorA >>= 8
 
 	red := colorR
 	green := colorG << 8
@@ -435,7 +456,7 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 
 		Gl.BindBuffer(Gl.ARRAY_BUFFER, ren.buffer)
 		Gl.VertexAttribPointer(l.inPosition, 2, Gl.FLOAT, false, 12, 0)
-		Gl.VertexAttribPointer(l.inColor, 4, Gl.UNSIGNED_BYTE, false, 12, 8)
+		Gl.VertexAttribPointer(l.inColor, 4, Gl.UNSIGNED_BYTE, true, 12, 8)
 
 		l.lastBuffer = ren.buffer
 	}
@@ -478,8 +499,8 @@ var (
 
 func initShaders() {
 	if !shadersSet {
-		DefaultShader.Initialize()
-		HUDShader.Initialize()
+		//DefaultShader.Initialize()
+		//HUDShader.Initialize()
 		LegacyShader.Initialize()
 
 		shadersSet = true

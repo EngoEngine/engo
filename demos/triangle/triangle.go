@@ -27,7 +27,7 @@ func (*DefaultScene) Preload() {}
 
 // Setup is called before the main loop is started
 func (*DefaultScene) Setup(w *ecs.World) {
-	engo.SetBackground(color.RGBA{5, 5, 5, 255})
+	engo.SetBackground(color.RGBA{55, 55, 55, 255})
 	w.AddSystem(&engo.RenderSystem{})
 
 	// Adding KeyboardScroller so we can actually see the difference between background and HUD when scrolling
