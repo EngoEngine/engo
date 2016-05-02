@@ -195,6 +195,7 @@ func SetBackground(c color.Color) {
 	if !headless {
 		r, g, b, a := c.RGBA()
 
+		// TODO: doesnt seem to work the way it should
 		Gl.ClearColor(float32(r), float32(g), float32(b), float32(a))
 	}
 }
