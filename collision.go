@@ -15,6 +15,7 @@ type SpaceComponent struct {
 	Position Point
 	Width    float32
 	Height   float32
+	Rotation float32 // angle in degrees for the rotation to apply clockwise
 }
 
 // Center positions the space component according to its center instead of its
@@ -27,13 +28,51 @@ func (sc *SpaceComponent) Center(p Point) {
 	sc.Position.Y = p.Y - yDelta
 }
 
+// AABB returns the minimum and maximum point for the given SpaceComponent. It hereby takes into account the
+// rotation of the Component - it may very well be that the Minimum as given by AABB, is smaller than the Position
+// of the object (i.e. when rotated). As this method takes into account the rotation, it should be used only when
+// required.
 func (sc SpaceComponent) AABB() AABB {
-	return AABB{Min: sc.Position, Max: Point{sc.Position.X + sc.Width, sc.Position.Y + sc.Height}}
+	if sc.Rotation == 0 {
+		return AABB{
+			Min: sc.Position,
+			Max: Point{sc.Position.X + sc.Width, sc.Position.Y + sc.Height},
+		}
+	}
+
+	sin, cos := math.Sincos(sc.Rotation * math.Pi / 180)
+	xmin := sc.Position.X
+	xmax := sc.Position.X + sc.Width*cos - sc.Height*sin
+	ymin := sc.Position.Y
+	ymax := sc.Position.Y + sc.Height*cos + sc.Width*sin
+
+	var (
+		X_MIN, X_MAX, Y_MIN, Y_MAX float32
+	)
+
+	if xmin < xmax {
+		X_MIN = xmin
+		X_MAX = xmax
+	} else {
+		X_MIN = xmax
+		X_MAX = xmin
+	}
+
+	if ymin < ymax {
+		Y_MIN = ymin
+		Y_MAX = ymax
+	} else {
+		Y_MIN = ymax
+		Y_MAX = ymin
+	}
+
+	return AABB{Point{X_MIN, Y_MIN}, Point{X_MAX, Y_MAX}}
 }
 
 type CollisionComponent struct {
 	Solid, Main bool
 	Extra       Point
+	Collides    bool // Collides is true if the component is colliding with something during this pass
 }
 
 type CollisionMessage struct {
@@ -83,6 +122,8 @@ func (cs *CollisionSystem) Update(dt float32) {
 		entityAABB.Max.X += offset.X
 		entityAABB.Max.Y += offset.Y
 
+		var collided bool
+
 		for i2, e2 := range cs.entities {
 			if i1 == i2 {
 				continue // with other entities, because we won't collide with ourselves
@@ -102,9 +143,12 @@ func (cs *CollisionSystem) Update(dt float32) {
 					e1.SpaceComponent.Position.Y += mtd.Y
 				}
 
+				collided = true
 				Mailbox.Dispatch(CollisionMessage{Entity: e1, To: e2})
 			}
 		}
+
+		e1.CollisionComponent.Collides = collided
 	}
 }
 

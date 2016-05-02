@@ -121,7 +121,7 @@ func (a *AnimationSystem) Update(dt float32) {
 
 		e.AnimationComponent.change += dt
 		if e.AnimationComponent.change >= e.AnimationComponent.Rate {
-			e.RenderComponent.SetDrawable(e.AnimationComponent.Cell())
+			e.RenderComponent.Drawable = e.AnimationComponent.Cell()
 			e.AnimationComponent.NextFrame()
 		}
 	}

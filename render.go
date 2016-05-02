@@ -7,7 +7,6 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/gl"
-	"github.com/luxengine/math"
 )
 
 const (
@@ -25,52 +24,35 @@ type Drawable interface {
 	Width() float32
 	Height() float32
 	View() (float32, float32, float32, float32)
+	Close()
 }
+
+type TextureRepeating uint8
+
+const (
+	CLAMP_TO_EDGE TextureRepeating = iota
+	CLAMP_TO_BORDER
+	REPEAT
+	MIRRORED_REPEAT
+)
 
 type RenderComponent struct {
 	// Hidden is used to prevent drawing by OpenGL
 	Hidden bool
+	// Scale is the scale at which to render, in the X and Y axis. Not defining Scale, will default to Point{1, 1}
+	Scale Point
+	// Color defines how much of the color-components of the texture get used
+	Color color.Color
+	// Drawable refers to the Texture that should be drawn
+	Drawable Drawable
+	// Repeat defines how to repeat the Texture if the viewport of the texture is larger than the texture itself
+	Repeat TextureRepeating
 
-	// Transparency is the level of transparency that is used to draw the texture
-	Transparency float32
-
-	scale  Point
-	Color  color.Color
 	shader Shader
 	zIndex float32
 
-	drawable      Drawable
 	buffer        *gl.Buffer
 	bufferContent []float32
-}
-
-func NewRenderComponent(d Drawable, scale Point) RenderComponent {
-	rc := RenderComponent{
-		Transparency: 1,
-		Color:        color.White,
-		scale:        scale,
-	}
-	rc.SetDrawable(d)
-
-	return rc
-}
-
-func (r *RenderComponent) SetDrawable(d Drawable) {
-	r.drawable = d
-	r.preloadTexture()
-}
-
-func (r *RenderComponent) Drawable() Drawable {
-	return r.drawable
-}
-
-func (r *RenderComponent) SetScale(scale Point) {
-	r.scale = scale
-	r.preloadTexture()
-}
-
-func (r *RenderComponent) Scale() Point {
-	return r.scale
 }
 
 func (r *RenderComponent) SetShader(s Shader) {
@@ -81,103 +63,6 @@ func (r *RenderComponent) SetShader(s Shader) {
 func (r *RenderComponent) SetZIndex(index float32) {
 	r.zIndex = index
 	Mailbox.Dispatch(&renderChangeMessage{})
-}
-
-// Init is called to initialize the RenderElement
-func (ren *RenderComponent) preloadTexture() {
-	if ren.drawable == nil || headless {
-		return
-	}
-
-	ren.bufferContent = ren.generateBufferContent()
-
-	ren.buffer = Gl.CreateBuffer()
-	Gl.BindBuffer(Gl.ARRAY_BUFFER, ren.buffer)
-	Gl.BufferData(Gl.ARRAY_BUFFER, ren.bufferContent, Gl.STATIC_DRAW)
-}
-
-// generateBufferContent computes information about the 4 vertices needed to draw the texture, which should
-// be stored in the buffer
-func (ren *RenderComponent) generateBufferContent() []float32 {
-	scaleX := ren.scale.X
-	scaleY := ren.scale.Y
-	rotation := float32(0.0)
-	transparency := float32(1.0)
-	c := ren.Color
-
-	fx := float32(0)
-	fy := float32(0)
-	fx2 := ren.drawable.Width()
-	fy2 := ren.drawable.Height()
-
-	if scaleX != 1 || scaleY != 1 {
-		//fx *= scaleX
-		//fy *= scaleY
-		fx2 *= scaleX
-		fy2 *= scaleY
-	}
-
-	p1x := fx
-	p1y := fy
-	p2x := fx
-	p2y := fy2
-	p3x := fx2
-	p3y := fy2
-	p4x := fx2
-	p4y := fy
-
-	var x1 float32
-	var y1 float32
-	var x2 float32
-	var y2 float32
-	var x3 float32
-	var y3 float32
-	var x4 float32
-	var y4 float32
-
-	if rotation != 0 {
-		rot := rotation * (math.Pi / 180.0)
-
-		cos := math.Cos(rot)
-		sin := math.Sin(rot)
-
-		x1 = cos*p1x - sin*p1y
-		y1 = sin*p1x + cos*p1y
-
-		x2 = cos*p2x - sin*p2y
-		y2 = sin*p2x + cos*p2y
-
-		x3 = cos*p3x - sin*p3y
-		y3 = sin*p3x + cos*p3y
-
-		x4 = x1 + (x3 - x2)
-		y4 = y3 - (y2 - y1)
-	} else {
-		x1 = p1x
-		y1 = p1y
-
-		x2 = p2x
-		y2 = p2y
-
-		x3 = p3x
-		y3 = p3y
-
-		x4 = p4x
-		y4 = p4y
-	}
-
-	colorR, colorG, colorB, _ := c.RGBA()
-
-	red := colorR
-	green := colorG << 8
-	blue := colorB << 16
-	alpha := uint32(transparency*255.0) << 24
-
-	tint := math.Float32frombits((alpha | blue | green | red) & 0xfeffffff)
-
-	u, v, u2, v2 := ren.drawable.View()
-
-	return []float32{x1, y1, u, v, tint, x4, y4, u2, v, tint, x3, y3, u2, v2, tint, x2, y2, u, v2, tint}
 }
 
 type renderEntity struct {
@@ -220,7 +105,7 @@ func (rs *RenderSystem) New(w *ecs.World) {
 	rs.world = w
 
 	if !headless {
-		initShaders(GameWidth(), GameHeight())
+		initShaders()
 	}
 
 	Mailbox.Listen("renderChangeMessage", func(Message) {
@@ -280,7 +165,17 @@ func (rs *RenderSystem) Update(dt float32) {
 			rs.currentShader = shader
 		}
 
-		rs.currentShader.Draw(e.RenderComponent.drawable.Texture(), e.RenderComponent.buffer, e.SpaceComponent.Position.X, e.SpaceComponent.Position.Y, 0) // TODO: add rotation
+		// Setting default scale to 1
+		if e.RenderComponent.Scale.X == 0 && e.RenderComponent.Scale.Y == 0 {
+			e.RenderComponent.Scale = Point{1, 1}
+		}
+
+		// Setting default to white
+		if e.RenderComponent.Color == nil {
+			e.RenderComponent.Color = color.White
+		}
+
+		rs.currentShader.Draw(e.RenderComponent, e.SpaceComponent)
 	}
 
 	if rs.currentShader != nil {

@@ -60,8 +60,15 @@ func (*DefaultScene) Type() string { return "GameWorld" }
 func (*DefaultScene) CreateEntity(point *engo.Point, spriteSheet *engo.Spritesheet) *Animation {
 	entity := &Animation{BasicEntity: ecs.NewBasic()}
 
-	entity.SpaceComponent = engo.SpaceComponent{*point, 150, 150}
-	entity.RenderComponent = engo.NewRenderComponent(spriteSheet.Cell(0), engo.Point{3, 3})
+	entity.SpaceComponent = engo.SpaceComponent{
+		Position: *point,
+		Width:    150,
+		Height:   150,
+	}
+	entity.RenderComponent = engo.RenderComponent{
+		Drawable: spriteSheet.Cell(0),
+		Scale:    engo.Point{3, 3},
+	}
 	entity.AnimationComponent = engo.NewAnimationComponent(spriteSheet.Drawables(), 0.1)
 
 	entity.AnimationComponent.AddAnimations(actions)

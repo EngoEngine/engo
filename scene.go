@@ -86,6 +86,7 @@ func SetScene(s Scene, forceNewWorld bool) {
 	currentScene = s
 	currentWorld = wrapper.world
 	Mailbox = wrapper.mailbox
+	// update global cam var
 	cam = wrapper.camera
 
 	// doSetup is true whenever we're (re)initializing the Scene

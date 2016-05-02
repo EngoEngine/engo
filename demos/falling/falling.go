@@ -47,13 +47,19 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 4x
-	guy.RenderComponent = engo.NewRenderComponent(texture, engo.Point{4, 4})
+	guy.RenderComponent = engo.RenderComponent{
+		Drawable: texture,
+		Scale:    engo.Point{4, 4},
+	}
 	guy.SpaceComponent = engo.SpaceComponent{
 		Position: engo.Point{0, 0},
-		Width:    texture.Width() * guy.RenderComponent.Scale().X,
-		Height:   texture.Height() * guy.RenderComponent.Scale().Y,
+		Width:    texture.Width() * guy.RenderComponent.Scale.X,
+		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
 	}
-	guy.CollisionComponent = engo.CollisionComponent{Solid: true, Main: true}
+	guy.CollisionComponent = engo.CollisionComponent{
+		Solid: true,
+		Main:  true,
+	}
 
 	// Add it to appropriate systems
 	for _, system := range w.Systems() {
@@ -145,11 +151,14 @@ func NewRock(world *ecs.World, position engo.Point) {
 	texture := engo.Files.Image("rock.png")
 
 	rock := Rock{BasicEntity: ecs.NewBasic()}
-	rock.RenderComponent = engo.NewRenderComponent(texture, engo.Point{4, 4})
+	rock.RenderComponent = engo.RenderComponent{
+		Drawable: texture,
+		Scale:    engo.Point{4, 4},
+	}
 	rock.SpaceComponent = engo.SpaceComponent{
 		Position: position,
-		Width:    texture.Width() * rock.RenderComponent.Scale().X,
-		Height:   texture.Height() * rock.RenderComponent.Scale().Y,
+		Width:    texture.Width() * rock.RenderComponent.Scale.X,
+		Height:   texture.Height() * rock.RenderComponent.Scale.Y,
 	}
 	rock.CollisionComponent = engo.CollisionComponent{Solid: true}
 
@@ -203,6 +212,7 @@ func (*DeathSystem) New(*ecs.World) {
 	// Subscribe to ScoreMessage
 	engo.Mailbox.Listen("CollisionMessage", func(message engo.Message) {
 		_, isCollision := message.(engo.CollisionMessage)
+
 		if isCollision {
 			log.Println("DEAD")
 		}
@@ -210,7 +220,7 @@ func (*DeathSystem) New(*ecs.World) {
 }
 
 func (*DeathSystem) Remove(ecs.BasicEntity) {}
-func (*DeathSystem) Update(dt float32)      {}
+func (*DeathSystem) Update(float32)         {}
 
 func main() {
 	opts := engo.RunOptions{

@@ -175,6 +175,10 @@ func LoadShader(vertSrc, fragSrc string) *gl.Program {
 	vertShader := Gl.CreateShader(Gl.VERTEX_SHADER)
 	Gl.ShaderSource(vertShader, vertSrc)
 	Gl.CompileShader(vertShader)
+	if !Gl.GetShaderiv(vertShader, Gl.COMPILE_STATUS) {
+		errorLog := Gl.GetShaderInfoLog(vertShader)
+		log.Print("Error during vertex shader compilation:\n", errorLog)
+	}
 	defer Gl.DeleteShader(vertShader)
 
 	fragShader := Gl.CreateShader(Gl.FRAGMENT_SHADER)
@@ -228,6 +232,10 @@ func (r *Region) View() (float32, float32, float32, float32) {
 	return r.u, r.v, r.u2, r.v2
 }
 
+func (r *Region) Close() {
+	r.texture.Close()
+}
+
 type Texture struct {
 	id     *gl.Texture
 	width  float32
@@ -272,6 +280,12 @@ func (t *Texture) Texture() *gl.Texture {
 
 func (r *Texture) View() (float32, float32, float32, float32) {
 	return 0.0, 0.0, 1.0, 1.0
+}
+
+func (r *Texture) Close() {
+	if !headless {
+		Gl.DeleteTexture(r.id)
+	}
 }
 
 type Sprite struct {
