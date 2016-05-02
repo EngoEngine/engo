@@ -3,7 +3,6 @@ package engo
 import (
 	"engo.io/gl"
 	"github.com/luxengine/math"
-	"log"
 )
 
 const bufferSize = 10000
@@ -410,8 +409,6 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 	green := colorG << 8
 	blue := colorB << 16
 	alpha := colorA << 24
-
-	log.Println(colorR, colorG, colorB, colorA)
 
 	tint := math.Float32frombits((alpha | blue | green | red) & 0xfeffffff)
 
