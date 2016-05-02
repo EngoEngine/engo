@@ -38,7 +38,7 @@ we have a list of those changes, with the most recent being at the top. If you r
 * `ecs.Entity` changed to `ecs.BasicEntity`, `world.AddEntity` is gone - **a lot** has changed here. The entire issue is described [here](https://github.com/EngoEngine/ecs/issues/13), while [this comment](https://github.com/EngoEngine/ecs/issues/13#issuecomment-210887914) in particular, should help you migrate your code. 
 * Renamed `engo.io/webgl` to `engo.io/gl`, because the package handles more than only *web*gl. 
 * `scene.Exit()` - a `Scene` now also requires an `Exit()` function, alongside the `Hide()` and `Show()` it already required. 
-* `github.com/EngoEngine/engo` -> `engo.io/engo` - Our packages `engo`, `ecs` and `webgl` should now be imported using the `engo.io` path. 
+* `github.com/EngoEngine/engo` -> `engo.io/engo` - Our packages `engo`, `ecs` and `gl` should now be imported using the `engo.io` path. 
 * `engi.XXX` -> `engo.XXX` - We renamed our package `engi` to `engo`. 
 
 ## History
