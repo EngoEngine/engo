@@ -141,7 +141,7 @@ func (rock *RockSpawnSystem) Update(dt float32) {
 	}
 
 	position := engo.Point{
-		X: rand.Float32() * engo.Width(),
+		X: rand.Float32() * engo.GameWidth(),
 		Y: -32,
 	}
 	NewRock(rock.world, position)

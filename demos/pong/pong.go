@@ -62,15 +62,15 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	ball := Ball{BasicEntity: ecs.NewBasic()}
 	ball.RenderComponent = engo.RenderComponent{
 		Drawable: ballTexture,
-		Scale: engo.Point{2, 2},
+		Scale:    engo.Point{2, 2},
 	}
 	ball.SpaceComponent = engo.SpaceComponent{
-		Position: engo.Point{(engo.Width() - ballTexture.Width()) / 2, (engo.Height() - ballTexture.Height()) / 2},
-		Width:    ballTexture.Width() * ball.RenderComponent.Scale.X,
-		Height:   ballTexture.Height() * ball.RenderComponent.Scale.Y,
+		Position: engo.Point{(engo.GameWidth() - ballTexture.Width()) / 2, (engo.GameHeight() - ballTexture.Height()) / 2},
+		Width:    ballTexture.Width() * ball.RenderComponent.Scale().X,
+		Height:   ballTexture.Height() * ball.RenderComponent.Scale().Y,
 	}
 	ball.CollisionComponent = engo.CollisionComponent{
-		Main: true,
+		Main:  true,
 		Solid: true,
 	}
 	ball.SpeedComponent = SpeedComponent{Point: engo.Point{300, 1000}}
@@ -115,7 +115,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		paddle := Paddle{BasicEntity: ecs.NewBasic()}
 		paddle.RenderComponent = engo.RenderComponent{
 			Drawable: paddleTexture,
-			Scale: engo.Point{2, 2},
+			Scale:    engo.Point{2, 2},
 		}
 
 		x := float32(0)
@@ -124,13 +124,13 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		}
 
 		paddle.SpaceComponent = engo.SpaceComponent{
-			Position: engo.Point{x, (engo.Height() - paddleTexture.Height()) / 2},
-			Width:    paddle.RenderComponent.Scale.X * paddleTexture.Width(),
-			Height:   paddle.RenderComponent.Scale.Y * paddleTexture.Height(),
+			Position: engo.Point{x, (engo.GameHeight() - paddleTexture.Height()) / 2},
+			Width:    paddle.RenderComponent.Scale().X * paddleTexture.Width(),
+			Height:   paddle.RenderComponent.Scale().Y * paddleTexture.Height(),
 		}
 		paddle.ControlComponent = ControlComponent{schemes[i]}
 		paddle.CollisionComponent = engo.CollisionComponent{
-			Main: false,
+			Main:  false,
 			Solid: true,
 		}
 
