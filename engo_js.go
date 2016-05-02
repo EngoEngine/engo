@@ -93,7 +93,7 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 	})
 
 	Files = NewLoader()
-	WorldBounds.Max = Point{Width(), Height()}
+	WorldBounds.Max = Point{GameWidth(), GameHeight()}
 }
 
 func SetBackground(c color.Color) {

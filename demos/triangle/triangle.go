@@ -35,7 +35,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	w.AddSystem(&engo.MouseZoomer{zoomSpeed})
 
 	triangle1 := MyTriangle{BasicEntity: ecs.NewBasic()}
-	triangle1.SpaceComponent = engo.SpaceComponent{Width: 400, Height: 200}
+	triangle1.SpaceComponent = engo.SpaceComponent{Width: 200, Height: 200}
 	triangle1.RenderComponent = engo.RenderComponent{Drawable: engo.Triangle{}, Color: color.RGBA{255, 0, 0, 255}}
 	triangle1.RenderComponent.SetShader(engo.LegacyShader)
 
