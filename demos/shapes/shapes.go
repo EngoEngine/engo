@@ -31,7 +31,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	w.AddSystem(&engo.RenderSystem{})
 
 	// Adding camera controllers so we can verify it doesn't break when we move
-	w.AddSystem(engo.NewKeyboardScroller(scrollSpeed, engo.W, engo.D, engo.S, engo.A))
+	w.AddSystem(engo.NewKeyboardScroller(scrollSpeed, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis))
 	w.AddSystem(&engo.MouseZoomer{zoomSpeed})
 	w.AddSystem(&engo.MouseRotator{RotationSpeed: 0.125})
 
