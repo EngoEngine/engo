@@ -130,7 +130,6 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		}
 	}
 
-	schemes := []string{"WASD", ""}
 	paddleTexture := engo.Files.Image("paddle.png")
 
 	for i := 0; i < 2; i++ {
@@ -324,7 +323,7 @@ func (c *ControlSystem) Update(dt float32) {
 		e.SpaceComponent.Position.Y += speed * vert.Value()
 
 		if (e.SpaceComponent.Height + e.SpaceComponent.Position.Y) > 800 {
-			e.SpaceComponent.Position.Y = 800
+			e.SpaceComponent.Position.Y = 800 - e.SpaceComponent.Height
 		} else if e.SpaceComponent.Position.Y < 0 {
 			e.SpaceComponent.Position.Y = 0
 		}
