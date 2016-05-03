@@ -211,10 +211,13 @@ func (s *basicShader) Post() {
 	s.lastBuffer = nil
 
 	// Cleanup
-	Gl.BindTexture(Gl.TEXTURE_2D, nil)
 	Gl.DisableVertexAttribArray(s.inPosition)
 	Gl.DisableVertexAttribArray(s.inTexCoords)
 	Gl.DisableVertexAttribArray(s.inColor)
+
+	Gl.BindTexture(Gl.TEXTURE_2D, nil)
+	Gl.BindBuffer(Gl.ARRAY_BUFFER, nil)
+	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, nil)
 }
 
 func (s *basicShader) updateBuffer(ren *RenderComponent) {
@@ -291,9 +294,7 @@ func setBufferValue(buffer []float32, index int, value float32, changed *bool) {
 type legacyShader struct {
 	program *gl.Program
 
-	indicesTriangles     []uint16
 	indicesRectangles    []uint16
-	indicesTrianglesVBO  *gl.Buffer
 	indicesRectanglesVBO *gl.Buffer
 
 	inPosition int
@@ -372,11 +373,6 @@ void main (void) {
 }`)
 
 	// Create and populate indices buffer
-	l.indicesTriangles = []uint16{0, 1, 2}
-	l.indicesTrianglesVBO = Gl.CreateBuffer()
-	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indicesTrianglesVBO)
-	Gl.BufferData(Gl.ELEMENT_ARRAY_BUFFER, l.indicesTriangles, Gl.STATIC_DRAW)
-
 	l.indicesRectangles = []uint16{0, 1, 2, 0, 2, 3}
 	l.indicesRectanglesVBO = Gl.CreateBuffer()
 	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectanglesVBO)
@@ -415,7 +411,6 @@ void main (void) {
 func (l *legacyShader) Pre() {
 	// Bind shader and buffer, enable attributes
 	Gl.UseProgram(l.program)
-	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indicesTrianglesVBO)
 	Gl.EnableVertexAttribArray(l.inPosition)
 	Gl.EnableVertexAttribArray(l.inColor)
 
@@ -446,9 +441,8 @@ func (l *legacyShader) Pre() {
 
 func (l *legacyShader) updateBuffer(ren *RenderComponent, space *SpaceComponent) {
 	if len(ren.bufferContent) == 0 {
-		ren.bufferContent = make([]float32, 12) // because we add at most this many elements to it
+		ren.bufferContent = make([]float32, l.computeBufferSize(ren.Drawable)) // because we add at most this many elements to it
 	}
-
 	if changed := l.generateBufferContent(ren, space, ren.bufferContent); !changed {
 		return
 	}
@@ -458,6 +452,21 @@ func (l *legacyShader) updateBuffer(ren *RenderComponent, space *SpaceComponent)
 	}
 	Gl.BindBuffer(Gl.ARRAY_BUFFER, ren.buffer)
 	Gl.BufferData(Gl.ARRAY_BUFFER, ren.bufferContent, Gl.STATIC_DRAW)
+}
+
+func (l *legacyShader) computeBufferSize(draw Drawable) int {
+	switch shape := draw.(type) {
+	case Triangle:
+		return 9
+	case Rectangle:
+		return 12
+	case Circle:
+		return 12
+	case ComplexTriangles:
+		return len(shape.Points) * 3
+	default:
+		return 0
+	}
 }
 
 func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceComponent, buffer []float32) bool {
@@ -542,6 +551,15 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 		setBufferValue(buffer, 10, h, &changed)
 		setBufferValue(buffer, 11, tint, &changed)
 
+	case ComplexTriangles:
+		var index int
+		for _, point := range shape.Points {
+			setBufferValue(buffer, index, point.X*w, &changed)
+			setBufferValue(buffer, index+1, point.Y*h, &changed)
+			setBufferValue(buffer, index+2, tint, &changed)
+			index += 3
+		}
+
 	default:
 		log.Println("Warning: type not supported")
 	}
@@ -579,11 +597,10 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 
 	Gl.UniformMatrix3fv(l.matrixModel, false, l.modelMatrix)
 
-	switch ren.Drawable.(type) {
+	switch shape := ren.Drawable.(type) {
 	case Triangle:
 		Gl.Uniform2f(l.inRadius, 0, 0)
-		Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indicesTrianglesVBO)
-		Gl.DrawElements(Gl.TRIANGLES, 3, Gl.UNSIGNED_SHORT, 0)
+		Gl.DrawArrays(Gl.TRIANGLES, 0, 3)
 	case Rectangle:
 		Gl.Uniform2f(l.inRadius, 0, 0)
 		Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectanglesVBO)
@@ -593,6 +610,9 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		Gl.Uniform2f(l.inCenter, space.Width/2, space.Height/2)
 		Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectanglesVBO)
 		Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
+	case ComplexTriangles:
+		Gl.Uniform2f(l.inRadius, 0, 0)
+		Gl.DrawArrays(Gl.TRIANGLES, 0, len(shape.Points))
 	default:
 		log.Println("Warning: type not supported")
 	}
@@ -604,6 +624,9 @@ func (l *legacyShader) Post() {
 	// Cleanup
 	Gl.DisableVertexAttribArray(l.inPosition)
 	Gl.DisableVertexAttribArray(l.inColor)
+
+	Gl.BindBuffer(Gl.ARRAY_BUFFER, nil)
+	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, nil)
 }
 
 var (

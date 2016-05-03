@@ -42,3 +42,17 @@ func (Circle) Width() float32                             { return 0 }
 func (Circle) Height() float32                            { return 0 }
 func (Circle) View() (float32, float32, float32, float32) { return 0, 0, 1, 1 }
 func (Circle) Close()                                     {}
+
+// ComplexTriangles is a complex form, made out of triangles.
+type ComplexTriangles struct {
+	// Points are the points the form is made of. They should be defined on a scale from 0 to 1, where (0, 0) starts
+	// at the top-left of the area (as defined by the `SpaceComponent`.
+	// You should use a multitude of 3 points, because each triangle is defined by defining 3 points.
+	Points []Point
+}
+
+func (ComplexTriangles) Texture() *gl.Texture                       { return nil }
+func (ComplexTriangles) Width() float32                             { return 0 }
+func (ComplexTriangles) Height() float32                            { return 0 }
+func (ComplexTriangles) View() (float32, float32, float32, float32) { return 0, 0, 1, 1 }
+func (ComplexTriangles) Close()                                     {}
