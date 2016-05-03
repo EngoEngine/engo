@@ -4,8 +4,19 @@ import (
 	"engo.io/gl"
 )
 
+type TriangleType uint8
+
+const (
+	// Indicates a Triangle where two sides have equal length
+	TriangleIsosceles TriangleType = iota
+	// Indicates a Triangles where one angle is at 90 degrees
+	TriangleRight
+)
+
 // Triangle is a basic triangular form; the "point" of the triangle is pointing to the top
-type Triangle struct{}
+type Triangle struct {
+	TriangleType TriangleType
+}
 
 func (Triangle) Texture() *gl.Texture                       { return nil }
 func (Triangle) Width() float32                             { return 0 }

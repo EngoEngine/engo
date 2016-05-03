@@ -479,19 +479,34 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 
 	var changed bool
 
-	switch ren.Drawable.(type) {
+	switch shape := ren.Drawable.(type) {
 	case Triangle:
-		setBufferValue(buffer, 0, w/2, &changed)
-		//setBufferValue(buffer, 1, 0, &changed)
-		setBufferValue(buffer, 2, tint, &changed)
+		switch shape.TriangleType {
+		case TriangleIsosceles:
+			setBufferValue(buffer, 0, w/2, &changed)
+			//setBufferValue(buffer, 1, 0, &changed)
+			setBufferValue(buffer, 2, tint, &changed)
 
-		setBufferValue(buffer, 3, w, &changed)
-		setBufferValue(buffer, 4, h, &changed)
-		setBufferValue(buffer, 5, tint, &changed)
+			setBufferValue(buffer, 3, w, &changed)
+			setBufferValue(buffer, 4, h, &changed)
+			setBufferValue(buffer, 5, tint, &changed)
 
-		//setBufferValue(buffer, 6, 0, &changed)
-		setBufferValue(buffer, 7, h, &changed)
-		setBufferValue(buffer, 8, tint, &changed)
+			//setBufferValue(buffer, 6, 0, &changed)
+			setBufferValue(buffer, 7, h, &changed)
+			setBufferValue(buffer, 8, tint, &changed)
+		case TriangleRight:
+			//setBufferValue(buffer, 0, 0, &changed)
+			//setBufferValue(buffer, 1, 0, &changed)
+			setBufferValue(buffer, 2, tint, &changed)
+
+			setBufferValue(buffer, 3, w, &changed)
+			setBufferValue(buffer, 4, h, &changed)
+			setBufferValue(buffer, 5, tint, &changed)
+
+			//setBufferValue(buffer, 6, 0, &changed)
+			setBufferValue(buffer, 7, h, &changed)
+			setBufferValue(buffer, 8, tint, &changed)
+		}
 
 	case Circle:
 		//setBufferValue(buffer, 0, 0, &changed)
