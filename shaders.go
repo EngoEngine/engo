@@ -3,6 +3,7 @@ package engo
 import (
 	"engo.io/gl"
 	"github.com/luxengine/math"
+	"log"
 )
 
 const bufferSize = 10000
@@ -290,8 +291,10 @@ func setBufferValue(buffer []float32, index int, value float32, changed *bool) {
 type legacyShader struct {
 	program *gl.Program
 
-	indices  []uint16
-	indexVBO *gl.Buffer
+	indicesTriangles     []uint16
+	indicesRectangles    []uint16
+	indicesTrianglesVBO  *gl.Buffer
+	indicesRectanglesVBO *gl.Buffer
 
 	inPosition int
 	inColor    int
@@ -299,6 +302,8 @@ type legacyShader struct {
 	matrixProjection *gl.UniformLocation
 	matrixView       *gl.UniformLocation
 	matrixModel      *gl.UniformLocation
+	inRadius         *gl.UniformLocation
+	inCenter         *gl.UniformLocation
 
 	projectionMatrix []float32
 	viewMatrix       []float32
@@ -315,11 +320,30 @@ attribute vec4 in_Color;
 uniform mat3 matrixProjection;
 uniform mat3 matrixView;
 uniform mat3 matrixModel;
+uniform vec2 in_Radius;
+uniform vec2 in_Center;
 
 varying vec4 var_Color;
+varying vec2 var_Radius;
+varying vec2 var_Center;
 
 void main() {
   var_Color = in_Color;
+
+  // TODO: we should convert these into window coordinates -.-
+  if (in_Radius.x > 0.0 && in_Radius.y > 0.0)
+  {
+    //var_Radius = vec2(200.0, 200.0);
+    //var_Center = vec2(500.0, 500.0);
+    //var_Radius = (matrixProjection * matrixView * vec3(in_Radius, 1.0)).xy;
+    //var_Center = ((matrixProjection * matrixView * matrixModel * vec3(in_Center, 1.0)).xy+vec2(1.0, 1.0))/2;
+    //(matrixProjection * matrixView * vec3(in_Center, 1.0)).xy ;//* vec2(-1.0, -1.0);
+
+    var_Radius = in_Radius;
+    var_Center = in_Center;
+  } else {
+    var_Radius = vec2(0.0, 0.0);
+  }
 
   vec3 matr = matrixProjection * matrixView * matrixModel * vec3(in_Position, 1.0);
   gl_Position = vec4(matr.xy, 0, matr.z);
@@ -333,17 +357,29 @@ precision mediump float;
 #endif
 
 varying vec4 var_Color;
+varying vec2 var_Radius;
+varying vec2 var_Center;
 
 void main (void) {
+  if (var_Radius.x > 0.0 && var_Radius.y > 0.0)
+  {
+    if (pow(gl_FragCoord.x - var_Center.x, 2.0) / pow(var_Radius.x, 2.0) + pow(gl_FragCoord.y - var_Center.y, 2.0) / pow(var_Radius.y, 2.0) > 1.0)
+      discard;
+  }
+
   gl_FragColor = var_Color;
 }`)
 
 	// Create and populate indices buffer
-	l.indices = []uint16{0, 1, 2}
+	l.indicesTriangles = []uint16{0, 1, 2}
+	l.indicesTrianglesVBO = Gl.CreateBuffer()
+	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indicesTrianglesVBO)
+	Gl.BufferData(Gl.ELEMENT_ARRAY_BUFFER, l.indicesTriangles, Gl.STATIC_DRAW)
 
-	l.indexVBO = Gl.CreateBuffer()
-	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indexVBO)
-	Gl.BufferData(Gl.ELEMENT_ARRAY_BUFFER, l.indices, Gl.STATIC_DRAW)
+	l.indicesRectangles = []uint16{0, 1, 2, 0, 2, 3}
+	l.indicesRectanglesVBO = Gl.CreateBuffer()
+	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectanglesVBO)
+	Gl.BufferData(Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectangles, Gl.STATIC_DRAW)
 
 	// Define things that should be read from the texture buffer
 	l.inPosition = Gl.GetAttribLocation(l.program, "in_Position")
@@ -353,6 +389,8 @@ void main (void) {
 	l.matrixProjection = Gl.GetUniformLocation(l.program, "matrixProjection")
 	l.matrixView = Gl.GetUniformLocation(l.program, "matrixView")
 	l.matrixModel = Gl.GetUniformLocation(l.program, "matrixModel")
+	l.inRadius = Gl.GetUniformLocation(l.program, "in_Radius")
+	l.inCenter = Gl.GetUniformLocation(l.program, "in_Center")
 
 	// Not sure if they go here, or in Pre()
 	Gl.Enable(Gl.BLEND)
@@ -375,7 +413,7 @@ void main (void) {
 func (l *legacyShader) Pre() {
 	// Bind shader and buffer, enable attributes
 	Gl.UseProgram(l.program)
-	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indexVBO)
+	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indicesTrianglesVBO)
 	Gl.EnableVertexAttribArray(l.inPosition)
 	Gl.EnableVertexAttribArray(l.inColor)
 
@@ -405,7 +443,7 @@ func (l *legacyShader) Pre() {
 
 func (l *legacyShader) updateBuffer(ren *RenderComponent, space *SpaceComponent) {
 	if len(ren.bufferContent) == 0 {
-		ren.bufferContent = make([]float32, 9) // because we add 9 elements to it
+		ren.bufferContent = make([]float32, 12) // because we add at most this many elements to it
 	}
 
 	if changed := l.generateBufferContent(ren, space, ren.bufferContent); !changed {
@@ -438,17 +476,57 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 
 	var changed bool
 
-	setBufferValue(buffer, 0, w/2, &changed)
-	//setBufferValue(buffer, 1, 0, &changed)
-	setBufferValue(buffer, 2, tint, &changed)
+	switch ren.Drawable.(type) {
+	case Triangle:
+		setBufferValue(buffer, 0, w/2, &changed)
+		//setBufferValue(buffer, 1, 0, &changed)
+		setBufferValue(buffer, 2, tint, &changed)
 
-	setBufferValue(buffer, 3, w, &changed)
-	setBufferValue(buffer, 4, h, &changed)
-	setBufferValue(buffer, 5, tint, &changed)
+		setBufferValue(buffer, 3, w, &changed)
+		setBufferValue(buffer, 4, h, &changed)
+		setBufferValue(buffer, 5, tint, &changed)
 
-	//setBufferValue(buffer, 6, 0, &changed)
-	setBufferValue(buffer, 7, h, &changed)
-	setBufferValue(buffer, 8, tint, &changed)
+		//setBufferValue(buffer, 6, 0, &changed)
+		setBufferValue(buffer, 7, h, &changed)
+		setBufferValue(buffer, 8, tint, &changed)
+
+	case Circle:
+		//setBufferValue(buffer, 0, 0, &changed)
+		//setBufferValue(buffer, 1, 0, &changed)
+		setBufferValue(buffer, 2, tint, &changed)
+
+		setBufferValue(buffer, 3, w, &changed)
+		//setBufferValue(buffer, 4, 0, &changed)
+		setBufferValue(buffer, 5, tint, &changed)
+
+		setBufferValue(buffer, 6, w, &changed)
+		setBufferValue(buffer, 7, h, &changed)
+		setBufferValue(buffer, 8, tint, &changed)
+
+		//setBufferValue(buffer, 9, 0, &changed)
+		setBufferValue(buffer, 10, h, &changed)
+		setBufferValue(buffer, 11, tint, &changed)
+
+	case Rectangle:
+		//setBufferValue(buffer, 0, 0, &changed)
+		//setBufferValue(buffer, 1, 0, &changed)
+		setBufferValue(buffer, 2, tint, &changed)
+
+		setBufferValue(buffer, 3, w, &changed)
+		//setBufferValue(buffer, 4, 0, &changed)
+		setBufferValue(buffer, 5, tint, &changed)
+
+		setBufferValue(buffer, 6, w, &changed)
+		setBufferValue(buffer, 7, h, &changed)
+		setBufferValue(buffer, 8, tint, &changed)
+
+		//setBufferValue(buffer, 9, 0, &changed)
+		setBufferValue(buffer, 10, h, &changed)
+		setBufferValue(buffer, 11, tint, &changed)
+
+	default:
+		log.Println("Warning: type not supported")
+	}
 
 	return changed
 }
@@ -485,7 +563,22 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 
 	switch ren.Drawable.(type) {
 	case Triangle:
+		Gl.Uniform2f(l.inRadius, 0, 0)
+		Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indicesTrianglesVBO)
 		Gl.DrawElements(Gl.TRIANGLES, 3, Gl.UNSIGNED_SHORT, 0)
+	case Rectangle:
+		Gl.Uniform2f(l.inRadius, 0, 0)
+		Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectanglesVBO)
+		Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
+	case Circle:
+		aabb := space.AABB()
+
+		Gl.Uniform2f(l.inRadius, space.Width/2, space.Height/2)
+		Gl.Uniform2f(l.inCenter, space.Width/2+aabb.Min.X, windowHeight-(space.Height/2+aabb.Min.Y))
+		Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectanglesVBO)
+		Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
+	default:
+		log.Println("Warning: type not supported")
 	}
 }
 

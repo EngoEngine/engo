@@ -184,6 +184,10 @@ func LoadShader(vertSrc, fragSrc string) *gl.Program {
 	fragShader := Gl.CreateShader(Gl.FRAGMENT_SHADER)
 	Gl.ShaderSource(fragShader, fragSrc)
 	Gl.CompileShader(fragShader)
+	if !Gl.GetShaderiv(fragShader, Gl.COMPILE_STATUS) {
+		errorLog := Gl.GetShaderInfoLog(fragShader)
+		log.Print("Error during fragment shader compilation:\n", errorLog)
+	}
 	defer Gl.DeleteShader(fragShader)
 
 	program := Gl.CreateProgram()
