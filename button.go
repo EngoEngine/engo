@@ -6,7 +6,7 @@ type Button struct {
 	Name     string
 }
 
-// JustPressed checks whether an input was pressed in the previous frame>
+// JustPressed checks whether an input was pressed in the previous frame.
 func (b Button) JustPressed() bool {
 	for _, trigger := range b.Triggers {
 		v := Input.keys.Get(trigger).JustPressed()
