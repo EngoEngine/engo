@@ -2,13 +2,16 @@ package engo // import "engo.io/engo"
 
 import (
 	"fmt"
+	"log"
 
 	"engo.io/ecs"
 )
 
 var (
-	Time               *Clock
-	Files              *Loader
+	Time  *Clock
+	Files *Loader
+	Input *InputManager
+
 	closeGame          bool
 	defaultCloseAction bool
 	WorldBounds        AABB
@@ -23,6 +26,11 @@ var (
 	headless        = false
 	vsync           = true
 	resetLoopTicker = make(chan bool, 1)
+)
+
+const (
+	DefaultVerticalAxis   = "vertical"
+	DefaultHorizontalAxis = "horizontal"
 )
 
 type RunOptions struct {
@@ -51,6 +59,8 @@ type RunOptions struct {
 	// OverrideCloseAction indicates that (when true) engo will never close whenever the gamer wants to close the
 	// game - that will be your responsibility
 	OverrideCloseAction bool
+
+	StandardInputs bool
 }
 
 func Run(opts RunOptions, defaultScene Scene) {
@@ -59,6 +69,18 @@ func Run(opts RunOptions, defaultScene Scene) {
 	SetFPSLimit(opts.FPSLimit)
 	vsync = opts.VSync
 	defaultCloseAction = !opts.OverrideCloseAction
+
+	// Create input
+	Input = NewInputManager()
+	if opts.StandardInputs {
+		log.Println("Using standard inputs")
+
+		Input.RegisterButton("jump", Space)
+		Input.RegisterButton("action", Enter)
+
+		Input.RegisterAxis(DefaultHorizontalAxis, AxisKeyPair{A, D}, AxisKeyPair{ArrowLeft, ArrowRight})
+		Input.RegisterAxis(DefaultVerticalAxis, AxisKeyPair{W, S}, AxisKeyPair{ArrowUp, ArrowDown})
+	}
 
 	if opts.HeadlessMode {
 		headless = true

@@ -30,7 +30,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 
 	// These are not required, but allow you to move / rotate and still see that it works
 	w.AddSystem(&engo.MouseZoomer{-0.125})
-	w.AddSystem(engo.NewKeyboardScroller(500, engo.W, engo.D, engo.S, engo.A))
+	w.AddSystem(engo.NewKeyboardScroller(500, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis))
 	w.AddSystem(&engo.MouseRotator{RotationSpeed: 0.125})
 
 	// Retrieve a texture

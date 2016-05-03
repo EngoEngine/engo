@@ -86,11 +86,12 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 	})
 	w.AddEventListener("keydown", false, func(ev dom.Event) {
 		ke := ev.(*dom.KeyboardEvent)
-		keyStates[Key(ke.KeyCode)] = true
+		Input.keys.Set(Key(ke.KeyCode), true)
 	})
+
 	w.AddEventListener("keyup", false, func(ev dom.Event) {
 		ke := ev.(*dom.KeyboardEvent)
-		keyStates[Key(ke.KeyCode)] = false
+		Input.keys.Set(Key(ke.KeyCode), false)
 	})
 
 	Files = NewLoader()
@@ -172,7 +173,7 @@ func rafPolyfill() {
 }
 
 func RunIteration() {
-	keysUpdate()
+	Input.update()
 	currentWorld.Update(Time.Delta())
 	Time.Tick()
 	// TODO: this may not work, and sky-rocket the FPS
@@ -197,7 +198,6 @@ func cancelAnimationFrame(id int) {
 }
 
 func RunPreparation() {
-	keyStates = make(map[Key]bool)
 	Time = NewClock()
 
 	dom.GetWindow().AddEventListener("onbeforeunload", false, func(e dom.Event) {

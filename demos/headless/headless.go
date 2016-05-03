@@ -295,26 +295,15 @@ func (c *ControlSystem) Remove(basic ecs.BasicEntity) {
 
 func (c *ControlSystem) Update(dt float32) {
 	for _, e := range c.entities {
-		up := false
-		down := false
-		if e.ControlComponent.Scheme == "WASD" {
-			up = engo.Keys.Get(engo.W).Down()
-			down = engo.Keys.Get(engo.S).Down()
-		} else {
-			up = engo.Keys.Get(engo.ArrowUp).Down()
-			down = engo.Keys.Get(engo.ArrowDown).Down()
-		}
+		speed := 800 * dt
 
-		if up {
-			if e.SpaceComponent.Position.Y > 0 {
-				e.SpaceComponent.Position.Y -= 800 * dt
-			}
-		}
+		vert := engo.Input.Axis(engo.DefaultVerticalAxis)
+		e.SpaceComponent.Position.Y += speed * vert.Value()
 
-		if down {
-			if (e.SpaceComponent.Height + e.SpaceComponent.Position.Y) < 800 {
-				e.SpaceComponent.Position.Y += 800 * dt
-			}
+		if (e.SpaceComponent.Height + e.SpaceComponent.Position.Y) > 800 {
+			e.SpaceComponent.Position.Y = 800
+		} else if e.SpaceComponent.Position.Y < 0 {
+			e.SpaceComponent.Position.Y = 0
 		}
 	}
 }
@@ -399,7 +388,9 @@ func (ScoreMessage) Type() string {
 
 func main() {
 	opts := engo.RunOptions{
-		HeadlessMode: true,
+		HeadlessMode:   true,
+		StandardInputs: true,
 	}
+
 	engo.Run(opts, &PongGame{})
 }
