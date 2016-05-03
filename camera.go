@@ -232,13 +232,9 @@ func (CameraMessage) Type() string {
 
 // KeyboardScroller is a System that allows for scrolling when certain keys are pressed
 type KeyboardScroller struct {
-	ScrollSpeed float32
-	upKeys      []Key
-	leftKeys    []Key
-	downKeys    []Key
-	rightKeys   []Key
-
-	keysMu sync.RWMutex
+	ScrollSpeed                  float32
+	horizontalAxis, verticalAxis string
+	keysMu                       sync.RWMutex
 }
 
 func (*KeyboardScroller) Priority() int          { return KeyboardScrollerPriority }
@@ -248,50 +244,29 @@ func (c *KeyboardScroller) Update(dt float32) {
 	c.keysMu.RLock()
 	defer c.keysMu.RUnlock()
 
-	for _, upKey := range c.upKeys {
-		if Keys.Get(upKey).Down() {
-			Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: -c.ScrollSpeed * dt, Incremental: true})
-			break
-		}
-	}
+	vert := Input.Axis(c.verticalAxis)
+	Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: vert.Value() * c.ScrollSpeed * dt, Incremental: true})
 
-	for _, rightKey := range c.rightKeys {
-		if Keys.Get(rightKey).Down() {
-			Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: c.ScrollSpeed * dt, Incremental: true})
-			break
-		}
-	}
-
-	for _, downKey := range c.downKeys {
-		if Keys.Get(downKey).Down() {
-			Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: c.ScrollSpeed * dt, Incremental: true})
-			break
-		}
-	}
-
-	for _, leftKey := range c.leftKeys {
-		if Keys.Get(leftKey).Down() {
-			Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: -c.ScrollSpeed * dt, Incremental: true})
-			break
-		}
-	}
+	hori := Input.Axis(c.horizontalAxis)
+	Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: hori.Value() * c.ScrollSpeed * dt, Incremental: true})
 }
 
-func (c *KeyboardScroller) BindKeyboard(up, right, down, left Key) {
+func (c *KeyboardScroller) BindKeyboard(hori, vert string) {
 	c.keysMu.Lock()
-	defer c.keysMu.Unlock()
 
-	c.upKeys = append(c.upKeys, up)
-	c.rightKeys = append(c.rightKeys, right)
-	c.downKeys = append(c.downKeys, down)
-	c.leftKeys = append(c.leftKeys, left)
+	c.verticalAxis = vert
+	c.horizontalAxis = hori
+
+	defer c.keysMu.Unlock()
 }
 
-func NewKeyboardScroller(scrollSpeed float32, up, right, down, left Key) *KeyboardScroller {
+func NewKeyboardScroller(scrollSpeed float32, hori, vert string) *KeyboardScroller {
 	kbs := &KeyboardScroller{
 		ScrollSpeed: scrollSpeed,
 	}
-	kbs.BindKeyboard(up, right, down, left)
+
+	kbs.BindKeyboard(hori, vert)
+
 	return kbs
 }
 

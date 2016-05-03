@@ -27,7 +27,7 @@ type DefaultScene struct{}
 
 func (*DefaultScene) Preload() {
 	// Add all the files in the data directory non recursively
-	engo.Files.AddFromDir("data", false)
+	engo.Files.Add("data/icon.png", "data/rock.png")
 }
 
 func (*DefaultScene) Setup(w *ecs.World) {
@@ -106,21 +106,11 @@ func (c *ControlSystem) Update(dt float32) {
 	speed := 400 * dt
 
 	for _, e := range c.entities {
-		if engo.Keys.Get(engo.A).Down() {
-			e.SpaceComponent.Position.X -= speed
-		}
+		hori := engo.Input.Axis(engo.DefaultHorizontalAxis)
+		e.SpaceComponent.Position.X += speed * hori.Value()
 
-		if engo.Keys.Get(engo.D).Down() {
-			e.SpaceComponent.Position.X += speed
-		}
-
-		if engo.Keys.Get(engo.W).Down() {
-			e.SpaceComponent.Position.Y -= speed
-		}
-
-		if engo.Keys.Get(engo.S).Down() {
-			e.SpaceComponent.Position.Y += speed
-		}
+		vert := engo.Input.Axis(engo.DefaultVerticalAxis)
+		e.SpaceComponent.Position.Y += speed * vert.Value()
 	}
 }
 
@@ -201,8 +191,10 @@ func (f *FallingSystem) Remove(basic ecs.BasicEntity) {
 }
 
 func (f *FallingSystem) Update(dt float32) {
+	speed := 400 * dt
+
 	for _, e := range f.entities {
-		e.SpaceComponent.Position.Y += 200 * dt
+		e.SpaceComponent.Position.Y += speed
 	}
 }
 
@@ -224,9 +216,11 @@ func (*DeathSystem) Update(float32)         {}
 
 func main() {
 	opts := engo.RunOptions{
-		Title:  "Falling Demo",
-		Width:  1024,
-		Height: 640,
+		Title:          "Falling Demo",
+		Width:          1024,
+		Height:         640,
+		StandardInputs: true,
 	}
+
 	engo.Run(opts, &DefaultScene{})
 }
