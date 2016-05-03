@@ -59,7 +59,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	}
 
 	circle1 := MyShape{BasicEntity: ecs.NewBasic()}
-	circle1.SpaceComponent = engo.SpaceComponent{Position: engo.Point{400, 400}, Width: 200, Height: 200}
+	circle1.SpaceComponent = engo.SpaceComponent{Position: engo.Point{400, 400}, Width: 200, Height: 200, Rotation: -90}
 	circle1.RenderComponent = engo.RenderComponent{Drawable: engo.Circle{}, Color: color.RGBA{0, 0, 255, 255}}
 	circle1.RenderComponent.SetShader(engo.LegacyShader)
 

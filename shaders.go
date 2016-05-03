@@ -304,6 +304,7 @@ type legacyShader struct {
 	matrixModel      *gl.UniformLocation
 	inRadius         *gl.UniformLocation
 	inCenter         *gl.UniformLocation
+	inViewport       *gl.UniformLocation
 
 	projectionMatrix []float32
 	viewMatrix       []float32
@@ -322,6 +323,7 @@ uniform mat3 matrixView;
 uniform mat3 matrixModel;
 uniform vec2 in_Radius;
 uniform vec2 in_Center;
+uniform vec2 in_Viewport;
 
 varying vec4 var_Color;
 varying vec2 var_Radius;
@@ -333,14 +335,17 @@ void main() {
   // TODO: we should convert these into window coordinates -.-
   if (in_Radius.x > 0.0 && in_Radius.y > 0.0)
   {
-    //var_Radius = vec2(200.0, 200.0);
+    //var_Radius = vec2(100.0, 100.0);
     //var_Center = vec2(500.0, 500.0);
     //var_Radius = (matrixProjection * matrixView * vec3(in_Radius, 1.0)).xy;
     //var_Center = ((matrixProjection * matrixView * matrixModel * vec3(in_Center, 1.0)).xy+vec2(1.0, 1.0))/2;
     //(matrixProjection * matrixView * vec3(in_Center, 1.0)).xy ;//* vec2(-1.0, -1.0);
 
     var_Radius = in_Radius;
-    var_Center = in_Center;
+    //var_Center = ().xy;
+    //var_Center.y = in_Viewport.y - var_Center.y; // this is because window coordinates start at the bottom left instead of top left
+    var_Center = ((matrixProjection * matrixView * matrixModel * vec3(in_Center, 1.0)).xy + vec2(1.0, 1.0)) * in_Viewport / vec2(2.0, 2.0);
+
   } else {
     var_Radius = vec2(0.0, 0.0);
   }
@@ -361,13 +366,15 @@ varying vec2 var_Radius;
 varying vec2 var_Center;
 
 void main (void) {
+  gl_FragColor = var_Color;
+
   if (var_Radius.x > 0.0 && var_Radius.y > 0.0)
   {
     if (pow(gl_FragCoord.x - var_Center.x, 2.0) / pow(var_Radius.x, 2.0) + pow(gl_FragCoord.y - var_Center.y, 2.0) / pow(var_Radius.y, 2.0) > 1.0)
-      discard;
+    {
+      gl_FragColor.w = 0.0;
+    }
   }
-
-  gl_FragColor = var_Color;
 }`)
 
 	// Create and populate indices buffer
@@ -391,6 +398,7 @@ void main (void) {
 	l.matrixModel = Gl.GetUniformLocation(l.program, "matrixModel")
 	l.inRadius = Gl.GetUniformLocation(l.program, "in_Radius")
 	l.inCenter = Gl.GetUniformLocation(l.program, "in_Center")
+	l.inViewport = Gl.GetUniformLocation(l.program, "in_Viewport")
 
 	// Not sure if they go here, or in Pre()
 	Gl.Enable(Gl.BLEND)
@@ -425,7 +433,7 @@ func (l *legacyShader) Pre() {
 		l.projectionMatrix[4] = 1 / (-windowHeight / 2)
 	}
 
-	if false {
+	if true {
 		l.viewMatrix[1], l.viewMatrix[0] = math.Sincos(cam.angle * math.Pi / 180)
 		l.viewMatrix[3] = -l.viewMatrix[1]
 		l.viewMatrix[4] = l.viewMatrix[0]
@@ -439,6 +447,7 @@ func (l *legacyShader) Pre() {
 
 	Gl.UniformMatrix3fv(l.matrixProjection, false, l.projectionMatrix)
 	Gl.UniformMatrix3fv(l.matrixView, false, l.viewMatrix)
+	Gl.Uniform2f(l.inViewport, windowWidth, windowHeight)
 }
 
 func (l *legacyShader) updateBuffer(ren *RenderComponent, space *SpaceComponent) {
@@ -571,10 +580,8 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectanglesVBO)
 		Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
 	case Circle:
-		aabb := space.AABB()
-
-		Gl.Uniform2f(l.inRadius, space.Width/2, space.Height/2)
-		Gl.Uniform2f(l.inCenter, space.Width/2+aabb.Min.X, windowHeight-(space.Height/2+aabb.Min.Y))
+		Gl.Uniform2f(l.inRadius, (space.Width/2)/cam.z, (space.Height/2)/cam.z)
+		Gl.Uniform2f(l.inCenter, space.Width/2, space.Height/2)
 		Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectanglesVBO)
 		Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
 	default:
