@@ -11,6 +11,7 @@ type DefaultScene struct{}
 
 type Guy struct {
 	ecs.BasicEntity
+
 	engo.RenderComponent
 	engo.SpaceComponent
 }

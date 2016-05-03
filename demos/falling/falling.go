@@ -27,7 +27,7 @@ type DefaultScene struct{}
 
 func (*DefaultScene) Preload() {
 	// Add all the files in the data directory non recursively
-	engo.Files.AddFromDir("data", false)
+	engo.Files.Add("data/icon.png", "data/rock.png")
 }
 
 func (*DefaultScene) Setup(w *ecs.World) {
