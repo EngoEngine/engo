@@ -6,6 +6,7 @@ type Button struct {
 	Name     string
 }
 
+// JustPressed checks whether an input was pressed in the previous frame>
 func (b Button) JustPressed() bool {
 	for _, trigger := range b.Triggers {
 		v := Input.keys.Get(trigger).JustPressed()
@@ -17,6 +18,7 @@ func (b Button) JustPressed() bool {
 	return false
 }
 
+// JustReleased checks whether an input was released in the previous frame.
 func (b Button) JustReleased() bool {
 	for _, trigger := range b.Triggers {
 		v := Input.keys.Get(trigger).JustReleased()
@@ -28,6 +30,7 @@ func (b Button) JustReleased() bool {
 	return false
 }
 
+// Down checks whether the current input is being held down.
 func (b Button) Down() bool {
 	for _, trigger := range b.Triggers {
 		v := Input.keys.Get(trigger).Down()
