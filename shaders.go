@@ -310,6 +310,8 @@ type legacyShader struct {
 	viewMatrix       []float32
 	modelMatrix      []float32
 
+	cameraEnabled bool
+
 	lastBuffer *gl.Buffer
 }
 
@@ -332,26 +334,18 @@ varying vec2 var_Center;
 void main() {
   var_Color = in_Color;
 
-  // TODO: we should convert these into window coordinates -.-
+  vec3 matr = matrixProjection * matrixView * matrixModel * vec3(in_Position, 1.0);
+  gl_Position = vec4(matr.xy, 0, matr.z);
+
   if (in_Radius.x > 0.0 && in_Radius.y > 0.0)
   {
-    //var_Radius = vec2(100.0, 100.0);
-    //var_Center = vec2(500.0, 500.0);
-    //var_Radius = (matrixProjection * matrixView * vec3(in_Radius, 1.0)).xy;
-    //var_Center = ((matrixProjection * matrixView * matrixModel * vec3(in_Center, 1.0)).xy+vec2(1.0, 1.0))/2;
-    //(matrixProjection * matrixView * vec3(in_Center, 1.0)).xy ;//* vec2(-1.0, -1.0);
-
     var_Radius = in_Radius;
-    //var_Center = ().xy;
-    //var_Center.y = in_Viewport.y - var_Center.y; // this is because window coordinates start at the bottom left instead of top left
-    var_Center = ((matrixProjection * matrixView * matrixModel * vec3(in_Center, 1.0)).xy + vec2(1.0, 1.0)) * in_Viewport / vec2(2.0, 2.0);
 
+    vec3 vecCenter = (matrixProjection * matrixView * matrixModel * vec3(in_Center, 1.0));
+    var_Center = (vecCenter.xy/vecCenter.z + vec2(1.0, 1.0)) * in_Viewport / vec2(2.0);
   } else {
     var_Radius = vec2(0.0, 0.0);
   }
-
-  vec3 matr = matrixProjection * matrixView * matrixModel * vec3(in_Position, 1.0);
-  gl_Position = vec4(matr.xy, 0, matr.z);
 }
 `, `
 #ifdef GL_ES
@@ -429,11 +423,11 @@ func (l *legacyShader) Pre() {
 		l.projectionMatrix[0] = 1 / (gameWidth / 2)
 		l.projectionMatrix[4] = 1 / (-gameHeight / 2)
 	} else {
-		l.projectionMatrix[0] = 1 / (windowWidth / 2)
-		l.projectionMatrix[4] = 1 / (-windowHeight / 2)
+		l.projectionMatrix[0] = 1 / (gameWidth / 2)   // TODO: canvasWidth
+		l.projectionMatrix[4] = 1 / (-gameHeight / 2) // TODO: canvasHeight
 	}
 
-	if true {
+	if l.cameraEnabled {
 		l.viewMatrix[1], l.viewMatrix[0] = math.Sincos(cam.angle * math.Pi / 180)
 		l.viewMatrix[3] = -l.viewMatrix[1]
 		l.viewMatrix[4] = l.viewMatrix[0]
@@ -447,7 +441,7 @@ func (l *legacyShader) Pre() {
 
 	Gl.UniformMatrix3fv(l.matrixProjection, false, l.projectionMatrix)
 	Gl.UniformMatrix3fv(l.matrixView, false, l.viewMatrix)
-	Gl.Uniform2f(l.inViewport, windowWidth, windowHeight)
+	Gl.Uniform2f(l.inViewport, gameWidth, gameHeight) // TODO: canvasWidth/Height
 }
 
 func (l *legacyShader) updateBuffer(ren *RenderComponent, space *SpaceComponent) {
@@ -598,10 +592,11 @@ func (l *legacyShader) Post() {
 }
 
 var (
-	DefaultShader = &basicShader{cameraEnabled: true}
-	HUDShader     = &basicShader{cameraEnabled: false}
-	LegacyShader  = &legacyShader{}
-	shadersSet    bool
+	DefaultShader   = &basicShader{cameraEnabled: true}
+	HUDShader       = &basicShader{cameraEnabled: false}
+	LegacyShader    = &legacyShader{cameraEnabled: true}
+	LegacyHUDShader = &legacyShader{cameraEnabled: false}
+	shadersSet      bool
 )
 
 func initShaders() {
@@ -609,6 +604,7 @@ func initShaders() {
 		DefaultShader.Initialize()
 		HUDShader.Initialize()
 		LegacyShader.Initialize()
+		LegacyHUDShader.Initialize()
 
 		shadersSet = true
 	}
