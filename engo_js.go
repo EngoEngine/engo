@@ -36,7 +36,7 @@ func init() {
 //var canvas *js.Object
 var document = dom.GetWindow().Document().(dom.HTMLDocument)
 
-func CreateWindow(title string, width, height int, fullscreen bool) {
+func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 	canvas := document.CreateElement("canvas").(*dom.HTMLCanvasElement)
 

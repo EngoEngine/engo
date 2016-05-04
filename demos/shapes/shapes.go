@@ -117,9 +117,11 @@ func (*DefaultScene) Type() string { return "Game" }
 
 func main() {
 	opts := engo.RunOptions{
-		Title:  "Triangle Demo",
-		Width:  worldWidth,
-		Height: worldHeight,
+		Title:          "Shapes Demo",
+		Width:          worldWidth,
+		Height:         worldHeight,
+		StandardInputs: true,
+		MSAA:           4, // This one is not mandatory, but makes the shapes look so much better when rotating the camera
 	}
 	engo.Run(opts, &DefaultScene{})
 }

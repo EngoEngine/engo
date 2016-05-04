@@ -46,7 +46,7 @@ func fatalErr(err error) {
 	}
 }
 
-func CreateWindow(title string, width, height int, fullscreen bool) {
+func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	err := glfw.Init()
 	fatalErr(err)
 
@@ -71,6 +71,8 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 
 	glfw.WindowHint(glfw.ContextVersionMajor, 2)
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
+
+	glfw.WindowHint(glfw.Samples, msaa)
 
 	window, err = glfw.CreateWindow(width, height, title, nil, nil)
 	fatalErr(err)
