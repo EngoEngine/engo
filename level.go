@@ -10,31 +10,31 @@ type Level struct {
 	TileWidth  int
 	TileHeight int
 	Tiles      []*tile
-	LineBounds []Line
+	LineBounds []*Line
 	Images     []*tile
 }
 
 func (t *tile) Height() float32 {
-	return float32(t.height);
+	return float32(t.height)
 }
 
 func (t *tile) Width() float32 {
-	return float32(t.width);
+	return float32(t.width)
 }
 
 func (t *tile) Texture() *gl.Texture {
-	return t.Image.Texture();
+	return t.Image.Texture()
 }
 
-func (t *tile) View() (float32, float32, float32, float32 ) {
+func (t *tile) View() (float32, float32, float32, float32) {
 	return t.Image.u, t.Image.v, t.Image.u2, t.Image.v2
 }
 
 type tile struct {
 	Point
 	height int
-	width int
-	Image *Region
+	width  int
+	Image  *Region
 }
 
 type tilesheet struct {

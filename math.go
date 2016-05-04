@@ -1,12 +1,13 @@
 package engo
 
 import (
+	"fmt"
 	"github.com/luxengine/math"
 )
 
 type Trace struct {
 	Fraction float32
-	Line
+	*Line
 	EndPosition Point
 }
 
@@ -229,14 +230,31 @@ func (l *Line) LineTrace(l2 Line) float32 {
 func (l *Line) GetTrace(lines []*Line) Trace {
 	var t Trace
 
-	t.Fraction = l.LineTrace(*lines[0])
-	t.Line = *lines[0]
+	for _, cl := range lines {
+		fmt.Println("Line:", cl)
+		if cl == nil {
+			continue
+		}
 
-	moveVector := l.P2
-	moveVector.Subtract(l.P1)
-	moveVector.MultiplyScalar(t.Fraction)
-	t.EndPosition = l.P1
-	t.EndPosition.Add(moveVector)
+		fraction := l.LineTrace(*cl)
+
+		if fraction == 0 {
+			println("it's 0")
+			continue
+		}
+
+		if t.Line == nil || fraction < t.Fraction {
+			t.Fraction = fraction
+			t.Line = cl
+
+			moveVector := l.P2
+			moveVector.Subtract(l.P1)
+			moveVector.MultiplyScalar(t.Fraction)
+			t.EndPosition = l.P1
+			t.EndPosition.Add(moveVector)
+			fmt.Println(t.EndPosition)
+		}
+	}
 
 	return t
 }
