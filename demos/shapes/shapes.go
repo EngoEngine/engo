@@ -111,6 +111,72 @@ func (*DefaultScene) Setup(w *ecs.World) {
 			sys.Add(&complexTriangle1.BasicEntity, &complexTriangle1.RenderComponent, &complexTriangle1.SpaceComponent)
 		}
 	}
+
+	triangle3 := MyShape{BasicEntity: ecs.NewBasic()}
+	triangle3.SpaceComponent = engo.SpaceComponent{Position: engo.Point{23, 123}, Width: 50, Height: 50}
+	triangle3.RenderComponent = engo.RenderComponent{Drawable: engo.Triangle{BorderWidth: 1, BorderColor: color.White}, Color: color.RGBA{255, 0, 0, 255}}
+	triangle3.RenderComponent.SetShader(engo.LegacyShader)
+
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *engo.RenderSystem:
+			sys.Add(&triangle3.BasicEntity, &triangle3.RenderComponent, &triangle3.SpaceComponent)
+		}
+	}
+
+	rectangle2 := MyShape{BasicEntity: ecs.NewBasic()}
+	rectangle2.SpaceComponent = engo.SpaceComponent{Position: engo.Point{123, 223}, Width: 50, Height: 50}
+	rectangle2.RenderComponent = engo.RenderComponent{Drawable: engo.Rectangle{BorderWidth: 1, BorderColor: color.White}, Color: color.RGBA{0, 255, 0, 255}}
+	rectangle2.RenderComponent.SetShader(engo.LegacyShader)
+
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *engo.RenderSystem:
+			sys.Add(&rectangle2.BasicEntity, &rectangle2.RenderComponent, &rectangle2.SpaceComponent)
+		}
+	}
+
+	circle2 := MyShape{BasicEntity: ecs.NewBasic()}
+	circle2.SpaceComponent = engo.SpaceComponent{Position: engo.Point{223, 323}, Width: 50, Height: 50}
+	circle2.RenderComponent = engo.RenderComponent{Drawable: engo.Circle{BorderWidth: 1, BorderColor: color.White}, Color: color.RGBA{0, 0, 255, 255}}
+	circle2.RenderComponent.SetShader(engo.LegacyShader)
+
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *engo.RenderSystem:
+			sys.Add(&circle2.BasicEntity, &circle2.RenderComponent, &circle2.SpaceComponent)
+		}
+	}
+
+	triangle4 := MyShape{BasicEntity: ecs.NewBasic()}
+	triangle4.SpaceComponent = engo.SpaceComponent{Position: engo.Point{323, 423}, Width: 50, Height: 50}
+	triangle4.RenderComponent = engo.RenderComponent{Drawable: engo.Triangle{TriangleType: engo.TriangleRight, BorderWidth: 1, BorderColor: color.White}, Color: color.RGBA{255, 255, 0, 255}}
+	triangle4.RenderComponent.SetShader(engo.LegacyShader)
+
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *engo.RenderSystem:
+			sys.Add(&triangle4.BasicEntity, &triangle4.RenderComponent, &triangle4.SpaceComponent)
+		}
+	}
+
+	complexTriangle2 := MyShape{BasicEntity: ecs.NewBasic()}
+	complexTriangle2.SpaceComponent = engo.SpaceComponent{Position: engo.Point{523, 623}, Width: 50, Height: 50}
+	complexTriangle2.RenderComponent = engo.RenderComponent{Drawable: engo.ComplexTriangles{
+		BorderWidth: 1, BorderColor: color.White,
+		Points: []engo.Point{
+			{0.0, 0.0}, {1.0, 0.25}, {0.5, 0.5},
+			{0.5, 0.5}, {1.0, 0.75}, {0.0, 1.0},
+			{0.0, 0.0}, {0.5, 0.50}, {0.0, 1.0},
+		}}, Color: color.RGBA{255, 0, 255, 255}}
+	complexTriangle2.RenderComponent.SetShader(engo.LegacyShader)
+
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *engo.RenderSystem:
+			sys.Add(&complexTriangle2.BasicEntity, &complexTriangle2.RenderComponent, &complexTriangle2.SpaceComponent)
+		}
+	}
 }
 
 func (*DefaultScene) Type() string { return "Game" }

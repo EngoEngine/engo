@@ -3,6 +3,7 @@ package engo
 import (
 	"engo.io/gl"
 	"github.com/luxengine/math"
+	"image/color"
 	"log"
 )
 
@@ -306,6 +307,8 @@ type legacyShader struct {
 	inRadius         *gl.UniformLocation
 	inCenter         *gl.UniformLocation
 	inViewport       *gl.UniformLocation
+	inBorderWidth    *gl.UniformLocation
+	inBorderColor    *gl.UniformLocation
 
 	projectionMatrix []float32
 	viewMatrix       []float32
@@ -327,10 +330,14 @@ uniform mat3 matrixModel;
 uniform vec2 in_Radius;
 uniform vec2 in_Center;
 uniform vec2 in_Viewport;
+uniform float in_BorderWidth;
+uniform vec4 in_BorderColor;
 
 varying vec4 var_Color;
 varying vec2 var_Radius;
 varying vec2 var_Center;
+varying float var_BorderWidth;
+varying vec4 var_BorderColor;
 
 void main() {
   var_Color = in_Color;
@@ -341,6 +348,8 @@ void main() {
   if (in_Radius.x > 0.0 && in_Radius.y > 0.0)
   {
     var_Radius = in_Radius;
+    var_BorderWidth = in_BorderWidth;
+    var_BorderColor = in_BorderColor;
 
     vec3 vecCenter = (matrixProjection * matrixView * matrixModel * vec3(in_Center, 1.0));
     var_Center = (vecCenter.xy/vecCenter.z + vec2(1.0, 1.0)) * in_Viewport / vec2(2.0);
@@ -359,15 +368,24 @@ precision mediump float;
 varying vec4 var_Color;
 varying vec2 var_Radius;
 varying vec2 var_Center;
+varying float var_BorderWidth;
+varying vec4 var_BorderColor;
 
 void main (void) {
   gl_FragColor = var_Color;
 
+  float halfBorder = var_BorderWidth / 2;
+
   if (var_Radius.x > 0.0 && var_Radius.y > 0.0)
   {
-    if (pow(gl_FragCoord.x - var_Center.x, 2.0) / pow(var_Radius.x, 2.0) + pow(gl_FragCoord.y - var_Center.y, 2.0) / pow(var_Radius.y, 2.0) > 1.0)
+    if (pow(gl_FragCoord.x - var_Center.x, 2.0) / pow(var_Radius.x - halfBorder, 2.0) + pow(gl_FragCoord.y - var_Center.y, 2.0) / pow(var_Radius.y - halfBorder, 2.0) > 1.0)
     {
-      gl_FragColor.w = 0.0;
+      if (pow(gl_FragCoord.x - var_Center.x, 2.0) / pow(var_Radius.x + halfBorder, 2.0) + pow(gl_FragCoord.y - var_Center.y, 2.0) / pow(var_Radius.y + halfBorder, 2.0) > 1.0)
+	  {
+	    gl_FragColor.w = 0.0;
+	  } else {
+	    gl_FragColor = var_BorderColor;
+	  }
     }
   }
 }`)
@@ -389,6 +407,8 @@ void main (void) {
 	l.inRadius = Gl.GetUniformLocation(l.program, "in_Radius")
 	l.inCenter = Gl.GetUniformLocation(l.program, "in_Center")
 	l.inViewport = Gl.GetUniformLocation(l.program, "in_Viewport")
+	l.inBorderWidth = Gl.GetUniformLocation(l.program, "in_BorderWidth")
+	l.inBorderColor = Gl.GetUniformLocation(l.program, "in_BorderColor")
 
 	// Not sure if they go here, or in Pre()
 	Gl.Enable(Gl.BLEND)
@@ -457,13 +477,25 @@ func (l *legacyShader) updateBuffer(ren *RenderComponent, space *SpaceComponent)
 func (l *legacyShader) computeBufferSize(draw Drawable) int {
 	switch shape := draw.(type) {
 	case Triangle:
-		return 9
+		if shape.BorderWidth > 0 {
+			return 18
+		} else {
+			return 9
+		}
 	case Rectangle:
-		return 12
+		if shape.BorderWidth > 0 {
+			return 24
+		} else {
+			return 12
+		}
 	case Circle:
 		return 12
 	case ComplexTriangles:
-		return len(shape.Points) * 3
+		if shape.BorderWidth > 0 {
+			return len(shape.Points) * 6
+		} else {
+			return len(shape.Points) * 3
+		}
 	default:
 		return 0
 	}
@@ -473,20 +505,9 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 	w := space.Width
 	h := space.Height
 
-	colorR, colorG, colorB, colorA := ren.Color.RGBA()
-	colorR >>= 8
-	colorG >>= 8
-	colorB >>= 8
-	colorA >>= 8
-
-	red := colorR
-	green := colorG << 8
-	blue := colorB << 16
-	alpha := colorA << 24
-
-	tint := math.Float32frombits((alpha | blue | green | red) & 0xfeffffff)
-
 	var changed bool
+
+	tint := colorToFloat32(ren.Color)
 
 	switch shape := ren.Drawable.(type) {
 	case Triangle:
@@ -503,6 +524,22 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 			//setBufferValue(buffer, 6, 0, &changed)
 			setBufferValue(buffer, 7, h, &changed)
 			setBufferValue(buffer, 8, tint, &changed)
+
+			if shape.BorderWidth > 0 {
+				borderTint := colorToFloat32(shape.BorderColor)
+
+				setBufferValue(buffer, 9, w/2, &changed)
+				//setBufferValue(buffer, 10, 0, &changed)
+				setBufferValue(buffer, 11, borderTint, &changed)
+
+				setBufferValue(buffer, 12, w, &changed)
+				setBufferValue(buffer, 13, h, &changed)
+				setBufferValue(buffer, 14, borderTint, &changed)
+
+				//setBufferValue(buffer, 15, 0, &changed)
+				setBufferValue(buffer, 16, h, &changed)
+				setBufferValue(buffer, 17, borderTint, &changed)
+			}
 		case TriangleRight:
 			//setBufferValue(buffer, 0, 0, &changed)
 			//setBufferValue(buffer, 1, 0, &changed)
@@ -515,23 +552,40 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 			//setBufferValue(buffer, 6, 0, &changed)
 			setBufferValue(buffer, 7, h, &changed)
 			setBufferValue(buffer, 8, tint, &changed)
+
+			if shape.BorderWidth > 0 {
+				borderTint := colorToFloat32(shape.BorderColor)
+
+				//setBufferValue(buffer, 9, 0, &changed)
+				//setBufferValue(buffer, 10, 0, &changed)
+				setBufferValue(buffer, 11, borderTint, &changed)
+
+				setBufferValue(buffer, 12, w, &changed)
+				setBufferValue(buffer, 13, h, &changed)
+				setBufferValue(buffer, 14, borderTint, &changed)
+
+				//setBufferValue(buffer, 15, 0, &changed)
+				setBufferValue(buffer, 16, h, &changed)
+				setBufferValue(buffer, 17, borderTint, &changed)
+			}
 		}
 
 	case Circle:
-		//setBufferValue(buffer, 0, 0, &changed)
-		//setBufferValue(buffer, 1, 0, &changed)
+		halfWidth := shape.BorderWidth / 2
+		setBufferValue(buffer, 0, -halfWidth, &changed)
+		setBufferValue(buffer, 1, -halfWidth, &changed)
 		setBufferValue(buffer, 2, tint, &changed)
 
-		setBufferValue(buffer, 3, w, &changed)
-		//setBufferValue(buffer, 4, 0, &changed)
+		setBufferValue(buffer, 3, w+halfWidth, &changed)
+		setBufferValue(buffer, 4, -halfWidth, &changed)
 		setBufferValue(buffer, 5, tint, &changed)
 
-		setBufferValue(buffer, 6, w, &changed)
-		setBufferValue(buffer, 7, h, &changed)
+		setBufferValue(buffer, 6, w+halfWidth, &changed)
+		setBufferValue(buffer, 7, h+halfWidth, &changed)
 		setBufferValue(buffer, 8, tint, &changed)
 
-		//setBufferValue(buffer, 9, 0, &changed)
-		setBufferValue(buffer, 10, h, &changed)
+		setBufferValue(buffer, 9, -halfWidth, &changed)
+		setBufferValue(buffer, 10, h+halfWidth, &changed)
 		setBufferValue(buffer, 11, tint, &changed)
 
 	case Rectangle:
@@ -551,6 +605,26 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 		setBufferValue(buffer, 10, h, &changed)
 		setBufferValue(buffer, 11, tint, &changed)
 
+		if shape.BorderWidth > 0 {
+			borderTint := colorToFloat32(shape.BorderColor)
+
+			//setBufferValue(buffer, 12, 0, &changed)
+			//setBufferValue(buffer, 13, 0, &changed)
+			setBufferValue(buffer, 14, borderTint, &changed)
+
+			setBufferValue(buffer, 15, w, &changed)
+			//setBufferValue(buffer, 16, 0, &changed)
+			setBufferValue(buffer, 17, borderTint, &changed)
+
+			setBufferValue(buffer, 18, w, &changed)
+			setBufferValue(buffer, 19, h, &changed)
+			setBufferValue(buffer, 20, borderTint, &changed)
+
+			//setBufferValue(buffer, 21, 0, &changed)
+			setBufferValue(buffer, 22, h, &changed)
+			setBufferValue(buffer, 23, borderTint, &changed)
+		}
+
 	case ComplexTriangles:
 		var index int
 		for _, point := range shape.Points {
@@ -560,6 +634,16 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 			index += 3
 		}
 
+		if shape.BorderWidth > 0 {
+			borderTint := colorToFloat32(shape.BorderColor)
+
+			for _, point := range shape.Points {
+				setBufferValue(buffer, index, point.X*w, &changed)
+				setBufferValue(buffer, index+1, point.Y*h, &changed)
+				setBufferValue(buffer, index+2, borderTint, &changed)
+				index += 3
+			}
+		}
 	default:
 		log.Println("Warning: type not supported")
 	}
@@ -601,11 +685,34 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 	case Triangle:
 		Gl.Uniform2f(l.inRadius, 0, 0)
 		Gl.DrawArrays(Gl.TRIANGLES, 0, 3)
+
+		if shape.BorderWidth > 0 {
+			borderWidth := shape.BorderWidth
+			if l.cameraEnabled {
+				borderWidth /= cam.z
+			}
+			Gl.LineWidth(borderWidth)
+			Gl.DrawArrays(Gl.LINE_LOOP, 3, 3)
+		}
 	case Rectangle:
 		Gl.Uniform2f(l.inRadius, 0, 0)
 		Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectanglesVBO)
 		Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
+
+		if shape.BorderWidth > 0 {
+			borderWidth := shape.BorderWidth
+			if l.cameraEnabled {
+				borderWidth /= cam.z
+			}
+			Gl.LineWidth(borderWidth)
+			Gl.DrawArrays(Gl.LINE_LOOP, 4, 4)
+		}
 	case Circle:
+		Gl.Uniform1f(l.inBorderWidth, shape.BorderWidth/cam.z)
+		if shape.BorderWidth > 0 {
+			r, g, b, a := shape.BorderColor.RGBA()
+			Gl.Uniform4f(l.inBorderColor, float32(r>>8), float32(g>>8), float32(b>>8), float32(a>>8))
+		}
 		Gl.Uniform2f(l.inRadius, (space.Width/2)/cam.z, (space.Height/2)/cam.z)
 		Gl.Uniform2f(l.inCenter, space.Width/2, space.Height/2)
 		Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectanglesVBO)
@@ -613,6 +720,15 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 	case ComplexTriangles:
 		Gl.Uniform2f(l.inRadius, 0, 0)
 		Gl.DrawArrays(Gl.TRIANGLES, 0, len(shape.Points))
+
+		if shape.BorderWidth > 0 {
+			borderWidth := shape.BorderWidth
+			if l.cameraEnabled {
+				borderWidth /= cam.z
+			}
+			Gl.LineWidth(borderWidth)
+			Gl.DrawArrays(Gl.LINE_LOOP, len(shape.Points), len(shape.Points))
+		}
 	default:
 		log.Println("Warning: type not supported")
 	}
@@ -627,6 +743,22 @@ func (l *legacyShader) Post() {
 
 	Gl.BindBuffer(Gl.ARRAY_BUFFER, nil)
 	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, nil)
+}
+
+// colorToFloat32 returns the float32 representation of the given color
+func colorToFloat32(c color.Color) float32 {
+	colorR, colorG, colorB, colorA := c.RGBA()
+	colorR >>= 8
+	colorG >>= 8
+	colorB >>= 8
+	colorA >>= 8
+
+	red := colorR
+	green := colorG << 8
+	blue := colorB << 16
+	alpha := colorA << 24
+
+	return math.Float32frombits((alpha | blue | green | red) & 0xfeffffff)
 }
 
 var (
