@@ -8,9 +8,29 @@ type Point struct {
 	X, Y float32
 }
 
+type Line struct {
+	P1 Point
+	P2 Point
+}
+
+type Trace struct {
+	Fraction float32
+	EndPosition Point
+	*Line
+}
+
 func (p *Point) Set(x, y float32) {
 	p.X = x
 	p.Y = y
+}
+
+func (p *Point) Dot(other Point) float32 {
+	return p.X*other.X + p.Y*other.Y
+}
+
+// 2D cross product is magnitude of 3D cross product
+func (p *Point) Cross(other Point) float32 {
+	return p.X*other.Y - p.Y*other.X
 }
 
 func (p *Point) SetTo(v float32) {
@@ -48,6 +68,11 @@ func (p *Point) Multiply(p2 Point) {
 	p.Y *= p2.Y
 }
 
+func (p *Point) Divide(p2 Point) {
+	p.X /= p2.X
+	p.Y /= p2.Y
+}
+
 func (p *Point) PointDistance(p2 Point) float32 {
 	return math.Sqrt(p.PointDistanceSquared(p2))
 }
@@ -72,11 +97,6 @@ func (a *Point) Normalize() (Point, float32) {
 	unit := Point{a.X / mag, a.Y / mag}
 
 	return unit, mag
-}
-
-type Line struct {
-	P1 Point
-	P2 Point
 }
 
 // Returns which side of the line the point is on
@@ -127,25 +147,111 @@ func (l *Line) PointDistanceSquared(point Point) float32 {
 		(y0-(y1+t*(y2-y1)))*(y0-(y1+t*(y2-y1)))
 }
 
-// Returns the point where the two lines intersect
-func (l *Line) LineIntersection(l2 Line) Point {
-	x1 := l.P1.X
-	x2 := l.P2.X
-	x3 := l2.P1.X
-	x4 := l2.P2.X
+// Left Hand Normal
+func (l *Line) Normal() Point {
+	dx := l.P2.X - l.P1.X
+	dy := l.P2.Y - l.P1.Y
+	inverse := Point{dy, -dx}
+	unit, _ := inverse.Normalize()
 
-	y1 := l.P1.Y
-	y2 := l.P2.Y
-	y3 := l2.P1.Y
-	y4 := l2.P2.Y
+	return unit
+}
 
-	denom := ((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4))
-	if denom == 0 {
+
+// Returns the point where the two line *segments* intersect
+func LineIntersection(one, two *Line) Point {
+	p := one.P1
+	q := two.P1
+
+	r := one.P2
+	r.Subtract(p)
+	s := two.P2
+	s.Subtract(q)
+
+	// t = (q − p) × s / (r × s)
+	// u = (q − p) × r / (r × s)
+	// So then we define
+	// qmp = (q - p)
+	// rcs = (r × s)
+	// and we get simply:
+	// t = qmp × s / rcs
+	// u = qmp × r / rcs
+	qmp := q
+	qmp.Subtract(p)
+	qmpcs := qmp.Cross(s)
+	qmpcr := qmp.Cross(r)
+	rcs := r.Cross(s)
+
+	// Collinear
+	if rcs == 0 && qmpcr == 0 {
 		return Point{-1, -1}
 	}
 
-	px := ((x1*y2-y1*x2)*(x3-x4) - (x1-x2)*(x3*y4-y3*x4)) / denom
-	py := ((x1*y2-y1*x2)*(y3-y4) - (y1-y2)*(x3*y4-y3*x4)) / denom
+	// Parallel
+	if rcs == 0 && qmpcr != 0 {
+		return Point{-1, -1}
+	}
 
-	return Point{px, py}
+	t := qmpcs / rcs
+	u := qmpcr / rcs
+	// rcs != 0 at this point
+	if t >= 0 && t <= 1 && u >= 0 && u <= 1 {
+		// the two line segments meet at the point p + t r = q + u s.
+		return Point{p.X + t*r.X, p.Y + t*r.Y}
+	}
+
+	return Point{-1, -1}
+}
+
+// Returns the trace fraction of tracer through boundary
+// 1 means no intersection
+// 0 means tracer's origin lies on the boundary line
+func LineTraceFraction(tracer, boundary *Line) float32 {
+
+	pt := LineIntersection(tracer, boundary)
+	if pt.X == -1 && pt.Y == -1 {
+		return 1
+	}
+
+	traceMag := tracer.P1.PointDistance(pt)
+	lineMag := tracer.P1.PointDistance(tracer.P2)
+
+	if traceMag > lineMag {
+		return 1
+	}
+
+	if lineMag == 0 {
+		return 0
+	}
+
+	return traceMag / lineMag
+}
+
+// Runs a series of line tracers from tracer to each boundary line
+// and returns the nearest trace values
+func LineTrace(tracer *Line, boundaries []*Line) Trace {
+	var t Trace
+
+	for _, cl := range boundaries {
+		//TODO why are some lines nil here?
+		//fmt.Println("Line:", cl)
+		if cl == nil {
+			continue
+		}
+
+		fraction := LineTraceFraction(tracer, cl)
+
+		if t.Line == nil || fraction < t.Fraction {
+			t.Fraction = fraction
+			t.Line = cl
+
+			moveVector := tracer.P2
+			moveVector.Subtract(tracer.P1)
+			moveVector.MultiplyScalar(t.Fraction)
+			t.EndPosition = tracer.P1
+			t.EndPosition.Add(moveVector)
+		}
+	}
+
+	return t
 }
