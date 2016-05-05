@@ -1,18 +1,22 @@
 package engo
 
 import (
-	"fmt"
 	"github.com/luxengine/math"
 )
 
-type Trace struct {
-	Fraction float32
-	*Line
-	EndPosition Point
-}
-
 type Point struct {
 	X, Y float32
+}
+
+type Line struct {
+	P1 Point
+	P2 Point
+}
+
+type Trace struct {
+	Fraction float32
+	EndPosition Point
+	*Line
 }
 
 func (p *Point) Set(x, y float32) {
@@ -96,11 +100,6 @@ func (a *Point) Normalize() (Point, float32) {
 	return unit, mag
 }
 
-type Line struct {
-	P1 Point
-	P2 Point
-}
-
 // Returns which side of the line the point is on
 // This is useful if you have a point of reference
 func (l *Line) PointSide(point Point) bool {
@@ -149,14 +148,25 @@ func (l *Line) PointDistanceSquared(point Point) float32 {
 		(y0-(y1+t*(y2-y1)))*(y0-(y1+t*(y2-y1)))
 }
 
-// Returns the point where the two line *segments* intersect
-func (l *Line) LineIntersection(l2 Line) Point {
-	p := l.P1
-	q := l2.P1
+// Left Hand Normal
+func (l *Line) Normal() Point {
+	dx := l.P2.X - l.P1.X
+	dy := l.P2.Y - l.P1.Y
+	inverse := Point{dy, -dx}
+	unit, _ := inverse.Normalize()
 
-	r := l.P2
+	return unit
+}
+
+
+// Returns the point where the two line *segments* intersect
+func LineIntersection(one, two *Line) Point {
+	p := one.P1
+	q := two.P1
+
+	r := one.P2
 	r.Subtract(p)
-	s := l2.P2
+	s := two.P2
 	s.Subtract(q)
 
 	// t = (q − p) × s / (r × s)
@@ -194,26 +204,18 @@ func (l *Line) LineIntersection(l2 Line) Point {
 	return Point{-1, -1}
 }
 
-func (l *Line) Normal() Point {
-	dx := l.P2.X - l.P1.X
-	dy := l.P2.Y - l.P1.Y
-	inverse := Point{dy, -dx}
-	unit, _ := inverse.Normalize()
+// Returns the trace fraction of tracer through boundary
+// 1 means no intersection
+// 0 means tracer's origin lies on the boundary line
+func LineTraceFraction(tracer, boundary *Line) float32 {
 
-	return unit
-}
-
-// Returns the trace through the input line
-// 1 if no intersection 0 if origin lies on input line
-func (l *Line) LineTrace(l2 Line) float32 {
-
-	pt := l.LineIntersection(l2)
+	pt := LineIntersection(tracer, boundary)
 	if pt.X == -1 && pt.Y == -1 {
 		return 1
 	}
 
-	traceMag := l.P1.PointDistance(pt)
-	lineMag := l.P1.PointDistance(l.P2)
+	traceMag := tracer.P1.PointDistance(pt)
+	lineMag := tracer.P1.PointDistance(tracer.P2)
 
 	if traceMag > lineMag {
 		return 1
@@ -226,17 +228,19 @@ func (l *Line) LineTrace(l2 Line) float32 {
 	return traceMag / lineMag
 }
 
-//TODO
-func (l *Line) GetTrace(lines []*Line) Trace {
+// Runs a series of line tracers from tracer to each boundary line
+// and returns the nearest trace values
+func LineTrace(tracer *Line, boundaries []*Line) Trace {
 	var t Trace
 
-	for _, cl := range lines {
-		fmt.Println("Line:", cl)
+	for _, cl := range boundaries {
+		//TODO why are some lines nil here?
+		//fmt.Println("Line:", cl)
 		if cl == nil {
 			continue
 		}
 
-		fraction := l.LineTrace(*cl)
+		fraction := LineTraceFraction(tracer, cl)
 
 		if fraction == 0 {
 			println("it's 0")
@@ -247,12 +251,11 @@ func (l *Line) GetTrace(lines []*Line) Trace {
 			t.Fraction = fraction
 			t.Line = cl
 
-			moveVector := l.P2
-			moveVector.Subtract(l.P1)
+			moveVector := tracer.P2
+			moveVector.Subtract(tracer.P1)
 			moveVector.MultiplyScalar(t.Fraction)
-			t.EndPosition = l.P1
+			t.EndPosition = tracer.P1
 			t.EndPosition.Add(moveVector)
-			fmt.Println(t.EndPosition)
 		}
 	}
 
