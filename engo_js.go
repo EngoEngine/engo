@@ -46,11 +46,11 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 	canvas.Style().SetProperty("width", fmt.Sprintf("%vpx", width), "")
 	canvas.Style().SetProperty("height", fmt.Sprintf("%vpx", height), "")
 
-	if js.Global.Get("document").Get("body") == nil {
-		body := js.Global.Get("document").Call("createElement", "body")
-		js.Global.Get("document").Set("body", body)
+	if document.Body() == nil {
+		js.Global.Get("document").Set("body", js.Global.Get("document").Call("createElement", "body"))
 		log.Println("Creating body, since it doesn't exist.")
 	}
+
 	document.Body().Style().SetProperty("margin", "0", "")
 	document.Body().AppendChild(canvas)
 
@@ -242,7 +242,6 @@ func loadImage(r Resource) (Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Println()
 
 	return NewHtmlImageObject(img), nil
 }
@@ -291,7 +290,6 @@ func loadFont(r Resource) (*truetype.Font, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Println(ttfBytes)
 	return freetype.ParseFont(ttfBytes)
 }
 
