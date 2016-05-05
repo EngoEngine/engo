@@ -242,11 +242,6 @@ func LineTrace(tracer *Line, boundaries []*Line) Trace {
 
 		fraction := LineTraceFraction(tracer, cl)
 
-		if fraction == 0 {
-			println("it's 0")
-			continue
-		}
-
 		if t.Line == nil || fraction < t.Fraction {
 			t.Fraction = fraction
 			t.Line = cl
