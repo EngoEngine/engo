@@ -4,6 +4,7 @@ package engo
 
 import (
 	"image"
+	"image/color"
 	"image/draw"
 	_ "image/png"
 	"io"
@@ -23,15 +24,14 @@ import (
 
 var (
 	window *glfw.Window
+	Gl     *gl.Context
 
-	Arrow              *glfw.Cursor
-	IBeam              *glfw.Cursor
-	Crosshair          *glfw.Cursor
-	Hand               *glfw.Cursor
-	HResize            *glfw.Cursor
-	VResize            *glfw.Cursor
-	defaultCloseAction bool
-	close              bool
+	Arrow     *glfw.Cursor
+	IBeam     *glfw.Cursor
+	Crosshair *glfw.Cursor
+	Hand      *glfw.Cursor
+	HResize   *glfw.Cursor
+	VResize   *glfw.Cursor
 
 	headlessWidth             = 800
 	headlessHeight            = 800
@@ -125,9 +125,9 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 	window.SetKeyCallback(func(window *glfw.Window, k glfw.Key, s int, a glfw.Action, m glfw.ModifierKey) {
 		key := Key(k)
 		if a == glfw.Press {
-			keyStates[key] = true
+			Input.keys.Set(key, true)
 		} else if a == glfw.Release {
-			keyStates[key] = false
+			Input.keys.Set(key, false)
 		}
 	})
 
@@ -168,16 +168,12 @@ func SetTitle(title string) {
 	}
 }
 
-func runHeadless(defaultScene Scene) {
-	runLoop(defaultScene, true)
-}
-
 // RunIteration runs one iteration / frame
 func RunIteration() {
 	// First check for new keypresses
 	if !headless {
+		Input.update()
 		glfw.PollEvents()
-		keysUpdate()
 	}
 
 	// Then update the world and all Systems
@@ -185,22 +181,32 @@ func RunIteration() {
 
 	// Lastly, forget keypresses and swap buffers
 	if !headless {
+		// reset values to avoid catching the same "signal" twice
 		Mouse.ScrollX, Mouse.ScrollY = 0, 0
+		Mouse.Action = NEUTRAL
+
 		window.SwapBuffers()
 	}
 
 	Time.Tick()
 }
 
+func SetBackground(c color.Color) {
+	if !headless {
+		r, g, b, a := c.RGBA()
+
+		Gl.ClearColor(float32(r), float32(g), float32(b), float32(a))
+	}
+}
+
 // RunPreparation is called only once, and is called automatically when calling Open
 // It is only here for benchmarking in combination with OpenHeadlessNoRun
 func RunPreparation(defaultScene Scene) {
-	keyStates = make(map[Key]bool)
 	Time = NewClock()
 	Files = NewLoader()
 
 	// Default WorldBounds values
-	WorldBounds.Max = Point{Width(), Height()}
+	WorldBounds.Max = Point{GameWidth(), GameHeight()}
 
 	SetScene(defaultScene, false)
 }
@@ -229,14 +235,14 @@ func runLoop(defaultScene Scene, headless bool) {
 	}()
 
 	RunPreparation(defaultScene)
-
 	ticker := time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
+
 Outer:
 	for {
 		select {
 		case <-ticker.C:
 			RunIteration()
-			if close {
+			if closeGame {
 				break Outer
 			}
 			if !headless && window.ShouldClose() {
@@ -250,12 +256,20 @@ Outer:
 	ticker.Stop()
 }
 
-func Width() float32 {
+func GameWidth() float32 {
 	return gameWidth
 }
 
-func Height() float32 {
+func GameHeight() float32 {
 	return gameHeight
+}
+
+func CursorPos() (x, y float64) {
+	return window.GetCursorPos()
+}
+
+func WindowSize() (w, h int) {
+	return window.GetSize()
 }
 
 func WindowWidth() float32 {
@@ -267,7 +281,7 @@ func WindowHeight() float32 {
 }
 
 func Exit() {
-	close = true
+	closeGame = true
 }
 
 func SetCursor(c *glfw.Cursor) {

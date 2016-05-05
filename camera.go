@@ -1,12 +1,20 @@
 package engo
 
 import (
+	"log"
 	"sync"
+	"time"
 
 	"engo.io/ecs"
 	"github.com/go-gl/mathgl/mgl32"
-	"log"
-	"time"
+	"github.com/luxengine/math"
+)
+
+const (
+	MouseRotatorPriority     = 100
+	MouseZoomerPriority      = 110
+	EdgeScrollerPriority     = 120
+	KeyboardScrollerPriority = 130
 )
 
 var (
@@ -24,6 +32,9 @@ type cameraSystem struct {
 	x, y, z  float32
 	tracking cameraEntity // The entity that is currently being followed
 
+	// angle is the angle of the camera, in degrees (not radians!)
+	angle float32
+
 	longTasks map[CameraAxis]*CameraMessage
 }
 
@@ -31,6 +42,7 @@ func (cam *cameraSystem) New(*ecs.World) {
 	cam.x = WorldBounds.Max.X / 2
 	cam.y = WorldBounds.Max.Y / 2
 	cam.z = 1
+
 	cam.longTasks = make(map[CameraAxis]*CameraMessage)
 
 	Mailbox.Listen("CameraMessage", func(msg Message) {
@@ -57,6 +69,8 @@ func (cam *cameraSystem) New(*ecs.World) {
 				cam.moveY(cammsg.Value)
 			case ZAxis:
 				cam.zoom(cammsg.Value)
+			case Angle:
+				cam.rotate(cammsg.Value)
 			}
 		} else {
 			switch cammsg.Axis {
@@ -66,12 +80,14 @@ func (cam *cameraSystem) New(*ecs.World) {
 				cam.moveToY(cammsg.Value)
 			case ZAxis:
 				cam.zoomTo(cammsg.Value)
+			case Angle:
+				cam.rotateTo(cammsg.Value)
 			}
 		}
 	})
 }
 
-func (cam *cameraSystem) Remove(basic ecs.BasicEntity) {}
+func (cam *cameraSystem) Remove(ecs.BasicEntity) {}
 
 func (cam *cameraSystem) Update(dt float32) {
 	for axis, longTask := range cam.longTasks {
@@ -80,11 +96,13 @@ func (cam *cameraSystem) Update(dt float32) {
 
 			switch axis {
 			case XAxis:
-				longTask.Value -= cam.X()
+				longTask.Value -= cam.x
 			case YAxis:
-				longTask.Value -= cam.Y()
+				longTask.Value -= cam.y
 			case ZAxis:
-				longTask.Value -= cam.Z()
+				longTask.Value -= cam.z
+			case Angle:
+				longTask.Value -= cam.angle
 			}
 		}
 
@@ -101,6 +119,8 @@ func (cam *cameraSystem) Update(dt float32) {
 			cam.moveY(dAxis)
 		case ZAxis:
 			cam.zoom(dAxis)
+		case Angle:
+			cam.rotate(dAxis)
 		}
 
 		longTask.Duration -= time.Duration(dt)
@@ -129,16 +149,24 @@ func (cam *cameraSystem) FollowEntity(basic *ecs.BasicEntity, space *SpaceCompon
 	cam.tracking = cameraEntity{basic, space}
 }
 
+// X returns the X-coordinate of the location of the Camera
 func (cam *cameraSystem) X() float32 {
 	return cam.x
 }
 
+// Y returns the Y-coordinate of the location of the Camera
 func (cam *cameraSystem) Y() float32 {
 	return cam.y
 }
 
+// Z returns the Z-coordinate of the location of the Camera
 func (cam *cameraSystem) Z() float32 {
 	return cam.z
+}
+
+// Angle returns the angle (in degrees) at which the Camera is rotated
+func (cam *cameraSystem) Angle() float32 {
+	return cam.angle
 }
 
 func (cam *cameraSystem) moveX(value float32) {
@@ -153,6 +181,10 @@ func (cam *cameraSystem) zoom(value float32) {
 	cam.zoomTo(cam.z + value)
 }
 
+func (cam *cameraSystem) rotate(value float32) {
+	cam.rotateTo(cam.angle + value)
+}
+
 func (cam *cameraSystem) moveToX(location float32) {
 	cam.x = mgl32.Clamp(location, WorldBounds.Min.X, WorldBounds.Max.X)
 }
@@ -163,6 +195,10 @@ func (cam *cameraSystem) moveToY(location float32) {
 
 func (cam *cameraSystem) zoomTo(zoomLevel float32) {
 	cam.z = mgl32.Clamp(zoomLevel, MinZoom, MaxZoom)
+}
+
+func (cam *cameraSystem) rotateTo(rotation float32) {
+	cam.angle = math.Mod(rotation, 360)
 }
 
 func (cam *cameraSystem) centerCam(x, y, z float32) {
@@ -178,6 +214,7 @@ const (
 	XAxis CameraAxis = iota
 	YAxis
 	ZAxis
+	Angle
 )
 
 // CameraMessage is a message that can be sent to the Camera (and other Systemers), to indicate movement
@@ -195,66 +232,41 @@ func (CameraMessage) Type() string {
 
 // KeyboardScroller is a System that allows for scrolling when certain keys are pressed
 type KeyboardScroller struct {
-	ScrollSpeed float32
-	upKeys      []Key
-	leftKeys    []Key
-	downKeys    []Key
-	rightKeys   []Key
-
-	keysMu sync.RWMutex
+	ScrollSpeed                  float32
+	horizontalAxis, verticalAxis string
+	keysMu                       sync.RWMutex
 }
 
-func (*KeyboardScroller) Priority() int          { return 10 }
+func (*KeyboardScroller) Priority() int          { return KeyboardScrollerPriority }
 func (*KeyboardScroller) Remove(ecs.BasicEntity) {}
 
 func (c *KeyboardScroller) Update(dt float32) {
 	c.keysMu.RLock()
 	defer c.keysMu.RUnlock()
 
-	for _, upKey := range c.upKeys {
-		if Keys.Get(upKey).Down() {
-			Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: -c.ScrollSpeed * dt, Incremental: true})
-			break
-		}
-	}
+	vert := Input.Axis(c.verticalAxis)
+	Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: vert.Value() * c.ScrollSpeed * dt, Incremental: true})
 
-	for _, rightKey := range c.rightKeys {
-		if Keys.Get(rightKey).Down() {
-			Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: c.ScrollSpeed * dt, Incremental: true})
-			break
-		}
-	}
-
-	for _, downKey := range c.downKeys {
-		if Keys.Get(downKey).Down() {
-			Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: c.ScrollSpeed * dt, Incremental: true})
-			break
-		}
-	}
-
-	for _, leftKey := range c.leftKeys {
-		if Keys.Get(leftKey).Down() {
-			Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: -c.ScrollSpeed * dt, Incremental: true})
-			break
-		}
-	}
+	hori := Input.Axis(c.horizontalAxis)
+	Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: hori.Value() * c.ScrollSpeed * dt, Incremental: true})
 }
 
-func (c *KeyboardScroller) BindKeyboard(up, right, down, left Key) {
+func (c *KeyboardScroller) BindKeyboard(hori, vert string) {
 	c.keysMu.Lock()
-	defer c.keysMu.Unlock()
 
-	c.upKeys = append(c.upKeys, up)
-	c.rightKeys = append(c.rightKeys, right)
-	c.downKeys = append(c.downKeys, down)
-	c.leftKeys = append(c.leftKeys, left)
+	c.verticalAxis = vert
+	c.horizontalAxis = hori
+
+	defer c.keysMu.Unlock()
 }
 
-func NewKeyboardScroller(scrollSpeed float32, up, right, down, left Key) *KeyboardScroller {
+func NewKeyboardScroller(scrollSpeed float32, hori, vert string) *KeyboardScroller {
 	kbs := &KeyboardScroller{
 		ScrollSpeed: scrollSpeed,
 	}
-	kbs.BindKeyboard(up, right, down, left)
+
+	kbs.BindKeyboard(hori, vert)
+
 	return kbs
 }
 
@@ -265,13 +277,13 @@ type EdgeScroller struct {
 	EdgeMargin  float64
 }
 
-func (*EdgeScroller) Priority() int          { return 10 }
+func (*EdgeScroller) Priority() int          { return EdgeScrollerPriority }
 func (*EdgeScroller) Remove(ecs.BasicEntity) {}
 
+// TODO: Warning doesn't get the cursor position
 func (c *EdgeScroller) Update(dt float32) {
-	curX, curY := window.GetCursorPos()
-	maxX, maxY := window.GetSize()
-
+	curX, curY := CursorPos()
+	maxX, maxY := WindowSize()
 	if curX < c.EdgeMargin {
 		Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: -c.ScrollSpeed * dt, Incremental: true})
 	} else if curX > float64(maxX)-c.EdgeMargin {
@@ -290,11 +302,40 @@ type MouseZoomer struct {
 	ZoomSpeed float32
 }
 
-func (*MouseZoomer) Priority() int          { return 10 }
+func (*MouseZoomer) Priority() int          { return MouseZoomerPriority }
 func (*MouseZoomer) Remove(ecs.BasicEntity) {}
 
-func (c *MouseZoomer) Update(dt float32) {
+func (c *MouseZoomer) Update(float32) {
 	if Mouse.ScrollY != 0 {
 		Mailbox.Dispatch(CameraMessage{Axis: ZAxis, Value: Mouse.ScrollY * c.ZoomSpeed, Incremental: true})
 	}
+}
+
+// MouseRotator is a System that allows for zooming when the scroll wheel is used
+type MouseRotator struct {
+	// RotationSpeed indicates the speed at which the rotation should happen. This is being used together with the
+	// movement by the mouse on the X-axis, to compute the actual rotation.
+	RotationSpeed float32
+
+	oldX    float32
+	pressed bool
+}
+
+func (*MouseRotator) Priority() int          { return MouseRotatorPriority }
+func (*MouseRotator) Remove(ecs.BasicEntity) {}
+
+func (c *MouseRotator) Update(float32) {
+	if Mouse.Button == MouseButtonMiddle && Mouse.Action == PRESS {
+		c.pressed = true
+	}
+
+	if Mouse.Action == RELEASE {
+		c.pressed = false
+	}
+
+	if c.pressed {
+		Mailbox.Dispatch(CameraMessage{Axis: Angle, Value: (c.oldX - Mouse.X) * -c.RotationSpeed, Incremental: true})
+	}
+
+	c.oldX = Mouse.X
 }

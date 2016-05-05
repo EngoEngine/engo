@@ -25,7 +25,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	w.AddSystem(&engo.RenderSystem{})
 
 	// The most important line in this whole demo:
-	w.AddSystem(engo.NewKeyboardScroller(scrollSpeed, engo.W, engo.D, engo.S, engo.A))
+	w.AddSystem(engo.NewKeyboardScroller(scrollSpeed, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis))
 
 	// Create the background; this way we'll see when we actually scroll
 	demoutils.NewBackground(w, worldWidth, worldHeight, color.RGBA{102, 153, 0, 255}, color.RGBA{102, 173, 0, 255})
@@ -35,9 +35,11 @@ func (*DefaultScene) Type() string { return "Game" }
 
 func main() {
 	opts := engo.RunOptions{
-		Title:  "KeyboardScroller Demo",
-		Width:  worldWidth,
-		Height: worldHeight,
+		Title:          "KeyboardScroller Demo",
+		Width:          worldWidth,
+		Height:         worldHeight,
+		StandardInputs: true,
 	}
+
 	engo.Run(opts, &DefaultScene{})
 }

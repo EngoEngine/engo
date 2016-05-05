@@ -35,11 +35,14 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	guy.RenderComponent = engo.NewRenderComponent(texture, engo.Point{8, 8})
+	guy.RenderComponent = engo.RenderComponent{
+		Drawable: texture,
+		Scale: engo.Point{8, 8},
+	}
 	guy.SpaceComponent = engo.SpaceComponent{
 		Position: engo.Point{0, 0},
-		Width:    texture.Width() * guy.RenderComponent.Scale().X,
-		Height:   texture.Height() * guy.RenderComponent.Scale().Y,
+		Width:    texture.Width() * guy.RenderComponent.Scale.X,
+		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
 	}
 
 	// Add it to appropriate systems
@@ -91,13 +94,13 @@ func (s *ScaleSystem) Update(dt float32) {
 			mod = -0.1
 		}
 
-		if e.RenderComponent.Scale().X+mod >= 15 || e.RenderComponent.Scale().X+mod <= 1 {
+		if e.RenderComponent.Scale.X+mod >= 15 || e.RenderComponent.Scale.X+mod <= 1 {
 			mod *= -1
 		}
 
-		newScale := e.RenderComponent.Scale()
+		newScale := e.RenderComponent.Scale
 		newScale.AddScalar(mod)
-		e.RenderComponent.SetScale(newScale)
+		e.RenderComponent.Scale = newScale
 	}
 }
 

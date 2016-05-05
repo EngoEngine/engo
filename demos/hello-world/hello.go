@@ -11,13 +11,14 @@ type DefaultScene struct{}
 
 type Guy struct {
 	ecs.BasicEntity
+
 	engo.RenderComponent
 	engo.SpaceComponent
 }
 
 func (*DefaultScene) Preload() {
 	// Load all files from the data directory. `false` means: do not do it recursively.
-	engo.Files.AddFromDir("data", false)
+	engo.Files.Add("data/icon.png")
 }
 
 func (*DefaultScene) Setup(w *ecs.World) {
@@ -32,11 +33,14 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	guy.RenderComponent = engo.NewRenderComponent(texture, engo.Point{8, 8})
+	guy.RenderComponent = engo.RenderComponent{
+		Drawable: texture,
+		Scale:    engo.Point{8, 8},
+	}
 	guy.SpaceComponent = engo.SpaceComponent{
 		Position: engo.Point{0, 0},
-		Width:    texture.Width() * guy.RenderComponent.Scale().X,
-		Height:   texture.Height() * guy.RenderComponent.Scale().Y,
+		Width:    texture.Width() * guy.RenderComponent.Scale.X,
+		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
 	}
 
 	// Add it to appropriate systems

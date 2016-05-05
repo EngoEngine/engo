@@ -39,7 +39,7 @@ type Exiter interface {
 	// To prevent the default action (close/exit) make sure to set OverrideCloseAction in
 	// your RunOpts to `true`. You should then handle the exiting of the program by calling
 	//    engo.Exit()
-	Exit() bool
+	Exit()
 }
 
 type sceneWrapper struct {
@@ -86,6 +86,7 @@ func SetScene(s Scene, forceNewWorld bool) {
 	currentScene = s
 	currentWorld = wrapper.world
 	Mailbox = wrapper.mailbox
+	// update global cam var
 	cam = wrapper.camera
 
 	// doSetup is true whenever we're (re)initializing the Scene

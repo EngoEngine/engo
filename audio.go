@@ -1,4 +1,4 @@
-// +build !windows
+// +build !windows,!netgo
 
 package engo
 
@@ -83,7 +83,7 @@ func (a *AudioSystem) New(*ecs.World) {
 
 		// Hopefully not that much of an issue, when we receive it before the CameraSystem does
 		// TODO: but it is when the CameraMessage is not Incremental (i.e. the changes are big)
-		al.SetListenerPosition(al.Vector{cam.X() / Width(), cam.Y() / Height(), cam.Z() * a.HeightModifier})
+		al.SetListenerPosition(al.Vector{cam.X() / GameWidth(), cam.Y() / GameHeight(), cam.Z() * a.HeightModifier})
 	})
 }
 
@@ -130,8 +130,8 @@ func (a *AudioSystem) Update(dt float32) {
 
 			if !e.AudioComponent.Background {
 				e.AudioComponent.player.source.SetPosition(al.Vector{
-					(e.SpaceComponent.Position.X + e.SpaceComponent.Width/2) / Width(), // TODO: ensure we're using correct Width/Height()
-					(e.SpaceComponent.Position.Y + e.SpaceComponent.Height/2) / Height(),
+					(e.SpaceComponent.Position.X + e.SpaceComponent.Width/2) / GameWidth(), // TODO: ensure we're using correct Width/Height()
+					(e.SpaceComponent.Position.Y + e.SpaceComponent.Height/2) / GameHeight(),
 					0,
 				})
 			}

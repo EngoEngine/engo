@@ -2,7 +2,10 @@ package engo
 
 import (
 	"engo.io/ecs"
+	"github.com/luxengine/math"
 )
+
+const MouseSystemPriority = 100
 
 // MouseComponent is the location for the MouseSystem to store its results;
 // to be used / viewed by other Systems
@@ -68,8 +71,8 @@ type MouseSystem struct {
 	mouseDown bool
 }
 
-// Priority returns a priority of 10 (higher than most) to ensure that this System runs before all others
-func (m *MouseSystem) Priority() int { return 10 }
+// Priority returns a priority higher than most, to ensure that this System runs before all others
+func (m *MouseSystem) Priority() int { return MouseSystemPriority }
 
 // Add adds a new entity to the MouseSystem.
 // * RenderComponent is only required if you're using the HUDShader on this Entity.
@@ -97,7 +100,13 @@ func (m *MouseSystem) Remove(basic ecs.BasicEntity) {
 func (m *MouseSystem) Update(dt float32) {
 	// Translate Mouse.X and Mouse.Y into "game coordinates"
 	m.mouseX = Mouse.X*cam.z*(gameWidth/windowWidth) + cam.x - (gameWidth/2)*cam.z
-	m.mouseY = Mouse.Y*cam.z*(gameHeight/windowHeight) + cam.y - (gameHeight/2)*cam.z
+	m.mouseY = Mouse.Y*cam.z*(gameHeight/windowHeight) + cam.y - (gameHeight/2)*cam.z // TODO maybe other width/height?
+
+	// Rotate if needed
+	if cam.angle != 0 {
+		sin, cos := math.Sincos(cam.angle * math.Pi / 180)
+		m.mouseX, m.mouseY = m.mouseX*cos+m.mouseY*sin, m.mouseY*cos-m.mouseX*sin
+	}
 
 	for _, e := range m.entities {
 		// Reset all values except these
@@ -133,9 +142,10 @@ func (m *MouseSystem) Update(dt float32) {
 		// if the Mouse component is a tracker we always update it
 		// Check if the X-value is within range
 		// and if the Y-value is within range
+		pos := e.SpaceComponent.AABB()
+
 		if e.MouseComponent.Track ||
-			mx > e.SpaceComponent.Position.X && mx < (e.SpaceComponent.Position.X+e.SpaceComponent.Width) &&
-				my > e.SpaceComponent.Position.Y && my < (e.SpaceComponent.Position.Y+e.SpaceComponent.Height) {
+			mx > pos.Min.X && mx < pos.Max.X && my > pos.Min.Y && my < pos.Max.Y {
 
 			e.MouseComponent.Enter = !e.MouseComponent.Hovered
 			e.MouseComponent.Hovered = true
@@ -185,8 +195,4 @@ func (m *MouseSystem) Update(dt float32) {
 		// implementers can take different decisions based on those
 		e.MouseComponent.Modifier = Mouse.Modifer
 	}
-
-	// reset mouse.Action value to something meaningless to avoid
-	// catching the same "signal" twice
-	Mouse.Action = NEUTRAL
 }
