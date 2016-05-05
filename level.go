@@ -26,6 +26,10 @@ func (t *tile) Texture() *gl.Texture {
 	return t.Image.Texture()
 }
 
+func (t *tile) Close() {
+	// noop
+}
+
 func (t *tile) View() (float32, float32, float32, float32) {
 	return t.Image.u, t.Image.v, t.Image.u2, t.Image.v2
 }

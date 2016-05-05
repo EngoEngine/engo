@@ -68,11 +68,6 @@ func (p *Point) Multiply(p2 Point) {
 	p.Y *= p2.Y
 }
 
-func (p *Point) Divide(p2 Point) {
-	p.X /= p2.X
-	p.Y /= p2.Y
-}
-
 func (p *Point) PointDistance(p2 Point) float32 {
 	return math.Sqrt(p.PointDistanceSquared(p2))
 }
