@@ -65,6 +65,8 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 	}
 	Gl.Viewport(0, 0, width, height)
 
+	Gl.GetExtension("OES_texture_float")
+
 	// DEBUG: Add framebuffer information div.
 	if false {
 		//canvas.Height -= 30
@@ -242,7 +244,7 @@ func loadImage(r Resource) (Image, error) {
 	}
 	log.Println()
 
-	return &ImageObject{img}, nil
+	return NewHtmlImageObject(img), nil
 }
 
 func loadJSON(r Resource) (string, error) {
@@ -293,22 +295,22 @@ func loadFont(r Resource) (*truetype.Font, error) {
 	return freetype.ParseFont(ttfBytes)
 }
 
-type ImageObject struct {
+type HtmlImageObject struct {
 	data *js.Object
 }
 
-func NewImageObject(img *js.Object) *ImageObject {
-	return &ImageObject{img}
+func NewHtmlImageObject(img *js.Object) *HtmlImageObject {
+	return &HtmlImageObject{data: img}
 }
 
-func (i *ImageObject) Data() interface{} {
+func (i *HtmlImageObject) Data() interface{} {
 	return i.data
 }
 
-func (i *ImageObject) Width() int {
+func (i *HtmlImageObject) Width() int {
 	return i.data.Get("width").Int()
 }
 
-func (i *ImageObject) Height() int {
+func (i *HtmlImageObject) Height() int {
 	return i.data.Get("height").Int()
 }

@@ -316,3 +316,23 @@ func ImageToNRGBA(img image.Image, width, height int) *image.NRGBA {
 
 	return newm
 }
+
+type ImageObject struct {
+	data *image.NRGBA
+}
+
+func NewImageObject(img *image.NRGBA) *ImageObject {
+	return &ImageObject{img}
+}
+
+func (i *ImageObject) Data() interface{} {
+	return i.data
+}
+
+func (i *ImageObject) Width() int {
+	return i.data.Rect.Max.X
+}
+
+func (i *ImageObject) Height() int {
+	return i.data.Rect.Max.Y
+}
