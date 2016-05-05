@@ -12,6 +12,9 @@ var (
 	StopAction  *engo.Animation
 	SkillAction *engo.Animation
 	actions     []*engo.Animation
+
+	jumpButton   = "jump"
+	actionButton = "action"
 )
 
 type DefaultScene struct{}
@@ -25,10 +28,14 @@ type Animation struct {
 
 func (*DefaultScene) Preload() {
 	engo.Files.Add("assets/hero.png")
+
 	StopAction = &engo.Animation{Name: "stop", Frames: []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}}
 	WalkAction = &engo.Animation{Name: "move", Frames: []int{11, 12, 13, 14, 15}, Loop: true}
 	SkillAction = &engo.Animation{Name: "skill", Frames: []int{44, 45, 46, 47, 48, 49, 50, 51, 52, 53}}
 	actions = []*engo.Animation{StopAction, WalkAction, SkillAction}
+
+	engo.Input.RegisterButton(jumpButton, engo.Space, engo.X)
+	engo.Input.RegisterButton(actionButton, engo.D, engo.ArrowRight)
 }
 
 func (scene *DefaultScene) Setup(w *ecs.World) {
@@ -60,8 +67,15 @@ func (*DefaultScene) Type() string { return "GameWorld" }
 func (*DefaultScene) CreateEntity(point *engo.Point, spriteSheet *engo.Spritesheet) *Animation {
 	entity := &Animation{BasicEntity: ecs.NewBasic()}
 
-	entity.SpaceComponent = engo.SpaceComponent{*point, 150, 150}
-	entity.RenderComponent = engo.NewRenderComponent(spriteSheet.Cell(0), engo.Point{3, 3})
+	entity.SpaceComponent = engo.SpaceComponent{
+		Position: *point,
+		Width:    150,
+		Height:   150,
+	}
+	entity.RenderComponent = engo.RenderComponent{
+		Drawable: spriteSheet.Cell(0),
+		Scale:    engo.Point{3, 3},
+	}
 	entity.AnimationComponent = engo.NewAnimationComponent(spriteSheet.Drawables(), 0.1)
 
 	entity.AnimationComponent.AddAnimations(actions)
@@ -98,9 +112,9 @@ func (c *ControlSystem) Remove(basic ecs.BasicEntity) {
 
 func (c *ControlSystem) Update(dt float32) {
 	for _, e := range c.entities {
-		if engo.Keys.Get(engo.ArrowRight).Down() {
+		if engo.Input.Button(actionButton).JustPressed() {
 			e.AnimationComponent.SelectAnimationByAction(WalkAction)
-		} else if engo.Keys.Get(engo.Space).Down() {
+		} else if engo.Input.Button(jumpButton).JustPressed() {
 			e.AnimationComponent.SelectAnimationByAction(SkillAction)
 		}
 	}

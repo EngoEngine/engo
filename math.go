@@ -11,7 +11,6 @@ type Point struct {
 func (p *Point) Set(x, y float32) {
 	p.X = x
 	p.Y = y
-
 }
 
 func (p *Point) SetTo(v float32) {

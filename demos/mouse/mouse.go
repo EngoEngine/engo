@@ -27,7 +27,11 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	w.AddSystem(&engo.MouseSystem{})
 	w.AddSystem(&engo.RenderSystem{})
 	w.AddSystem(&ControlSystem{})
+
+	// These are not required, but allow you to move / rotate and still see that it works
 	w.AddSystem(&engo.MouseZoomer{-0.125})
+	w.AddSystem(engo.NewKeyboardScroller(500, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis))
+	w.AddSystem(&engo.MouseRotator{RotationSpeed: 0.125})
 
 	// Retrieve a texture
 	texture := engo.Files.Image("icon.png")
@@ -36,11 +40,15 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	guy.RenderComponent = engo.NewRenderComponent(texture, engo.Point{8, 8})
+	guy.RenderComponent = engo.RenderComponent{
+		Drawable: texture,
+		Scale:    engo.Point{8, 8},
+	}
 	guy.SpaceComponent = engo.SpaceComponent{
-		Position: engo.Point{0, 0},
-		Width:    texture.Width() * guy.RenderComponent.Scale().X,
-		Height:   texture.Height() * guy.RenderComponent.Scale().Y,
+		Position: engo.Point{200, 200},
+		Width:    texture.Width() * guy.RenderComponent.Scale.X,
+		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
+		Rotation: 90,
 	}
 	// guy.MouseComponent doesn't have to be set, because its default values will do
 
@@ -85,7 +93,7 @@ func (c *ControlSystem) Remove(basic ecs.BasicEntity) {
 	}
 }
 
-func (c *ControlSystem) Update(dt float32) {
+func (c *ControlSystem) Update(float32) {
 	for _, e := range c.entities {
 		if e.MouseComponent.Enter {
 			engo.SetCursor(engo.Hand)

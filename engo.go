@@ -2,17 +2,19 @@ package engo // import "engo.io/engo"
 
 import (
 	"fmt"
-	"image/color"
+	"log"
 
 	"engo.io/ecs"
-	"engo.io/gl"
 )
 
 var (
-	Time        *Clock
-	Files       *Loader
-	Gl          *gl.Context
-	WorldBounds AABB
+	Time  *Clock
+	Files *Loader
+	Input *InputManager
+
+	closeGame          bool
+	defaultCloseAction bool
+	WorldBounds        AABB
 
 	currentWorld *ecs.World
 	currentScene Scene
@@ -24,6 +26,11 @@ var (
 	headless        = false
 	vsync           = true
 	resetLoopTicker = make(chan bool, 1)
+)
+
+const (
+	DefaultVerticalAxis   = "vertical"
+	DefaultHorizontalAxis = "horizontal"
 )
 
 type RunOptions struct {
@@ -52,6 +59,8 @@ type RunOptions struct {
 	// OverrideCloseAction indicates that (when true) engo will never close whenever the gamer wants to close the
 	// game - that will be your responsibility
 	OverrideCloseAction bool
+
+	StandardInputs bool
 }
 
 func Run(opts RunOptions, defaultScene Scene) {
@@ -60,6 +69,18 @@ func Run(opts RunOptions, defaultScene Scene) {
 	SetFPSLimit(opts.FPSLimit)
 	vsync = opts.VSync
 	defaultCloseAction = !opts.OverrideCloseAction
+
+	// Create input
+	Input = NewInputManager()
+	if opts.StandardInputs {
+		log.Println("Using standard inputs")
+
+		Input.RegisterButton("jump", Space)
+		Input.RegisterButton("action", Enter)
+
+		Input.RegisterAxis(DefaultHorizontalAxis, AxisKeyPair{A, D}, AxisKeyPair{ArrowLeft, ArrowRight})
+		Input.RegisterAxis(DefaultVerticalAxis, AxisKeyPair{W, S}, AxisKeyPair{ArrowUp, ArrowDown})
+	}
 
 	if opts.HeadlessMode {
 		headless = true
@@ -74,14 +95,6 @@ func Run(opts RunOptions, defaultScene Scene) {
 		if !opts.NoRun {
 			runLoop(defaultScene, false)
 		}
-	}
-}
-
-func SetBackground(c color.Color) {
-	if !headless {
-		r, g, b, a := c.RGBA()
-
-		Gl.ClearColor(float32(r), float32(g), float32(b), float32(a))
 	}
 }
 
@@ -100,4 +113,8 @@ func SetFPSLimit(limit int) error {
 	fpsLimit = limit
 	resetLoopTicker <- true
 	return nil
+}
+
+func runHeadless(defaultScene Scene) {
+	runLoop(defaultScene, true)
 }

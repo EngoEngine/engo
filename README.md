@@ -33,10 +33,13 @@ us a DM or [create an issue](https://github.com/EngoEngine/engo/issues/new).
 Engo is currently undergoing a lot of optimizations and constantly gets new features. However, this sometimes means things break. In order to make transitioning easier for you, 
 we have a list of those changes, with the most recent being at the top. If you run into any problems, please contact us at [gitter](https://gitter.im/EngoEngine/engo). 
 
+* `engo.Width()` and `engo.Height()` have been changed to `engo.GameWidth()` and `engo.GameHeight()` respectively.
+* `RenderComponent.Scale` is now no longer a method, but a variable you can change / access directly. 
+* `engo.NewRenderComponent` was removed. You can now define the values you want directly by using `engo.RenderComponent{}`. Note that the `Drawable` is still required. 
 * `ecs.Entity` changed to `ecs.BasicEntity`, `world.AddEntity` is gone - **a lot** has changed here. The entire issue is described [here](https://github.com/EngoEngine/ecs/issues/13), while [this comment](https://github.com/EngoEngine/ecs/issues/13#issuecomment-210887914) in particular, should help you migrate your code. 
 * Renamed `engo.io/webgl` to `engo.io/gl`, because the package handles more than only *web*gl. 
 * `scene.Exit()` - a `Scene` now also requires an `Exit()` function, alongside the `Hide()` and `Show()` it already required. 
-* `github.com/EngoEngine/engo` -> `engo.io/engo` - Our packages `engo`, `ecs` and `webgl` should now be imported using the `engo.io` path. 
+* `github.com/EngoEngine/engo` -> `engo.io/engo` - Our packages `engo`, `ecs` and `gl` should now be imported using the `engo.io` path. 
 * `engi.XXX` -> `engo.XXX` - We renamed our package `engi` to `engo`. 
 
 ## History
@@ -45,9 +48,14 @@ Engo, originally known as `Engi` was written by [ajhager](https://github.com/ajh
 
 ## Credits
 
-Thank you to everyone who has worked on, or with `Engo`. Non of this would be possible without you, and your help has been truly amazing.
+Thank you to everyone who has worked on, or with `Engo`. None of this would be possible without you, and your help has been truly amazing.
 
 - [ajhager](https://github.com/ajhager): Building the original `engi`, which engo was based off of
 - [paked](https://github.com/paked): Adding ECS element, project maintenance and management
 - [EtienneBruines](https://github.com/EtienneBruines): Rewriting the OpenGL code, maintenance and helping redesign the API
+- [otraore](https://github.com/otraore): Adding in GopherJs support, maintenance
 - [Everyone else who has submitted PRs over the years, to any iteration of the project](https://github.com/EngoEngine/engo/graphs/contributors)
+
+These are 3rd party projects that have made `Engo` possible.
+- [Lux](https://github.com/luxengine/) , which provides a `float32` [math](https://godoc.org/github.com/luxengine/math) package ([MIT license](https://github.com/luxengine/math/blob/master/LICENSE))
+- The original [engi](https://github.com/aljhager/engi) game engine which engo was based off of ([BSD license](https://github.com/ajhager/engi/blob/master/LICENSE))
