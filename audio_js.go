@@ -1,4 +1,4 @@
-// +build netgo
+// +build netgo, android
 
 package engo
 
