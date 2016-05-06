@@ -36,7 +36,7 @@ func init() {
 //var canvas *js.Object
 var document = dom.GetWindow().Document().(dom.HTMLDocument)
 
-func CreateWindow(title string, width, height int, fullscreen bool) {
+func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 	canvas := document.CreateElement("canvas").(*dom.HTMLCanvasElement)
 
@@ -77,6 +77,7 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 	gameHeight = float32(height)
 	windowWidth = WindowWidth()
 	windowHeight = WindowHeight()
+
 	w := dom.GetWindow()
 	w.AddEventListener("keypress", false, func(ev dom.Event) {
 		// TODO: Not sure what to do here, come back

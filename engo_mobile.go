@@ -1,4 +1,4 @@
-//+build android
+//+build !linux, !windows, !netgo, android
 
 package engo
 
@@ -23,17 +23,27 @@ import (
 	"golang.org/x/mobile/event/paint"
 	"golang.org/x/mobile/event/size"
 	"golang.org/x/mobile/event/touch"
+	"golang.org/x/mobile/exp/app/debug"
+	"golang.org/x/mobile/exp/gl/glutil"
+	mobilegl "golang.org/x/mobile/gl"
 	"io/ioutil"
 )
 
 var (
 	Gl *gl.Context
+	sz size.Event
 
 	gameWidth, gameHeight     float32
 	windowWidth, windowHeight float32
+
+	msaaPreference int
 )
 
-func CreateWindow(title string, width, height int, fullscreen bool) {}
+func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
+	gameWidth = float32(width)
+	gameHeight = float32(height)
+	msaaPreference = msaa
+}
 
 func loadImage(r Resource) (Image, error) {
 	if strings.HasPrefix(r.url, "assets/") {
@@ -80,8 +90,7 @@ func loadFont(r Resource) (*truetype.Font, error) {
 }
 
 func WindowSize() (w, h int) {
-	log.Println("warning: not yet implemented WindowSize")
-	return 0, 0
+	return sz.WidthPx, sz.HeightPx
 }
 
 func CursorPos() (x, y float64) {
@@ -137,22 +146,34 @@ func runLoop(defaultScene Scene, headless bool) {
 	}()
 
 	app.Main(func(a app.App) {
+		var (
+			images *glutil.Images
+			fps    *debug.FPS
+		)
+
 		for e := range a.Events() {
 			switch e := a.Filter(e).(type) {
 			case lifecycle.Event:
 				switch e.Crosses(lifecycle.StageVisible) {
 				case lifecycle.CrossOn:
 					Gl = gl.NewContext(e.DrawContext)
-
 					RunPreparation(defaultScene)
+
+					images = glutil.NewImages(e.DrawContext.(mobilegl.Context))
+					fps = debug.NewFPS(images)
 
 					// Let the device know we want to start painting :-)
 					a.Send(paint.Event{})
 				case lifecycle.CrossOff:
-					closeEvent()
+					//closeEvent()
 				}
+
 			case size.Event:
-			//sz = e
+				sz = e
+				windowWidth = float32(sz.WidthPx)
+				windowHeight = float32(sz.HeightPx)
+				Gl.Viewport(0, 0, sz.WidthPx, sz.HeightPx)
+
 			//touchX = float32(sz.WidthPx / 2)
 			//touchY = float32(sz.HeightPx / 2)
 			case paint.Event:
@@ -168,12 +189,30 @@ func runLoop(defaultScene Scene, headless bool) {
 					break
 				}
 
+				fps.Draw(sz)
+
+				// Reset mouse if needed
+				if Mouse.Action == RELEASE {
+					Mouse.Action = NEUTRAL
+				}
+
 				a.Publish() // same as SwapBuffers
 
 				// Drive the animation by preparing to paint the next frame
 				// after this one is shown. - FPS is ignored here!
 				a.Send(paint.Event{})
 			case touch.Event:
+				Mouse.X = e.X
+				Mouse.Y = e.Y
+				switch e.Type {
+				case touch.TypeBegin:
+					Mouse.Action = PRESS
+				case touch.TypeMove:
+					Mouse.Action = MOVE
+				case touch.TypeEnd:
+					Mouse.Action = RELEASE
+				}
+
 				//touchX = e.X
 				//touchY = e.Y
 			}
@@ -213,23 +252,12 @@ func RunPreparation(defaultScene Scene) {
 
 // RunIteration runs one iteration / frame
 func RunIteration() {
-	// First check for new keypresses
 	if !headless {
 		Input.update()
-		//glfw.PollEvents()
 	}
 
 	// Then update the world and all Systems
 	currentWorld.Update(Time.Delta())
-
-	// Lastly, forget keypresses and swap buffers
-	if !headless {
-		// reset values to avoid catching the same "signal" twice
-		Mouse.ScrollX, Mouse.ScrollY = 0, 0
-		Mouse.Action = NEUTRAL
-
-		//window.SwapBuffers()
-	}
 
 	Time.Tick()
 }
