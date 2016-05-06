@@ -424,26 +424,6 @@ func (i *ImageRGBA) Height() int {
 	return i.data.Rect.Max.Y
 }
 
-func NewImageObject(img *image.NRGBA) *ImageObject {
-	return &ImageObject{img}
-}
-
-type ImageObject struct {
-	data *image.NRGBA
-}
-
-func (i *ImageObject) Data() interface{} {
-	return i.data
-}
-
-func (i *ImageObject) Width() int {
-	return i.data.Rect.Max.X
-}
-
-func (i *ImageObject) Height() int {
-	return i.data.Rect.Max.Y
-}
-
 func loadImage(r Resource) (Image, error) {
 	file, err := os.Open(r.url)
 	if err != nil {
