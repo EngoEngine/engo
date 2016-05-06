@@ -24,7 +24,7 @@ We have a [gitter](https://gitter.im/EngoEngine/engo) chat for people to join wh
 2. Then, you can go get it:
 `go get -u engo.io/engo`
 3. Now, you have two choices:
-  1. Visit [our website](https://engo.io/), which hosts a full-blown toturial series on how to create your own game, and on top of that, has some conceptual explanations;
+  1. Visit [our website](https://engo.io/), which hosts a full-blown tutorial series on how to create your own game, and on top of that, has some conceptual explanations;
   2. Check out some demos in our [demos folder](https://github.com/EngoEngine/engo/tree/master/demos). 
 4. Finally, if you run into problems, if you've encountered a bug, or want to request a feature, feel free to shoot 
 us a DM or [create an issue](https://github.com/EngoEngine/engo/issues/new). 
