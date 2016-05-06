@@ -293,22 +293,28 @@ func loadFont(r Resource) (*truetype.Font, error) {
 	return freetype.ParseFont(ttfBytes)
 }
 
+// HtmlImageObject is a webgl-specific implementation of `Drawable`, designed to be used with native `HTML` elements,
+// such as `<img>`
 type HtmlImageObject struct {
 	data *js.Object
 }
 
+// NewHtmlImageObject creates a new HtmlImageObject for the given javascript object
 func NewHtmlImageObject(img *js.Object) *HtmlImageObject {
 	return &HtmlImageObject{data: img}
 }
 
+// Data returns the entire javascript object
 func (i *HtmlImageObject) Data() interface{} {
 	return i.data
 }
 
+// Width returns the value of the "width" variable of the javascript object
 func (i *HtmlImageObject) Width() int {
 	return i.data.Get("width").Int()
 }
 
+// Height returns the value of the "height" variable of the javascript object
 func (i *HtmlImageObject) Height() int {
 	return i.data.Get("height").Int()
 }
