@@ -387,7 +387,7 @@ type ScoreSystem struct {
 }
 
 func (s *ScoreSystem) New(*ecs.World) {
-	s.upToDate = true
+	s.upToDate = false
 	engo.Mailbox.Listen("ScoreMessage", func(message engo.Message) {
 		scoreMessage, isScore := message.(ScoreMessage)
 		if !isScore {
