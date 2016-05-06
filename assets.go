@@ -320,3 +320,28 @@ func ImageToNRGBA(img image.Image, width, height int) *image.NRGBA {
 
 	return newm
 }
+
+// ImageObject is a pure Go implementation of a `Drawable`
+type ImageObject struct {
+	data *image.NRGBA
+}
+
+// NewImageObject creates a new ImageObject given the image.NRGBA reference
+func NewImageObject(img *image.NRGBA) *ImageObject {
+	return &ImageObject{img}
+}
+
+// Data returns the entire image.NRGBA object
+func (i *ImageObject) Data() interface{} {
+	return i.data
+}
+
+// Width returns the maximum X coordinate of the image
+func (i *ImageObject) Width() int {
+	return i.data.Rect.Max.X
+}
+
+// Height returns the maximum Y coordinate of the image
+func (i *ImageObject) Height() int {
+	return i.data.Rect.Max.Y
+}
