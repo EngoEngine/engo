@@ -108,6 +108,8 @@ func (rs *RenderSystem) New(w *ecs.World) {
 		initShaders()
 	}
 
+	Gl.Enable(Gl.MULTISAMPLE)
+
 	Mailbox.Listen("renderChangeMessage", func(Message) {
 		rs.sortingNeeded = true
 	})
