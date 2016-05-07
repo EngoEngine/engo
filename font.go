@@ -1,5 +1,3 @@
-// +build !netgo
-
 package engo
 
 import (
@@ -141,5 +139,4 @@ func (f *Font) Render(text string) *Texture {
 	// Create texture
 	imObj := &ImageObject{nrgba}
 	return NewTexture(imObj)
-
 }

@@ -46,7 +46,7 @@ func fatalErr(err error) {
 	}
 }
 
-func CreateWindow(title string, width, height int, fullscreen bool) {
+func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	err := glfw.Init()
 	fatalErr(err)
 
@@ -71,6 +71,8 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 
 	glfw.WindowHint(glfw.ContextVersionMajor, 2)
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
+
+	glfw.WindowHint(glfw.Samples, msaa)
 
 	window, err = glfw.CreateWindow(width, height, title, nil, nil)
 	fatalErr(err)
@@ -195,7 +197,7 @@ func SetBackground(c color.Color) {
 	if !headless {
 		r, g, b, a := c.RGBA()
 
-		Gl.ClearColor(float32(r), float32(g), float32(b), float32(a))
+		Gl.ClearColor(float32(r)/0xffff, float32(g)/0xffff, float32(b)/0xffff, float32(a)/0xffff)
 	}
 }
 
@@ -421,26 +423,6 @@ func (i *ImageRGBA) Width() int {
 }
 
 func (i *ImageRGBA) Height() int {
-	return i.data.Rect.Max.Y
-}
-
-func NewImageObject(img *image.NRGBA) *ImageObject {
-	return &ImageObject{img}
-}
-
-type ImageObject struct {
-	data *image.NRGBA
-}
-
-func (i *ImageObject) Data() interface{} {
-	return i.data
-}
-
-func (i *ImageObject) Width() int {
-	return i.data.Rect.Max.X
-}
-
-func (i *ImageObject) Height() int {
 	return i.data.Rect.Max.Y
 }
 

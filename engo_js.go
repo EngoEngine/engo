@@ -36,7 +36,7 @@ func init() {
 //var canvas *js.Object
 var document = dom.GetWindow().Document().(dom.HTMLDocument)
 
-func CreateWindow(title string, width, height int, fullscreen bool) {
+func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 	canvas := document.CreateElement("canvas").(*dom.HTMLCanvasElement)
 
@@ -46,11 +46,11 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 	canvas.Style().SetProperty("width", fmt.Sprintf("%vpx", width), "")
 	canvas.Style().SetProperty("height", fmt.Sprintf("%vpx", height), "")
 
-	if js.Global.Get("document").Get("body") == nil {
-		body := js.Global.Get("document").Call("createElement", "body")
-		js.Global.Get("document").Set("body", body)
+	if document.Body() == nil {
+		js.Global.Get("document").Set("body", js.Global.Get("document").Call("createElement", "body"))
 		log.Println("Creating body, since it doesn't exist.")
 	}
+
 	document.Body().Style().SetProperty("margin", "0", "")
 	document.Body().AppendChild(canvas)
 
@@ -65,6 +65,8 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 	}
 	Gl.Viewport(0, 0, width, height)
 
+	Gl.GetExtension("OES_texture_float")
+
 	// DEBUG: Add framebuffer information div.
 	if false {
 		//canvas.Height -= 30
@@ -77,6 +79,7 @@ func CreateWindow(title string, width, height int, fullscreen bool) {
 	gameHeight = float32(height)
 	windowWidth = WindowWidth()
 	windowHeight = WindowHeight()
+
 	w := dom.GetWindow()
 	w.AddEventListener("keypress", false, func(ev dom.Event) {
 		// TODO: Not sure what to do here, come back
@@ -240,9 +243,8 @@ func loadImage(r Resource) (Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Println()
 
-	return &ImageObject{img}, nil
+	return NewHtmlImageObject(img), nil
 }
 
 func loadJSON(r Resource) (string, error) {
@@ -289,26 +291,31 @@ func loadFont(r Resource) (*truetype.Font, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Println(ttfBytes)
 	return freetype.ParseFont(ttfBytes)
 }
 
-type ImageObject struct {
+// HtmlImageObject is a webgl-specific implementation of `Drawable`, designed to be used with native `HTML` elements,
+// such as `<img>`
+type HtmlImageObject struct {
 	data *js.Object
 }
 
-func NewImageObject(img *js.Object) *ImageObject {
-	return &ImageObject{img}
+// NewHtmlImageObject creates a new HtmlImageObject for the given javascript object
+func NewHtmlImageObject(img *js.Object) *HtmlImageObject {
+	return &HtmlImageObject{data: img}
 }
 
-func (i *ImageObject) Data() interface{} {
+// Data returns the entire javascript object
+func (i *HtmlImageObject) Data() interface{} {
 	return i.data
 }
 
-func (i *ImageObject) Width() int {
+// Width returns the value of the "width" variable of the javascript object
+func (i *HtmlImageObject) Width() int {
 	return i.data.Get("width").Int()
 }
 
-func (i *ImageObject) Height() int {
+// Height returns the value of the "height" variable of the javascript object
+func (i *HtmlImageObject) Height() int {
 	return i.data.Get("height").Int()
 }
