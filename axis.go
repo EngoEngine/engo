@@ -39,3 +39,47 @@ func (keys AxisKeyPair) Value() float32 {
 
 	return AxisNeutral
 }
+
+const (
+	// The vertical mouse axis
+	AxisMouseVert = 0
+	// The horizontal mouse axis
+	AxisMouseHori = 1
+)
+
+// AxisMouse is an axis of the mouse direction.
+type AxisMouse struct {
+	direction int
+
+	old float32
+}
+
+// NewAxisMouse creates a new Mouse Axis in either direction AxisMouseVert or AxisMouseHori.
+func NewAxisMouse(d int) *AxisMouse {
+	old := Input.Mouse.Y
+	if old == AxisMouseHori {
+		old = Input.Mouse.X
+	}
+
+	return &AxisMouse{
+		direction: d,
+		old:       old,
+	}
+}
+
+// Value returns the delta of a mouse movement.
+func (am *AxisMouse) Value() float32 {
+	var diff float32
+
+	if am.direction == AxisMouseHori {
+		diff = Input.Mouse.X - am.old
+
+		am.old = Input.Mouse.X
+	} else {
+		diff = Input.Mouse.Y - am.old
+
+		am.old = Input.Mouse.Y
+	}
+
+	return diff
+}

@@ -17,6 +17,8 @@ func NewInputManager() *InputManager {
 
 // InputManager contains information about all forms of input.
 type InputManager struct {
+	Mouse Mouse
+
 	axes    map[string]Axis
 	buttons map[string]Button
 	keys    *KeyManager
@@ -50,4 +52,12 @@ func (im *InputManager) Axis(name string) Axis {
 // Button retrieves a Button with a specified name.
 func (im *InputManager) Button(name string) Button {
 	return im.buttons[name]
+}
+
+type Mouse struct {
+	X, Y             float32
+	ScrollX, ScrollY float32
+	Action           Action
+	Button           MouseButton
+	Modifer          Modifier
 }

@@ -23,6 +23,14 @@ const (
 
 const MouseSystemPriority = 100
 
+type Mouse struct {
+	X, Y             float32
+	ScrollX, ScrollY float32
+	Action           Action
+	Button           MouseButton
+	Modifer          Modifier
+}
+
 // MouseComponent is the location for the MouseSystem to store its results;
 // to be used / viewed by other Systems
 type MouseComponent struct {
@@ -137,8 +145,8 @@ func (m *MouseSystem) Remove(basic ecs.BasicEntity) {
 
 func (m *MouseSystem) Update(dt float32) {
 	// Translate Mouse.X and Mouse.Y into "game coordinates"
-	m.mouseX = engo.Mouse.X*m.camera.z*(engo.GameWidth()/engo.CanvasWidth()) + m.camera.x - (engo.GameWidth()/2)*m.camera.z
-	m.mouseY = engo.Mouse.Y*m.camera.z*(engo.GameHeight()/engo.CanvasHeight()) + m.camera.y - (engo.GameHeight()/2)*m.camera.z
+	m.mouseX = engo.Input.Mouse.X*m.camera.z*(engo.GameWidth()/engo.CanvasWidth()) + m.camera.x - (engo.GameWidth()/2)*m.camera.z
+	m.mouseY = engo.Input.Mouse.Y*m.camera.z*(engo.GameHeight()/engo.CanvasHeight()) + m.camera.y - (engo.GameHeight()/2)*m.camera.z
 
 	// Rotate if needed
 	if m.camera.angle != 0 {
@@ -173,12 +181,12 @@ func (m *MouseSystem) Update(dt float32) {
 		if e.RenderComponent != nil {
 			// Hardcoded special case for the HUD | TODO: make generic instead of hardcoding
 			if e.RenderComponent.shader == HUDShader {
-				mx = engo.Mouse.X
-				my = engo.Mouse.Y
+				mx = engo.Input.Mouse.X
+				my = engo.Input.Mouse.Y
 			}
 		}
 
-		// if the Mouse component is a tracker we always update it
+		// If the Mouse component is a tracker we always update it
 		// Check if the X-value is within range
 		// and if the Y-value is within range
 		pos := e.SpaceComponent.AABB()
@@ -196,19 +204,21 @@ func (m *MouseSystem) Update(dt float32) {
 				e.MouseComponent.MouseY = my
 			}
 
-			switch engo.Mouse.Action {
+			switch engo.Input.Mouse.Action {
 			case engo.Press:
-				switch engo.Mouse.Button {
+				switch engo.Input.Mouse.Button {
 				case engo.MouseButtonLeft:
 					e.MouseComponent.startedDragging = true
+				case MouseButtonLeft:
 					e.MouseComponent.Clicked = true
 				case engo.MouseButtonRight:
 					e.MouseComponent.RightClicked = true
 				}
+
 				m.mouseDown = true
 			case engo.Release:
-				switch engo.Mouse.Button {
-				case engo.MouseButtonLeft:
+				switch engo.Input.Mouse.Button {
+				case MouseButtonLeft:
 					e.MouseComponent.Released = true
 				case engo.MouseButtonRight:
 					e.MouseComponent.RightReleased = true
@@ -222,6 +232,7 @@ func (m *MouseSystem) Update(dt float32) {
 			if e.MouseComponent.Hovered {
 				e.MouseComponent.Leave = true
 			}
+
 			e.MouseComponent.Hovered = false
 		}
 
@@ -237,6 +248,6 @@ func (m *MouseSystem) Update(dt float32) {
 
 		// propagate the modifiers to the mouse component so that game
 		// implementers can take different decisions based on those
-		e.MouseComponent.Modifier = engo.Mouse.Modifier
+		e.MouseComponent.Modifier = engo.Input.Mouse.Modifer
 	}
 }
