@@ -193,14 +193,6 @@ func RunIteration() {
 	Time.Tick()
 }
 
-func SetBackground(c color.Color) {
-	if !headless {
-		r, g, b, a := c.RGBA()
-
-		Gl.ClearColor(float32(r)/0xffff, float32(g)/0xffff, float32(b)/0xffff, float32(a)/0xffff)
-	}
-}
-
 // RunPreparation is called only once, and is called automatically when calling Open
 // It is only here for benchmarking in combination with OpenHeadlessNoRun
 func RunPreparation(defaultScene Scene) {
@@ -211,20 +203,6 @@ func RunPreparation(defaultScene Scene) {
 	WorldBounds.Max = Point{GameWidth(), GameHeight()}
 
 	SetScene(defaultScene, false)
-}
-
-func closeEvent() {
-	for _, scenes := range scenes {
-		if exiter, ok := scenes.scene.(Exiter); ok {
-			exiter.Exit()
-		}
-	}
-
-	if defaultCloseAction {
-		Exit()
-	} else {
-		log.Println("Warning: default close action set to false, please make sure you manually handle this")
-	}
 }
 
 func runLoop(defaultScene Scene, headless bool) {
@@ -280,10 +258,6 @@ func WindowWidth() float32 {
 
 func WindowHeight() float32 {
 	return windowHeight
-}
-
-func Exit() {
-	closeGame = true
 }
 
 func SetCursor(c *glfw.Cursor) {

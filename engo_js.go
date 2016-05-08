@@ -100,17 +100,7 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	WorldBounds.Max = Point{GameWidth(), GameHeight()}
 }
 
-func SetBackground(c color.Color) {
-	if !headless {
-		r, g, b, a := c.RGBA()
-		Gl.ClearColor(float32(r), float32(g), float32(b), float32(a))
-		Gl.Clear(Gl.COLOR_BUFFER_BIT)
-	}
-}
-
-func DestroyWindow() {
-	// TODO: anything to do here?
-}
+func DestroyWindow() {}
 
 func GameWidth() float32 {
 	return gameWidth

@@ -1,4 +1,4 @@
-//+build !linux, !windows, !netgo, android
+//+build android
 
 package engo
 
@@ -145,7 +145,7 @@ func runLoop(defaultScene Scene, headless bool) {
 					// Let the device know we want to start painting :-)
 					a.Send(paint.Event{})
 				case lifecycle.CrossOff:
-					//closeEvent()
+					closeEvent()
 				}
 
 			case size.Event:
@@ -153,9 +153,6 @@ func runLoop(defaultScene Scene, headless bool) {
 				windowWidth = float32(sz.WidthPx)
 				windowHeight = float32(sz.HeightPx)
 				Gl.Viewport(0, 0, sz.WidthPx, sz.HeightPx)
-
-			//touchX = float32(sz.WidthPx / 2)
-			//touchY = float32(sz.HeightPx / 2)
 			case paint.Event:
 				if e.External {
 					// As we are actively painting as fast as
@@ -192,30 +189,9 @@ func runLoop(defaultScene Scene, headless bool) {
 				case touch.TypeEnd:
 					Mouse.Action = RELEASE
 				}
-
-				//touchX = e.X
-				//touchY = e.Y
 			}
 		}
 	})
-}
-
-func closeEvent() {
-	for _, scenes := range scenes {
-		if exiter, ok := scenes.scene.(Exiter); ok {
-			exiter.Exit()
-		}
-	}
-
-	if defaultCloseAction {
-		Exit()
-	} else {
-		log.Println("Warning: default close action set to false, please make sure you manually handle this")
-	}
-}
-
-func Exit() {
-	closeGame = true
 }
 
 // RunPreparation is called only once, and is called automatically when calling Open
@@ -240,12 +216,4 @@ func RunIteration() {
 	currentWorld.Update(Time.Delta())
 
 	Time.Tick()
-}
-
-func SetBackground(c color.Color) {
-	if !headless {
-		r, g, b, a := c.RGBA()
-
-		Gl.ClearColor(float32(r), float32(g), float32(b), float32(a))
-	}
 }

@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"engo.io/ecs"
+	"image/color"
 )
 
 var (
@@ -60,6 +61,8 @@ type RunOptions struct {
 	// game - that will be your responsibility
 	OverrideCloseAction bool
 
+	// StandardInputs is an easy way to map common inputs to actions, such as "jump" being <SPACE>, and "action" being
+	// <ENTER>.
 	StandardInputs bool
 
 	// MSAA indicates the amount of samples that should be taken. Leaving it blank will default to 1, and you may
@@ -78,6 +81,9 @@ type RunOptions struct {
 	MSAA int
 }
 
+// Run is called to create a window, initialize everything, and start the main loop. Once this function returns,
+// the game window has been closed already. You can supply a lot of options within `RunOptions`, and your starting
+// `Scene` should be defined in `defaultScene`.
 func Run(opts RunOptions, defaultScene Scene) {
 	// Save settings
 	SetScaleOnResize(opts.ScaleOnResize)
@@ -129,6 +135,14 @@ func SetOverrideCloseAction(value bool) {
 	defaultCloseAction = !value
 }
 
+func SetBackground(c color.Color) {
+	if !headless {
+		r, g, b, a := c.RGBA()
+
+		Gl.ClearColor(float32(r), float32(g), float32(b), float32(a))
+	}
+}
+
 func SetFPSLimit(limit int) error {
 	if limit <= 0 {
 		return fmt.Errorf("FPS Limit out of bounds. Requires > 0")
@@ -140,4 +154,22 @@ func SetFPSLimit(limit int) error {
 
 func runHeadless(defaultScene Scene) {
 	runLoop(defaultScene, true)
+}
+
+func Exit() {
+	closeGame = true
+}
+
+func closeEvent() {
+	for _, scenes := range scenes {
+		if exiter, ok := scenes.scene.(Exiter); ok {
+			exiter.Exit()
+		}
+	}
+
+	if defaultCloseAction {
+		Exit()
+	} else {
+		log.Println("Warning: default close action set to false, please make sure you manually handle this")
+	}
 }

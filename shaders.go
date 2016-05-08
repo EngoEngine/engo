@@ -101,9 +101,6 @@ void main (void) {
 	s.matrixView = Gl.GetUniformLocation(s.program, "matrixView")
 	s.matrixModel = Gl.GetUniformLocation(s.program, "matrixModel")
 
-	Gl.Enable(Gl.BLEND)
-	Gl.BlendFunc(Gl.SRC_ALPHA, Gl.ONE_MINUS_SRC_ALPHA)
-
 	s.projectionMatrix = make([]float32, 9)
 	s.projectionMatrix[8] = 1
 
@@ -119,6 +116,9 @@ void main (void) {
 }
 
 func (s *basicShader) Pre() {
+	Gl.Enable(Gl.BLEND)
+	Gl.BlendFunc(Gl.SRC_ALPHA, Gl.ONE_MINUS_SRC_ALPHA)
+
 	// Enable shader and buffer, enable attributes in shader
 	Gl.UseProgram(s.program)
 	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, s.indexVBO)
@@ -219,6 +219,8 @@ func (s *basicShader) Post() {
 	Gl.BindTexture(Gl.TEXTURE_2D, nil)
 	Gl.BindBuffer(Gl.ARRAY_BUFFER, nil)
 	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, nil)
+
+	Gl.Disable(Gl.BLEND)
 }
 
 func (s *basicShader) updateBuffer(ren *RenderComponent) {
@@ -414,10 +416,6 @@ void main (void) {
 	l.inBorderWidth = Gl.GetUniformLocation(l.program, "in_BorderWidth")
 	l.inBorderColor = Gl.GetUniformLocation(l.program, "in_BorderColor")
 
-	// Not sure if they go here, or in Pre()
-	Gl.Enable(Gl.BLEND)
-	Gl.BlendFunc(Gl.SRC_ALPHA, Gl.ONE_MINUS_SRC_ALPHA)
-
 	l.projectionMatrix = make([]float32, 9)
 	l.projectionMatrix[8] = 1
 
@@ -433,6 +431,9 @@ void main (void) {
 }
 
 func (l *legacyShader) Pre() {
+	Gl.Enable(Gl.BLEND)
+	Gl.BlendFunc(Gl.SRC_ALPHA, Gl.ONE_MINUS_SRC_ALPHA)
+
 	// Bind shader and buffer, enable attributes
 	Gl.UseProgram(l.program)
 	Gl.EnableVertexAttribArray(l.inPosition)
@@ -747,6 +748,8 @@ func (l *legacyShader) Post() {
 
 	Gl.BindBuffer(Gl.ARRAY_BUFFER, nil)
 	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, nil)
+
+	Gl.Disable(Gl.BLEND)
 }
 
 // colorToFloat32 returns the float32 representation of the given color
