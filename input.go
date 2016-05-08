@@ -20,6 +20,8 @@ func NewInputManager() *InputManager {
 
 // InputManager contains information about all forms of input.
 type InputManager struct {
+	// Mouse is InputManager's reference to the mouse. It is recommended to use the
+	// Axis and Button system if at all possible.
 	Mouse Mouse
 
 	axes    map[string]Axis

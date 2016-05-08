@@ -23,12 +23,22 @@ const (
 
 const MouseSystemPriority = 100
 
+// Mouse is the representation of the physical mouse
 type Mouse struct {
-	X, Y             float32
-	ScrollX, ScrollY float32
-	Action           Action
-	Button           MouseButton
-	Modifer          Modifier
+	// X is the current x position of the mouse in the game
+	X float32
+	// Y is the current y position of the mouse in the game
+	Y float32
+	// ScrollX is the current scrolled position on the x component
+	ScrollX float32
+	// ScrollY is the current scrolled position on the y component
+	ScrollY float32
+	// Action is the currently active Action
+	Action Action
+	// Button is which button is being pressed on the mouse
+	Button MouseButton
+	// Modifier is whether any modifier mouse buttons are being pressed
+	Modifer Modifier
 }
 
 // MouseComponent is the location for the MouseSystem to store its results;
