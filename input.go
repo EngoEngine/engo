@@ -1,9 +1,12 @@
 package engo
 
 const (
-	AxisMax     float32 = 1
+	// AxisMax is the maximum value a joystick or keypress axis will reach
+	AxisMax float32 = 1
+	// AxisMin is the value an axis returns if there has been to state change.
 	AxisNeutral float32 = 0
-	AxisMin     float32 = -1
+	// AxisMin is the minimum value a joystick or keypress axis will reach
+	AxisMin float32 = -1
 )
 
 // NewInputManager holds onto anything input related for engo

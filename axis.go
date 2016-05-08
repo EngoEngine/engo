@@ -41,16 +41,19 @@ func (keys AxisKeyPair) Value() float32 {
 }
 
 const (
-	// The vertical mouse axis
+	// AxisMouseVert is vertical mouse axis
 	AxisMouseVert = 0
-	// The horizontal mouse axis
+	// AxisMouseHori is vertical mouse axis
 	AxisMouseHori = 1
 )
 
-// AxisMouse is an axis of the mouse direction.
+// AxisMouse is an axis for a single x or y component of the Mouse. The value returned from it is
+// the delta movement, since the previous call and it is not constrained by the AxisMin and AxisMax values.
 type AxisMouse struct {
+	// direction is the value storing either AxisMouseVert and AxisMouseHori. It determines which directional
+	// component to operate on.
 	direction int
-
+	// old is the delta from the previous calling of Value.
 	old float32
 }
 
@@ -73,11 +76,9 @@ func (am *AxisMouse) Value() float32 {
 
 	if am.direction == AxisMouseHori {
 		diff = Input.Mouse.X - am.old
-
 		am.old = Input.Mouse.X
 	} else {
 		diff = Input.Mouse.Y - am.old
-
 		am.old = Input.Mouse.Y
 	}
 
