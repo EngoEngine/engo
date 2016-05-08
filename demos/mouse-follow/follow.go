@@ -9,16 +9,14 @@ import (
 
 type DefaultScene struct{}
 
-type Guy struct {
+type Player struct {
 	ecs.BasicEntity
 	engo.RenderComponent
 	engo.SpaceComponent
 }
 
 func (*DefaultScene) Preload() {
-	// This could be done individually: engo.Files.Add("data/icon.png"), etc
-	// Second value (false) says whether to check recursively or not
-	engo.Files.AddFromDir("data", false)
+	engo.Files.Add("data/icon.png")
 }
 
 func (*DefaultScene) Setup(w *ecs.World) {
@@ -31,7 +29,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	texture := engo.Files.Image("icon.png")
 
 	// Create an entity
-	guy := Guy{BasicEntity: ecs.NewBasic()}
+	guy := Player{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
 	guy.RenderComponent = engo.RenderComponent{
@@ -57,18 +55,18 @@ func (*DefaultScene) Setup(w *ecs.World) {
 
 func (*DefaultScene) Type() string { return "GameWorld" }
 
-type scaleEntity struct {
+type followEntity struct {
 	*ecs.BasicEntity
 	*engo.RenderComponent
 	*engo.SpaceComponent
 }
 
 type FollowSystem struct {
-	entities []scaleEntity
+	entities []followEntity
 }
 
 func (s *FollowSystem) Add(basic *ecs.BasicEntity, render *engo.RenderComponent, space *engo.SpaceComponent) {
-	s.entities = append(s.entities, scaleEntity{basic, render, space})
+	s.entities = append(s.entities, followEntity{basic, render, space})
 }
 
 func (s *FollowSystem) Remove(basic ecs.BasicEntity) {
@@ -94,7 +92,7 @@ func (s *FollowSystem) Update(dt float32) {
 
 func main() {
 	opts := engo.RunOptions{
-		Title:          "Scale Demo",
+		Title:          "Follow Demo",
 		Width:          1024,
 		Height:         640,
 		StandardInputs: true,
