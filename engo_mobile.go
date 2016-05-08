@@ -116,26 +116,6 @@ func WindowHeight() float32 {
 
 func DestroyWindow() { /* nothing to do here? */ }
 
-func NewImageObject(img *image.NRGBA) *ImageObject {
-	return &ImageObject{img}
-}
-
-type ImageObject struct {
-	data *image.NRGBA
-}
-
-func (i *ImageObject) Data() interface{} {
-	return i.data
-}
-
-func (i *ImageObject) Width() int {
-	return i.data.Rect.Max.X
-}
-
-func (i *ImageObject) Height() int {
-	return i.data.Rect.Max.Y
-}
-
 func runLoop(defaultScene Scene, headless bool) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)

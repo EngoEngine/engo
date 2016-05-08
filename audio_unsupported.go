@@ -1,9 +1,8 @@
-// +build netgo, android
+// +build netgo, windows, android
 
 package engo
 
 import (
-	"io"
 	"log"
 
 	"engo.io/ecs"
@@ -12,12 +11,6 @@ import (
 const (
 	defaultHeightModifier float32 = 1
 )
-
-// ReadSeekCloser is an io.ReadSeeker and io.Closer.
-type ReadSeekCloser interface {
-	io.ReadSeeker
-	io.Closer
-}
 
 // AudioComponent is a Component which is used by the AudioSystem
 type AudioComponent struct {
@@ -32,7 +25,7 @@ type AudioSystem struct {
 }
 
 func (as *AudioSystem) New(*ecs.World) {
-	log.Println("Warning: audio is not yet implemented on Gopherjs")
+	log.Println("Warning: audio is not yet implemented on this platform")
 }
 
 func (as *AudioSystem) Add(*ecs.BasicEntity, *AudioComponent, *SpaceComponent) {}
