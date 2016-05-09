@@ -44,9 +44,7 @@ do
     go test ${dir} || exit 1
 
     mkdir -p "$outdir/gopherjs/"
-    echo "Gopherjs get is running now"
     gopherjs get ${dir} || exit 1
-    echo "Gopherjs get is done now"
     gopherjs build -o "$outdir/gopherjs/${dir}" ${dir} || exit 1
 
     mkdir -p `dirname "$outdir/android/${dir}.apk"`
