@@ -5,6 +5,18 @@ import (
 	"github.com/luxengine/math"
 )
 
+type Cursor uint8
+
+const (
+	CursorNone = iota
+	CursorArrow
+	CursorCrosshair
+	CursorHand
+	CursorIBeam
+	CursorHResize
+	CursorVResize
+)
+
 const MouseSystemPriority = 100
 
 // MouseComponent is the location for the MouseSystem to store its results;
@@ -53,6 +65,9 @@ type MouseComponent struct {
 	// Modifier is used to store the eventual modifiers that were pressed during
 	// the same time the different click events occurred
 	Modifier Modifier
+
+	// startedDragging is used internally to see if *this* is the object that is being dragged
+	startedDragging bool
 }
 
 type mouseEntity struct {
@@ -111,8 +126,9 @@ func (m *MouseSystem) Update(dt float32) {
 	for _, e := range m.entities {
 		// Reset all values except these
 		*e.MouseComponent = MouseComponent{
-			Track:   e.MouseComponent.Track,
-			Hovered: e.MouseComponent.Hovered,
+			Track:           e.MouseComponent.Track,
+			Hovered:         e.MouseComponent.Hovered,
+			startedDragging: e.MouseComponent.startedDragging,
 		}
 
 		if e.MouseComponent.Track {
@@ -144,7 +160,7 @@ func (m *MouseSystem) Update(dt float32) {
 		// and if the Y-value is within range
 		pos := e.SpaceComponent.AABB()
 
-		if e.MouseComponent.Track ||
+		if e.MouseComponent.Track || e.MouseComponent.startedDragging ||
 			mx > pos.Min.X && mx < pos.Max.X && my > pos.Min.Y && my < pos.Max.Y {
 
 			e.MouseComponent.Enter = !e.MouseComponent.Hovered
@@ -161,6 +177,7 @@ func (m *MouseSystem) Update(dt float32) {
 			case PRESS:
 				switch Mouse.Button {
 				case MouseButtonLeft:
+					e.MouseComponent.startedDragging = true
 					e.MouseComponent.Clicked = true
 				case MouseButtonRight:
 					e.MouseComponent.RightClicked = true
@@ -173,14 +190,8 @@ func (m *MouseSystem) Update(dt float32) {
 				case MouseButtonRight:
 					e.MouseComponent.RightReleased = true
 				}
-				// dragging stops as soon as one of the currently pressed buttons
-				// is released
-				e.MouseComponent.Dragged = false
-				// mouseDown goes false as soon as one of the pressed buttons is
-				// released. Effectively ending any dragging
-				m.mouseDown = false
 			case MOVE:
-				if m.mouseDown {
+				if m.mouseDown && e.MouseComponent.startedDragging {
 					e.MouseComponent.Dragged = true
 				}
 			}
@@ -189,6 +200,16 @@ func (m *MouseSystem) Update(dt float32) {
 				e.MouseComponent.Leave = true
 			}
 			e.MouseComponent.Hovered = false
+		}
+
+		if Mouse.Action == RELEASE {
+			// dragging stops as soon as one of the currently pressed buttons
+			// is released
+			e.MouseComponent.Dragged = false
+			e.MouseComponent.startedDragging = false
+			// mouseDown goes false as soon as one of the pressed buttons is
+			// released. Effectively ending any dragging
+			m.mouseDown = false
 		}
 
 		// propagate the modifiers to the mouse component so that game

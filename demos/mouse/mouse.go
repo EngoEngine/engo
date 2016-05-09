@@ -96,9 +96,9 @@ func (c *ControlSystem) Remove(basic ecs.BasicEntity) {
 func (c *ControlSystem) Update(float32) {
 	for _, e := range c.entities {
 		if e.MouseComponent.Enter {
-			engo.SetCursor(engo.Hand)
+			engo.SetCursor(engo.CursorHand)
 		} else if e.MouseComponent.Leave {
-			engo.SetCursor(nil)
+			engo.SetCursor(engo.CursorNone)
 		}
 	}
 }

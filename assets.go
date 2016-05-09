@@ -12,6 +12,7 @@ import (
 	"engo.io/gl"
 	"github.com/golang/freetype/truetype"
 	"github.com/luxengine/math"
+	"io"
 )
 
 type Resource struct {
@@ -93,6 +94,12 @@ func (l *Loader) Sound(name string) ReadSeekCloser {
 		return nil
 	}
 	return f
+}
+
+// ReadSeekCloser is an io.ReadSeeker and io.Closer.
+type ReadSeekCloser interface {
+	io.ReadSeeker
+	io.Closer
 }
 
 func (l *Loader) Load(onFinish func()) {
