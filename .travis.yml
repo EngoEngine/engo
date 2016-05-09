@@ -9,3 +9,6 @@ go_import_path: engo.io/engo
 go:
 - 1.6.2
 script: ./.runtests.sh
+cache:
+    directories:
+    - $GOPATH/pkg/gomobile
