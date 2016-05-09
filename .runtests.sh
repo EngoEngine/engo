@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Install dependencies
+go get github.com/gopherjs/gopherjs
+go get golang.org/x/mobile/cmd/gomobile
+
 echo "Using GOPATH=$GOPATH"
 
 # These can fail without us minding it
@@ -35,3 +39,5 @@ do
     gomobile build -o "$outdir/android/${dir}.apk" -target android ${dir} || exit 1
 
 done
+
+# Test the TrafficManager as well
