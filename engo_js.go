@@ -7,7 +7,6 @@ import (
 	"compress/gzip"
 	"encoding/base64"
 	"fmt"
-	"image/color"
 	"io/ioutil"
 	"log"
 	"math"
@@ -308,4 +307,9 @@ func (i *HtmlImageObject) Width() int {
 // Height returns the value of the "height" variable of the javascript object
 func (i *HtmlImageObject) Height() int {
 	return i.data.Get("height").Int()
+}
+
+// SetCursor changes the cursor - not yet implemented
+func SetCursor(c Cursor) {
+	log.Println("SetCursor: not yet implemented for gopherjs")
 }

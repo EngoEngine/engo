@@ -1,4 +1,4 @@
-// +build netgo, windows, android
+//+build netgo windows android
 
 package engo
 
@@ -12,11 +12,14 @@ const (
 	defaultHeightModifier float32 = 1
 )
 
+var MasterVolume float64 = 1
+
 // AudioComponent is a Component which is used by the AudioSystem
 type AudioComponent struct {
 	File       string
 	Repeat     bool
 	Background bool
+	RawVolume  float64
 }
 
 // AudioSystem is a System that allows for sound effects and / or music

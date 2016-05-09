@@ -5,6 +5,18 @@ import (
 	"github.com/luxengine/math"
 )
 
+type Cursor uint8
+
+const (
+	CursorNone = iota
+	CursorArrow
+	CursorCrosshair
+	CursorHand
+	CursorIBeam
+	CursorHResize
+	CursorVResize
+)
+
 const MouseSystemPriority = 100
 
 // MouseComponent is the location for the MouseSystem to store its results;

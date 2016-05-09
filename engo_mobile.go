@@ -6,9 +6,9 @@ import (
 	"engo.io/gl"
 	"fmt"
 	"image"
-	"image/color"
 	"image/draw"
 	_ "image/png"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
@@ -26,7 +26,6 @@ import (
 	"golang.org/x/mobile/exp/app/debug"
 	"golang.org/x/mobile/exp/gl/glutil"
 	mobilegl "golang.org/x/mobile/gl"
-	"io/ioutil"
 )
 
 var (
@@ -216,4 +215,9 @@ func RunIteration() {
 	currentWorld.Update(Time.Delta())
 
 	Time.Tick()
+}
+
+// SetCursor changes the cursor - not yet implemented
+func SetCursor(c Cursor) {
+	log.Println("SetCursor: not yet implemented for mobile")
 }

@@ -4,7 +4,6 @@ package engo
 
 import (
 	"image"
-	"image/color"
 	"image/draw"
 	_ "image/png"
 	"io"
@@ -26,12 +25,12 @@ var (
 	window *glfw.Window
 	Gl     *gl.Context
 
-	Arrow     *glfw.Cursor
-	IBeam     *glfw.Cursor
-	Crosshair *glfw.Cursor
-	Hand      *glfw.Cursor
-	HResize   *glfw.Cursor
-	VResize   *glfw.Cursor
+	cursorArrow     *glfw.Cursor
+	cursorIBeam     *glfw.Cursor
+	cursorCrosshair *glfw.Cursor
+	cursorHand      *glfw.Cursor
+	cursorHResize   *glfw.Cursor
+	cursorVResize   *glfw.Cursor
 
 	headlessWidth             = 800
 	headlessHeight            = 800
@@ -50,10 +49,12 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	err := glfw.Init()
 	fatalErr(err)
 
-	Arrow = glfw.CreateStandardCursor(int(glfw.ArrowCursor))
-	Hand = glfw.CreateStandardCursor(int(glfw.HandCursor))
-	IBeam = glfw.CreateStandardCursor(int(glfw.IBeamCursor))
-	Crosshair = glfw.CreateStandardCursor(int(glfw.CrosshairCursor))
+	cursorArrow = glfw.CreateStandardCursor(int(glfw.ArrowCursor))
+	cursorIBeam = glfw.CreateStandardCursor(int(glfw.IBeamCursor))
+	cursorCrosshair = glfw.CreateStandardCursor(int(glfw.CrosshairCursor))
+	cursorHand = glfw.CreateStandardCursor(int(glfw.HandCursor))
+	cursorHResize = glfw.CreateStandardCursor(int(glfw.HResizeCursor))
+	cursorVResize = glfw.CreateStandardCursor(int(glfw.VResizeCursor))
 
 	monitor := glfw.GetPrimaryMonitor()
 	mode := monitor.GetVideoMode()
@@ -260,8 +261,26 @@ func WindowHeight() float32 {
 	return windowHeight
 }
 
-func SetCursor(c *glfw.Cursor) {
-	window.SetCursor(c)
+// SetCursor sets the pointer of the mouse to the defined standard cursor
+func SetCursor(c Cursor) {
+	var cur *glfw.Cursor
+	switch c {
+	case CursorNone:
+		cur = nil // just for the documentation, this isn't required
+	case CursorArrow:
+		cur = cursorArrow
+	case CursorCrosshair:
+		cur = cursorCrosshair
+	case CursorHand:
+		cur = cursorHand
+	case CursorIBeam:
+		cur = cursorIBeam
+	case CursorHResize:
+		cur = cursorHResize
+	case CursorVResize:
+		cur = cursorVResize
+	}
+	window.SetCursor(cur)
 }
 
 func SetVSync(enabled bool) {

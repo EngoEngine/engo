@@ -376,11 +376,7 @@ varying vec4 var_BorderColor;
 void main (void) {
   gl_FragColor = var_Color;
 
-<<<<<<< HEAD
   float halfBorder = var_BorderWidth / 2.0;
-=======
-  float halfBorder = var_BorderWidth / 2;
->>>>>>> 57b1f011fca6b0924388639df3b123d8a0ee786e
 
   if (var_Radius.x > 0.0 && var_Radius.y > 0.0)
   {
