@@ -36,7 +36,7 @@ do
     go test ${dir} || exit 1
 
     mkdir -p "$outdir/gopherjs/"
-    gopherjs get -u ${dir} || exit 1
+    gopherjs get ${dir} || exit 1
     gopherjs build -o "$outdir/gopherjs/${dir}" ${dir} || exit 1
 
     mkdir -p `dirname "$outdir/android/${dir}.apk"`
