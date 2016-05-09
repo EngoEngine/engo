@@ -17,6 +17,15 @@ gomobile init
 
 echo "Using GOPATH=$GOPATH"
 
+echo "Testing engo.io/engo using 'go test'"
+go test
+
+# TODO: Fix the build so this actually passes
+# echo "Testing engo.io/engo using 'gopherjs test'"
+# gopherjs test
+
+echo "Skipping tests for engo.io/engo using 'gomobile' (no tools exist yet)"
+
 # These can fail without us minding it
 blacklist="engo.io/engo/demos/demoutils,engo.io/engo/demos/tilemap"
 
