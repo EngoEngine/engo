@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
 # Install dependencies
+echo "Installing gopherjs"
 go get github.com/gopherjs/gopherjs
+
+echo "Installing gomobile"
 go get golang.org/x/mobile/cmd/gomobile
 
 echo "Using GOPATH=$GOPATH"
@@ -33,7 +36,7 @@ do
     go test ${dir} || exit 1
 
     mkdir -p "$outdir/gopherjs/"
-    gopherjs build -o "$outdir/gopherjs/${dir}" ${dir} || exit 1
+    gopherjs get -o "$outdir/gopherjs/${dir}" ${dir} || exit 1
 
     mkdir -p `dirname "$outdir/android/${dir}.apk"`
     gomobile build -o "$outdir/android/${dir}.apk" -target android ${dir} || exit 1
