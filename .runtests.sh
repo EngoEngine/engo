@@ -10,6 +10,7 @@ go get golang.org/x/mobile/cmd/gomobile
 # TODO: These few lines are required until https://github.com/gopherjs/gopherjs/issues/455 is fixed.
 echo "Installing engo_js dependencies ..."
 gopherjs get "honnef.co/go/js/dom"
+gopherjs get "honnef.co/go/js/xhr"
 
 echo "Using GOPATH=$GOPATH"
 
@@ -43,10 +44,10 @@ do
     echo "Gopherjs get is running now"
     gopherjs get ${dir} || exit 1
     echo "Gopherjs get is done now"
-    #gopherjs build -o "$outdir/gopherjs/${dir}" ${dir} || exit 1
+    gopherjs build -o "$outdir/gopherjs/${dir}" ${dir} || exit 1
 
     mkdir -p `dirname "$outdir/android/${dir}.apk"`
-    #gomobile build -o "$outdir/android/${dir}.apk" -target android ${dir} || exit 1
+    gomobile build -o "$outdir/android/${dir}.apk" -target android ${dir} || exit 1
 
 done
 
