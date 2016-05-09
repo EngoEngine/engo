@@ -18,7 +18,7 @@ gomobile init
 echo "Using GOPATH=$GOPATH"
 
 echo "Testing engo.io/engo using 'go test'"
-go test
+go test -v ./... || exit 1
 
 # TODO: Fix the build so this actually passes
 # echo "Testing engo.io/engo using 'gopherjs test'"
@@ -48,11 +48,6 @@ do
     outdir="/tmp/go-builds"
 
     # Per build method, creating the output directory, attempting to build/test and exit 1 if it failed
-
-    mkdir -p "$outdir/native/"
-    go build -o "$outdir/native/${dir}" ${dir} || exit 1
-    go test ${dir} || exit 1
-
     mkdir -p "$outdir/gopherjs/"
     gopherjs get ${dir} || exit 1
     gopherjs build -o "$outdir/gopherjs/${dir}" ${dir} || exit 1
