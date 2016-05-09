@@ -10,5 +10,6 @@ go:
 - 1.6.2
 script: ./.runtests.sh
 cache:
+    apt: true
     directories:
     - $GOPATH/pkg/gomobile
