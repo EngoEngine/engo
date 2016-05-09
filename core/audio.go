@@ -1,11 +1,12 @@
 //+build !windows,!netgo,!android
 
-package engo
+package core
 
 import (
 	"log"
 
 	"engo.io/ecs"
+	"engo.io/engo"
 	"golang.org/x/mobile/exp/audio/al"
 )
 
@@ -63,7 +64,7 @@ func (a *AudioSystem) Remove(basic ecs.BasicEntity) {
 	}
 }
 
-func (a *AudioSystem) New(*ecs.World) {
+func (a *AudioSystem) New(w *ecs.World) {
 	a.cachedVolume = MasterVolume
 
 	if a.HeightModifier == 0 {
@@ -75,7 +76,20 @@ func (a *AudioSystem) New(*ecs.World) {
 		return
 	}
 
-	Mailbox.Listen("CameraMessage", func(msg Message) {
+	var cam *CameraSystem
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *CameraSystem:
+			cam = sys
+		}
+	}
+
+	if cam == nil {
+		log.Println("CameraSystem not found, MouseSystem cannot run")
+		return
+	}
+
+	engo.Mailbox.Listen("CameraMessage", func(msg engo.Message) {
 		_, ok := msg.(CameraMessage)
 		if !ok {
 			return
@@ -83,14 +97,14 @@ func (a *AudioSystem) New(*ecs.World) {
 
 		// Hopefully not that much of an issue, when we receive it before the CameraSystem does
 		// TODO: but it is when the CameraMessage is not Incremental (i.e. the changes are big)
-		al.SetListenerPosition(al.Vector{cam.X() / GameWidth(), cam.Y() / GameHeight(), cam.Z() * a.HeightModifier})
+		al.SetListenerPosition(al.Vector{cam.X() / engo.GameWidth(), cam.Y() / engo.GameHeight(), cam.Z() * a.HeightModifier})
 	})
 }
 
 func (a *AudioSystem) Update(dt float32) {
 	for _, e := range a.entities {
 		if e.AudioComponent.player == nil {
-			f := Files.Sound(e.AudioComponent.File)
+			f := engo.Files.Sound(e.AudioComponent.File)
 			if f == nil {
 				log.Println("Audio file not loaded:", e.AudioComponent.File)
 				continue
@@ -130,8 +144,8 @@ func (a *AudioSystem) Update(dt float32) {
 
 			if !e.AudioComponent.Background {
 				e.AudioComponent.player.source.SetPosition(al.Vector{
-					(e.SpaceComponent.Position.X + e.SpaceComponent.Width/2) / GameWidth(), // TODO: ensure we're using correct Width/Height()
-					(e.SpaceComponent.Position.Y + e.SpaceComponent.Height/2) / GameHeight(),
+					(e.SpaceComponent.Position.X + e.SpaceComponent.Width/2) / engo.GameWidth(),
+					(e.SpaceComponent.Position.Y + e.SpaceComponent.Height/2) / engo.GameHeight(),
 					0,
 				})
 			}

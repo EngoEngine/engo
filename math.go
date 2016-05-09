@@ -4,6 +4,10 @@ import (
 	"github.com/luxengine/math"
 )
 
+type AABB struct {
+	Min, Max Point
+}
+
 type Point struct {
 	X, Y float32
 }

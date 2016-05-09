@@ -46,7 +46,6 @@ type sceneWrapper struct {
 	scene   Scene
 	world   *ecs.World
 	mailbox *MessageManager
-	camera  *cameraSystem
 }
 
 // CurrentScene returns the SceneWorld that is currently active
@@ -77,7 +76,6 @@ func SetScene(s Scene, forceNewWorld bool) {
 	if wrapper.world == nil || forceNewWorld {
 		wrapper.world = &ecs.World{}
 		wrapper.mailbox = &MessageManager{}
-		wrapper.camera = &cameraSystem{}
 
 		doSetup = true
 	}
@@ -86,8 +84,6 @@ func SetScene(s Scene, forceNewWorld bool) {
 	currentScene = s
 	currentWorld = wrapper.world
 	Mailbox = wrapper.mailbox
-	// update global cam var
-	cam = wrapper.camera
 
 	// doSetup is true whenever we're (re)initializing the Scene
 	if doSetup {
@@ -95,8 +91,6 @@ func SetScene(s Scene, forceNewWorld bool) {
 		Files.Load(func() {})
 
 		wrapper.mailbox.listeners = make(map[string][]MessageHandler)
-
-		wrapper.world.AddSystem(wrapper.camera)
 
 		s.Setup(wrapper.world)
 	} else {

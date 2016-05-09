@@ -1,4 +1,6 @@
-package engo
+//+build ignore
+
+package core
 
 import (
 	"bytes"
@@ -12,6 +14,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"engo.io/engo"
 )
 
 // Just used to create levelTileset->Image
@@ -170,7 +173,7 @@ func createLevelFromTmx(r Resource) (*Level, error) {
 		curX := float32(tlvl.ImgLayers[i].X)
 		curY := float32(tlvl.ImgLayers[i].Y)
 		reg := NewRegion(curImg, 0, 0, curImg.width, curImg.height)
-		lvl.Images = append(lvl.Images, &tile{Point{curX, curY}, reg})
+		lvl.Images = append(lvl.Images, &tile{engo.Point{curX, curY}, reg})
 	}
 
 	return lvl, nil
@@ -194,8 +197,8 @@ func pointStringToLines(str string, xOff, yOff float64) []Line {
 		y1 := float32(floatPts[i][1] + yOff)
 		x2 := float32(floatPts[i+1][0] + xOff)
 		y2 := float32(floatPts[i+1][1] + yOff)
-		p1 := Point{x1, y1}
-		p2 := Point{x2, y2}
+		p1 := engo.Point{x1, y1}
+		p2 := engo.Point{x2, y2}
 		newLine := Line{p1, p2}
 		lines = append(lines, newLine)
 	}

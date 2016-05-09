@@ -1,4 +1,4 @@
-package engo
+package core
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"sort"
 
 	"engo.io/ecs"
+	"engo.io/engo"
 	"engo.io/gl"
 )
 
@@ -39,8 +40,8 @@ const (
 type RenderComponent struct {
 	// Hidden is used to prevent drawing by OpenGL
 	Hidden bool
-	// Scale is the scale at which to render, in the X and Y axis. Not defining Scale, will default to Point{1, 1}
-	Scale Point
+	// Scale is the scale at which to render, in the X and Y axis. Not defining Scale, will default to engo.Point{1, 1}
+	Scale engo.Point
 	// Color defines how much of the color-components of the texture get used
 	Color color.Color
 	// Drawable refers to the Texture that should be drawn
@@ -57,12 +58,12 @@ type RenderComponent struct {
 
 func (r *RenderComponent) SetShader(s Shader) {
 	r.shader = s
-	Mailbox.Dispatch(&renderChangeMessage{})
+	engo.Mailbox.Dispatch(&renderChangeMessage{})
 }
 
 func (r *RenderComponent) SetZIndex(index float32) {
 	r.zIndex = index
-	Mailbox.Dispatch(&renderChangeMessage{})
+	engo.Mailbox.Dispatch(&renderChangeMessage{})
 }
 
 type renderEntity struct {
@@ -104,13 +105,13 @@ func (*RenderSystem) Priority() int { return RenderSystemPriority }
 func (rs *RenderSystem) New(w *ecs.World) {
 	rs.world = w
 
-	if !headless {
-		initShaders()
+	if !engo.Headless() {
+		initShaders(w)
 	}
 
-	Gl.Enable(Gl.MULTISAMPLE)
+	engo.Gl.Enable(engo.Gl.MULTISAMPLE)
 
-	Mailbox.Listen("renderChangeMessage", func(Message) {
+	engo.Mailbox.Listen("renderChangeMessage", func(engo.Message) {
 		rs.sortingNeeded = true
 	})
 }
@@ -135,7 +136,7 @@ func (rs *RenderSystem) Remove(basic ecs.BasicEntity) {
 }
 
 func (rs *RenderSystem) Update(dt float32) {
-	if headless {
+	if engo.Headless() {
 		return
 	}
 
@@ -144,7 +145,7 @@ func (rs *RenderSystem) Update(dt float32) {
 		rs.sortingNeeded = false
 	}
 
-	Gl.Clear(Gl.COLOR_BUFFER_BIT)
+	engo.Gl.Clear(engo.Gl.COLOR_BUFFER_BIT)
 
 	// TODO: it's linear for now, but that might very well be a bad idea
 	for _, e := range rs.entities {
@@ -169,7 +170,7 @@ func (rs *RenderSystem) Update(dt float32) {
 
 		// Setting default scale to 1
 		if e.RenderComponent.Scale.X == 0 && e.RenderComponent.Scale.Y == 0 {
-			e.RenderComponent.Scale = Point{1, 1}
+			e.RenderComponent.Scale = engo.Point{1, 1}
 		}
 
 		// Setting default to white

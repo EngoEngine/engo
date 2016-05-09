@@ -6,7 +6,9 @@ type Modifier int
 
 var (
 	Mouse mouse
+)
 
+const (
 	MOVE    = Action(0)
 	PRESS   = Action(1)
 	RELEASE = Action(2)

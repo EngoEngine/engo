@@ -1,4 +1,4 @@
-// +build !netgo,!android
+//+build !netgo,!android
 
 package engo
 

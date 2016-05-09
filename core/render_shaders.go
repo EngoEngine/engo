@@ -1,6 +1,8 @@
-package engo
+package core
 
 import (
+	"engo.io/ecs"
+	"engo.io/engo"
 	"engo.io/gl"
 	"github.com/luxengine/math"
 	"image/color"
@@ -10,7 +12,7 @@ import (
 const bufferSize = 10000
 
 type Shader interface {
-	Initialize()
+	Setup(*ecs.World)
 	Pre()
 	Draw(*RenderComponent, *SpaceComponent)
 	Post()
@@ -37,11 +39,12 @@ type basicShader struct {
 	viewMatrix       []float32
 	modelMatrix      []float32
 
+	camera        *CameraSystem
 	cameraEnabled bool
 }
 
-func (s *basicShader) Initialize() {
-	s.program = LoadShader(`
+func (s *basicShader) Setup(w *ecs.World) {
+	s.program = engo.LoadShader(`
 attribute vec2 in_Position;
 attribute vec2 in_TexCoords;
 attribute vec4 in_Color;
@@ -87,19 +90,19 @@ void main (void) {
 		s.indices[i+4] = uint16(j + 2)
 		s.indices[i+5] = uint16(j + 3)
 	}
-	s.indexVBO = Gl.CreateBuffer()
-	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, s.indexVBO)
-	Gl.BufferData(Gl.ELEMENT_ARRAY_BUFFER, s.indices, Gl.STATIC_DRAW)
+	s.indexVBO = engo.Gl.CreateBuffer()
+	engo.Gl.BindBuffer(engo.Gl.ELEMENT_ARRAY_BUFFER, s.indexVBO)
+	engo.Gl.BufferData(engo.Gl.ELEMENT_ARRAY_BUFFER, s.indices, engo.Gl.STATIC_DRAW)
 
 	// Define things that should be read from the texture buffer
-	s.inPosition = Gl.GetAttribLocation(s.program, "in_Position")
-	s.inTexCoords = Gl.GetAttribLocation(s.program, "in_TexCoords")
-	s.inColor = Gl.GetAttribLocation(s.program, "in_Color")
+	s.inPosition = engo.Gl.GetAttribLocation(s.program, "in_Position")
+	s.inTexCoords = engo.Gl.GetAttribLocation(s.program, "in_TexCoords")
+	s.inColor = engo.Gl.GetAttribLocation(s.program, "in_Color")
 
 	// Define things that should be set per draw
-	s.matrixProjection = Gl.GetUniformLocation(s.program, "matrixProjection")
-	s.matrixView = Gl.GetUniformLocation(s.program, "matrixView")
-	s.matrixModel = Gl.GetUniformLocation(s.program, "matrixModel")
+	s.matrixProjection = engo.Gl.GetUniformLocation(s.program, "matrixProjection")
+	s.matrixView = engo.Gl.GetUniformLocation(s.program, "matrixView")
+	s.matrixModel = engo.Gl.GetUniformLocation(s.program, "matrixModel")
 
 	s.projectionMatrix = make([]float32, 9)
 	s.projectionMatrix[8] = 1
@@ -113,57 +116,69 @@ void main (void) {
 	s.modelMatrix[0] = 1
 	s.modelMatrix[4] = 1
 	s.modelMatrix[8] = 1
+
+	if s.cameraEnabled {
+		for _, system := range w.Systems() {
+			switch sys := system.(type) {
+			case *CameraSystem:
+				s.camera = sys
+			}
+		}
+		if s.camera == nil {
+			log.Println("WARNING: BasicShader has CameraEnabled, but CameraSystem was not found")
+		}
+	}
 }
 
 func (s *basicShader) Pre() {
-	Gl.Enable(Gl.BLEND)
-	Gl.BlendFunc(Gl.SRC_ALPHA, Gl.ONE_MINUS_SRC_ALPHA)
+	engo.Gl.Enable(engo.Gl.BLEND)
+	engo.Gl.BlendFunc(engo.Gl.SRC_ALPHA, engo.Gl.ONE_MINUS_SRC_ALPHA)
 
 	// Enable shader and buffer, enable attributes in shader
-	Gl.UseProgram(s.program)
-	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, s.indexVBO)
-	Gl.EnableVertexAttribArray(s.inPosition)
-	Gl.EnableVertexAttribArray(s.inTexCoords)
-	Gl.EnableVertexAttribArray(s.inColor)
+	engo.Gl.UseProgram(s.program)
+	engo.Gl.BindBuffer(engo.Gl.ELEMENT_ARRAY_BUFFER, s.indexVBO)
+	engo.Gl.EnableVertexAttribArray(s.inPosition)
+	engo.Gl.EnableVertexAttribArray(s.inTexCoords)
+	engo.Gl.EnableVertexAttribArray(s.inColor)
 
-	if scaleOnResize {
-		s.projectionMatrix[0] = 1 / (gameWidth / 2)
-		s.projectionMatrix[4] = 1 / (-gameHeight / 2)
+	if engo.ScaleOnResize() {
+		s.projectionMatrix[0] = 1 / (engo.GameWidth() / 2)
+		s.projectionMatrix[4] = 1 / (-engo.GameHeight() / 2)
 	} else {
-		s.projectionMatrix[0] = 1 / (windowWidth / 2)
-		s.projectionMatrix[4] = 1 / (-windowHeight / 2)
+		s.projectionMatrix[0] = 1 / (engo.WindowWidth() / 2)
+		s.projectionMatrix[4] = 1 / (-engo.WindowHeight() / 2)
 	}
 
 	if s.cameraEnabled {
-		s.viewMatrix[1], s.viewMatrix[0] = math.Sincos(cam.angle * math.Pi / 180)
+		s.viewMatrix[1], s.viewMatrix[0] = math.Sincos(s.camera.angle * math.Pi / 180)
 		s.viewMatrix[3] = -s.viewMatrix[1]
 		s.viewMatrix[4] = s.viewMatrix[0]
-		s.viewMatrix[6] = -cam.x
-		s.viewMatrix[7] = -cam.y
-		s.viewMatrix[8] = cam.z
+		s.viewMatrix[6] = -s.camera.x
+		s.viewMatrix[7] = -s.camera.y
+		s.viewMatrix[8] = s.camera.z
 	} else {
 		s.viewMatrix[6] = -1 / s.projectionMatrix[0]
 		s.viewMatrix[7] = 1 / s.projectionMatrix[4]
 	}
 
-	Gl.UniformMatrix3fv(s.matrixProjection, false, s.projectionMatrix)
-	Gl.UniformMatrix3fv(s.matrixView, false, s.viewMatrix)
+	engo.Gl.UniformMatrix3fv(s.matrixProjection, false, s.projectionMatrix)
+	engo.Gl.UniformMatrix3fv(s.matrixView, false, s.viewMatrix)
 }
 
 func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 	if s.lastBuffer != ren.buffer || ren.buffer == nil {
 		s.updateBuffer(ren)
 
-		Gl.BindBuffer(Gl.ARRAY_BUFFER, ren.buffer)
-		Gl.VertexAttribPointer(s.inPosition, 2, Gl.FLOAT, false, 20, 0)
-		Gl.VertexAttribPointer(s.inTexCoords, 2, Gl.FLOAT, false, 20, 8)
-		Gl.VertexAttribPointer(s.inColor, 4, Gl.UNSIGNED_BYTE, true, 20, 16)
+		engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.buffer)
+		engo.Gl.VertexAttribPointer(s.inPosition, 2, engo.Gl.FLOAT, false, 20, 0)
+		engo.Gl.VertexAttribPointer(s.inTexCoords, 2, engo.Gl.FLOAT, false, 20, 8)
+		engo.Gl.VertexAttribPointer(s.inColor, 4, engo.Gl.UNSIGNED_BYTE, true, 20, 16)
 
 		s.lastBuffer = ren.buffer
 	}
 
 	if s.lastTexture != ren.Drawable.Texture() {
-		Gl.BindTexture(Gl.TEXTURE_2D, ren.Drawable.Texture())
+		engo.Gl.BindTexture(engo.Gl.TEXTURE_2D, ren.Drawable.Texture())
 
 		s.lastTexture = ren.Drawable.Texture()
 	}
@@ -172,17 +187,17 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		var val int
 		switch ren.Repeat {
 		case CLAMP_TO_EDGE:
-			val = Gl.CLAMP_TO_EDGE
+			val = engo.Gl.CLAMP_TO_EDGE
 		case CLAMP_TO_BORDER:
-			val = Gl.CLAMP_TO_EDGE
+			val = engo.Gl.CLAMP_TO_EDGE
 		case REPEAT:
-			val = Gl.REPEAT
+			val = engo.Gl.REPEAT
 		case MIRRORED_REPEAT:
-			val = Gl.MIRRORED_REPEAT
+			val = engo.Gl.MIRRORED_REPEAT
 		}
 
-		Gl.TexParameteri(Gl.TEXTURE_2D, Gl.TEXTURE_WRAP_S, val)
-		Gl.TexParameteri(Gl.TEXTURE_2D, Gl.TEXTURE_WRAP_T, val)
+		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_S, val)
+		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_T, val)
 	}
 
 	if space.Rotation != 0 {
@@ -202,9 +217,9 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 	s.modelMatrix[6] = space.Position.X
 	s.modelMatrix[7] = space.Position.Y
 
-	Gl.UniformMatrix3fv(s.matrixModel, false, s.modelMatrix)
+	engo.Gl.UniformMatrix3fv(s.matrixModel, false, s.modelMatrix)
 
-	Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
+	engo.Gl.DrawElements(engo.Gl.TRIANGLES, 6, engo.Gl.UNSIGNED_SHORT, 0)
 }
 
 func (s *basicShader) Post() {
@@ -212,15 +227,15 @@ func (s *basicShader) Post() {
 	s.lastBuffer = nil
 
 	// Cleanup
-	Gl.DisableVertexAttribArray(s.inPosition)
-	Gl.DisableVertexAttribArray(s.inTexCoords)
-	Gl.DisableVertexAttribArray(s.inColor)
+	engo.Gl.DisableVertexAttribArray(s.inPosition)
+	engo.Gl.DisableVertexAttribArray(s.inTexCoords)
+	engo.Gl.DisableVertexAttribArray(s.inColor)
 
-	Gl.BindTexture(Gl.TEXTURE_2D, nil)
-	Gl.BindBuffer(Gl.ARRAY_BUFFER, nil)
-	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, nil)
+	engo.Gl.BindTexture(engo.Gl.TEXTURE_2D, nil)
+	engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, nil)
+	engo.Gl.BindBuffer(engo.Gl.ELEMENT_ARRAY_BUFFER, nil)
 
-	Gl.Disable(Gl.BLEND)
+	engo.Gl.Disable(engo.Gl.BLEND)
 }
 
 func (s *basicShader) updateBuffer(ren *RenderComponent) {
@@ -233,10 +248,10 @@ func (s *basicShader) updateBuffer(ren *RenderComponent) {
 	}
 
 	if ren.buffer == nil {
-		ren.buffer = Gl.CreateBuffer()
+		ren.buffer = engo.Gl.CreateBuffer()
 	}
-	Gl.BindBuffer(Gl.ARRAY_BUFFER, ren.buffer)
-	Gl.BufferData(Gl.ARRAY_BUFFER, ren.bufferContent, Gl.STATIC_DRAW)
+	engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.buffer)
+	engo.Gl.BufferData(engo.Gl.ARRAY_BUFFER, ren.bufferContent, engo.Gl.STATIC_DRAW)
 }
 
 func (s *basicShader) generateBufferContent(ren *RenderComponent, buffer []float32) bool {
@@ -316,13 +331,14 @@ type legacyShader struct {
 	viewMatrix       []float32
 	modelMatrix      []float32
 
+	camera        *CameraSystem
 	cameraEnabled bool
 
 	lastBuffer *gl.Buffer
 }
 
-func (l *legacyShader) Initialize() {
-	l.program = LoadShader(`
+func (l *legacyShader) Setup(w *ecs.World) {
+	l.program = engo.LoadShader(`
 attribute vec2 in_Position;
 attribute vec4 in_Color;
 
@@ -394,23 +410,23 @@ void main (void) {
 
 	// Create and populate indices buffer
 	l.indicesRectangles = []uint16{0, 1, 2, 0, 2, 3}
-	l.indicesRectanglesVBO = Gl.CreateBuffer()
-	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectanglesVBO)
-	Gl.BufferData(Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectangles, Gl.STATIC_DRAW)
+	l.indicesRectanglesVBO = engo.Gl.CreateBuffer()
+	engo.Gl.BindBuffer(engo.Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectanglesVBO)
+	engo.Gl.BufferData(engo.Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectangles, engo.Gl.STATIC_DRAW)
 
 	// Define things that should be read from the texture buffer
-	l.inPosition = Gl.GetAttribLocation(l.program, "in_Position")
-	l.inColor = Gl.GetAttribLocation(l.program, "in_Color")
+	l.inPosition = engo.Gl.GetAttribLocation(l.program, "in_Position")
+	l.inColor = engo.Gl.GetAttribLocation(l.program, "in_Color")
 
 	// Define things that should be set per draw
-	l.matrixProjection = Gl.GetUniformLocation(l.program, "matrixProjection")
-	l.matrixView = Gl.GetUniformLocation(l.program, "matrixView")
-	l.matrixModel = Gl.GetUniformLocation(l.program, "matrixModel")
-	l.inRadius = Gl.GetUniformLocation(l.program, "in_Radius")
-	l.inCenter = Gl.GetUniformLocation(l.program, "in_Center")
-	l.inViewport = Gl.GetUniformLocation(l.program, "in_Viewport")
-	l.inBorderWidth = Gl.GetUniformLocation(l.program, "in_BorderWidth")
-	l.inBorderColor = Gl.GetUniformLocation(l.program, "in_BorderColor")
+	l.matrixProjection = engo.Gl.GetUniformLocation(l.program, "matrixProjection")
+	l.matrixView = engo.Gl.GetUniformLocation(l.program, "matrixView")
+	l.matrixModel = engo.Gl.GetUniformLocation(l.program, "matrixModel")
+	l.inRadius = engo.Gl.GetUniformLocation(l.program, "in_Radius")
+	l.inCenter = engo.Gl.GetUniformLocation(l.program, "in_Center")
+	l.inViewport = engo.Gl.GetUniformLocation(l.program, "in_Viewport")
+	l.inBorderWidth = engo.Gl.GetUniformLocation(l.program, "in_BorderWidth")
+	l.inBorderColor = engo.Gl.GetUniformLocation(l.program, "in_BorderColor")
 
 	l.projectionMatrix = make([]float32, 9)
 	l.projectionMatrix[8] = 1
@@ -424,40 +440,52 @@ void main (void) {
 	l.modelMatrix[0] = 1
 	l.modelMatrix[4] = 1
 	l.modelMatrix[8] = 1
+
+	if l.cameraEnabled {
+		for _, system := range w.Systems() {
+			switch sys := system.(type) {
+			case *CameraSystem:
+				l.camera = sys
+			}
+		}
+		if l.camera == nil {
+			log.Println("WARNING: BasicShader has CameraEnabled, but CameraSystem was not found")
+		}
+	}
 }
 
 func (l *legacyShader) Pre() {
-	Gl.Enable(Gl.BLEND)
-	Gl.BlendFunc(Gl.SRC_ALPHA, Gl.ONE_MINUS_SRC_ALPHA)
+	engo.Gl.Enable(engo.Gl.BLEND)
+	engo.Gl.BlendFunc(engo.Gl.SRC_ALPHA, engo.Gl.ONE_MINUS_SRC_ALPHA)
 
 	// Bind shader and buffer, enable attributes
-	Gl.UseProgram(l.program)
-	Gl.EnableVertexAttribArray(l.inPosition)
-	Gl.EnableVertexAttribArray(l.inColor)
+	engo.Gl.UseProgram(l.program)
+	engo.Gl.EnableVertexAttribArray(l.inPosition)
+	engo.Gl.EnableVertexAttribArray(l.inColor)
 
-	if scaleOnResize {
-		l.projectionMatrix[0] = 1 / (gameWidth / 2)
-		l.projectionMatrix[4] = 1 / (-gameHeight / 2)
+	if engo.ScaleOnResize() {
+		l.projectionMatrix[0] = 1 / (engo.GameWidth() / 2)
+		l.projectionMatrix[4] = 1 / (-engo.GameHeight() / 2)
 	} else {
-		l.projectionMatrix[0] = 1 / (windowWidth / 2)   // TODO: canvasWidth
-		l.projectionMatrix[4] = 1 / (-windowHeight / 2) // TODO: canvasHeight
+		l.projectionMatrix[0] = 1 / (engo.WindowWidth() / 2)   // TODO: canvasWidth
+		l.projectionMatrix[4] = 1 / (-engo.WindowHeight() / 2) // TODO: canvasHeight
 	}
 
 	if l.cameraEnabled {
-		l.viewMatrix[1], l.viewMatrix[0] = math.Sincos(cam.angle * math.Pi / 180)
+		l.viewMatrix[1], l.viewMatrix[0] = math.Sincos(l.camera.angle * math.Pi / 180)
 		l.viewMatrix[3] = -l.viewMatrix[1]
 		l.viewMatrix[4] = l.viewMatrix[0]
-		l.viewMatrix[6] = -cam.x
-		l.viewMatrix[7] = -cam.y
-		l.viewMatrix[8] = cam.z
+		l.viewMatrix[6] = -l.camera.x
+		l.viewMatrix[7] = -l.camera.y
+		l.viewMatrix[8] = l.camera.z
 	} else {
 		l.viewMatrix[6] = -1 / l.projectionMatrix[0]
 		l.viewMatrix[7] = 1 / l.projectionMatrix[4]
 	}
 
-	Gl.UniformMatrix3fv(l.matrixProjection, false, l.projectionMatrix)
-	Gl.UniformMatrix3fv(l.matrixView, false, l.viewMatrix)
-	Gl.Uniform2f(l.inViewport, gameWidth, gameHeight) // TODO: canvasWidth/Height
+	engo.Gl.UniformMatrix3fv(l.matrixProjection, false, l.projectionMatrix)
+	engo.Gl.UniformMatrix3fv(l.matrixView, false, l.viewMatrix)
+	engo.Gl.Uniform2f(l.inViewport, engo.GameWidth(), engo.GameHeight()) // TODO: canvasWidth/Height
 }
 
 func (l *legacyShader) updateBuffer(ren *RenderComponent, space *SpaceComponent) {
@@ -469,10 +497,10 @@ func (l *legacyShader) updateBuffer(ren *RenderComponent, space *SpaceComponent)
 	}
 
 	if ren.buffer == nil {
-		ren.buffer = Gl.CreateBuffer()
+		ren.buffer = engo.Gl.CreateBuffer()
 	}
-	Gl.BindBuffer(Gl.ARRAY_BUFFER, ren.buffer)
-	Gl.BufferData(Gl.ARRAY_BUFFER, ren.bufferContent, Gl.STATIC_DRAW)
+	engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.buffer)
+	engo.Gl.BufferData(engo.Gl.ARRAY_BUFFER, ren.bufferContent, engo.Gl.STATIC_DRAW)
 }
 
 func (l *legacyShader) computeBufferSize(draw Drawable) int {
@@ -656,9 +684,9 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 	if l.lastBuffer != ren.buffer || ren.buffer == nil {
 		l.updateBuffer(ren, space)
 
-		Gl.BindBuffer(Gl.ARRAY_BUFFER, ren.buffer)
-		Gl.VertexAttribPointer(l.inPosition, 2, Gl.FLOAT, false, 12, 0)
-		Gl.VertexAttribPointer(l.inColor, 4, Gl.UNSIGNED_BYTE, true, 12, 8)
+		engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.buffer)
+		engo.Gl.VertexAttribPointer(l.inPosition, 2, engo.Gl.FLOAT, false, 12, 0)
+		engo.Gl.VertexAttribPointer(l.inColor, 4, engo.Gl.UNSIGNED_BYTE, true, 12, 8)
 
 		l.lastBuffer = ren.buffer
 	}
@@ -680,55 +708,55 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 	l.modelMatrix[6] = space.Position.X
 	l.modelMatrix[7] = space.Position.Y
 
-	Gl.UniformMatrix3fv(l.matrixModel, false, l.modelMatrix)
+	engo.Gl.UniformMatrix3fv(l.matrixModel, false, l.modelMatrix)
 
 	switch shape := ren.Drawable.(type) {
 	case Triangle:
-		Gl.Uniform2f(l.inRadius, 0, 0)
-		Gl.DrawArrays(Gl.TRIANGLES, 0, 3)
+		engo.Gl.Uniform2f(l.inRadius, 0, 0)
+		engo.Gl.DrawArrays(engo.Gl.TRIANGLES, 0, 3)
 
 		if shape.BorderWidth > 0 {
 			borderWidth := shape.BorderWidth
 			if l.cameraEnabled {
-				borderWidth /= cam.z
+				borderWidth /= l.camera.z
 			}
-			Gl.LineWidth(borderWidth)
-			Gl.DrawArrays(Gl.LINE_LOOP, 3, 3)
+			engo.Gl.LineWidth(borderWidth)
+			engo.Gl.DrawArrays(engo.Gl.LINE_LOOP, 3, 3)
 		}
 	case Rectangle:
-		Gl.Uniform2f(l.inRadius, 0, 0)
-		Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectanglesVBO)
-		Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
+		engo.Gl.Uniform2f(l.inRadius, 0, 0)
+		engo.Gl.BindBuffer(engo.Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectanglesVBO)
+		engo.Gl.DrawElements(engo.Gl.TRIANGLES, 6, engo.Gl.UNSIGNED_SHORT, 0)
 
 		if shape.BorderWidth > 0 {
 			borderWidth := shape.BorderWidth
 			if l.cameraEnabled {
-				borderWidth /= cam.z
+				borderWidth /= l.camera.z
 			}
-			Gl.LineWidth(borderWidth)
-			Gl.DrawArrays(Gl.LINE_LOOP, 4, 4)
+			engo.Gl.LineWidth(borderWidth)
+			engo.Gl.DrawArrays(engo.Gl.LINE_LOOP, 4, 4)
 		}
 	case Circle:
-		Gl.Uniform1f(l.inBorderWidth, shape.BorderWidth/cam.z)
+		engo.Gl.Uniform1f(l.inBorderWidth, shape.BorderWidth/l.camera.z)
 		if shape.BorderWidth > 0 {
 			r, g, b, a := shape.BorderColor.RGBA()
-			Gl.Uniform4f(l.inBorderColor, float32(r>>8), float32(g>>8), float32(b>>8), float32(a>>8))
+			engo.Gl.Uniform4f(l.inBorderColor, float32(r>>8), float32(g>>8), float32(b>>8), float32(a>>8))
 		}
-		Gl.Uniform2f(l.inRadius, (space.Width/2)/cam.z, (space.Height/2)/cam.z)
-		Gl.Uniform2f(l.inCenter, space.Width/2, space.Height/2)
-		Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectanglesVBO)
-		Gl.DrawElements(Gl.TRIANGLES, 6, Gl.UNSIGNED_SHORT, 0)
+		engo.Gl.Uniform2f(l.inRadius, (space.Width/2)/l.camera.z, (space.Height/2)/l.camera.z)
+		engo.Gl.Uniform2f(l.inCenter, space.Width/2, space.Height/2)
+		engo.Gl.BindBuffer(engo.Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectanglesVBO)
+		engo.Gl.DrawElements(engo.Gl.TRIANGLES, 6, engo.Gl.UNSIGNED_SHORT, 0)
 	case ComplexTriangles:
-		Gl.Uniform2f(l.inRadius, 0, 0)
-		Gl.DrawArrays(Gl.TRIANGLES, 0, len(shape.Points))
+		engo.Gl.Uniform2f(l.inRadius, 0, 0)
+		engo.Gl.DrawArrays(engo.Gl.TRIANGLES, 0, len(shape.Points))
 
 		if shape.BorderWidth > 0 {
 			borderWidth := shape.BorderWidth
 			if l.cameraEnabled {
-				borderWidth /= cam.z
+				borderWidth /= l.camera.z
 			}
-			Gl.LineWidth(borderWidth)
-			Gl.DrawArrays(Gl.LINE_LOOP, len(shape.Points), len(shape.Points))
+			engo.Gl.LineWidth(borderWidth)
+			engo.Gl.DrawArrays(engo.Gl.LINE_LOOP, len(shape.Points), len(shape.Points))
 		}
 	default:
 		log.Println("Warning: type not supported")
@@ -739,13 +767,13 @@ func (l *legacyShader) Post() {
 	l.lastBuffer = nil
 
 	// Cleanup
-	Gl.DisableVertexAttribArray(l.inPosition)
-	Gl.DisableVertexAttribArray(l.inColor)
+	engo.Gl.DisableVertexAttribArray(l.inPosition)
+	engo.Gl.DisableVertexAttribArray(l.inColor)
 
-	Gl.BindBuffer(Gl.ARRAY_BUFFER, nil)
-	Gl.BindBuffer(Gl.ELEMENT_ARRAY_BUFFER, nil)
+	engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, nil)
+	engo.Gl.BindBuffer(engo.Gl.ELEMENT_ARRAY_BUFFER, nil)
 
-	Gl.Disable(Gl.BLEND)
+	engo.Gl.Disable(engo.Gl.BLEND)
 }
 
 // colorToFloat32 returns the float32 representation of the given color
@@ -772,12 +800,12 @@ var (
 	shadersSet      bool
 )
 
-func initShaders() {
+func initShaders(w *ecs.World) {
 	if !shadersSet {
-		DefaultShader.Initialize()
-		HUDShader.Initialize()
-		LegacyShader.Initialize()
-		LegacyHUDShader.Initialize()
+		DefaultShader.Setup(w)
+		HUDShader.Setup(w)
+		LegacyShader.Setup(w)
+		LegacyHUDShader.Setup(w)
 
 		shadersSet = true
 	}

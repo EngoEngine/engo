@@ -20,7 +20,6 @@ var (
 	currentWorld *ecs.World
 	currentScene Scene
 	Mailbox      *MessageManager
-	cam          *cameraSystem
 
 	scaleOnResize   = false
 	fpsLimit        = 60
@@ -150,6 +149,18 @@ func SetFPSLimit(limit int) error {
 	fpsLimit = limit
 	resetLoopTicker <- true
 	return nil
+}
+
+// Headless indicates whether or not OpenGL-calls should be made
+func Headless() bool {
+	return headless
+}
+
+// ScaleOnResizes indicates whether or not the screen should resize (i.e. make things look smaller/bigger) whenever
+// the window resized. If `false`, then the size of the screen does not affect the size of the things drawn - it just
+// makes less/more objects visible
+func ScaleOnResize() bool {
+	return scaleOnResize
 }
 
 func runHeadless(defaultScene Scene) {

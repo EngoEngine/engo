@@ -25,7 +25,6 @@ type Loader struct {
 	resources []Resource
 	images    map[string]*Texture
 	jsons     map[string]string
-	levels    map[string]*Level
 	sounds    map[string]string
 	fonts     map[string]*truetype.Font
 }
@@ -35,7 +34,6 @@ func NewLoader() *Loader {
 		resources: make([]Resource, 1),
 		images:    make(map[string]*Texture),
 		jsons:     make(map[string]string),
-		levels:    make(map[string]*Level),
 		sounds:    make(map[string]string),
 		fonts:     make(map[string]*truetype.Font),
 	}
@@ -84,16 +82,17 @@ func (l *Loader) Json(name string) string {
 	return l.jsons[name]
 }
 
-func (l *Loader) Level(name string) *Level {
-	return l.levels[name]
-}
-
 func (l *Loader) Sound(name string) ReadSeekCloser {
 	f, err := os.Open(l.sounds[name])
 	if err != nil {
 		return nil
 	}
 	return f
+}
+
+func (l *Loader) Font(name string) (*truetype.Font, bool) {
+	font, ok := l.fonts[name]
+	return font, ok
 }
 
 // ReadSeekCloser is an io.ReadSeeker and io.Closer.
@@ -141,18 +140,6 @@ func (l *Loader) Load(onFinish func()) {
 			}
 
 			l.jsons[r.name] = data
-		case "tmx":
-			if _, ok := l.levels[r.name]; ok {
-				continue // with other resources
-			}
-
-			data, err := createLevelFromTmx(r)
-			if err != nil {
-				log.Println("Error loading resource:", err)
-				continue // with other resources
-			}
-
-			l.levels[r.name] = data
 		case "wav":
 			l.sounds[r.name] = r.url
 		case "ttf":
