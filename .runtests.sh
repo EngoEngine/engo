@@ -23,6 +23,7 @@ go test
 # TODO: Fix the build so this actually passes
 # echo "Testing engo.io/engo using 'gopherjs test'"
 # gopherjs test
+echo "Skipping tests for engo.io/engo using 'gopherjs test' (won't pass)"
 
 echo "Skipping tests for engo.io/engo using 'gomobile' (no tools exist yet)"
 
