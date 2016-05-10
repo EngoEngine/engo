@@ -93,7 +93,7 @@ func WindowSize() (w, h int) {
 }
 
 func CursorPos() (x, y float64) {
-	log.Println("warning: not yet implemented CursorPos")
+	notImplemented("CursorPos")
 	return 0, 0
 }
 
@@ -219,5 +219,5 @@ func RunIteration() {
 
 // SetCursor changes the cursor - not yet implemented
 func SetCursor(c Cursor) {
-	log.Println("SetCursor: not yet implemented for mobile")
+	notImplemented("SetCursor")
 }
