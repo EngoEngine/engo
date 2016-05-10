@@ -246,7 +246,7 @@ func (m *MouseSystem) Update(dt float32) {
 			e.MouseComponent.Hovered = false
 		}
 
-		if engo.Mouse.Action == engo.Release {
+		if engo.Input.Mouse.Action == engo.Release {
 			// dragging stops as soon as one of the currently pressed buttons
 			// is released
 			e.MouseComponent.Dragged = false
