@@ -16,9 +16,6 @@ var (
 
 	jumpButton   = "jump"
 	actionButton = "action"
-
-	zoomSpeed   float32 = -0.125
-	scrollSpeed float32 = 700
 )
 
 type DefaultScene struct{}
@@ -49,10 +46,6 @@ func (scene *DefaultScene) Setup(w *ecs.World) {
 	w.AddSystem(&core.AnimationSystem{})
 	w.AddSystem(&ControlSystem{})
 
-	// Adding KeyboardScroller so we can actually see the difference between background and HUD when scrolling
-	w.AddSystem(core.NewKeyboardScroller(scrollSpeed, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis))
-	w.AddSystem(&core.MouseZoomer{zoomSpeed})
-
 	spriteSheet := core.NewSpritesheetFromFile("hero.png", 150, 150)
 
 	hero := scene.CreateEntity(engo.Point{0, 0}, spriteSheet)
@@ -82,7 +75,7 @@ func (*DefaultScene) CreateEntity(point engo.Point, spriteSheet *core.Spriteshee
 	}
 	entity.RenderComponent = core.RenderComponent{
 		Drawable: spriteSheet.Cell(0),
-		Scale:    engo.Point{1, 1},
+		Scale:    engo.Point{3, 3},
 	}
 	entity.AnimationComponent = core.NewAnimationComponent(spriteSheet.Drawables(), 0.1)
 
@@ -130,10 +123,9 @@ func (c *ControlSystem) Update(dt float32) {
 
 func main() {
 	opts := engo.RunOptions{
-		Title:          "Animation Demo",
-		Width:          1024,
-		Height:         640,
-		StandardInputs: true,
+		Title:  "Animation Demo",
+		Width:  1024,
+		Height: 640,
 	}
 	engo.Run(opts, &DefaultScene{})
 }

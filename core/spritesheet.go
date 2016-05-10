@@ -1,9 +1,10 @@
 package core
 
 import (
+	"log"
+
 	"engo.io/engo"
 	"engo.io/gl"
-	"log"
 )
 
 // Spritesheet is a class that stores a set of tiles from a file, used by tilemaps and animations
@@ -53,8 +54,6 @@ func (s *Spritesheet) Cell(index int) Texture {
 		engo.Point{x / s.width, y / s.height},
 		engo.Point{(x + float32(s.cellWidth)) / s.width, (y + float32(s.cellHeight)) / s.height},
 	}}
-
-	log.Println(s.cache[index])
 
 	return s.cache[index]
 }
