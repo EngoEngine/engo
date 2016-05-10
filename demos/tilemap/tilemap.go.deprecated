@@ -23,7 +23,7 @@ func (game *GameWorld) Preload() {
 func (game *GameWorld) Setup() {
 	engo.SetBackground(0x2d3739)
 
-	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&core.RenderSystem{})
 
 	gameMap := ecs.NewEntity("RenderSystem")
 	tilemap := engo.NewTilemap(

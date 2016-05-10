@@ -45,7 +45,7 @@ func (pong *PongGame) Preload() {
 
 func (pong *PongGame) Setup(w *ecs.World) {
 	engo.SetBackground(color.Black)
-	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&core.RenderSystem{})
 	w.AddSystem(&engo.CollisionSystem{})
 	w.AddSystem(&SpeedSystem{})
 	w.AddSystem(&ControlSystem{})
@@ -78,7 +78,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	// Add our entity to the appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *core.RenderSystem:
 			sys.Add(&ball.BasicEntity, &ball.RenderComponent, &ball.SpaceComponent)
 		case *engo.CollisionSystem:
 			sys.Add(&ball.BasicEntity, &ball.CollisionComponent, &ball.SpaceComponent)
@@ -100,7 +100,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	// Add our entity to the appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *core.RenderSystem:
 			sys.Add(&score.BasicEntity, &score.RenderComponent, &score.SpaceComponent)
 		case *ScoreSystem:
 			sys.Add(&score.BasicEntity, &score.RenderComponent, &score.SpaceComponent)
@@ -136,7 +136,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		// Add our entity to the appropriate systems
 		for _, system := range w.Systems() {
 			switch sys := system.(type) {
-			case *engo.RenderSystem:
+			case *core.RenderSystem:
 				sys.Add(&paddle.BasicEntity, &paddle.RenderComponent, &paddle.SpaceComponent)
 			case *engo.CollisionSystem:
 				sys.Add(&paddle.BasicEntity, &paddle.CollisionComponent, &paddle.SpaceComponent)

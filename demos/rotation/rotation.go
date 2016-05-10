@@ -28,7 +28,7 @@ func (game *DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 
 	w.AddSystem(&RotationSystem{})
-	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&core.RenderSystem{})
 
 	// Retrieve a texture
 	texture := engo.Files.Image("icon.png")
@@ -50,7 +50,7 @@ func (game *DefaultScene) Setup(w *ecs.World) {
 	// Add it to appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *core.RenderSystem:
 			sys.Add(&guy.BasicEntity, &guy.RenderComponent, &guy.SpaceComponent)
 		case *RotationSystem:
 			sys.Add(&guy.BasicEntity, &guy.SpaceComponent)

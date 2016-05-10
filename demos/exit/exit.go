@@ -11,7 +11,7 @@ type DefaultScene struct{}
 
 func (*DefaultScene) Preload() {}
 func (*DefaultScene) Setup(w *ecs.World) {
-	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&core.RenderSystem{})
 }
 
 func (*DefaultScene) Exit() {

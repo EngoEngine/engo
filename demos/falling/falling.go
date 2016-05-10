@@ -34,7 +34,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 
 	// Add all of the systems
-	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&core.RenderSystem{})
 	w.AddSystem(&engo.CollisionSystem{})
 	w.AddSystem(&DeathSystem{})
 	w.AddSystem(&FallingSystem{})
@@ -64,7 +64,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	// Add it to appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *core.RenderSystem:
 			sys.Add(&guy.BasicEntity, &guy.RenderComponent, &guy.SpaceComponent)
 		case *engo.CollisionSystem:
 			sys.Add(&guy.BasicEntity, &guy.CollisionComponent, &guy.SpaceComponent)
@@ -154,7 +154,7 @@ func NewRock(world *ecs.World, position engo.Point) {
 
 	for _, system := range world.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *core.RenderSystem:
 			sys.Add(&rock.BasicEntity, &rock.RenderComponent, &rock.SpaceComponent)
 		case *engo.CollisionSystem:
 			sys.Add(&rock.BasicEntity, &rock.CollisionComponent, &rock.SpaceComponent)

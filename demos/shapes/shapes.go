@@ -28,7 +28,7 @@ func (*DefaultScene) Preload() {}
 // Setup is called before the main loop is started
 func (*DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.RGBA{55, 55, 55, 255})
-	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&core.RenderSystem{})
 
 	// Adding camera controllers so we can verify it doesn't break when we move
 	w.AddSystem(engo.NewKeyboardScroller(scrollSpeed, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis))
@@ -42,7 +42,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *core.RenderSystem:
 			sys.Add(&triangle1.BasicEntity, &triangle1.RenderComponent, &triangle1.SpaceComponent)
 		}
 	}
@@ -54,7 +54,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *core.RenderSystem:
 			sys.Add(&rectangle1.BasicEntity, &rectangle1.RenderComponent, &rectangle1.SpaceComponent)
 		}
 	}
@@ -66,7 +66,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *core.RenderSystem:
 			sys.Add(&circle1.BasicEntity, &circle1.RenderComponent, &circle1.SpaceComponent)
 		}
 	}
@@ -78,7 +78,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *core.RenderSystem:
 			sys.Add(&triangle2.BasicEntity, &triangle2.RenderComponent, &triangle2.SpaceComponent)
 		}
 	}
@@ -90,7 +90,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *core.RenderSystem:
 			sys.Add(&line1.BasicEntity, &line1.RenderComponent, &line1.SpaceComponent)
 		}
 	}
@@ -107,7 +107,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *core.RenderSystem:
 			sys.Add(&complexTriangle1.BasicEntity, &complexTriangle1.RenderComponent, &complexTriangle1.SpaceComponent)
 		}
 	}
@@ -119,7 +119,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *core.RenderSystem:
 			sys.Add(&triangle3.BasicEntity, &triangle3.RenderComponent, &triangle3.SpaceComponent)
 		}
 	}
@@ -131,7 +131,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *core.RenderSystem:
 			sys.Add(&rectangle2.BasicEntity, &rectangle2.RenderComponent, &rectangle2.SpaceComponent)
 		}
 	}
@@ -143,7 +143,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *core.RenderSystem:
 			sys.Add(&circle2.BasicEntity, &circle2.RenderComponent, &circle2.SpaceComponent)
 		}
 	}
@@ -155,7 +155,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *core.RenderSystem:
 			sys.Add(&triangle4.BasicEntity, &triangle4.RenderComponent, &triangle4.SpaceComponent)
 		}
 	}
@@ -173,7 +173,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *core.RenderSystem:
 			sys.Add(&complexTriangle2.BasicEntity, &complexTriangle2.RenderComponent, &complexTriangle2.SpaceComponent)
 		}
 	}

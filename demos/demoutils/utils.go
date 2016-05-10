@@ -39,10 +39,10 @@ func NewBackground(world *ecs.World, width, height int, colorA, colorB color.Col
 		}
 	}
 
-	bgTexture := engo.NewImageObject(img)
+	bgTexture := core.NewImageObject(img)
 
 	bg := &Background{BasicEntity: ecs.NewBasic()}
-	bg.RenderComponent = core.RenderComponent{Drawable: engo.NewTexture(bgTexture)}
+	bg.RenderComponent = core.RenderComponent{Drawable: core.NewTextureSingle(bgTexture)}
 	bg.SpaceComponent = core.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    float32(width),
@@ -51,7 +51,7 @@ func NewBackground(world *ecs.World, width, height int, colorA, colorB color.Col
 
 	for _, system := range world.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *core.RenderSystem:
 			sys.Add(&bg.BasicEntity, &bg.RenderComponent, &bg.SpaceComponent)
 		}
 	}

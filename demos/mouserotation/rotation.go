@@ -23,7 +23,7 @@ func (*DefaultScene) Preload() {}
 // Setup is called before the main loop is started
 func (*DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
-	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&core.RenderSystem{})
 	w.AddSystem(&engo.MouseRotator{RotationSpeed: rotationSpeed})
 
 	// Create a background; this way we'll see when we actually rotate

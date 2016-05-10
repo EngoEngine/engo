@@ -23,7 +23,7 @@ func (*DefaultScene) Preload() {
 func (*DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 
-	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&core.RenderSystem{})
 	w.AddSystem(&HideSystem{})
 
 	// Retrieve a texture
@@ -46,7 +46,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	// Add it to appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *core.RenderSystem:
 			sys.Add(&rock.BasicEntity, &rock.RenderComponent, &rock.SpaceComponent)
 		case *HideSystem:
 			sys.Add(&rock.BasicEntity, &rock.RenderComponent)

@@ -25,7 +25,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 
 	w.AddSystem(&engo.MouseSystem{})
-	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&core.RenderSystem{})
 	w.AddSystem(&ControlSystem{})
 
 	// These are not required, but allow you to move / rotate and still see that it works
@@ -55,7 +55,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	// Add our guy to appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *core.RenderSystem:
 			sys.Add(&guy.BasicEntity, &guy.RenderComponent, &guy.SpaceComponent)
 		case *engo.MouseSystem:
 			sys.Add(&guy.BasicEntity, &guy.MouseComponent, &guy.SpaceComponent, &guy.RenderComponent)

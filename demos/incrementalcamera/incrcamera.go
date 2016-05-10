@@ -21,7 +21,7 @@ func (*DefaultScene) Preload() {}
 // Setup is called before the main loop is started
 func (*DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
-	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&core.RenderSystem{})
 
 	demoutils.NewBackground(w, worldWidth, worldHeight, color.RGBA{102, 153, 0, 255}, color.RGBA{102, 173, 0, 255})
 
