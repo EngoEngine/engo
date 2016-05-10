@@ -43,7 +43,7 @@ func (c *Clock) Delta() float32 {
 	return c.delta
 }
 
-func (c *Clock) Fps() float32 {
+func (c *Clock) FPS() float32 {
 	return float32(c.fps)
 }
 

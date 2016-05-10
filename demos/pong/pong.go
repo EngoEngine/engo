@@ -59,7 +59,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		log.Fatalln("Could not load font:", err)
 	}
 
-	ballTexture, err := core.SpriteFromAssetManager("ball.png")
+	ballTexture, err := core.PreloadedSpriteSingle("ball.png")
 	if err != nil {
 		log.Fatalln("Could not load texture:", err)
 	}
@@ -135,7 +135,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		}
 	}
 
-	paddleTexture, err := core.SpriteFromAssetManager("paddle.png")
+	paddleTexture, err := core.PreloadedSpriteSingle("paddle.png")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -382,7 +382,7 @@ func (c *ControlSystem) Update(dt float32) {
 
 	if c.fpscounter > 0 {
 		c.fpscounter = 0
-		engo.SetTitle(fmt.Sprintf("FPS: %f", engo.Time.Fps()))
+		engo.SetTitle(fmt.Sprintf("FPS: %f", engo.Time.FPS()))
 	}
 	c.fpscounter += dt
 }

@@ -4,7 +4,7 @@ package engo
 
 import (
 	"image"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"os/signal"
@@ -14,9 +14,6 @@ import (
 
 	"engo.io/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
-	"github.com/golang/freetype"
-	"github.com/golang/freetype/truetype"
-	"io"
 )
 
 var (
@@ -85,7 +82,7 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	width, height = window.GetFramebufferSize()
 	windowWidth, windowHeight = float32(width), float32(height)
 
-	SetVSync(vsync)
+	SetVSync(opts.VSync)
 
 	Gl = gl.NewContext()
 	Gl.Viewport(0, 0, width, height)
@@ -143,7 +140,7 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		windowWidth = float32(widthInt)
 		windowHeight = float32(heightInt)
 
-		if !scaleOnResize {
+		if !opts.ScaleOnResize {
 			gameWidth, gameHeight = float32(widthInt), float32(heightInt)
 		}
 
@@ -162,7 +159,7 @@ func DestroyWindow() {
 }
 
 func SetTitle(title string) {
-	if headless {
+	if opts.HeadlessMode {
 		log.Println("Title set to:", title)
 	} else {
 		window.SetTitle(title)
@@ -172,7 +169,7 @@ func SetTitle(title string) {
 // RunIteration runs one iteration / frame
 func RunIteration() {
 	// First check for new keypresses
-	if !headless {
+	if !opts.HeadlessMode {
 		Input.update()
 		glfw.PollEvents()
 	}
@@ -181,7 +178,7 @@ func RunIteration() {
 	currentWorld.Update(Time.Delta())
 
 	// Lastly, forget keypresses and swap buffers
-	if !headless {
+	if !opts.HeadlessMode {
 		// reset values to avoid catching the same "signal" twice
 		Mouse.ScrollX, Mouse.ScrollY = 0, 0
 		Mouse.Action = NEUTRAL
@@ -198,7 +195,8 @@ func RunPreparation(defaultScene Scene) {
 	Time = NewClock()
 
 	// Default WorldBounds values
-	WorldBounds.Max = Point{GameWidth(), GameHeight()}
+	//WorldBounds.Max = Point{GameWidth(), GameHeight()}
+	// TODO: move this to appropriate location
 
 	SetScene(defaultScene, false)
 }
@@ -213,7 +211,7 @@ func runLoop(defaultScene Scene, headless bool) {
 	}()
 
 	RunPreparation(defaultScene)
-	ticker := time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
+	ticker := time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
 
 Outer:
 	for {
@@ -228,7 +226,7 @@ Outer:
 			}
 		case <-resetLoopTicker:
 			ticker.Stop()
-			ticker = time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
+			ticker = time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
 		}
 	}
 	ticker.Stop()
@@ -281,8 +279,8 @@ func SetCursor(c Cursor) {
 }
 
 func SetVSync(enabled bool) {
-	vsync = enabled
-	if vsync {
+	opts.VSync = enabled
+	if opts.VSync {
 		glfw.SwapInterval(1)
 	} else {
 		glfw.SwapInterval(0)

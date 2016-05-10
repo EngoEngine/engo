@@ -127,9 +127,9 @@ func (i *ImageObject) Height() int {
 	return i.data.Rect.Max.Y
 }
 
-// SpriteFromAssetManager loads the texture-reference from `engo.Files`, and wraps it in a `*Texture`.
+// PreloadedSpriteSingle loads the texture-reference from `engo.Files`, and wraps it in a `*Texture`.
 // This method is intended for image-files which represent entire sprites.
-func SpriteFromAssetManager(url string) (*Texture, error) {
+func PreloadedSpriteSingle(url string) (*Texture, error) {
 	res, ok := engo.Files.Resource(url)
 	if !ok {
 		return nil, fmt.Errorf("resource not found: %s", url)

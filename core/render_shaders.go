@@ -167,7 +167,7 @@ func (s *basicShader) Pre() {
 
 func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 	if s.lastBuffer != ren.buffer || ren.buffer == nil {
-		s.updateBuffer(ren)
+		s.updateBuffer(ren, space)
 
 		engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.buffer)
 		engo.Gl.VertexAttribPointer(s.inPosition, 2, engo.Gl.FLOAT, false, 20, 0)
@@ -238,12 +238,12 @@ func (s *basicShader) Post() {
 	engo.Gl.Disable(engo.Gl.BLEND)
 }
 
-func (s *basicShader) updateBuffer(ren *RenderComponent) {
+func (s *basicShader) updateBuffer(ren *RenderComponent, space *SpaceComponent) {
 	if len(ren.bufferContent) == 0 {
 		ren.bufferContent = make([]float32, 20) // because we add 20 elements to it
 	}
 
-	if changed := s.generateBufferContent(ren, ren.bufferContent); !changed {
+	if changed := s.generateBufferContent(ren, space, ren.bufferContent); !changed {
 		return
 	}
 
@@ -254,9 +254,9 @@ func (s *basicShader) updateBuffer(ren *RenderComponent) {
 	engo.Gl.BufferData(engo.Gl.ARRAY_BUFFER, ren.bufferContent, engo.Gl.STATIC_DRAW)
 }
 
-func (s *basicShader) generateBufferContent(ren *RenderComponent, buffer []float32) bool {
-	w := ren.Drawable.Width()
-	h := ren.Drawable.Height()
+func (s *basicShader) generateBufferContent(ren *RenderComponent, space *SpaceComponent, buffer []float32) bool {
+	w := space.Width
+	h := space.Height
 
 	colorR, colorG, colorB, colorA := ren.Color.RGBA()
 	colorR >>= 8

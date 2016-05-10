@@ -128,28 +128,6 @@ type Image interface {
 
 // Region has been removed, and is now called core.Texture
 
-type Sprite struct {
-	Position *Point
-	Scale    *Point
-	Anchor   *Point
-	Rotation float32
-	Color    color.Color
-	Alpha    float32
-	Region   *Region
-}
-
-func NewSprite(region *Region, x, y float32) *Sprite {
-	return &Sprite{
-		Position: &Point{x, y},
-		Scale:    &Point{1, 1},
-		Anchor:   &Point{0, 0},
-		Rotation: 0,
-		Color:    color.White,
-		Alpha:    1,
-		Region:   region,
-	}
-}
-
 func ImageToNRGBA(img image.Image, width, height int) *image.NRGBA {
 	newm := image.NewNRGBA(image.Rect(0, 0, width, height))
 	draw.Draw(newm, newm.Bounds(), img, image.Point{0, 0}, draw.Src)

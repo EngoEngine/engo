@@ -21,6 +21,8 @@ const (
 var (
 	MinZoom float32 = 0.25
 	MaxZoom float32 = 3
+
+	CameraBounds engo.AABB
 )
 
 type cameraEntity struct {
@@ -40,8 +42,10 @@ type cameraSystem struct {
 }
 
 func (cam *cameraSystem) New(*ecs.World) {
-	cam.x = engo.WorldBounds.Max.X / 2
-	cam.y = engo.WorldBounds.Max.Y / 2
+	CameraBounds.Max = engo.Point{engo.GameWidth(), engo.GameHeight()}
+
+	cam.x = CameraBounds.Max.X / 2
+	cam.y = CameraBounds.Max.Y / 2
 	cam.z = 1
 
 	cam.longTasks = make(map[CameraAxis]*CameraMessage)
@@ -187,11 +191,11 @@ func (cam *cameraSystem) rotate(value float32) {
 }
 
 func (cam *cameraSystem) moveToX(location float32) {
-	cam.x = mgl32.Clamp(location, engo.WorldBounds.Min.X, engo.WorldBounds.Max.X)
+	cam.x = mgl32.Clamp(location, CameraBounds.Min.X, CameraBounds.Max.X)
 }
 
 func (cam *cameraSystem) moveToY(location float32) {
-	cam.y = mgl32.Clamp(location, engo.WorldBounds.Min.Y, engo.WorldBounds.Max.Y)
+	cam.y = mgl32.Clamp(location, CameraBounds.Min.Y, CameraBounds.Max.Y)
 }
 
 func (cam *cameraSystem) zoomTo(zoomLevel float32) {

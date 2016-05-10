@@ -9,23 +9,19 @@ import (
 )
 
 var (
+	// Time is the active FPS counter
 	Time *Clock
-	//Files *Loader
+	// Input handles all input: mouse, keyboard and touch
 	Input *InputManager
-
-	closeGame          bool
-	defaultCloseAction bool
-	WorldBounds        AABB
+	// Mailbox is used by all Systems to communicate
+	Mailbox *MessageManager
 
 	currentWorld *ecs.World
 	currentScene Scene
-	Mailbox      *MessageManager
 
-	scaleOnResize   = false
-	fpsLimit        = 60
-	headless        = false
-	vsync           = true
+	opts            RunOptions
 	resetLoopTicker = make(chan bool, 1)
+	closeGame       bool
 )
 
 const (
@@ -43,6 +39,7 @@ type RunOptions struct {
 	// HeadlessMode indicates whether or not OpenGL calls should be made
 	HeadlessMode bool
 
+	// Fullscreen indicates the game should run in fullscreen mode if run on a desktop
 	Fullscreen bool
 
 	Width, Height int
@@ -91,15 +88,25 @@ type RunOptions struct {
 // Run is called to create a window, initialize everything, and start the main loop. Once this function returns,
 // the game window has been closed already. You can supply a lot of options within `RunOptions`, and your starting
 // `Scene` should be defined in `defaultScene`.
-func Run(opts RunOptions, defaultScene Scene) {
-	// Save settings
-	SetScaleOnResize(opts.ScaleOnResize)
-	SetFPSLimit(opts.FPSLimit)
-	vsync = opts.VSync
-	defaultCloseAction = !opts.OverrideCloseAction
-	if opts.FPSLimit > 0 {
-		fpsLimit = opts.FPSLimit
+func Run(o RunOptions, defaultScene Scene) {
+	// Setting defaults
+	if o.FPSLimit == 0 {
+		o.FPSLimit = 60
 	}
+
+	if o.MSAA < 0 {
+		panic("MSAA has to be greater or equal to 0")
+	}
+
+	if o.MSAA == 0 {
+		o.MSAA = 1
+	}
+
+	if len(o.AssetsRoot) == 0 {
+		o.AssetsRoot = "assets"
+	}
+
+	opts = o
 
 	// Create input
 	Input = NewInputManager()
@@ -113,23 +120,10 @@ func Run(opts RunOptions, defaultScene Scene) {
 		Input.RegisterAxis(DefaultVerticalAxis, AxisKeyPair{W, S}, AxisKeyPair{ArrowUp, ArrowDown})
 	}
 
-	if opts.MSAA < 0 {
-		panic("MSAA has to be greater or equal to 0")
-	}
-
-	if opts.MSAA == 0 {
-		opts.MSAA = 1
-	}
-
-	if len(opts.AssetsRoot) == 0 {
-		opts.AssetsRoot = "assets"
-	}
-
 	Files.SetRoot(opts.AssetsRoot)
 
+	// And run the game
 	if opts.HeadlessMode {
-		headless = true
-
 		if !opts.NoRun {
 			runHeadless(defaultScene)
 		}
@@ -144,15 +138,15 @@ func Run(opts RunOptions, defaultScene Scene) {
 }
 
 func SetScaleOnResize(b bool) {
-	scaleOnResize = b
+	opts.ScaleOnResize = b
 }
 
 func SetOverrideCloseAction(value bool) {
-	defaultCloseAction = !value
+	opts.OverrideCloseAction = value
 }
 
 func SetBackground(c color.Color) {
-	if !headless {
+	if !opts.HeadlessMode {
 		r, g, b, a := c.RGBA()
 
 		Gl.ClearColor(float32(r), float32(g), float32(b), float32(a))
@@ -163,21 +157,21 @@ func SetFPSLimit(limit int) error {
 	if limit <= 0 {
 		return fmt.Errorf("FPS Limit out of bounds. Requires > 0")
 	}
-	fpsLimit = limit
+	opts.FPSLimit = limit
 	resetLoopTicker <- true
 	return nil
 }
 
 // Headless indicates whether or not OpenGL-calls should be made
 func Headless() bool {
-	return headless
+	return opts.HeadlessMode
 }
 
 // ScaleOnResizes indicates whether or not the screen should resize (i.e. make things look smaller/bigger) whenever
 // the window resized. If `false`, then the size of the screen does not affect the size of the things drawn - it just
 // makes less/more objects visible
 func ScaleOnResize() bool {
-	return scaleOnResize
+	return opts.ScaleOnResize
 }
 
 func runHeadless(defaultScene Scene) {
@@ -195,7 +189,7 @@ func closeEvent() {
 		}
 	}
 
-	if defaultCloseAction {
+	if !opts.OverrideCloseAction {
 		Exit()
 	} else {
 		log.Println("Warning: default close action set to false, please make sure you manually handle this")

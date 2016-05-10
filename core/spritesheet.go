@@ -1,32 +1,60 @@
-//+build ignore
-
 package core
 
-import "engo.io/engo"
+import (
+	"engo.io/engo"
+	"engo.io/gl"
+	"log"
+)
 
 // Spritesheet is a class that stores a set of tiles from a file, used by tilemaps and animations
 type Spritesheet struct {
-	texture               *engo.Texture        // The original texture
-	CellWidth, CellHeight int                  // The dimensions of the cells
-	cache                 map[int]*engo.Region // The cell cache cells
+	texture               *gl.Texture     // The original texture
+	width, height         float32         // The dimensions of the total texture
+	cellWidth, cellHeight int             // The dimensions of the cells
+	cache                 map[int]Texture // The cell cache cells
 }
 
-func NewSpritesheetFromTexture(texture *engo.Texture, cellWidth, cellHeight int) *Spritesheet {
-	return &Spritesheet{texture: texture, CellWidth: cellWidth, CellHeight: cellHeight, cache: make(map[int]*engo.Region)}
+func NewSpritesheetFromTexture(tr *TextureResource, cellWidth, cellHeight int) *Spritesheet {
+	return &Spritesheet{texture: tr.Texture,
+		width: tr.Width, height: tr.Height,
+		cellWidth: cellWidth, cellHeight: cellHeight,
+		cache: make(map[int]Texture),
+	}
 }
 
 // NewSpritesheetFromFile is a simple handler for creating a new spritesheet from a file
 // textureName is the name of a texture already preloaded with engo.Files.Add
 func NewSpritesheetFromFile(textureName string, cellWidth, cellHeight int) *Spritesheet {
-	return NewSpritesheetFromTexture(engo.Files.Image(textureName), cellWidth, cellHeight)
+	res, ok := engo.Files.Resource(textureName)
+	if !ok {
+		log.Println("[WARNING] Resource not found:", textureName)
+		return nil
+	}
+
+	img, ok := res.(TextureResource)
+	if !ok {
+		log.Println("[WARNING] Resource not of type `TextureResource`:", textureName)
+		return nil
+	}
+
+	return NewSpritesheetFromTexture(&img, cellWidth, cellHeight)
 }
 
 // Cell gets the region at the index i, updates and pulls from cache if need be
-func (s *Spritesheet) Cell(index int) *engo.Region {
-	if r := s.cache[index]; r != nil {
+func (s *Spritesheet) Cell(index int) Texture {
+	if r, ok := s.cache[index]; ok {
 		return r
 	}
-	s.cache[index] = regionFromSheet(s.texture, s.CellWidth, s.CellHeight, index)
+
+	cellsPerRow := int(s.Width())
+	var x float32 = float32((index % cellsPerRow) * s.cellWidth)
+	var y float32 = float32((index / cellsPerRow) * s.cellHeight)
+	s.cache[index] = Texture{id: s.texture, width: s.width, height: s.height, viewport: engo.AABB{
+		engo.Point{x / s.width, y / s.height},
+		engo.Point{(x + float32(s.cellWidth)) / s.width, (y + float32(s.cellHeight)) / s.height},
+	}}
+
+	log.Println(s.cache[index])
 
 	return s.cache[index]
 }
@@ -49,9 +77,9 @@ func (s *Spritesheet) CellCount() int {
 	return int(s.Width()) * int(s.Height())
 }
 
-func (s *Spritesheet) Cells() []*engo.Region {
+func (s *Spritesheet) Cells() []Texture {
 	cellsNo := s.CellCount()
-	cells := make([]*engo.Region, cellsNo)
+	cells := make([]Texture, cellsNo)
 	for i := 0; i < cellsNo; i++ {
 		cells[i] = s.Cell(i)
 	}
@@ -61,18 +89,34 @@ func (s *Spritesheet) Cells() []*engo.Region {
 
 // Width is the amount of tiles on the x-axis of the spritesheet
 func (s Spritesheet) Width() float32 {
-	return s.texture.Width() / float32(s.CellWidth)
+	return s.width / float32(s.cellWidth)
 }
 
 // Height is the amount of tiles on the y-axis of the spritesheet
 func (s Spritesheet) Height() float32 {
-	return s.texture.Height() / float32(s.CellHeight)
+	return s.height / float32(s.cellHeight)
 }
 
-// Works for tiles rendered right-down
-func regionFromSheet(sheet *engo.Texture, tw, th int, index int) *engo.Region {
-	setWidth := int(sheet.Width()) / tw
-	x := (index % setWidth) * tw
-	y := (index / setWidth) * th
-	return engo.NewRegion(sheet, float32(x), float32(y), float32(tw), float32(th))
+/*
+type Sprite struct {
+	Position *Point
+	Scale    *Point
+	Anchor   *Point
+	Rotation float32
+	Color    color.Color
+	Alpha    float32
+	Region   *Region
 }
+
+func NewSprite(region *Region, x, y float32) *Sprite {
+	return &Sprite{
+		Position: &Point{x, y},
+		Scale:    &Point{1, 1},
+		Anchor:   &Point{0, 0},
+		Rotation: 0,
+		Color:    color.White,
+		Alpha:    1,
+		Region:   region,
+	}
+}
+*/
