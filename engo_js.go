@@ -311,5 +311,5 @@ func (i *HtmlImageObject) Height() int {
 
 // SetCursor changes the cursor - not yet implemented
 func SetCursor(c Cursor) {
-	log.Println("SetCursor: not yet implemented for gopherjs")
+	notImplemented("SetCursor")
 }

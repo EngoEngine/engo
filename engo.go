@@ -170,6 +170,6 @@ func closeEvent() {
 	if defaultCloseAction {
 		Exit()
 	} else {
-		log.Println("Warning: default close action set to false, please make sure you manually handle this")
+		warning("default close action set to false, please make sure you manually handle this")
 	}
 }

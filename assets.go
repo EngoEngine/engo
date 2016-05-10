@@ -46,7 +46,7 @@ func NewResource(url string) Resource {
 	name := path.Base(url)
 
 	if len(kind) == 0 {
-		log.Println("WARNING: Cannot load extensionless resource.")
+		warning("Cannot load extensionless resource " + url)
 		return Resource{}
 	}
 

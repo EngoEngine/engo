@@ -4,7 +4,6 @@ import (
 	"engo.io/gl"
 	"github.com/luxengine/math"
 	"image/color"
-	"log"
 )
 
 const bufferSize = 10000
@@ -646,7 +645,7 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 			}
 		}
 	default:
-		log.Println("Warning: type not supported")
+		unsupportedType()
 	}
 
 	return changed
@@ -731,7 +730,7 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 			Gl.DrawArrays(Gl.LINE_LOOP, len(shape.Points), len(shape.Points))
 		}
 	default:
-		log.Println("Warning: type not supported")
+		unsupportedType()
 	}
 }
 
