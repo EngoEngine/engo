@@ -39,12 +39,12 @@ type basicShader struct {
 	viewMatrix       []float32
 	modelMatrix      []float32
 
-	camera        *CameraSystem
+	camera        *cameraSystem
 	cameraEnabled bool
 }
 
 func (s *basicShader) Setup(w *ecs.World) {
-	s.program = engo.LoadShader(`
+	s.program = LoadShader(`
 attribute vec2 in_Position;
 attribute vec2 in_TexCoords;
 attribute vec4 in_Color;
@@ -120,7 +120,7 @@ void main (void) {
 	if s.cameraEnabled {
 		for _, system := range w.Systems() {
 			switch sys := system.(type) {
-			case *CameraSystem:
+			case *cameraSystem:
 				s.camera = sys
 			}
 		}
@@ -331,14 +331,14 @@ type legacyShader struct {
 	viewMatrix       []float32
 	modelMatrix      []float32
 
-	camera        *CameraSystem
+	camera        *cameraSystem
 	cameraEnabled bool
 
 	lastBuffer *gl.Buffer
 }
 
 func (l *legacyShader) Setup(w *ecs.World) {
-	l.program = engo.LoadShader(`
+	l.program = LoadShader(`
 attribute vec2 in_Position;
 attribute vec4 in_Color;
 
@@ -444,7 +444,7 @@ void main (void) {
 	if l.cameraEnabled {
 		for _, system := range w.Systems() {
 			switch sys := system.(type) {
-			case *CameraSystem:
+			case *cameraSystem:
 				l.camera = sys
 			}
 		}
@@ -809,4 +809,33 @@ func initShaders(w *ecs.World) {
 
 		shadersSet = true
 	}
+}
+
+// LoadShader takes a Vertex-shader and Fragment-shader, compiles them and attaches them to a newly created glProgram.
+// It will log possible compilation errors
+func LoadShader(vertSrc, fragSrc string) *gl.Program {
+	vertShader := engo.Gl.CreateShader(engo.Gl.VERTEX_SHADER)
+	engo.Gl.ShaderSource(vertShader, vertSrc)
+	engo.Gl.CompileShader(vertShader)
+	if !engo.Gl.GetShaderiv(vertShader, engo.Gl.COMPILE_STATUS) {
+		errorLog := engo.Gl.GetShaderInfoLog(vertShader)
+		log.Print("Error during vertex shader compilation:\n", errorLog)
+	}
+	defer engo.Gl.DeleteShader(vertShader)
+
+	fragShader := engo.Gl.CreateShader(engo.Gl.FRAGMENT_SHADER)
+	engo.Gl.ShaderSource(fragShader, fragSrc)
+	engo.Gl.CompileShader(fragShader)
+	if !engo.Gl.GetShaderiv(fragShader, engo.Gl.COMPILE_STATUS) {
+		errorLog := engo.Gl.GetShaderInfoLog(fragShader)
+		log.Print("Error during fragment shader compilation:\n", errorLog)
+	}
+	defer engo.Gl.DeleteShader(fragShader)
+
+	program := engo.Gl.CreateProgram()
+	engo.Gl.AttachShader(program, vertShader)
+	engo.Gl.AttachShader(program, fragShader)
+	engo.Gl.LinkProgram(program)
+
+	return program
 }

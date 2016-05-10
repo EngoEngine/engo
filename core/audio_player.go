@@ -6,16 +6,14 @@ package core
 
 import (
 	"bytes"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
 	"sync"
 	"time"
 
-	"encoding/binary"
-
 	"golang.org/x/mobile/exp/audio/al"
-	"engo.io/engo"
 )
 
 // Format represents a PCM data format.
@@ -85,7 +83,7 @@ var codeToState = map[int32]State{
 type track struct {
 	format           Format
 	samplesPerSecond int64
-	src              engo.ReadSeekCloser
+	src              ReadSeekCloser
 
 	// hasHeader represents whether the audio source contains
 	// a PCM header. If true, the audio data starts 44 bytes
@@ -113,7 +111,7 @@ type Player struct {
 // An error is returned if the format and sample rate can't be determined.
 //
 // The audio package is only designed for small audio sources.
-func NewPlayer(src engo.ReadSeekCloser, format Format, samplesPerSecond int64) (*Player, error) {
+func NewPlayer(src ReadSeekCloser, format Format, samplesPerSecond int64) (*Player, error) {
 	s := al.GenSources(1)
 	if code := al.Error(); code != 0 {
 		return nil, fmt.Errorf("audio: cannot generate an audio source [err=%x]", code)

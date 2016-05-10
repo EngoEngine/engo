@@ -4,9 +4,6 @@ package engo
 
 import (
 	"image"
-	"image/draw"
-	_ "image/png"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -198,7 +195,6 @@ func RunIteration() {
 // It is only here for benchmarking in combination with OpenHeadlessNoRun
 func RunPreparation(defaultScene Scene) {
 	Time = NewClock()
-	Files = NewLoader()
 
 	// Default WorldBounds values
 	WorldBounds.Max = Point{GameWidth(), GameHeight()}
@@ -419,26 +415,8 @@ func (i *ImageRGBA) Height() int {
 	return i.data.Rect.Max.Y
 }
 
-func loadImage(r Resource) (Image, error) {
-	file, err := os.Open(r.url)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	img, _, err := image.Decode(file)
-	if err != nil {
-		return nil, err
-	}
-
-	b := img.Bounds()
-	newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
-	draw.Draw(newm, newm.Bounds(), img, b.Min, draw.Src)
-
-	return &ImageObject{newm}, nil
-}
-
 func loadJSON(r Resource) (string, error) {
-	file, err := ioutil.ReadFile(r.url)
+	file, err := ioutil.ReadFile(r.URL())
 	if err != nil {
 		return "", err
 	}
@@ -446,7 +424,7 @@ func loadJSON(r Resource) (string, error) {
 }
 
 func loadFont(r Resource) (*truetype.Font, error) {
-	ttfBytes, err := ioutil.ReadFile(r.url)
+	ttfBytes, err := ioutil.ReadFile(r.URL())
 	if err != nil {
 		return nil, err
 	}
@@ -454,6 +432,7 @@ func loadFont(r Resource) (*truetype.Font, error) {
 	return freetype.ParseFont(ttfBytes)
 }
 
+/*
 type Assets struct {
 	queue  []string
 	cache  map[string]Image
@@ -517,3 +496,4 @@ func LoadImage(data interface{}) Image {
 
 	return &ImageObject{newm}
 }
+*/

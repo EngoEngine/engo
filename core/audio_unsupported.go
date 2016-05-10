@@ -14,6 +14,12 @@ const (
 
 var MasterVolume float64 = 1
 
+// ReadSeekCloser is an io.ReadSeeker and io.Closer.
+type ReadSeekCloser interface {
+	io.ReadSeeker
+	io.Closer
+}
+
 // AudioComponent is a Component which is used by the AudioSystem
 type AudioComponent struct {
 	File       string

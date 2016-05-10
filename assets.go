@@ -1,25 +1,140 @@
 package engo
 
 import (
-	"image"
-	"image/color"
-	"image/draw"
-	"io/ioutil"
-	"log"
-	"os"
-	"path"
-
-	"engo.io/gl"
-	"github.com/golang/freetype/truetype"
-	"github.com/luxengine/math"
+	"fmt"
 	"io"
+	"log"
+	"path/filepath"
 )
 
-type Resource struct {
-	kind string
-	name string
-	url  string
+// FileLoader implements support for loading and releasing file resources.
+type FileLoader interface {
+	// Load loads the given resource into memory.
+	Load(url string, data io.Reader) error
+
+	// Unload releases the given resource from memory.
+	Unload(url string) error
+
+	// Resource returns the given resource, and a boolean indicating whether the
+	// resource was loaded.
+	Resource(url string) (Resource, bool)
 }
+
+type Resource interface {
+	URL() string
+}
+
+// Files manages global resource handling of registered file formats for game
+// assets.
+var Files = &Formats{formats: make(map[string]FileLoader)}
+
+// Formats manages resource handling of registered file formats.
+type Formats struct {
+	// formats maps from file extensions to resource loaders.
+	formats map[string]FileLoader
+}
+
+// Register registers a resource loader for the given file format.
+func (formats *Formats) Register(ext string, loader FileLoader) {
+	formats.formats[ext] = loader
+}
+
+// Load loads the given resource into memory.
+func (formats *Formats) Load(url string) error {
+	ext := filepath.Ext(url)
+	if loader, ok := Files.formats[ext]; ok {
+		return loader.Load(url, nil) // TODO: io.Reader instead of nil
+	}
+	return fmt.Errorf("no resource loader registered for file format %q", ext)
+}
+
+// Unload releases the given resource from memory.
+func (formats *Formats) Unload(url string) error {
+	ext := filepath.Ext(url)
+	if loader, ok := Files.formats[ext]; ok {
+		return loader.Unload(url)
+	}
+	return fmt.Errorf("no resource loader registered for file format %q", ext)
+}
+
+// Resource returns the given resource, and a boolean indicating whether the
+// resource was loaded.
+func (formats *Formats) Resource(url string) (Resource, bool) {
+	ext := filepath.Ext(url)
+	if loader, ok := Files.formats[ext]; ok {
+		return loader.Resource(url)
+	}
+	log.Printf("no resource loader registered for file format %q", ext)
+	return nil, false
+}
+
+/* desktop
+func loadImage(r Resource) (Image, error) {
+	file, err := os.Open(r.URL)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	img, _, err := image.Decode(file)
+	if err != nil {
+		return nil, err
+	}
+
+	b := img.Bounds()
+	newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+	draw.Draw(newm, newm.Bounds(), img, b.Min, draw.Src)
+
+	return &ImageObject{newm}, nil
+}
+*/
+
+/* gopherjs
+func loadImage(r Resource) (Image, error) {
+	ch := make(chan error, 1)
+
+	img := js.Global.Get("Image").New()
+	img.Call("addEventListener", "load", func(*js.Object) {
+		go func() { ch <- nil }()
+	}, false)
+	img.Call("addEventListener", "error", func(o *js.Object) {
+		go func() { ch <- &js.Error{Object: o} }()
+	}, false)
+	img.Set("src", r.URL +"?"+strconv.FormatInt(rand.Int63(), 10))
+
+	err := <-ch
+	if err != nil {
+		return nil, err
+	}
+
+	return NewHtmlImageObject(img), nil
+}
+*/
+
+/* mobile
+func loadImage(r Resource) (Image, error) {
+	if strings.HasPrefix(r.URL, "assets/") {
+		r.URL = r.URL[7:]
+	}
+
+	file, err := asset.Open(r.URL)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	img, _, err := image.Decode(file)
+	if err != nil {
+		return nil, err
+	}
+
+	b := img.Bounds()
+	newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+	draw.Draw(newm, newm.Bounds(), img, b.Min, draw.Src)
+
+	return &ImageObject{newm}, nil
+}
+*/
+
+/*
 
 type Loader struct {
 	resources []Resource
@@ -95,11 +210,6 @@ func (l *Loader) Font(name string) (*truetype.Font, bool) {
 	return font, ok
 }
 
-// ReadSeekCloser is an io.ReadSeeker and io.Closer.
-type ReadSeekCloser interface {
-	io.ReadSeeker
-	io.Closer
-}
 
 func (l *Loader) Load(onFinish func()) {
 	for _, r := range l.resources {
@@ -163,33 +273,6 @@ type Image interface {
 	Data() interface{}
 	Width() int
 	Height() int
-}
-
-func LoadShader(vertSrc, fragSrc string) *gl.Program {
-	vertShader := Gl.CreateShader(Gl.VERTEX_SHADER)
-	Gl.ShaderSource(vertShader, vertSrc)
-	Gl.CompileShader(vertShader)
-	if !Gl.GetShaderiv(vertShader, Gl.COMPILE_STATUS) {
-		errorLog := Gl.GetShaderInfoLog(vertShader)
-		log.Print("Error during vertex shader compilation:\n", errorLog)
-	}
-	defer Gl.DeleteShader(vertShader)
-
-	fragShader := Gl.CreateShader(Gl.FRAGMENT_SHADER)
-	Gl.ShaderSource(fragShader, fragSrc)
-	Gl.CompileShader(fragShader)
-	if !Gl.GetShaderiv(fragShader, Gl.COMPILE_STATUS) {
-		errorLog := Gl.GetShaderInfoLog(fragShader)
-		log.Print("Error during fragment shader compilation:\n", errorLog)
-	}
-	defer Gl.DeleteShader(fragShader)
-
-	program := Gl.CreateProgram()
-	Gl.AttachShader(program, vertShader)
-	Gl.AttachShader(program, fragShader)
-	Gl.LinkProgram(program)
-
-	return program
 }
 
 type Region struct {
@@ -315,27 +398,4 @@ func ImageToNRGBA(img image.Image, width, height int) *image.NRGBA {
 	return newm
 }
 
-// ImageObject is a pure Go implementation of a `Drawable`
-type ImageObject struct {
-	data *image.NRGBA
-}
-
-// NewImageObject creates a new ImageObject given the image.NRGBA reference
-func NewImageObject(img *image.NRGBA) *ImageObject {
-	return &ImageObject{img}
-}
-
-// Data returns the entire image.NRGBA object
-func (i *ImageObject) Data() interface{} {
-	return i.data
-}
-
-// Width returns the maximum X coordinate of the image
-func (i *ImageObject) Width() int {
-	return i.data.Rect.Max.X
-}
-
-// Height returns the maximum Y coordinate of the image
-func (i *ImageObject) Height() int {
-	return i.data.Rect.Max.Y
-}
+*/

@@ -85,6 +85,7 @@ type mouseEntity struct {
 type MouseSystem struct {
 	entities []mouseEntity
 	world    *ecs.World
+	camera *cameraSystem
 
 	mouseX    float32
 	mouseY    float32
@@ -96,6 +97,19 @@ func (m *MouseSystem) Priority() int { return MouseSystemPriority }
 
 func (m *MouseSystem) New(w *ecs.World) {
 	m.world = w
+
+	// First check if the CameraSystem is available
+	for _, system := range m.world.Systems() {
+		switch sys := system.(type) {
+		case *cameraSystem:
+			m.camera = sys
+		}
+	}
+
+	if m.camera== nil {
+		log.Println("ERROR: CameraSystem not found - have you added the `RenderSystem` before the `MouseSystem`?")
+		return
+	}
 }
 
 // Add adds a new entity to the MouseSystem.
@@ -122,27 +136,13 @@ func (m *MouseSystem) Remove(basic ecs.BasicEntity) {
 }
 
 func (m *MouseSystem) Update(dt float32) {
-	// First check if the CameraSystem is available - TODO: do this on Update or on Setup?
-	var cam *CameraSystem
-	for _, system := range m.world.Systems() {
-		switch sys := system.(type) {
-		case *CameraSystem:
-			cam = sys
-		}
-	}
-
-	if cam == nil {
-		log.Println("CameraSystem not found, MouseSystem cannot run")
-		return
-	}
-
 	// Translate Mouse.X and Mouse.Y into "game coordinates"
-	m.mouseX = engo.Mouse.X*cam.z*(engo.GameWidth()/engo.WindowWidth()) + cam.x - (engo.GameWidth()/2)*cam.z
-	m.mouseY = engo.Mouse.Y*cam.z*(engo.GameHeight()/engo.WindowHeight()) + cam.y - (engo.GameHeight()/2)*cam.z
+	m.mouseX = engo.Mouse.X*m.camera.z*(engo.GameWidth()/engo.WindowWidth()) + m.camera.x - (engo.GameWidth()/2)*m.camera.z
+	m.mouseY = engo.Mouse.Y*m.camera.z*(engo.GameHeight()/engo.WindowHeight()) + m.camera.y - (engo.GameHeight()/2)*m.camera.z
 
 	// Rotate if needed
-	if cam.angle != 0 {
-		sin, cos := math.Sincos(cam.angle * math.Pi / 180)
+	if m.camera.angle != 0 {
+		sin, cos := math.Sincos(m.camera.angle * math.Pi / 180)
 		m.mouseX, m.mouseY = m.mouseX*cos+m.mouseY*sin, m.mouseY*cos-m.mouseX*sin
 	}
 

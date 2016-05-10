@@ -44,38 +44,16 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	msaaPreference = msaa
 }
 
-func loadImage(r Resource) (Image, error) {
-	if strings.HasPrefix(r.url, "assets/") {
-		r.url = r.url[7:]
-	}
-
-	file, err := asset.Open(r.url)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	img, _, err := image.Decode(file)
-	if err != nil {
-		return nil, err
-	}
-
-	b := img.Bounds()
-	newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
-	draw.Draw(newm, newm.Bounds(), img, b.Min, draw.Src)
-
-	return &ImageObject{newm}, nil
-}
-
 func loadJSON(r Resource) (string, error) {
 	return "", fmt.Errorf("loadJSON not yet impplemented")
 }
 
 func loadFont(r Resource) (*truetype.Font, error) {
-	if strings.HasPrefix(r.url, "assets/") {
-		r.url = r.url[7:]
+	if strings.HasPrefix(r.URL, "assets/") {
+		r.URL = r.URL[7:]
 	}
 
-	file, err := asset.Open(r.url)
+	file, err := asset.Open(r.URL)
 	if err != nil {
 		return nil, err
 	}

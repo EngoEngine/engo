@@ -8,6 +8,7 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"golang.org/x/mobile/exp/audio/al"
+	"io"
 )
 
 const (
@@ -15,6 +16,12 @@ const (
 )
 
 var MasterVolume float64 = 1
+
+// ReadSeekCloser is an io.ReadSeeker and io.Closer.
+type ReadSeekCloser interface {
+	io.ReadSeeker
+	io.Closer
+}
 
 // AudioComponent is a Component which is used by the AudioSystem
 type AudioComponent struct {
@@ -76,19 +83,20 @@ func (a *AudioSystem) New(w *ecs.World) {
 		return
 	}
 
-	var cam *CameraSystem
+	var cam *cameraSystem
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *CameraSystem:
+		case *cameraSystem:
 			cam = sys
 		}
 	}
 
 	if cam == nil {
-		log.Println("CameraSystem not found, MouseSystem cannot run")
+		log.Println("ERROR: CameraSystem not found - have you added the `RenderSystem` before the `AudioSystem`?")
 		return
 	}
 
+	// TODO: does this break by any chance, if we use multiple scenes? (w/o recreating world)
 	engo.Mailbox.Listen("CameraMessage", func(msg engo.Message) {
 		_, ok := msg.(CameraMessage)
 		if !ok {

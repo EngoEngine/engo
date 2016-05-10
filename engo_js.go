@@ -216,28 +216,8 @@ Outer:
 	ticker.Stop()
 }
 
-func loadImage(r Resource) (Image, error) {
-	ch := make(chan error, 1)
-
-	img := js.Global.Get("Image").New()
-	img.Call("addEventListener", "load", func(*js.Object) {
-		go func() { ch <- nil }()
-	}, false)
-	img.Call("addEventListener", "error", func(o *js.Object) {
-		go func() { ch <- &js.Error{Object: o} }()
-	}, false)
-	img.Set("src", r.url+"?"+strconv.FormatInt(rand.Int63(), 10))
-
-	err := <-ch
-	if err != nil {
-		return nil, err
-	}
-
-	return NewHtmlImageObject(img), nil
-}
-
 func loadJSON(r Resource) (string, error) {
-	req := xhr.NewRequest("GET", r.url)
+	req := xhr.NewRequest("GET", r.URL)
 	err := req.Send("")
 	if err != nil {
 		return "", err
@@ -264,7 +244,7 @@ func loadJSON(r Resource) (string, error) {
 }
 
 func loadFont(r Resource) (*truetype.Font, error) {
-	req := xhr.NewRequest("GET", r.url+"_js")
+	req := xhr.NewRequest("GET", r.URL+"_js")
 	err := req.Send("")
 	if err != nil {
 		return &truetype.Font{}, err

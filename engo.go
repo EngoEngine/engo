@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	Time  *Clock
-	Files *Loader
+	Time *Clock
+	//Files *Loader
 	Input *InputManager
 
 	closeGame          bool
@@ -89,6 +89,9 @@ func Run(opts RunOptions, defaultScene Scene) {
 	SetFPSLimit(opts.FPSLimit)
 	vsync = opts.VSync
 	defaultCloseAction = !opts.OverrideCloseAction
+	if opts.FPSLimit > 0 {
+		fpsLimit = opts.FPSLimit
+	}
 
 	// Create input
 	Input = NewInputManager()
