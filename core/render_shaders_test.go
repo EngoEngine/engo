@@ -8,14 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type defaultScene struct{}
-
-func (defaultScene) Type() string { return "defaultScene" }
-func (defaultScene) Preload()     {}
-func (defaultScene) Setup(w *ecs.World) {
-	w.AddSystem(&RenderSystem{})
-}
-
 func TestShaders(t *testing.T) {
 	engo.CreateWindow("", 100, 100, false, 1)
 
