@@ -5,6 +5,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/core"
 	"engo.io/engo/demos/demoutils"
 )
 
@@ -25,7 +26,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	w.AddSystem(&core.RenderSystem{})
 
 	// The most important line in this whole demo:
-	w.AddSystem(engo.NewKeyboardScroller(scrollSpeed, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis))
+	w.AddSystem(core.NewKeyboardScroller(scrollSpeed, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis))
 
 	// Create the background; this way we'll see when we actually scroll
 	demoutils.NewBackground(w, worldWidth, worldHeight, color.RGBA{102, 153, 0, 255}, color.RGBA{102, 173, 0, 255})

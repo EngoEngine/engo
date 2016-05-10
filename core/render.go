@@ -109,9 +109,8 @@ func (rs *RenderSystem) New(w *ecs.World) {
 
 	if !engo.Headless() {
 		initShaders(w)
+		engo.Gl.Enable(engo.Gl.MULTISAMPLE)
 	}
-
-	engo.Gl.Enable(engo.Gl.MULTISAMPLE)
 
 	engo.Mailbox.Listen("renderChangeMessage", func(engo.Message) {
 		rs.sortingNeeded = true

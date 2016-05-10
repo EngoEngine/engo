@@ -5,6 +5,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/core"
 	"engo.io/engo/demos/demoutils"
 )
 
@@ -12,7 +13,7 @@ type DefaultScene struct{}
 
 var (
 	// rotationSpeed is the speed at which to rotate
-	rotationSpeed float32 = 10
+	rotationSpeed float32 = 1
 
 	worldWidth  int = 800
 	worldHeight int = 800
@@ -24,7 +25,7 @@ func (*DefaultScene) Preload() {}
 func (*DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 	w.AddSystem(&core.RenderSystem{})
-	w.AddSystem(&engo.MouseRotator{RotationSpeed: rotationSpeed})
+	w.AddSystem(&core.MouseRotator{RotationSpeed: rotationSpeed})
 
 	// Create a background; this way we'll see when we actually rotate
 	demoutils.NewBackground(w, 300, worldHeight, color.RGBA{102, 153, 0, 255}, color.RGBA{102, 173, 0, 255})

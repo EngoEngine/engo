@@ -1,3 +1,5 @@
+//+build ignore
+
 package main
 
 import (
@@ -5,6 +7,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/core"
 )
 
 var World *GameWorld

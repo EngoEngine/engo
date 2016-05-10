@@ -2,10 +2,12 @@ package main
 
 import (
 	"image/color"
+	"log"
 	"math/rand"
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/core"
 )
 
 type DefaultScene struct{}
@@ -17,9 +19,10 @@ type Guy struct {
 }
 
 func (*DefaultScene) Preload() {
-	// This could be done individually: engo.Files.Add("data/icon.png"), etc
-	// Second value (false) says whether to check recursively or not
-	engo.Files.AddFromDir("data", false)
+	err := engo.Files.LoadMany("icon.png", "rock.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (*DefaultScene) Setup(w *ecs.World) {
@@ -29,7 +32,10 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	w.AddSystem(&ScaleSystem{})
 
 	// Retrieve a texture
-	texture := engo.Files.Image("icon.png")
+	texture, err := core.PreloadedSpriteSingle("icon.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create an entity
 	guy := Guy{BasicEntity: ecs.NewBasic()}
@@ -37,7 +43,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	// Initialize the components, set scale to 8x
 	guy.RenderComponent = core.RenderComponent{
 		Drawable: texture,
-		Scale: engo.Point{8, 8},
+		Scale:    engo.Point{8, 8},
 	}
 	guy.SpaceComponent = core.SpaceComponent{
 		Position: engo.Point{0, 0},

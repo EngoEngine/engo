@@ -8,4 +8,4 @@ For doing so, it created a green background. This way, you'll notice the zooming
 ## What are important aspects of the code?
 These lines are key in this demo:
 
-* `w.AddSystem(&engo.MouseZoomer{zoomSpeed})`, to enable the scrolling with the mouse wheel. 
+* `w.AddSystem(&core.MouseZoomer{zoomSpeed})`, to enable the scrolling with the mouse wheel. 

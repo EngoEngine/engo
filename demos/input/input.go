@@ -5,6 +5,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/core"
 )
 
 type DefaultScene struct{}
@@ -48,7 +49,7 @@ func (c *InputSystem) Remove(basic ecs.BasicEntity) {
 
 func (c *InputSystem) Update(dt float32) {
 	if v := engo.Input.Axis("sideways").Value(); v != 0 {
-		//fmt.Println(v)
+		fmt.Println(v)
 	}
 
 	if btn := engo.Input.Button("action"); btn.JustPressed() {

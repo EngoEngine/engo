@@ -2,39 +2,46 @@ package main
 
 import (
 	"image/color"
+	"log"
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/core"
 )
 
 type DefaultScene struct{}
 
 type Guy struct {
 	ecs.BasicEntity
-	engo.MouseComponent
+	core.MouseComponent
 	core.RenderComponent
 	core.SpaceComponent
 }
 
 func (*DefaultScene) Preload() {
-	// Load all files from the data directory. `false` means: do not do it recursively.
-	engo.Files.AddFromDir("data", false)
+	err := engo.Files.Load("icon.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (*DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 
-	w.AddSystem(&engo.MouseSystem{})
 	w.AddSystem(&core.RenderSystem{})
+	w.AddSystem(&core.MouseSystem{})
 	w.AddSystem(&ControlSystem{})
 
 	// These are not required, but allow you to move / rotate and still see that it works
-	w.AddSystem(&engo.MouseZoomer{-0.125})
-	w.AddSystem(engo.NewKeyboardScroller(500, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis))
-	w.AddSystem(&engo.MouseRotator{RotationSpeed: 0.125})
+	w.AddSystem(&core.MouseZoomer{-0.125})
+	w.AddSystem(core.NewKeyboardScroller(500, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis))
+	w.AddSystem(&core.MouseRotator{RotationSpeed: 0.125})
 
 	// Retrieve a texture
-	texture := engo.Files.Image("icon.png")
+	texture, err := core.PreloadedSpriteSingle("icon.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create an entity
 	guy := Guy{BasicEntity: ecs.NewBasic()}
@@ -57,7 +64,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 		switch sys := system.(type) {
 		case *core.RenderSystem:
 			sys.Add(&guy.BasicEntity, &guy.RenderComponent, &guy.SpaceComponent)
-		case *engo.MouseSystem:
+		case *core.MouseSystem:
 			sys.Add(&guy.BasicEntity, &guy.MouseComponent, &guy.SpaceComponent, &guy.RenderComponent)
 		case *ControlSystem:
 			sys.Add(&guy.BasicEntity, &guy.MouseComponent)
@@ -69,14 +76,14 @@ func (*DefaultScene) Type() string { return "GameWorld" }
 
 type controlEntity struct {
 	*ecs.BasicEntity
-	*engo.MouseComponent
+	*core.MouseComponent
 }
 
 type ControlSystem struct {
 	entities []controlEntity
 }
 
-func (c *ControlSystem) Add(basic *ecs.BasicEntity, mouse *engo.MouseComponent) {
+func (c *ControlSystem) Add(basic *ecs.BasicEntity, mouse *core.MouseComponent) {
 	c.entities = append(c.entities, controlEntity{basic, mouse})
 }
 

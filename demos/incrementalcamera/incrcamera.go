@@ -6,6 +6,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/core"
 	"engo.io/engo/demos/demoutils"
 )
 
@@ -26,8 +27,8 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	demoutils.NewBackground(w, worldWidth, worldHeight, color.RGBA{102, 153, 0, 255}, color.RGBA{102, 173, 0, 255})
 
 	// We issue one camera zoom command at the start, but it takes a while to process because we set a duration
-	engo.Mailbox.Dispatch(engo.CameraMessage{
-		Axis:        engo.ZAxis,
+	engo.Mailbox.Dispatch(core.CameraMessage{
+		Axis:        core.ZAxis,
 		Value:       3, // so zooming out a lot
 		Incremental: true,
 		Duration:    time.Second * 5,

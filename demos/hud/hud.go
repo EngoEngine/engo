@@ -5,6 +5,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/core"
 	"engo.io/engo/demos/demoutils"
 )
 
@@ -26,8 +27,8 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	w.AddSystem(&core.RenderSystem{})
 
 	// Adding KeyboardScroller so we can actually see the difference between background and HUD when scrolling
-	w.AddSystem(engo.NewKeyboardScroller(scrollSpeed, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis))
-	w.AddSystem(&engo.MouseZoomer{zoomSpeed})
+	w.AddSystem(core.NewKeyboardScroller(scrollSpeed, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis))
+	w.AddSystem(&core.MouseZoomer{zoomSpeed})
 
 	// Create background, so we can see difference between this and HUD
 	demoutils.NewBackground(w, worldWidth, worldHeight, color.RGBA{102, 153, 0, 255}, color.RGBA{102, 173, 0, 255})
@@ -42,7 +43,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 
 	// These adjustments are needed to transform it into a HUD:
 	hudBg.RenderComponent.SetZIndex(1) // something bigger than default (0), so it'll be on top of the regular background
-	hudBg.RenderComponent.SetShader(engo.HUDShader)
+	hudBg.RenderComponent.SetShader(core.HUDShader)
 }
 
 func (*DefaultScene) Type() string { return "Game" }

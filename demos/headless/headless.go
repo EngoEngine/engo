@@ -9,19 +9,20 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/core"
 )
 
 type PongGame struct{}
 
 var (
-	basicFont *engo.Font
+	basicFont *core.Font
 )
 
 type Ball struct {
 	ecs.BasicEntity
 	core.RenderComponent
 	core.SpaceComponent
-	engo.CollisionComponent
+	core.CollisionComponent
 	SpeedComponent
 }
 
@@ -34,30 +35,36 @@ type Score struct {
 type Paddle struct {
 	ecs.BasicEntity
 	ControlComponent
-	engo.CollisionComponent
+	core.CollisionComponent
 	core.RenderComponent
 	core.SpaceComponent
 }
 
 func (pong *PongGame) Preload() {
-	engo.Files.AddFromDir("assets", true)
+	err := engo.Files.LoadMany("ball.png", "paddle.png", "Roboto-Regular.ttf")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (pong *PongGame) Setup(w *ecs.World) {
 	engo.SetBackground(color.Black)
 	w.AddSystem(&core.RenderSystem{})
-	w.AddSystem(&engo.CollisionSystem{})
+	w.AddSystem(&core.CollisionSystem{})
 	w.AddSystem(&SpeedSystem{})
 	w.AddSystem(&ControlSystem{})
 	w.AddSystem(&BallSystem{})
 	w.AddSystem(&ScoreSystem{})
 
-	basicFont = (&engo.Font{URL: "Roboto-Regular.ttf", Size: 32, FG: color.NRGBA{255, 255, 255, 255}})
+	basicFont = (&core.Font{URL: "Roboto-Regular.ttf", Size: 32, FG: color.NRGBA{255, 255, 255, 255}})
 	if err := basicFont.CreatePreloaded(); err != nil {
 		log.Fatalln("Could not load font:", err)
 	}
 
-	ballTexture := engo.Files.Image("ball.png")
+	ballTexture, err := core.PreloadedSpriteSingle("ball.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	ball := Ball{BasicEntity: ecs.NewBasic()}
 	ball.RenderComponent = core.RenderComponent{
@@ -69,7 +76,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		Width:    ballTexture.Width() * ball.RenderComponent.Scale.X,
 		Height:   ballTexture.Height() * ball.RenderComponent.Scale.Y,
 	}
-	ball.CollisionComponent = engo.CollisionComponent{
+	ball.CollisionComponent = core.CollisionComponent{
 		Main:  true,
 		Solid: true,
 	}
@@ -80,7 +87,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		switch sys := system.(type) {
 		case *core.RenderSystem:
 			sys.Add(&ball.BasicEntity, &ball.RenderComponent, &ball.SpaceComponent)
-		case *engo.CollisionSystem:
+		case *core.CollisionSystem:
 			sys.Add(&ball.BasicEntity, &ball.CollisionComponent, &ball.SpaceComponent)
 		case *SpeedSystem:
 			sys.Add(&ball.BasicEntity, &ball.SpeedComponent, &ball.SpaceComponent)
@@ -108,7 +115,10 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	}
 
 	schemes := []string{"WASD", ""}
-	paddleTexture := engo.Files.Image("paddle.png")
+	paddleTexture, err := core.PreloadedSpriteSingle("paddle.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	for i := 0; i < 2; i++ {
 		paddle := Paddle{BasicEntity: ecs.NewBasic()}
@@ -128,7 +138,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 			Height:   paddle.RenderComponent.Scale.Y * paddleTexture.Height(),
 		}
 		paddle.ControlComponent = ControlComponent{schemes[i]}
-		paddle.CollisionComponent = engo.CollisionComponent{
+		paddle.CollisionComponent = core.CollisionComponent{
 			Main:  false,
 			Solid: true,
 		}
@@ -138,7 +148,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 			switch sys := system.(type) {
 			case *core.RenderSystem:
 				sys.Add(&paddle.BasicEntity, &paddle.RenderComponent, &paddle.SpaceComponent)
-			case *engo.CollisionSystem:
+			case *core.CollisionSystem:
 				sys.Add(&paddle.BasicEntity, &paddle.CollisionComponent, &paddle.SpaceComponent)
 			case *ControlSystem:
 				sys.Add(&paddle.BasicEntity, &paddle.ControlComponent, &paddle.SpaceComponent)
@@ -171,7 +181,7 @@ func (s *SpeedSystem) New(*ecs.World) {
 	engo.Mailbox.Listen("CollisionMessage", func(message engo.Message) {
 		log.Println("collision")
 
-		collision, isCollision := message.(engo.CollisionMessage)
+		collision, isCollision := message.(core.CollisionMessage)
 		if isCollision {
 			// See if we also have that Entity, and if so, change the speed
 			for _, e := range s.entities {

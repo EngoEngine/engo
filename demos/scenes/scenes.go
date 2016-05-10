@@ -8,6 +8,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/core"
 )
 
 var (
@@ -31,7 +32,10 @@ type Rock struct {
 type IconScene struct{}
 
 func (*IconScene) Preload() {
-	engo.Files.Add("data/icon.png")
+	err := engo.Files.Load("icon.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (*IconScene) Setup(w *ecs.World) {
@@ -42,7 +46,10 @@ func (*IconScene) Setup(w *ecs.World) {
 	w.AddSystem(&SceneSwitcherSystem{NextScene: "RockScene", WaitTime: time.Second * 3})
 
 	// Retrieve a texture
-	texture := engo.Files.Image("icon.png")
+	texture, err := core.PreloadedSpriteSingle("icon.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create an entity
 	guy := Guy{BasicEntity: ecs.NewBasic()}
@@ -50,7 +57,7 @@ func (*IconScene) Setup(w *ecs.World) {
 	// Initialize the components, set scale to 8x
 	guy.RenderComponent = core.RenderComponent{
 		Drawable: texture,
-		Scale: engo.Point{8, 8},
+		Scale:    engo.Point{8, 8},
 	}
 	guy.SpaceComponent = core.SpaceComponent{
 		Position: engo.Point{0, 0},
@@ -83,7 +90,10 @@ func (*IconScene) Type() string { return "IconScene" }
 type RockScene struct{}
 
 func (*RockScene) Preload() {
-	engo.Files.Add("data/rock.png")
+	err := engo.Files.Load("rock.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (game *RockScene) Setup(w *ecs.World) {
@@ -94,7 +104,10 @@ func (game *RockScene) Setup(w *ecs.World) {
 	w.AddSystem(&SceneSwitcherSystem{NextScene: "IconScene", WaitTime: time.Second * 3})
 
 	// Retrieve a texture
-	texture := engo.Files.Image("rock.png")
+	texture, err := core.PreloadedSpriteSingle("rock.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create an entity
 	rock := Rock{BasicEntity: ecs.NewBasic()}
@@ -102,7 +115,7 @@ func (game *RockScene) Setup(w *ecs.World) {
 	// Initialize the components, set scale to 8x
 	rock.RenderComponent = core.RenderComponent{
 		Drawable: texture,
-		Scale: engo.Point{8, 8},
+		Scale:    engo.Point{8, 8},
 	}
 	rock.SpaceComponent = core.SpaceComponent{
 		Position: engo.Point{0, 0},

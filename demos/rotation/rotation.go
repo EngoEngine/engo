@@ -6,6 +6,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/core"
 	"github.com/luxengine/math"
 )
 
@@ -18,10 +19,10 @@ type Guy struct {
 type DefaultScene struct{}
 
 func (game *DefaultScene) Preload() {
-	// Load all files from the data directory. Do not do it recursively.
-	engo.Files.AddFromDir("data", false)
-
-	log.Println("Preloaded")
+	err := engo.Files.Load("icon.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (game *DefaultScene) Setup(w *ecs.World) {
@@ -31,7 +32,10 @@ func (game *DefaultScene) Setup(w *ecs.World) {
 	w.AddSystem(&core.RenderSystem{})
 
 	// Retrieve a texture
-	texture := engo.Files.Image("icon.png")
+	texture, err := core.PreloadedSpriteSingle("icon.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create an entity
 	guy := Guy{BasicEntity: ecs.NewBasic()}
@@ -39,7 +43,7 @@ func (game *DefaultScene) Setup(w *ecs.World) {
 	// Initialize the components, set scale to 8x
 	guy.RenderComponent = core.RenderComponent{
 		Drawable: texture,
-		Scale: engo.Point{8, 8},
+		Scale:    engo.Point{8, 8},
 	}
 	guy.SpaceComponent = core.SpaceComponent{
 		Position: engo.Point{200, 200},

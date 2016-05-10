@@ -6,6 +6,8 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/core"
+	"log"
 )
 
 type DefaultScene struct{}
@@ -17,7 +19,10 @@ type Rock struct {
 }
 
 func (*DefaultScene) Preload() {
-	engo.Files.AddFromDir("assets", false)
+	err := engo.Files.Load("rock.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (*DefaultScene) Setup(w *ecs.World) {
@@ -27,7 +32,10 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	w.AddSystem(&HideSystem{})
 
 	// Retrieve a texture
-	texture := engo.Files.Image("rock.png")
+	texture, err := core.PreloadedSpriteSingle("rock.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create an entity
 	rock := Rock{BasicEntity: ecs.NewBasic()}
@@ -35,7 +43,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	// Initialize the components, set scale to 8x
 	rock.RenderComponent = core.RenderComponent{
 		Drawable: texture,
-		Scale: engo.Point{8, 8},
+		Scale:    engo.Point{8, 8},
 	}
 	rock.SpaceComponent = core.SpaceComponent{
 		Position: engo.Point{0, 0},

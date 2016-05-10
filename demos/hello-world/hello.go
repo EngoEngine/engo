@@ -2,9 +2,11 @@ package main
 
 import (
 	"image/color"
+	"log"
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/core"
 )
 
 type DefaultScene struct{}
@@ -17,7 +19,7 @@ type Guy struct {
 }
 
 func (*DefaultScene) Preload() {
-	engo.Files.Add("assets/icon.png")
+	engo.Files.Load("icon.png")
 }
 
 func (*DefaultScene) Setup(w *ecs.World) {
@@ -26,7 +28,10 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	w.AddSystem(&core.RenderSystem{})
 
 	// Retrieve a texture
-	texture := engo.Files.Image("icon.png")
+	texture, err := core.PreloadedSpriteSingle("icon.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create an entity
 	guy := Guy{BasicEntity: ecs.NewBasic()}

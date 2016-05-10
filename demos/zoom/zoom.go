@@ -5,6 +5,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/core"
 	"engo.io/engo/demos/demoutils"
 )
 
@@ -23,7 +24,7 @@ func (*DefaultScene) Preload() {}
 func (*DefaultScene) Setup(w *ecs.World) {
 	engo.SetBackground(color.White)
 	w.AddSystem(&core.RenderSystem{})
-	w.AddSystem(&engo.MouseZoomer{zoomSpeed})
+	w.AddSystem(&core.MouseZoomer{zoomSpeed})
 
 	// Create the background; this way we'll see when we actually zoom
 	demoutils.NewBackground(w, worldWidth, worldHeight, color.RGBA{102, 153, 0, 255}, color.RGBA{102, 173, 0, 255})
