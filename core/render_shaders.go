@@ -1,11 +1,13 @@
 package core
 
 import (
+	"image/color"
+
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/gl"
 	"github.com/luxengine/math"
-	"image/color"
+	"log"
 )
 
 const bufferSize = 10000

@@ -1,4 +1,4 @@
-package engo
+package core
 
 import "log"
 
