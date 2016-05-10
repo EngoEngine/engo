@@ -255,8 +255,10 @@ func (s *basicShader) updateBuffer(ren *RenderComponent, space *SpaceComponent) 
 }
 
 func (s *basicShader) generateBufferContent(ren *RenderComponent, space *SpaceComponent, buffer []float32) bool {
-	w := space.Width
-	h := space.Height
+	// We shouldn't use SpaceComponent to get width/height, because this usually already contains the Scale (which
+	// is being added elsewhere, so we don't want to over-do it)
+	w := ren.Drawable.Width()
+	h := ren.Drawable.Height()
 
 	colorR, colorG, colorB, colorA := ren.Color.RGBA()
 	colorR >>= 8

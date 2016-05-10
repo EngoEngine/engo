@@ -50,7 +50,7 @@ func (s *Spritesheet) Cell(index int) Texture {
 	cellsPerRow := int(s.Width())
 	var x float32 = float32((index % cellsPerRow) * s.cellWidth)
 	var y float32 = float32((index / cellsPerRow) * s.cellHeight)
-	s.cache[index] = Texture{id: s.texture, width: s.width, height: s.height, viewport: engo.AABB{
+	s.cache[index] = Texture{id: s.texture, width: float32(s.cellWidth), height: float32(s.cellHeight), viewport: engo.AABB{
 		engo.Point{x / s.width, y / s.height},
 		engo.Point{(x + float32(s.cellWidth)) / s.width, (y + float32(s.cellHeight)) / s.height},
 	}}
