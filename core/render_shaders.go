@@ -6,14 +6,16 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/gl"
+	"fmt"
 	"github.com/luxengine/math"
 	"log"
+	"strings"
 )
 
 const bufferSize = 10000
 
 type Shader interface {
-	Setup(*ecs.World)
+	Setup(*ecs.World) error
 	Pre()
 	Draw(*RenderComponent, *SpaceComponent)
 	Post()
@@ -44,8 +46,9 @@ type basicShader struct {
 	cameraEnabled bool
 }
 
-func (s *basicShader) Setup(w *ecs.World) {
-	s.program = LoadShader(`
+func (s *basicShader) Setup(w *ecs.World) error {
+	var err error
+	s.program, err = LoadShader(`
 attribute vec2 in_Position;
 attribute vec2 in_TexCoords;
 attribute vec4 in_Color;
@@ -80,6 +83,10 @@ uniform sampler2D uf_Texture;
 void main (void) {
   gl_FragColor = var_Color * texture2D(uf_Texture, var_TexCoords);
 }`)
+
+	if err != nil {
+		return err
+	}
 
 	// Create and populate indices buffer
 	s.indices = make([]uint16, 6*bufferSize)
@@ -129,6 +136,8 @@ void main (void) {
 			log.Println("WARNING: BasicShader has CameraEnabled, but CameraSystem was not found")
 		}
 	}
+
+	return nil
 }
 
 func (s *basicShader) Pre() {
@@ -340,8 +349,9 @@ type legacyShader struct {
 	lastBuffer *gl.Buffer
 }
 
-func (l *legacyShader) Setup(w *ecs.World) {
-	l.program = LoadShader(`
+func (l *legacyShader) Setup(w *ecs.World) error {
+	var err error
+	l.program, err = LoadShader(`
 attribute vec2 in_Position;
 attribute vec4 in_Color;
 
@@ -411,6 +421,10 @@ void main (void) {
   }
 }`)
 
+	if err != nil {
+		return err
+	}
+
 	// Create and populate indices buffer
 	l.indicesRectangles = []uint16{0, 1, 2, 0, 2, 3}
 	l.indicesRectanglesVBO = engo.Gl.CreateBuffer()
@@ -455,6 +469,8 @@ void main (void) {
 			log.Println("WARNING: BasicShader has CameraEnabled, but CameraSystem was not found")
 		}
 	}
+
+	return nil
 }
 
 func (l *legacyShader) Pre() {
@@ -803,26 +819,37 @@ var (
 	shadersSet      bool
 )
 
-func initShaders(w *ecs.World) {
+func initShaders(w *ecs.World) error {
 	if !shadersSet {
-		DefaultShader.Setup(w)
-		HUDShader.Setup(w)
-		LegacyShader.Setup(w)
-		LegacyHUDShader.Setup(w)
+		shaders := []Shader{
+			DefaultShader,
+			HUDShader,
+			LegacyShader,
+			LegacyHUDShader,
+		}
+		var err error
+
+		for _, shader := range shaders {
+			err = shader.Setup(w)
+			if err != nil {
+				return err
+			}
+		}
 
 		shadersSet = true
 	}
+	return nil
 }
 
 // LoadShader takes a Vertex-shader and Fragment-shader, compiles them and attaches them to a newly created glProgram.
 // It will log possible compilation errors
-func LoadShader(vertSrc, fragSrc string) *gl.Program {
+func LoadShader(vertSrc, fragSrc string) (*gl.Program, error) {
 	vertShader := engo.Gl.CreateShader(engo.Gl.VERTEX_SHADER)
 	engo.Gl.ShaderSource(vertShader, vertSrc)
 	engo.Gl.CompileShader(vertShader)
 	if !engo.Gl.GetShaderiv(vertShader, engo.Gl.COMPILE_STATUS) {
 		errorLog := engo.Gl.GetShaderInfoLog(vertShader)
-		log.Print("Error during vertex shader compilation:\n", errorLog)
+		return nil, VertexShaderCompilationError{errorLog}
 	}
 	defer engo.Gl.DeleteShader(vertShader)
 
@@ -831,7 +858,7 @@ func LoadShader(vertSrc, fragSrc string) *gl.Program {
 	engo.Gl.CompileShader(fragShader)
 	if !engo.Gl.GetShaderiv(fragShader, engo.Gl.COMPILE_STATUS) {
 		errorLog := engo.Gl.GetShaderInfoLog(fragShader)
-		log.Print("Error during fragment shader compilation:\n", errorLog)
+		return nil, FragmentShaderCompilationError{errorLog}
 	}
 	defer engo.Gl.DeleteShader(fragShader)
 
@@ -840,5 +867,21 @@ func LoadShader(vertSrc, fragSrc string) *gl.Program {
 	engo.Gl.AttachShader(program, fragShader)
 	engo.Gl.LinkProgram(program)
 
-	return program
+	return program, nil
+}
+
+type VertexShaderCompilationError struct {
+	OpenGLError string
+}
+
+func (v VertexShaderCompilationError) Error() string {
+	return fmt.Sprintf("an error occured compiling the vertex shader: %s", strings.Trim(v.OpenGLError, "\r\n"))
+}
+
+type FragmentShaderCompilationError struct {
+	OpenGLError string
+}
+
+func (f FragmentShaderCompilationError) Error() string {
+	return fmt.Sprintf("an error occured compiling the fragment shader: %s", strings.Trim(f.OpenGLError, "\r\n"))
 }
