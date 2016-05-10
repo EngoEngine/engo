@@ -4,7 +4,6 @@ import (
 	"engo.io/gl"
 	"github.com/luxengine/math"
 	"image/color"
-	"log"
 )
 
 const bufferSize = 10000
