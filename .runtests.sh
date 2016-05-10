@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 # Setting xvfb
-sudo Xvfb :10 -ac
+echo "Initializing xvfb ..."
+sudo Xvfb :10 -ac &
+export DISPLAY=:10
 
 # Install dependencies
 echo "Installing gopherjs ..."
