@@ -78,6 +78,14 @@ type RunOptions struct {
 	// More info at https://www.opengl.org/wiki/Multisampling
 	// "With multisampling, each pixel at the edge of a polygon is sampled multiple times."
 	MSAA int
+
+	// AssetsRoot is the path where all resources (images, audio files, fonts, etc.) can be found. Leaving this at
+	// empty-string, will default this to `assets`.
+	//
+	// Whenever using any value that does not start with the directory `assets`, you will not be able to support
+	// mobile (Android/iOS), because they **require** all assets to be within the `assets` directory. You may however
+	// use any subfolder-structure within that `assets` directory.
+	AssetsRoot string
 }
 
 // Run is called to create a window, initialize everything, and start the main loop. Once this function returns,
@@ -112,6 +120,12 @@ func Run(opts RunOptions, defaultScene Scene) {
 	if opts.MSAA == 0 {
 		opts.MSAA = 1
 	}
+
+	if len(opts.AssetsRoot) == 0 {
+		opts.AssetsRoot = "assets"
+	}
+
+	Files.SetRoot(opts.AssetsRoot)
 
 	if opts.HeadlessMode {
 		headless = true

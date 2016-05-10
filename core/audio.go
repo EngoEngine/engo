@@ -92,7 +92,7 @@ func (a *AudioSystem) New(w *ecs.World) {
 	}
 
 	if cam == nil {
-		log.Println("ERROR: CameraSystem not found - have you added the `RenderSystem` before the `AudioSystem`?")
+		log.Println("[ERROR] CameraSystem not found - have you added the `RenderSystem` before the `AudioSystem`?")
 		return
 	}
 
@@ -112,18 +112,19 @@ func (a *AudioSystem) New(w *ecs.World) {
 func (a *AudioSystem) Update(dt float32) {
 	for _, e := range a.entities {
 		if e.AudioComponent.player == nil {
-			f := engo.Files.Sound(e.AudioComponent.File)
-			if f == nil {
-				log.Println("Audio file not loaded:", e.AudioComponent.File)
-				continue
+			playerRes, ok := engo.Files.Resource(e.AudioComponent.File)
+			if !ok {
+				log.Println("[ERROR] Loaded audio file not found:", e.AudioComponent.File)
+				continue // with other entities
 			}
 
-			var err error
-			e.AudioComponent.player, err = NewPlayer(f, 0, 0)
-			if err != nil {
-				log.Println("Error initializing AudioComponent:", err)
-				continue
+			player, ok := playerRes.(AudioResource)
+			if !ok {
+				log.Println("[ERROR] Loaded audio file is not of type `AudioResource`:", e.AudioComponent.File)
+				continue // with other entities
 			}
+
+			e.AudioComponent.player = player.Player
 		}
 
 		if MasterVolume != a.cachedVolume {

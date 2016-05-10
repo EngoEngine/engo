@@ -199,3 +199,12 @@ func RunIteration() {
 func SetCursor(c Cursor) {
 	log.Println("SetCursor: not yet implemented for mobile")
 }
+
+// openFile is the mobile-specific way of opening a file
+func openFile(url string) (io.ReadCloser, error) {
+	if strings.HasPrefix(r.URL, "assets/") {
+		r.URL = r.URL[7:]
+	}
+
+	return asset.Open(r.URL)
+}

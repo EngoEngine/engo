@@ -8,6 +8,7 @@ import (
 
 	"engo.io/engo"
 	"engo.io/gl"
+	"fmt"
 )
 
 type TextureResource struct {
@@ -46,11 +47,14 @@ func (i *imageLoader) Load(url string, data io.Reader) error {
 	newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
 	draw.Draw(newm, newm.Bounds(), img, b.Min, draw.Src)
 
-	return NewTexture(&ImageObject{newm}), nil
+	i.images[url] = NewTextureResource(&ImageObject{newm})
+
+	return nil
 }
 
-func (i *imageLoader) Unload(url string) {
+func (i *imageLoader) Unload(url string) error {
 	delete(i.images, url)
+	return nil
 }
 
 func (i *imageLoader) Resource(url string) (engo.Resource, bool) {
@@ -64,7 +68,8 @@ type Image interface {
 	Height() int
 }
 
-func NewTexture(img Image) TextureResource {
+// UploadTexture sends the image to the GPU, to be kept in GPU RAM
+func UploadTexture(img Image) *gl.Texture {
 	var id *gl.Texture
 	if !engo.Headless() {
 		id = engo.Gl.CreateTexture()
@@ -82,8 +87,19 @@ func NewTexture(img Image) TextureResource {
 
 		engo.Gl.TexImage2D(engo.Gl.TEXTURE_2D, 0, engo.Gl.RGBA, engo.Gl.RGBA, engo.Gl.UNSIGNED_BYTE, img.Data())
 	}
+	return id
+}
 
+// NewTextureResource sends the image to the GPU and returns a `TextureResource` for easy access
+func NewTextureResource(img Image) TextureResource {
+	id := UploadTexture(img)
 	return TextureResource{Texture: id, Width: float32(img.Width()), Height: float32(img.Height())}
+}
+
+// NewTextureSingle sends the image to the GPU and returns a `Texture` with a viewport for single-sprite images
+func NewTextureSingle(img Image) Texture {
+	id := UploadTexture(img)
+	return Texture{id, float32(img.Width()), float32(img.Height()), engo.AABB{Max: engo.Point{1.0, 1.0}}}
 }
 
 // ImageObject is a pure Go implementation of a `Drawable`
@@ -111,8 +127,56 @@ func (i *ImageObject) Height() int {
 	return i.data.Rect.Max.Y
 }
 
+// SpriteFromAssetManager loads the texture-reference from `engo.Files`, and wraps it in a `*Texture`.
+// This method is intended for image-files which represent entire sprites.
+func SpriteFromAssetManager(url string) (*Texture, error) {
+	res, ok := engo.Files.Resource(url)
+	if !ok {
+		return nil, fmt.Errorf("resource not found: %s", url)
+	}
+
+	img, ok := res.(TextureResource)
+	if !ok {
+		return nil, fmt.Errorf("resource not of type `TextureResource`: %s", url)
+	}
+
+	return &Texture{img.Texture, img.Width, img.Height, engo.AABB{Max: engo.Point{1.0, 1.0}}}, nil
+}
+
+// Texture represents a texture loaded in the GPU RAM (by using OpenGL), which defined dimensions and viewport
+type Texture struct {
+	id       *gl.Texture
+	width    float32
+	height   float32
+	viewport engo.AABB
+}
+
+// Width returns the width of the texture.
+func (t Texture) Width() float32 {
+	return t.width
+}
+
+// Height returns the height of the texture.
+func (t Texture) Height() float32 {
+	return t.height
+}
+
+func (t Texture) Texture() *gl.Texture {
+	return t.id
+}
+
+func (r Texture) View() (float32, float32, float32, float32) {
+	return r.viewport.Min.X, r.viewport.Min.Y, r.viewport.Max.X, r.viewport.Max.Y
+}
+
+func (r Texture) Close() {
+	if !engo.Headless() {
+		engo.Gl.DeleteTexture(r.id)
+	}
+}
+
 func init() {
-	engo.Files.Register(".jpg", &imageLoader{})
-	engo.Files.Register(".png", &imageLoader{})
-	engo.Files.Register(".gif", &imageLoader{})
+	engo.Files.Register(".jpg", &imageLoader{images: make(map[string]TextureResource)})
+	engo.Files.Register(".png", &imageLoader{images: make(map[string]TextureResource)})
+	engo.Files.Register(".gif", &imageLoader{images: make(map[string]TextureResource)})
 }

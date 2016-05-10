@@ -16,6 +16,7 @@ import (
 	"github.com/go-gl/glfw/v3.1/glfw"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
+	"io"
 )
 
 var (
@@ -415,21 +416,9 @@ func (i *ImageRGBA) Height() int {
 	return i.data.Rect.Max.Y
 }
 
-func loadJSON(r Resource) (string, error) {
-	file, err := ioutil.ReadFile(r.URL())
-	if err != nil {
-		return "", err
-	}
-	return string(file), nil
-}
-
-func loadFont(r Resource) (*truetype.Font, error) {
-	ttfBytes, err := ioutil.ReadFile(r.URL())
-	if err != nil {
-		return nil, err
-	}
-
-	return freetype.ParseFont(ttfBytes)
+// openFile is the desktop-specific way of opening a file
+func openFile(url string) (io.ReadCloser, error) {
+	return os.Open(url)
 }
 
 /*

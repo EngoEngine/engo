@@ -19,7 +19,6 @@ var (
 	dpi = float64(72)
 )
 
-// TODO FG and BG color config
 type Font struct {
 	URL  string
 	Size float64
@@ -47,12 +46,17 @@ func (f *Font) Create() error {
 
 // CreatePreloaded is for loading fonts which have already been defined (and loaded) within Preload
 func (f *Font) CreatePreloaded() error {
-	var ok bool
-	f.TTF, ok = engo.Files.Font(f.URL)
+	fontres, ok := engo.Files.Resource(f.URL)
 	if !ok {
 		return fmt.Errorf("could not find preloaded font: %s", f.URL)
 	}
 
+	font, ok := fontres.(FontResource)
+	if !ok {
+		return fmt.Errorf("preloaded font is not of type `*truetype.Font`: %s", f.URL)
+	}
+
+	f.TTF = font.Font
 	return nil
 }
 
@@ -134,10 +138,10 @@ func (f *Font) RenderNRGBA(text string) *image.NRGBA {
 	return nrgba
 }
 
-func (f *Font) Render(text string) *engo.Texture {
+func (f *Font) Render(text string) Texture {
 	nrgba := f.RenderNRGBA(text)
 
 	// Create texture
-	imObj := engo.NewImageObject(nrgba)
-	return engo.NewTexture(imObj)
+	imObj := NewImageObject(nrgba)
+	return NewTextureSingle(imObj)
 }

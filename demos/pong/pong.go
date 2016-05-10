@@ -41,7 +41,7 @@ type Paddle struct {
 }
 
 func (pong *PongGame) Preload() {
-	engo.Files.Add("assets/ball.png", "assets/paddle.png", "assets/Roboto-Regular.ttf")
+	engo.Files.LoadMany("ball.png", "paddle.png", "Roboto-Regular.ttf")
 }
 
 func (pong *PongGame) Setup(w *ecs.World) {
@@ -59,7 +59,10 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		log.Fatalln("Could not load font:", err)
 	}
 
-	ballTexture := engo.Files.Image("ball.png")
+	ballTexture, err := core.SpriteFromAssetManager("ball.png")
+	if err != nil {
+		log.Fatalln("Could not load texture:", err)
+	}
 
 	ball := Ball{BasicEntity: ecs.NewBasic()}
 	ball.RenderComponent = core.RenderComponent{
@@ -132,7 +135,10 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		}
 	}
 
-	paddleTexture := engo.Files.Image("paddle.png")
+	paddleTexture, err := core.SpriteFromAssetManager("paddle.png")
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	for i := 0; i < 2; i++ {
 		paddle := Paddle{BasicEntity: ecs.NewBasic()}

@@ -1,66 +1,58 @@
 package core
 
 import (
-	"image"
-	"image/draw"
-	_ "image/png"
 	"io"
+	"io/ioutil"
 
 	"engo.io/engo"
-	"engo.io/gl"
+	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
 )
 
-type TextureResource struct {
+// FontResource is a wrapper for `*truetype.Font` which is being passed by the the `engo.Files.Resource` method in the
+// case of `.ttf` files.
+type FontResource struct {
 	Font *truetype.Font
-
-	Texture *gl.Texture
-	Width   float32
-	Height  float32
-	url     string
+	url  string
 }
 
-func (t TextureResource) URL() string {
-	return t.url
+func (f FontResource) URL() string {
+	return f.url
 }
 
+// fontLoader is responsible for managing `.ttf` files within `engo.Files`
 type fontLoader struct {
-	fonts map[string]TextureResource
-	/*
-		// Load loads the given resource into memory.
-		Load(url string, data io.Reader) error
-
-		// Unload releases the given resource from memory.
-		Unload(url string) error
-
-		// Resource returns the given resource, and a boolean indicating whether the
-		// resource was loaded.
-		Resource(url string) (Resource, bool)
-	*/
+	fonts map[string]FontResource
 }
 
+// Load processes the data stream and parses it as a freetype font
 func (i *fontLoader) Load(url string, data io.Reader) error {
-	img, _, err := image.Decode(data)
+	ttfBytes, err := ioutil.ReadAll(data)
 	if err != nil {
 		return err
 	}
 
-	b := img.Bounds()
-	newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
-	draw.Draw(newm, newm.Bounds(), img, b.Min, draw.Src)
+	ttf, err := freetype.ParseFont(ttfBytes)
+	if err != nil {
+		return err
+	}
 
-	return NewTexture(&ImageObject{newm}), nil
+	i.fonts[url] = FontResource{Font: ttf, url: url}
+	return nil
 }
 
-func (i *fontLoader) Unload(url string) {
+// Load removes the preloaded font from the cache
+func (i *fontLoader) Unload(url string) error {
 	delete(i.fonts, url)
+	return nil
 }
 
+// Resource retrieves the preloaded font, passed as a `FontResource`
 func (i *fontLoader) Resource(url string) (engo.Resource, bool) {
 	texture, ok := i.fonts[url]
 	return texture, ok
 }
 
 func init() {
-	engo.Files.Register(".ttf", &fontLoader{})
+	engo.Files.Register(".ttf", &fontLoader{fonts: make(map[string]FontResource)})
 }
