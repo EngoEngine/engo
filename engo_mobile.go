@@ -9,7 +9,6 @@ import (
 	"image/draw"
 	_ "image/png"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/signal"
 	"strings"
