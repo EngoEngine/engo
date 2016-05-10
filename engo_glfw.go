@@ -74,7 +74,7 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 	glfw.WindowHint(glfw.Samples, msaa)
 
-	window, err = glfw.CreateWindow(width, height, title, nil, nil)
+	window, err = glfw.CreateWindow(width, height, title, monitor, nil)
 	fatalErr(err)
 
 	window.MakeContextCurrent()

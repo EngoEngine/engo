@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Setting xvfb
+sudo Xvfb :10 -ac
+
 # Install dependencies
 echo "Installing gopherjs ..."
 go get github.com/gopherjs/gopherjs
