@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"image/draw"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 
