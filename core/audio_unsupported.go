@@ -3,8 +3,6 @@
 package core
 
 import (
-	"log"
-
 	"engo.io/ecs"
 )
 
@@ -34,7 +32,7 @@ type AudioSystem struct {
 }
 
 func (as *AudioSystem) New(*ecs.World) {
-	log.Println("Warning: audio is not yet implemented on this platform")
+	notImplemented("audio")
 }
 
 func (as *AudioSystem) Add(*ecs.BasicEntity, *AudioComponent, *SpaceComponent) {}
