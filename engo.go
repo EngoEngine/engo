@@ -192,6 +192,6 @@ func closeEvent() {
 	if !opts.OverrideCloseAction {
 		Exit()
 	} else {
-		warning("default close action set to false, please make sure you manually handle this")
+		log.Println("[WARNING] default close action set to false, please make sure you manually handle this")
 	}
 }
