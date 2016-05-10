@@ -46,7 +46,6 @@ func (pong *PongGame) Preload() {
 
 func (pong *PongGame) Setup(w *ecs.World) {
 	engo.SetBackground(color.Black)
-	w.AddSystem(&core.CameraSystem{})
 	w.AddSystem(&core.RenderSystem{})
 	w.AddSystem(&core.CollisionSystem{})
 	w.AddSystem(&core.MouseSystem{})
@@ -153,11 +152,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 			Height:   paddle.RenderComponent.Scale.Y * paddleTexture.Height(),
 		}
 		paddle.ControlComponent = ControlComponent{Scheme: schemes[i]}
-<<<<<<< HEAD
 		paddle.CollisionComponent = core.CollisionComponent{
-=======
-		paddle.CollisionComponent = engo.CollisionComponent{
->>>>>>> e5a88d21b82a2fcab7048cf941b7bad02850c498
 			Main:  false,
 			Solid: true,
 		}
@@ -320,11 +315,9 @@ type ControlSystem struct {
 	entities []controlEntity
 
 	mouseTrackerBasic ecs.BasicEntity
-<<<<<<< HEAD
 	mouseTrackerMouse core.MouseComponent
-=======
-	mouseTrackerMouse engo.MouseComponent
->>>>>>> e5a88d21b82a2fcab7048cf941b7bad02850c498
+
+	fpscounter float32
 }
 
 func (c *ControlSystem) New(w *ecs.World) {
@@ -333,11 +326,7 @@ func (c *ControlSystem) New(w *ecs.World) {
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-<<<<<<< HEAD
 		case *core.MouseSystem:
-=======
-		case *engo.MouseSystem:
->>>>>>> e5a88d21b82a2fcab7048cf941b7bad02850c498
 			sys.Add(&c.mouseTrackerBasic, &c.mouseTrackerMouse, nil, nil)
 		}
 	}
@@ -384,6 +373,12 @@ func (c *ControlSystem) Update(dt float32) {
 			e.SpaceComponent.Position.Y = 0
 		}
 	}
+
+	if c.fpscounter > 0 {
+		c.fpscounter = 0
+		engo.SetTitle(fmt.Sprintf("FPS: %f", engo.Time.Fps()))
+	}
+	c.fpscounter += dt
 }
 
 type scoreEntity struct {
