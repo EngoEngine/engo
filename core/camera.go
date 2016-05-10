@@ -42,7 +42,9 @@ type cameraSystem struct {
 }
 
 func (cam *cameraSystem) New(*ecs.World) {
-	CameraBounds.Max = engo.Point{engo.GameWidth(), engo.GameHeight()}
+	if CameraBounds.Max.X == 0 && CameraBounds.Max.Y == 0 {
+		CameraBounds.Max = engo.Point{engo.GameWidth(), engo.GameHeight()}
+	}
 
 	cam.x = CameraBounds.Max.X / 2
 	cam.y = CameraBounds.Max.Y / 2
