@@ -8,9 +8,10 @@ import (
 	"io/ioutil"
 
 	"engo.io/engo"
+	"fmt"
 )
 
-// FontResource is a wrapper for `*Player` which is being passed by the the `engo.Files.Resource` method in the
+// AudioResource is a wrapper for `*Player` which is being passed by the the `engo.Files.Resource` method in the
 // case of `.wav` files.
 type AudioResource struct {
 	Player *Player
@@ -36,7 +37,7 @@ func (i *audioLoader) Load(url string, data io.Reader) error {
 	audioBuffer := bytes.NewReader(audioBytes)
 	player, err := NewPlayer(&readSeekCloserBuffer{audioBuffer}, 0, 0)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s (are you running `core.AudioSystemPreload()` before preloading .wav files?)", err.Error())
 	}
 
 	i.audios[url] = AudioResource{Player: player, url: url}

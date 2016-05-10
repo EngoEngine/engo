@@ -11,8 +11,8 @@ import (
 
 type Guy struct {
 	ecs.BasicEntity
-	engo.RenderComponent
-	engo.SpaceComponent
+	core.RenderComponent
+	core.SpaceComponent
 }
 
 type DefaultScene struct{}
@@ -37,11 +37,11 @@ func (game *DefaultScene) Setup(w *ecs.World) {
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	guy.RenderComponent = engo.RenderComponent{
+	guy.RenderComponent = core.RenderComponent{
 		Drawable: texture,
 		Scale: engo.Point{8, 8},
 	}
-	guy.SpaceComponent = engo.SpaceComponent{
+	guy.SpaceComponent = core.SpaceComponent{
 		Position: engo.Point{200, 200},
 		Width:    texture.Width() * guy.RenderComponent.Scale.X,
 		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
@@ -60,14 +60,14 @@ func (game *DefaultScene) Setup(w *ecs.World) {
 
 type rotationEntity struct {
 	*ecs.BasicEntity
-	*engo.SpaceComponent
+	*core.SpaceComponent
 }
 
 type RotationSystem struct {
 	entities []rotationEntity
 }
 
-func (r *RotationSystem) Add(basic *ecs.BasicEntity, space *engo.SpaceComponent) {
+func (r *RotationSystem) Add(basic *ecs.BasicEntity, space *core.SpaceComponent) {
 	r.entities = append(r.entities, rotationEntity{basic, space})
 }
 

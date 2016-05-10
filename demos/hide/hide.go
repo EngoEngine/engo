@@ -12,8 +12,8 @@ type DefaultScene struct{}
 
 type Rock struct {
 	ecs.BasicEntity
-	engo.RenderComponent
-	engo.SpaceComponent
+	core.RenderComponent
+	core.SpaceComponent
 }
 
 func (*DefaultScene) Preload() {
@@ -33,11 +33,11 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	rock := Rock{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	rock.RenderComponent = engo.RenderComponent{
+	rock.RenderComponent = core.RenderComponent{
 		Drawable: texture,
 		Scale: engo.Point{8, 8},
 	}
-	rock.SpaceComponent = engo.SpaceComponent{
+	rock.SpaceComponent = core.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    texture.Width() * rock.RenderComponent.Scale.X,
 		Height:   texture.Height() * rock.RenderComponent.Scale.Y,
@@ -58,14 +58,14 @@ func (*DefaultScene) Type() string { return "GameWorld" }
 
 type hideEntity struct {
 	*ecs.BasicEntity
-	*engo.RenderComponent
+	*core.RenderComponent
 }
 
 type HideSystem struct {
 	entities []hideEntity
 }
 
-func (h *HideSystem) Add(basic *ecs.BasicEntity, render *engo.RenderComponent) {
+func (h *HideSystem) Add(basic *ecs.BasicEntity, render *core.RenderComponent) {
 	h.entities = append(h.entities, hideEntity{basic, render})
 }
 

@@ -17,14 +17,14 @@ var (
 
 type Guy struct {
 	ecs.BasicEntity
-	engo.RenderComponent
-	engo.SpaceComponent
+	core.RenderComponent
+	core.SpaceComponent
 }
 
 type Rock struct {
 	ecs.BasicEntity
-	engo.RenderComponent
-	engo.SpaceComponent
+	core.RenderComponent
+	core.SpaceComponent
 }
 
 // IconScene is responsible for managing the icon
@@ -48,11 +48,11 @@ func (*IconScene) Setup(w *ecs.World) {
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	guy.RenderComponent = engo.RenderComponent{
+	guy.RenderComponent = core.RenderComponent{
 		Drawable: texture,
 		Scale: engo.Point{8, 8},
 	}
-	guy.SpaceComponent = engo.SpaceComponent{
+	guy.SpaceComponent = core.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    texture.Width() * guy.RenderComponent.Scale.X,
 		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
@@ -100,11 +100,11 @@ func (game *RockScene) Setup(w *ecs.World) {
 	rock := Rock{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	rock.RenderComponent = engo.RenderComponent{
+	rock.RenderComponent = core.RenderComponent{
 		Drawable: texture,
 		Scale: engo.Point{8, 8},
 	}
-	rock.SpaceComponent = engo.SpaceComponent{
+	rock.SpaceComponent = core.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    texture.Width() * rock.RenderComponent.Scale.X,
 		Height:   texture.Height() * rock.RenderComponent.Scale.Y,
@@ -155,14 +155,14 @@ func (s *SceneSwitcherSystem) Update(dt float32) {
 
 type scaleEntity struct {
 	*ecs.BasicEntity
-	*engo.RenderComponent
+	*core.RenderComponent
 }
 
 type ScaleSystem struct {
 	entities []scaleEntity
 }
 
-func (s *ScaleSystem) Add(basic *ecs.BasicEntity, render *engo.RenderComponent) {
+func (s *ScaleSystem) Add(basic *ecs.BasicEntity, render *core.RenderComponent) {
 	s.entities = append(s.entities, scaleEntity{basic, render})
 }
 

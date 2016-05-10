@@ -35,7 +35,7 @@ func (game *GameWorld) Setup() {
 		engo.Files.Image("sheet"), 16)
 
 	mapRender := engo.NewRenderComponent(tilemap, engo.Point{1, 1}, "map")
-	mapSpace := &engo.SpaceComponent{engo.Point{100, 100}, 0, 0}
+	mapSpace := &core.SpaceComponent{engo.Point{100, 100}, 0, 0}
 	gameMap.AddComponent(mapRender)
 	gameMap.AddComponent(mapSpace)
 

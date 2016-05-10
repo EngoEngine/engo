@@ -12,15 +12,15 @@ import (
 type Guy struct {
 	ecs.BasicEntity
 	engo.CollisionComponent
-	engo.RenderComponent
-	engo.SpaceComponent
+	core.RenderComponent
+	core.SpaceComponent
 }
 
 type Rock struct {
 	ecs.BasicEntity
 	engo.CollisionComponent
-	engo.RenderComponent
-	engo.SpaceComponent
+	core.RenderComponent
+	core.SpaceComponent
 }
 
 type DefaultScene struct{}
@@ -47,11 +47,11 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 4x
-	guy.RenderComponent = engo.RenderComponent{
+	guy.RenderComponent = core.RenderComponent{
 		Drawable: texture,
 		Scale:    engo.Point{4, 4},
 	}
-	guy.SpaceComponent = engo.SpaceComponent{
+	guy.SpaceComponent = core.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    texture.Width() * guy.RenderComponent.Scale.X,
 		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
@@ -78,14 +78,14 @@ func (*DefaultScene) Type() string { return "Game" }
 
 type controlEntity struct {
 	*ecs.BasicEntity
-	*engo.SpaceComponent
+	*core.SpaceComponent
 }
 
 type ControlSystem struct {
 	entities []controlEntity
 }
 
-func (c *ControlSystem) Add(basic *ecs.BasicEntity, space *engo.SpaceComponent) {
+func (c *ControlSystem) Add(basic *ecs.BasicEntity, space *core.SpaceComponent) {
 	c.entities = append(c.entities, controlEntity{basic, space})
 }
 
@@ -141,11 +141,11 @@ func NewRock(world *ecs.World, position engo.Point) {
 	texture := engo.Files.Image("rock.png")
 
 	rock := Rock{BasicEntity: ecs.NewBasic()}
-	rock.RenderComponent = engo.RenderComponent{
+	rock.RenderComponent = core.RenderComponent{
 		Drawable: texture,
 		Scale:    engo.Point{4, 4},
 	}
-	rock.SpaceComponent = engo.SpaceComponent{
+	rock.SpaceComponent = core.SpaceComponent{
 		Position: position,
 		Width:    texture.Width() * rock.RenderComponent.Scale.X,
 		Height:   texture.Height() * rock.RenderComponent.Scale.Y,
@@ -166,14 +166,14 @@ func NewRock(world *ecs.World, position engo.Point) {
 
 type fallingEntity struct {
 	*ecs.BasicEntity
-	*engo.SpaceComponent
+	*core.SpaceComponent
 }
 
 type FallingSystem struct {
 	entities []fallingEntity
 }
 
-func (f *FallingSystem) Add(basic *ecs.BasicEntity, space *engo.SpaceComponent) {
+func (f *FallingSystem) Add(basic *ecs.BasicEntity, space *core.SpaceComponent) {
 	f.entities = append(f.entities, fallingEntity{basic, space})
 }
 

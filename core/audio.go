@@ -51,6 +51,17 @@ type AudioSystem struct {
 	cachedVolume float64
 }
 
+var audioSystemPreloaded bool
+
+// AudioSystemPreload has to be called before preloading any `.wav` files
+func AudioSystemPreload() {
+	if err := al.OpenDevice(); err != nil {
+		log.Println("Error initializing AudioSystem:", err)
+		return
+	}
+	audioSystemPreloaded = true
+}
+
 // Add adds a new entity to the AudioSystem. AudioComponent is always required, and the SpaceComponent is
 // required as soon as AudioComponent.Background is false. (So if it's not a background noise, we want to know
 // where it's originated from)
@@ -78,9 +89,8 @@ func (a *AudioSystem) New(w *ecs.World) {
 		a.HeightModifier = defaultHeightModifier
 	}
 
-	if err := al.OpenDevice(); err != nil {
-		log.Println("Error initializing AudioSystem:", err)
-		return
+	if !audioSystemPreloaded {
+		AudioSystemPreload()
 	}
 
 	var cam *cameraSystem

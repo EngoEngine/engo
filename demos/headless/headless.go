@@ -19,24 +19,24 @@ var (
 
 type Ball struct {
 	ecs.BasicEntity
-	engo.RenderComponent
-	engo.SpaceComponent
+	core.RenderComponent
+	core.SpaceComponent
 	engo.CollisionComponent
 	SpeedComponent
 }
 
 type Score struct {
 	ecs.BasicEntity
-	engo.RenderComponent
-	engo.SpaceComponent
+	core.RenderComponent
+	core.SpaceComponent
 }
 
 type Paddle struct {
 	ecs.BasicEntity
 	ControlComponent
 	engo.CollisionComponent
-	engo.RenderComponent
-	engo.SpaceComponent
+	core.RenderComponent
+	core.SpaceComponent
 }
 
 func (pong *PongGame) Preload() {
@@ -60,11 +60,11 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	ballTexture := engo.Files.Image("ball.png")
 
 	ball := Ball{BasicEntity: ecs.NewBasic()}
-	ball.RenderComponent = engo.RenderComponent{
+	ball.RenderComponent = core.RenderComponent{
 		Drawable: ballTexture,
 		Scale:    engo.Point{2, 2},
 	}
-	ball.SpaceComponent = engo.SpaceComponent{
+	ball.SpaceComponent = core.SpaceComponent{
 		Position: engo.Point{(engo.GameWidth() - ballTexture.Width()) / 2, (engo.GameHeight() - ballTexture.Height()) / 2},
 		Width:    ballTexture.Width() * ball.RenderComponent.Scale.X,
 		Height:   ballTexture.Height() * ball.RenderComponent.Scale.Y,
@@ -90,8 +90,8 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	}
 
 	score := Score{BasicEntity: ecs.NewBasic()}
-	score.RenderComponent = engo.RenderComponent{Drawable: basicFont.Render(" ")}
-	score.SpaceComponent = engo.SpaceComponent{
+	score.RenderComponent = core.RenderComponent{Drawable: basicFont.Render(" ")}
+	score.SpaceComponent = core.SpaceComponent{
 		Position: engo.Point{100, 100},
 		Width:    100,
 		Height:   100,
@@ -112,7 +112,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 
 	for i := 0; i < 2; i++ {
 		paddle := Paddle{BasicEntity: ecs.NewBasic()}
-		paddle.RenderComponent = engo.RenderComponent{
+		paddle.RenderComponent = core.RenderComponent{
 			Drawable: paddleTexture,
 			Scale:    engo.Point{2, 2},
 		}
@@ -122,7 +122,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 			x = 800 - 16
 		}
 
-		paddle.SpaceComponent = engo.SpaceComponent{
+		paddle.SpaceComponent = core.SpaceComponent{
 			Position: engo.Point{x, (engo.GameHeight() - paddleTexture.Height()) / 2},
 			Width:    paddle.RenderComponent.Scale.X * paddleTexture.Width(),
 			Height:   paddle.RenderComponent.Scale.Y * paddleTexture.Height(),
@@ -160,7 +160,7 @@ type ControlComponent struct {
 type speedEntity struct {
 	*ecs.BasicEntity
 	*SpeedComponent
-	*engo.SpaceComponent
+	*core.SpaceComponent
 }
 
 type SpeedSystem struct {
@@ -183,7 +183,7 @@ func (s *SpeedSystem) New(*ecs.World) {
 	})
 }
 
-func (s *SpeedSystem) Add(basic *ecs.BasicEntity, speed *SpeedComponent, space *engo.SpaceComponent) {
+func (s *SpeedSystem) Add(basic *ecs.BasicEntity, speed *SpeedComponent, space *core.SpaceComponent) {
 	s.entities = append(s.entities, speedEntity{basic, speed, space})
 }
 
@@ -210,14 +210,14 @@ func (s *SpeedSystem) Update(dt float32) {
 type ballEntity struct {
 	*ecs.BasicEntity
 	*SpeedComponent
-	*engo.SpaceComponent
+	*core.SpaceComponent
 }
 
 type BallSystem struct {
 	entities []ballEntity
 }
 
-func (b *BallSystem) Add(basic *ecs.BasicEntity, speed *SpeedComponent, space *engo.SpaceComponent) {
+func (b *BallSystem) Add(basic *ecs.BasicEntity, speed *SpeedComponent, space *core.SpaceComponent) {
 	b.entities = append(b.entities, ballEntity{basic, speed, space})
 }
 
@@ -269,14 +269,14 @@ func (b *BallSystem) Update(dt float32) {
 type controlEntity struct {
 	*ecs.BasicEntity
 	*ControlComponent
-	*engo.SpaceComponent
+	*core.SpaceComponent
 }
 
 type ControlSystem struct {
 	entities []controlEntity
 }
 
-func (c *ControlSystem) Add(basic *ecs.BasicEntity, control *ControlComponent, space *engo.SpaceComponent) {
+func (c *ControlSystem) Add(basic *ecs.BasicEntity, control *ControlComponent, space *core.SpaceComponent) {
 	c.entities = append(c.entities, controlEntity{basic, control, space})
 }
 
@@ -310,8 +310,8 @@ func (c *ControlSystem) Update(dt float32) {
 
 type scoreEntity struct {
 	*ecs.BasicEntity
-	*engo.RenderComponent
-	*engo.SpaceComponent
+	*core.RenderComponent
+	*core.SpaceComponent
 }
 
 type ScoreSystem struct {
@@ -342,7 +342,7 @@ func (s *ScoreSystem) New(*ecs.World) {
 	})
 }
 
-func (c *ScoreSystem) Add(basic *ecs.BasicEntity, render *engo.RenderComponent, space *engo.SpaceComponent) {
+func (c *ScoreSystem) Add(basic *ecs.BasicEntity, render *core.RenderComponent, space *core.SpaceComponent) {
 	c.entities = append(c.entities, scoreEntity{basic, render, space})
 }
 

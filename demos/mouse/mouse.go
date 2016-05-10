@@ -12,8 +12,8 @@ type DefaultScene struct{}
 type Guy struct {
 	ecs.BasicEntity
 	engo.MouseComponent
-	engo.RenderComponent
-	engo.SpaceComponent
+	core.RenderComponent
+	core.SpaceComponent
 }
 
 func (*DefaultScene) Preload() {
@@ -40,11 +40,11 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	guy.RenderComponent = engo.RenderComponent{
+	guy.RenderComponent = core.RenderComponent{
 		Drawable: texture,
 		Scale:    engo.Point{8, 8},
 	}
-	guy.SpaceComponent = engo.SpaceComponent{
+	guy.SpaceComponent = core.SpaceComponent{
 		Position: engo.Point{200, 200},
 		Width:    texture.Width() * guy.RenderComponent.Scale.X,
 		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
