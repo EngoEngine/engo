@@ -65,6 +65,10 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		monitor = nil
 	}
 
+	if opts.HeadlessMode {
+		glfw.WindowHint(glfw.Visible, glfw.False)
+	}
+
 	glfw.WindowHint(glfw.ContextVersionMajor, 2)
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
 

@@ -167,6 +167,12 @@ func Headless() bool {
 	return opts.HeadlessMode
 }
 
+// SetHeadless sets the headless-mode variable - should be used before calling `Run`, and will be overriden when
+// calling `Run` with `RunOpts`.
+func SetHeadless(b bool) {
+	opts.HeadlessMode = b
+}
+
 // ScaleOnResizes indicates whether or not the screen should resize (i.e. make things look smaller/bigger) whenever
 // the window resized. If `false`, then the size of the screen does not affect the size of the things drawn - it just
 // makes less/more objects visible
