@@ -364,9 +364,9 @@ func (c *ControlSystem) Update(dt float32) {
 		e.SpaceComponent.Position.Y += speed * vert.Value()
 
 		var moveThisOne bool
-		if engo.Mouse.X > engo.GameWidth()/2 && e.ControlComponent.Scheme == "arrows" {
+		if engo.Input.Mouse.X > engo.WindowWidth()/2 && e.ControlComponent.Scheme == "arrows" {
 			moveThisOne = true
-		} else if engo.Mouse.X < engo.GameWidth()/2 && e.ControlComponent.Scheme == "wasd" {
+		} else if engo.Input.Mouse.X < engo.WindowWidth()/2 && e.ControlComponent.Scheme == "wasd" {
 			moveThisOne = true
 		}
 
