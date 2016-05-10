@@ -3,8 +3,6 @@
 package engo
 
 import (
-	"log"
-
 	"engo.io/ecs"
 )
 
