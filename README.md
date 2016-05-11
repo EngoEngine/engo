@@ -4,8 +4,22 @@
 
 A cross-platform game engine written in Go following an interpretation of the Entity Component System paradigm. Engo is
 currently compilable for Mac OSX, Linux and Windows. With the release of Go 1.4, sporting Android and the inception of
-iOS compatibility, mobile will [soon](https://github.com/EngoEngine/engo/issues/63) be added as a release target. Web
-support  ([gopherjs](https://github.com/gopherjs/gopherjs)) is also [planned](https://github.com/EngoEngine/engo/issues/71).
+iOS compatibility, mobile has been be added as a release target. Web support 
+([gopherjs](https://github.com/gopherjs/gopherjs)) is also available. 
+
+This table shows the current state of what's working and what's not. We are aiming to turn all **No** columns into **Yes** columns. 
+
+| Aspect/Target | Linux | Windows | OSX | WebGL | Android | iOS* |
+| ------------- | ----- | ------- | --- | ----- | ------- | ---  |
+| Compilation   | Yes   | Yes     | Yes | Yes   | Yes     | ?    |
+| AudioSystem   | Yes   | No      | Yes | No    | No      | ?    |
+| RenderSystem  | Yes   | Yes     | Yes | Yes   | Yes     | ?    |
+| XXXXXSystem   | Yes   | Yes     | Yes | Yes   | Yes     | ?    |
+
+*iOS will not build at all (due to `gomobile` limitations), if it would, most of these would be supported the same way Android is. 
+
+We are working towards a `1.0` [release](https://github.com/EngoEngine/engo/milestones/1.0), and making good progress. 
+We welcome any contributions.  
 
 Currently documentation is pretty scarce, this is because we have not *completely* finalized the API and are about to 
 go through a "prettification" process in order to increase elegance and usability. For a basic up-to-date example of 
@@ -34,6 +48,7 @@ us a DM or [create an issue](https://github.com/EngoEngine/engo/issues/new).
 Engo is currently undergoing a lot of optimizations and constantly gets new features. However, this sometimes means things break. In order to make transitioning easier for you, 
 we have a list of those changes, with the most recent being at the top. If you run into any problems, please contact us at [gitter](https://gitter.im/EngoEngine/engo). 
 
+* `engo` has been split in `engo` (which contains stuff about creating windows, starting the game, creating an OpenGL context, input handling, etc.) - and `core` (which contains a lot of common `System` implementations for common tasks (`RenderSystem`, `CameraSystem`, `AudioSystem`, etc.)
 * `engo.Width()` and `engo.Height()` have been changed to `engo.GameWidth()` and `engo.GameHeight()` respectively.
 * `RenderComponent.Scale` is now no longer a method, but a variable you can change / access directly. 
 * `engo.NewRenderComponent` was removed. You can now define the values you want directly by using `engo.RenderComponent{}`. Note that the `Drawable` is still required. 
@@ -55,7 +70,7 @@ Thank you to everyone who has worked on, or with `Engo`. None of this would be p
 - [paked](https://github.com/paked): Adding ECS element, project maintenance and management
 - [EtienneBruines](https://github.com/EtienneBruines): Rewriting the OpenGL code, maintenance and helping redesign the API
 - [otraore](https://github.com/otraore): Adding in GopherJs support, maintenance
-- [@hydroflame](https://github.com/hydroflame): Shared his extensive knowledge about OpenGL, which enabled our `RenderSystem` and shaders 
+- [hydroflame](https://github.com/hydroflame): Shared his extensive knowledge about OpenGL, which enabled our `RenderSystem` and shaders 
 - [Everyone else who has submitted PRs over the years, to any iteration of the project](https://github.com/EngoEngine/engo/graphs/contributors)
 
 These are 3rd party projects that have made `engo` possible.
