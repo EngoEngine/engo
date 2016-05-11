@@ -11,7 +11,6 @@ import (
 func TestShaders(t *testing.T) {
 	engo.SetHeadless(true)
 	engo.CreateWindow("", 100, 100, false, 1)
-
 	w := &ecs.World{}
 	w.AddSystem(&cameraSystem{})
 	err := initShaders(w)

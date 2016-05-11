@@ -1,25 +1,5 @@
 #!/usr/bin/env bash
 
-# Setting xvfb
-echo "Initializing xvfb ..."
-sudo Xvfb :10 -ac &
-export DISPLAY=:10
-
-# Install dependencies
-echo "Installing gopherjs ..."
-go get github.com/gopherjs/gopherjs
-
-# TODO: These few lines are required until https://github.com/gopherjs/gopherjs/issues/455 is fixed.
-echo "Installing engo_js dependencies ..."
-gopherjs get "honnef.co/go/js/dom"
-gopherjs get "honnef.co/go/js/xhr"
-
-echo "Installing gomobile ..."
-go get golang.org/x/mobile/cmd/gomobile
-
-echo "Initializing gomobile ..."
-gomobile init
-
 echo "Using GOPATH=$GOPATH"
 
 echo "Testing engo.io/engo using 'go test'"

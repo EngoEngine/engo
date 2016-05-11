@@ -20,7 +20,9 @@ type FileLoader interface {
 	Resource(url string) (Resource, bool)
 }
 
+// Resource represents a game resource, such as an image or a sound.
 type Resource interface {
+	// URL returns the uniform resource locator of the given resource.
 	URL() string
 }
 
