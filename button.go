@@ -1,6 +1,6 @@
 package engo
 
-// Button is an input which can be either JustPressed, JustReleased or Down. Common uses would be for, a jump key or an action key.
+// A Button is an input which can be either JustPressed, JustReleased or Down. Common uses would be for, a jump key or an action key.
 type Button struct {
 	Triggers []Key
 	Name     string

@@ -11,8 +11,10 @@ import (
 var (
 	// Time is the active FPS counter
 	Time *Clock
+
 	// Input handles all input: mouse, keyboard and touch
 	Input *InputManager
+
 	// Mailbox is used by all Systems to communicate
 	Mailbox *MessageManager
 
@@ -25,7 +27,12 @@ var (
 )
 
 const (
+	// DefaultVerticalAxis is the name of the default vertical axis, as used internally in `engo` when `StandardInputs`
+	// is defined.
 	DefaultVerticalAxis   = "vertical"
+
+	// DefaultHorizontalAxis is the name of the default horizontal axis, as used internally in `engo` when `StandardInputs`
+	// is defined.
 	DefaultHorizontalAxis = "horizontal"
 )
 
@@ -137,14 +144,17 @@ func Run(o RunOptions, defaultScene Scene) {
 	}
 }
 
+// SetScaleOnResize can be used to change the value in the given `RunOpts` after already having called `engo.Run`.
 func SetScaleOnResize(b bool) {
 	opts.ScaleOnResize = b
 }
 
+// SetOverrideCloseAction can be used to change the value in the given `RunOpts` after already having called `engo.Run`.
 func SetOverrideCloseAction(value bool) {
 	opts.OverrideCloseAction = value
 }
 
+// SetFPSLimit can be used to change the value in the given `RunOpts` after already having called `engo.Run`.
 func SetFPSLimit(limit int) error {
 	if limit <= 0 {
 		return fmt.Errorf("FPS Limit out of bounds. Requires > 0")
@@ -154,15 +164,15 @@ func SetFPSLimit(limit int) error {
 	return nil
 }
 
+// SetHeadless sets the headless-mode variable - should be used before calling `Run`, and will be overridden by the
+// value within the `RunOpts` once you call `engo.Run`.
+func SetHeadless(b bool) {
+	opts.HeadlessMode = b
+}
+
 // Headless indicates whether or not OpenGL-calls should be made
 func Headless() bool {
 	return opts.HeadlessMode
-}
-
-// SetHeadless sets the headless-mode variable - should be used before calling `Run`, and will be overriden when
-// calling `Run` with `RunOpts`.
-func SetHeadless(b bool) {
-	opts.HeadlessMode = b
 }
 
 // ScaleOnResizes indicates whether or not the screen should resize (i.e. make things look smaller/bigger) whenever
@@ -172,10 +182,7 @@ func ScaleOnResize() bool {
 	return opts.ScaleOnResize
 }
 
-func runHeadless(defaultScene Scene) {
-	runLoop(defaultScene, true)
-}
-
+// Exit is the safest way to close your game, as `engo` will correctly attempt to close all windows, handlers and contexts
 func Exit() {
 	closeGame = true
 }
@@ -192,4 +199,8 @@ func closeEvent() {
 	} else {
 		log.Println("[WARNING] default close action set to false, please make sure you manually handle this")
 	}
+}
+
+func runHeadless(defaultScene Scene) {
+	runLoop(defaultScene, true)
 }
