@@ -27,6 +27,9 @@ type AudioComponent struct {
 	RawVolume  float64
 }
 
+// AudioSystemPreload enables the preloading of `.wav` files - has no effect here (because AudioSystem is unimplemented)
+func AudioSystemPreload() {}
+
 // AudioSystem is a System that allows for sound effects and / or music
 type AudioSystem struct {
 	HeightModifier float32

@@ -4,11 +4,11 @@ package core
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 
 	"engo.io/engo"
-	"fmt"
 )
 
 // AudioResource is a wrapper for `*Player` which is being passed by the the `engo.Files.Resource` method in the
