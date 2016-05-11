@@ -2,6 +2,9 @@
 
 echo "Using GOPATH=$GOPATH"
 
+echo "Getting engo.io/engo using 'go get'"
+go get -t -v ./... || exit 1
+
 echo "Testing engo.io/engo using 'go test'"
 go test -v ./... || exit 1
 
