@@ -28,7 +28,7 @@ func (*DefaultScene) Preload() {}
 
 // Setup is called before the main loop is started
 func (*DefaultScene) Setup(w *ecs.World) {
-	engo.SetBackground(color.RGBA{55, 55, 55, 255})
+	core.SetBackground(color.RGBA{55, 55, 55, 255})
 	w.AddSystem(&core.RenderSystem{})
 
 	// Adding camera controllers so we can verify it doesn't break when we move

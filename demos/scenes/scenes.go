@@ -39,7 +39,7 @@ func (*IconScene) Preload() {
 }
 
 func (*IconScene) Setup(w *ecs.World) {
-	engo.SetBackground(color.White)
+	core.SetBackground(color.White)
 
 	w.AddSystem(&core.RenderSystem{})
 	w.AddSystem(&ScaleSystem{})
@@ -97,7 +97,7 @@ func (*RockScene) Preload() {
 }
 
 func (game *RockScene) Setup(w *ecs.World) {
-	engo.SetBackground(color.White)
+	core.SetBackground(color.White)
 
 	w.AddSystem(&core.RenderSystem{})
 	w.AddSystem(&ScaleSystem{})

@@ -26,7 +26,7 @@ func (game *DefaultScene) Preload() {
 }
 
 func (game *DefaultScene) Setup(w *ecs.World) {
-	engo.SetBackground(color.White)
+	core.SetBackground(color.White)
 
 	w.AddSystem(&RotationSystem{})
 	w.AddSystem(&core.RenderSystem{})

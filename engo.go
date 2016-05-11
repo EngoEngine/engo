@@ -145,14 +145,6 @@ func SetOverrideCloseAction(value bool) {
 	opts.OverrideCloseAction = value
 }
 
-func SetBackground(c color.Color) {
-	if !opts.HeadlessMode {
-		r, g, b, a := c.RGBA()
-
-		Gl.ClearColor(float32(r), float32(g), float32(b), float32(a))
-	}
-}
-
 func SetFPSLimit(limit int) error {
 	if limit <= 0 {
 		return fmt.Errorf("FPS Limit out of bounds. Requires > 0")

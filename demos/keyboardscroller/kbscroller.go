@@ -22,7 +22,7 @@ func (*DefaultScene) Preload() {}
 
 // Setup is called before the main loop is started
 func (*DefaultScene) Setup(w *ecs.World) {
-	engo.SetBackground(color.White)
+	core.SetBackground(color.White)
 	w.AddSystem(&core.RenderSystem{})
 
 	// The most important line in this whole demo:

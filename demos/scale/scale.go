@@ -26,7 +26,7 @@ func (*DefaultScene) Preload() {
 }
 
 func (*DefaultScene) Setup(w *ecs.World) {
-	engo.SetBackground(color.White)
+	core.SetBackground(color.White)
 
 	w.AddSystem(&core.RenderSystem{})
 	w.AddSystem(&ScaleSystem{})

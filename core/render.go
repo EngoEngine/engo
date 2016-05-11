@@ -187,3 +187,11 @@ func (rs *RenderSystem) Update(dt float32) {
 		rs.currentShader = nil
 	}
 }
+
+func SetBackground(c color.Color) {
+	if !engo.Headless(){
+		r, g, b, a := c.RGBA()
+
+		engo.Gl.ClearColor(float32(r) / 0xffff, float32(g) / 0xffff, float32(b) / 0xffff, float32(a) / 0xffff)
+	}
+}
