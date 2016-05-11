@@ -4,6 +4,7 @@ package core
 
 import (
 	"engo.io/ecs"
+	"io"
 )
 
 const (
