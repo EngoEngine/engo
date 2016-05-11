@@ -106,6 +106,11 @@ func CursorPos() (x, y float64) {
 	return 0.0, 0.0
 }
 
+// SetTitle changes the title of the page to the given string
+func SetTitle(title string) {
+	document.SetTitle(title)
+}
+
 func WindowSize() (w, h int) {
 	w = int(WindowWidth())
 	h = int(WindowHeight())

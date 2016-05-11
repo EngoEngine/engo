@@ -166,6 +166,9 @@ func SetCursor(Cursor) {
 	notImplemented("SetCursor")
 }
 
+// SetTitle has no effect on mobile
+func SetTitle(title string) {}
+
 // openFile is the mobile-specific way of opening a file
 func openFile(url string) (io.ReadCloser, error) {
 	usedUrl := url
