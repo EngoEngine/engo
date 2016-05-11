@@ -2,6 +2,7 @@ sudo: false
 addons:
     apt_packages:
         - libgl1-mesa-dev
+        - libopenal-dev
         - xorg-dev
 branch:
     only:
