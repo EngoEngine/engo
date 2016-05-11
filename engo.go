@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"engo.io/ecs"
-	"image/color"
 )
 
 var (
