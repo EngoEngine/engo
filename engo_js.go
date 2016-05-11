@@ -4,19 +4,15 @@ package engo
 
 import (
 	"bytes"
-	"compress/gzip"
-	"encoding/base64"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"math"
-	"math/rand"
+	"net/http"
 	"strconv"
 	"time"
 
 	"engo.io/gl"
-	"github.com/golang/freetype"
-	"github.com/golang/freetype/truetype"
 	"github.com/gopherjs/gopherjs/js"
 	"honnef.co/go/js/dom"
 	"honnef.co/go/js/xhr"
@@ -94,9 +90,6 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		ke := ev.(*dom.KeyboardEvent)
 		Input.keys.Set(Key(ke.KeyCode), false)
 	})
-
-	Files = NewLoader()
-	WorldBounds.Max = Point{GameWidth(), GameHeight()}
 }
 
 func DestroyWindow() {}
@@ -199,7 +192,7 @@ func RunPreparation() {
 func runLoop(defaultScene Scene, headless bool) {
 	SetScene(defaultScene, false)
 	RunPreparation()
-	ticker := time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
+	ticker := time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
 Outer:
 	for {
 		select {
@@ -210,83 +203,32 @@ Outer:
 			RunIteration()
 		case <-resetLoopTicker:
 			ticker.Stop()
-			ticker = time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
+			ticker = time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
 		}
 	}
 	ticker.Stop()
 }
 
-func loadJSON(r Resource) (string, error) {
-	req := xhr.NewRequest("GET", r.URL)
-	err := req.Send("")
-	if err != nil {
-		return "", err
-	}
-	return req.Response.String(), nil
-	// ch := make(chan error, 1)
-
-	// req := js.Global.Get("XMLHttpRequest").New()
-	// req.Call("open", "GET", r.url, true)
-	// req.Call("addEventListener", "load", func(*js.Object) {
-	// 	go func() { ch <- nil }()
-	// }, false)
-	// req.Call("addEventListener", "error", func(o *js.Object) {
-	// 	go func() { ch <- &js.Error{Object: o} }()
-	// }, false)
-	// req.Call("send", nil)
-
-	// err := <-ch
-	// if err != nil {
-	// 	return "", err
-	// }
-
-	// return req.Get("responseText").Str(), nil
-}
-
-func loadFont(r Resource) (*truetype.Font, error) {
-	req := xhr.NewRequest("GET", r.URL+"_js")
-	err := req.Send("")
-	if err != nil {
-		return &truetype.Font{}, err
-	}
-	fontDataEncoded := bytes.NewBuffer([]byte(req.Response.String()))
-	fontDataCompressed := base64.NewDecoder(base64.StdEncoding, fontDataEncoded)
-	fontDataTtf, err := gzip.NewReader(fontDataCompressed)
-	if err != nil {
+func openFile(url string) (io.ReadCloser, error) {
+	req := xhr.NewRequest("GET", url)
+	if err := req.Send(nil); err != nil {
 		return nil, err
 	}
-	var ttfBytes []byte
-	ttfBytes, err = ioutil.ReadAll(fontDataTtf)
-	if err != nil {
-		return nil, err
+
+	if req.Status != http.StatusOK {
+		return nil, fmt.Errorf("unable to open resource (%s), expected HTTP status %d but got %d", url, http.StatusOK, req.Status)
 	}
-	return freetype.ParseFont(ttfBytes)
+
+	return noCloseReadCloser{bytes.NewReader([]byte(req.Response.String()))}, nil
 }
 
-// HtmlImageObject is a webgl-specific implementation of `Drawable`, designed to be used with native `HTML` elements,
-// such as `<img>`
-type HtmlImageObject struct {
-	data *js.Object
+type noCloseReadCloser struct {
+	r io.Reader
 }
 
-// NewHtmlImageObject creates a new HtmlImageObject for the given javascript object
-func NewHtmlImageObject(img *js.Object) *HtmlImageObject {
-	return &HtmlImageObject{data: img}
-}
-
-// Data returns the entire javascript object
-func (i *HtmlImageObject) Data() interface{} {
-	return i.data
-}
-
-// Width returns the value of the "width" variable of the javascript object
-func (i *HtmlImageObject) Width() int {
-	return i.data.Get("width").Int()
-}
-
-// Height returns the value of the "height" variable of the javascript object
-func (i *HtmlImageObject) Height() int {
-	return i.data.Get("height").Int()
+func (n noCloseReadCloser) Close() error { return nil }
+func (n noCloseReadCloser) Read(p []byte) (int, error) {
+	return n.r.Read(p)
 }
 
 // SetCursor changes the cursor - not yet implemented
