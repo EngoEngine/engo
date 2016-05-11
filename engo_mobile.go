@@ -3,19 +3,13 @@
 package engo
 
 import (
-	"engo.io/gl"
-	"fmt"
-	"image"
-	"image/draw"
-	_ "image/png"
-	"io/ioutil"
+	"io"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 
-	"github.com/golang/freetype"
-	"github.com/golang/freetype/truetype"
+	"engo.io/gl"
 	"golang.org/x/mobile/app"
 	"golang.org/x/mobile/asset"
 	"golang.org/x/mobile/event/lifecycle"
@@ -41,28 +35,6 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	gameWidth = float32(width)
 	gameHeight = float32(height)
 	msaaPreference = msaa
-}
-
-func loadJSON(r Resource) (string, error) {
-	return "", fmt.Errorf("loadJSON not yet impplemented")
-}
-
-func loadFont(r Resource) (*truetype.Font, error) {
-	if strings.HasPrefix(r.URL, "assets/") {
-		r.URL = r.URL[7:]
-	}
-
-	file, err := asset.Open(r.URL)
-	if err != nil {
-		return nil, err
-	}
-
-	ttfBytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		return nil, err
-	}
-
-	return freetype.ParseFont(ttfBytes)
 }
 
 func WindowSize() (w, h int) {
@@ -174,17 +146,12 @@ func runLoop(defaultScene Scene, headless bool) {
 // It is only here for benchmarking in combination with OpenHeadlessNoRun
 func RunPreparation(defaultScene Scene) {
 	Time = NewClock()
-	Files = NewLoader()
-
-	// Default WorldBounds values
-	WorldBounds.Max = Point{GameWidth(), GameHeight()}
-
 	SetScene(defaultScene, false)
 }
 
 // RunIteration runs one iteration / frame
 func RunIteration() {
-	if !headless {
+	if !opts.HeadlessMode {
 		Input.update()
 	}
 
@@ -195,15 +162,16 @@ func RunIteration() {
 }
 
 // SetCursor changes the cursor - not yet implemented
-func SetCursor(c Cursor) {
+func SetCursor(Cursor) {
 	notImplemented("SetCursor")
 }
 
 // openFile is the mobile-specific way of opening a file
 func openFile(url string) (io.ReadCloser, error) {
-	if strings.HasPrefix(r.URL, "assets/") {
-		r.URL = r.URL[7:]
+	usedUrl := url
+	if strings.HasPrefix(url, "assets/") {
+		usedUrl = usedUrl[7:]
 	}
 
-	return asset.Open(r.URL)
+	return asset.Open(usedUrl)
 }
