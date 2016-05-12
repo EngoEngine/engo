@@ -46,9 +46,9 @@ func (f *Font) Create() error {
 
 // CreatePreloaded is for loading fonts which have already been defined (and loaded) within Preload
 func (f *Font) CreatePreloaded() error {
-	fontres, ok := engo.Files.Resource(f.URL)
-	if !ok {
-		return fmt.Errorf("could not find preloaded font: %s", f.URL)
+	fontres, err := engo.Files.Resource(f.URL)
+	if err != nil {
+		return err
 	}
 
 	font, ok := fontres.(FontResource)

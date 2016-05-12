@@ -24,17 +24,6 @@ func (t TextureResource) URL() string {
 
 type imageLoader struct {
 	images map[string]TextureResource
-	/*
-		// Load loads the given resource into memory.
-		Load(url string, data io.Reader) error
-
-		// Unload releases the given resource from memory.
-		Unload(url string) error
-
-		// Resource returns the given resource, and a boolean indicating whether the
-		// resource was loaded.
-		Resource(url string) (Resource, bool)
-	*/
 }
 
 func (i *imageLoader) Load(url string, data io.Reader) error {
@@ -57,9 +46,13 @@ func (i *imageLoader) Unload(url string) error {
 	return nil
 }
 
-func (i *imageLoader) Resource(url string) (engo.Resource, bool) {
+func (i *imageLoader) Resource(url string) (engo.Resource, error) {
 	texture, ok := i.images[url]
-	return texture, ok
+	if !ok {
+		return nil, engo.ResourceNotLoadedError{url}
+	}
+
+	return texture, nil
 }
 
 type Image interface {
@@ -130,9 +123,9 @@ func (i *ImageObject) Height() int {
 // PreloadedSpriteSingle loads the texture-reference from `engo.Files`, and wraps it in a `*Texture`.
 // This method is intended for image-files which represent entire sprites.
 func PreloadedSpriteSingle(url string) (*Texture, error) {
-	res, ok := engo.Files.Resource(url)
-	if !ok {
-		return nil, fmt.Errorf("resource not found: %s", url)
+	res, err := engo.Files.Resource(url)
+	if err != nil {
+		return nil, err
 	}
 
 	img, ok := res.(TextureResource)

@@ -122,15 +122,15 @@ func (a *AudioSystem) New(w *ecs.World) {
 func (a *AudioSystem) Update(dt float32) {
 	for _, e := range a.entities {
 		if e.AudioComponent.player == nil {
-			playerRes, ok := engo.Files.Resource(e.AudioComponent.File)
-			if !ok {
-				log.Println("[ERROR] Loaded audio file not found:", e.AudioComponent.File)
+			playerRes, err := engo.Files.Resource(e.AudioComponent.File)
+			if err != nil {
+				log.Println("[ERROR] [AudioSystem]:", err)
 				continue // with other entities
 			}
 
 			player, ok := playerRes.(AudioResource)
 			if !ok {
-				log.Println("[ERROR] Loaded audio file is not of type `AudioResource`:", e.AudioComponent.File)
+				log.Println("[ERROR] [AudioSystem]: Loaded audio file is not of type `AudioResource`:", e.AudioComponent.File)
 				continue // with other entities
 			}
 

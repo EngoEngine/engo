@@ -3,7 +3,6 @@ package engo
 import (
 	"fmt"
 	"io"
-	"log"
 	"path/filepath"
 )
 
@@ -15,9 +14,8 @@ type FileLoader interface {
 	// Unload releases the given resource from memory.
 	Unload(url string) error
 
-	// Resource returns the given resource, and a boolean indicating whether the
-	// resource was loaded.
-	Resource(url string) (Resource, bool)
+	// Resource returns the given resource, and an error if it didn't succeed
+	Resource(url string) (Resource, error)
 }
 
 // Resource represents a game resource, such as an image or a sound.
@@ -59,13 +57,13 @@ func (formats *Formats) Load(url string) error {
 	if loader, ok := Files.formats[ext]; ok {
 		readCloser, err := openFile(filepath.Join(formats.root, url))
 		if err != nil {
-			return err
+			return ResourceOpenError{URL: url, Err: err}
 		}
 		defer readCloser.Close()
 
 		return loader.Load(url, readCloser)
 	}
-	return fmt.Errorf("no resource loader registered for file format %q", ext)
+	return ResourceLoaderNotFoundError{Format: ext, URL: url}
 }
 
 // LoadMany loads the given resources into memory, stopping at the first error.
@@ -85,16 +83,52 @@ func (formats *Formats) Unload(url string) error {
 	if loader, ok := Files.formats[ext]; ok {
 		return loader.Unload(url)
 	}
-	return fmt.Errorf("no resource loader registered for file format %q", ext)
+	return ResourceLoaderNotFoundError{Format: ext, URL: url}
 }
 
-// Resource returns the given resource, and a boolean indicating whether the
-// resource was loaded.
-func (formats *Formats) Resource(url string) (Resource, bool) {
+// Resource returns the given resource, and an error if it didn't succeed
+func (formats *Formats) Resource(url string) (Resource, error) {
 	ext := filepath.Ext(url)
 	if loader, ok := Files.formats[ext]; ok {
 		return loader.Resource(url)
 	}
-	log.Printf("no resource loader registered for file format %q", ext)
-	return nil, false
+	return nil, ResourceLoaderNotFoundError{Format: ext, URL: url}
+}
+
+// A ResourceLoaderNotFoundError is returned whenever the specified file format has no registered `FileLoader` to
+// return the requested resource.
+type ResourceLoaderNotFoundError struct {
+	Format string
+	URL    string
+}
+
+func (r ResourceLoaderNotFoundError) Error() string {
+	return fmt.Sprintf("no `FileLoader` registered for file format %s (within url: %s)", r.Format, r.URL)
+}
+
+// A ResourceNotLoadedError is returned whenever the requested `Resource` was unable to be located within the memory.
+// This usually indicates the `Load`-step failed.
+type ResourceNotLoadedError struct {
+	URL string
+}
+
+func (r ResourceNotLoadedError) Error() string {
+	return fmt.Sprintf("the `FileLoader` was unable to find `Resource` in memory: %s", r.URL)
+}
+
+// ResourceOpenError is returned whenever the assets manager was unable to access the file. It was therefore also
+// unable to send the file to the `FileLoader`.
+//
+// Possible reasons for this may be that your program does not have the right permissions to open the file,
+// that the path (url) is false, or that the file simply does not exist.
+type ResourceOpenError struct {
+	URL string
+
+	// Err is the internal error of the `io` method used. Which method this is, is OS-dependant (`io` for desktop,
+	// `asset` for mobile, etc.)
+	Err error
+}
+
+func (r ResourceOpenError) Error() string {
+	return fmt.Sprintf("the assets manager was unable to open `Resource`: %s (%s)", r.URL, r.Err.Error())
 }

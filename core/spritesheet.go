@@ -26,15 +26,15 @@ func NewSpritesheetFromTexture(tr *TextureResource, cellWidth, cellHeight int) *
 // NewSpritesheetFromFile is a simple handler for creating a new spritesheet from a file
 // textureName is the name of a texture already preloaded with engo.Files.Add
 func NewSpritesheetFromFile(textureName string, cellWidth, cellHeight int) *Spritesheet {
-	res, ok := engo.Files.Resource(textureName)
-	if !ok {
-		log.Println("[WARNING] Resource not found:", textureName)
+	res, err := engo.Files.Resource(textureName)
+	if err != nil {
+		log.Println("[WARNING] [NewSpritesheetFromFile]: Received error:", err)
 		return nil
 	}
 
 	img, ok := res.(TextureResource)
 	if !ok {
-		log.Println("[WARNING] Resource not of type `TextureResource`:", textureName)
+		log.Println("[WARNING] [NewSpritesheetFromFile]: Resource not of type `TextureResource`:", textureName)
 		return nil
 	}
 

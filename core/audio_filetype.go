@@ -51,9 +51,13 @@ func (l *audioLoader) Unload(url string) error {
 }
 
 // Resource retrieves the preloaded audio file, passed as a `AudioResource`
-func (l *audioLoader) Resource(url string) (engo.Resource, bool) {
+func (l *audioLoader) Resource(url string) (engo.Resource, error) {
 	texture, ok := l.audios[url]
-	return texture, ok
+	if !ok {
+		return nil, engo.ResourceNotLoadedError{url}
+	}
+
+	return texture, nil
 }
 
 // readSeekCloserBuffer is a wrapper to create a ReadSeekCloser

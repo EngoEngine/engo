@@ -48,9 +48,13 @@ func (i *fontLoader) Unload(url string) error {
 }
 
 // Resource retrieves the preloaded font, passed as a `FontResource`
-func (i *fontLoader) Resource(url string) (engo.Resource, bool) {
+func (i *fontLoader) Resource(url string) (engo.Resource, error) {
 	texture, ok := i.fonts[url]
-	return texture, ok
+	if !ok {
+		return nil, engo.ResourceNotLoadedError{url}
+	}
+
+	return texture, nil
 }
 
 func init() {
