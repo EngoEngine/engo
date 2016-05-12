@@ -9,6 +9,7 @@ environment:
 
 install:
   - echo %PATH%
+  - SET PATH=%PATH%;C:\MinGW\bin
   - echo %GOPATH%
   - go version
   - go env
