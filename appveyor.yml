@@ -10,6 +10,7 @@ environment:
   PATH: '%PATH%;C:\go-x86;C:\MinGW\bin'
 
 install:
+  - set PATH=%PATH:c:\go;=%
   - echo %GOPATH%
   - echo %PATH%
   - go version
