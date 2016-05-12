@@ -1,4 +1,4 @@
-branch: 
+branch:
     only:
     - "master"
 language: go
