@@ -693,7 +693,7 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 			}
 		}
 	default:
-		unsupportedType()
+		unsupportedType(shape)
 	}
 
 	return changed
@@ -778,7 +778,7 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 			engo.Gl.DrawArrays(engo.Gl.LINE_LOOP, len(shape.Points), len(shape.Points))
 		}
 	default:
-		unsupportedType()
+		unsupportedType(shape)
 	}
 }
 
