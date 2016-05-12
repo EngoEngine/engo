@@ -8,13 +8,13 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/xml"
+	"engo.io/engo"
 	"fmt"
 	"io/ioutil"
 	"path"
 	"sort"
 	"strconv"
 	"strings"
-	"engo.io/engo"
 )
 
 // Just used to create levelTileset->Image

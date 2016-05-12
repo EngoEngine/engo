@@ -12,17 +12,21 @@ import (
 func TestShadersInitialization(t *testing.T) {
 	engo.SetHeadless(true)
 	engo.CreateWindow("", 100, 100, false, 1)
+	defer engo.DestroyWindow()
+
 	w := &ecs.World{}
 	w.AddSystem(&cameraSystem{})
 	err := initShaders(w)
 	assert.NoError(t, err)
 }
 
-// TestShaderCompilation tests whether the LoadShader method will indeed report errors iff
+// TestShaderCompilation tests whether the `LoadShader` method will indeed report errors iff
 // (one of) the GLSL-shaders is incorrect.
 func TestShaderCompilation(t *testing.T) {
 	engo.SetHeadless(true)
 	engo.CreateWindow("", 100, 100, false, 1)
+	defer engo.DestroyWindow()
+
 	var err error
 
 	_, err = LoadShader(correctVertShader, correctFragShader)

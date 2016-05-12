@@ -870,6 +870,7 @@ func LoadShader(vertSrc, fragSrc string) (*gl.Program, error) {
 	return program, nil
 }
 
+// VertexShaderCompilationError is returned whenever the `LoadShader` method was unable to compile your Vertex-shader (GLSL)
 type VertexShaderCompilationError struct {
 	OpenGLError string
 }
@@ -878,6 +879,7 @@ func (v VertexShaderCompilationError) Error() string {
 	return fmt.Sprintf("an error occured compiling the vertex shader: %s", strings.Trim(v.OpenGLError, "\r\n"))
 }
 
+// FragmentShaderCompilationError is returned whenever the `LoadShader` method was unable to compile your Fragment-shader (GLSL)
 type FragmentShaderCompilationError struct {
 	OpenGLError string
 }
