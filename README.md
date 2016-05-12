@@ -31,6 +31,17 @@ We have a [gitter](https://gitter.im/EngoEngine/engo) chat for people to join wh
 
 ## Getting Started
 
+### Theory: `core` vs `engo`
+
+There are currently two major important packages within this repository: `engo.io/engo` and `engo.io/engo/core`. 
+
+The top level `engo` package contains the functionality of creating windows, starting the game, creating an OpenGL 
+context and handling input. It is designed to be used with Systems designed as per `engo.io/ecs` specifications. 
+The `core` package contains our ECS implementations of common game development Systems like a  `RenderSystem` or 
+`CameraSystem`.
+
+### Practice: Getting it to Run
+
 1. First, you have to install some dependencies:
   1. If you're running on Debian/Ubuntu:
     `sudo apt-get install libopenal-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev xorg-dev libgl1-mesa-dev`
