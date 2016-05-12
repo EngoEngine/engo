@@ -7,10 +7,11 @@ clone_folder: c:\gopath\src\engo.io\engo
 environment:
   GOPATH: c:\gopath
   GOROOT: C:\go-x86
-  PATH: '%PATH%;C:\go-x86;C:\MinGW\bin'
+  PATH: '%PATH%;C:\go-x86;C:\go-x86;C:\MinGW\bin'
 
 install:
   - set PATH=%PATH:c:\go;=%
+  - set PATH=%PATH:c:\go\bin;=%
   - echo %GOPATH%
   - echo %PATH%
   - go version
