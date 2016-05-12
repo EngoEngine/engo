@@ -645,7 +645,7 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 			}
 		}
 	default:
-		unsupportedType()
+		unsupportedType(shape)
 	}
 
 	return changed
@@ -730,7 +730,7 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 			Gl.DrawArrays(Gl.LINE_LOOP, len(shape.Points), len(shape.Points))
 		}
 	default:
-		unsupportedType()
+		unsupportedType(shape)
 	}
 }
 
