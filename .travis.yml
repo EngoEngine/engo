@@ -1,0 +1,15 @@
+branch:
+    only:
+    - "master"
+language: go
+before_install:
+    - sudo apt-get -qq update
+    - sudo apt-get install -y libopenal-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev xorg-dev libgl1-mesa-dev
+go_import_path: engo.io/engo
+go:
+- 1.6.2
+script: ./.runtests.sh
+cache:
+    apt: true
+    directories:
+    - $GOPATH/pkg/gomobile
