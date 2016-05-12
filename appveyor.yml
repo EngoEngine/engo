@@ -11,7 +11,7 @@ environment:
 
 install:
   - set PATH=%PATH:c:\go;=%
-  - set PATH=%PATH%;c:\go\bin
+  - set PATH=%PATH%;c:\go-x86\bin
   - echo %GOPATH%
   - echo %PATH%
   - go version
