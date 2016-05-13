@@ -5,14 +5,14 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
-	"engo.io/engo/core"
+	"engo.io/engo/common"
 )
 
 var (
-	WalkAction  *core.Animation
-	StopAction  *core.Animation
-	SkillAction *core.Animation
-	actions     []*core.Animation
+	WalkAction  *common.Animation
+	StopAction  *common.Animation
+	SkillAction *common.Animation
+	actions     []*common.Animation
 
 	jumpButton   = "jump"
 	actionButton = "action"
@@ -22,40 +22,40 @@ type DefaultScene struct{}
 
 type Animation struct {
 	ecs.BasicEntity
-	core.AnimationComponent
-	core.RenderComponent
-	core.SpaceComponent
+	common.AnimationComponent
+	common.RenderComponent
+	common.SpaceComponent
 }
 
 func (*DefaultScene) Preload() {
 	engo.Files.Load("hero.png")
 
-	StopAction = &core.Animation{Name: "stop", Frames: []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}}
-	WalkAction = &core.Animation{Name: "move", Frames: []int{11, 12, 13, 14, 15}, Loop: true}
-	SkillAction = &core.Animation{Name: "skill", Frames: []int{44, 45, 46, 47, 48, 49, 50, 51, 52, 53}}
-	actions = []*core.Animation{StopAction, WalkAction, SkillAction}
+	StopAction = &common.Animation{Name: "stop", Frames: []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}}
+	WalkAction = &common.Animation{Name: "move", Frames: []int{11, 12, 13, 14, 15}, Loop: true}
+	SkillAction = &common.Animation{Name: "skill", Frames: []int{44, 45, 46, 47, 48, 49, 50, 51, 52, 53}}
+	actions = []*common.Animation{StopAction, WalkAction, SkillAction}
 
 	engo.Input.RegisterButton(jumpButton, engo.Space, engo.X)
 	engo.Input.RegisterButton(actionButton, engo.D, engo.ArrowRight)
 }
 
 func (scene *DefaultScene) Setup(w *ecs.World) {
-	core.SetBackground(color.White)
+	common.SetBackground(color.White)
 
-	w.AddSystem(&core.RenderSystem{})
-	w.AddSystem(&core.AnimationSystem{})
+	w.AddSystem(&common.RenderSystem{})
+	w.AddSystem(&common.AnimationSystem{})
 	w.AddSystem(&ControlSystem{})
 
-	spriteSheet := core.NewSpritesheetFromFile("hero.png", 150, 150)
+	spriteSheet := common.NewSpritesheetFromFile("hero.png", 150, 150)
 
 	hero := scene.CreateEntity(engo.Point{0, 0}, spriteSheet)
 
 	// Add our hero to the appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *core.RenderSystem:
+		case *common.RenderSystem:
 			sys.Add(&hero.BasicEntity, &hero.RenderComponent, &hero.SpaceComponent)
-		case *core.AnimationSystem:
+		case *common.AnimationSystem:
 			sys.Add(&hero.BasicEntity, &hero.AnimationComponent, &hero.RenderComponent)
 		case *ControlSystem:
 			sys.Add(&hero.BasicEntity, &hero.AnimationComponent)
@@ -65,19 +65,19 @@ func (scene *DefaultScene) Setup(w *ecs.World) {
 
 func (*DefaultScene) Type() string { return "GameWorld" }
 
-func (*DefaultScene) CreateEntity(point engo.Point, spriteSheet *core.Spritesheet) *Animation {
+func (*DefaultScene) CreateEntity(point engo.Point, spriteSheet *common.Spritesheet) *Animation {
 	entity := &Animation{BasicEntity: ecs.NewBasic()}
 
-	entity.SpaceComponent = core.SpaceComponent{
+	entity.SpaceComponent = common.SpaceComponent{
 		Position: point,
 		Width:    150,
 		Height:   150,
 	}
-	entity.RenderComponent = core.RenderComponent{
+	entity.RenderComponent = common.RenderComponent{
 		Drawable: spriteSheet.Cell(0),
 		Scale:    engo.Point{3, 3},
 	}
-	entity.AnimationComponent = core.NewAnimationComponent(spriteSheet.Drawables(), 0.1)
+	entity.AnimationComponent = common.NewAnimationComponent(spriteSheet.Drawables(), 0.1)
 
 	entity.AnimationComponent.AddAnimations(actions)
 	entity.AnimationComponent.AddDefaultAnimation(StopAction)
@@ -87,14 +87,14 @@ func (*DefaultScene) CreateEntity(point engo.Point, spriteSheet *core.Spriteshee
 
 type controlEntity struct {
 	*ecs.BasicEntity
-	*core.AnimationComponent
+	*common.AnimationComponent
 }
 
 type ControlSystem struct {
 	entities []controlEntity
 }
 
-func (c *ControlSystem) Add(basic *ecs.BasicEntity, anim *core.AnimationComponent) {
+func (c *ControlSystem) Add(basic *ecs.BasicEntity, anim *common.AnimationComponent) {
 	c.entities = append(c.entities, controlEntity{basic, anim})
 }
 

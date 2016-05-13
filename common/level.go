@@ -1,6 +1,6 @@
 //+build ignore
 
-package core
+package common
 
 import "engo.io/engo"
 

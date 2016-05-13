@@ -7,21 +7,21 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
-	"engo.io/engo/core"
+	"engo.io/engo/common"
 )
 
 type Guy struct {
 	ecs.BasicEntity
-	core.CollisionComponent
-	core.RenderComponent
-	core.SpaceComponent
+	common.CollisionComponent
+	common.RenderComponent
+	common.SpaceComponent
 }
 
 type Rock struct {
 	ecs.BasicEntity
-	core.CollisionComponent
-	core.RenderComponent
-	core.SpaceComponent
+	common.CollisionComponent
+	common.RenderComponent
+	common.SpaceComponent
 }
 
 type DefaultScene struct{}
@@ -34,17 +34,17 @@ func (*DefaultScene) Preload() {
 }
 
 func (*DefaultScene) Setup(w *ecs.World) {
-	core.SetBackground(color.White)
+	common.SetBackground(color.White)
 
 	// Add all of the systems
-	w.AddSystem(&core.RenderSystem{})
-	w.AddSystem(&core.CollisionSystem{})
+	w.AddSystem(&common.RenderSystem{})
+	w.AddSystem(&common.CollisionSystem{})
 	w.AddSystem(&DeathSystem{})
 	w.AddSystem(&FallingSystem{})
 	w.AddSystem(&ControlSystem{})
 	w.AddSystem(&RockSpawnSystem{})
 
-	texture, err := core.PreloadedSpriteSingle("icon.png")
+	texture, err := common.PreloadedSpriteSingle("icon.png")
 	if err != nil {
 		log.Println(err)
 	}
@@ -53,16 +53,16 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 4x
-	guy.RenderComponent = core.RenderComponent{
+	guy.RenderComponent = common.RenderComponent{
 		Drawable: texture,
 		Scale:    engo.Point{4, 4},
 	}
-	guy.SpaceComponent = core.SpaceComponent{
+	guy.SpaceComponent = common.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    texture.Width() * guy.RenderComponent.Scale.X,
 		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
 	}
-	guy.CollisionComponent = core.CollisionComponent{
+	guy.CollisionComponent = common.CollisionComponent{
 		Solid: true,
 		Main:  true,
 	}
@@ -70,9 +70,9 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	// Add it to appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *core.RenderSystem:
+		case *common.RenderSystem:
 			sys.Add(&guy.BasicEntity, &guy.RenderComponent, &guy.SpaceComponent)
-		case *core.CollisionSystem:
+		case *common.CollisionSystem:
 			sys.Add(&guy.BasicEntity, &guy.CollisionComponent, &guy.SpaceComponent)
 		case *ControlSystem:
 			sys.Add(&guy.BasicEntity, &guy.SpaceComponent)
@@ -84,14 +84,14 @@ func (*DefaultScene) Type() string { return "Game" }
 
 type controlEntity struct {
 	*ecs.BasicEntity
-	*core.SpaceComponent
+	*common.SpaceComponent
 }
 
 type ControlSystem struct {
 	entities []controlEntity
 }
 
-func (c *ControlSystem) Add(basic *ecs.BasicEntity, space *core.SpaceComponent) {
+func (c *ControlSystem) Add(basic *ecs.BasicEntity, space *common.SpaceComponent) {
 	c.entities = append(c.entities, controlEntity{basic, space})
 }
 
@@ -144,28 +144,28 @@ func (rock *RockSpawnSystem) Update(dt float32) {
 }
 
 func NewRock(world *ecs.World, position engo.Point) {
-	texture, err := core.PreloadedSpriteSingle("rock.png")
+	texture, err := common.PreloadedSpriteSingle("rock.png")
 	if err != nil {
 		log.Println(err)
 	}
 
 	rock := Rock{BasicEntity: ecs.NewBasic()}
-	rock.RenderComponent = core.RenderComponent{
+	rock.RenderComponent = common.RenderComponent{
 		Drawable: texture,
 		Scale:    engo.Point{4, 4},
 	}
-	rock.SpaceComponent = core.SpaceComponent{
+	rock.SpaceComponent = common.SpaceComponent{
 		Position: position,
 		Width:    texture.Width() * rock.RenderComponent.Scale.X,
 		Height:   texture.Height() * rock.RenderComponent.Scale.Y,
 	}
-	rock.CollisionComponent = core.CollisionComponent{Solid: true}
+	rock.CollisionComponent = common.CollisionComponent{Solid: true}
 
 	for _, system := range world.Systems() {
 		switch sys := system.(type) {
-		case *core.RenderSystem:
+		case *common.RenderSystem:
 			sys.Add(&rock.BasicEntity, &rock.RenderComponent, &rock.SpaceComponent)
-		case *core.CollisionSystem:
+		case *common.CollisionSystem:
 			sys.Add(&rock.BasicEntity, &rock.CollisionComponent, &rock.SpaceComponent)
 		case *FallingSystem:
 			sys.Add(&rock.BasicEntity, &rock.SpaceComponent)
@@ -175,14 +175,14 @@ func NewRock(world *ecs.World, position engo.Point) {
 
 type fallingEntity struct {
 	*ecs.BasicEntity
-	*core.SpaceComponent
+	*common.SpaceComponent
 }
 
 type FallingSystem struct {
 	entities []fallingEntity
 }
 
-func (f *FallingSystem) Add(basic *ecs.BasicEntity, space *core.SpaceComponent) {
+func (f *FallingSystem) Add(basic *ecs.BasicEntity, space *common.SpaceComponent) {
 	f.entities = append(f.entities, fallingEntity{basic, space})
 }
 
@@ -212,7 +212,7 @@ type DeathSystem struct{}
 func (*DeathSystem) New(*ecs.World) {
 	// Subscribe to ScoreMessage
 	engo.Mailbox.Listen("CollisionMessage", func(message engo.Message) {
-		_, isCollision := message.(core.CollisionMessage)
+		_, isCollision := message.(common.CollisionMessage)
 
 		if isCollision {
 			log.Println("DEAD")

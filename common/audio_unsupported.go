@@ -1,6 +1,6 @@
 //+build netgo windows android
 
-package core
+package common
 
 import (
 	"io"

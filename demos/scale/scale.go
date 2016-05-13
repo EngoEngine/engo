@@ -7,15 +7,15 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
-	"engo.io/engo/core"
+	"engo.io/engo/common"
 )
 
 type DefaultScene struct{}
 
 type Guy struct {
 	ecs.BasicEntity
-	core.RenderComponent
-	core.SpaceComponent
+	common.RenderComponent
+	common.SpaceComponent
 }
 
 func (*DefaultScene) Preload() {
@@ -26,13 +26,13 @@ func (*DefaultScene) Preload() {
 }
 
 func (*DefaultScene) Setup(w *ecs.World) {
-	core.SetBackground(color.White)
+	common.SetBackground(color.White)
 
-	w.AddSystem(&core.RenderSystem{})
+	w.AddSystem(&common.RenderSystem{})
 	w.AddSystem(&ScaleSystem{})
 
 	// Retrieve a texture
-	texture, err := core.PreloadedSpriteSingle("icon.png")
+	texture, err := common.PreloadedSpriteSingle("icon.png")
 	if err != nil {
 		log.Println(err)
 	}
@@ -41,11 +41,11 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	guy.RenderComponent = core.RenderComponent{
+	guy.RenderComponent = common.RenderComponent{
 		Drawable: texture,
 		Scale:    engo.Point{8, 8},
 	}
-	guy.SpaceComponent = core.SpaceComponent{
+	guy.SpaceComponent = common.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    texture.Width() * guy.RenderComponent.Scale.X,
 		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
@@ -54,7 +54,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	// Add it to appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *core.RenderSystem:
+		case *common.RenderSystem:
 			sys.Add(&guy.BasicEntity, &guy.RenderComponent, &guy.SpaceComponent)
 		case *ScaleSystem:
 			sys.Add(&guy.BasicEntity, &guy.RenderComponent)
@@ -66,14 +66,14 @@ func (*DefaultScene) Type() string { return "GameWorld" }
 
 type scaleEntity struct {
 	*ecs.BasicEntity
-	*core.RenderComponent
+	*common.RenderComponent
 }
 
 type ScaleSystem struct {
 	entities []scaleEntity
 }
 
-func (s *ScaleSystem) Add(basic *ecs.BasicEntity, render *core.RenderComponent) {
+func (s *ScaleSystem) Add(basic *ecs.BasicEntity, render *common.RenderComponent) {
 	s.entities = append(s.entities, scaleEntity{basic, render})
 }
 

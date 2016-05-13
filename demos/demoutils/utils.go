@@ -6,13 +6,13 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
-	"engo.io/engo/core"
+	"engo.io/engo/common"
 )
 
 type Background struct {
 	ecs.BasicEntity
-	core.RenderComponent
-	core.SpaceComponent
+	common.RenderComponent
+	common.SpaceComponent
 }
 
 // NewBackground creates a background of colored tiles - might not be the most efficient way to do this
@@ -39,11 +39,11 @@ func NewBackground(world *ecs.World, width, height int, colorA, colorB color.Col
 		}
 	}
 
-	bgTexture := core.NewImageObject(img)
+	bgTexture := common.NewImageObject(img)
 
 	bg := &Background{BasicEntity: ecs.NewBasic()}
-	bg.RenderComponent = core.RenderComponent{Drawable: core.NewTextureSingle(bgTexture)}
-	bg.SpaceComponent = core.SpaceComponent{
+	bg.RenderComponent = common.RenderComponent{Drawable: common.NewTextureSingle(bgTexture)}
+	bg.SpaceComponent = common.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    float32(width),
 		Height:   float32(height),
@@ -51,7 +51,7 @@ func NewBackground(world *ecs.World, width, height int, colorA, colorB color.Col
 
 	for _, system := range world.Systems() {
 		switch sys := system.(type) {
-		case *core.RenderSystem:
+		case *common.RenderSystem:
 			sys.Add(&bg.BasicEntity, &bg.RenderComponent, &bg.SpaceComponent)
 		}
 	}

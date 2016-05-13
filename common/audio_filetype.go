@@ -1,6 +1,6 @@
 //+build !windows,!netgo,!android
 
-package core
+package common
 
 import (
 	"bytes"

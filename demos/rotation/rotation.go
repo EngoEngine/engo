@@ -6,14 +6,14 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
-	"engo.io/engo/core"
+	"engo.io/engo/common"
 	"github.com/luxengine/math"
 )
 
 type Guy struct {
 	ecs.BasicEntity
-	core.RenderComponent
-	core.SpaceComponent
+	common.RenderComponent
+	common.SpaceComponent
 }
 
 type DefaultScene struct{}
@@ -26,13 +26,13 @@ func (game *DefaultScene) Preload() {
 }
 
 func (game *DefaultScene) Setup(w *ecs.World) {
-	core.SetBackground(color.White)
+	common.SetBackground(color.White)
 
 	w.AddSystem(&RotationSystem{})
-	w.AddSystem(&core.RenderSystem{})
+	w.AddSystem(&common.RenderSystem{})
 
 	// Retrieve a texture
-	texture, err := core.PreloadedSpriteSingle("icon.png")
+	texture, err := common.PreloadedSpriteSingle("icon.png")
 	if err != nil {
 		log.Println(err)
 	}
@@ -41,11 +41,11 @@ func (game *DefaultScene) Setup(w *ecs.World) {
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	guy.RenderComponent = core.RenderComponent{
+	guy.RenderComponent = common.RenderComponent{
 		Drawable: texture,
 		Scale:    engo.Point{8, 8},
 	}
-	guy.SpaceComponent = core.SpaceComponent{
+	guy.SpaceComponent = common.SpaceComponent{
 		Position: engo.Point{200, 200},
 		Width:    texture.Width() * guy.RenderComponent.Scale.X,
 		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
@@ -54,7 +54,7 @@ func (game *DefaultScene) Setup(w *ecs.World) {
 	// Add it to appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *core.RenderSystem:
+		case *common.RenderSystem:
 			sys.Add(&guy.BasicEntity, &guy.RenderComponent, &guy.SpaceComponent)
 		case *RotationSystem:
 			sys.Add(&guy.BasicEntity, &guy.SpaceComponent)
@@ -64,14 +64,14 @@ func (game *DefaultScene) Setup(w *ecs.World) {
 
 type rotationEntity struct {
 	*ecs.BasicEntity
-	*core.SpaceComponent
+	*common.SpaceComponent
 }
 
 type RotationSystem struct {
 	entities []rotationEntity
 }
 
-func (r *RotationSystem) Add(basic *ecs.BasicEntity, space *core.SpaceComponent) {
+func (r *RotationSystem) Add(basic *ecs.BasicEntity, space *common.SpaceComponent) {
 	r.entities = append(r.entities, rotationEntity{basic, space})
 }
 

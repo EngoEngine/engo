@@ -1,6 +1,7 @@
-package core
+package common
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 

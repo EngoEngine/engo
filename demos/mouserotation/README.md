@@ -8,4 +8,4 @@ For doing so, it created a green background. This way, you'll notice the rotatio
 ## What are important aspects of the code?
 These lines are key in this demo:
 
-* `w.AddSystem(&core.MouseRotator{rotationSpeed})`, to enable the scrolling with the mouse wheel. 
+* `w.AddSystem(&common.MouseRotator{rotationSpeed})`, to enable the scrolling with the mouse wheel. 

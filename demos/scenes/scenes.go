@@ -8,7 +8,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
-	"engo.io/engo/core"
+	"engo.io/engo/common"
 )
 
 var (
@@ -18,14 +18,14 @@ var (
 
 type Guy struct {
 	ecs.BasicEntity
-	core.RenderComponent
-	core.SpaceComponent
+	common.RenderComponent
+	common.SpaceComponent
 }
 
 type Rock struct {
 	ecs.BasicEntity
-	core.RenderComponent
-	core.SpaceComponent
+	common.RenderComponent
+	common.SpaceComponent
 }
 
 // IconScene is responsible for managing the icon
@@ -39,14 +39,14 @@ func (*IconScene) Preload() {
 }
 
 func (*IconScene) Setup(w *ecs.World) {
-	core.SetBackground(color.White)
+	common.SetBackground(color.White)
 
-	w.AddSystem(&core.RenderSystem{})
+	w.AddSystem(&common.RenderSystem{})
 	w.AddSystem(&ScaleSystem{})
 	w.AddSystem(&SceneSwitcherSystem{NextScene: "RockScene", WaitTime: time.Second * 3})
 
 	// Retrieve a texture
-	texture, err := core.PreloadedSpriteSingle("icon.png")
+	texture, err := common.PreloadedSpriteSingle("icon.png")
 	if err != nil {
 		log.Println(err)
 	}
@@ -55,11 +55,11 @@ func (*IconScene) Setup(w *ecs.World) {
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	guy.RenderComponent = core.RenderComponent{
+	guy.RenderComponent = common.RenderComponent{
 		Drawable: texture,
 		Scale:    engo.Point{8, 8},
 	}
-	guy.SpaceComponent = core.SpaceComponent{
+	guy.SpaceComponent = common.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    texture.Width() * guy.RenderComponent.Scale.X,
 		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
@@ -68,7 +68,7 @@ func (*IconScene) Setup(w *ecs.World) {
 	// Add it to appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *core.RenderSystem:
+		case *common.RenderSystem:
 			sys.Add(&guy.BasicEntity, &guy.RenderComponent, &guy.SpaceComponent)
 		case *ScaleSystem:
 			sys.Add(&guy.BasicEntity, &guy.RenderComponent)
@@ -97,14 +97,14 @@ func (*RockScene) Preload() {
 }
 
 func (game *RockScene) Setup(w *ecs.World) {
-	core.SetBackground(color.White)
+	common.SetBackground(color.White)
 
-	w.AddSystem(&core.RenderSystem{})
+	w.AddSystem(&common.RenderSystem{})
 	w.AddSystem(&ScaleSystem{})
 	w.AddSystem(&SceneSwitcherSystem{NextScene: "IconScene", WaitTime: time.Second * 3})
 
 	// Retrieve a texture
-	texture, err := core.PreloadedSpriteSingle("rock.png")
+	texture, err := common.PreloadedSpriteSingle("rock.png")
 	if err != nil {
 		log.Println(err)
 	}
@@ -113,11 +113,11 @@ func (game *RockScene) Setup(w *ecs.World) {
 	rock := Rock{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	rock.RenderComponent = core.RenderComponent{
+	rock.RenderComponent = common.RenderComponent{
 		Drawable: texture,
 		Scale:    engo.Point{8, 8},
 	}
-	rock.SpaceComponent = core.SpaceComponent{
+	rock.SpaceComponent = common.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    texture.Width() * rock.RenderComponent.Scale.X,
 		Height:   texture.Height() * rock.RenderComponent.Scale.Y,
@@ -126,7 +126,7 @@ func (game *RockScene) Setup(w *ecs.World) {
 	// Add it to appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *core.RenderSystem:
+		case *common.RenderSystem:
 			sys.Add(&rock.BasicEntity, &rock.RenderComponent, &rock.SpaceComponent)
 		case *ScaleSystem:
 			sys.Add(&rock.BasicEntity, &rock.RenderComponent)
@@ -168,14 +168,14 @@ func (s *SceneSwitcherSystem) Update(dt float32) {
 
 type scaleEntity struct {
 	*ecs.BasicEntity
-	*core.RenderComponent
+	*common.RenderComponent
 }
 
 type ScaleSystem struct {
 	entities []scaleEntity
 }
 
-func (s *ScaleSystem) Add(basic *ecs.BasicEntity, render *core.RenderComponent) {
+func (s *ScaleSystem) Add(basic *ecs.BasicEntity, render *common.RenderComponent) {
 	s.entities = append(s.entities, scaleEntity{basic, render})
 }
 

@@ -4,14 +4,11 @@ package engo
 
 import (
 	"bytes"
-	"compress/gzip"
-	"encoding/base64"
 	"fmt"
 	"io"
 	"log"
 	"math"
 	"net/http"
-	"path/filepath"
 	"strconv"
 	"time"
 
