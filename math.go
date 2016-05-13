@@ -4,79 +4,78 @@ import (
 	"github.com/luxengine/math"
 )
 
+// Point describes a coordinate on a 2 dimensional euclidean space
+// it can also be thought of as a 2 dimensional vector from the origin
 type Point struct {
 	X, Y float32
 }
 
+// Line describes a line segment on a 2 dimensional euclidean space
+// it can also be thought of as a 2 dimensional vector with an offset
 type Line struct {
 	P1 Point
 	P2 Point
 }
 
+// Trace describes all the values computed from a line trace
 type Trace struct {
-	Fraction float32
+	Fraction    float32
 	EndPosition Point
 	*Line
 }
 
+// Set sets the coordinates of p to x and y
 func (p *Point) Set(x, y float32) {
 	p.X = x
 	p.Y = y
 }
 
-func (p *Point) Dot(other Point) float32 {
-	return p.X*other.X + p.Y*other.Y
-}
-
-// 2D cross product is magnitude of 3D cross product
-func (p *Point) Cross(other Point) float32 {
-	return p.X*other.Y - p.Y*other.X
-}
-
-func (p *Point) SetTo(v float32) {
-	p.X = v
-	p.Y = v
-}
-
+// AddScalar adds s to each component of p
 func (p *Point) AddScalar(s float32) {
 	p.X += s
 	p.Y += s
 }
 
+// SubtractScalar subtracts s from each component of p
 func (p *Point) SubtractScalar(s float32) {
-	p.X -= s
-	p.Y -= s
+	p.AddScalar(-s)
 }
 
+// MultiplyScalar multiplies each component of p by s
 func (p *Point) MultiplyScalar(s float32) {
 	p.X *= s
 	p.Y *= s
 }
 
+// Add sets the components of p to the pointwise summation of p + p2
 func (p *Point) Add(p2 Point) {
 	p.X += p2.X
 	p.Y += p2.Y
 }
 
+// Subtract sets the components of p to the pointwise difference of p - p2
 func (p *Point) Subtract(p2 Point) {
 	p.X -= p2.X
 	p.Y -= p2.Y
 }
 
+// Multiply sets the components of p to the pointwise product of p * p2
 func (p *Point) Multiply(p2 Point) {
 	p.X *= p2.X
 	p.Y *= p2.Y
 }
 
+// PointDistance returns the euclidean distance between p and p2
 func (p *Point) PointDistance(p2 Point) float32 {
 	return math.Sqrt(p.PointDistanceSquared(p2))
 }
 
+// PointDistanceSquared returns the squared euclidean distance between p and p2
 func (p *Point) PointDistanceSquared(p2 Point) float32 {
 	return (p.X-p2.X)*(p.X-p2.X) + (p.Y-p2.Y)*(p.Y-p2.Y)
 }
 
-// Returns the vector produced by projecting a on to b
+// ProjectOnto returns the vector produced by projecting a on to b
 func (a *Point) ProjectOnto(b Point) Point {
 	dot := a.X*b.X + a.Y*b.Y
 	proj := Point{
@@ -86,16 +85,20 @@ func (a *Point) ProjectOnto(b Point) Point {
 	return proj
 }
 
-// Returns the unit vector from a, and it's magnitude
+// Normalize returns the unit vector from a, and its magnitude.
+// if you try to normalize the null vector, the return value will be null values
 func (a *Point) Normalize() (Point, float32) {
+	if a.X == 0 && a.Y == 0 {
+		return *a, 0
+	}
+
 	mag := math.Sqrt(a.X*a.X + a.Y*a.Y)
 	unit := Point{a.X / mag, a.Y / mag}
 
 	return unit, mag
 }
 
-// Returns which side of the line the point is on
-// This is useful if you have a point of reference
+// PointSide returns which side of the line l the point p sits on
 func (l *Line) PointSide(point Point) bool {
 	one := (point.X - l.P1.X) * (l.P2.Y - l.P1.Y)
 	two := (point.Y - l.P1.Y) * (l.P2.X - l.P1.X)
@@ -103,17 +106,19 @@ func (l *Line) PointSide(point Point) bool {
 	return math.Signbit(one - two)
 }
 
-// Returns the line's angle relative to Y = 0
+// Angle returns the euclidean angle of l relative to Y = 0
 func (l *Line) Angle() float32 {
 	return math.Atan2(l.P1.X-l.P2.X, l.P1.Y-l.P2.Y)
 }
 
-// Returns the squared euclidean distance from a point to a line *segment*
+// PointDistance Returns the squared euclidean distance from the point p to the
+// line segment l
 func (l *Line) PointDistance(point Point) float32 {
 	return math.Sqrt(l.PointDistanceSquared(point))
 }
 
-// Returns the squared euclidean distance from a point to a line *segment*
+// PointDistanceSquared returns the squared euclidean distance from the point p
+// to the line segment l
 func (l *Line) PointDistanceSquared(point Point) float32 {
 	p1 := l.P1
 	p2 := l.P2
@@ -142,7 +147,7 @@ func (l *Line) PointDistanceSquared(point Point) float32 {
 		(y0-(y1+t*(y2-y1)))*(y0-(y1+t*(y2-y1)))
 }
 
-// Left Hand Normal
+// Normal returns the left hand normal of the line segment l
 func (l *Line) Normal() Point {
 	dx := l.P2.X - l.P1.X
 	dy := l.P2.Y - l.P1.Y
@@ -152,8 +157,19 @@ func (l *Line) Normal() Point {
 	return unit
 }
 
+// DotProduct returns the dot product between this and that
+func DotProduct(this, that Point) float32 {
+	return this.X*that.X + this.Y*that.Y
+}
 
-// Returns the point where the two line *segments* intersect
+// CrossProduct returns the 2 dimensional cross product of this and that,
+// which represents the magnitude of the three dimensional cross product
+func CrossProduct(this, that Point) float32 {
+	return this.X*that.Y - this.Y*that.X
+}
+
+// LineIntersection returns the point where the line segments one and two
+// intersect
 func LineIntersection(one, two *Line) Point {
 	p := one.P1
 	q := two.P1
@@ -173,9 +189,9 @@ func LineIntersection(one, two *Line) Point {
 	// u = qmp × r / rcs
 	qmp := q
 	qmp.Subtract(p)
-	qmpcs := qmp.Cross(s)
-	qmpcr := qmp.Cross(r)
-	rcs := r.Cross(s)
+	qmpcs := CrossProduct(qmp, s)
+	qmpcr := CrossProduct(qmp, r)
+	rcs := CrossProduct(r, s)
 
 	// Collinear
 	if rcs == 0 && qmpcr == 0 {
@@ -198,7 +214,7 @@ func LineIntersection(one, two *Line) Point {
 	return Point{-1, -1}
 }
 
-// Returns the trace fraction of tracer through boundary
+// LineTraceFraction returns the trace fraction of tracer through boundary
 // 1 means no intersection
 // 0 means tracer's origin lies on the boundary line
 func LineTraceFraction(tracer, boundary *Line) float32 {
@@ -222,7 +238,7 @@ func LineTraceFraction(tracer, boundary *Line) float32 {
 	return traceMag / lineMag
 }
 
-// Runs a series of line tracers from tracer to each boundary line
+// LineTrace runs a series of line traces from tracer to each boundary line
 // and returns the nearest trace values
 func LineTrace(tracer *Line, boundaries []*Line) Trace {
 	var t Trace
