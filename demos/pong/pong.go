@@ -447,7 +447,7 @@ func (s *ScoreSystem) Update(dt float32) {
 			e.RenderComponent.Drawable = basicFont.Render(label)
 			width := len(label) * 20
 
-			e.SpaceComponent.Position.X = float32((engo.GameWidth()/) - (width / 2))
+			e.SpaceComponent.Position.X = float32((engo.GameWidth() / 2) - (width / 2))
 		}
 	}
 }
