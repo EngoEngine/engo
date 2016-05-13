@@ -22,6 +22,7 @@ var (
 	Gl                        *gl.Context
 	gameWidth, gameHeight     float32
 	windowWidth, windowHeight float32
+	devicePixelRatio          float64
 )
 
 func init() {
@@ -34,11 +35,12 @@ var document = dom.GetWindow().Document().(dom.HTMLDocument)
 func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	canvas := document.CreateElement("canvas").(*dom.HTMLCanvasElement)
 
-	devicePixelRatio := js.Global.Get("devicePixelRatio").Float()
+	devicePixelRatio = js.Global.Get("devicePixelRatio").Float()
 	canvas.Width = int(float64(width)*devicePixelRatio + 0.5)   // Nearest non-negative int.
 	canvas.Height = int(float64(height)*devicePixelRatio + 0.5) // Nearest non-negative int.
 	canvas.Style().SetProperty("width", fmt.Sprintf("%vpx", width), "")
 	canvas.Style().SetProperty("height", fmt.Sprintf("%vpx", height), "")
+	log.Println("devicePixelRatio", devicePixelRatio)
 
 	if document.Body() == nil {
 		js.Global.Get("document").Set("body", js.Global.Get("document").Call("createElement", "body"))
@@ -57,15 +59,14 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		log.Println("Could not create context:", err)
 		return
 	}
-	Gl.Viewport(0, 0, width, height)
-
+	fmt.Println("Gl.Viewport(0, 0,", width, ",", height, ")")
 	Gl.GetExtension("OES_texture_float")
 
 	// DEBUG: Add framebuffer information div.
 	if false {
 		//canvas.Height -= 30
 		text := document.CreateElement("div")
-		textContent := fmt.Sprintf("%v %v (%v) @%v", dom.GetWindow().InnerWidth(), canvas.Width, float64(width)*devicePixelRatio, devicePixelRatio)
+		textContent := fmt.Sprintf("%v %v (%v %v %v) @%v", dom.GetWindow().InnerWidth(), canvas.Width, float64(width)*devicePixelRatio, GameWidth(), CanvasWidth(), devicePixelRatio)
 		text.SetTextContent(textContent)
 		document.Body().AppendChild(text)
 	}
@@ -92,22 +93,22 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 	w.AddEventListener("mousemove", false, func(ev dom.Event) {
 		mm := ev.(*dom.MouseEvent)
-		Mouse.X = float32(mm.ClientX)
-		Mouse.Y = float32(mm.ClientY)
+		Mouse.X = float32(float64(mm.ClientX) * devicePixelRatio)
+		Mouse.Y = float32(float64(mm.ClientY) * devicePixelRatio)
 		//Mouse.Action = MOVE
 	})
 
 	w.AddEventListener("mousedown", false, func(ev dom.Event) {
 		mm := ev.(*dom.MouseEvent)
-		Mouse.X = float32(mm.ClientX)
-		Mouse.Y = float32(mm.ClientY)
+		Mouse.X = float32(float64(mm.ClientX) * devicePixelRatio)
+		Mouse.Y = float32(float64(mm.ClientY) * devicePixelRatio)
 		Mouse.Action = Press
 	})
 
 	w.AddEventListener("mouseup", false, func(ev dom.Event) {
 		mm := ev.(*dom.MouseEvent)
-		Mouse.X = float32(mm.ClientX)
-		Mouse.Y = float32(mm.ClientY)
+		Mouse.X = float32(float64(mm.ClientX) * devicePixelRatio)
+		Mouse.Y = float32(float64(mm.ClientY) * devicePixelRatio)
 		Mouse.Action = Release
 	})
 }

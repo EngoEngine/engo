@@ -152,7 +152,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 
 		x := float32(0)
 		if i != 0 {
-			x = 800 - 16
+			x = engo.GameWidth() - 16
 		}
 
 		paddle.SpaceComponent = common.SpaceComponent{
@@ -287,10 +287,10 @@ func (b *BounceSystem) Update(dt float32) {
 		if e.SpaceComponent.Position.X < 0 {
 			engo.Mailbox.Dispatch(ScoreMessage{1})
 
-			e.SpaceComponent.Position.X = 400 - 16
-			e.SpaceComponent.Position.Y = 400 - 16
-			e.SpeedComponent.X = 800 * rand.Float32()
-			e.SpeedComponent.Y = 800 * rand.Float32()
+			e.SpaceComponent.Position.X = (engo.GameWidth() / 2) - 16
+			e.SpaceComponent.Position.Y = (engo.GameHeight() / 2) - 16
+			e.SpeedComponent.X = engo.GameWidth() * rand.Float32()
+			e.SpeedComponent.Y = engo.GameHeight() * rand.Float32()
 		}
 
 		if e.SpaceComponent.Position.Y < 0 {
@@ -298,17 +298,17 @@ func (b *BounceSystem) Update(dt float32) {
 			e.SpeedComponent.Y *= -1
 		}
 
-		if e.SpaceComponent.Position.X > (800 - 16) {
+		if e.SpaceComponent.Position.X > (engo.GameWidth() - 16) {
 			engo.Mailbox.Dispatch(ScoreMessage{2})
 
-			e.SpaceComponent.Position.X = 400 - 16
-			e.SpaceComponent.Position.Y = 400 - 16
-			e.SpeedComponent.X = 800 * rand.Float32()
-			e.SpeedComponent.Y = 800 * rand.Float32()
+			e.SpaceComponent.Position.X = (engo.GameWidth() / 2) - 16
+			e.SpaceComponent.Position.Y = (engo.GameHeight() / 2) - 16
+			e.SpeedComponent.X = engo.GameWidth() * rand.Float32()
+			e.SpeedComponent.Y = engo.GameHeight() * rand.Float32()
 		}
 
-		if e.SpaceComponent.Position.Y > (800 - 16) {
-			e.SpaceComponent.Position.Y = 800 - 16
+		if e.SpaceComponent.Position.Y > (engo.GameHeight() - 16) {
+			e.SpaceComponent.Position.Y = engo.GameHeight() - 16
 			e.SpeedComponent.Y *= -1
 		}
 	}
@@ -325,8 +325,6 @@ type ControlSystem struct {
 
 	mouseTrackerBasic ecs.BasicEntity
 	mouseTrackerMouse common.MouseComponent
-
-	fpscounter float32
 }
 
 func (c *ControlSystem) New(w *ecs.World) {
@@ -360,15 +358,15 @@ func (c *ControlSystem) Remove(basic ecs.BasicEntity) {
 
 func (c *ControlSystem) Update(dt float32) {
 	for _, e := range c.entities {
-		speed := 800 * dt
+		speed := engo.GameWidth() * dt
 
 		vert := engo.Input.Axis(e.ControlComponent.Scheme)
 		e.SpaceComponent.Position.Y += speed * vert.Value()
 
 		var moveThisOne bool
-		if engo.Mouse.X > engo.WindowWidth()/2 && e.ControlComponent.Scheme == "arrows" {
+		if engo.Mouse.X > 800/2 && e.ControlComponent.Scheme == "arrows" {
 			moveThisOne = true
-		} else if engo.Mouse.X < engo.WindowWidth()/2 && e.ControlComponent.Scheme == "wasd" {
+		} else if engo.Mouse.X < 800/2 && e.ControlComponent.Scheme == "wasd" {
 			moveThisOne = true
 		}
 
@@ -376,18 +374,12 @@ func (c *ControlSystem) Update(dt float32) {
 			e.SpaceComponent.Position.Y = c.mouseTrackerMouse.MouseY - e.SpaceComponent.Height/2
 		}
 
-		if (e.SpaceComponent.Height + e.SpaceComponent.Position.Y) > 800 {
-			e.SpaceComponent.Position.Y = 800 - e.SpaceComponent.Height
+		if (e.SpaceComponent.Height + e.SpaceComponent.Position.Y) > engo.GameHeight() {
+			e.SpaceComponent.Position.Y = engo.GameHeight() - e.SpaceComponent.Height
 		} else if e.SpaceComponent.Position.Y < 0 {
 			e.SpaceComponent.Position.Y = 0
 		}
 	}
-
-	if c.fpscounter > 0 {
-		c.fpscounter = 0
-		engo.SetTitle(fmt.Sprintf("FPS: %f", engo.Time.FPS()))
-	}
-	c.fpscounter += dt
 }
 
 type scoreEntity struct {

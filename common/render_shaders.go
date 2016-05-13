@@ -155,8 +155,8 @@ func (s *basicShader) Pre() {
 		s.projectionMatrix[0] = 1 / (engo.GameWidth() / 2)
 		s.projectionMatrix[4] = 1 / (-engo.GameHeight() / 2)
 	} else {
-		s.projectionMatrix[0] = 1 / (engo.WindowWidth() / 2)
-		s.projectionMatrix[4] = 1 / (-engo.WindowHeight() / 2)
+		s.projectionMatrix[0] = 1 / (engo.CanvasWidth() / 2)
+		s.projectionMatrix[4] = 1 / (-engo.CanvasHeight() / 2)
 	}
 
 	if s.cameraEnabled {
@@ -486,8 +486,8 @@ func (l *legacyShader) Pre() {
 		l.projectionMatrix[0] = 1 / (engo.GameWidth() / 2)
 		l.projectionMatrix[4] = 1 / (-engo.GameHeight() / 2)
 	} else {
-		l.projectionMatrix[0] = 1 / (engo.WindowWidth() / 2)   // TODO: canvasWidth
-		l.projectionMatrix[4] = 1 / (-engo.WindowHeight() / 2) // TODO: canvasHeight
+		l.projectionMatrix[0] = 1 / (engo.CanvasWidth() / 2)
+		l.projectionMatrix[4] = 1 / (-engo.CanvasHeight() / 2)
 	}
 
 	if l.cameraEnabled {
