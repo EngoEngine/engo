@@ -525,25 +525,13 @@ func (l *legacyShader) updateBuffer(ren *RenderComponent, space *SpaceComponent)
 func (l *legacyShader) computeBufferSize(draw Drawable) int {
 	switch shape := draw.(type) {
 	case Triangle:
-		if shape.BorderWidth > 0 {
-			return 18
-		} else {
-			return 9
-		}
+		return 18
 	case Rectangle:
-		if shape.BorderWidth > 0 {
-			return 24
-		} else {
-			return 12
-		}
+		return 24
 	case Circle:
 		return 12
 	case ComplexTriangles:
-		if shape.BorderWidth > 0 {
-			return len(shape.Points) * 6
-		} else {
-			return len(shape.Points) * 3
-		}
+		return len(shape.Points) * 6
 	default:
 		return 0
 	}
@@ -693,7 +681,7 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 			}
 		}
 	default:
-		unsupportedType()
+		unsupportedType(ren.Drawable)
 	}
 
 	return changed
@@ -778,7 +766,7 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 			engo.Gl.DrawArrays(engo.Gl.LINE_LOOP, len(shape.Points), len(shape.Points))
 		}
 	default:
-		unsupportedType()
+		unsupportedType(ren.Drawable)
 	}
 }
 
