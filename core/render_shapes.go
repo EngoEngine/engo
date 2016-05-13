@@ -1,9 +1,10 @@
 package core
 
 import (
+	"image/color"
+
 	"engo.io/engo"
 	"engo.io/gl"
-	"image/color"
 )
 
 type TriangleType uint8

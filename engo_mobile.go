@@ -27,6 +27,7 @@ var (
 
 	gameWidth, gameHeight     float32
 	windowWidth, windowHeight float32
+	canvasWidth, canvasHeight float32
 
 	msaaPreference int
 )
@@ -60,6 +61,14 @@ func WindowWidth() float32 {
 
 func WindowHeight() float32 {
 	return windowHeight
+}
+
+func CanvasWidth() float32 {
+	return canvasWidth
+}
+
+func CanvasHeight() float32 {
+	return canvasHeight
 }
 
 func DestroyWindow() { /* nothing to do here? */ }
@@ -100,6 +109,8 @@ func runLoop(defaultScene Scene, headless bool) {
 				sz = e
 				windowWidth = float32(sz.WidthPx)
 				windowHeight = float32(sz.HeightPx)
+				canvasWidth = float32(sz.WidthPx)
+				canvasHeight = float32(sz.HeightPx)
 				Gl.Viewport(0, 0, sz.WidthPx, sz.HeightPx)
 			case paint.Event:
 				if e.External {
@@ -117,8 +128,8 @@ func runLoop(defaultScene Scene, headless bool) {
 				fps.Draw(sz)
 
 				// Reset mouse if needed
-				if Mouse.Action == RELEASE {
-					Mouse.Action = NEUTRAL
+				if Mouse.Action == Release {
+					Mouse.Action = Neutral
 				}
 
 				a.Publish() // same as SwapBuffers
@@ -131,11 +142,11 @@ func runLoop(defaultScene Scene, headless bool) {
 				Mouse.Y = e.Y
 				switch e.Type {
 				case touch.TypeBegin:
-					Mouse.Action = PRESS
+					Mouse.Action = Press
 				case touch.TypeMove:
-					Mouse.Action = MOVE
+					Mouse.Action = Move
 				case touch.TypeEnd:
-					Mouse.Action = RELEASE
+					Mouse.Action = Release
 				}
 			}
 		}

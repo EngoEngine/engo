@@ -197,7 +197,7 @@ func (m *MouseSystem) Update(dt float32) {
 			}
 
 			switch engo.Mouse.Action {
-			case engo.PRESS:
+			case engo.Press:
 				switch engo.Mouse.Button {
 				case engo.MouseButtonLeft:
 					e.MouseComponent.startedDragging = true
@@ -206,14 +206,14 @@ func (m *MouseSystem) Update(dt float32) {
 					e.MouseComponent.RightClicked = true
 				}
 				m.mouseDown = true
-			case engo.RELEASE:
+			case engo.Release:
 				switch engo.Mouse.Button {
 				case engo.MouseButtonLeft:
 					e.MouseComponent.Released = true
 				case engo.MouseButtonRight:
 					e.MouseComponent.RightReleased = true
 				}
-			case engo.MOVE:
+			case engo.Move:
 				if m.mouseDown && e.MouseComponent.startedDragging {
 					e.MouseComponent.Dragged = true
 				}
@@ -225,7 +225,7 @@ func (m *MouseSystem) Update(dt float32) {
 			e.MouseComponent.Hovered = false
 		}
 
-		if engo.Mouse.Action == engo.RELEASE {
+		if engo.Mouse.Action == engo.Release {
 			// dragging stops as soon as one of the currently pressed buttons
 			// is released
 			e.MouseComponent.Dragged = false
@@ -237,6 +237,6 @@ func (m *MouseSystem) Update(dt float32) {
 
 		// propagate the modifiers to the mouse component so that game
 		// implementers can take different decisions based on those
-		e.MouseComponent.Modifier = engo.Mouse.Modifer
+		e.MouseComponent.Modifier = engo.Mouse.Modifier
 	}
 }

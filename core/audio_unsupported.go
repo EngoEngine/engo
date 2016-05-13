@@ -3,8 +3,9 @@
 package core
 
 import (
-	"engo.io/ecs"
 	"io"
+
+	"engo.io/ecs"
 )
 
 const (

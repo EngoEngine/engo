@@ -31,10 +31,10 @@ type Drawable interface {
 type TextureRepeating uint8
 
 const (
-	CLAMP_TO_EDGE TextureRepeating = iota
-	CLAMP_TO_BORDER
-	REPEAT
-	MIRRORED_REPEAT
+	ClampToEdge TextureRepeating = iota
+	ClampToBorder
+	Repeat
+	MirroredRepeat
 )
 
 type RenderComponent struct {
@@ -189,9 +189,9 @@ func (rs *RenderSystem) Update(dt float32) {
 }
 
 func SetBackground(c color.Color) {
-	if !engo.Headless(){
+	if !engo.Headless() {
 		r, g, b, a := c.RGBA()
 
-		engo.Gl.ClearColor(float32(r) / 0xffff, float32(g) / 0xffff, float32(b) / 0xffff, float32(a) / 0xffff)
+		engo.Gl.ClearColor(float32(r)/0xffff, float32(g)/0xffff, float32(b)/0xffff, float32(a)/0xffff)
 	}
 }

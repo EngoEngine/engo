@@ -21,7 +21,7 @@ type DefaultScene struct{}
 func (game *DefaultScene) Preload() {
 	err := engo.Files.Load("icon.png")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
 
@@ -34,7 +34,7 @@ func (game *DefaultScene) Setup(w *ecs.World) {
 	// Retrieve a texture
 	texture, err := core.PreloadedSpriteSingle("icon.png")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	// Create an entity

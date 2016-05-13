@@ -105,14 +105,14 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		mm := ev.(*dom.MouseEvent)
 		Mouse.X = float32(mm.ClientX)
 		Mouse.Y = float32(mm.ClientY)
-		Mouse.Action = PRESS
+		Mouse.Action = Press
 	})
 
 	w.AddEventListener("mouseup", false, func(ev dom.Event) {
 		mm := ev.(*dom.MouseEvent)
 		Mouse.X = float32(mm.ClientX)
 		Mouse.Y = float32(mm.ClientY)
-		Mouse.Action = RELEASE
+		Mouse.Action = Release
 	})
 }
 
@@ -255,18 +255,9 @@ Outer:
 }
 
 func openFile(url string) (io.ReadCloser, error) {
-	log.Println("opening", url)
-	if filepath.Ext(url) == ".ttf" {
-		//url += "_js"
-	}
-
 	req := xhr.NewRequest("GET", url)
 
 	req.ResponseType = xhr.ArrayBuffer
-	if filepath.Ext(url) != ".ttf" {
-
-		//req.ResponseType = xhr.Blob
-	}
 
 	if err := req.Send(""); err != nil {
 		return nil, err
@@ -276,22 +267,9 @@ func openFile(url string) (io.ReadCloser, error) {
 		return nil, fmt.Errorf("unable to open resource (%s), expected HTTP status %d but got %d", url, http.StatusOK, req.Status)
 	}
 
-	var reader io.Reader
+	buffer := bytes.NewBuffer(js.Global.Get("Uint8Array").New(req.Response).Interface().([]byte))
 
-	if filepath.Ext(url) == ".ttf" && false {
-		fontDataEncoded := bytes.NewBuffer([]byte(req.Response.String()))
-		fontDataCompressed := base64.NewDecoder(base64.StdEncoding, fontDataEncoded)
-		var err error
-		reader, err = gzip.NewReader(fontDataCompressed)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		buffy := bytes.NewBuffer(js.Global.Get("Uint8Array").New(req.Response).Interface().([]byte))
-		reader = buffy
-	}
-
-	return noCloseReadCloser{reader}, nil
+	return noCloseReadCloser{buffer}, nil
 }
 
 type noCloseReadCloser struct {

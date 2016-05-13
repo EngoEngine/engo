@@ -34,7 +34,7 @@ type IconScene struct{}
 func (*IconScene) Preload() {
 	err := engo.Files.Load("icon.png")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
 
@@ -48,7 +48,7 @@ func (*IconScene) Setup(w *ecs.World) {
 	// Retrieve a texture
 	texture, err := core.PreloadedSpriteSingle("icon.png")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	// Create an entity
@@ -92,7 +92,7 @@ type RockScene struct{}
 func (*RockScene) Preload() {
 	err := engo.Files.Load("rock.png")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
 
@@ -106,7 +106,7 @@ func (game *RockScene) Setup(w *ecs.World) {
 	// Retrieve a texture
 	texture, err := core.PreloadedSpriteSingle("rock.png")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	// Create an entity

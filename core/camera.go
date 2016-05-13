@@ -333,11 +333,11 @@ func (*MouseRotator) Priority() int          { return MouseRotatorPriority }
 func (*MouseRotator) Remove(ecs.BasicEntity) {}
 
 func (c *MouseRotator) Update(float32) {
-	if engo.Mouse.Button == engo.MouseButtonMiddle && engo.Mouse.Action == engo.PRESS {
+	if engo.Mouse.Button == engo.MouseButtonMiddle && engo.Mouse.Action == engo.Press {
 		c.pressed = true
 	}
 
-	if engo.Mouse.Action == engo.RELEASE {
+	if engo.Mouse.Action == engo.Release {
 		c.pressed = false
 	}
 

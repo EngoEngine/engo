@@ -49,7 +49,7 @@ func (i *imageLoader) Unload(url string) error {
 func (i *imageLoader) Resource(url string) (engo.Resource, error) {
 	texture, ok := i.images[url]
 	if !ok {
-		return nil, engo.ResourceNotLoadedError{url}
+		return nil, fmt.Errorf("resource not loaded by `FileLoader`: %q", url)
 	}
 
 	return texture, nil

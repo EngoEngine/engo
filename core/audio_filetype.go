@@ -54,7 +54,7 @@ func (l *audioLoader) Unload(url string) error {
 func (l *audioLoader) Resource(url string) (engo.Resource, error) {
 	texture, ok := l.audios[url]
 	if !ok {
-		return nil, engo.ResourceNotLoadedError{url}
+		return nil, fmt.Errorf("resource not loaded by `FileLoader`: %q", url)
 	}
 
 	return texture, nil

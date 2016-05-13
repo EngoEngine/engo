@@ -51,7 +51,7 @@ func (i *fontLoader) Unload(url string) error {
 func (i *fontLoader) Resource(url string) (engo.Resource, error) {
 	texture, ok := i.fonts[url]
 	if !ok {
-		return nil, engo.ResourceNotLoadedError{url}
+		return nil, fmt.Errorf("resource not loaded by `FileLoader`: %q", url)
 	}
 
 	return texture, nil

@@ -2,12 +2,12 @@ package main
 
 import (
 	"image/color"
+	"log"
 	"math/rand"
 
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/engo/core"
-	"log"
 )
 
 type DefaultScene struct{}
@@ -21,7 +21,7 @@ type Rock struct {
 func (*DefaultScene) Preload() {
 	err := engo.Files.Load("rock.png")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
 
@@ -34,7 +34,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	// Retrieve a texture
 	texture, err := core.PreloadedSpriteSingle("rock.png")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	// Create an entity

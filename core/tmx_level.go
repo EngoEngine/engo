@@ -8,13 +8,14 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/xml"
-	"engo.io/engo"
 	"fmt"
 	"io/ioutil"
 	"path"
 	"sort"
 	"strconv"
 	"strings"
+
+	"engo.io/engo"
 )
 
 // Just used to create levelTileset->Image
@@ -173,11 +174,7 @@ func createLevelFromTmx(r Resource) (*Level, error) {
 		curX := float32(tlvl.ImgLayers[i].X)
 		curY := float32(tlvl.ImgLayers[i].Y)
 		reg := NewRegion(curImg, 0, 0, curImg.width, curImg.height)
-<<<<<<< HEAD:core/tmx_level.go
-		lvl.Images = append(lvl.Images, &tile{engo.Point{curX, curY}, reg})
-=======
-		lvl.Images = append(lvl.Images, &tile{Point{curX, curY}, tlvl.TileWidth, tlvl.TileHeight, reg})
->>>>>>> fdd732c641e9b891720896022d96dad014c9fd67:tmx_level.go
+		lvl.Images = append(lvl.Images, &tile{engo.Point{curX, curY}, tlvl.TileWidth, tlvl.TileHeight, reg})
 	}
 
 	return lvl, nil

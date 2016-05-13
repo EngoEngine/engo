@@ -1,15 +1,15 @@
 package core
 
 import (
+	"fmt"
 	"image/color"
+	"log"
+	"strings"
 
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/gl"
-	"fmt"
 	"github.com/luxengine/math"
-	"log"
-	"strings"
 )
 
 const bufferSize = 10000
@@ -196,13 +196,13 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 	if s.lastRepeating != ren.Repeat {
 		var val int
 		switch ren.Repeat {
-		case CLAMP_TO_EDGE:
+		case ClampToEdge:
 			val = engo.Gl.CLAMP_TO_EDGE
-		case CLAMP_TO_BORDER:
+		case ClampToBorder:
 			val = engo.Gl.CLAMP_TO_EDGE
-		case REPEAT:
+		case Repeat:
 			val = engo.Gl.REPEAT
-		case MIRRORED_REPEAT:
+		case MirroredRepeat:
 			val = engo.Gl.MIRRORED_REPEAT
 		}
 

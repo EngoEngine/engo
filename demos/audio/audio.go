@@ -2,11 +2,11 @@ package main
 
 import (
 	"image/color"
+	"log"
 
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/engo/core"
-	"log"
 )
 
 type DefaultScene struct{}
@@ -21,7 +21,7 @@ func (*DefaultScene) Preload() {
 
 	err := engo.Files.Load("326488.wav")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
 

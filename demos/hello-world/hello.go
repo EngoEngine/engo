@@ -30,7 +30,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	// Retrieve a texture
 	texture, err := core.PreloadedSpriteSingle("icon.png")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	// Create an entity

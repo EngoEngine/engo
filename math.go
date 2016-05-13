@@ -4,11 +4,13 @@ import (
 	"github.com/luxengine/math"
 )
 
+// AABB describes two points of a rectangle: the upper-left corner and the lower-right corner. It should always hold that
+// `Min.X <= Max.X` and `Min.Y <= Max.Y`.
 type AABB struct {
 	Min, Max Point
 }
 
-// Point describes a coordinate on a 2 dimensional euclidean space
+// Point describes a coordinate in a 2 dimensional euclidean space
 // it can also be thought of as a 2 dimensional vector from the origin
 type Point struct {
 	X, Y float32

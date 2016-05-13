@@ -6,9 +6,7 @@ import (
 	"engo.io/ecs"
 )
 
-var (
-	scenes = make(map[string]*sceneWrapper)
-)
+var scenes = make(map[string]*sceneWrapper)
 
 // Scene represents a screen ingame.
 // i.e.: main menu, settings, but also the game itself

@@ -59,12 +59,12 @@ func (pong *PongGame) Setup(w *ecs.World) {
 
 	basicFont = (&core.Font{URL: "Roboto-Regular.ttf", Size: 32, FG: color.NRGBA{255, 255, 255, 255}})
 	if err := basicFont.CreatePreloaded(); err != nil {
-		log.Fatalln("Could not load font:", err)
+		log.Printlnln("Could not load font:", err)
 	}
 
 	ballTexture, err := core.PreloadedSpriteSingle("ball.png")
 	if err != nil {
-		log.Fatalln("Could not load texture:", err)
+		log.Printlnln("Could not load texture:", err)
 	}
 
 	ball := Ball{BasicEntity: ecs.NewBasic()}
@@ -140,7 +140,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 
 	paddleTexture, err := core.PreloadedSpriteSingle("paddle.png")
 	if err != nil {
-		log.Fatalln(err)
+		log.Printlnln(err)
 	}
 
 	for i := 0; i < 2; i++ {

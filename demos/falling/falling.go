@@ -29,7 +29,7 @@ type DefaultScene struct{}
 func (*DefaultScene) Preload() {
 	err := engo.Files.LoadMany("icon.png", "rock.png")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
 
@@ -46,7 +46,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 
 	texture, err := core.PreloadedSpriteSingle("icon.png")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	// Create an entity
@@ -146,7 +146,7 @@ func (rock *RockSpawnSystem) Update(dt float32) {
 func NewRock(world *ecs.World, position engo.Point) {
 	texture, err := core.PreloadedSpriteSingle("rock.png")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	rock := Rock{BasicEntity: ecs.NewBasic()}

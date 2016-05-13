@@ -28,7 +28,7 @@ var (
 const (
 	// DefaultVerticalAxis is the name of the default vertical axis, as used internally in `engo` when `StandardInputs`
 	// is defined.
-	DefaultVerticalAxis   = "vertical"
+	DefaultVerticalAxis = "vertical"
 
 	// DefaultHorizontalAxis is the name of the default horizontal axis, as used internally in `engo` when `StandardInputs`
 	// is defined.

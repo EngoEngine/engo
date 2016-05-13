@@ -21,7 +21,7 @@ type Guy struct {
 func (*DefaultScene) Preload() {
 	err := engo.Files.LoadMany("icon.png", "rock.png")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
 
@@ -34,7 +34,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	// Retrieve a texture
 	texture, err := core.PreloadedSpriteSingle("icon.png")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	// Create an entity

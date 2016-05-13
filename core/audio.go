@@ -3,12 +3,12 @@
 package core
 
 import (
+	"io"
 	"log"
 
 	"engo.io/ecs"
 	"engo.io/engo"
 	"golang.org/x/mobile/exp/audio/al"
-	"io"
 )
 
 const (
