@@ -168,13 +168,13 @@ func MinimumTranslation(rect1 engo.AABB, rect2 engo.AABB) engo.Point {
 	if left > 0 || right < 0 {
 		log.Println("Box aint intercepting")
 		return mtd
-		//box doesnt intercept
+		//box doesn't intercept
 	}
 
 	if top > 0 || bottom < 0 {
 		log.Println("Box aint intercepting")
 		return mtd
-		//box doesnt intercept
+		//box doesn't intercept
 	}
 	if math.Abs(left) < right {
 		mtd.X = left
