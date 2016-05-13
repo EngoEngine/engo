@@ -2,44 +2,50 @@ package main
 
 import (
 	"image/color"
+	"log"
 	"math/rand"
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/common"
 )
 
 type DefaultScene struct{}
 
 type Guy struct {
 	ecs.BasicEntity
-	engo.RenderComponent
-	engo.SpaceComponent
+	common.RenderComponent
+	common.SpaceComponent
 }
 
 func (*DefaultScene) Preload() {
-	// This could be done individually: engo.Files.Add("data/icon.png"), etc
-	// Second value (false) says whether to check recursively or not
-	engo.Files.AddFromDir("data", false)
+	err := engo.Files.LoadMany("icon.png", "rock.png")
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (*DefaultScene) Setup(w *ecs.World) {
-	engo.SetBackground(color.White)
+	common.SetBackground(color.White)
 
-	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&common.RenderSystem{})
 	w.AddSystem(&ScaleSystem{})
 
 	// Retrieve a texture
-	texture := engo.Files.Image("icon.png")
+	texture, err := common.PreloadedSpriteSingle("icon.png")
+	if err != nil {
+		log.Println(err)
+	}
 
 	// Create an entity
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	guy.RenderComponent = engo.RenderComponent{
+	guy.RenderComponent = common.RenderComponent{
 		Drawable: texture,
-		Scale: engo.Point{8, 8},
+		Scale:    engo.Point{8, 8},
 	}
-	guy.SpaceComponent = engo.SpaceComponent{
+	guy.SpaceComponent = common.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    texture.Width() * guy.RenderComponent.Scale.X,
 		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
@@ -48,7 +54,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	// Add it to appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *common.RenderSystem:
 			sys.Add(&guy.BasicEntity, &guy.RenderComponent, &guy.SpaceComponent)
 		case *ScaleSystem:
 			sys.Add(&guy.BasicEntity, &guy.RenderComponent)
@@ -60,14 +66,14 @@ func (*DefaultScene) Type() string { return "GameWorld" }
 
 type scaleEntity struct {
 	*ecs.BasicEntity
-	*engo.RenderComponent
+	*common.RenderComponent
 }
 
 type ScaleSystem struct {
 	entities []scaleEntity
 }
 
-func (s *ScaleSystem) Add(basic *ecs.BasicEntity, render *engo.RenderComponent) {
+func (s *ScaleSystem) Add(basic *ecs.BasicEntity, render *common.RenderComponent) {
 	s.entities = append(s.entities, scaleEntity{basic, render})
 }
 

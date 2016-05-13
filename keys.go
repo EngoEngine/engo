@@ -1,6 +1,8 @@
 package engo
 
-import "sync"
+import (
+	"sync"
+)
 
 const (
 	KeyStateUp = iota

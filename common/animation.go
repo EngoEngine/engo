@@ -1,4 +1,4 @@
-package engo
+package common
 
 import (
 	"log"

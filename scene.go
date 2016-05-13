@@ -6,9 +6,7 @@ import (
 	"engo.io/ecs"
 )
 
-var (
-	scenes = make(map[string]*sceneWrapper)
-)
+var scenes = make(map[string]*sceneWrapper)
 
 // Scene represents a screen ingame.
 // i.e.: main menu, settings, but also the game itself
@@ -23,16 +21,22 @@ type Scene interface {
 	Type() string
 }
 
+// Shower is an optional interface a Scene can implement, indicating it'll have custom behavior
+// whenever the Scene gets shown again after being hidden (due to switching to other Scenes)
 type Shower interface {
 	// Show is called whenever the other Scene becomes inactive, and this one becomes the active one
 	Show()
 }
 
+// Hider is an optional interface a Scene can implement, indicating it'll have custom behavior
+// whenever the Scene get hidden to make room fr other Scenes.
 type Hider interface {
 	// Hide is called when an other Scene becomes active
 	Hide()
 }
 
+// Exiter is an optional interface a Scene can implement, indicating it'll have custom behavior
+// whenever the game get closed.
 type Exiter interface {
 	// Exit is called when the user or the system requests to close the game
 	// This should be used to cleanup or prompt user if they're sure they want to close
@@ -46,7 +50,6 @@ type sceneWrapper struct {
 	scene   Scene
 	world   *ecs.World
 	mailbox *MessageManager
-	camera  *cameraSystem
 }
 
 // CurrentScene returns the SceneWorld that is currently active
@@ -77,7 +80,6 @@ func SetScene(s Scene, forceNewWorld bool) {
 	if wrapper.world == nil || forceNewWorld {
 		wrapper.world = &ecs.World{}
 		wrapper.mailbox = &MessageManager{}
-		wrapper.camera = &cameraSystem{}
 
 		doSetup = true
 	}
@@ -86,17 +88,12 @@ func SetScene(s Scene, forceNewWorld bool) {
 	currentScene = s
 	currentWorld = wrapper.world
 	Mailbox = wrapper.mailbox
-	// update global cam var
-	cam = wrapper.camera
 
 	// doSetup is true whenever we're (re)initializing the Scene
 	if doSetup {
 		s.Preload()
-		Files.Load(func() {})
 
 		wrapper.mailbox.listeners = make(map[string][]MessageHandler)
-
-		wrapper.world.AddSystem(wrapper.camera)
 
 		s.Setup(wrapper.world)
 	} else {

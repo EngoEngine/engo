@@ -2,42 +2,50 @@ package main
 
 import (
 	"image/color"
+	"log"
 	"math/rand"
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/common"
 )
 
 type DefaultScene struct{}
 
 type Rock struct {
 	ecs.BasicEntity
-	engo.RenderComponent
-	engo.SpaceComponent
+	common.RenderComponent
+	common.SpaceComponent
 }
 
 func (*DefaultScene) Preload() {
-	engo.Files.AddFromDir("assets", false)
+	err := engo.Files.Load("rock.png")
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (*DefaultScene) Setup(w *ecs.World) {
-	engo.SetBackground(color.White)
+	common.SetBackground(color.White)
 
-	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&common.RenderSystem{})
 	w.AddSystem(&HideSystem{})
 
 	// Retrieve a texture
-	texture := engo.Files.Image("rock.png")
+	texture, err := common.PreloadedSpriteSingle("rock.png")
+	if err != nil {
+		log.Println(err)
+	}
 
 	// Create an entity
 	rock := Rock{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	rock.RenderComponent = engo.RenderComponent{
+	rock.RenderComponent = common.RenderComponent{
 		Drawable: texture,
-		Scale: engo.Point{8, 8},
+		Scale:    engo.Point{8, 8},
 	}
-	rock.SpaceComponent = engo.SpaceComponent{
+	rock.SpaceComponent = common.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    texture.Width() * rock.RenderComponent.Scale.X,
 		Height:   texture.Height() * rock.RenderComponent.Scale.Y,
@@ -46,7 +54,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	// Add it to appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *common.RenderSystem:
 			sys.Add(&rock.BasicEntity, &rock.RenderComponent, &rock.SpaceComponent)
 		case *HideSystem:
 			sys.Add(&rock.BasicEntity, &rock.RenderComponent)
@@ -58,14 +66,14 @@ func (*DefaultScene) Type() string { return "GameWorld" }
 
 type hideEntity struct {
 	*ecs.BasicEntity
-	*engo.RenderComponent
+	*common.RenderComponent
 }
 
 type HideSystem struct {
 	entities []hideEntity
 }
 
-func (h *HideSystem) Add(basic *ecs.BasicEntity, render *engo.RenderComponent) {
+func (h *HideSystem) Add(basic *ecs.BasicEntity, render *common.RenderComponent) {
 	h.entities = append(h.entities, hideEntity{basic, render})
 }
 

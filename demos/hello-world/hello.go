@@ -2,9 +2,11 @@ package main
 
 import (
 	"image/color"
+	"log"
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/common"
 )
 
 type DefaultScene struct{}
@@ -12,31 +14,34 @@ type DefaultScene struct{}
 type Guy struct {
 	ecs.BasicEntity
 
-	engo.RenderComponent
-	engo.SpaceComponent
+	common.RenderComponent
+	common.SpaceComponent
 }
 
 func (*DefaultScene) Preload() {
-	engo.Files.Add("assets/icon.png")
+	engo.Files.Load("icon.png")
 }
 
 func (*DefaultScene) Setup(w *ecs.World) {
-	engo.SetBackground(color.White)
+	common.SetBackground(color.White)
 
-	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&common.RenderSystem{})
 
 	// Retrieve a texture
-	texture := engo.Files.Image("icon.png")
+	texture, err := common.PreloadedSpriteSingle("icon.png")
+	if err != nil {
+		log.Println(err)
+	}
 
 	// Create an entity
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	guy.RenderComponent = engo.RenderComponent{
+	guy.RenderComponent = common.RenderComponent{
 		Drawable: texture,
 		Scale:    engo.Point{8, 8},
 	}
-	guy.SpaceComponent = engo.SpaceComponent{
+	guy.SpaceComponent = common.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    texture.Width() * guy.RenderComponent.Scale.X,
 		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
@@ -45,7 +50,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	// Add it to appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *common.RenderSystem:
 			sys.Add(&guy.BasicEntity, &guy.RenderComponent, &guy.SpaceComponent)
 		}
 	}

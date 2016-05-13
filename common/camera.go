@@ -1,4 +1,4 @@
-package engo
+package common
 
 import (
 	"log"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"engo.io/ecs"
+	"engo.io/engo"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/luxengine/math"
 )
@@ -20,6 +21,8 @@ const (
 var (
 	MinZoom float32 = 0.25
 	MaxZoom float32 = 3
+
+	CameraBounds engo.AABB
 )
 
 type cameraEntity struct {
@@ -39,13 +42,17 @@ type cameraSystem struct {
 }
 
 func (cam *cameraSystem) New(*ecs.World) {
-	cam.x = WorldBounds.Max.X / 2
-	cam.y = WorldBounds.Max.Y / 2
+	if CameraBounds.Max.X == 0 && CameraBounds.Max.Y == 0 {
+		CameraBounds.Max = engo.Point{engo.GameWidth(), engo.GameHeight()}
+	}
+
+	cam.x = CameraBounds.Max.X / 2
+	cam.y = CameraBounds.Max.Y / 2
 	cam.z = 1
 
 	cam.longTasks = make(map[CameraAxis]*CameraMessage)
 
-	Mailbox.Listen("CameraMessage", func(msg Message) {
+	engo.Mailbox.Listen("CameraMessage", func(msg engo.Message) {
 		cammsg, ok := msg.(CameraMessage)
 		if !ok {
 			return
@@ -186,11 +193,11 @@ func (cam *cameraSystem) rotate(value float32) {
 }
 
 func (cam *cameraSystem) moveToX(location float32) {
-	cam.x = mgl32.Clamp(location, WorldBounds.Min.X, WorldBounds.Max.X)
+	cam.x = mgl32.Clamp(location, CameraBounds.Min.X, CameraBounds.Max.X)
 }
 
 func (cam *cameraSystem) moveToY(location float32) {
-	cam.y = mgl32.Clamp(location, WorldBounds.Min.Y, WorldBounds.Max.Y)
+	cam.y = mgl32.Clamp(location, CameraBounds.Min.Y, CameraBounds.Max.Y)
 }
 
 func (cam *cameraSystem) zoomTo(zoomLevel float32) {
@@ -244,11 +251,11 @@ func (c *KeyboardScroller) Update(dt float32) {
 	c.keysMu.RLock()
 	defer c.keysMu.RUnlock()
 
-	vert := Input.Axis(c.verticalAxis)
-	Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: vert.Value() * c.ScrollSpeed * dt, Incremental: true})
+	vert := engo.Input.Axis(c.verticalAxis)
+	engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: vert.Value() * c.ScrollSpeed * dt, Incremental: true})
 
-	hori := Input.Axis(c.horizontalAxis)
-	Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: hori.Value() * c.ScrollSpeed * dt, Incremental: true})
+	hori := engo.Input.Axis(c.horizontalAxis)
+	engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: hori.Value() * c.ScrollSpeed * dt, Incremental: true})
 }
 
 func (c *KeyboardScroller) BindKeyboard(hori, vert string) {
@@ -282,18 +289,19 @@ func (*EdgeScroller) Remove(ecs.BasicEntity) {}
 
 // TODO: Warning doesn't get the cursor position
 func (c *EdgeScroller) Update(dt float32) {
-	curX, curY := CursorPos()
-	maxX, maxY := WindowSize()
+	curX, curY := engo.CursorPos()
+	maxX, maxY := engo.CanvasWidth(), engo.CanvasHeight()
+
 	if curX < c.EdgeMargin {
-		Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: -c.ScrollSpeed * dt, Incremental: true})
+		engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: -c.ScrollSpeed * dt, Incremental: true})
 	} else if curX > float64(maxX)-c.EdgeMargin {
-		Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: c.ScrollSpeed * dt, Incremental: true})
+		engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: c.ScrollSpeed * dt, Incremental: true})
 	}
 
 	if curY < c.EdgeMargin {
-		Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: -c.ScrollSpeed * dt, Incremental: true})
+		engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: -c.ScrollSpeed * dt, Incremental: true})
 	} else if curY > float64(maxY)-c.EdgeMargin {
-		Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: c.ScrollSpeed * dt, Incremental: true})
+		engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: c.ScrollSpeed * dt, Incremental: true})
 	}
 }
 
@@ -306,8 +314,8 @@ func (*MouseZoomer) Priority() int          { return MouseZoomerPriority }
 func (*MouseZoomer) Remove(ecs.BasicEntity) {}
 
 func (c *MouseZoomer) Update(float32) {
-	if Mouse.ScrollY != 0 {
-		Mailbox.Dispatch(CameraMessage{Axis: ZAxis, Value: Mouse.ScrollY * c.ZoomSpeed, Incremental: true})
+	if engo.Mouse.ScrollY != 0 {
+		engo.Mailbox.Dispatch(CameraMessage{Axis: ZAxis, Value: engo.Mouse.ScrollY * c.ZoomSpeed, Incremental: true})
 	}
 }
 
@@ -325,17 +333,17 @@ func (*MouseRotator) Priority() int          { return MouseRotatorPriority }
 func (*MouseRotator) Remove(ecs.BasicEntity) {}
 
 func (c *MouseRotator) Update(float32) {
-	if Mouse.Button == MouseButtonMiddle && Mouse.Action == PRESS {
+	if engo.Mouse.Button == engo.MouseButtonMiddle && engo.Mouse.Action == engo.Press {
 		c.pressed = true
 	}
 
-	if Mouse.Action == RELEASE {
+	if engo.Mouse.Action == engo.Release {
 		c.pressed = false
 	}
 
 	if c.pressed {
-		Mailbox.Dispatch(CameraMessage{Axis: Angle, Value: (c.oldX - Mouse.X) * -c.RotationSpeed, Incremental: true})
+		engo.Mailbox.Dispatch(CameraMessage{Axis: Angle, Value: (c.oldX - engo.Mouse.X) * -c.RotationSpeed, Incremental: true})
 	}
 
-	c.oldX = Mouse.X
+	c.oldX = engo.Mouse.X
 }

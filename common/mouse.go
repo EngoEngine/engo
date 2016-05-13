@@ -1,10 +1,14 @@
-package engo
+package common
 
 import (
+	"log"
+
 	"engo.io/ecs"
+	"engo.io/engo"
 	"github.com/luxengine/math"
 )
 
+// Cursor is a reference to a GLFW-cursor - to be used with the `SetCursor` method.
 type Cursor uint8
 
 const (
@@ -64,7 +68,7 @@ type MouseComponent struct {
 	Track bool
 	// Modifier is used to store the eventual modifiers that were pressed during
 	// the same time the different click events occurred
-	Modifier Modifier
+	Modifier engo.Modifier
 
 	// startedDragging is used internally to see if *this* is the object that is being dragged
 	startedDragging bool
@@ -80,6 +84,8 @@ type mouseEntity struct {
 // MouseSystem listens for mouse events, and changes value for MouseComponent accordingly
 type MouseSystem struct {
 	entities []mouseEntity
+	world    *ecs.World
+	camera   *cameraSystem
 
 	mouseX    float32
 	mouseY    float32
@@ -88,6 +94,23 @@ type MouseSystem struct {
 
 // Priority returns a priority higher than most, to ensure that this System runs before all others
 func (m *MouseSystem) Priority() int { return MouseSystemPriority }
+
+func (m *MouseSystem) New(w *ecs.World) {
+	m.world = w
+
+	// First check if the CameraSystem is available
+	for _, system := range m.world.Systems() {
+		switch sys := system.(type) {
+		case *cameraSystem:
+			m.camera = sys
+		}
+	}
+
+	if m.camera == nil {
+		log.Println("ERROR: CameraSystem not found - have you added the `RenderSystem` before the `MouseSystem`?")
+		return
+	}
+}
 
 // Add adds a new entity to the MouseSystem.
 // * RenderComponent is only required if you're using the HUDShader on this Entity.
@@ -114,12 +137,12 @@ func (m *MouseSystem) Remove(basic ecs.BasicEntity) {
 
 func (m *MouseSystem) Update(dt float32) {
 	// Translate Mouse.X and Mouse.Y into "game coordinates"
-	m.mouseX = Mouse.X*cam.z*(gameWidth/windowWidth) + cam.x - (gameWidth/2)*cam.z
-	m.mouseY = Mouse.Y*cam.z*(gameHeight/windowHeight) + cam.y - (gameHeight/2)*cam.z // TODO maybe other width/height?
+	m.mouseX = engo.Mouse.X*m.camera.z*(engo.GameWidth()/engo.CanvasWidth()) + m.camera.x - (engo.GameWidth()/2)*m.camera.z
+	m.mouseY = engo.Mouse.Y*m.camera.z*(engo.GameHeight()/engo.CanvasHeight()) + m.camera.y - (engo.GameHeight()/2)*m.camera.z
 
 	// Rotate if needed
-	if cam.angle != 0 {
-		sin, cos := math.Sincos(cam.angle * math.Pi / 180)
+	if m.camera.angle != 0 {
+		sin, cos := math.Sincos(m.camera.angle * math.Pi / 180)
 		m.mouseX, m.mouseY = m.mouseX*cos+m.mouseY*sin, m.mouseY*cos-m.mouseX*sin
 	}
 
@@ -150,8 +173,8 @@ func (m *MouseSystem) Update(dt float32) {
 		if e.RenderComponent != nil {
 			// Hardcoded special case for the HUD | TODO: make generic instead of hardcoding
 			if e.RenderComponent.shader == HUDShader {
-				mx = Mouse.X
-				my = Mouse.Y
+				mx = engo.Mouse.X
+				my = engo.Mouse.Y
 			}
 		}
 
@@ -173,24 +196,24 @@ func (m *MouseSystem) Update(dt float32) {
 				e.MouseComponent.MouseY = my
 			}
 
-			switch Mouse.Action {
-			case PRESS:
-				switch Mouse.Button {
-				case MouseButtonLeft:
+			switch engo.Mouse.Action {
+			case engo.Press:
+				switch engo.Mouse.Button {
+				case engo.MouseButtonLeft:
 					e.MouseComponent.startedDragging = true
 					e.MouseComponent.Clicked = true
-				case MouseButtonRight:
+				case engo.MouseButtonRight:
 					e.MouseComponent.RightClicked = true
 				}
 				m.mouseDown = true
-			case RELEASE:
-				switch Mouse.Button {
-				case MouseButtonLeft:
+			case engo.Release:
+				switch engo.Mouse.Button {
+				case engo.MouseButtonLeft:
 					e.MouseComponent.Released = true
-				case MouseButtonRight:
+				case engo.MouseButtonRight:
 					e.MouseComponent.RightReleased = true
 				}
-			case MOVE:
+			case engo.Move:
 				if m.mouseDown && e.MouseComponent.startedDragging {
 					e.MouseComponent.Dragged = true
 				}
@@ -202,7 +225,7 @@ func (m *MouseSystem) Update(dt float32) {
 			e.MouseComponent.Hovered = false
 		}
 
-		if Mouse.Action == RELEASE {
+		if engo.Mouse.Action == engo.Release {
 			// dragging stops as soon as one of the currently pressed buttons
 			// is released
 			e.MouseComponent.Dragged = false
@@ -214,6 +237,6 @@ func (m *MouseSystem) Update(dt float32) {
 
 		// propagate the modifiers to the mouse component so that game
 		// implementers can take different decisions based on those
-		e.MouseComponent.Modifier = Mouse.Modifer
+		e.MouseComponent.Modifier = engo.Mouse.Modifier
 	}
 }

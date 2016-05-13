@@ -2,49 +2,56 @@ package main
 
 import (
 	"image/color"
+	"log"
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/common"
 )
 
 type DefaultScene struct{}
 
 type Guy struct {
 	ecs.BasicEntity
-	engo.MouseComponent
-	engo.RenderComponent
-	engo.SpaceComponent
+	common.MouseComponent
+	common.RenderComponent
+	common.SpaceComponent
 }
 
 func (*DefaultScene) Preload() {
-	// Load all files from the data directory. `false` means: do not do it recursively.
-	engo.Files.AddFromDir("data", false)
+	err := engo.Files.Load("icon.png")
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (*DefaultScene) Setup(w *ecs.World) {
-	engo.SetBackground(color.White)
+	common.SetBackground(color.White)
 
-	w.AddSystem(&engo.MouseSystem{})
-	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&common.RenderSystem{})
+	w.AddSystem(&common.MouseSystem{})
 	w.AddSystem(&ControlSystem{})
 
 	// These are not required, but allow you to move / rotate and still see that it works
-	w.AddSystem(&engo.MouseZoomer{-0.125})
-	w.AddSystem(engo.NewKeyboardScroller(500, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis))
-	w.AddSystem(&engo.MouseRotator{RotationSpeed: 0.125})
+	w.AddSystem(&common.MouseZoomer{-0.125})
+	w.AddSystem(common.NewKeyboardScroller(500, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis))
+	w.AddSystem(&common.MouseRotator{RotationSpeed: 0.125})
 
 	// Retrieve a texture
-	texture := engo.Files.Image("icon.png")
+	texture, err := common.PreloadedSpriteSingle("icon.png")
+	if err != nil {
+		log.Println(err)
+	}
 
 	// Create an entity
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	guy.RenderComponent = engo.RenderComponent{
+	guy.RenderComponent = common.RenderComponent{
 		Drawable: texture,
 		Scale:    engo.Point{8, 8},
 	}
-	guy.SpaceComponent = engo.SpaceComponent{
+	guy.SpaceComponent = common.SpaceComponent{
 		Position: engo.Point{200, 200},
 		Width:    texture.Width() * guy.RenderComponent.Scale.X,
 		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
@@ -55,9 +62,9 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	// Add our guy to appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *common.RenderSystem:
 			sys.Add(&guy.BasicEntity, &guy.RenderComponent, &guy.SpaceComponent)
-		case *engo.MouseSystem:
+		case *common.MouseSystem:
 			sys.Add(&guy.BasicEntity, &guy.MouseComponent, &guy.SpaceComponent, &guy.RenderComponent)
 		case *ControlSystem:
 			sys.Add(&guy.BasicEntity, &guy.MouseComponent)
@@ -69,14 +76,14 @@ func (*DefaultScene) Type() string { return "GameWorld" }
 
 type controlEntity struct {
 	*ecs.BasicEntity
-	*engo.MouseComponent
+	*common.MouseComponent
 }
 
 type ControlSystem struct {
 	entities []controlEntity
 }
 
-func (c *ControlSystem) Add(basic *ecs.BasicEntity, mouse *engo.MouseComponent) {
+func (c *ControlSystem) Add(basic *ecs.BasicEntity, mouse *common.MouseComponent) {
 	c.entities = append(c.entities, controlEntity{basic, mouse})
 }
 

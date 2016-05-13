@@ -5,13 +5,14 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/common"
 )
 
 var (
-	WalkAction  *engo.Animation
-	StopAction  *engo.Animation
-	SkillAction *engo.Animation
-	actions     []*engo.Animation
+	WalkAction  *common.Animation
+	StopAction  *common.Animation
+	SkillAction *common.Animation
+	actions     []*common.Animation
 
 	jumpButton   = "jump"
 	actionButton = "action"
@@ -21,40 +22,40 @@ type DefaultScene struct{}
 
 type Animation struct {
 	ecs.BasicEntity
-	engo.AnimationComponent
-	engo.RenderComponent
-	engo.SpaceComponent
+	common.AnimationComponent
+	common.RenderComponent
+	common.SpaceComponent
 }
 
 func (*DefaultScene) Preload() {
-	engo.Files.Add("assets/hero.png")
+	engo.Files.Load("hero.png")
 
-	StopAction = &engo.Animation{Name: "stop", Frames: []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}}
-	WalkAction = &engo.Animation{Name: "move", Frames: []int{11, 12, 13, 14, 15}, Loop: true}
-	SkillAction = &engo.Animation{Name: "skill", Frames: []int{44, 45, 46, 47, 48, 49, 50, 51, 52, 53}}
-	actions = []*engo.Animation{StopAction, WalkAction, SkillAction}
+	StopAction = &common.Animation{Name: "stop", Frames: []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}}
+	WalkAction = &common.Animation{Name: "move", Frames: []int{11, 12, 13, 14, 15}, Loop: true}
+	SkillAction = &common.Animation{Name: "skill", Frames: []int{44, 45, 46, 47, 48, 49, 50, 51, 52, 53}}
+	actions = []*common.Animation{StopAction, WalkAction, SkillAction}
 
 	engo.Input.RegisterButton(jumpButton, engo.Space, engo.X)
 	engo.Input.RegisterButton(actionButton, engo.D, engo.ArrowRight)
 }
 
 func (scene *DefaultScene) Setup(w *ecs.World) {
-	engo.SetBackground(color.White)
+	common.SetBackground(color.White)
 
-	w.AddSystem(&engo.RenderSystem{})
-	w.AddSystem(&engo.AnimationSystem{})
+	w.AddSystem(&common.RenderSystem{})
+	w.AddSystem(&common.AnimationSystem{})
 	w.AddSystem(&ControlSystem{})
 
-	spriteSheet := engo.NewSpritesheetFromFile("hero.png", 150, 150)
+	spriteSheet := common.NewSpritesheetFromFile("hero.png", 150, 150)
 
-	hero := scene.CreateEntity(&engo.Point{0, 0}, spriteSheet)
+	hero := scene.CreateEntity(engo.Point{0, 0}, spriteSheet)
 
 	// Add our hero to the appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *common.RenderSystem:
 			sys.Add(&hero.BasicEntity, &hero.RenderComponent, &hero.SpaceComponent)
-		case *engo.AnimationSystem:
+		case *common.AnimationSystem:
 			sys.Add(&hero.BasicEntity, &hero.AnimationComponent, &hero.RenderComponent)
 		case *ControlSystem:
 			sys.Add(&hero.BasicEntity, &hero.AnimationComponent)
@@ -64,19 +65,19 @@ func (scene *DefaultScene) Setup(w *ecs.World) {
 
 func (*DefaultScene) Type() string { return "GameWorld" }
 
-func (*DefaultScene) CreateEntity(point *engo.Point, spriteSheet *engo.Spritesheet) *Animation {
+func (*DefaultScene) CreateEntity(point engo.Point, spriteSheet *common.Spritesheet) *Animation {
 	entity := &Animation{BasicEntity: ecs.NewBasic()}
 
-	entity.SpaceComponent = engo.SpaceComponent{
-		Position: *point,
+	entity.SpaceComponent = common.SpaceComponent{
+		Position: point,
 		Width:    150,
 		Height:   150,
 	}
-	entity.RenderComponent = engo.RenderComponent{
+	entity.RenderComponent = common.RenderComponent{
 		Drawable: spriteSheet.Cell(0),
 		Scale:    engo.Point{3, 3},
 	}
-	entity.AnimationComponent = engo.NewAnimationComponent(spriteSheet.Drawables(), 0.1)
+	entity.AnimationComponent = common.NewAnimationComponent(spriteSheet.Drawables(), 0.1)
 
 	entity.AnimationComponent.AddAnimations(actions)
 	entity.AnimationComponent.AddDefaultAnimation(StopAction)
@@ -86,14 +87,14 @@ func (*DefaultScene) CreateEntity(point *engo.Point, spriteSheet *engo.Spriteshe
 
 type controlEntity struct {
 	*ecs.BasicEntity
-	*engo.AnimationComponent
+	*common.AnimationComponent
 }
 
 type ControlSystem struct {
 	entities []controlEntity
 }
 
-func (c *ControlSystem) Add(basic *ecs.BasicEntity, anim *engo.AnimationComponent) {
+func (c *ControlSystem) Add(basic *ecs.BasicEntity, anim *common.AnimationComponent) {
 	c.entities = append(c.entities, controlEntity{basic, anim})
 }
 

@@ -9,67 +9,74 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/common"
 )
 
 type PongGame struct{}
 
 var (
-	basicFont *engo.Font
+	basicFont *common.Font
 )
 
 type Ball struct {
 	ecs.BasicEntity
-	engo.RenderComponent
-	engo.SpaceComponent
-	engo.CollisionComponent
+	common.RenderComponent
+	common.SpaceComponent
+	common.CollisionComponent
 	SpeedComponent
 }
 
 type Score struct {
 	ecs.BasicEntity
-	engo.RenderComponent
-	engo.SpaceComponent
+	common.RenderComponent
+	common.SpaceComponent
 }
 
 type Paddle struct {
 	ecs.BasicEntity
 	ControlComponent
-	engo.CollisionComponent
-	engo.RenderComponent
-	engo.SpaceComponent
+	common.CollisionComponent
+	common.RenderComponent
+	common.SpaceComponent
 }
 
 func (pong *PongGame) Preload() {
-	engo.Files.AddFromDir("assets", true)
+	err := engo.Files.LoadMany("ball.png", "paddle.png", "Roboto-Regular.ttf")
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (pong *PongGame) Setup(w *ecs.World) {
-	engo.SetBackground(color.Black)
-	w.AddSystem(&engo.RenderSystem{})
-	w.AddSystem(&engo.CollisionSystem{})
+	common.SetBackground(color.Black)
+	w.AddSystem(&common.RenderSystem{})
+	w.AddSystem(&common.CollisionSystem{})
 	w.AddSystem(&SpeedSystem{})
 	w.AddSystem(&ControlSystem{})
 	w.AddSystem(&BallSystem{})
 	w.AddSystem(&ScoreSystem{})
 
-	basicFont = (&engo.Font{URL: "Roboto-Regular.ttf", Size: 32, FG: color.NRGBA{255, 255, 255, 255}})
+	basicFont = (&common.Font{URL: "Roboto-Regular.ttf", Size: 32, FG: color.NRGBA{255, 255, 255, 255}})
 	if err := basicFont.CreatePreloaded(); err != nil {
-		log.Fatalln("Could not load font:", err)
+		log.Println("Could not load font:", err)
 	}
 
-	ballTexture := engo.Files.Image("ball.png")
+	ballTexture, err := common.PreloadedSpriteSingle("ball.png")
+	if err != nil {
+		log.Println(err)
+	}
 
 	ball := Ball{BasicEntity: ecs.NewBasic()}
-	ball.RenderComponent = engo.RenderComponent{
+	ball.RenderComponent = common.RenderComponent{
 		Drawable: ballTexture,
 		Scale:    engo.Point{2, 2},
 	}
-	ball.SpaceComponent = engo.SpaceComponent{
+	ball.SpaceComponent = common.SpaceComponent{
 		Position: engo.Point{(engo.GameWidth() - ballTexture.Width()) / 2, (engo.GameHeight() - ballTexture.Height()) / 2},
 		Width:    ballTexture.Width() * ball.RenderComponent.Scale.X,
 		Height:   ballTexture.Height() * ball.RenderComponent.Scale.Y,
 	}
-	ball.CollisionComponent = engo.CollisionComponent{
+	ball.CollisionComponent = common.CollisionComponent{
 		Main:  true,
 		Solid: true,
 	}
@@ -78,9 +85,9 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	// Add our entity to the appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *common.RenderSystem:
 			sys.Add(&ball.BasicEntity, &ball.RenderComponent, &ball.SpaceComponent)
-		case *engo.CollisionSystem:
+		case *common.CollisionSystem:
 			sys.Add(&ball.BasicEntity, &ball.CollisionComponent, &ball.SpaceComponent)
 		case *SpeedSystem:
 			sys.Add(&ball.BasicEntity, &ball.SpeedComponent, &ball.SpaceComponent)
@@ -90,8 +97,8 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	}
 
 	score := Score{BasicEntity: ecs.NewBasic()}
-	score.RenderComponent = engo.RenderComponent{Drawable: basicFont.Render(" ")}
-	score.SpaceComponent = engo.SpaceComponent{
+	score.RenderComponent = common.RenderComponent{Drawable: basicFont.Render(" ")}
+	score.SpaceComponent = common.SpaceComponent{
 		Position: engo.Point{100, 100},
 		Width:    100,
 		Height:   100,
@@ -100,7 +107,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	// Add our entity to the appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *common.RenderSystem:
 			sys.Add(&score.BasicEntity, &score.RenderComponent, &score.SpaceComponent)
 		case *ScoreSystem:
 			sys.Add(&score.BasicEntity, &score.RenderComponent, &score.SpaceComponent)
@@ -108,11 +115,14 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	}
 
 	schemes := []string{"WASD", ""}
-	paddleTexture := engo.Files.Image("paddle.png")
+	paddleTexture, err := common.PreloadedSpriteSingle("paddle.png")
+	if err != nil {
+		log.Println(err)
+	}
 
 	for i := 0; i < 2; i++ {
 		paddle := Paddle{BasicEntity: ecs.NewBasic()}
-		paddle.RenderComponent = engo.RenderComponent{
+		paddle.RenderComponent = common.RenderComponent{
 			Drawable: paddleTexture,
 			Scale:    engo.Point{2, 2},
 		}
@@ -122,13 +132,13 @@ func (pong *PongGame) Setup(w *ecs.World) {
 			x = 800 - 16
 		}
 
-		paddle.SpaceComponent = engo.SpaceComponent{
+		paddle.SpaceComponent = common.SpaceComponent{
 			Position: engo.Point{x, (engo.GameHeight() - paddleTexture.Height()) / 2},
 			Width:    paddle.RenderComponent.Scale.X * paddleTexture.Width(),
 			Height:   paddle.RenderComponent.Scale.Y * paddleTexture.Height(),
 		}
 		paddle.ControlComponent = ControlComponent{schemes[i]}
-		paddle.CollisionComponent = engo.CollisionComponent{
+		paddle.CollisionComponent = common.CollisionComponent{
 			Main:  false,
 			Solid: true,
 		}
@@ -136,9 +146,9 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		// Add our entity to the appropriate systems
 		for _, system := range w.Systems() {
 			switch sys := system.(type) {
-			case *engo.RenderSystem:
+			case *common.RenderSystem:
 				sys.Add(&paddle.BasicEntity, &paddle.RenderComponent, &paddle.SpaceComponent)
-			case *engo.CollisionSystem:
+			case *common.CollisionSystem:
 				sys.Add(&paddle.BasicEntity, &paddle.CollisionComponent, &paddle.SpaceComponent)
 			case *ControlSystem:
 				sys.Add(&paddle.BasicEntity, &paddle.ControlComponent, &paddle.SpaceComponent)
@@ -160,7 +170,7 @@ type ControlComponent struct {
 type speedEntity struct {
 	*ecs.BasicEntity
 	*SpeedComponent
-	*engo.SpaceComponent
+	*common.SpaceComponent
 }
 
 type SpeedSystem struct {
@@ -171,7 +181,7 @@ func (s *SpeedSystem) New(*ecs.World) {
 	engo.Mailbox.Listen("CollisionMessage", func(message engo.Message) {
 		log.Println("collision")
 
-		collision, isCollision := message.(engo.CollisionMessage)
+		collision, isCollision := message.(common.CollisionMessage)
 		if isCollision {
 			// See if we also have that Entity, and if so, change the speed
 			for _, e := range s.entities {
@@ -183,7 +193,7 @@ func (s *SpeedSystem) New(*ecs.World) {
 	})
 }
 
-func (s *SpeedSystem) Add(basic *ecs.BasicEntity, speed *SpeedComponent, space *engo.SpaceComponent) {
+func (s *SpeedSystem) Add(basic *ecs.BasicEntity, speed *SpeedComponent, space *common.SpaceComponent) {
 	s.entities = append(s.entities, speedEntity{basic, speed, space})
 }
 
@@ -210,14 +220,14 @@ func (s *SpeedSystem) Update(dt float32) {
 type ballEntity struct {
 	*ecs.BasicEntity
 	*SpeedComponent
-	*engo.SpaceComponent
+	*common.SpaceComponent
 }
 
 type BallSystem struct {
 	entities []ballEntity
 }
 
-func (b *BallSystem) Add(basic *ecs.BasicEntity, speed *SpeedComponent, space *engo.SpaceComponent) {
+func (b *BallSystem) Add(basic *ecs.BasicEntity, speed *SpeedComponent, space *common.SpaceComponent) {
 	b.entities = append(b.entities, ballEntity{basic, speed, space})
 }
 
@@ -269,14 +279,14 @@ func (b *BallSystem) Update(dt float32) {
 type controlEntity struct {
 	*ecs.BasicEntity
 	*ControlComponent
-	*engo.SpaceComponent
+	*common.SpaceComponent
 }
 
 type ControlSystem struct {
 	entities []controlEntity
 }
 
-func (c *ControlSystem) Add(basic *ecs.BasicEntity, control *ControlComponent, space *engo.SpaceComponent) {
+func (c *ControlSystem) Add(basic *ecs.BasicEntity, control *ControlComponent, space *common.SpaceComponent) {
 	c.entities = append(c.entities, controlEntity{basic, control, space})
 }
 
@@ -310,8 +320,8 @@ func (c *ControlSystem) Update(dt float32) {
 
 type scoreEntity struct {
 	*ecs.BasicEntity
-	*engo.RenderComponent
-	*engo.SpaceComponent
+	*common.RenderComponent
+	*common.SpaceComponent
 }
 
 type ScoreSystem struct {
@@ -342,7 +352,7 @@ func (s *ScoreSystem) New(*ecs.World) {
 	})
 }
 
-func (c *ScoreSystem) Add(basic *ecs.BasicEntity, render *engo.RenderComponent, space *engo.SpaceComponent) {
+func (c *ScoreSystem) Add(basic *ecs.BasicEntity, render *common.RenderComponent, space *common.SpaceComponent) {
 	c.entities = append(c.entities, scoreEntity{basic, render, space})
 }
 

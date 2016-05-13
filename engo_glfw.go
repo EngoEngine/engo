@@ -1,13 +1,10 @@
-// +build !netgo,!android
+//+build !netgo,!android
 
 package engo
 
 import (
 	"image"
-	"image/draw"
-	_ "image/png"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
@@ -17,8 +14,6 @@ import (
 
 	"engo.io/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
-	"github.com/golang/freetype"
-	"github.com/golang/freetype/truetype"
 )
 
 var (
@@ -36,6 +31,7 @@ var (
 	headlessHeight            = 800
 	gameWidth, gameHeight     float32
 	windowWidth, windowHeight float32
+	canvasWidth, canvasHeight float32
 )
 
 // fatalErr calls log.Fatal with the given error if it is non-nil.
@@ -57,7 +53,21 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	cursorVResize = glfw.CreateStandardCursor(int(glfw.VResizeCursor))
 
 	monitor := glfw.GetPrimaryMonitor()
-	mode := monitor.GetVideoMode()
+
+	var mode *glfw.VidMode
+	if monitor != nil {
+		mode = monitor.GetVideoMode()
+	} else {
+		// Initialize default values if no monitor is found
+		mode = &glfw.VidMode{
+			Width:       1,
+			Height:      1,
+			RedBits:     8,
+			GreenBits:   8,
+			BlueBits:    8,
+			RefreshRate: 60,
+		}
+	}
 
 	gameWidth = float32(width)
 	gameHeight = float32(height)
@@ -70,12 +80,16 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		monitor = nil
 	}
 
+	if opts.HeadlessMode {
+		glfw.WindowHint(glfw.Visible, glfw.False)
+	}
+
 	glfw.WindowHint(glfw.ContextVersionMajor, 2)
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
 
 	glfw.WindowHint(glfw.Samples, msaa)
 
-	window, err = glfw.CreateWindow(width, height, title, nil, nil)
+	window, err = glfw.CreateWindow(width, height, title, monitor, nil)
 	fatalErr(err)
 
 	window.MakeContextCurrent()
@@ -84,13 +98,17 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		window.SetPos((mode.Width-width)/2, (mode.Height-height)/2)
 	}
 
+	SetVSync(opts.VSync)
+
+	// TODO: verify these for retina displays
 	width, height = window.GetFramebufferSize()
 	windowWidth, windowHeight = float32(width), float32(height)
 
-	SetVSync(vsync)
-
 	Gl = gl.NewContext()
-	Gl.Viewport(0, 0, width, height)
+
+	// TODO: verify these for retina displays
+	vp := Gl.GetViewport()
+	canvasWidth, windowWidth = float32(vp[2]), float32(vp[3])
 
 	window.SetFramebufferSizeCallback(func(window *glfw.Window, w, h int) {
 		width, height = window.GetFramebufferSize()
@@ -102,7 +120,7 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 	window.SetCursorPosCallback(func(window *glfw.Window, x, y float64) {
 		Mouse.X, Mouse.Y = float32(x), float32(y)
-		Mouse.Action = MOVE
+		Mouse.Action = Move
 	})
 
 	window.SetMouseButtonCallback(func(window *glfw.Window, b glfw.MouseButton, a glfw.Action, m glfw.ModifierKey) {
@@ -111,12 +129,12 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		// this is only valid because we use an internal structure that is
 		// 100% compatible with glfw3.h
 		Mouse.Button = MouseButton(b)
-		Mouse.Modifer = Modifier(m)
+		Mouse.Modifier = Modifier(m)
 
 		if a == glfw.Press {
-			Mouse.Action = PRESS
+			Mouse.Action = Press
 		} else {
-			Mouse.Action = RELEASE
+			Mouse.Action = Release
 		}
 	})
 
@@ -145,7 +163,11 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		windowWidth = float32(widthInt)
 		windowHeight = float32(heightInt)
 
-		if !scaleOnResize {
+		// TODO: verify these for retina displays & verify if needed here
+		vp := Gl.GetViewport()
+		canvasWidth, canvasHeight = float32(vp[2]), float32(vp[3])
+
+		if !opts.ScaleOnResize {
 			gameWidth, gameHeight = float32(widthInt), float32(heightInt)
 		}
 
@@ -164,7 +186,7 @@ func DestroyWindow() {
 }
 
 func SetTitle(title string) {
-	if headless {
+	if opts.HeadlessMode {
 		log.Println("Title set to:", title)
 	} else {
 		window.SetTitle(title)
@@ -174,7 +196,7 @@ func SetTitle(title string) {
 // RunIteration runs one iteration / frame
 func RunIteration() {
 	// First check for new keypresses
-	if !headless {
+	if !opts.HeadlessMode {
 		Input.update()
 		glfw.PollEvents()
 	}
@@ -183,10 +205,10 @@ func RunIteration() {
 	currentWorld.Update(Time.Delta())
 
 	// Lastly, forget keypresses and swap buffers
-	if !headless {
+	if !opts.HeadlessMode {
 		// reset values to avoid catching the same "signal" twice
 		Mouse.ScrollX, Mouse.ScrollY = 0, 0
-		Mouse.Action = NEUTRAL
+		Mouse.Action = Neutral
 
 		window.SwapBuffers()
 	}
@@ -198,10 +220,10 @@ func RunIteration() {
 // It is only here for benchmarking in combination with OpenHeadlessNoRun
 func RunPreparation(defaultScene Scene) {
 	Time = NewClock()
-	Files = NewLoader()
 
 	// Default WorldBounds values
-	WorldBounds.Max = Point{GameWidth(), GameHeight()}
+	//WorldBounds.Max = Point{GameWidth(), GameHeight()}
+	// TODO: move this to appropriate location
 
 	SetScene(defaultScene, false)
 }
@@ -216,7 +238,7 @@ func runLoop(defaultScene Scene, headless bool) {
 	}()
 
 	RunPreparation(defaultScene)
-	ticker := time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
+	ticker := time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
 
 Outer:
 	for {
@@ -231,7 +253,7 @@ Outer:
 			}
 		case <-resetLoopTicker:
 			ticker.Stop()
-			ticker = time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
+			ticker = time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
 		}
 	}
 	ticker.Stop()
@@ -261,6 +283,14 @@ func WindowHeight() float32 {
 	return windowHeight
 }
 
+func CanvasWidth() float32 {
+	return canvasWidth
+}
+
+func CanvasHeight() float32 {
+	return canvasHeight
+}
+
 // SetCursor sets the pointer of the mouse to the defined standard cursor
 func SetCursor(c Cursor) {
 	var cur *glfw.Cursor
@@ -284,8 +314,8 @@ func SetCursor(c Cursor) {
 }
 
 func SetVSync(enabled bool) {
-	vsync = enabled
-	if vsync {
+	opts.VSync = enabled
+	if opts.VSync {
 		glfw.SwapInterval(1)
 	} else {
 		glfw.SwapInterval(0)
@@ -419,101 +449,7 @@ func (i *ImageRGBA) Height() int {
 	return i.data.Rect.Max.Y
 }
 
-func loadImage(r Resource) (Image, error) {
-	file, err := os.Open(r.url)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	img, _, err := image.Decode(file)
-	if err != nil {
-		return nil, err
-	}
-
-	b := img.Bounds()
-	newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
-	draw.Draw(newm, newm.Bounds(), img, b.Min, draw.Src)
-
-	return &ImageObject{newm}, nil
-}
-
-func loadJSON(r Resource) (string, error) {
-	file, err := ioutil.ReadFile(r.url)
-	if err != nil {
-		return "", err
-	}
-	return string(file), nil
-}
-
-func loadFont(r Resource) (*truetype.Font, error) {
-	ttfBytes, err := ioutil.ReadFile(r.url)
-	if err != nil {
-		return nil, err
-	}
-
-	return freetype.ParseFont(ttfBytes)
-}
-
-type Assets struct {
-	queue  []string
-	cache  map[string]Image
-	loads  int
-	errors int
-}
-
-func NewAssets() *Assets {
-	return &Assets{make([]string, 0), make(map[string]Image), 0, 0}
-}
-
-func (a *Assets) Image(path string) {
-	a.queue = append(a.queue, path)
-}
-
-func (a *Assets) Get(path string) Image {
-	return a.cache[path]
-}
-
-func (a *Assets) Load(onFinish func()) {
-	if len(a.queue) == 0 {
-		onFinish()
-	} else {
-		for _, path := range a.queue {
-			img := LoadImage(path)
-			a.cache[path] = img
-		}
-	}
-}
-
-func LoadImage(data interface{}) Image {
-	var m image.Image
-
-	switch data := data.(type) {
-	default:
-		log.Fatal("NewTexture needs a string or io.Reader")
-	case string:
-		file, err := os.Open(data)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer file.Close()
-		img, _, err := image.Decode(file)
-		if err != nil {
-			log.Fatal(err)
-		}
-		m = img
-	case io.Reader:
-		img, _, err := image.Decode(data)
-		if err != nil {
-			log.Fatal(err)
-		}
-		m = img
-	case image.Image:
-		m = data
-	}
-
-	b := m.Bounds()
-	newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
-	draw.Draw(newm, newm.Bounds(), m, b.Min, draw.Src)
-
-	return &ImageObject{newm}
+// openFile is the desktop-specific way of opening a file
+func openFile(url string) (io.ReadCloser, error) {
+	return os.Open(url)
 }

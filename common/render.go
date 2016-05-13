@@ -1,4 +1,4 @@
-package engo
+package common
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"sort"
 
 	"engo.io/ecs"
+	"engo.io/engo"
 	"engo.io/gl"
 )
 
@@ -30,17 +31,17 @@ type Drawable interface {
 type TextureRepeating uint8
 
 const (
-	CLAMP_TO_EDGE TextureRepeating = iota
-	CLAMP_TO_BORDER
-	REPEAT
-	MIRRORED_REPEAT
+	ClampToEdge TextureRepeating = iota
+	ClampToBorder
+	Repeat
+	MirroredRepeat
 )
 
 type RenderComponent struct {
 	// Hidden is used to prevent drawing by OpenGL
 	Hidden bool
-	// Scale is the scale at which to render, in the X and Y axis. Not defining Scale, will default to Point{1, 1}
-	Scale Point
+	// Scale is the scale at which to render, in the X and Y axis. Not defining Scale, will default to engo.Point{1, 1}
+	Scale engo.Point
 	// Color defines how much of the color-components of the texture get used
 	Color color.Color
 	// Drawable refers to the Texture that should be drawn
@@ -57,12 +58,12 @@ type RenderComponent struct {
 
 func (r *RenderComponent) SetShader(s Shader) {
 	r.shader = s
-	Mailbox.Dispatch(&renderChangeMessage{})
+	engo.Mailbox.Dispatch(&renderChangeMessage{})
 }
 
 func (r *RenderComponent) SetZIndex(index float32) {
 	r.zIndex = index
-	Mailbox.Dispatch(&renderChangeMessage{})
+	engo.Mailbox.Dispatch(&renderChangeMessage{})
 }
 
 type renderEntity struct {
@@ -104,13 +105,14 @@ func (*RenderSystem) Priority() int { return RenderSystemPriority }
 func (rs *RenderSystem) New(w *ecs.World) {
 	rs.world = w
 
-	if !headless {
-		initShaders()
+	w.AddSystem(&cameraSystem{})
+
+	if !engo.Headless() {
+		initShaders(w)
+		engo.Gl.Enable(engo.Gl.MULTISAMPLE)
 	}
 
-	Gl.Enable(Gl.MULTISAMPLE)
-
-	Mailbox.Listen("renderChangeMessage", func(Message) {
+	engo.Mailbox.Listen("renderChangeMessage", func(engo.Message) {
 		rs.sortingNeeded = true
 	})
 }
@@ -135,7 +137,7 @@ func (rs *RenderSystem) Remove(basic ecs.BasicEntity) {
 }
 
 func (rs *RenderSystem) Update(dt float32) {
-	if headless {
+	if engo.Headless() {
 		return
 	}
 
@@ -144,7 +146,7 @@ func (rs *RenderSystem) Update(dt float32) {
 		rs.sortingNeeded = false
 	}
 
-	Gl.Clear(Gl.COLOR_BUFFER_BIT)
+	engo.Gl.Clear(engo.Gl.COLOR_BUFFER_BIT)
 
 	// TODO: it's linear for now, but that might very well be a bad idea
 	for _, e := range rs.entities {
@@ -169,7 +171,7 @@ func (rs *RenderSystem) Update(dt float32) {
 
 		// Setting default scale to 1
 		if e.RenderComponent.Scale.X == 0 && e.RenderComponent.Scale.Y == 0 {
-			e.RenderComponent.Scale = Point{1, 1}
+			e.RenderComponent.Scale = engo.Point{1, 1}
 		}
 
 		// Setting default to white
@@ -183,5 +185,13 @@ func (rs *RenderSystem) Update(dt float32) {
 	if rs.currentShader != nil {
 		rs.currentShader.Post()
 		rs.currentShader = nil
+	}
+}
+
+func SetBackground(c color.Color) {
+	if !engo.Headless() {
+		r, g, b, a := c.RGBA()
+
+		engo.Gl.ClearColor(float32(r)/0xffff, float32(g)/0xffff, float32(b)/0xffff, float32(a)/0xffff)
 	}
 }

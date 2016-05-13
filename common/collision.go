@@ -1,18 +1,15 @@
-package engo
+package common
 
 import (
 	"log"
 
 	"engo.io/ecs"
+	"engo.io/engo"
 	"github.com/luxengine/math"
 )
 
-type AABB struct {
-	Min, Max Point
-}
-
 type SpaceComponent struct {
-	Position Point
+	Position engo.Point
 	Width    float32
 	Height   float32
 	Rotation float32 // angle in degrees for the rotation to apply clockwise
@@ -20,7 +17,7 @@ type SpaceComponent struct {
 
 // Center positions the space component according to its center instead of its
 // top-left point (this avoids doing the same math each time in your systems)
-func (sc *SpaceComponent) Center(p Point) {
+func (sc *SpaceComponent) Center(p engo.Point) {
 	xDelta := sc.Width / 2
 	yDelta := sc.Height / 2
 	// update position according to point being used as our center
@@ -29,14 +26,14 @@ func (sc *SpaceComponent) Center(p Point) {
 }
 
 // AABB returns the minimum and maximum point for the given SpaceComponent. It hereby takes into account the
-// rotation of the Component - it may very well be that the Minimum as given by AABB, is smaller than the Position
+// rotation of the Component - it may very well be that the Minimum as given by engo.AABB, is smaller than the Position
 // of the object (i.e. when rotated). As this method takes into account the rotation, it should be used only when
 // required.
-func (sc SpaceComponent) AABB() AABB {
+func (sc SpaceComponent) AABB() engo.AABB {
 	if sc.Rotation == 0 {
-		return AABB{
+		return engo.AABB{
 			Min: sc.Position,
-			Max: Point{sc.Position.X + sc.Width, sc.Position.Y + sc.Height},
+			Max: engo.Point{sc.Position.X + sc.Width, sc.Position.Y + sc.Height},
 		}
 	}
 
@@ -66,12 +63,12 @@ func (sc SpaceComponent) AABB() AABB {
 		Y_MAX = ymin
 	}
 
-	return AABB{Point{X_MIN, Y_MIN}, Point{X_MAX, Y_MAX}}
+	return engo.AABB{engo.Point{X_MIN, Y_MIN}, engo.Point{X_MAX, Y_MAX}}
 }
 
 type CollisionComponent struct {
 	Solid, Main bool
-	Extra       Point
+	Extra       engo.Point
 	Collides    bool // Collides is true if the component is colliding with something during this pass
 }
 
@@ -116,7 +113,7 @@ func (cs *CollisionSystem) Update(dt float32) {
 		}
 
 		entityAABB := e1.SpaceComponent.AABB()
-		offset := Point{e1.CollisionComponent.Extra.X / 2, e1.CollisionComponent.Extra.Y / 2}
+		offset := engo.Point{e1.CollisionComponent.Extra.X / 2, e1.CollisionComponent.Extra.Y / 2}
 		entityAABB.Min.X -= offset.X
 		entityAABB.Min.Y -= offset.Y
 		entityAABB.Max.X += offset.X
@@ -130,7 +127,7 @@ func (cs *CollisionSystem) Update(dt float32) {
 			}
 
 			otherAABB := e2.SpaceComponent.AABB()
-			offset = Point{e2.CollisionComponent.Extra.X / 2, e2.CollisionComponent.Extra.Y / 2}
+			offset = engo.Point{e2.CollisionComponent.Extra.X / 2, e2.CollisionComponent.Extra.Y / 2}
 			otherAABB.Min.X -= offset.X
 			otherAABB.Min.Y -= offset.Y
 			otherAABB.Max.X += offset.X
@@ -144,7 +141,7 @@ func (cs *CollisionSystem) Update(dt float32) {
 				}
 
 				collided = true
-				Mailbox.Dispatch(CollisionMessage{Entity: e1, To: e2})
+				engo.Mailbox.Dispatch(CollisionMessage{Entity: e1, To: e2})
 			}
 		}
 
@@ -152,7 +149,7 @@ func (cs *CollisionSystem) Update(dt float32) {
 	}
 }
 
-func IsIntersecting(rect1 AABB, rect2 AABB) bool {
+func IsIntersecting(rect1 engo.AABB, rect2 engo.AABB) bool {
 	if rect1.Max.X > rect2.Min.X && rect1.Min.X < rect2.Max.X && rect1.Max.Y > rect2.Min.Y && rect1.Min.Y < rect2.Max.Y {
 		return true
 	}
@@ -160,8 +157,8 @@ func IsIntersecting(rect1 AABB, rect2 AABB) bool {
 	return false
 }
 
-func MinimumTranslation(rect1 AABB, rect2 AABB) Point {
-	mtd := Point{}
+func MinimumTranslation(rect1 engo.AABB, rect2 engo.AABB) engo.Point {
+	mtd := engo.Point{}
 
 	left := rect2.Min.X - rect1.Max.X
 	right := rect2.Max.X - rect1.Min.X
@@ -171,13 +168,13 @@ func MinimumTranslation(rect1 AABB, rect2 AABB) Point {
 	if left > 0 || right < 0 {
 		log.Println("Box aint intercepting")
 		return mtd
-		//box doesnt intercept
+		//box doesn't intercept
 	}
 
 	if top > 0 || bottom < 0 {
 		log.Println("Box aint intercepting")
 		return mtd
-		//box doesnt intercept
+		//box doesn't intercept
 	}
 	if math.Abs(left) < right {
 		mtd.X = left

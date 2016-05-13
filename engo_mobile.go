@@ -3,19 +3,13 @@
 package engo
 
 import (
-	"engo.io/gl"
-	"fmt"
-	"image"
-	"image/draw"
-	_ "image/png"
-	"io/ioutil"
+	"io"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 
-	"github.com/golang/freetype"
-	"github.com/golang/freetype/truetype"
+	"engo.io/gl"
 	"golang.org/x/mobile/app"
 	"golang.org/x/mobile/asset"
 	"golang.org/x/mobile/event/lifecycle"
@@ -33,6 +27,7 @@ var (
 
 	gameWidth, gameHeight     float32
 	windowWidth, windowHeight float32
+	canvasWidth, canvasHeight float32
 
 	msaaPreference int
 )
@@ -41,50 +36,6 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	gameWidth = float32(width)
 	gameHeight = float32(height)
 	msaaPreference = msaa
-}
-
-func loadImage(r Resource) (Image, error) {
-	if strings.HasPrefix(r.url, "assets/") {
-		r.url = r.url[7:]
-	}
-
-	file, err := asset.Open(r.url)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	img, _, err := image.Decode(file)
-	if err != nil {
-		return nil, err
-	}
-
-	b := img.Bounds()
-	newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
-	draw.Draw(newm, newm.Bounds(), img, b.Min, draw.Src)
-
-	return &ImageObject{newm}, nil
-}
-
-func loadJSON(r Resource) (string, error) {
-	return "", fmt.Errorf("loadJSON not yet impplemented")
-}
-
-func loadFont(r Resource) (*truetype.Font, error) {
-	if strings.HasPrefix(r.url, "assets/") {
-		r.url = r.url[7:]
-	}
-
-	file, err := asset.Open(r.url)
-	if err != nil {
-		return nil, err
-	}
-
-	ttfBytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		return nil, err
-	}
-
-	return freetype.ParseFont(ttfBytes)
 }
 
 func WindowSize() (w, h int) {
@@ -110,6 +61,14 @@ func WindowWidth() float32 {
 
 func WindowHeight() float32 {
 	return windowHeight
+}
+
+func CanvasWidth() float32 {
+	return canvasWidth
+}
+
+func CanvasHeight() float32 {
+	return canvasHeight
 }
 
 func DestroyWindow() { /* nothing to do here? */ }
@@ -150,6 +109,8 @@ func runLoop(defaultScene Scene, headless bool) {
 				sz = e
 				windowWidth = float32(sz.WidthPx)
 				windowHeight = float32(sz.HeightPx)
+				canvasWidth = float32(sz.WidthPx)
+				canvasHeight = float32(sz.HeightPx)
 				Gl.Viewport(0, 0, sz.WidthPx, sz.HeightPx)
 			case paint.Event:
 				if e.External {
@@ -167,8 +128,8 @@ func runLoop(defaultScene Scene, headless bool) {
 				fps.Draw(sz)
 
 				// Reset mouse if needed
-				if Mouse.Action == RELEASE {
-					Mouse.Action = NEUTRAL
+				if Mouse.Action == Release {
+					Mouse.Action = Neutral
 				}
 
 				a.Publish() // same as SwapBuffers
@@ -181,11 +142,11 @@ func runLoop(defaultScene Scene, headless bool) {
 				Mouse.Y = e.Y
 				switch e.Type {
 				case touch.TypeBegin:
-					Mouse.Action = PRESS
+					Mouse.Action = Press
 				case touch.TypeMove:
-					Mouse.Action = MOVE
+					Mouse.Action = Move
 				case touch.TypeEnd:
-					Mouse.Action = RELEASE
+					Mouse.Action = Release
 				}
 			}
 		}
@@ -196,17 +157,12 @@ func runLoop(defaultScene Scene, headless bool) {
 // It is only here for benchmarking in combination with OpenHeadlessNoRun
 func RunPreparation(defaultScene Scene) {
 	Time = NewClock()
-	Files = NewLoader()
-
-	// Default WorldBounds values
-	WorldBounds.Max = Point{GameWidth(), GameHeight()}
-
 	SetScene(defaultScene, false)
 }
 
 // RunIteration runs one iteration / frame
 func RunIteration() {
-	if !headless {
+	if !opts.HeadlessMode {
 		Input.update()
 	}
 
@@ -217,6 +173,19 @@ func RunIteration() {
 }
 
 // SetCursor changes the cursor - not yet implemented
-func SetCursor(c Cursor) {
+func SetCursor(Cursor) {
 	notImplemented("SetCursor")
+}
+
+// SetTitle has no effect on mobile
+func SetTitle(title string) {}
+
+// openFile is the mobile-specific way of opening a file
+func openFile(url string) (io.ReadCloser, error) {
+	usedUrl := url
+	if strings.HasPrefix(url, "assets/") {
+		usedUrl = usedUrl[7:]
+	}
+
+	return asset.Open(usedUrl)
 }

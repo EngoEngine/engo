@@ -1,3 +1,5 @@
+//+build ignore
+
 package main
 
 import (
@@ -5,6 +7,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/common"
 )
 
 var World *GameWorld
@@ -21,9 +24,9 @@ func (game *GameWorld) Preload() {
 }
 
 func (game *GameWorld) Setup() {
-	engo.SetBackground(0x2d3739)
+	common.SetBackground(0x2d3739)
 
-	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&common.RenderSystem{})
 
 	gameMap := ecs.NewEntity("RenderSystem")
 	tilemap := engo.NewTilemap(
@@ -35,7 +38,7 @@ func (game *GameWorld) Setup() {
 		engo.Files.Image("sheet"), 16)
 
 	mapRender := engo.NewRenderComponent(tilemap, engo.Point{1, 1}, "map")
-	mapSpace := &engo.SpaceComponent{engo.Point{100, 100}, 0, 0}
+	mapSpace := &common.SpaceComponent{engo.Point{100, 100}, 0, 0}
 	gameMap.AddComponent(mapRender)
 	gameMap.AddComponent(mapSpace)
 

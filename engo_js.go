@@ -4,19 +4,15 @@ package engo
 
 import (
 	"bytes"
-	"compress/gzip"
-	"encoding/base64"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"math"
-	"math/rand"
+	"net/http"
 	"strconv"
 	"time"
 
 	"engo.io/gl"
-	"github.com/golang/freetype"
-	"github.com/golang/freetype/truetype"
 	"github.com/gopherjs/gopherjs/js"
 	"honnef.co/go/js/dom"
 	"honnef.co/go/js/xhr"
@@ -26,6 +22,7 @@ var (
 	Gl                        *gl.Context
 	gameWidth, gameHeight     float32
 	windowWidth, windowHeight float32
+	devicePixelRatio          float64
 )
 
 func init() {
@@ -36,14 +33,14 @@ func init() {
 var document = dom.GetWindow().Document().(dom.HTMLDocument)
 
 func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
-
 	canvas := document.CreateElement("canvas").(*dom.HTMLCanvasElement)
 
-	devicePixelRatio := js.Global.Get("devicePixelRatio").Float()
+	devicePixelRatio = js.Global.Get("devicePixelRatio").Float()
 	canvas.Width = int(float64(width)*devicePixelRatio + 0.5)   // Nearest non-negative int.
 	canvas.Height = int(float64(height)*devicePixelRatio + 0.5) // Nearest non-negative int.
 	canvas.Style().SetProperty("width", fmt.Sprintf("%vpx", width), "")
 	canvas.Style().SetProperty("height", fmt.Sprintf("%vpx", height), "")
+	log.Println("devicePixelRatio", devicePixelRatio)
 
 	if document.Body() == nil {
 		js.Global.Get("document").Set("body", js.Global.Get("document").Call("createElement", "body"))
@@ -62,15 +59,14 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		log.Println("Could not create context:", err)
 		return
 	}
-	Gl.Viewport(0, 0, width, height)
-
+	fmt.Println("Gl.Viewport(0, 0,", width, ",", height, ")")
 	Gl.GetExtension("OES_texture_float")
 
 	// DEBUG: Add framebuffer information div.
 	if false {
 		//canvas.Height -= 30
 		text := document.CreateElement("div")
-		textContent := fmt.Sprintf("%v %v (%v) @%v", dom.GetWindow().InnerWidth(), canvas.Width, float64(width)*devicePixelRatio, devicePixelRatio)
+		textContent := fmt.Sprintf("%v %v (%v %v %v) @%v", dom.GetWindow().InnerWidth(), canvas.Width, float64(width)*devicePixelRatio, GameWidth(), CanvasWidth(), devicePixelRatio)
 		text.SetTextContent(textContent)
 		document.Body().AppendChild(text)
 	}
@@ -95,8 +91,26 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		Input.keys.Set(Key(ke.KeyCode), false)
 	})
 
-	Files = NewLoader()
-	WorldBounds.Max = Point{GameWidth(), GameHeight()}
+	w.AddEventListener("mousemove", false, func(ev dom.Event) {
+		mm := ev.(*dom.MouseEvent)
+		Mouse.X = float32(float64(mm.ClientX) * devicePixelRatio)
+		Mouse.Y = float32(float64(mm.ClientY) * devicePixelRatio)
+		//Mouse.Action = MOVE
+	})
+
+	w.AddEventListener("mousedown", false, func(ev dom.Event) {
+		mm := ev.(*dom.MouseEvent)
+		Mouse.X = float32(float64(mm.ClientX) * devicePixelRatio)
+		Mouse.Y = float32(float64(mm.ClientY) * devicePixelRatio)
+		Mouse.Action = Press
+	})
+
+	w.AddEventListener("mouseup", false, func(ev dom.Event) {
+		mm := ev.(*dom.MouseEvent)
+		Mouse.X = float32(float64(mm.ClientX) * devicePixelRatio)
+		Mouse.Y = float32(float64(mm.ClientY) * devicePixelRatio)
+		Mouse.Action = Release
+	})
 }
 
 func DestroyWindow() {}
@@ -110,7 +124,12 @@ func GameHeight() float32 {
 }
 
 func CursorPos() (x, y float64) {
-	return 0.0, 0.0
+	return float64(Mouse.X), float64(Mouse.Y)
+}
+
+// SetTitle changes the title of the page to the given string
+func SetTitle(title string) {
+	document.SetTitle(title)
 }
 
 func WindowSize() (w, h int) {
@@ -125,6 +144,22 @@ func WindowWidth() float32 {
 
 func WindowHeight() float32 {
 	return float32(dom.GetWindow().InnerHeight())
+}
+
+func CanvasWidth() float32 {
+	flt, err := strconv.ParseFloat(document.Body().GetElementsByTagName("canvas")[0].GetAttribute("width"), 32)
+	if err != nil {
+		log.Println("[ERROR] [CanvasWidth]:", err)
+	}
+	return float32(flt)
+}
+
+func CanvasHeight() float32 {
+	flt, err := strconv.ParseFloat(document.Body().GetElementsByTagName("canvas")[0].GetAttribute("height"), 32)
+	if err != nil {
+		log.Println("[ERROR] [CanvasHeight]:", err)
+	}
+	return float32(flt)
 }
 
 func toPx(n int) string {
@@ -164,8 +199,8 @@ func rafPolyfill() {
 }
 
 func RunIteration() {
-	Input.update()
 	currentWorld.Update(Time.Delta())
+	Input.update()
 	Time.Tick()
 	// TODO: this may not work, and sky-rocket the FPS
 	//  requestAnimationFrame(func(dt float32) {
@@ -199,7 +234,7 @@ func RunPreparation() {
 func runLoop(defaultScene Scene, headless bool) {
 	SetScene(defaultScene, false)
 	RunPreparation()
-	ticker := time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
+	ticker := time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
 Outer:
 	for {
 		select {
@@ -210,106 +245,45 @@ Outer:
 			RunIteration()
 		case <-resetLoopTicker:
 			ticker.Stop()
-			ticker = time.NewTicker(time.Duration(int(time.Second) / fpsLimit))
+			ticker = time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
 		}
 	}
 	ticker.Stop()
 }
 
-func loadImage(r Resource) (Image, error) {
-	ch := make(chan error, 1)
+func openFile(url string) (io.ReadCloser, error) {
+	req := xhr.NewRequest("GET", url)
 
-	img := js.Global.Get("Image").New()
-	img.Call("addEventListener", "load", func(*js.Object) {
-		go func() { ch <- nil }()
-	}, false)
-	img.Call("addEventListener", "error", func(o *js.Object) {
-		go func() { ch <- &js.Error{Object: o} }()
-	}, false)
-	img.Set("src", r.url+"?"+strconv.FormatInt(rand.Int63(), 10))
+	req.ResponseType = xhr.ArrayBuffer
 
-	err := <-ch
-	if err != nil {
+	if err := req.Send(""); err != nil {
 		return nil, err
 	}
 
-	return NewHtmlImageObject(img), nil
-}
-
-func loadJSON(r Resource) (string, error) {
-	req := xhr.NewRequest("GET", r.url)
-	err := req.Send("")
-	if err != nil {
-		return "", err
+	if req.Status != http.StatusOK {
+		return nil, fmt.Errorf("unable to open resource (%s), expected HTTP status %d but got %d", url, http.StatusOK, req.Status)
 	}
-	return req.Response.String(), nil
-	// ch := make(chan error, 1)
 
-	// req := js.Global.Get("XMLHttpRequest").New()
-	// req.Call("open", "GET", r.url, true)
-	// req.Call("addEventListener", "load", func(*js.Object) {
-	// 	go func() { ch <- nil }()
-	// }, false)
-	// req.Call("addEventListener", "error", func(o *js.Object) {
-	// 	go func() { ch <- &js.Error{Object: o} }()
-	// }, false)
-	// req.Call("send", nil)
+	buffer := bytes.NewBuffer(js.Global.Get("Uint8Array").New(req.Response).Interface().([]byte))
 
-	// err := <-ch
-	// if err != nil {
-	// 	return "", err
-	// }
-
-	// return req.Get("responseText").Str(), nil
+	return noCloseReadCloser{buffer}, nil
 }
 
-func loadFont(r Resource) (*truetype.Font, error) {
-	req := xhr.NewRequest("GET", r.url+"_js")
-	err := req.Send("")
-	if err != nil {
-		return &truetype.Font{}, err
-	}
-	fontDataEncoded := bytes.NewBuffer([]byte(req.Response.String()))
-	fontDataCompressed := base64.NewDecoder(base64.StdEncoding, fontDataEncoded)
-	fontDataTtf, err := gzip.NewReader(fontDataCompressed)
-	if err != nil {
-		return nil, err
-	}
-	var ttfBytes []byte
-	ttfBytes, err = ioutil.ReadAll(fontDataTtf)
-	if err != nil {
-		return nil, err
-	}
-	return freetype.ParseFont(ttfBytes)
+type noCloseReadCloser struct {
+	r io.Reader
 }
 
-// HtmlImageObject is a webgl-specific implementation of `Drawable`, designed to be used with native `HTML` elements,
-// such as `<img>`
-type HtmlImageObject struct {
-	data *js.Object
+func (n noCloseReadCloser) Close() error { return nil }
+func (n noCloseReadCloser) Read(p []byte) (int, error) {
+	return n.r.Read(p)
 }
 
-// NewHtmlImageObject creates a new HtmlImageObject for the given javascript object
-func NewHtmlImageObject(img *js.Object) *HtmlImageObject {
-	return &HtmlImageObject{data: img}
-}
-
-// Data returns the entire javascript object
-func (i *HtmlImageObject) Data() interface{} {
-	return i.data
-}
-
-// Width returns the value of the "width" variable of the javascript object
-func (i *HtmlImageObject) Width() int {
-	return i.data.Get("width").Int()
-}
-
-// Height returns the value of the "height" variable of the javascript object
-func (i *HtmlImageObject) Height() int {
-	return i.data.Get("height").Int()
-}
-
-// SetCursor changes the cursor - not yet implemented
+// SetCursor changes the cursor
 func SetCursor(c Cursor) {
-	notImplemented("SetCursor")
+	switch c {
+	case CursorNone:
+		document.Body().Style().Set("cursor", "default")
+	case CursorHand:
+		document.Body().Style().Set("cursor", "hand")
+	}
 }

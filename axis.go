@@ -1,6 +1,6 @@
 package engo
 
-// Axis is an input which is a spectrum of values. An example of this is the horizontal movement in a game, or how far a joystick is pressed.
+// An Axis is an input which is a spectrum of values. An example of this is the horizontal movement in a game, or how far a joystick is pressed.
 type Axis struct {
 	Name  string
 	Pairs []AxisPair
@@ -18,12 +18,12 @@ func (a Axis) Value() float32 {
 	return AxisNeutral
 }
 
-// AxisPair is a set of Min/Max values which could possible be used by an Axis.
+// An AxisPair is a set of Min/Max values which could possible be used by an Axis.
 type AxisPair interface {
 	Value() float32
 }
 
-// AxisKeyPair is a set of Min/Max values used for detecting whether or not a key has been pressed.
+// An AxisKeyPair is a set of Min/Max values used for detecting whether or not a key has been pressed.
 type AxisKeyPair struct {
 	Min Key
 	Max Key

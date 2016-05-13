@@ -1,27 +1,28 @@
-package engo
+package common
 
 import (
 	"testing"
 
 	"engo.io/ecs"
+	"engo.io/engo"
 	"github.com/stretchr/testify/assert"
 )
 
+var cam *cameraSystem
+
 func initialize() {
-	Mailbox = &MessageManager{}
-	WorldBounds = AABB{Point{0, 0}, Point{300, 300}}
-	currentWorld = &ecs.World{}
+	engo.Mailbox = &engo.MessageManager{}
+	CameraBounds = engo.AABB{engo.Point{0, 0}, engo.Point{300, 300}}
+	w := &ecs.World{}
 
 	cam = &cameraSystem{}
-	cam.New(currentWorld)
+	cam.New(w)
 }
 
 type CameraTestScene struct{}
 
 func (*CameraTestScene) Preload()         {}
 func (*CameraTestScene) Setup(*ecs.World) {}
-func (*CameraTestScene) Show()            {}
-func (*CameraTestScene) Hide()            {}
 func (*CameraTestScene) Type() string     { return "CameraTestScene" }
 
 func TestCameraMoveX(t *testing.T) {
@@ -48,10 +49,10 @@ func TestCameraMoveX(t *testing.T) {
 	assert.Equal(t, cam.X(), currentX, "Moving by -10 units, should have moved the camera back by 10 units")
 
 	cam.moveX(305)
-	assert.Equal(t, cam.X(), WorldBounds.Max.X, "Moving too many unit, should have moved the camera to the maximum")
+	assert.Equal(t, cam.X(), CameraBounds.Max.X, "Moving too many unit, should have moved the camera to the maximum")
 
 	cam.moveX(-305)
-	assert.Equal(t, cam.X(), WorldBounds.Min.X, "Moving too many units back, should have moved the camera to the minimum")
+	assert.Equal(t, cam.X(), CameraBounds.Min.X, "Moving too many units back, should have moved the camera to the minimum")
 }
 
 func TestCameraMoveY(t *testing.T) {
@@ -78,10 +79,10 @@ func TestCameraMoveY(t *testing.T) {
 	assert.Equal(t, cam.Y(), currentY, "Moving by -10 units, should have moved the camera back by 10 units")
 
 	cam.moveY(305)
-	assert.Equal(t, cam.Y(), WorldBounds.Max.Y, "Moving too many unit, should have moved the camera to the maximum")
+	assert.Equal(t, cam.Y(), CameraBounds.Max.Y, "Moving too many unit, should have moved the camera to the maximum")
 
 	cam.moveY(-305)
-	assert.Equal(t, cam.Y(), WorldBounds.Min.Y, "Moving too many units back, should have moved the camera to the minimum")
+	assert.Equal(t, cam.Y(), CameraBounds.Min.Y, "Moving too many units back, should have moved the camera to the minimum")
 }
 
 func TestCameraZoom(t *testing.T) {
@@ -123,10 +124,10 @@ func TestCameraMoveToX(t *testing.T) {
 	assert.Equal(t, cam.X(), currentX+5, "Moving to current + 5 should get us to current + 5")
 
 	cam.moveToX(600)
-	assert.Equal(t, cam.X(), WorldBounds.Max.X, "Moving to a location out of bounds, should get us to the maximum")
+	assert.Equal(t, cam.X(), CameraBounds.Max.X, "Moving to a location out of bounds, should get us to the maximum")
 
 	cam.moveToX(-10)
-	assert.Equal(t, cam.X(), WorldBounds.Min.X, "Moving to a location out of bounds, should get us to the minimum")
+	assert.Equal(t, cam.X(), CameraBounds.Min.X, "Moving to a location out of bounds, should get us to the minimum")
 }
 
 func TestCameraMoveToY(t *testing.T) {
@@ -138,10 +139,10 @@ func TestCameraMoveToY(t *testing.T) {
 	assert.Equal(t, cam.Y(), currentY+5, "Moving to current + 5 should get us to current + 5")
 
 	cam.moveToY(600)
-	assert.Equal(t, cam.Y(), WorldBounds.Max.Y, "Moving to a location out of bounds, should get us to the maximum")
+	assert.Equal(t, cam.Y(), CameraBounds.Max.Y, "Moving to a location out of bounds, should get us to the maximum")
 
 	cam.moveToY(-10)
-	assert.Equal(t, cam.Y(), WorldBounds.Min.Y, "Moving to a location out of bounds, should get us to the minimum")
+	assert.Equal(t, cam.Y(), CameraBounds.Min.Y, "Moving to a location out of bounds, should get us to the minimum")
 }
 
 func TestCameraZoomTo(t *testing.T) {

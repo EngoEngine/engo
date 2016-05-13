@@ -5,32 +5,33 @@ import (
 	"log"
 
 	"engo.io/ecs"
-	"image/color"
 )
 
 var (
-	Time  *Clock
-	Files *Loader
+	// Time is the active FPS counter
+	Time *Clock
+
+	// Input handles all input: mouse, keyboard and touch
 	Input *InputManager
 
-	closeGame          bool
-	defaultCloseAction bool
-	WorldBounds        AABB
+	// Mailbox is used by all Systems to communicate
+	Mailbox *MessageManager
 
 	currentWorld *ecs.World
 	currentScene Scene
-	Mailbox      *MessageManager
-	cam          *cameraSystem
 
-	scaleOnResize   = false
-	fpsLimit        = 60
-	headless        = false
-	vsync           = true
+	opts            RunOptions
 	resetLoopTicker = make(chan bool, 1)
+	closeGame       bool
 )
 
 const (
-	DefaultVerticalAxis   = "vertical"
+	// DefaultVerticalAxis is the name of the default vertical axis, as used internally in `engo` when `StandardInputs`
+	// is defined.
+	DefaultVerticalAxis = "vertical"
+
+	// DefaultHorizontalAxis is the name of the default horizontal axis, as used internally in `engo` when `StandardInputs`
+	// is defined.
 	DefaultHorizontalAxis = "horizontal"
 )
 
@@ -44,6 +45,7 @@ type RunOptions struct {
 	// HeadlessMode indicates whether or not OpenGL calls should be made
 	HeadlessMode bool
 
+	// Fullscreen indicates the game should run in fullscreen mode if run on a desktop
 	Fullscreen bool
 
 	Width, Height int
@@ -79,17 +81,38 @@ type RunOptions struct {
 	// More info at https://www.opengl.org/wiki/Multisampling
 	// "With multisampling, each pixel at the edge of a polygon is sampled multiple times."
 	MSAA int
+
+	// AssetsRoot is the path where all resources (images, audio files, fonts, etc.) can be found. Leaving this at
+	// empty-string, will default this to `assets`.
+	//
+	// Whenever using any value that does not start with the directory `assets`, you will not be able to support
+	// mobile (Android/iOS), because they **require** all assets to be within the `assets` directory. You may however
+	// use any subfolder-structure within that `assets` directory.
+	AssetsRoot string
 }
 
 // Run is called to create a window, initialize everything, and start the main loop. Once this function returns,
 // the game window has been closed already. You can supply a lot of options within `RunOptions`, and your starting
 // `Scene` should be defined in `defaultScene`.
-func Run(opts RunOptions, defaultScene Scene) {
-	// Save settings
-	SetScaleOnResize(opts.ScaleOnResize)
-	SetFPSLimit(opts.FPSLimit)
-	vsync = opts.VSync
-	defaultCloseAction = !opts.OverrideCloseAction
+func Run(o RunOptions, defaultScene Scene) {
+	// Setting defaults
+	if o.FPSLimit == 0 {
+		o.FPSLimit = 60
+	}
+
+	if o.MSAA < 0 {
+		panic("MSAA has to be greater or equal to 0")
+	}
+
+	if o.MSAA == 0 {
+		o.MSAA = 1
+	}
+
+	if len(o.AssetsRoot) == 0 {
+		o.AssetsRoot = "assets"
+	}
+
+	opts = o
 
 	// Create input
 	Input = NewInputManager()
@@ -103,17 +126,10 @@ func Run(opts RunOptions, defaultScene Scene) {
 		Input.RegisterAxis(DefaultVerticalAxis, AxisKeyPair{W, S}, AxisKeyPair{ArrowUp, ArrowDown})
 	}
 
-	if opts.MSAA < 0 {
-		panic("MSAA has to be greater or equal to 0")
-	}
+	Files.SetRoot(opts.AssetsRoot)
 
-	if opts.MSAA == 0 {
-		opts.MSAA = 1
-	}
-
+	// And run the game
 	if opts.HeadlessMode {
-		headless = true
-
 		if !opts.NoRun {
 			runHeadless(defaultScene)
 		}
@@ -127,35 +143,45 @@ func Run(opts RunOptions, defaultScene Scene) {
 	}
 }
 
+// SetScaleOnResize can be used to change the value in the given `RunOpts` after already having called `engo.Run`.
 func SetScaleOnResize(b bool) {
-	scaleOnResize = b
+	opts.ScaleOnResize = b
 }
 
+// SetOverrideCloseAction can be used to change the value in the given `RunOpts` after already having called `engo.Run`.
 func SetOverrideCloseAction(value bool) {
-	defaultCloseAction = !value
+	opts.OverrideCloseAction = value
 }
 
-func SetBackground(c color.Color) {
-	if !headless {
-		r, g, b, a := c.RGBA()
-
-		Gl.ClearColor(float32(r), float32(g), float32(b), float32(a))
-	}
-}
-
+// SetFPSLimit can be used to change the value in the given `RunOpts` after already having called `engo.Run`.
 func SetFPSLimit(limit int) error {
 	if limit <= 0 {
 		return fmt.Errorf("FPS Limit out of bounds. Requires > 0")
 	}
-	fpsLimit = limit
+	opts.FPSLimit = limit
 	resetLoopTicker <- true
 	return nil
 }
 
-func runHeadless(defaultScene Scene) {
-	runLoop(defaultScene, true)
+// SetHeadless sets the headless-mode variable - should be used before calling `Run`, and will be overridden by the
+// value within the `RunOpts` once you call `engo.Run`.
+func SetHeadless(b bool) {
+	opts.HeadlessMode = b
 }
 
+// Headless indicates whether or not OpenGL-calls should be made
+func Headless() bool {
+	return opts.HeadlessMode
+}
+
+// ScaleOnResizes indicates whether or not the screen should resize (i.e. make things look smaller/bigger) whenever
+// the window resized. If `false`, then the size of the screen does not affect the size of the things drawn - it just
+// makes less/more objects visible
+func ScaleOnResize() bool {
+	return opts.ScaleOnResize
+}
+
+// Exit is the safest way to close your game, as `engo` will correctly attempt to close all windows, handlers and contexts
 func Exit() {
 	closeGame = true
 }
@@ -167,9 +193,13 @@ func closeEvent() {
 		}
 	}
 
-	if defaultCloseAction {
+	if !opts.OverrideCloseAction {
 		Exit()
 	} else {
-		warning("default close action set to false, please make sure you manually handle this")
+		log.Println("[WARNING] default close action set to false, please make sure you manually handle this")
 	}
+}
+
+func runHeadless(defaultScene Scene) {
+	runLoop(defaultScene, true)
 }

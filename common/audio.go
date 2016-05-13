@@ -1,11 +1,13 @@
 //+build !windows,!netgo,!android
 
-package engo
+package common
 
 import (
+	"io"
 	"log"
 
 	"engo.io/ecs"
+	"engo.io/engo"
 	"golang.org/x/mobile/exp/audio/al"
 )
 
@@ -14,6 +16,12 @@ const (
 )
 
 var MasterVolume float64 = 1
+
+// ReadSeekCloser is an io.ReadSeeker and io.Closer.
+type ReadSeekCloser interface {
+	io.ReadSeeker
+	io.Closer
+}
 
 // AudioComponent is a Component which is used by the AudioSystem
 type AudioComponent struct {
@@ -43,6 +51,17 @@ type AudioSystem struct {
 	cachedVolume float64
 }
 
+var audioSystemPreloaded bool
+
+// AudioSystemPreload has to be called before preloading any `.wav` files
+func AudioSystemPreload() {
+	if err := al.OpenDevice(); err != nil {
+		log.Println("Error initializing AudioSystem:", err)
+		return
+	}
+	audioSystemPreloaded = true
+}
+
 // Add adds a new entity to the AudioSystem. AudioComponent is always required, and the SpaceComponent is
 // required as soon as AudioComponent.Background is false. (So if it's not a background noise, we want to know
 // where it's originated from)
@@ -63,19 +82,32 @@ func (a *AudioSystem) Remove(basic ecs.BasicEntity) {
 	}
 }
 
-func (a *AudioSystem) New(*ecs.World) {
+func (a *AudioSystem) New(w *ecs.World) {
 	a.cachedVolume = MasterVolume
 
 	if a.HeightModifier == 0 {
 		a.HeightModifier = defaultHeightModifier
 	}
 
-	if err := al.OpenDevice(); err != nil {
-		log.Println("Error initializing AudioSystem:", err)
+	if !audioSystemPreloaded {
+		AudioSystemPreload()
+	}
+
+	var cam *cameraSystem
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *cameraSystem:
+			cam = sys
+		}
+	}
+
+	if cam == nil {
+		log.Println("[ERROR] CameraSystem not found - have you added the `RenderSystem` before the `AudioSystem`?")
 		return
 	}
 
-	Mailbox.Listen("CameraMessage", func(msg Message) {
+	// TODO: does this break by any chance, if we use multiple scenes? (w/o recreating world)
+	engo.Mailbox.Listen("CameraMessage", func(msg engo.Message) {
 		_, ok := msg.(CameraMessage)
 		if !ok {
 			return
@@ -83,25 +115,26 @@ func (a *AudioSystem) New(*ecs.World) {
 
 		// Hopefully not that much of an issue, when we receive it before the CameraSystem does
 		// TODO: but it is when the CameraMessage is not Incremental (i.e. the changes are big)
-		al.SetListenerPosition(al.Vector{cam.X() / GameWidth(), cam.Y() / GameHeight(), cam.Z() * a.HeightModifier})
+		al.SetListenerPosition(al.Vector{cam.X() / engo.GameWidth(), cam.Y() / engo.GameHeight(), cam.Z() * a.HeightModifier})
 	})
 }
 
 func (a *AudioSystem) Update(dt float32) {
 	for _, e := range a.entities {
 		if e.AudioComponent.player == nil {
-			f := Files.Sound(e.AudioComponent.File)
-			if f == nil {
-				log.Println("Audio file not loaded:", e.AudioComponent.File)
-				continue
+			playerRes, err := engo.Files.Resource(e.AudioComponent.File)
+			if err != nil {
+				log.Println("[ERROR] [AudioSystem]:", err)
+				continue // with other entities
 			}
 
-			var err error
-			e.AudioComponent.player, err = NewPlayer(f, 0, 0)
-			if err != nil {
-				log.Println("Error initializing AudioComponent:", err)
-				continue
+			player, ok := playerRes.(AudioResource)
+			if !ok {
+				log.Println("[ERROR] [AudioSystem]: Loaded audio file is not of type `AudioResource`:", e.AudioComponent.File)
+				continue // with other entities
 			}
+
+			e.AudioComponent.player = player.Player
 		}
 
 		if MasterVolume != a.cachedVolume {
@@ -130,8 +163,8 @@ func (a *AudioSystem) Update(dt float32) {
 
 			if !e.AudioComponent.Background {
 				e.AudioComponent.player.source.SetPosition(al.Vector{
-					(e.SpaceComponent.Position.X + e.SpaceComponent.Width/2) / GameWidth(), // TODO: ensure we're using correct Width/Height()
-					(e.SpaceComponent.Position.Y + e.SpaceComponent.Height/2) / GameHeight(),
+					(e.SpaceComponent.Position.X + e.SpaceComponent.Width/2) / engo.GameWidth(),
+					(e.SpaceComponent.Position.Y + e.SpaceComponent.Height/2) / engo.GameHeight(),
 					0,
 				})
 			}

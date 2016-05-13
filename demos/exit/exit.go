@@ -5,13 +5,14 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/common"
 )
 
 type DefaultScene struct{}
 
 func (*DefaultScene) Preload() {}
 func (*DefaultScene) Setup(w *ecs.World) {
-	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&common.RenderSystem{})
 }
 
 func (*DefaultScene) Exit() {

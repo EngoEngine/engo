@@ -1,4 +1,8 @@
-package engo
+//+build ignore
+
+package common
+
+import "engo.io/engo"
 
 import (
 	"engo.io/gl"
@@ -82,9 +86,10 @@ func createLevelTiles(lvl *Level, layers []*layer, ts []*tile) []*tile {
 				t := &tile{}
 				if tileIdx := int(mapping[idx]) - 1; tileIdx >= 0 {
 					t.Image = ts[tileIdx].Image
+
 					t.height = lvl.TileHeight
 					t.width = lvl.TileWidth
-					t.Point = Point{float32(x * lvl.TileWidth), float32(y * lvl.TileHeight)}
+					t.Point = engo.Point{float32(x * lvl.TileWidth), float32(y * lvl.TileHeight)}
 				}
 				tilemap = append(tilemap, t)
 			}
@@ -92,12 +97,4 @@ func createLevelTiles(lvl *Level, layers []*layer, ts []*tile) []*tile {
 	}
 
 	return tilemap
-}
-
-// Works for tiles rendered right-down
-func regionFromSheet(sheet *Texture, tw, th int, index int) *Region {
-	setWidth := int(sheet.Width()) / tw
-	x := (index % setWidth) * tw
-	y := (index / setWidth) * th
-	return NewRegion(sheet, float32(x), float32(y), float32(tw), float32(th))
 }

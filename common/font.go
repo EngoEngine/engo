@@ -1,4 +1,4 @@
-package engo
+package common
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 
+	"engo.io/engo"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
@@ -18,7 +19,6 @@ var (
 	dpi = float64(72)
 )
 
-// TODO FG and BG color config
 type Font struct {
 	URL  string
 	Size float64
@@ -46,12 +46,17 @@ func (f *Font) Create() error {
 
 // CreatePreloaded is for loading fonts which have already been defined (and loaded) within Preload
 func (f *Font) CreatePreloaded() error {
-	var ok bool
-	f.TTF, ok = Files.fonts[f.URL]
-	if !ok {
-		return fmt.Errorf("could not find preloaded font: %s", f.URL)
+	fontres, err := engo.Files.Resource(f.URL)
+	if err != nil {
+		return err
 	}
 
+	font, ok := fontres.(FontResource)
+	if !ok {
+		return fmt.Errorf("preloaded font is not of type `*truetype.Font`: %s", f.URL)
+	}
+
+	f.TTF = font.Font
 	return nil
 }
 
@@ -133,10 +138,10 @@ func (f *Font) RenderNRGBA(text string) *image.NRGBA {
 	return nrgba
 }
 
-func (f *Font) Render(text string) *Texture {
+func (f *Font) Render(text string) Texture {
 	nrgba := f.RenderNRGBA(text)
 
 	// Create texture
-	imObj := &ImageObject{nrgba}
-	return NewTexture(imObj)
+	imObj := NewImageObject(nrgba)
+	return NewTextureSingle(imObj)
 }

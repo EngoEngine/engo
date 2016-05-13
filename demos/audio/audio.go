@@ -2,35 +2,43 @@ package main
 
 import (
 	"image/color"
+	"log"
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/common"
 )
 
 type DefaultScene struct{}
 
 type Whoop struct {
 	ecs.BasicEntity
-	engo.AudioComponent
+	common.AudioComponent
 }
 
 func (*DefaultScene) Preload() {
-	engo.Files.Add("assets/326488.wav")
+	common.AudioSystemPreload()
+
+	err := engo.Files.Load("326488.wav")
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (*DefaultScene) Setup(w *ecs.World) {
-	engo.SetBackground(color.White)
+	common.SetBackground(color.White)
 
-	w.AddSystem(&engo.AudioSystem{})
+	w.AddSystem(&common.RenderSystem{})
+	w.AddSystem(&common.AudioSystem{})
 	w.AddSystem(&WhoopSystem{})
 
 	whoop := Whoop{BasicEntity: ecs.NewBasic()}
-	whoop.AudioComponent = engo.AudioComponent{File: "326488.wav", Repeat: true, Background: true, RawVolume: 1}
+	whoop.AudioComponent = common.AudioComponent{File: "326488.wav", Repeat: true, Background: true, RawVolume: 1}
 
 	// Let's add our whoop to the appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.AudioSystem:
+		case *common.AudioSystem:
 			// Note we are giving a `nil` reference to the `SpeedComponent`. This is because the documentation of the
 			// AudioSystem says the `SpeedComponent` is only required when `AudioComponent.Background` is `false`.
 			// In our case, it is `true` (it's a background noise, i.e. not tied to a location in the game world),
@@ -52,16 +60,16 @@ func (w *WhoopSystem) Remove(basic ecs.BasicEntity) {}
 func (w *WhoopSystem) Update(dt float32) {
 	d := float64(dt * 0.1)
 	if w.goingUp {
-		engo.MasterVolume += d
+		common.MasterVolume += d
 	} else {
-		engo.MasterVolume -= d
+		common.MasterVolume -= d
 	}
 
-	if engo.MasterVolume < 0 {
-		engo.MasterVolume = 0
+	if common.MasterVolume < 0 {
+		common.MasterVolume = 0
 		w.goingUp = true
-	} else if engo.MasterVolume > 1 {
-		engo.MasterVolume = 1
+	} else if common.MasterVolume > 1 {
+		common.MasterVolume = 1
 		w.goingUp = false
 	}
 }

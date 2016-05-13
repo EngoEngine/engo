@@ -8,6 +8,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/common"
 )
 
 var (
@@ -17,42 +18,48 @@ var (
 
 type Guy struct {
 	ecs.BasicEntity
-	engo.RenderComponent
-	engo.SpaceComponent
+	common.RenderComponent
+	common.SpaceComponent
 }
 
 type Rock struct {
 	ecs.BasicEntity
-	engo.RenderComponent
-	engo.SpaceComponent
+	common.RenderComponent
+	common.SpaceComponent
 }
 
 // IconScene is responsible for managing the icon
 type IconScene struct{}
 
 func (*IconScene) Preload() {
-	engo.Files.Add("data/icon.png")
+	err := engo.Files.Load("icon.png")
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (*IconScene) Setup(w *ecs.World) {
-	engo.SetBackground(color.White)
+	common.SetBackground(color.White)
 
-	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&common.RenderSystem{})
 	w.AddSystem(&ScaleSystem{})
 	w.AddSystem(&SceneSwitcherSystem{NextScene: "RockScene", WaitTime: time.Second * 3})
 
 	// Retrieve a texture
-	texture := engo.Files.Image("icon.png")
+	texture, err := common.PreloadedSpriteSingle("icon.png")
+	if err != nil {
+		log.Println(err)
+	}
 
 	// Create an entity
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	guy.RenderComponent = engo.RenderComponent{
+	guy.RenderComponent = common.RenderComponent{
 		Drawable: texture,
-		Scale: engo.Point{8, 8},
+		Scale:    engo.Point{8, 8},
 	}
-	guy.SpaceComponent = engo.SpaceComponent{
+	guy.SpaceComponent = common.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    texture.Width() * guy.RenderComponent.Scale.X,
 		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
@@ -61,7 +68,7 @@ func (*IconScene) Setup(w *ecs.World) {
 	// Add it to appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *common.RenderSystem:
 			sys.Add(&guy.BasicEntity, &guy.RenderComponent, &guy.SpaceComponent)
 		case *ScaleSystem:
 			sys.Add(&guy.BasicEntity, &guy.RenderComponent)
@@ -83,28 +90,34 @@ func (*IconScene) Type() string { return "IconScene" }
 type RockScene struct{}
 
 func (*RockScene) Preload() {
-	engo.Files.Add("data/rock.png")
+	err := engo.Files.Load("rock.png")
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (game *RockScene) Setup(w *ecs.World) {
-	engo.SetBackground(color.White)
+	common.SetBackground(color.White)
 
-	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&common.RenderSystem{})
 	w.AddSystem(&ScaleSystem{})
 	w.AddSystem(&SceneSwitcherSystem{NextScene: "IconScene", WaitTime: time.Second * 3})
 
 	// Retrieve a texture
-	texture := engo.Files.Image("rock.png")
+	texture, err := common.PreloadedSpriteSingle("rock.png")
+	if err != nil {
+		log.Println(err)
+	}
 
 	// Create an entity
 	rock := Rock{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	rock.RenderComponent = engo.RenderComponent{
+	rock.RenderComponent = common.RenderComponent{
 		Drawable: texture,
-		Scale: engo.Point{8, 8},
+		Scale:    engo.Point{8, 8},
 	}
-	rock.SpaceComponent = engo.SpaceComponent{
+	rock.SpaceComponent = common.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    texture.Width() * rock.RenderComponent.Scale.X,
 		Height:   texture.Height() * rock.RenderComponent.Scale.Y,
@@ -113,7 +126,7 @@ func (game *RockScene) Setup(w *ecs.World) {
 	// Add it to appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *common.RenderSystem:
 			sys.Add(&rock.BasicEntity, &rock.RenderComponent, &rock.SpaceComponent)
 		case *ScaleSystem:
 			sys.Add(&rock.BasicEntity, &rock.RenderComponent)
@@ -155,14 +168,14 @@ func (s *SceneSwitcherSystem) Update(dt float32) {
 
 type scaleEntity struct {
 	*ecs.BasicEntity
-	*engo.RenderComponent
+	*common.RenderComponent
 }
 
 type ScaleSystem struct {
 	entities []scaleEntity
 }
 
-func (s *ScaleSystem) Add(basic *ecs.BasicEntity, render *engo.RenderComponent) {
+func (s *ScaleSystem) Add(basic *ecs.BasicEntity, render *common.RenderComponent) {
 	s.entities = append(s.entities, scaleEntity{basic, render})
 }
 
