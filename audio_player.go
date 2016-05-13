@@ -1,4 +1,4 @@
-// +build !windows,!netgo
+//+build !windows,!netgo,!android
 
 package engo
 
@@ -16,12 +16,6 @@ import (
 
 	"golang.org/x/mobile/exp/audio/al"
 )
-
-// ReadSeekCloser is an io.ReadSeeker and io.Closer.
-type ReadSeekCloser interface {
-	io.ReadSeeker
-	io.Closer
-}
 
 // Format represents a PCM data format.
 type Format int

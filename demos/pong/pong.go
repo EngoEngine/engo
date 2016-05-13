@@ -47,6 +47,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 	engo.SetBackground(color.Black)
 	w.AddSystem(&engo.RenderSystem{})
 	w.AddSystem(&engo.CollisionSystem{})
+	w.AddSystem(&engo.MouseSystem{})
 	w.AddSystem(&SpeedSystem{})
 	w.AddSystem(&ControlSystem{})
 	w.AddSystem(&BounceSystem{})
@@ -149,7 +150,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 			Width:    paddle.RenderComponent.Scale.X * paddleTexture.Width(),
 			Height:   paddle.RenderComponent.Scale.Y * paddleTexture.Height(),
 		}
-		paddle.ControlComponent = ControlComponent{schemes[i]}
+		paddle.ControlComponent = ControlComponent{Scheme: schemes[i]}
 		paddle.CollisionComponent = engo.CollisionComponent{
 			Main:  false,
 			Solid: true,
@@ -177,6 +178,9 @@ type SpeedComponent struct {
 
 type ControlComponent struct {
 	Scheme string
+
+	// oldY is (optionally) the old Y-location of the mouse / touch - used to determine drag direction
+	oldY float32
 }
 
 type speedEntity struct {
@@ -223,9 +227,21 @@ func (s *SpeedSystem) Remove(basic ecs.BasicEntity) {
 }
 
 func (s *SpeedSystem) Update(dt float32) {
+	speedMultiplier := float32(100)
+
 	for _, e := range s.entities {
 		e.SpaceComponent.Position.X += e.SpeedComponent.X * dt
 		e.SpaceComponent.Position.Y += e.SpeedComponent.Y * dt
+
+		var direction float32
+		if e.SpeedComponent.X > 0 {
+			direction = 1.0
+		} else {
+			direction = -1.0
+		}
+
+		e.SpeedComponent.X += speedMultiplier * dt * direction
+		e.SpeedComponent.Y += speedMultiplier * dt * direction
 	}
 }
 
@@ -296,6 +312,21 @@ type controlEntity struct {
 
 type ControlSystem struct {
 	entities []controlEntity
+
+	mouseTrackerBasic ecs.BasicEntity
+	mouseTrackerMouse engo.MouseComponent
+}
+
+func (c *ControlSystem) New(w *ecs.World) {
+	c.mouseTrackerBasic = ecs.NewBasic()
+	c.mouseTrackerMouse.Track = true
+
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *engo.MouseSystem:
+			sys.Add(&c.mouseTrackerBasic, &c.mouseTrackerMouse, nil, nil)
+		}
+	}
 }
 
 func (c *ControlSystem) Add(basic *ecs.BasicEntity, control *ControlComponent, space *engo.SpaceComponent) {
@@ -322,6 +353,17 @@ func (c *ControlSystem) Update(dt float32) {
 		vert := engo.Input.Axis(e.ControlComponent.Scheme)
 		e.SpaceComponent.Position.Y += speed * vert.Value()
 
+		var moveThisOne bool
+		if engo.Mouse.X > engo.WindowWidth()/2 && e.ControlComponent.Scheme == "arrows" {
+			moveThisOne = true
+		} else if engo.Mouse.X < engo.WindowWidth()/2 && e.ControlComponent.Scheme == "wasd" {
+			moveThisOne = true
+		}
+
+		if moveThisOne {
+			e.SpaceComponent.Position.Y = c.mouseTrackerMouse.MouseY - e.SpaceComponent.Height/2
+		}
+
 		if (e.SpaceComponent.Height + e.SpaceComponent.Position.Y) > 800 {
 			e.SpaceComponent.Position.Y = 800 - e.SpaceComponent.Height
 		} else if e.SpaceComponent.Position.Y < 0 {
@@ -345,7 +387,7 @@ type ScoreSystem struct {
 }
 
 func (s *ScoreSystem) New(*ecs.World) {
-	s.upToDate = true
+	s.upToDate = false
 	engo.Mailbox.Listen("ScoreMessage", func(message engo.Message) {
 		scoreMessage, isScore := message.(ScoreMessage)
 		if !isScore {

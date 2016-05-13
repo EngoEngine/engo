@@ -1,5 +1,6 @@
 # Engo
-[![Join the chat at https://gitter.im/EngoEngine/engo](https://badges.gitter.im/EngoEngine/engo.svg)](https://gitter.im/EngoEngine/engo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![License](https://img.shields.io/badge/License-MIT-blue.svg) [![Build Status](https://travis-ci.org/EngoEngine/engo.svg?branch=master)](https://travis-ci.org/EngoEngine/engo)
+[![Join the chat at https://gitter.im/EngoEngine/engo](https://badges.gitter.im/EngoEngine/engo.svg)](https://gitter.im/EngoEngine/engo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![License](https://img.shields.io/badge/License-MIT-blue.svg) [![Build Status](https://travis-ci.org/EngoEngine/engo.svg?branch=master)](https://travis-ci.org/EngoEngine/engo) [![Build status](https://ci.appveyor.com/api/projects/status/019qc8hncmhnje83?svg=true)](https://ci.appveyor.com/project/otraore/engo)
+
 
 A cross-platform game engine written in Go following an interpretation of the Entity Component System paradigm. Engo is
 currently compilable for Mac OSX, Linux and Windows. With the release of Go 1.4, sporting Android and the inception of
@@ -24,7 +25,7 @@ We have a [gitter](https://gitter.im/EngoEngine/engo) chat for people to join wh
 2. Then, you can go get it:
 `go get -u engo.io/engo`
 3. Now, you have two choices:
-  1. Visit [our website](https://engo.io/), which hosts a full-blown toturial series on how to create your own game, and on top of that, has some conceptual explanations;
+  1. Visit [our website](https://engo.io/), which hosts a full-blown tutorial series on how to create your own game, and on top of that, has some conceptual explanations;
   2. Check out some demos in our [demos folder](https://github.com/EngoEngine/engo/tree/master/demos). 
 4. Finally, if you run into problems, if you've encountered a bug, or want to request a feature, feel free to shoot 
 us a DM or [create an issue](https://github.com/EngoEngine/engo/issues/new). 
@@ -54,8 +55,9 @@ Thank you to everyone who has worked on, or with `Engo`. None of this would be p
 - [paked](https://github.com/paked): Adding ECS element, project maintenance and management
 - [EtienneBruines](https://github.com/EtienneBruines): Rewriting the OpenGL code, maintenance and helping redesign the API
 - [otraore](https://github.com/otraore): Adding in GopherJs support, maintenance
+- [@hydroflame](https://github.com/hydroflame): Shared his extensive knowledge about OpenGL, which enabled our `RenderSystem` and shaders 
 - [Everyone else who has submitted PRs over the years, to any iteration of the project](https://github.com/EngoEngine/engo/graphs/contributors)
 
-These are 3rd party projects that have made `Engo` possible.
+These are 3rd party projects that have made `engo` possible.
 - [Lux](https://github.com/luxengine/) , which provides a `float32` [math](https://godoc.org/github.com/luxengine/math) package ([MIT license](https://github.com/luxengine/math/blob/master/LICENSE))
 - The original [engi](https://github.com/aljhager/engi) game engine which engo was based off of ([BSD license](https://github.com/ajhager/engi/blob/master/LICENSE))

@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"engo.io/ecs"
+	"image/color"
 )
 
 var (
@@ -60,9 +61,29 @@ type RunOptions struct {
 	// game - that will be your responsibility
 	OverrideCloseAction bool
 
+	// StandardInputs is an easy way to map common inputs to actions, such as "jump" being <SPACE>, and "action" being
+	// <ENTER>.
 	StandardInputs bool
+
+	// MSAA indicates the amount of samples that should be taken. Leaving it blank will default to 1, and you may
+	// use any positive value you wish. It may be possible that the operating system / environment doesn't support
+	// the requested amount. In that case, GLFW will (hopefully) pick the highest supported sampling count. The higher
+	// the value, the bigger the performance cost.
+	//
+	// Our `RenderSystem` automatically calls `gl.Enable(gl.MULTISAMPLE)` (which is required to make use of it), but
+	// if you're going to use your own rendering `System` instead, you will have to call it yourself.
+	//
+	// Also note that this value is entirely ignored in WebGL - most browsers enable it by default when available, and
+	// none of them (at time of writing) allow you to tune it.
+	//
+	// More info at https://www.opengl.org/wiki/Multisampling
+	// "With multisampling, each pixel at the edge of a polygon is sampled multiple times."
+	MSAA int
 }
 
+// Run is called to create a window, initialize everything, and start the main loop. Once this function returns,
+// the game window has been closed already. You can supply a lot of options within `RunOptions`, and your starting
+// `Scene` should be defined in `defaultScene`.
 func Run(opts RunOptions, defaultScene Scene) {
 	// Save settings
 	SetScaleOnResize(opts.ScaleOnResize)
@@ -82,6 +103,14 @@ func Run(opts RunOptions, defaultScene Scene) {
 		Input.RegisterAxis(DefaultVerticalAxis, AxisKeyPair{W, S}, AxisKeyPair{ArrowUp, ArrowDown})
 	}
 
+	if opts.MSAA < 0 {
+		panic("MSAA has to be greater or equal to 0")
+	}
+
+	if opts.MSAA == 0 {
+		opts.MSAA = 1
+	}
+
 	if opts.HeadlessMode {
 		headless = true
 
@@ -89,7 +118,7 @@ func Run(opts RunOptions, defaultScene Scene) {
 			runHeadless(defaultScene)
 		}
 	} else {
-		CreateWindow(opts.Title, opts.Width, opts.Height, opts.Fullscreen)
+		CreateWindow(opts.Title, opts.Width, opts.Height, opts.Fullscreen, opts.MSAA)
 		defer DestroyWindow()
 
 		if !opts.NoRun {
@@ -106,6 +135,14 @@ func SetOverrideCloseAction(value bool) {
 	defaultCloseAction = !value
 }
 
+func SetBackground(c color.Color) {
+	if !headless {
+		r, g, b, a := c.RGBA()
+
+		Gl.ClearColor(float32(r), float32(g), float32(b), float32(a))
+	}
+}
+
 func SetFPSLimit(limit int) error {
 	if limit <= 0 {
 		return fmt.Errorf("FPS Limit out of bounds. Requires > 0")
@@ -117,4 +154,22 @@ func SetFPSLimit(limit int) error {
 
 func runHeadless(defaultScene Scene) {
 	runLoop(defaultScene, true)
+}
+
+func Exit() {
+	closeGame = true
+}
+
+func closeEvent() {
+	for _, scenes := range scenes {
+		if exiter, ok := scenes.scene.(Exiter); ok {
+			exiter.Exit()
+		}
+	}
+
+	if defaultCloseAction {
+		Exit()
+	} else {
+		warning("default close action set to false, please make sure you manually handle this")
+	}
 }
