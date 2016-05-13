@@ -53,7 +53,21 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	cursorVResize = glfw.CreateStandardCursor(int(glfw.VResizeCursor))
 
 	monitor := glfw.GetPrimaryMonitor()
-	mode := monitor.GetVideoMode()
+
+	var mode *glfw.VidMode
+	if monitor != nil {
+		mode = monitor.GetVideoMode()
+	} else {
+		// Initialize default values if no monitor is found
+		mode = &glfw.VidMode{
+			Width:       1,
+			Height:      1,
+			RedBits:     8,
+			GreenBits:   8,
+			BlueBits:    8,
+			RefreshRate: 60,
+		}
+	}
 
 	gameWidth = float32(width)
 	gameHeight = float32(height)

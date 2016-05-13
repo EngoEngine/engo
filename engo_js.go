@@ -35,7 +35,6 @@ func init() {
 var document = dom.GetWindow().Document().(dom.HTMLDocument)
 
 func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
-
 	canvas := document.CreateElement("canvas").(*dom.HTMLCanvasElement)
 
 	devicePixelRatio := js.Global.Get("devicePixelRatio").Float()
