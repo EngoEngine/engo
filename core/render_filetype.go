@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"image"
 	"image/draw"
 	_ "image/png"
@@ -8,7 +9,6 @@ import (
 
 	"engo.io/engo"
 	"engo.io/gl"
-	"fmt"
 )
 
 type TextureResource struct {
@@ -93,6 +93,15 @@ func NewTextureResource(img Image) TextureResource {
 func NewTextureSingle(img Image) Texture {
 	id := UploadTexture(img)
 	return Texture{id, float32(img.Width()), float32(img.Height()), engo.AABB{Max: engo.Point{1.0, 1.0}}}
+}
+
+// ImageToNRGBA takes a given `image.Image` and converts it into an `image.NRGBA`. Especially useful when transforming
+// image.Uniform to something usable by `engo`.
+func ImageToNRGBA(img image.Image, width, height int) *image.NRGBA {
+	newm := image.NewNRGBA(image.Rect(0, 0, width, height))
+	draw.Draw(newm, newm.Bounds(), img, image.Point{0, 0}, draw.Src)
+
+	return newm
 }
 
 // ImageObject is a pure Go implementation of a `Drawable`

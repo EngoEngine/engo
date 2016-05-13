@@ -1,0 +1,22 @@
+version: "{build}"
+
+os: Windows Server 2012 R2
+
+clone_folder: c:\gopath\src\engo.io\engo
+
+environment:
+  GOPATH: c:\gopath
+  GOROOT: c:\go-x86
+  PATH: '%PATH%;c:\go-x86;c:\go-x86\bin;c:\MinGW\bin'
+
+install:
+  - set PATH=%PATH:c:\go;=%
+  - set PATH=%PATH:c:\go\bin;=%
+  - echo %GOPATH%
+  - echo %PATH%
+  - go version
+  - go env
+  - go get -v -t ./...
+
+build_script:
+  - go test -v ./...

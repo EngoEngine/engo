@@ -31,6 +31,7 @@ var (
 	headlessHeight            = 800
 	gameWidth, gameHeight     float32
 	windowWidth, windowHeight float32
+	canvasWidth, canvasHeight float32
 )
 
 // fatalErr calls log.Fatal with the given error if it is non-nil.
@@ -85,6 +86,7 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 	width, height = window.GetFramebufferSize()
 	windowWidth, windowHeight = float32(width), float32(height)
+	canvasWidth, canvasHeight = float32(width), float32(height)
 
 	SetVSync(opts.VSync)
 
@@ -143,6 +145,8 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 		windowWidth = float32(widthInt)
 		windowHeight = float32(heightInt)
+		canvasWidth = windowWidth
+		canvasHeight = windowHeight
 
 		if !opts.ScaleOnResize {
 			gameWidth, gameHeight = float32(widthInt), float32(heightInt)
@@ -258,6 +262,14 @@ func WindowWidth() float32 {
 
 func WindowHeight() float32 {
 	return windowHeight
+}
+
+func CanvasWidth() float32 {
+	return canvasWidth
+}
+
+func CanvasHeight() float32 {
+	return canvasHeight
 }
 
 // SetCursor sets the pointer of the mouse to the defined standard cursor

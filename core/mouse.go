@@ -85,7 +85,7 @@ type mouseEntity struct {
 type MouseSystem struct {
 	entities []mouseEntity
 	world    *ecs.World
-	camera *cameraSystem
+	camera   *cameraSystem
 
 	mouseX    float32
 	mouseY    float32
@@ -106,7 +106,7 @@ func (m *MouseSystem) New(w *ecs.World) {
 		}
 	}
 
-	if m.camera== nil {
+	if m.camera == nil {
 		log.Println("ERROR: CameraSystem not found - have you added the `RenderSystem` before the `MouseSystem`?")
 		return
 	}
@@ -137,8 +137,8 @@ func (m *MouseSystem) Remove(basic ecs.BasicEntity) {
 
 func (m *MouseSystem) Update(dt float32) {
 	// Translate Mouse.X and Mouse.Y into "game coordinates"
-	m.mouseX = engo.Mouse.X*m.camera.z*(engo.GameWidth()/engo.WindowWidth()) + m.camera.x - (engo.GameWidth()/2)*m.camera.z
-	m.mouseY = engo.Mouse.Y*m.camera.z*(engo.GameHeight()/engo.WindowHeight()) + m.camera.y - (engo.GameHeight()/2)*m.camera.z
+	m.mouseX = engo.Mouse.X*m.camera.z*(engo.GameWidth()/engo.CanvasWidth()) + m.camera.x - (engo.GameWidth()/2)*m.camera.z
+	m.mouseY = engo.Mouse.Y*m.camera.z*(engo.GameHeight()/engo.CanvasHeight()) + m.camera.y - (engo.GameHeight()/2)*m.camera.z
 
 	// Rotate if needed
 	if m.camera.angle != 0 {

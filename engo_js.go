@@ -4,11 +4,14 @@ package engo
 
 import (
 	"bytes"
+	"compress/gzip"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"log"
 	"math"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -90,6 +93,27 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		ke := ev.(*dom.KeyboardEvent)
 		Input.keys.Set(Key(ke.KeyCode), false)
 	})
+
+	w.AddEventListener("mousemove", false, func(ev dom.Event) {
+		mm := ev.(*dom.MouseEvent)
+		Mouse.X = float32(mm.ClientX)
+		Mouse.Y = float32(mm.ClientY)
+		//Mouse.Action = MOVE
+	})
+
+	w.AddEventListener("mousedown", false, func(ev dom.Event) {
+		mm := ev.(*dom.MouseEvent)
+		Mouse.X = float32(mm.ClientX)
+		Mouse.Y = float32(mm.ClientY)
+		Mouse.Action = PRESS
+	})
+
+	w.AddEventListener("mouseup", false, func(ev dom.Event) {
+		mm := ev.(*dom.MouseEvent)
+		Mouse.X = float32(mm.ClientX)
+		Mouse.Y = float32(mm.ClientY)
+		Mouse.Action = RELEASE
+	})
 }
 
 func DestroyWindow() {}
@@ -103,7 +127,7 @@ func GameHeight() float32 {
 }
 
 func CursorPos() (x, y float64) {
-	return 0.0, 0.0
+	return float64(Mouse.X), float64(Mouse.Y)
 }
 
 // SetTitle changes the title of the page to the given string
@@ -123,6 +147,22 @@ func WindowWidth() float32 {
 
 func WindowHeight() float32 {
 	return float32(dom.GetWindow().InnerHeight())
+}
+
+func CanvasWidth() float32 {
+	flt, err := strconv.ParseFloat(document.Body().GetElementsByTagName("canvas")[0].GetAttribute("width"), 32)
+	if err != nil {
+		log.Println("[ERROR] [CanvasWidth]:", err)
+	}
+	return float32(flt)
+}
+
+func CanvasHeight() float32 {
+	flt, err := strconv.ParseFloat(document.Body().GetElementsByTagName("canvas")[0].GetAttribute("height"), 32)
+	if err != nil {
+		log.Println("[ERROR] [CanvasHeight]:", err)
+	}
+	return float32(flt)
 }
 
 func toPx(n int) string {
@@ -162,8 +202,8 @@ func rafPolyfill() {
 }
 
 func RunIteration() {
-	Input.update()
 	currentWorld.Update(Time.Delta())
+	Input.update()
 	Time.Tick()
 	// TODO: this may not work, and sky-rocket the FPS
 	//  requestAnimationFrame(func(dt float32) {
@@ -215,8 +255,20 @@ Outer:
 }
 
 func openFile(url string) (io.ReadCloser, error) {
+	log.Println("opening", url)
+	if filepath.Ext(url) == ".ttf" {
+		//url += "_js"
+	}
+
 	req := xhr.NewRequest("GET", url)
-	if err := req.Send(nil); err != nil {
+
+	req.ResponseType = xhr.ArrayBuffer
+	if filepath.Ext(url) != ".ttf" {
+
+		//req.ResponseType = xhr.Blob
+	}
+
+	if err := req.Send(""); err != nil {
 		return nil, err
 	}
 
@@ -224,7 +276,22 @@ func openFile(url string) (io.ReadCloser, error) {
 		return nil, fmt.Errorf("unable to open resource (%s), expected HTTP status %d but got %d", url, http.StatusOK, req.Status)
 	}
 
-	return noCloseReadCloser{bytes.NewReader([]byte(req.Response.String()))}, nil
+	var reader io.Reader
+
+	if filepath.Ext(url) == ".ttf" && false {
+		fontDataEncoded := bytes.NewBuffer([]byte(req.Response.String()))
+		fontDataCompressed := base64.NewDecoder(base64.StdEncoding, fontDataEncoded)
+		var err error
+		reader, err = gzip.NewReader(fontDataCompressed)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		buffy := bytes.NewBuffer(js.Global.Get("Uint8Array").New(req.Response).Interface().([]byte))
+		reader = buffy
+	}
+
+	return noCloseReadCloser{reader}, nil
 }
 
 type noCloseReadCloser struct {
@@ -236,7 +303,12 @@ func (n noCloseReadCloser) Read(p []byte) (int, error) {
 	return n.r.Read(p)
 }
 
-// SetCursor changes the cursor - not yet implemented
+// SetCursor changes the cursor
 func SetCursor(c Cursor) {
-	notImplemented("SetCursor")
+	switch c {
+	case CursorNone:
+		document.Body().Style().Set("cursor", "default")
+	case CursorHand:
+		document.Body().Style().Set("cursor", "hand")
+	}
 }

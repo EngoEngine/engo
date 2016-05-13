@@ -94,8 +94,6 @@ func SetScene(s Scene, forceNewWorld bool) {
 	// doSetup is true whenever we're (re)initializing the Scene
 	if doSetup {
 		s.Preload()
-		//Files.Load(func() {})
-		// TODO: preload files!
 
 		wrapper.mailbox.listeners = make(map[string][]MessageHandler)
 

@@ -142,8 +142,8 @@ func createLevelFromTmx(r Resource) (*Level, error) {
 		tlvl.Tilesets[k] = ts
 	}
 
-	lvl.Width = tlvl.Width
-	lvl.Height = tlvl.Height
+	lvl.width = tlvl.Width
+	lvl.height = tlvl.Height
 	lvl.TileWidth = tlvl.TileWidth
 	lvl.TileHeight = tlvl.TileHeight
 
@@ -173,13 +173,17 @@ func createLevelFromTmx(r Resource) (*Level, error) {
 		curX := float32(tlvl.ImgLayers[i].X)
 		curY := float32(tlvl.ImgLayers[i].Y)
 		reg := NewRegion(curImg, 0, 0, curImg.width, curImg.height)
+<<<<<<< HEAD:core/tmx_level.go
 		lvl.Images = append(lvl.Images, &tile{engo.Point{curX, curY}, reg})
+=======
+		lvl.Images = append(lvl.Images, &tile{Point{curX, curY}, tlvl.TileWidth, tlvl.TileHeight, reg})
+>>>>>>> fdd732c641e9b891720896022d96dad014c9fd67:tmx_level.go
 	}
 
 	return lvl, nil
 }
 
-func pointStringToLines(str string, xOff, yOff float64) []Line {
+func pointStringToLines(str string, xOff, yOff float64) []*Line {
 	pts := strings.Split(str, " ")
 	floatPts := make([][]float64, len(pts))
 	for i, x := range pts {
@@ -189,7 +193,7 @@ func pointStringToLines(str string, xOff, yOff float64) []Line {
 		floatPts[i][1], _ = strconv.ParseFloat(pt[1], 64)
 	}
 
-	lines := make([]Line, len(floatPts)-1)
+	lines := make([]*Line, len(floatPts)-1)
 
 	// Now to globalize line coordinates
 	for i := 0; i < len(floatPts)-1; i++ {
@@ -197,9 +201,11 @@ func pointStringToLines(str string, xOff, yOff float64) []Line {
 		y1 := float32(floatPts[i][1] + yOff)
 		x2 := float32(floatPts[i+1][0] + xOff)
 		y2 := float32(floatPts[i+1][1] + yOff)
+
 		p1 := engo.Point{x1, y1}
 		p2 := engo.Point{x2, y2}
-		newLine := Line{p1, p2}
+		newLine := &Line{p1, p2}
+
 		lines = append(lines, newLine)
 	}
 
