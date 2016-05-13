@@ -98,14 +98,17 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		window.SetPos((mode.Width-width)/2, (mode.Height-height)/2)
 	}
 
-	width, height = window.GetFramebufferSize()
-	windowWidth, windowHeight = float32(width), float32(height)
-	canvasWidth, canvasHeight = float32(width), float32(height)
-
 	SetVSync(opts.VSync)
 
+	// TODO: verify these for retina displays
+	width, height = window.GetFramebufferSize()
+	windowWidth, windowHeight = float32(width), float32(height)
+
 	Gl = gl.NewContext()
-	Gl.Viewport(0, 0, width, height)
+
+	// TODO: verify these for retina displays
+	vp := Gl.GetViewport()
+	canvasWidth, windowWidth = float32(vp[2]), float32(vp[3])
 
 	window.SetFramebufferSizeCallback(func(window *glfw.Window, w, h int) {
 		width, height = window.GetFramebufferSize()
@@ -159,8 +162,10 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 		windowWidth = float32(widthInt)
 		windowHeight = float32(heightInt)
-		canvasWidth = windowWidth
-		canvasHeight = windowHeight
+
+		// TODO: verify these for retina displays & verify if needed here
+		vp := Gl.GetViewport()
+		canvasWidth, canvasHeight = float32(vp[2]), float32(vp[3])
 
 		if !opts.ScaleOnResize {
 			gameWidth, gameHeight = float32(widthInt), float32(heightInt)
