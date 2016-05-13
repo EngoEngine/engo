@@ -85,5 +85,5 @@ Thank you to everyone who has worked on, or with `Engo`. None of this would be p
 - [Everyone else who has submitted PRs over the years, to any iteration of the project](https://github.com/EngoEngine/engo/graphs/contributors)
 
 These are 3rd party projects that have made `engo` possible.
-- [Lux](https://github.com/luxengine/) , which provides a `float32` [math](https://godoc.org/github.com/luxengine/math) package ([MIT license](https://github.com/luxengine/math/blob/master/LICENSE))
-- The original [engi](https://github.com/aljhager/engi) game engine which engo was based off of ([BSD license](https://github.com/ajhager/engi/blob/master/LICENSE))
+- [Lux](https://github.com/luxengine/) , which provides a `float32` [math](https://godoc.org/github.com/luxengine/math) package ([BSD-3 license](https://github.com/luxengine/math/blob/master/LICENSE))
+- The original [engi](https://github.com/ajhager/engi) game engine which engo was based off of ([BSD license](https://github.com/ajhager/engi/blob/master/LICENSE))
