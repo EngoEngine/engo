@@ -370,7 +370,7 @@ func durToByteOffset(t *track, dur time.Duration) int64 {
 }
 
 // lastErr returns the last error or nil if the last operation
-// has been succesful.
+// has been successful.
 func lastErr() error {
 	if code := al.Error(); code != 0 {
 		return fmt.Errorf("audio: openal failed with %x", code)
