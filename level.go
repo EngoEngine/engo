@@ -1,18 +1,44 @@
 package engo
 
+import (
+	"engo.io/gl"
+)
+
 type Level struct {
-	Width      int
-	Height     int
+	width      int
+	height     int
 	TileWidth  int
 	TileHeight int
 	Tiles      []*tile
-	LineBounds []Line
+	LineBounds []*Line
 	Images     []*tile
+}
+
+func (t *tile) Height() float32 {
+	return float32(t.height)
+}
+
+func (t *tile) Width() float32 {
+	return float32(t.width)
+}
+
+func (t *tile) Texture() *gl.Texture {
+	return t.Image.Texture()
+}
+
+func (t *tile) Close() {
+	// noop
+}
+
+func (t *tile) View() (float32, float32, float32, float32) {
+	return t.Image.u, t.Image.v, t.Image.u2, t.Image.v2
 }
 
 type tile struct {
 	Point
-	Image *Region
+	height int
+	width  int
+	Image  *Region
 }
 
 type tilesheet struct {
@@ -50,12 +76,14 @@ func createLevelTiles(lvl *Level, layers []*layer, ts []*tile) []*tile {
 
 	for _, lay := range layers {
 		mapping := lay.TileMapping
-		for y := 0; y < lvl.Height; y++ {
-			for x := 0; x < lvl.Width; x++ {
-				idx := x + y*lvl.Width
+		for y := 0; y < lvl.height; y++ {
+			for x := 0; x < lvl.width; x++ {
+				idx := x + y*lvl.width
 				t := &tile{}
 				if tileIdx := int(mapping[idx]) - 1; tileIdx >= 0 {
 					t.Image = ts[tileIdx].Image
+					t.height = lvl.TileHeight
+					t.width = lvl.TileWidth
 					t.Point = Point{float32(x * lvl.TileWidth), float32(y * lvl.TileHeight)}
 				}
 				tilemap = append(tilemap, t)
