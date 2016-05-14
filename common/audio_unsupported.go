@@ -1,4 +1,4 @@
-//+build netgo windows android
+//+build windows android
 
 package common
 
