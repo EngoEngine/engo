@@ -314,13 +314,8 @@ func (*MouseZoomer) Priority() int          { return MouseZoomerPriority }
 func (*MouseZoomer) Remove(ecs.BasicEntity) {}
 
 func (c *MouseZoomer) Update(float32) {
-<<<<<<< 3b5b80fc9934ccec062781fc5ce50cc38fea26d6:common/camera.go
-	if engo.Mouse.ScrollY != 0 {
-		engo.Mailbox.Dispatch(CameraMessage{Axis: ZAxis, Value: engo.Mouse.ScrollY * c.ZoomSpeed, Incremental: true})
-=======
 	if Input.Mouse.ScrollY != 0 {
 		Mailbox.Dispatch(CameraMessage{Axis: ZAxis, Value: Input.Mouse.ScrollY * c.ZoomSpeed, Incremental: true})
->>>>>>> Add mouse support to the Input Manager:camera.go
 	}
 }
 
@@ -338,32 +333,17 @@ func (*MouseRotator) Priority() int          { return MouseRotatorPriority }
 func (*MouseRotator) Remove(ecs.BasicEntity) {}
 
 func (c *MouseRotator) Update(float32) {
-<<<<<<< 3b5b80fc9934ccec062781fc5ce50cc38fea26d6:common/camera.go
 	if engo.Mouse.Button == engo.MouseButtonMiddle && engo.Mouse.Action == engo.Press {
 		c.pressed = true
 	}
 
-	if engo.Mouse.Action == engo.Release {
-=======
-	if Input.Mouse.Button == MouseButtonMiddle && Input.Mouse.Action == PRESS {
-		c.pressed = true
-	}
-
-	if Input.Mouse.Action == RELEASE {
->>>>>>> Add mouse support to the Input Manager:camera.go
+	if engo.Input.Mouse.Action == engo.Release {
 		c.pressed = false
 	}
 
 	if c.pressed {
-<<<<<<< 3b5b80fc9934ccec062781fc5ce50cc38fea26d6:common/camera.go
-		engo.Mailbox.Dispatch(CameraMessage{Axis: Angle, Value: (c.oldX - engo.Mouse.X) * -c.RotationSpeed, Incremental: true})
+		engo.Mailbox.Dispatch(CameraMessage{Axis: Angle, Value: (c.oldX - engo.Input.Mouse.X) * -c.RotationSpeed, Incremental: true})
 	}
 
 	c.oldX = engo.Mouse.X
-=======
-		Mailbox.Dispatch(CameraMessage{Axis: Angle, Value: (c.oldX - Input.Mouse.X) * -c.RotationSpeed, Incremental: true})
-	}
-
-	c.oldX = Input.Mouse.X
->>>>>>> Add mouse support to the Input Manager:camera.go
 }
