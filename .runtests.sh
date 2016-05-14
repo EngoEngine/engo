@@ -8,6 +8,9 @@ go get -t -v ./... || exit 1
 echo "Testing engo.io/engo using 'go test'"
 go test -v ./... || exit 1
 
+echo "Testing engo.io/engo using coveralls"
+go test -v -covermode=count -coverprofile=coverage.out
+$HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 # TODO: Fix the build so this actually passes
 # echo "Testing engo.io/engo using 'gopherjs test'"
 # gopherjs test
