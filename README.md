@@ -2,7 +2,7 @@
 [![Join the chat at https://gitter.im/EngoEngine/engo](https://badges.gitter.im/EngoEngine/engo.svg)](https://gitter.im/EngoEngine/engo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![License](https://img.shields.io/badge/License-MIT-blue.svg) [![Build Status](https://travis-ci.org/EngoEngine/engo.svg?branch=master)](https://travis-ci.org/EngoEngine/engo) [![Build status](https://ci.appveyor.com/api/projects/status/019qc8hncmhnje83?svg=true)](https://ci.appveyor.com/project/otraore/engo) [![Go Report Card](https://goreportcard.com/badge/engo.io/engo)](https://goreportcard.com/report/engo.io/engo) [![Coverage Status](https://coveralls.io/repos/github/EngoEngine/engo/badge.svg?branch=master)](https://coveralls.io/github/EngoEngine/engo?branch=master)
 
 A cross-platform game engine written in Go following an interpretation of the Entity Component System paradigm. Engo is
-currently compilable for Mac OSX, Linux and Windows. With the release of Go 1.4, sporting Android and the inception of
+currently compilable for Mac OSX, Linux and Windows. With the release of Go 1.4, suporting Android and the inception of
 iOS compatibility, mobile has been be added as a release target. Web support
 ([gopherjs](https://github.com/gopherjs/gopherjs)) is also available.
 
@@ -30,13 +30,13 @@ We have a [gitter](https://gitter.im/EngoEngine/engo) chat for people to join wh
 
 ## Getting Started
 
-### Theory: `core` vs `engo`
+### Theory: `common` vs `engo`
 
-There are currently two major important packages within this repository: `engo.io/engo` and `engo.io/engo/core`.
+There are currently two major important packages within this repository: `engo.io/engo` and `engo.io/engo/common`.
 
 The top level `engo` package contains the functionality of creating windows, starting the game, creating an OpenGL
 context and handling input. It is designed to be used with Systems designed as per `engo.io/ecs` specifications.
-The `core` package contains our ECS implementations of common game development Systems like a  `RenderSystem` or
+The `common` package contains our ECS implementations of common game development Systems like a  `RenderSystem` or
 `CameraSystem`.
 
 ### Practice: Getting it to Run
@@ -78,11 +78,11 @@ Thank you to everyone who has worked on, or with `Engo`. None of this would be p
 
 - [ajhager](https://github.com/ajhager): Building the original `engi`, which engo was based off of
 - [paked](https://github.com/paked): Adding ECS element, project maintenance and management
-- [Newbrict] (https://github.com/Newbrict): Font rendering, TMX support
+- [Newbrict](https://github.com/Newbrict): Font rendering, TMX support
 - [EtienneBruines](https://github.com/EtienneBruines): Rewriting the OpenGL code, maintenance and helping redesign the API
 - [otraore](https://github.com/otraore): Adding in GopherJS support, maintenance
 - [hydroflame](https://github.com/hydroflame): Shared his extensive knowledge about OpenGL, which enabled our `RenderSystem` and shaders
-- [Everyone else who has submitted PRs over the years, to any iteration of the project](https://github.com/EngoEngine/engo/graphs/contributors)
+- [Everyone else who has submitted PRs or issues over the years, to any iteration of the project](https://github.com/EngoEngine/engo/graphs/contributors)
 
 These are 3rd party projects that have made `engo` possible.
 - [Lux](https://github.com/luxengine/) , which provides a `float32` [math](https://godoc.org/github.com/luxengine/math) package ([BSD-3 license](https://github.com/luxengine/math/blob/master/LICENSE))
