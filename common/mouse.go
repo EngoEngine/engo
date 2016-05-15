@@ -34,11 +34,11 @@ type Mouse struct {
 	// ScrollY is the current scrolled position on the y component
 	ScrollY float32
 	// Action is the currently active Action
-	Action Action
+	Action engo.Action
 	// Button is which button is being pressed on the mouse
-	Button MouseButton
+	Button engo.MouseButton
 	// Modifier is whether any modifier mouse buttons are being pressed
-	Modifer Modifier
+	Modifer engo.Modifier
 }
 
 // MouseComponent is the location for the MouseSystem to store its results;
@@ -218,9 +218,8 @@ func (m *MouseSystem) Update(dt float32) {
 			case engo.Press:
 				switch engo.Input.Mouse.Button {
 				case engo.MouseButtonLeft:
-					e.MouseComponent.startedDragging = true
-				case MouseButtonLeft:
 					e.MouseComponent.Clicked = true
+					e.MouseComponent.startedDragging = true
 				case engo.MouseButtonRight:
 					e.MouseComponent.RightClicked = true
 				}
@@ -228,7 +227,7 @@ func (m *MouseSystem) Update(dt float32) {
 				m.mouseDown = true
 			case engo.Release:
 				switch engo.Input.Mouse.Button {
-				case MouseButtonLeft:
+				case engo.MouseButtonLeft:
 					e.MouseComponent.Released = true
 				case engo.MouseButtonRight:
 					e.MouseComponent.RightReleased = true

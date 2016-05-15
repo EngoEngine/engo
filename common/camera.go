@@ -314,8 +314,8 @@ func (*MouseZoomer) Priority() int          { return MouseZoomerPriority }
 func (*MouseZoomer) Remove(ecs.BasicEntity) {}
 
 func (c *MouseZoomer) Update(float32) {
-	if Input.Mouse.ScrollY != 0 {
-		Mailbox.Dispatch(CameraMessage{Axis: ZAxis, Value: Input.Mouse.ScrollY * c.ZoomSpeed, Incremental: true})
+	if engo.Input.Mouse.ScrollY != 0 {
+		engo.Mailbox.Dispatch(CameraMessage{Axis: ZAxis, Value: engo.Input.Mouse.ScrollY * c.ZoomSpeed, Incremental: true})
 	}
 }
 
@@ -333,7 +333,7 @@ func (*MouseRotator) Priority() int          { return MouseRotatorPriority }
 func (*MouseRotator) Remove(ecs.BasicEntity) {}
 
 func (c *MouseRotator) Update(float32) {
-	if engo.Mouse.Button == engo.MouseButtonMiddle && engo.Mouse.Action == engo.Press {
+	if engo.Input.Mouse.Button == engo.MouseButtonMiddle && engo.Input.Mouse.Action == engo.Press {
 		c.pressed = true
 	}
 
@@ -345,5 +345,5 @@ func (c *MouseRotator) Update(float32) {
 		engo.Mailbox.Dispatch(CameraMessage{Axis: Angle, Value: (c.oldX - engo.Input.Mouse.X) * -c.RotationSpeed, Incremental: true})
 	}
 
-	c.oldX = engo.Mouse.X
+	c.oldX = engo.Input.Mouse.X
 }

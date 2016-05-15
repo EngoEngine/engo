@@ -2,41 +2,46 @@ package main
 
 import (
 	"image/color"
+	"log"
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/common"
 )
 
 type DefaultScene struct{}
 
 type Player struct {
 	ecs.BasicEntity
-	engo.RenderComponent
-	engo.SpaceComponent
+	common.RenderComponent
+	common.SpaceComponent
 }
 
 func (*DefaultScene) Preload() {
-	engo.Files.Add("data/icon.png")
+	engo.Files.Load("icon.png")
 }
 
 func (*DefaultScene) Setup(w *ecs.World) {
-	engo.SetBackground(color.White)
+	common.SetBackground(color.White)
 
-	w.AddSystem(&engo.RenderSystem{})
+	w.AddSystem(&common.RenderSystem{})
 	w.AddSystem(&FollowSystem{})
 
 	// Retrieve a texture
-	texture := engo.Files.Image("icon.png")
+	texture, err := common.PreloadedSpriteSingle("icon.png")
+	if err != nil {
+		log.Println(err)
+	}
 
 	// Create an entity
 	guy := Player{BasicEntity: ecs.NewBasic()}
 
 	// Initialize the components, set scale to 8x
-	guy.RenderComponent = engo.RenderComponent{
+	guy.RenderComponent = common.RenderComponent{
 		Drawable: texture,
 		Scale:    engo.Point{8, 8},
 	}
-	guy.SpaceComponent = engo.SpaceComponent{
+	guy.SpaceComponent = common.SpaceComponent{
 		Position: engo.Point{0, 0},
 		Width:    texture.Width() * guy.RenderComponent.Scale.X,
 		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
@@ -45,7 +50,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	// Add it to appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *engo.RenderSystem:
+		case *common.RenderSystem:
 			sys.Add(&guy.BasicEntity, &guy.RenderComponent, &guy.SpaceComponent)
 		case *FollowSystem:
 			sys.Add(&guy.BasicEntity, &guy.RenderComponent, &guy.SpaceComponent)
@@ -57,15 +62,15 @@ func (*DefaultScene) Type() string { return "GameWorld" }
 
 type followEntity struct {
 	*ecs.BasicEntity
-	*engo.RenderComponent
-	*engo.SpaceComponent
+	*common.RenderComponent
+	*common.SpaceComponent
 }
 
 type FollowSystem struct {
 	entities []followEntity
 }
 
-func (s *FollowSystem) Add(basic *ecs.BasicEntity, render *engo.RenderComponent, space *engo.SpaceComponent) {
+func (s *FollowSystem) Add(basic *ecs.BasicEntity, render *common.RenderComponent, space *common.SpaceComponent) {
 	s.entities = append(s.entities, followEntity{basic, render, space})
 }
 

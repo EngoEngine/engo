@@ -5,14 +5,14 @@ type Key int
 type Modifier int
 
 var (
-	MOVE    = Action(0)
-	PRESS   = Action(1)
-	RELEASE = Action(2)
-	NEUTRAL = Action(99)
-	SHIFT   = Modifier(0x0001)
-	CONTROL = Modifier(0x0002)
-	ALT     = Modifier(0x0004)
-	SUPER   = Modifier(0x0008)
+	Move    = Action(0)
+	Press   = Action(1)
+	Release = Action(2)
+	Neutral = Action(99)
+	Shift   = Modifier(0x0001)
+	Control = Modifier(0x0002)
+	Alt     = Modifier(0x0004)
+	Super   = Modifier(0x0008)
 )
 
 // MouseButton corresponds to a mouse button.

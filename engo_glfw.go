@@ -120,7 +120,7 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 	window.SetCursorPosCallback(func(window *glfw.Window, x, y float64) {
 		Input.Mouse.X, Input.Mouse.Y = float32(x), float32(y)
-		Input.Mouse.Action = MOVE
+		Input.Mouse.Action = Move
 	})
 
 	window.SetMouseButtonCallback(func(window *glfw.Window, b glfw.MouseButton, a glfw.Action, m glfw.ModifierKey) {
@@ -133,9 +133,9 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		Input.Mouse.Modifer = Modifier(m)
 
 		if a == glfw.Press {
-			Input.Mouse.Action = PRESS
+			Input.Mouse.Action = Press
 		} else {
-			Input.Mouse.Action = RELEASE
+			Input.Mouse.Action = Release
 		}
 	})
 
@@ -209,7 +209,7 @@ func RunIteration() {
 	if !opts.HeadlessMode {
 		// reset values to avoid catching the same "signal" twice
 		Input.Mouse.ScrollX, Input.Mouse.ScrollY = 0, 0
-		Input.Mouse.Action = NEUTRAL
+		Input.Mouse.Action = Neutral
 
 		window.SwapBuffers()
 	}
