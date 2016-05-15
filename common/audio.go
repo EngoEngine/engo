@@ -1,3 +1,4 @@
+//+build !android,!windows
 package common
 
 import (
