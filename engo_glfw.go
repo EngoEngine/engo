@@ -108,7 +108,7 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 	// TODO: verify these for retina displays
 	vp := Gl.GetViewport()
-	canvasWidth, windowWidth = float32(vp[2]), float32(vp[3])
+	canvasWidth, canvasHeight = float32(vp[2]), float32(vp[3])
 
 	window.SetFramebufferSizeCallback(func(window *glfw.Window, w, h int) {
 		width, height = window.GetFramebufferSize()
