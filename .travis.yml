@@ -1,33 +1,35 @@
 sudo: false
 addons:
-    apt_packages:
-        - libgl1-mesa-dev
-        - libopenal-dev
-        - xorg-dev
+  apt_packages:
+  - libgl1-mesa-dev
+  - libopenal-dev
+  - xorg-dev
 branch:
-    only:
-    - "master"
+  only:
+  - master
 language: go
 go_import_path: engo.io/engo
 go:
-    - 1.6.2
+- 1.6.2
 before_install:
-    - go get golang.org/x/tools/cmd/cover
-    - go get github.com/mattn/goveralls
-    - go get github.com/gopherjs/gopherjs
-    - gopherjs get "honnef.co/go/js/dom"
-    - gopherjs get "honnef.co/go/js/xhr"
-    - go get golang.org/x/mobile/cmd/gomobile
-    - gomobile init
+- go get golang.org/x/tools/cmd/cover
+- go get github.com/mattn/goveralls
+- go get github.com/gopherjs/gopherjs
+- gopherjs get "honnef.co/go/js/dom"
+- gopherjs get "honnef.co/go/js/xhr"
+- go get golang.org/x/mobile/cmd/gomobile
+- gomobile init
 install:
-    - # Do nothing. This is needed to prevent default install action "go get -t -v ./..." from happening here (we want it to happen inside script step).
+-
 before_script:
-    - export DISPLAY=:99.0
-    - sh -e /etc/init.d/xvfb start
-    - sleep 3 # Give xvfb some time to start
-script: ./.runtests.sh
-
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- sleep 3
+script: "./.runtests.sh"
 cache:
-    apt: true
-    directories:
-    - $GOPATH/pkg/gomobile
+  apt: true
+  directories:
+  - "$GOPATH/pkg/gomobile"
+env:
+  global:
+    secure: BVZrmTzkg/CPF6QDsQWyh/K+bd4yU3N3PFzcERaO6i32ln+uqaejhMtCsTXrr439vKH33DF5BFG34W+K4IbqwQyBgzjzUnotPXcWtXSuiojSOmCWkuw8qiPBuVTAsahBhP6N11LgUAcgkfAl968CkfIN3I7gBF916PFsefZtn6s=
