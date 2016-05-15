@@ -128,8 +128,8 @@ func runLoop(defaultScene Scene, headless bool) {
 				fps.Draw(sz)
 
 				// Reset mouse if needed
-				if Input.Mouse.Action == RELEASE {
-					Input.Mouse.Action = NEUTRAL
+				if Input.Mouse.Action == Release {
+					Input.Mouse.Action = Neutral
 					a.Publish() // same as SwapBuffers
 				}
 
