@@ -42,7 +42,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 		Scale:    engo.Point{8, 8},
 	}
 	guy.SpaceComponent = common.SpaceComponent{
-		Position: engo.Point{1, 1},
+		Position: engo.Point{0, 0},
 		Width:    texture.Width() * guy.RenderComponent.Scale.X,
 		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
 	}
