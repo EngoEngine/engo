@@ -48,8 +48,8 @@ func (formats *Formats) SetRoot(root string) {
 	formats.root = root
 }
 
-// GetRoot returns the currently set root directory for assets
-func (formats *Formats) GetRoot() string {
+// Root returns the currently set root directory for assets
+func (formats *Formats) Root() string {
 	return formats.root
 }
 
