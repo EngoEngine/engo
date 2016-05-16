@@ -15,7 +15,7 @@ import (
 // Load processes the data stream and parses it as an audio file
 func (i *audioLoader) Load(url string, data io.Reader) error {
 
-	player, err := audio.NewPlayer(engo.Files.GetRoot()+"/"+url, 0, 0)
+	player, err := audio.NewPlayer(engo.Files.Root()+"/"+url, 0, 0)
 	if err != nil {
 		return fmt.Errorf("%s (are you running `core.AudioSystemPreload()` before preloading .wav files?)", err.Error())
 	}
