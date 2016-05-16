@@ -33,6 +33,8 @@ const (
 	// DefaultHorizontalAxis is the name of the default horizontal axis, as used internally in `engo` when `StandardInputs`
 	// is defined.
 	DefaultHorizontalAxis = "horizontal"
+	DefaultMouseXAxis     = "mouse x"
+	DefaultMouseYAxis     = "mouse y"
 )
 
 type RunOptions struct {
@@ -124,6 +126,9 @@ func Run(o RunOptions, defaultScene Scene) {
 
 		Input.RegisterAxis(DefaultHorizontalAxis, AxisKeyPair{A, D}, AxisKeyPair{ArrowLeft, ArrowRight})
 		Input.RegisterAxis(DefaultVerticalAxis, AxisKeyPair{W, S}, AxisKeyPair{ArrowUp, ArrowDown})
+
+		Input.RegisterAxis(DefaultMouseXAxis, NewAxisMouse(AxisMouseHori))
+		Input.RegisterAxis(DefaultMouseYAxis, NewAxisMouse(AxisMouseVert))
 	}
 
 	Files.SetRoot(opts.AssetsRoot)
