@@ -40,6 +40,7 @@ func (keys AxisKeyPair) Value() float32 {
 	return AxisNeutral
 }
 
+// AxisMouseDirection is the direction (X or Y) which the mouse is being tracked for.
 type AxisMouseDirection uint
 
 const (
