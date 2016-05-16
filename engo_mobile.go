@@ -128,25 +128,24 @@ func runLoop(defaultScene Scene, headless bool) {
 				fps.Draw(sz)
 
 				// Reset mouse if needed
-				if Mouse.Action == Release {
-					Mouse.Action = Neutral
+				if Input.Mouse.Action == Release {
+					Input.Mouse.Action = Neutral
+					a.Publish() // same as SwapBuffers
 				}
-
-				a.Publish() // same as SwapBuffers
 
 				// Drive the animation by preparing to paint the next frame
 				// after this one is shown. - FPS is ignored here!
 				a.Send(paint.Event{})
 			case touch.Event:
-				Mouse.X = e.X
-				Mouse.Y = e.Y
+				Input.Mouse.X = e.X
+				Input.Mouse.Y = e.Y
 				switch e.Type {
 				case touch.TypeBegin:
-					Mouse.Action = Press
+					Input.Mouse.Action = Press
 				case touch.TypeMove:
-					Mouse.Action = Move
+					Input.Mouse.Action = Move
 				case touch.TypeEnd:
-					Mouse.Action = Release
+					Input.Mouse.Action = Release
 				}
 			}
 		}

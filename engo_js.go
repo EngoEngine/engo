@@ -93,23 +93,23 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 	w.AddEventListener("mousemove", false, func(ev dom.Event) {
 		mm := ev.(*dom.MouseEvent)
-		Mouse.X = float32(float64(mm.ClientX) * devicePixelRatio)
-		Mouse.Y = float32(float64(mm.ClientY) * devicePixelRatio)
+		Input.Mouse.X = float32(float64(mm.ClientX) * devicePixelRatio)
+		Input.Mouse.Y = float32(float64(mm.ClientY) * devicePixelRatio)
 		//Mouse.Action = MOVE
 	})
 
 	w.AddEventListener("mousedown", false, func(ev dom.Event) {
 		mm := ev.(*dom.MouseEvent)
-		Mouse.X = float32(float64(mm.ClientX) * devicePixelRatio)
-		Mouse.Y = float32(float64(mm.ClientY) * devicePixelRatio)
-		Mouse.Action = Press
+		Input.Mouse.X = float32(float64(mm.ClientX) * devicePixelRatio)
+		Input.Mouse.Y = float32(float64(mm.ClientY) * devicePixelRatio)
+		Input.Mouse.Action = Press
 	})
 
 	w.AddEventListener("mouseup", false, func(ev dom.Event) {
 		mm := ev.(*dom.MouseEvent)
-		Mouse.X = float32(float64(mm.ClientX) * devicePixelRatio)
-		Mouse.Y = float32(float64(mm.ClientY) * devicePixelRatio)
-		Mouse.Action = Release
+		Input.Mouse.X = float32(float64(mm.ClientX) * devicePixelRatio)
+		Input.Mouse.Y = float32(float64(mm.ClientY) * devicePixelRatio)
+		Input.Mouse.Action = Release
 	})
 }
 
@@ -124,7 +124,7 @@ func GameHeight() float32 {
 }
 
 func CursorPos() (x, y float64) {
-	return float64(Mouse.X), float64(Mouse.Y)
+	return float64(Input.Mouse.X), float64(Input.Mouse.Y)
 }
 
 // SetTitle changes the title of the page to the given string
