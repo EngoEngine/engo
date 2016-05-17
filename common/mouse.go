@@ -190,7 +190,7 @@ func (m *MouseSystem) Update(dt float32) {
 
 		if e.RenderComponent != nil {
 			// Hardcoded special case for the HUD | TODO: make generic instead of hardcoding
-			if e.RenderComponent.shader == HUDShader {
+			if e.RenderComponent.shader == HUDShader || e.RenderComponent.shader == LegacyHUDShader {
 				mx = engo.Input.Mouse.X
 				my = engo.Input.Mouse.Y
 			}
@@ -199,10 +199,9 @@ func (m *MouseSystem) Update(dt float32) {
 		// If the Mouse component is a tracker we always update it
 		// Check if the X-value is within range
 		// and if the Y-value is within range
-		pos := e.SpaceComponent.AABB()
 
 		if e.MouseComponent.Track || e.MouseComponent.startedDragging ||
-			mx > pos.Min.X && mx < pos.Max.X && my > pos.Min.Y && my < pos.Max.Y {
+			e.SpaceComponent.Within(engo.Point{mx, my}) {
 
 			e.MouseComponent.Enter = !e.MouseComponent.Hovered
 			e.MouseComponent.Hovered = true
