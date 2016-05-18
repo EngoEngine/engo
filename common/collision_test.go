@@ -26,10 +26,14 @@ func TestSpaceComponent_Within(t *testing.T) {
 		engo.Point{120, 50},
 
 		// On the edge:
-		engo.Point{100, 100},
 		engo.Point{0, 0},
 		engo.Point{0, 50},
+		engo.Point{0, 100},
 		engo.Point{50, 0},
+		engo.Point{50, 100},
+		engo.Point{100, 0},
+		engo.Point{100, 50},
+		engo.Point{100, 100},
 	}
 
 	for _, p := range pass {

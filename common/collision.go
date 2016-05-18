@@ -5,6 +5,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"github.com/luxengine/glm"
 	"github.com/luxengine/math"
 )
 
@@ -43,27 +44,27 @@ func (sc SpaceComponent) AABB() engo.AABB {
 	corners := sc.Corners()
 
 	var (
-		X_MIN float32 = -math.MaxFloat32
-		X_MAX float32 = math.MaxFloat32
-		Y_MIN float32 = -math.MaxFloat32
-		Y_MAX float32 = math.MaxFloat32
+		xMin float32 = -math.MaxFloat32
+		xMax float32 = math.MaxFloat32
+		yMin float32 = -math.MaxFloat32
+		yMax float32 = math.MaxFloat32
 	)
 
 	for i := 0; i < 4; i++ {
-		if corners[i].X < X_MIN {
-			X_MIN = corners[i].X
-		} else if corners[i].X > X_MAX {
-			X_MAX = corners[i].X
+		if corners[i].X < xMin {
+			xMin = corners[i].X
+		} else if corners[i].X > xMax {
+			xMax = corners[i].X
 		}
-		if corners[i].Y < Y_MIN {
-			Y_MIN = corners[i].Y
+		if corners[i].Y < yMin {
+			yMin = corners[i].Y
 		}
-		if corners[i].Y > Y_MAX {
-			Y_MAX = corners[i].Y
+		if corners[i].Y > yMax {
+			yMax = corners[i].Y
 		}
 	}
 
-	return engo.AABB{engo.Point{X_MIN, Y_MIN}, engo.Point{X_MAX, Y_MAX}}
+	return engo.AABB{engo.Point{xMin, yMin}, engo.Point{xMax, yMax}}
 }
 
 // Corners returns the location of the four corners of the rectangular plane defined by the `SpaceComponent`, taking
@@ -95,7 +96,7 @@ func (sc SpaceComponent) Within(p engo.Point) bool {
 
 	for i := 0; i < 4; i++ {
 		for j := i + 1; j < 4; j++ {
-			if triangleArea(points[i], points[j], p) > halfArea {
+			if t := triangleArea(points[i], points[j], p); t > halfArea || glm.FloatEqual(t, halfArea) {
 				return false
 			}
 		}
