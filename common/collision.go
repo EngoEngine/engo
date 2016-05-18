@@ -5,6 +5,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"github.com/luxengine/glm"
 	"github.com/luxengine/math"
 )
 
@@ -27,8 +28,11 @@ func (sc *SpaceComponent) Center(p engo.Point) {
 
 // AABB returns the minimum and maximum point for the given SpaceComponent. It hereby takes into account the
 // rotation of the Component - it may very well be that the Minimum as given by engo.AABB, is smaller than the Position
-// of the object (i.e. when rotated). As this method takes into account the rotation, it should be used only when
-// required.
+// of the object (i.e. when rotated).
+//
+// This basically returns the "outer rectangle" of the plane defined by the `SpaceComponent`. Since this returns two
+// points, a minimum and a maximum, the "rectangle" resulting from this `AABB`, is not rotated in any way. However,
+// depending on the rotation of the `SpaceComponent`, this `AABB` may be larger than the original `SpaceComponent`.
 func (sc SpaceComponent) AABB() engo.AABB {
 	if sc.Rotation == 0 {
 		return engo.AABB{
@@ -37,33 +41,84 @@ func (sc SpaceComponent) AABB() engo.AABB {
 		}
 	}
 
-	sin, cos := math.Sincos(sc.Rotation * math.Pi / 180)
-	xmin := sc.Position.X
-	xmax := sc.Position.X + sc.Width*cos - sc.Height*sin
-	ymin := sc.Position.Y
-	ymax := sc.Position.Y + sc.Height*cos + sc.Width*sin
+	corners := sc.Corners()
 
 	var (
-		X_MIN, X_MAX, Y_MIN, Y_MAX float32
+		xMin float32 = -math.MaxFloat32
+		xMax float32 = math.MaxFloat32
+		yMin float32 = -math.MaxFloat32
+		yMax float32 = math.MaxFloat32
 	)
 
-	if xmin < xmax {
-		X_MIN = xmin
-		X_MAX = xmax
-	} else {
-		X_MIN = xmax
-		X_MAX = xmin
+	for i := 0; i < 4; i++ {
+		if corners[i].X < xMin {
+			xMin = corners[i].X
+		} else if corners[i].X > xMax {
+			xMax = corners[i].X
+		}
+		if corners[i].Y < yMin {
+			yMin = corners[i].Y
+		}
+		if corners[i].Y > yMax {
+			yMax = corners[i].Y
+		}
 	}
 
-	if ymin < ymax {
-		Y_MIN = ymin
-		Y_MAX = ymax
-	} else {
-		Y_MIN = ymax
-		Y_MAX = ymin
+	return engo.AABB{engo.Point{xMin, yMin}, engo.Point{xMax, yMax}}
+}
+
+// Corners returns the location of the four corners of the rectangular plane defined by the `SpaceComponent`, taking
+// into account any possible rotation.
+func (sc SpaceComponent) Corners() (points [4]engo.Point) {
+	points[0].X = sc.Position.X
+	points[0].Y = sc.Position.Y
+
+	sin, cos := math.Sincos(sc.Rotation * math.Pi / 180)
+
+	points[1].X = points[0].X + sc.Width*cos
+	points[1].Y = points[0].Y + sc.Width*sin
+
+	points[2].X = points[0].X - sc.Height*sin
+	points[2].Y = points[0].Y + sc.Height*cos
+
+	points[3].X = points[0].X + sc.Width*cos - sc.Height*sin
+	points[3].Y = points[0].Y + sc.Height*cos + sc.Width*sin
+
+	return
+}
+
+// Within indicates whether or not the given point is within the rectangular plane as defined by this `SpaceComponent`.
+// If it's on the border, it is considered "not within".
+func (sc SpaceComponent) Within(p engo.Point) bool {
+	points := sc.Corners()
+
+	halfArea := (sc.Width * sc.Height) / 2
+
+	for i := 0; i < 4; i++ {
+		for j := i + 1; j < 4; j++ {
+			if t := triangleArea(points[i], points[j], p); t > halfArea || glm.FloatEqual(t, halfArea) {
+				return false
+			}
+		}
 	}
 
-	return engo.AABB{engo.Point{X_MIN, Y_MIN}, engo.Point{X_MAX, Y_MAX}}
+	return true
+}
+
+// triangleArea computes the area of the triangle given by the three points
+func triangleArea(p1, p2, p3 engo.Point) float32 {
+	// Law of cosines states: (note a2 = math.Pow(a, 2))
+	// a2 = b2 + c2 - 2bc*cos(alpha)
+	// This ends in: alpha = arccos ((-a2 + b2 + c2)/(2bc))
+	a := p1.PointDistance(p3)
+	b := p1.PointDistance(p2)
+	c := p2.PointDistance(p3)
+	alpha := math.Acos((-math.Pow(a, 2) + math.Pow(b, 2) + math.Pow(c, 2)) / (2 * b * c))
+
+	// Law of sines state: a / sin(alpha) = c / sin(gamma)
+	height := (c / math.Sin(math.Pi/2)) * math.Sin(alpha)
+
+	return (b * height) / 2
 }
 
 type CollisionComponent struct {
