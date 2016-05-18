@@ -8,14 +8,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var cam *cameraSystem
+var cam *CameraSystem
 
 func initialize() {
 	engo.Mailbox = &engo.MessageManager{}
 	CameraBounds = engo.AABB{engo.Point{0, 0}, engo.Point{300, 300}}
 	w := &ecs.World{}
 
-	cam = &cameraSystem{}
+	cam = &CameraSystem{}
 	cam.New(w)
 }
 

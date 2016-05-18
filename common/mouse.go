@@ -103,7 +103,7 @@ type mouseEntity struct {
 type MouseSystem struct {
 	entities []mouseEntity
 	world    *ecs.World
-	camera   *cameraSystem
+	camera   *CameraSystem
 
 	mouseX    float32
 	mouseY    float32
@@ -119,7 +119,7 @@ func (m *MouseSystem) New(w *ecs.World) {
 	// First check if the CameraSystem is available
 	for _, system := range m.world.Systems() {
 		switch sys := system.(type) {
-		case *cameraSystem:
+		case *CameraSystem:
 			m.camera = sys
 		}
 	}

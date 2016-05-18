@@ -42,7 +42,7 @@ type basicShader struct {
 	viewMatrix       []float32
 	modelMatrix      []float32
 
-	camera        *cameraSystem
+	camera        *CameraSystem
 	cameraEnabled bool
 }
 
@@ -128,7 +128,7 @@ void main (void) {
 	if s.cameraEnabled {
 		for _, system := range w.Systems() {
 			switch sys := system.(type) {
-			case *cameraSystem:
+			case *CameraSystem:
 				s.camera = sys
 			}
 		}
@@ -343,7 +343,7 @@ type legacyShader struct {
 	viewMatrix       []float32
 	modelMatrix      []float32
 
-	camera        *cameraSystem
+	camera        *CameraSystem
 	cameraEnabled bool
 
 	lastBuffer *gl.Buffer
@@ -461,7 +461,7 @@ void main (void) {
 	if l.cameraEnabled {
 		for _, system := range w.Systems() {
 			switch sys := system.(type) {
-			case *cameraSystem:
+			case *CameraSystem:
 				l.camera = sys
 			}
 		}
