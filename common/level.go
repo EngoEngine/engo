@@ -1,11 +1,8 @@
-//+build ignore
-
 package common
-
-import "engo.io/engo"
 
 import (
 	"engo.io/gl"
+        "engo.io/engo"
 )
 
 type Level struct {
@@ -14,7 +11,7 @@ type Level struct {
 	TileWidth  int
 	TileHeight int
 	Tiles      []*tile
-	LineBounds []*Line
+	LineBounds []*engo.Line
 	Images     []*tile
 }
 
@@ -27,7 +24,7 @@ func (t *tile) Width() float32 {
 }
 
 func (t *tile) Texture() *gl.Texture {
-	return t.Image.Texture()
+	return t.Image.id
 }
 
 func (t *tile) Close() {
@@ -35,18 +32,18 @@ func (t *tile) Close() {
 }
 
 func (t *tile) View() (float32, float32, float32, float32) {
-	return t.Image.u, t.Image.v, t.Image.u2, t.Image.v2
+	return t.Image.View()
 }
 
 type tile struct {
-	Point
+	engo.Point
 	height int
 	width  int
-	Image  *Region
+	Image  *Texture
 }
 
 type tilesheet struct {
-	Image    *Texture
+	Image    *TextureResource
 	Firstgid int
 }
 
@@ -57,17 +54,28 @@ type layer struct {
 
 func createTileset(lvl *Level, sheets []*tilesheet) []*tile {
 	tileset := make([]*tile, 0)
-	tw := lvl.TileWidth
-	th := lvl.TileHeight
+	tw := float32(lvl.TileWidth)
+	th := float32(lvl.TileHeight)
 
 	for _, sheet := range sheets {
-		setWidth := int(sheet.Image.Width()) / tw
-		setHeight := int(sheet.Image.Height()) / th
-		totalTiles := setWidth * setHeight
+		setWidth := sheet.Image.Width / tw
+		setHeight := sheet.Image.Height / th
+		totalTiles := int(setWidth * setHeight)
 
 		for i := 0; i < totalTiles; i++ {
 			t := &tile{}
-			t.Image = regionFromSheet(sheet.Image, tw, th, i)
+			setWidth := sheet.Image.Width / tw
+			x := float32(i%int(setWidth)) * tw
+			y := float32(i/int(setWidth)) * th
+
+			invTexWidth := 1.0 / float32(sheet.Image.Width)
+			invTexHeight := 1.0 / float32(sheet.Image.Height)
+
+			u := float32(x) * invTexWidth
+			v := float32(y) * invTexHeight
+			u2 := float32(x+tw) * invTexWidth
+			v2 := float32(y+th) * invTexHeight
+			t.Image = &Texture{id: sheet.Image.Texture, width: tw, height: th, viewport: engo.AABB{engo.Point{u, v}, engo.Point{u2, v2}}}
 			tileset = append(tileset, t)
 		}
 	}
