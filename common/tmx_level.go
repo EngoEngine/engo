@@ -170,9 +170,13 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 
 	lvl.Tiles = createLevelTiles(lvl, lvlLayers, lvlTileset)
 
-	for _, o := range tlvl.ObjGroups[0].Objects {
-		p := o.Polylines[0].Points
-		lvl.LineBounds = append(lvl.LineBounds, pointStringToLines(p, o.X, o.Y)...)
+	// check if there are no object layers
+	if tlvl.ObjGroups != nil {
+
+		for _, o := range tlvl.ObjGroups[0].Objects {
+			p := o.Polylines[0].Points
+			lvl.LineBounds = append(lvl.LineBounds, pointStringToLines(p, o.X, o.Y)...)
+		}
 	}
 
 	for i := 0; i < len(tlvl.ImgLayers); i++ {
