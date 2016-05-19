@@ -84,12 +84,13 @@ func (t ByFirstgid) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
 func (t ByFirstgid) Less(i, j int) bool { return t[i].Firstgid < t[j].Firstgid }
 
 // MUST BE base64 ENCODED and COMPRESSED WITH zlib!
-func createLevelFromTmx(tmx string) (*Level, error) {
+func createLevelFromTmx(tmx, tmxUrl string) (*Level, error) {
 	tlvl := &TMXLevel{}
 	lvl := &Level{}
 
 	if err := xml.Unmarshal([]byte(tmx), &tlvl); err != nil {
 		fmt.Printf("Error unmarshalling XML: %v", err)
+                return lvl, err
 	}
 
 	// Extract the tile mappings from the compressed data at each layer
@@ -131,11 +132,11 @@ func createLevelFromTmx(tmx string) (*Level, error) {
 
 	// Load in the images needed for the tilesets
 	for k, ts := range tlvl.Tilesets {
-		url := ts.ImageSrc.Source
-		if err := engo.Files.Load("maps/" + url); err != nil {
+		url := path.Join(path.Dir(tmxUrl), ts.ImageSrc.Source)
+		if err := engo.Files.Load(url); err != nil {
 			return lvl, err
 		}
-		image, _ := engo.Files.Resource("maps/" + url)
+		image, _ := engo.Files.Resource(url)
 		texResource := image.(TextureResource)
 		ts.Image = &texResource
 		tlvl.Tilesets[k] = ts

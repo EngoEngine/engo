@@ -7,7 +7,7 @@ import (
 	"io"
 )
 
-// TMXResource is a wrapper for a level that was created from a Tile Map XML
+// TMXResource contains a level created from a Tile Map XML
 type TMXResource struct {
 	Level *Level
 	url   string
@@ -19,10 +19,10 @@ func (r TMXResource) URL() string {
 
 // tmxLoader is responsible for managing '.tmx' files within 'engo.Files'
 type tmxLoader struct {
-	tmxs map[string]TMXResource
+	levels map[string]TMXResource
 }
 
-// Load will read the tmx file into a string to create a level using createLevelFromTmx.  Any image files required for creating the level will be loaded in as needed.
+// Load will load the tmx file and any other image resources that are needed
 func (t *tmxLoader) Load(url string, data io.Reader) error {
 	buf := new(bytes.Buffer)
 	_, err := buf.ReadFrom(data)
@@ -30,31 +30,31 @@ func (t *tmxLoader) Load(url string, data io.Reader) error {
 		return err
 	}
 
-	lvl, err := createLevelFromTmx(buf.String())
+	lvl, err := createLevelFromTmx(buf.String(), url)
 	if err != nil {
 		return err
 	}
 
-	t.tmxs[url] = TMXResource{Level: lvl, url: url}
+	t.levels[url] = TMXResource{Level: lvl, url: url}
 	return nil
 }
 
 // Unload removes the preloaded level from the cache
 func (t *tmxLoader) Unload(url string) error {
-	delete(t.tmxs, url)
+	delete(t.levels, url)
 	return nil
 }
 
-// Resource retrieves the preloaded level, passed as a 'TMXResource'
+// Resource retrieves and returns the preloaded level of type 'TMXResource'
 func (t *tmxLoader) Resource(url string) (engo.Resource, error) {
-	tmx, ok := t.tmxs[url]
+	tmx, ok := t.levels[url]
 	if !ok {
-		return nil, fmt.Errorf("resource not loaded by `FileLoader`: %q", url)
+            return nil, fmt.Errorf("resource not loaded by `FileLoader`: %q", url)
 	}
 
 	return tmx, nil
 }
 
 func init() {
-	engo.Files.Register(".tmx", &tmxLoader{tmxs: make(map[string]TMXResource)})
+	engo.Files.Register(".tmx", &tmxLoader{levels: make(map[string]TMXResource)})
 }
