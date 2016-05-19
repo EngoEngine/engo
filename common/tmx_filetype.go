@@ -2,8 +2,8 @@ package common
 
 import (
 	"bytes"
+	"engo.io/engo"
 	"fmt"
-        "engo.io/engo"
 	"io"
 )
 
@@ -13,11 +13,13 @@ type TMXResource struct {
 	url   string
 }
 
+// URL retrieves the url to the .tmx file
 func (r TMXResource) URL() string {
 	return r.url
 }
 
-// tmxLoader is responsible for managing '.tmx' files within 'engo.Files'
+// tmxLoader is responsible for managing '.tmx' files within 'engo.Files'.
+// You can generate a TMX file with the Tiled map editor.
 type tmxLoader struct {
 	levels map[string]TMXResource
 }
@@ -49,7 +51,7 @@ func (t *tmxLoader) Unload(url string) error {
 func (t *tmxLoader) Resource(url string) (engo.Resource, error) {
 	tmx, ok := t.levels[url]
 	if !ok {
-            return nil, fmt.Errorf("resource not loaded by `FileLoader`: %q", url)
+		return nil, fmt.Errorf("resource not loaded by `FileLoader`: %q", url)
 	}
 
 	return tmx, nil

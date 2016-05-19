@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-        "engo.io/engo"
+	"engo.io/engo"
 )
 
 // Just used to create levelTileset->Image
@@ -90,7 +90,7 @@ func createLevelFromTmx(tmx, tmxUrl string) (*Level, error) {
 
 	if err := xml.Unmarshal([]byte(tmx), &tlvl); err != nil {
 		fmt.Printf("Error unmarshalling XML: %v", err)
-                return lvl, err
+		return lvl, err
 	}
 
 	// Extract the tile mappings from the compressed data at each layer

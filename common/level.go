@@ -1,8 +1,8 @@
 package common
 
 import (
+	"engo.io/engo"
 	"engo.io/gl"
-        "engo.io/engo"
 )
 
 type Level struct {
