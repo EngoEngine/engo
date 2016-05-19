@@ -105,7 +105,7 @@ func (*RenderSystem) Priority() int { return RenderSystemPriority }
 func (rs *RenderSystem) New(w *ecs.World) {
 	rs.world = w
 
-	w.AddSystem(&cameraSystem{})
+	w.AddSystem(&CameraSystem{})
 
 	if !engo.Headless() {
 		initShaders(w)

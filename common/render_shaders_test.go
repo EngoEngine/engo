@@ -17,7 +17,7 @@ func TestShadersInitialization(t *testing.T) {
 	defer engo.DestroyWindow()
 
 	w := &ecs.World{}
-	w.AddSystem(&cameraSystem{})
+	w.AddSystem(&CameraSystem{})
 	err := initShaders(w)
 	assert.NoError(t, err)
 }
