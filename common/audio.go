@@ -93,10 +93,10 @@ func (a *AudioSystem) New(w *ecs.World) {
 		AudioSystemPreload()
 	}
 
-	var cam *cameraSystem
+	var cam *CameraSystem
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *cameraSystem:
+		case *CameraSystem:
 			cam = sys
 		}
 	}
