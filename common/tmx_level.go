@@ -111,6 +111,7 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 		if err != nil {
 			return nil, err
 		}
+		defer zlr.Close()
 
 		tm := make([]uint32, 0)
 		var nextInt uint32
@@ -127,8 +128,6 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 			tm = append(tm, nextInt)
 		}
 		layer.TileMapping = tm
-
-		zlr.Close()
 	}
 
 	// Load in the images needed for the tilesets
@@ -170,7 +169,7 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 
 	lvl.Tiles = createLevelTiles(lvl, lvlLayers, lvlTileset)
 
-	// check if there are no object layers
+	// check if there are no object groups
 	if tlvl.ObjGroups != nil {
 
 		for _, o := range tlvl.ObjGroups[0].Objects {
@@ -192,7 +191,7 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 
 		curX := float32(tlvl.ImgLayers[i].X)
 		curY := float32(tlvl.ImgLayers[i].Y)
-		lvl.Images = append(lvl.Images, &tile{engo.Point{curX, curY}, tlvl.TileWidth, tlvl.TileHeight, curImg})
+		lvl.Images = append(lvl.Images, &tile{engo.Point{curX, curY}, curImg})
 	}
 
 	return lvl, nil
