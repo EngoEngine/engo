@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"encoding/xml"
 	"fmt"
+	"io"
 	"path"
 	"sort"
 	"strconv"
@@ -84,13 +85,12 @@ func (t ByFirstgid) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
 func (t ByFirstgid) Less(i, j int) bool { return t[i].Firstgid < t[j].Firstgid }
 
 // MUST BE base64 ENCODED and COMPRESSED WITH zlib!
-func createLevelFromTmx(tmx, tmxUrl string) (*Level, error) {
+func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 	tlvl := &TMXLevel{}
 	lvl := &Level{}
 
-	if err := xml.Unmarshal([]byte(tmx), &tlvl); err != nil {
-		fmt.Printf("Error unmarshalling XML: %v", err)
-		return lvl, err
+	if err := xml.Unmarshal(tmxBytes, &tlvl); err != nil {
+		return nil, err
 	}
 
 	// Extract the tile mappings from the compressed data at each layer
@@ -101,43 +101,49 @@ func createLevelFromTmx(tmx, tmxUrl string) (*Level, error) {
 		layer.CompData = []byte(strings.TrimSpace(string(layer.CompData)))
 
 		// Decode it out of base64
-		if n, err := base64.StdEncoding.Decode(layer.CompData, layer.CompData); err != nil {
-			fmt.Printf("error after %d bytes: %v", n, err)
-			return lvl, err
+		if _, err := base64.StdEncoding.Decode(layer.CompData, layer.CompData); err != nil {
+			return nil, err
 		}
 
 		// Decompress
 		b := bytes.NewReader(layer.CompData)
 		zlr, err := zlib.NewReader(b)
 		if err != nil {
-			fmt.Printf("error: %v", err)
-			return lvl, err
+			return nil, err
 		}
+		defer zlr.Close()
 
 		tm := make([]uint32, 0)
 		var nextInt uint32
 		for {
 			err = binary.Read(zlr, binary.LittleEndian, &nextInt)
 			if err != nil {
-				// this is -generally- EOF
-				//fmt.Println("binary.Read failed:", err)
-				break
+				// EOF or unexpected EOF error
+				if err == io.EOF {
+					break
+				}
+
+				return nil, err
 			}
 			tm = append(tm, nextInt)
 		}
 		layer.TileMapping = tm
-
-		zlr.Close()
 	}
 
 	// Load in the images needed for the tilesets
 	for k, ts := range tlvl.Tilesets {
 		url := path.Join(path.Dir(tmxUrl), ts.ImageSrc.Source)
 		if err := engo.Files.Load(url); err != nil {
-			return lvl, err
+			return nil, err
 		}
-		image, _ := engo.Files.Resource(url)
-		texResource := image.(TextureResource)
+		image, err := engo.Files.Resource(url)
+		if err != nil {
+			return nil, err
+		}
+		texResource, ok := image.(TextureResource)
+		if !ok {
+			return nil, fmt.Errorf("resource is not of type 'TextureResource': %q", url)
+		}
 		ts.Image = &texResource
 		tlvl.Tilesets[k] = ts
 	}
@@ -163,20 +169,29 @@ func createLevelFromTmx(tmx, tmxUrl string) (*Level, error) {
 
 	lvl.Tiles = createLevelTiles(lvl, lvlLayers, lvlTileset)
 
-	for _, o := range tlvl.ObjGroups[0].Objects {
-		p := o.Polylines[0].Points
-		lvl.LineBounds = append(lvl.LineBounds, pointStringToLines(p, o.X, o.Y)...)
+	// check if there are no object groups
+	if tlvl.ObjGroups != nil {
+
+		for _, o := range tlvl.ObjGroups[0].Objects {
+			p := o.Polylines[0].Points
+			lvl.LineBounds = append(lvl.LineBounds, pointStringToLines(p, o.X, o.Y)...)
+		}
 	}
 
 	for i := 0; i < len(tlvl.ImgLayers); i++ {
-		curImg, err := PreloadedSpriteSingle(path.Base(tlvl.ImgLayers[i].ImgSrc.Source))
+		url := path.Base(tlvl.ImgLayers[i].ImgSrc.Source)
+		if err := engo.Files.Load(url); err != nil {
+			return nil, err
+		}
+
+		curImg, err := PreloadedSpriteSingle(url)
 		if err != nil {
-			return lvl, nil
+			return nil, err
 		}
 
 		curX := float32(tlvl.ImgLayers[i].X)
 		curY := float32(tlvl.ImgLayers[i].Y)
-		lvl.Images = append(lvl.Images, &tile{engo.Point{curX, curY}, tlvl.TileWidth, tlvl.TileHeight, curImg})
+		lvl.Images = append(lvl.Images, &tile{engo.Point{curX, curY}, curImg})
 	}
 
 	return lvl, nil
@@ -205,7 +220,7 @@ func pointStringToLines(str string, xOff, yOff float64) []*engo.Line {
 		p2 := engo.Point{x2, y2}
 		newLine := &engo.Line{p1, p2}
 
-		lines = append(lines, newLine)
+		lines[i] = newLine
 	}
 
 	return lines

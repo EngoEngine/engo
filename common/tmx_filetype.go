@@ -1,10 +1,11 @@
 package common
 
 import (
-	"bytes"
-	"engo.io/engo"
 	"fmt"
 	"io"
+	"io/ioutil"
+
+	"engo.io/engo"
 )
 
 // TMXResource contains a level created from a Tile Map XML
@@ -26,13 +27,12 @@ type tmxLoader struct {
 
 // Load will load the tmx file and any other image resources that are needed
 func (t *tmxLoader) Load(url string, data io.Reader) error {
-	buf := new(bytes.Buffer)
-	_, err := buf.ReadFrom(data)
+	tmxBytes, err := ioutil.ReadAll(data)
 	if err != nil {
 		return err
 	}
 
-	lvl, err := createLevelFromTmx(buf.String(), url)
+	lvl, err := createLevelFromTmx(tmxBytes, url)
 	if err != nil {
 		return err
 	}

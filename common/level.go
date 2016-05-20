@@ -16,11 +16,11 @@ type Level struct {
 }
 
 func (t *tile) Height() float32 {
-	return float32(t.height)
+	return t.Image.Height()
 }
 
 func (t *tile) Width() float32 {
-	return float32(t.width)
+	return t.Image.Width()
 }
 
 func (t *tile) Texture() *gl.Texture {
@@ -28,7 +28,7 @@ func (t *tile) Texture() *gl.Texture {
 }
 
 func (t *tile) Close() {
-	// noop
+	t.Image.Close()
 }
 
 func (t *tile) View() (float32, float32, float32, float32) {
@@ -37,9 +37,7 @@ func (t *tile) View() (float32, float32, float32, float32) {
 
 type tile struct {
 	engo.Point
-	height int
-	width  int
-	Image  *Texture
+	Image *Texture
 }
 
 type tilesheet struct {
@@ -64,7 +62,6 @@ func createTileset(lvl *Level, sheets []*tilesheet) []*tile {
 
 		for i := 0; i < totalTiles; i++ {
 			t := &tile{}
-			setWidth := sheet.Image.Width / tw
 			x := float32(i%int(setWidth)) * tw
 			y := float32(i/int(setWidth)) * th
 
@@ -94,11 +91,10 @@ func createLevelTiles(lvl *Level, layers []*layer, ts []*tile) []*tile {
 				t := &tile{}
 				if tileIdx := int(mapping[idx]) - 1; tileIdx >= 0 {
 					t.Image = ts[tileIdx].Image
-
-					t.height = lvl.TileHeight
-					t.width = lvl.TileWidth
 					t.Point = engo.Point{float32(x * lvl.TileWidth), float32(y * lvl.TileHeight)}
+
 				}
+
 				tilemap = append(tilemap, t)
 			}
 		}
