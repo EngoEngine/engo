@@ -51,7 +51,7 @@ func (c *Clock) Delta() float32 {
 	return float32(float64(c.deltaStamp) / float64(secondsInNano))
 }
 
-// FPS is the amount of frames per second, computed every time a tick occurs at least a second after the previous update
+// Fps is the amount of frames per second, computed every time a tick occurs at least a second after the previous update
 func (c *Clock) Fps() float32 {
 	return float32(c.perSecond)
 }
