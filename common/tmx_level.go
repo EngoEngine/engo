@@ -1,5 +1,3 @@
-//+build ignore
-
 package common
 
 import (
@@ -9,7 +7,7 @@ import (
 	"encoding/binary"
 	"encoding/xml"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"path"
 	"sort"
 	"strconv"
@@ -31,7 +29,7 @@ type TMXTileset struct {
 	TileWidth  int           `xml:"tilewidth,attr"`
 	TileHeight int           `xml:"tileheight,attr"`
 	ImageSrc   TMXTilesetSrc `xml:"image"`
-	Image      *Texture
+	Image      *TextureResource
 }
 
 type TMXLayer struct {
@@ -87,17 +85,12 @@ func (t ByFirstgid) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
 func (t ByFirstgid) Less(i, j int) bool { return t[i].Firstgid < t[j].Firstgid }
 
 // MUST BE base64 ENCODED and COMPRESSED WITH zlib!
-func createLevelFromTmx(r Resource) (*Level, error) {
+func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 	tlvl := &TMXLevel{}
 	lvl := &Level{}
 
-	tmx, err := readTmx(r.url)
-	if err != nil {
-		return lvl, err
-	}
-
-	if err := xml.Unmarshal([]byte(tmx), &tlvl); err != nil {
-		fmt.Printf("Error unmarshalling XML: %v", err)
+	if err := xml.Unmarshal(tmxBytes, &tlvl); err != nil {
+		return nil, err
 	}
 
 	// Extract the tile mappings from the compressed data at each layer
@@ -108,38 +101,50 @@ func createLevelFromTmx(r Resource) (*Level, error) {
 		layer.CompData = []byte(strings.TrimSpace(string(layer.CompData)))
 
 		// Decode it out of base64
-		if n, err := base64.StdEncoding.Decode(layer.CompData, layer.CompData); err != nil {
-			fmt.Printf("error after %d bytes: %v", n, err)
-			return lvl, err
+		if _, err := base64.StdEncoding.Decode(layer.CompData, layer.CompData); err != nil {
+			return nil, err
 		}
 
 		// Decompress
 		b := bytes.NewReader(layer.CompData)
 		zlr, err := zlib.NewReader(b)
 		if err != nil {
-			fmt.Printf("error: %v", err)
-			return lvl, err
+			return nil, err
 		}
+		defer zlr.Close()
 
 		tm := make([]uint32, 0)
 		var nextInt uint32
 		for {
 			err = binary.Read(zlr, binary.LittleEndian, &nextInt)
 			if err != nil {
-				// this is -generally- EOF
-				//fmt.Println("binary.Read failed:", err)
-				break
+				// EOF or unexpected EOF error
+				if err == io.EOF {
+					break
+				}
+
+				return nil, err
 			}
 			tm = append(tm, nextInt)
 		}
 		layer.TileMapping = tm
-
-		zlr.Close()
 	}
 
 	// Load in the images needed for the tilesets
 	for k, ts := range tlvl.Tilesets {
-		ts.Image = Files.Image(path.Base(ts.ImageSrc.Source))
+		url := path.Join(path.Dir(tmxUrl), ts.ImageSrc.Source)
+		if err := engo.Files.Load(url); err != nil {
+			return nil, err
+		}
+		image, err := engo.Files.Resource(url)
+		if err != nil {
+			return nil, err
+		}
+		texResource, ok := image.(TextureResource)
+		if !ok {
+			return nil, fmt.Errorf("resource is not of type 'TextureResource': %q", url)
+		}
+		ts.Image = &texResource
 		tlvl.Tilesets[k] = ts
 	}
 
@@ -164,23 +169,35 @@ func createLevelFromTmx(r Resource) (*Level, error) {
 
 	lvl.Tiles = createLevelTiles(lvl, lvlLayers, lvlTileset)
 
-	for _, o := range tlvl.ObjGroups[0].Objects {
-		p := o.Polylines[0].Points
-		lvl.LineBounds = append(lvl.LineBounds, pointStringToLines(p, o.X, o.Y)...)
+	// check if there are no object groups
+	if tlvl.ObjGroups != nil {
+
+		for _, o := range tlvl.ObjGroups[0].Objects {
+			p := o.Polylines[0].Points
+			lvl.LineBounds = append(lvl.LineBounds, pointStringToLines(p, o.X, o.Y)...)
+		}
 	}
 
 	for i := 0; i < len(tlvl.ImgLayers); i++ {
-		curImg := Files.Image(path.Base(tlvl.ImgLayers[i].ImgSrc.Source))
+		url := path.Base(tlvl.ImgLayers[i].ImgSrc.Source)
+		if err := engo.Files.Load(url); err != nil {
+			return nil, err
+		}
+
+		curImg, err := PreloadedSpriteSingle(url)
+		if err != nil {
+			return nil, err
+		}
+
 		curX := float32(tlvl.ImgLayers[i].X)
 		curY := float32(tlvl.ImgLayers[i].Y)
-		reg := NewRegion(curImg, 0, 0, curImg.width, curImg.height)
-		lvl.Images = append(lvl.Images, &tile{engo.Point{curX, curY}, tlvl.TileWidth, tlvl.TileHeight, reg})
+		lvl.Images = append(lvl.Images, &tile{engo.Point{curX, curY}, curImg})
 	}
 
 	return lvl, nil
 }
 
-func pointStringToLines(str string, xOff, yOff float64) []*Line {
+func pointStringToLines(str string, xOff, yOff float64) []*engo.Line {
 	pts := strings.Split(str, " ")
 	floatPts := make([][]float64, len(pts))
 	for i, x := range pts {
@@ -190,7 +207,7 @@ func pointStringToLines(str string, xOff, yOff float64) []*Line {
 		floatPts[i][1], _ = strconv.ParseFloat(pt[1], 64)
 	}
 
-	lines := make([]*Line, len(floatPts)-1)
+	lines := make([]*engo.Line, len(floatPts)-1)
 
 	// Now to globalize line coordinates
 	for i := 0; i < len(floatPts)-1; i++ {
@@ -201,18 +218,10 @@ func pointStringToLines(str string, xOff, yOff float64) []*Line {
 
 		p1 := engo.Point{x1, y1}
 		p2 := engo.Point{x2, y2}
-		newLine := &Line{p1, p2}
+		newLine := &engo.Line{p1, p2}
 
-		lines = append(lines, newLine)
+		lines[i] = newLine
 	}
 
 	return lines
-}
-
-func readTmx(url string) (string, error) {
-	file, err := ioutil.ReadFile(url)
-	if err != nil {
-		return "", err
-	}
-	return string(file), nil
 }
