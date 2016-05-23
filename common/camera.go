@@ -295,7 +295,6 @@ func (c *EntityScroller) New(*ecs.World) {
 
 	CameraBounds.Max.X = c.TrackingBounds.Max.X - offsetX
 	CameraBounds.Max.Y = (c.TrackingBounds.Min.Y + distY) - offsetY
-	offsetY = offsetY
 }
 
 func (*EntityScroller) Priority() int          { return EntityScrollerPriority }
