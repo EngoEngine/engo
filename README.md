@@ -81,10 +81,7 @@ Thank you to everyone who has worked on, or with `Engo`. None of this would be p
 - [Newbrict](https://github.com/Newbrict): Font rendering, TMX support
 - [EtienneBruines](https://github.com/EtienneBruines): Rewriting the OpenGL code, maintenance and helping redesign the API
 - [otraore](https://github.com/otraore): Adding in GopherJS support, maintenance
-- [hydroflame](https://github.com/hydroflame): Shared his extensive knowledge about OpenGL, which enabled our `RenderSystem` and shaders
 - [Everyone else who has submitted PRs or issues over the years, to any iteration of the project](https://github.com/EngoEngine/engo/graphs/contributors)
 
 These are 3rd party projects that have made `engo` possible.
-- [Lux](https://github.com/luxengine/) , which provides a `float32` [math](https://godoc.org/github.com/luxengine/math) package ([BSD-3 license](https://github.com/luxengine/math/blob/master/LICENSE))
-- [Lux](https://github.com/luxengine/) , which provides a `float32` [glm](https://godoc.org/github.com/luxengine/glm) package ([BSD-3 license](https://github.com/luxengine/glm/blob/master/LICENSE))
 - The original [engi](https://github.com/ajhager/engi) game engine which engo was based off of ([BSD license](https://github.com/ajhager/engi/blob/master/LICENSE))
