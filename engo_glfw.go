@@ -326,6 +326,7 @@ func SetVSync(enabled bool) {
 func init() {
 	runtime.LockOSThread()
 
+	Grave = Key(glfw.KeyGraveAccent)
 	Dash = Key(glfw.KeyMinus)
 	Apostrophe = Key(glfw.KeyApostrophe)
 	Semicolon = Key(glfw.KeySemicolon)
