@@ -220,8 +220,6 @@ func RunIteration() {
 // RunPreparation is called only once, and is called automatically when calling Open
 // It is only here for benchmarking in combination with OpenHeadlessNoRun
 func RunPreparation(defaultScene Scene) {
-	Time = NewClock()
-
 	// Default WorldBounds values
 	//WorldBounds.Max = Point{GameWidth(), GameHeight()}
 	// TODO: move this to appropriate location
@@ -241,7 +239,9 @@ func runLoop(defaultScene Scene, headless bool) {
 	RunPreparation(defaultScene)
 	ticker := time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
 
-	Time.ResetDelta()
+	// Keep the start of the clock close to the
+	// start of the main loop to avoid large delta's
+	Time = NewClock()
 
 Outer:
 	for {

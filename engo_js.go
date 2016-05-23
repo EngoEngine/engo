@@ -224,8 +224,6 @@ func cancelAnimationFrame(id int) {
 }
 
 func RunPreparation() {
-	Time = NewClock()
-
 	dom.GetWindow().AddEventListener("onbeforeunload", false, func(e dom.Event) {
 		dom.GetWindow().Alert("You're closing")
 	})
@@ -236,7 +234,9 @@ func runLoop(defaultScene Scene, headless bool) {
 	RunPreparation()
 	ticker := time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
 
-	Time.ResetDelta()
+	// Keep the start of the clock close to the
+	// start of the main loop to avoid large delta's
+	Time = NewClock()
 
 Outer:
 	for {

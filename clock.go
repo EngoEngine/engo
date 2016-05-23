@@ -46,27 +46,6 @@ func (c *Clock) Tick() {
 	}
 }
 
-// Resets all the clock values.
-func (c *Clock) ResetAll() {
-	c.counter = 0
-	c.perSecond = 0
-
-	c.deltaStamp = 0
-	c.elapsStamp = 0
-	c.frameStamp = time.Now().UnixNano()
-	c.startStamp = c.frameStamp
-}
-
-// Resets the delta time of the clock.
-func (c *Clock) ResetDelta() {
-	c.frameStamp = time.Now().UnixNano()
-}
-
-// Resets the start time of the clock.
-func (c *Clock) ResetTimer() {
-	c.startStamp = time.Now().UnixNano()
-}
-
 // Delta is the amount of seconds between the last tick and the one before that
 func (c *Clock) Delta() float32 {
 	return float32(float64(c.deltaStamp) / float64(secondsInNano))
