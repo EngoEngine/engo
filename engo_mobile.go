@@ -99,9 +99,8 @@ func runLoop(defaultScene Scene, headless bool) {
 					images = glutil.NewImages(e.DrawContext.(mobilegl.Context))
 					fps = debug.NewFPS(images)
 
-					// Keep the start of the clock close to the
-					// start of the main loop to avoid large delta's
-					Time = NewClock()
+					// Start tick, minimize the delta
+					Time.Tick()
 
 					// Let the device know we want to start painting :-)
 					a.Send(paint.Event{})
@@ -159,6 +158,7 @@ func runLoop(defaultScene Scene, headless bool) {
 // RunPreparation is called only once, and is called automatically when calling Open
 // It is only here for benchmarking in combination with OpenHeadlessNoRun
 func RunPreparation(defaultScene Scene) {
+	Time = NewClock()
 	SetScene(defaultScene, false)
 }
 
