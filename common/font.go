@@ -219,8 +219,8 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 			fmt.Println(string(char), float32(vm.TopSideBearing), float32(g.Bounds.Min.X), float32(g.Bounds.Min.Y), float32(g.Bounds.Max.X), float32(g.Bounds.Max.Y), float32(g.Bounds.Max.Y-g.Bounds.Min.Y))
 		}
 
-		//yB := vm.TopSideBearing
-		yB := g.Bounds.Max.Y - g.Bounds.Min.Y
+		yB := vm.TopSideBearing
+		//yB := g.Bounds.Max.Y - g.Bounds.Min.Y
 		if yB > maxYBearing {
 			maxYBearing = yB
 		}
