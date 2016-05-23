@@ -30,8 +30,10 @@ func (c *ControlSystem) Add(char *Character) {
 	c.entity = char
 }
 
-func (c *ControlSystem) Remove(ecs.BasicEntity) {
-	c.entity = nil
+func (c *ControlSystem) Remove(basic ecs.BasicEntity) {
+	if c.entity != nil && basic.ID() == c.entity.ID() {
+		c.entity = nil
+	}
 }
 
 func (c *ControlSystem) Update(dt float32) {
@@ -143,9 +145,6 @@ func (game *GameWorld) Setup(w *ecs.World) {
 	engo.Input.RegisterButton("movedown", engo.ArrowDown)
 }
 
-func (game *GameWorld) Exit()        {}
-func (game *GameWorld) Hide()        {}
-func (game *GameWorld) Show()        {}
 func (game *GameWorld) Type() string { return "GameWorld" }
 
 func main() {
