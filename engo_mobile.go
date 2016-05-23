@@ -164,6 +164,8 @@ func RunPreparation(defaultScene Scene) {
 
 // RunIteration runs one iteration / frame
 func RunIteration() {
+	Time.Tick()
+
 	if !opts.HeadlessMode {
 		Input.update()
 	}
@@ -171,7 +173,6 @@ func RunIteration() {
 	// Then update the world and all Systems
 	currentWorld.Update(Time.Delta())
 
-	Time.Tick()
 }
 
 // SetCursor changes the cursor - not yet implemented

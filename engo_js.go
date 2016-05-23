@@ -199,9 +199,9 @@ func rafPolyfill() {
 }
 
 func RunIteration() {
-	currentWorld.Update(Time.Delta())
-	Input.update()
 	Time.Tick()
+	Input.update()
+	currentWorld.Update(Time.Delta())
 	// TODO: this may not work, and sky-rocket the FPS
 	//  requestAnimationFrame(func(dt float32) {
 	// 	currentWorld.Update(Time.Delta())

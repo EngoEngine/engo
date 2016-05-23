@@ -196,6 +196,8 @@ func SetTitle(title string) {
 
 // RunIteration runs one iteration / frame
 func RunIteration() {
+	Time.Tick()
+
 	// First check for new keypresses
 	if !opts.HeadlessMode {
 		Input.update()
@@ -214,7 +216,6 @@ func RunIteration() {
 		window.SwapBuffers()
 	}
 
-	Time.Tick()
 }
 
 // RunPreparation is called only once, and is called automatically when calling Open
