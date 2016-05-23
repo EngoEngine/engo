@@ -99,6 +99,8 @@ func runLoop(defaultScene Scene, headless bool) {
 					images = glutil.NewImages(e.DrawContext.(mobilegl.Context))
 					fps = debug.NewFPS(images)
 
+					Time.Reset()
+
 					// Let the device know we want to start painting :-)
 					a.Send(paint.Event{})
 				case lifecycle.CrossOff:

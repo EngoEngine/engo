@@ -235,6 +235,9 @@ func runLoop(defaultScene Scene, headless bool) {
 	SetScene(defaultScene, false)
 	RunPreparation()
 	ticker := time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
+
+	Time.Reset()
+
 Outer:
 	for {
 		select {
