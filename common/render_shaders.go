@@ -13,7 +13,7 @@ import (
 )
 
 // UnicodeCap is the amount of unicode characters the fonts will be able to use, starting from index 0.
-const UnicodeCap = 200
+var UnicodeCap = 200
 
 const bufferSize = 10000
 
