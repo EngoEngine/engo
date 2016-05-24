@@ -13,9 +13,9 @@ import (
 )
 
 // UnicodeCap is the amount of unicode characters the fonts will be able to use, starting from index 0.
-var UnicodeCap = 200
+const UnicodeCap = 200
 
-var bufferSize = 10000
+const bufferSize = 10000
 
 type Shader interface {
 	Setup(*ecs.World) error
@@ -1043,7 +1043,6 @@ func (l *textShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 	if !ok {
 		// Generate texture first
 		atlas = txt.Font.generateFontAtlas(UnicodeCap)
-		fmt.Println("Generating because !ok 1050")
 		atlasCache[txt.Font.URL] = atlas
 	}
 

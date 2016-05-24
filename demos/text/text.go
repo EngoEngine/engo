@@ -57,8 +57,6 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	}
 	label1.SetShader(common.HUDShader)
 
-	common.UnicodeCap = 1900
-
 	label2 := MyLabel{BasicEntity: ecs.NewBasic()}
 	label2.RenderComponent.Drawable = common.Text{
 		Font:          fnt,

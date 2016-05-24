@@ -197,7 +197,6 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 
 		int26Width += hm.AdvanceWidth
 
-		//atlas.Width[char] = float32(hm.AdvanceWidth * fixed.Int26_6(f.Size) / fupe)
 		atlas.Width[char] = float32(g.AdvanceWidth * fixed.Int26_6(f.Size) / fupe)
 
 		currentX = float32(int26Width * fixed.Int26_6(f.Size) / fupe)
@@ -205,9 +204,7 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 			maxX = currentX
 		}
 
-		//yB := vm.TopSideBearing
 		yB := vm.TopSideBearing - g.Bounds.Min.Y
-		//yB := g.Bounds.Max.Y - g.Bounds.Min.Y
 		if yB > maxYBearing {
 			maxYBearing = yB
 		}
