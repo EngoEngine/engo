@@ -25,9 +25,7 @@ type MyLabel struct {
 }
 
 func (*DefaultScene) Preload() {
-	err := engo.Files.LoadMany(
-		"Roboto-Regular.ttf",
-	)
+	err := engo.Files.Load("Roboto-Regular.ttf")
 	if err != nil {
 		panic(err)
 	}
@@ -38,7 +36,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	common.SetBackground(color.White)
 	w.AddSystem(&common.RenderSystem{})
 
-	// Adding KeyboardScroller so we can actually see the difference between background and HUD when scrolling
+	// Adding KeyboardScroller so we can actually see the difference between the HUD and non-HUD text
 	w.AddSystem(common.NewKeyboardScroller(scrollSpeed, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis))
 	w.AddSystem(&common.MouseZoomer{zoomSpeed})
 
@@ -57,16 +55,17 @@ func (*DefaultScene) Setup(w *ecs.World) {
 		Font: fnt,
 		Text: "Hello world !",
 	}
-	label1.SpaceComponent.Position = engo.Point{500, 500}
-	label1.RenderComponent.SetShader(common.TextHUDShader)
+	label1.SetShader(common.HUDShader)
+
+	common.UnicodeCap = 1900
 
 	label2 := MyLabel{BasicEntity: ecs.NewBasic()}
 	label2.RenderComponent.Drawable = common.Text{
-		Font: fnt,
-		Text: "This is \nmultilined Q :-), very nice!",
+		Font:          fnt,
+		Text:          "This may also be text\nwhich includes a newline. ",
+		LineSpacing:   0.5,
+		LetterSpacing: 0.15,
 	}
-	label2.SpaceComponent.Position = engo.Point{300, 300}
-	label2.RenderComponent.SetShader(common.TextShader)
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {

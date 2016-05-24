@@ -10,12 +10,10 @@ import (
 
 	"engo.io/engo"
 	"engo.io/gl"
-	"github.com/chai2010/webp"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
-	"os"
 )
 
 var (
@@ -170,7 +168,7 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 		currentX float32
 		maxX     float32
 
-		totalString string // TODO; string is immutable, so this is relatively inefficient
+		totalString string // TODO; string is immutable, so this is relatively inefficient; see also where we use `totalString += string(char)`
 		subString   string
 
 		drawCurY int
@@ -179,7 +177,6 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 	// The "full image"
 	nrgba := image.NewNRGBA(image.Rect(0, 0, 1200, 5000)) // way too big; hopefully
 
-	var lastI int
 	for i := 0; i < c; i++ {
 		char := rune(i)
 		totalString += string(char)
@@ -208,18 +205,8 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 			maxX = currentX
 		}
 
-		switch {
-		case char == 'i':
-			fallthrough
-		case char == 'j':
-			fallthrough
-		case char == 'e':
-			fallthrough
-		case char == 'Q':
-			fmt.Println(string(char), float32(vm.TopSideBearing), float32(g.Bounds.Min.X), float32(g.Bounds.Min.Y), float32(g.Bounds.Max.X), float32(g.Bounds.Max.Y), float32(g.Bounds.Max.Y-g.Bounds.Min.Y))
-		}
-
-		yB := vm.TopSideBearing
+		//yB := vm.TopSideBearing
+		yB := vm.TopSideBearing - g.Bounds.Min.Y
 		//yB := g.Bounds.Max.Y - g.Bounds.Min.Y
 		if yB > maxYBearing {
 			maxYBearing = yB
@@ -229,16 +216,9 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 		if int(int26Width*fixed.Int26_6(f.Size)/fupe) > 1024 {
 			// Now let's draw these chars!
 			subimg := f.RenderNRGBA(subString)
-			// TODO: optimize this!
+			// TODO: optimize this, because `f.RenderNRGBA` also allocates a new image, while we could be drawing to this one directly.
 			draw.Draw(nrgba, image.Rect(0, drawCurY, subimg.Bounds().Max.X, drawCurY+subimg.Bounds().Max.Y), subimg, image.ZP, draw.Src)
 			drawCurY += subimg.Bounds().Max.Y
-
-			/*
-				for subI := lastI; subI <= i; subI++ {
-					atlas.Height[rune(subI)] = float32(subimg.Bounds().Max.Y)
-				}
-			*/
-			fmt.Sprint(lastI)
 
 			int26Height += maxYBearing
 			totalHeight += maxYBearing
@@ -247,11 +227,22 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 			subString = ""
 			int26Width = 0
 			currentX = 0
-			lastI = i + 1
 		}
 	}
 
-	// TODO: draw last line?!
+	// Draw the last line as well
+	subimg := f.RenderNRGBA(subString)
+	// TODO: optimize this, because `f.RenderNRGBA` also allocates a new image, while we could be drawing to this one directly.
+	draw.Draw(nrgba, image.Rect(0, drawCurY, subimg.Bounds().Max.X, drawCurY+subimg.Bounds().Max.Y), subimg, image.ZP, draw.Src)
+	drawCurY += subimg.Bounds().Max.Y
+
+	int26Height += maxYBearing
+	totalHeight += maxYBearing
+	maxYBearing = fixed.Int26_6(0)
+
+	subString = ""
+	int26Width = 0
+	currentX = 0
 
 	atlas.TotalWidth = maxX
 	atlas.TotalHeight = float32(drawCurY)
@@ -260,16 +251,6 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 	actual := image.NewNRGBA(image.Rect(0, 0, int(atlas.TotalWidth), int(atlas.TotalHeight)))
 	draw.Draw(actual, actual.Bounds(), nrgba, image.ZP, draw.Src)
 
-	file, err := os.OpenFile("/tmp/debug.webp", os.O_CREATE|os.O_RDWR|os.O_TRUNC, os.FileMode(0777))
-	defer file.Close()
-	if err != nil {
-		panic(err)
-	}
-	err = webp.Encode(file, actual, &webp.Options{Quality: 100})
-	if err != nil {
-		panic(err)
-	}
-
 	imObj := NewImageObject(actual)
 	atlas.Texture = NewTextureSingle(imObj).id
 	return atlas
@@ -277,19 +258,38 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 
 // A FontAtlas is a representation of some of the Font characters, as an image
 type FontAtlas struct {
-	Texture     *gl.Texture
-	XLocation   []float32
-	YLocation   []float32
-	Width       []float32
-	Height      []float32
-	TotalWidth  float32
+	Texture *gl.Texture
+	// XLocation contains the X-coordinate of the starting position of all characters
+	XLocation []float32
+	// YLocation contains the Y-coordinate of the starting position of all characters
+	YLocation []float32
+	// Width contains the width in pixels of all the characters, including the spacing between characters
+	Width []float32
+	// Height contains the height in pixels of all the characters
+	Height []float32
+	// TotalWidth is the total amount of pixels the `FontAtlas` is wide; useful for determining the `Viewport`,
+	// which is relative to this value.
+	TotalWidth float32
+	// TotalHeight is the total amount of pixels the `FontAtlas` is high; useful for determining the `Viewport`,
+	// which is relative to this value.
 	TotalHeight float32
 }
 
-// Text represents a string drawn on the screen
+// Text represents a string drawn onto the screen, as used by the `TextShader`.
 type Text struct {
+	// Font is the reference to the font you're using to render this. This includes the color, as well as the font size.
 	Font *Font
+	// Text is the actual text you want to draw. This may include newlines (\n).
 	Text string
+	// LineSpacing is the amount of additional spacing there is between the lines (when `Text` consists of multiple lines),
+	// relative to the `Size` of the `Font`.
+	LineSpacing float32
+	// LetterSpacing is the amount of additional spacing there is between the characters, relative to the `Size` of
+	// the `Font`.
+	LetterSpacing float32
+	// RightToLeft is an experimental variable used to indicate that subsequent characters come to the left of the
+	// previous character.
+	RightToLeft bool
 }
 
 func (Text) Texture() *gl.Texture                       { return nil }

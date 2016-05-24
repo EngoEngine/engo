@@ -12,6 +12,7 @@ import (
 	"github.com/luxengine/math"
 )
 
+// UnicodeCap is the amount of unicode characters the fonts will be able to use, starting from index 0.
 var UnicodeCap = 200
 
 var bufferSize = 10000
@@ -797,7 +798,6 @@ type textShader struct {
 
 	lastBuffer  *gl.Buffer
 	lastTexture *gl.Texture
-	atlas       map[string]FontAtlas
 }
 
 func (l *textShader) Setup(w *ecs.World) error {
@@ -891,8 +891,6 @@ void main (void) {
 		}
 	}
 
-	l.atlas = make(map[string]FontAtlas)
-
 	return nil
 }
 
@@ -962,26 +960,29 @@ func (l *textShader) generateBufferContent(ren *RenderComponent, space *SpaceCom
 		return false
 	}
 
-	atlas, ok := l.atlas[txt.Font.URL]
+	atlas, ok := atlasCache[txt.Font.URL]
 	if !ok {
 		// Generate texture first
 		atlas = txt.Font.generateFontAtlas(UnicodeCap)
-		l.atlas[txt.Font.URL] = atlas
+		atlasCache[txt.Font.URL] = atlas
 	}
 
 	var currentX float32
 	var currentY float32
+
+	var modifier float32 = 1
+	if txt.RightToLeft {
+		modifier = -1
+	}
 
 	for index, char := range txt.Text {
 		// TODO: this might not work for all characters
 		switch {
 		case char == '\n':
 			currentX = 0
-			currentY += atlas.Height[char]
+			currentY += atlas.Height[char] + txt.LineSpacing*atlas.Height[char]
 			continue
-		case char == '\r':
-			fallthrough
-		case char < 32: // all system stuff
+		case char < 32: // all system stuff should be ignored
 			continue
 		}
 
@@ -1015,7 +1016,7 @@ func (l *textShader) generateBufferContent(ren *RenderComponent, space *SpaceCom
 		setBufferValue(buffer, 18+offset, (atlas.YLocation[char]+atlas.Height[char])/atlas.TotalHeight, &changed)
 		setBufferValue(buffer, 19+offset, tint, &changed)
 
-		currentX += atlas.Width[char]
+		currentX += modifier * (atlas.Width[char] + float32(txt.Font.Size)*txt.LetterSpacing)
 	}
 
 	return changed
@@ -1038,11 +1039,12 @@ func (l *textShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		unsupportedType(ren.Drawable)
 	}
 
-	atlas, ok := l.atlas[txt.Font.URL]
+	atlas, ok := atlasCache[txt.Font.URL]
 	if !ok {
 		// Generate texture first
 		atlas = txt.Font.generateFontAtlas(UnicodeCap)
-		l.atlas[txt.Font.URL] = atlas
+		fmt.Println("Generating because !ok 1050")
+		atlasCache[txt.Font.URL] = atlas
 	}
 
 	if atlas.Texture != l.lastTexture {
@@ -1111,6 +1113,7 @@ var (
 	TextShader      = &textShader{cameraEnabled: true}
 	TextHUDShader   = &textShader{cameraEnabled: false}
 	shadersSet      bool
+	atlasCache      = make(map[string]FontAtlas)
 )
 
 func initShaders(w *ecs.World) error {
