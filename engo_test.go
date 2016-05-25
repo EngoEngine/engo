@@ -19,7 +19,7 @@ func TestSetOverrideCloseAction(t *testing.T) {
 	SetOverrideCloseAction(true)
 	assert.True(t, opts.OverrideCloseAction)
 	SetOverrideCloseAction(false)
-	assert.True(t, opts.OverrideCloseAction)
+	assert.False(t, opts.OverrideCloseAction)
 }
 
 func TestSetFPSLimit(t *testing.T) {
