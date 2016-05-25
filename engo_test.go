@@ -8,18 +8,18 @@ import (
 
 func TestSetScaleOnResize(t *testing.T) {
     SetScaleOnResize(true)
-    assert.Equal(t, opts.ScaleOnResize, true)
-    assert.Equal(t, ScaleOnResize(), true)
+    assert.True(t, opts.ScaleOnResize)
+    assert.True(t, ScaleOnResize())
     SetScaleOnResize(false)
-    assert.Equal(t, opts.ScaleOnResize, false)
-    assert.Equal(t, ScaleOnResize(), false)
+    assert.False(t, opts.ScaleOnResize)
+    assert.False(t, ScaleOnResize())
 }
 
 func TestSetOverrideCloseAction(t *testing.T) {
     SetOverrideCloseAction(true)
-    assert.Equal(t, opts.OverrideCloseAction, true)
+    assert.True(t, opts.OverrideCloseAction)
     SetOverrideCloseAction(false)
-    assert.Equal(t, opts.OverrideCloseAction, false)
+    assert.True(t, opts.OverrideCloseAction)
 }
 
 func TestSetFPSLimit(t *testing.T) {
@@ -32,16 +32,16 @@ func TestSetFPSLimit(t *testing.T) {
 
 func TestHeadless(t *testing.T) {
     SetHeadless(false)
-    assert.Equal(t, opts.HeadlessMode, false)
-    assert.Equal(t, Headless(), false)
+    assert.False(t, opts.HeadlessMode)
+    assert.False(t, Headless())
     SetHeadless(true)
-    assert.Equal(t, opts.HeadlessMode, true)
+    assert.True(t, opts.HeadlessMode, )
     assert.Equal(t, Headless)
 }
 
 
 func TestExit(t *testing.T) {
-    assert.Equal(t, closeGame, false)
+    assert.False(t, closeGame)
     Exit()
-    assert.Equal(t, closeGame, true)
+    assert.True(t, closeGame)
 }
