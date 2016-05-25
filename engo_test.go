@@ -24,10 +24,10 @@ func TestSetOverrideCloseAction(t *testing.T) {
 
 func TestSetFPSLimit(t *testing.T) {
     err := SetFPSLimit(60)
-    assert.Equal(t, err, nil)
+    assert.Nil(t, err)
     assert.Equal(t, opts.FPSLimit, 60)
     err = SetFPSLimit(-1)
-    assert.NotEqual(t, err, nil)
+    assert.NotNil(t, err)
 }
 
 func TestHeadless(t *testing.T) {
