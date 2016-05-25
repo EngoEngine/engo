@@ -99,6 +99,9 @@ func runLoop(defaultScene Scene, headless bool) {
 					images = glutil.NewImages(e.DrawContext.(mobilegl.Context))
 					fps = debug.NewFPS(images)
 
+					// Start tick, minimize the delta
+					Time.Tick()
+
 					// Let the device know we want to start painting :-)
 					a.Send(paint.Event{})
 				case lifecycle.CrossOff:
@@ -161,6 +164,8 @@ func RunPreparation(defaultScene Scene) {
 
 // RunIteration runs one iteration / frame
 func RunIteration() {
+	Time.Tick()
+
 	if !opts.HeadlessMode {
 		Input.update()
 	}
@@ -168,7 +173,6 @@ func RunIteration() {
 	// Then update the world and all Systems
 	currentWorld.Update(Time.Delta())
 
-	Time.Tick()
 }
 
 // SetCursor changes the cursor - not yet implemented
