@@ -8,7 +8,7 @@ import (
     "github.com/github.com/stretchr/testify/assert"
 )
 
-func TestGameWidthHeight(t *testing.T) {
+func TestGameSize(t *testing.T) {
     assert.Equal(t, GameWidth(), gameWidth)
     assert.Equal(t, GameHeight(), gameHeight)    
 }
