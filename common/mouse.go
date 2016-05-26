@@ -201,7 +201,7 @@ func (m *MouseSystem) Update(dt float32) {
 		// and if the Y-value is within range
 
 		if e.MouseComponent.Track || e.MouseComponent.startedDragging ||
-			e.SpaceComponent.Within(engo.Point{mx, my}) {
+			e.SpaceComponent.Contains(engo.Point{mx, my}) {
 
 			e.MouseComponent.Enter = !e.MouseComponent.Hovered
 			e.MouseComponent.Hovered = true
