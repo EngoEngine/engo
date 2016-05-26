@@ -15,6 +15,18 @@ type Level struct {
 	Images     []*tile
 }
 
+func (l *Level) Bounds() engo.AABB {
+	return engo.AABB{Min: engo.Point{0, 0}, Max: engo.Point{float32(l.TileWidth * l.width), float32(l.TileHeight * l.height)}}
+}
+
+func (l *Level) Width() int {
+	return l.width
+}
+
+func (l *Level) Height() int {
+	return l.height
+}
+
 func (t *tile) Height() float32 {
 	return t.Image.Height()
 }
