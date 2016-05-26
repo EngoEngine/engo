@@ -87,9 +87,9 @@ func (sc SpaceComponent) Corners() (points [4]engo.Point) {
 	return
 }
 
-// Within indicates whether or not the given point is within the rectangular plane as defined by this `SpaceComponent`.
+// Contains indicates whether or not the given point is within the rectangular plane as defined by this `SpaceComponent`.
 // If it's on the border, it is considered "not within".
-func (sc SpaceComponent) Within(p engo.Point) bool {
+func (sc SpaceComponent) Contains(p engo.Point) bool {
 	points := sc.Corners()
 
 	halfArea := (sc.Width * sc.Height) / 2

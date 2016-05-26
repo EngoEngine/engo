@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSpaceComponent_Within(t *testing.T) {
+func TestSpaceComponent_Contains(t *testing.T) {
 	space := SpaceComponent{Width: 100, Height: 100}
 	pass := []engo.Point{
 		engo.Point{10, 10},
@@ -37,11 +37,11 @@ func TestSpaceComponent_Within(t *testing.T) {
 	}
 
 	for _, p := range pass {
-		assert.True(t, space.Within(p), fmt.Sprintf("point %v should be within area", p))
+		assert.True(t, space.Contains(p), fmt.Sprintf("point %v should be within area", p))
 	}
 
 	for _, f := range fail {
-		assert.False(t, space.Within(f), fmt.Sprintf("point %v should not be within area", f))
+		assert.False(t, space.Contains(f), fmt.Sprintf("point %v should not be within area", f))
 	}
 }
 
