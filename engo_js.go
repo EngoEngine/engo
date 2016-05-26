@@ -199,9 +199,9 @@ func rafPolyfill() {
 }
 
 func RunIteration() {
-	currentWorld.Update(Time.Delta())
-	Input.update()
 	Time.Tick()
+	Input.update()
+	currentWorld.Update(Time.Delta())
 	// TODO: this may not work, and sky-rocket the FPS
 	//  requestAnimationFrame(func(dt float32) {
 	// 	currentWorld.Update(Time.Delta())
@@ -235,6 +235,10 @@ func runLoop(defaultScene Scene, headless bool) {
 	SetScene(defaultScene, false)
 	RunPreparation()
 	ticker := time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
+
+	// Start tick, minimize the delta
+	Time.Tick()
+
 Outer:
 	for {
 		select {
