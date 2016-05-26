@@ -887,7 +887,7 @@ void main (void) {
 			}
 		}
 		if l.camera == nil {
-			log.Println("WARNING: BasicShader has CameraEnabled, but CameraSystem was not found")
+			log.Println("WARNING: TextShader has CameraEnabled, but CameraSystem was not found")
 		}
 	}
 
