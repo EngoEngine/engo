@@ -16,6 +16,7 @@ const (
 	MouseZoomerPriority      = 110
 	EdgeScrollerPriority     = 120
 	KeyboardScrollerPriority = 130
+	EntityScrollerPriority   = 140
 )
 
 var (
@@ -275,6 +276,41 @@ func NewKeyboardScroller(scrollSpeed float32, hori, vert string) *KeyboardScroll
 	kbs.BindKeyboard(hori, vert)
 
 	return kbs
+}
+
+// EntityScroller scrolls the camera to the position of a entity using its space component
+type EntityScroller struct {
+	*SpaceComponent
+	TrackingBounds engo.AABB
+}
+
+// New adjusts CameraBounds to the bounds of EntityScroller
+func (c *EntityScroller) New(*ecs.World) {
+	offsetX, offsetY := engo.CanvasWidth()/2, engo.CanvasHeight()/2
+	// This is to account for upper left origin
+	distY := c.TrackingBounds.Max.Y - c.TrackingBounds.Min.Y
+
+	CameraBounds.Min.X = c.TrackingBounds.Min.X + offsetX
+	CameraBounds.Min.Y = (c.TrackingBounds.Max.Y - distY) + offsetY
+
+	CameraBounds.Max.X = c.TrackingBounds.Max.X - offsetX
+	CameraBounds.Max.Y = (c.TrackingBounds.Min.Y + distY) - offsetY
+}
+
+func (*EntityScroller) Priority() int          { return EntityScrollerPriority }
+func (*EntityScroller) Remove(ecs.BasicEntity) {}
+
+// Update moves the camera to the center of the space component
+// Values are automatically clamped to TrackingBounds by the camera
+func (c *EntityScroller) Update(dt float32) {
+	width, height := c.SpaceComponent.Width, c.SpaceComponent.Height
+
+	pos := c.SpaceComponent.Position
+	trackToX := pos.X + width/2
+	trackToY := pos.Y + height/2
+
+	engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: trackToX, Incremental: false})
+	engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: trackToY, Incremental: false})
 }
 
 // EdgeScroller is a System that allows for scrolling when the cursor is near the edges of
