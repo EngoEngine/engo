@@ -7,8 +7,8 @@ import (
 const (
 	KeyStateUp = iota
 	KeyStateDown
-	KeyStateJustDown
 	KeyStateJustUp
+	KeyStateJustDown
 )
 
 // NewKeyManager creates a new KeyManager.
@@ -73,31 +73,33 @@ func (key *KeyState) set(state bool) {
 
 // State returns the raw state of a key.
 func (key *KeyState) State() int {
-	if !key.lastState && key.currentState {
-		return KeyStateJustDown
-	} else if key.lastState && !key.currentState {
-		return KeyStateJustUp
-	} else if key.lastState && key.currentState {
-		return KeyStateDown
-	} else if !key.lastState && !key.currentState {
-		return KeyStateUp
+	if key.lastState {
+		if key.currentState {
+			return KeyStateDown
+		} else {
+			return KeyStateJustUp
+		}
+	} else {
+		if key.currentState {
+			return KeyStateJustDown
+		} else {
+			return KeyStateUp
+		}
 	}
-
-	return KeyStateUp
-}
-
-func (key KeyState) JustPressed() bool {
-	return key.State() == KeyStateJustDown
-}
-
-func (key KeyState) JustReleased() bool {
-	return key.State() == KeyStateJustUp
 }
 
 func (key KeyState) Up() bool {
-	return key.State() == KeyStateUp
+	return (!key.lastState && !key.currentState)
 }
 
 func (key KeyState) Down() bool {
-	return key.State() == KeyStateDown
+	return (key.lastState && key.currentState)
+}
+
+func (key KeyState) JustPressed() bool {
+	return (!key.lastState && key.currentState)
+}
+
+func (key KeyState) JustReleased() bool {
+	return (key.lastState && !key.currentState)
 }
