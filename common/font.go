@@ -220,10 +220,6 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 			int26Height += maxYBearing
 			totalHeight += maxYBearing
 			maxYBearing = fixed.Int26_6(0)
-
-			subString = ""
-			int26Width = 0
-			currentX = 0
 		}
 	}
 
