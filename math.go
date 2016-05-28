@@ -1,7 +1,7 @@
 package engo
 
 import (
-	"engo.io/vendor/glm"
+	"github.com/engoengine/glm"
 	"github.com/luxengine/math"
 )
 
