@@ -5,7 +5,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
-	"github.com/engoengine/glm"
+	"engo.io/vendor/glm"
 	"github.com/luxengine/math"
 )
 
