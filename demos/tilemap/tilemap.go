@@ -90,10 +90,9 @@ func (game *GameWorld) Type() string { return "GameWorld" }
 
 func main() {
 	opts := engo.RunOptions{
-		Title:         "TileMap Demo",
-		Width:         800,
-		Height:        800,
-		ScaleOnResize: false,
+		Title:  "TileMap Demo",
+		Width:  800,
+		Height: 800,
 	}
 	engo.Run(opts, &GameWorld{})
 }
