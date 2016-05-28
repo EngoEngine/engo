@@ -22,13 +22,13 @@ func (game *GameWorld) Preload() {
 	// When you add tilesets to the Tiled Editor, the location where you added them from is where the engo loader will look for them
 	// Tileset from : http://opengameart.org
 
-	if err := engo.Files.LoadMany("example.tmx"); err != nil {
+	if err := engo.Files.Load("example.tmx"); err != nil {
 		panic(err)
 	}
 }
 
 func (game *GameWorld) Setup(w *ecs.World) {
-	common.SetBackground(color.RGBA{0x00, 0x00, 0x00, 0x00})
+	common.SetBackground(color.White)
 
 	w.AddSystem(&common.RenderSystem{})
 
@@ -86,17 +86,13 @@ func (game *GameWorld) Setup(w *ecs.World) {
 
 }
 
-func (game *GameWorld) Exit()        {}
-func (game *GameWorld) Hide()        {}
-func (game *GameWorld) Show()        {}
 func (game *GameWorld) Type() string { return "GameWorld" }
 
 func main() {
 	opts := engo.RunOptions{
-		Title:         "TileMap Demo",
-		Width:         800,
-		Height:        800,
-		ScaleOnResize: false,
+		Title:  "TileMap Demo",
+		Width:  800,
+		Height: 800,
 	}
 	engo.Run(opts, &GameWorld{})
 }
