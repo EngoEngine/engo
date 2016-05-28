@@ -86,9 +86,6 @@ func (game *GameWorld) Setup(w *ecs.World) {
 
 }
 
-func (game *GameWorld) Exit()        {}
-func (game *GameWorld) Hide()        {}
-func (game *GameWorld) Show()        {}
 func (game *GameWorld) Type() string { return "GameWorld" }
 
 func main() {
