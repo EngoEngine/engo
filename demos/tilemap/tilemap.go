@@ -28,7 +28,7 @@ func (game *GameWorld) Preload() {
 }
 
 func (game *GameWorld) Setup(w *ecs.World) {
-	common.SetBackground(color.RGBA{0x00, 0x00, 0x00, 0x00})
+	common.SetBackground(color.White)
 
 	w.AddSystem(&common.RenderSystem{})
 
