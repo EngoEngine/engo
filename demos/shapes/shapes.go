@@ -39,7 +39,6 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	triangle1 := MyShape{BasicEntity: ecs.NewBasic()}
 	triangle1.SpaceComponent = common.SpaceComponent{Width: 100, Height: 100}
 	triangle1.RenderComponent = common.RenderComponent{Drawable: common.Triangle{}, Color: color.RGBA{255, 0, 0, 255}}
-	triangle1.RenderComponent.SetShader(common.LegacyShader)
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
@@ -51,7 +50,6 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	rectangle1 := MyShape{BasicEntity: ecs.NewBasic()}
 	rectangle1.SpaceComponent = common.SpaceComponent{Position: engo.Point{100, 100}, Width: 100, Height: 100}
 	rectangle1.RenderComponent = common.RenderComponent{Drawable: common.Rectangle{}, Color: color.RGBA{0, 255, 0, 255}}
-	rectangle1.RenderComponent.SetShader(common.LegacyShader)
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
@@ -63,7 +61,6 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	circle1 := MyShape{BasicEntity: ecs.NewBasic()}
 	circle1.SpaceComponent = common.SpaceComponent{Position: engo.Point{200, 200}, Width: 100, Height: 100}
 	circle1.RenderComponent = common.RenderComponent{Drawable: common.Circle{}, Color: color.RGBA{0, 0, 255, 255}}
-	circle1.RenderComponent.SetShader(common.LegacyShader)
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
@@ -75,7 +72,6 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	triangle2 := MyShape{BasicEntity: ecs.NewBasic()}
 	triangle2.SpaceComponent = common.SpaceComponent{Position: engo.Point{300, 300}, Width: 100, Height: 100}
 	triangle2.RenderComponent = common.RenderComponent{Drawable: common.Triangle{TriangleType: common.TriangleRight}, Color: color.RGBA{255, 255, 0, 255}}
-	triangle2.RenderComponent.SetShader(common.LegacyShader)
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
@@ -87,7 +83,6 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	line1 := MyShape{BasicEntity: ecs.NewBasic()}
 	line1.SpaceComponent = common.SpaceComponent{Position: engo.Point{400, 400}, Width: 1, Height: 100}
 	line1.RenderComponent = common.RenderComponent{Drawable: common.Rectangle{}, Color: color.RGBA{0, 255, 255, 255}}
-	line1.RenderComponent.SetShader(common.LegacyShader)
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
@@ -104,7 +99,6 @@ func (*DefaultScene) Setup(w *ecs.World) {
 			{0.5, 0.5}, {1.0, 0.75}, {0.0, 1.0},
 			{0.0, 0.0}, {0.5, 0.50}, {0.0, 1.0},
 		}}, Color: color.RGBA{255, 0, 255, 255}}
-	complexTriangle1.RenderComponent.SetShader(common.LegacyShader)
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
@@ -116,7 +110,6 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	triangle3 := MyShape{BasicEntity: ecs.NewBasic()}
 	triangle3.SpaceComponent = common.SpaceComponent{Position: engo.Point{23, 123}, Width: 50, Height: 50}
 	triangle3.RenderComponent = common.RenderComponent{Drawable: common.Triangle{BorderWidth: 1, BorderColor: color.White}, Color: color.RGBA{255, 0, 0, 255}}
-	triangle3.RenderComponent.SetShader(common.LegacyShader)
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
@@ -128,7 +121,6 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	rectangle2 := MyShape{BasicEntity: ecs.NewBasic()}
 	rectangle2.SpaceComponent = common.SpaceComponent{Position: engo.Point{123, 223}, Width: 50, Height: 50}
 	rectangle2.RenderComponent = common.RenderComponent{Drawable: common.Rectangle{BorderWidth: 1, BorderColor: color.White}, Color: color.RGBA{0, 255, 0, 255}}
-	rectangle2.RenderComponent.SetShader(common.LegacyShader)
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
@@ -140,7 +132,6 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	circle2 := MyShape{BasicEntity: ecs.NewBasic()}
 	circle2.SpaceComponent = common.SpaceComponent{Position: engo.Point{223, 323}, Width: 50, Height: 50}
 	circle2.RenderComponent = common.RenderComponent{Drawable: common.Circle{BorderWidth: 1, BorderColor: color.White}, Color: color.RGBA{0, 0, 255, 255}}
-	circle2.RenderComponent.SetShader(common.LegacyShader)
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
@@ -152,7 +143,6 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	triangle4 := MyShape{BasicEntity: ecs.NewBasic()}
 	triangle4.SpaceComponent = common.SpaceComponent{Position: engo.Point{323, 423}, Width: 50, Height: 50}
 	triangle4.RenderComponent = common.RenderComponent{Drawable: common.Triangle{TriangleType: common.TriangleRight, BorderWidth: 1, BorderColor: color.White}, Color: color.RGBA{255, 255, 0, 255}}
-	triangle4.RenderComponent.SetShader(common.LegacyShader)
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
@@ -170,7 +160,6 @@ func (*DefaultScene) Setup(w *ecs.World) {
 			{0.5, 0.5}, {1.0, 0.75}, {0.0, 1.0},
 			{0.0, 0.0}, {0.5, 0.50}, {0.0, 1.0},
 		}}, Color: color.RGBA{255, 0, 255, 255}}
-	complexTriangle2.RenderComponent.SetShader(common.LegacyShader)
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
