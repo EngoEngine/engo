@@ -38,6 +38,7 @@ const (
 // with engo_glfw.
 // engo_glfw redefines the variables it needs to other values during init() so
 var (
+	Grave        Key = 192
 	Dash         Key = 189
 	Apostrophe   Key = 222
 	Semicolon    Key = 186

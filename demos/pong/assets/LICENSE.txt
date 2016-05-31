@@ -1,0 +1,3 @@
+The `Roboto-Regular.ttf` file has an Apache-2 license, and is not a part of `engo`.
+
+Please refer to the source directly: https://www.google.com/fonts/specimen/Roboto

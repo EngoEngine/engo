@@ -118,6 +118,42 @@ func (rs *RenderSystem) New(w *ecs.World) {
 }
 
 func (rs *RenderSystem) Add(basic *ecs.BasicEntity, render *RenderComponent, space *SpaceComponent) {
+	// Setting default shader
+	if render.shader == nil {
+		switch render.Drawable.(type) {
+		case Triangle:
+			render.shader = LegacyShader
+		case Circle:
+			render.shader = LegacyShader
+		case Rectangle:
+			render.shader = LegacyShader
+		case ComplexTriangles:
+			render.shader = LegacyShader
+		case Text:
+			render.shader = TextShader
+		default:
+			render.shader = DefaultShader
+		}
+	}
+
+	// This is to prevent users from using the wrong one
+	if render.shader == HUDShader {
+		switch render.Drawable.(type) {
+		case Triangle:
+			render.shader = LegacyHUDShader
+		case Circle:
+			render.shader = LegacyHUDShader
+		case Rectangle:
+			render.shader = LegacyHUDShader
+		case ComplexTriangles:
+			render.shader = LegacyHUDShader
+		case Text:
+			render.shader = TextHUDShader
+		default:
+			render.shader = HUDShader
+		}
+	}
+
 	rs.entities = append(rs.entities, renderEntity{basic, render, space})
 	rs.sortingNeeded = true
 }
@@ -156,9 +192,6 @@ func (rs *RenderSystem) Update(dt float32) {
 
 		// Retrieve a shader, may be the default one -- then use it if we aren't already using it
 		shader := e.RenderComponent.shader
-		if shader == nil {
-			shader = DefaultShader
-		}
 
 		// Change Shader if we have to
 		if shader != rs.currentShader {
