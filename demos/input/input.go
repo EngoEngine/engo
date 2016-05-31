@@ -52,8 +52,16 @@ func (c *InputSystem) Update(dt float32) {
 		fmt.Println(v)
 	}
 
+	if btn := engo.Input.Button("action"); btn.Down() {
+		fmt.Println("Still down!")
+	}
+
 	if btn := engo.Input.Button("action"); btn.JustPressed() {
-		fmt.Println("DOWN!")
+		fmt.Println("Key just pressed!")
+	}
+
+	if btn := engo.Input.Button("action"); btn.JustReleased() {
+		fmt.Println("Key just released!")
 	}
 }
 
