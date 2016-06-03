@@ -16,7 +16,7 @@ echo "Skipping tests for engo.io/engo using 'gopherjs test' (won't pass)"
 echo "Skipping tests for engo.io/engo using 'gomobile' (no tools exist yet)"
 
 # These can fail without us minding it
-blacklist="engo.io/engo/demos/demoutils,engo.io/engo/demos/tilemap"
+blacklist="engo.io/engo/demos/demoutils"
 
 for dir in `pwd`/demos/*/
 do
