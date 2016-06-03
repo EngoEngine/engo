@@ -38,12 +38,8 @@ func (km *KeyManager) Set(k Key, state bool) {
 // Get retrieves a keys state.
 func (km *KeyManager) Get(k Key) KeyState {
 	km.mutex.RLock()
-	defer km.mutex.RUnlock()
-
-	ks, ok := km.mapper[k]
-	if !ok {
-		return KeyState{false, false}
-	}
+	ks := km.mapper[k]
+	km.mutex.RUnlock()
 
 	return ks
 }
