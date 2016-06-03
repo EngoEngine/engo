@@ -22,51 +22,49 @@ import (
 )
 
 var (
+	// Gl is the current opengl context
 	Gl *gl.Context
 	sz size.Event
 
-	gameWidth, gameHeight     float32
-	windowWidth, windowHeight float32
 	canvasWidth, canvasHeight float32
 
 	msaaPreference int
 )
 
+// CreateWindow creates a window with the specified parameters
 func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	gameWidth = float32(width)
 	gameHeight = float32(height)
 	msaaPreference = msaa
 }
 
+// WindowSize returns the width and height of the current window
 func WindowSize() (w, h int) {
 	return sz.WidthPx, sz.HeightPx
 }
 
+// CursorPos returns the current cursor position
 func CursorPos() (x, y float64) {
 	notImplemented("CursorPos")
 	return 0, 0
 }
 
-func GameWidth() float32 {
-	return gameWidth
-}
-
-func GameHeight() float32 {
-	return gameHeight
-}
-
+// WindowWidth returns the current window width
 func WindowWidth() float32 {
 	return windowWidth
 }
 
+// WindowsHeight returns the current window width
 func WindowHeight() float32 {
 	return windowHeight
 }
 
+// CanvasWidth returns the current canvas width
 func CanvasWidth() float32 {
 	return canvasWidth
 }
 
+// CanvasHeight returns the current canvas height
 func CanvasHeight() float32 {
 	return canvasHeight
 }
