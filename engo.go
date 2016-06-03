@@ -20,9 +20,11 @@ var (
 	currentWorld *ecs.World
 	currentScene Scene
 
-	opts            RunOptions
-	resetLoopTicker = make(chan bool, 1)
-	closeGame       bool
+	opts                      RunOptions
+	resetLoopTicker           = make(chan bool, 1)
+	closeGame                 bool
+	gameWidth, gameHeight     float32
+	windowWidth, windowHeight float32
 )
 
 const (
@@ -189,6 +191,16 @@ func ScaleOnResize() bool {
 // Exit is the safest way to close your game, as `engo` will correctly attempt to close all windows, handlers and contexts
 func Exit() {
 	closeGame = true
+}
+
+// GameWidth returns the current game width
+func GameWidth() float32 {
+	return gameWidth
+}
+
+// GameHeight returns the current game height
+func GameHeight() float32 {
+	return gameHeight
 }
 
 func closeEvent() {
