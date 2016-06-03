@@ -1,5 +1,10 @@
 # Engo
-[![Join the chat at https://gitter.im/EngoEngine/engo](https://badges.gitter.im/EngoEngine/engo.svg)](https://gitter.im/EngoEngine/engo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![License](https://img.shields.io/badge/License-MIT-blue.svg) [![Build Status](https://travis-ci.org/EngoEngine/engo.svg?branch=master)](https://travis-ci.org/EngoEngine/engo) [![Build status](https://ci.appveyor.com/api/projects/status/019qc8hncmhnje83?svg=true)](https://ci.appveyor.com/project/otraore/engo) [![Go Report Card](https://goreportcard.com/badge/engo.io/engo)](https://goreportcard.com/report/engo.io/engo) [![Coverage Status](https://coveralls.io/repos/github/EngoEngine/engo/badge.svg?branch=master)](https://coveralls.io/github/EngoEngine/engo?branch=master)
+[![GoDoc](https://godoc.org/engo.io/engo?status.svg)](https://godoc.org/engo.io/engo)
+[![Join the chat at https://gitter.im/EngoEngine/engo](https://badges.gitter.im/EngoEngine/engo.svg)](https://gitter.im/EngoEngine/engo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![License](https://img.shields.io/badge/License-MIT-blue.svg)
+[![Build Status](https://travis-ci.org/EngoEngine/engo.svg?branch=master)](https://travis-ci.org/EngoEngine/engo)
+[![Build status](https://ci.appveyor.com/api/projects/status/019qc8hncmhnje83?svg=true)](https://ci.appveyor.com/project/otraore/engo)
+[![Go Report Card](https://goreportcard.com/badge/engo.io/engo)](https://goreportcard.com/report/engo.io/engo)
+[![Coverage Status](https://coveralls.io/repos/github/EngoEngine/engo/badge.svg?branch=master)](https://coveralls.io/github/EngoEngine/engo?branch=master)
 
 A cross-platform game engine written in Go following an interpretation of the Entity Component System paradigm. Engo is
 currently compilable for Mac OSX, Linux and Windows. With the release of Go 1.4, supporting Android and the inception of
