@@ -19,10 +19,10 @@ import (
 )
 
 var (
-	Gl                        *gl.Context
-	gameWidth, gameHeight     float32
-	windowWidth, windowHeight float32
-	devicePixelRatio          float64
+	// Gl is the current opengl context
+	Gl *gl.Context
+
+	devicePixelRatio float64
 )
 
 func init() {
@@ -32,6 +32,7 @@ func init() {
 //var canvas *js.Object
 var document = dom.GetWindow().Document().(dom.HTMLDocument)
 
+// CreateWindow creates a window with the specified parameters
 func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	canvas := document.CreateElement("canvas").(*dom.HTMLCanvasElement)
 
@@ -115,14 +116,7 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 func DestroyWindow() {}
 
-func GameWidth() float32 {
-	return gameWidth
-}
-
-func GameHeight() float32 {
-	return gameHeight
-}
-
+// CursorPos returns the current cursor position
 func CursorPos() (x, y float64) {
 	return float64(Input.Mouse.X), float64(Input.Mouse.Y)
 }
@@ -132,20 +126,24 @@ func SetTitle(title string) {
 	document.SetTitle(title)
 }
 
+// WindowSize returns the width and height of the current window
 func WindowSize() (w, h int) {
 	w = int(WindowWidth())
 	h = int(WindowHeight())
 	return
 }
 
+// WindowWidth returns the current window width
 func WindowWidth() float32 {
 	return float32(dom.GetWindow().InnerWidth())
 }
 
+// WindowsHeight returns the current window width
 func WindowHeight() float32 {
 	return float32(dom.GetWindow().InnerHeight())
 }
 
+// CanvasWidth returns the current canvas width
 func CanvasWidth() float32 {
 	flt, err := strconv.ParseFloat(document.Body().GetElementsByTagName("canvas")[0].GetAttribute("width"), 32)
 	if err != nil {
@@ -154,6 +152,7 @@ func CanvasWidth() float32 {
 	return float32(flt)
 }
 
+// CanvasHeight returns the current canvas height
 func CanvasHeight() float32 {
 	flt, err := strconv.ParseFloat(document.Body().GetElementsByTagName("canvas")[0].GetAttribute("height"), 32)
 	if err != nil {
@@ -198,6 +197,7 @@ func rafPolyfill() {
 	}
 }
 
+// RunIteration runs one iteration / frame
 func RunIteration() {
 	Time.Tick()
 	Input.update()
@@ -223,6 +223,8 @@ func cancelAnimationFrame(id int) {
 	dom.GetWindow().CancelAnimationFrame(id)
 }
 
+// RunPreparation is called only once, and is called automatically when calling Open
+// It is only here for benchmarking in combination with OpenHeadlessNoRun
 func RunPreparation() {
 	Time = NewClock()
 
