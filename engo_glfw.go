@@ -29,8 +29,6 @@ var (
 
 	headlessWidth             = 800
 	headlessHeight            = 800
-	gameWidth, gameHeight     float32
-	windowWidth, windowHeight float32
 	canvasWidth, canvasHeight float32
 )
 
@@ -262,14 +260,6 @@ Outer:
 		}
 	}
 	ticker.Stop()
-}
-
-func GameWidth() float32 {
-	return gameWidth
-}
-
-func GameHeight() float32 {
-	return gameHeight
 }
 
 func CursorPos() (x, y float64) {
