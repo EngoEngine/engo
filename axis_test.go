@@ -420,6 +420,46 @@ func TestAxisComplex(t *testing.T) {
 
 ////////////////
 
+func runAxisMouse(msg string, t *testing.T, x float32, y float32) {
+
+	if x != Input.Axis("mouse x").Value() {
+		t.Error(msg, "Invalid x value: ", x, "!=", Input.Axis("mouse x").Value())
+	}
+	if y != Input.Axis("mouse y").Value() {
+		t.Error(msg, "Invalid y value: ", y, "!=", Input.Axis("mouse y").Value())
+	}
+}
+
+func TestAxisMouse(t *testing.T) {
+	Input = NewInputManager()
+
+	Input.RegisterAxis("mouse x", NewAxisMouse(AxisMouseHori))
+	Input.RegisterAxis("mouse y", NewAxisMouse(AxisMouseVert))
+
+	runAxisMouse("Pass 0", t, 0.0, 0.0)
+
+	Input.Mouse.X = 1.0
+	Input.Mouse.Y = 1.0
+	runAxisMouse("Pass 1", t, 1.0, 1.0)
+
+	// Resets state to 0.0
+	runAxisMouse("Pass 2", t, 0.0, 0.0)
+	runAxisMouse("Pass 3", t, 0.0, 0.0)
+
+	Input.Mouse.Y = -1.0
+	Input.Mouse.X = -1.0
+	runAxisMouse("Pass 4", t, -2.0, -2.0)
+
+	Input.Mouse.X = 0.0
+	Input.Mouse.Y = 0.0
+	runAxisMouse("Pass 4", t, 1.0, 1.0)
+
+	runAxisMouse("Pass 6", t, 0.0, 0.0)
+	runAxisMouse("Pass 7", t, 0.0, 0.0)
+}
+
+////////////////
+
 // Used to store results when benchmarking.
 var axResult [6]axState
 
