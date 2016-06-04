@@ -420,6 +420,7 @@ func TestAxisComplex(t *testing.T) {
 
 ////////////////
 
+// Checks the state of the two mouse axes against provided values.
 func runAxisMouse(msg string, t *testing.T, x float32, y float32) {
 
 	if x != Input.Axis("mouse x").Value() {
@@ -430,6 +431,7 @@ func runAxisMouse(msg string, t *testing.T, x float32, y float32) {
 	}
 }
 
+// Test some state changes on the two mouse axes.
 func TestAxisMouse(t *testing.T) {
 	Input = NewInputManager()
 

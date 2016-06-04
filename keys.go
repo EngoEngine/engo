@@ -50,12 +50,7 @@ func (km *KeyManager) Get(k Key) KeyState {
 func (km *KeyManager) update() {
 	km.mutex.Lock()
 
-	// Set all keys to their current states
-	//for key, state := range km.mapper {
-	//	state.set(state.currentState)
-	//	km.mapper[key] = state
-	//}
-
+	// Update the state on all the dirty keys
 	for _, key := range km.dirtmap {
 		delete(km.dirtmap, key)
 

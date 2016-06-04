@@ -309,7 +309,7 @@ func checkKeyConfigSubOptimal(b *testing.B, mgr *KeyManager) {
 	}
 }
 
-// Benchmark sub-optimal state checks on a key manager.
+// Benchmark sub-optimal state checks on a clean key manager.
 func BenchmarkKeyMgr_CleanSubOptimal(b *testing.B) {
 	mgr := NewKeyManager()
 
@@ -319,7 +319,7 @@ func BenchmarkKeyMgr_CleanSubOptimal(b *testing.B) {
 	}
 }
 
-// Benchmark sub-optimal state checks on a key manager.
+// Benchmark sub-optimal state checks on a filled key manager.
 func BenchmarkKeyMgr_FilledSubOptimal(b *testing.B) {
 	mgr := NewKeyManager()
 	keyFillManager(mgr)
