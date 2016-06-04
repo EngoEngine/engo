@@ -53,7 +53,7 @@ func (formats *Formats) Register(ext string, loader FileLoader) {
 	formats.formats[ext] = loader
 }
 
-// Load loads the given resource into memory.
+// load loads the given resource into memory.
 func (formats *Formats) load(url string) error {
 	ext := filepath.Ext(url)
 	if loader, ok := Files.formats[ext]; ok {
