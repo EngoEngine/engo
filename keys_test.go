@@ -2,246 +2,350 @@ package engo
 
 import "testing"
 
-type ExpState struct {
+type keyState struct {
+	state    int
 	up       bool
 	down     bool
 	justUp   bool
 	justDown bool
 }
 
-var result [12]ExpState
-
 ////////////////
 
-var initList = [12]Key{
+// Keys used when testing
+var keySimpleCfg = [12]Key{
 	A, B, C, D,
 	F1, F2, F3, F4,
 	Slash, NumTwo,
 	Enter, ArrowLeft,
 }
 
-var initPass0 = [12]ExpState{
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
+// Expected key state @ pass 0
+var initPass0 = [12]keyState{
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
 }
 
-var initPass1 = [12]ExpState{
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: false, justDown: true},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: false, justDown: true},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: false, justDown: true},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: false, justDown: true},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: false, justDown: true},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: false, justDown: true},
+// Expected key state @ pass 1
+var initPass1 = [12]keyState{
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateJustDown},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateJustDown},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateJustDown},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateJustDown},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateJustDown},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateJustDown},
 }
 
-var initPass2 = [12]ExpState{
-	ExpState{up: false, down: false, justUp: false, justDown: true},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: false, justDown: true},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: false, justDown: true},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: false, justDown: true},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: false, justDown: true},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: false, justDown: true},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
+// Expected key state @ pass 2
+var initPass2 = [12]keyState{
+	keyState{state: KeyStateJustDown},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateJustDown},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateJustDown},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateJustDown},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateJustDown},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateJustDown},
+	keyState{state: KeyStateDown},
 }
 
-var initPass3 = [12]ExpState{
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
+// Expected key state @ pass 3
+var initPass3 = [12]keyState{
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateDown},
 }
 
-var initPass4 = [12]ExpState{
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: true, justDown: false},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: true, justDown: false},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: true, justDown: false},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: true, justDown: false},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: true, justDown: false},
-	ExpState{up: false, down: true, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: true, justDown: false},
+// Expected key state @ pass 4
+var initPass4 = [12]keyState{
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateJustUp},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateJustUp},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateJustUp},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateJustUp},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateJustUp},
+	keyState{state: KeyStateDown},
+	keyState{state: KeyStateJustUp},
 }
 
-var initPass5 = [12]ExpState{
-	ExpState{up: false, down: false, justUp: true, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: true, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: true, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: true, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: true, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: false, down: false, justUp: true, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
+// Expected key state @ pass 5
+var initPass5 = [12]keyState{
+	keyState{state: KeyStateJustUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateJustUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateJustUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateJustUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateJustUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateJustUp},
+	keyState{state: KeyStateUp},
 }
 
-var initPass6 = [12]ExpState{
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
-	ExpState{up: true, down: false, justUp: false, justDown: false},
+// Expected key state @ pass 6
+var initPass6 = [12]keyState{
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
+	keyState{state: KeyStateUp},
 }
 
 ////////////////
 
-func runInitList(msg string, t *testing.T, mgr *KeyManager, expect [12]ExpState) {
-	for i, cd := range initList {
+// Checks the state of keys in the configuration against the expected state.
+func runKeyChecks(msg string, t *testing.T, mgr *KeyManager, expect [12]keyState) {
+	for i, cd := range keySimpleCfg {
 		exp := expect[i]
-		ste := mgr.Get(cd)
-		if exp.up != ste.Up() {
+		sto := mgr.Get(cd)
+
+		if exp.state != sto.State() {
+			t.Error(msg, " Invalid on: ", cd, " - State")
+		}
+		if (KeyStateUp == exp.state) != sto.Up() {
 			t.Error(msg, " Invalid on: ", cd, " - Up")
 		}
-		if exp.down != ste.Down() {
+		if (KeyStateDown == exp.state) != sto.Down() {
 			t.Error(msg, " Invalid on: ", cd, " - Down")
 		}
-		if exp.justUp != ste.JustReleased() {
+		if (KeyStateJustUp == exp.state) != sto.JustReleased() {
 			t.Error(msg, " Invalid on: ", cd, " - Just Up")
 		}
-		if exp.justDown != ste.JustPressed() {
+		if (KeyStateJustDown == exp.state) != sto.JustPressed() {
 			t.Error(msg, " Invalid on: ", cd, " - Just Down")
 		}
 	}
 }
 
+// This test sets up a key manager and changes the states a few times, every
+// time the state changes the results are checked against the expected outcome.
 func TestKeyManager(t *testing.T) {
 	mgr := NewKeyManager()
-	runInitList("Init (0.0)", t, mgr, initPass0)
+	runKeyChecks("Init (0.0)", t, mgr, initPass0)
 
 	// Empty update pass0
 	mgr.update()
-	runInitList("Pass (0.1)", t, mgr, initPass0)
+	runKeyChecks("Pass (0.1)", t, mgr, initPass0)
 	mgr.update()
-	runInitList("Pass (0.2)", t, mgr, initPass0)
+	runKeyChecks("Pass (0.2)", t, mgr, initPass0)
 	mgr.update()
-	runInitList("Pass (0.3)", t, mgr, initPass0)
+	runKeyChecks("Pass (0.3)", t, mgr, initPass0)
 
 	// Set uneven true pass1
 	mgr.update()
 
-	mgr.Set(initList[1], true)
-	mgr.Set(initList[3], true)
-	mgr.Set(initList[5], true)
-	mgr.Set(initList[7], true)
-	mgr.Set(initList[9], true)
-	mgr.Set(initList[11], true)
+	mgr.Set(keySimpleCfg[1], true)
+	mgr.Set(keySimpleCfg[3], true)
+	mgr.Set(keySimpleCfg[5], true)
+	mgr.Set(keySimpleCfg[7], true)
+	mgr.Set(keySimpleCfg[9], true)
+	mgr.Set(keySimpleCfg[11], true)
 
-	runInitList("Pass (1.0)", t, mgr, initPass1)
+	runKeyChecks("Pass (1.0)", t, mgr, initPass1)
 
 	// Set even true pass2
 	mgr.update()
 
-	mgr.Set(initList[0], true)
-	mgr.Set(initList[2], true)
-	mgr.Set(initList[4], true)
-	mgr.Set(initList[6], true)
-	mgr.Set(initList[8], true)
-	mgr.Set(initList[10], true)
+	mgr.Set(keySimpleCfg[0], true)
+	mgr.Set(keySimpleCfg[2], true)
+	mgr.Set(keySimpleCfg[4], true)
+	mgr.Set(keySimpleCfg[6], true)
+	mgr.Set(keySimpleCfg[8], true)
+	mgr.Set(keySimpleCfg[10], true)
 
-	runInitList("Pass (2.0)", t, mgr, initPass2)
+	runKeyChecks("Pass (2.0)", t, mgr, initPass2)
 
 	// Keeps state
 	mgr.update()
-	runInitList("Pass (3.0)", t, mgr, initPass3)
+	runKeyChecks("Pass (3.0)", t, mgr, initPass3)
 	mgr.update()
-	runInitList("Pass (3.1)", t, mgr, initPass3)
+	runKeyChecks("Pass (3.1)", t, mgr, initPass3)
 	mgr.update()
-	runInitList("Pass (3.2)", t, mgr, initPass3)
-	mgr.update()
-	runInitList("Pass (3.3)", t, mgr, initPass3)
+	runKeyChecks("Pass (3.2)", t, mgr, initPass3)
 
 	// Set uneven to false
 	mgr.update()
 
-	mgr.Set(initList[1], false)
-	mgr.Set(initList[3], false)
-	mgr.Set(initList[5], false)
-	mgr.Set(initList[7], false)
-	mgr.Set(initList[9], false)
-	mgr.Set(initList[11], false)
+	mgr.Set(keySimpleCfg[1], false)
+	mgr.Set(keySimpleCfg[3], false)
+	mgr.Set(keySimpleCfg[5], false)
+	mgr.Set(keySimpleCfg[7], false)
+	mgr.Set(keySimpleCfg[9], false)
+	mgr.Set(keySimpleCfg[11], false)
 
-	runInitList("Pass (4.0)", t, mgr, initPass4)
+	runKeyChecks("Pass (4.0)", t, mgr, initPass4)
 
 	// Set uneven to false
 	mgr.update()
 
-	mgr.Set(initList[0], false)
-	mgr.Set(initList[2], false)
-	mgr.Set(initList[4], false)
-	mgr.Set(initList[6], false)
-	mgr.Set(initList[8], false)
-	mgr.Set(initList[10], false)
+	mgr.Set(keySimpleCfg[0], false)
+	mgr.Set(keySimpleCfg[2], false)
+	mgr.Set(keySimpleCfg[4], false)
+	mgr.Set(keySimpleCfg[6], false)
+	mgr.Set(keySimpleCfg[8], false)
+	mgr.Set(keySimpleCfg[10], false)
 
-	runInitList("Pass (5.0)", t, mgr, initPass5)
+	runKeyChecks("Pass (5.0)", t, mgr, initPass5)
 
 	// Final keeps state
 	mgr.update()
-	runInitList("Pass (6.0)", t, mgr, initPass6)
+	runKeyChecks("Pass (6.0)", t, mgr, initPass6)
 	mgr.update()
-	runInitList("Pass (6.1)", t, mgr, initPass6)
+	runKeyChecks("Pass (6.1)", t, mgr, initPass6)
 	mgr.update()
-	runInitList("Pass (6.2)", t, mgr, initPass6)
-	mgr.update()
-	runInitList("Pass (6.3)", t, mgr, initPass6)
+	runKeyChecks("Pass (6.2)", t, mgr, initPass6)
 }
 
 ////////////////
 
-func fillManager(mgr *KeyManager) {
-	mgr.Set(initList[0], false)
-	mgr.Set(initList[1], false)
-	mgr.Set(initList[2], false)
-	mgr.Set(initList[3], false)
-	mgr.Set(initList[4], false)
-	mgr.Set(initList[5], false)
-	mgr.Set(initList[6], false)
-	mgr.Set(initList[7], false)
-	mgr.Set(initList[8], false)
-	mgr.Set(initList[9], false)
-	mgr.Set(initList[10], false)
-	mgr.Set(initList[11], false)
+// Used to store results when benchmarking.
+var keyResult [12]keyState
+
+// Fast way to grab current key state, checks and store them externaly.
+func checkKeyConfigOptimal(b *testing.B, mgr *KeyManager) {
+	for i, cd := range keySimpleCfg {
+		st := mgr.Get(cd)
+		keyResult[i].up = st.Up()
+		keyResult[i].down = st.Down()
+		keyResult[i].justUp = st.JustReleased()
+		keyResult[i].justDown = st.JustPressed()
+	}
+}
+
+// Benchmark state checks with a clean manager.
+func BenchmarkKeyMgr_CleanState(b *testing.B) {
+	mgr := NewKeyManager()
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		checkKeyConfigOptimal(b, mgr)
+	}
+}
+
+// Benchmark state checks with a full key manager.
+func BenchmarkKeyMgr_FilledState(b *testing.B) {
+	mgr := NewKeyManager()
+	keyFillManager(mgr)
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		checkKeyConfigOptimal(b, mgr)
+	}
+}
+
+// Benchmark update with a clean manager and state checks.
+func BenchmarkKeyMgr_CleanUpdate(b *testing.B) {
+	mgr := NewKeyManager()
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		mgr.update()
+		checkKeyConfigOptimal(b, mgr)
+	}
+}
+
+// Benchmark update with a full key manager and state checks.
+func BenchmarkKeyMgr_FilledUpdate(b *testing.B) {
+	mgr := NewKeyManager()
+	keyFillManager(mgr)
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		mgr.update()
+		checkKeyConfigOptimal(b, mgr)
+	}
+}
+
+////////////////
+
+// Slow way to check key state, checks and store them externaly.
+func checkKeyConfigSubOptimal(b *testing.B, mgr *KeyManager) {
+	for i, cd := range keySimpleCfg {
+		keyResult[i].up = mgr.Get(cd).Up()
+		keyResult[i].down = mgr.Get(cd).Down()
+		keyResult[i].justUp = mgr.Get(cd).JustReleased()
+		keyResult[i].justDown = mgr.Get(cd).JustPressed()
+	}
+}
+
+// Benchmark sub-optimal state checks on a key manager.
+func BenchmarkKeyMgr_CleanSubOptimal(b *testing.B) {
+	mgr := NewKeyManager()
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		checkKeyConfigSubOptimal(b, mgr)
+	}
+}
+
+// Benchmark sub-optimal state checks on a key manager.
+func BenchmarkKeyMgr_FilledSubOptimal(b *testing.B) {
+	mgr := NewKeyManager()
+	keyFillManager(mgr)
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		checkKeyConfigSubOptimal(b, mgr)
+	}
+}
+
+////////////////
+
+// Utility function that fills the KeyManager with key states.
+func keyFillManager(mgr *KeyManager) {
+	mgr.Set(keySimpleCfg[0], false)
+	mgr.Set(keySimpleCfg[1], false)
+	mgr.Set(keySimpleCfg[2], false)
+	mgr.Set(keySimpleCfg[3], false)
+	mgr.Set(keySimpleCfg[4], false)
+	mgr.Set(keySimpleCfg[5], false)
+	mgr.Set(keySimpleCfg[6], false)
+	mgr.Set(keySimpleCfg[7], false)
+	mgr.Set(keySimpleCfg[8], false)
+	mgr.Set(keySimpleCfg[9], false)
+	mgr.Set(keySimpleCfg[10], false)
+	mgr.Set(keySimpleCfg[11], false)
 
 	mgr.Set(D, false)
 	mgr.Set(E, false)
@@ -298,79 +402,4 @@ func fillManager(mgr *KeyManager) {
 	mgr.Set(NumSeven, false)
 	mgr.Set(NumEight, false)
 	mgr.Set(NumNine, false)
-}
-
-func checkInitListOptimal(b *testing.B, mgr *KeyManager) {
-	for i, cd := range initList {
-		st := mgr.Get(cd)
-		result[i].up = st.Up()
-		result[i].down = st.Down()
-		result[i].justUp = st.JustReleased()
-		result[i].justDown = st.JustPressed()
-	}
-}
-
-// Benchmark optimal state checks
-func BenchmarkKeyMgrCleanState(b *testing.B) {
-	mgr := NewKeyManager()
-
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		checkInitListOptimal(b, mgr)
-	}
-}
-
-// Benchmark update with state checks to avoide optimizing.
-func BenchmarkKeyMgrCleanUpdate(b *testing.B) {
-	mgr := NewKeyManager()
-
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		mgr.update()
-		checkInitListOptimal(b, mgr)
-	}
-}
-
-// Benchmark optimal state checks with keys inside the map.
-func BenchmarkKeyMgrFilledState(b *testing.B) {
-	mgr := NewKeyManager()
-	fillManager(mgr)
-
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		checkInitListOptimal(b, mgr)
-	}
-}
-
-// Benchmark update with keys inside the map and state checks to avoide optimizing.
-func BenchmarkKeyMgrFilledUpdate(b *testing.B) {
-	mgr := NewKeyManager()
-	fillManager(mgr)
-
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		mgr.update()
-		checkInitListOptimal(b, mgr)
-	}
-}
-
-////////////////
-
-func checkInitListSubOptimal(b *testing.B, mgr *KeyManager) {
-	for i, cd := range initList {
-		result[i].up = mgr.Get(cd).Up()
-		result[i].down = mgr.Get(cd).Down()
-		result[i].justUp = mgr.Get(cd).JustReleased()
-		result[i].justDown = mgr.Get(cd).JustPressed()
-	}
-}
-
-// Benchmark sub-optimal state checks
-func BenchmarkKeyMgrCleanStateSubOptimal(b *testing.B) {
-	mgr := NewKeyManager()
-
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		checkInitListSubOptimal(b, mgr)
-	}
 }
