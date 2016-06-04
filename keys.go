@@ -7,21 +7,23 @@ import (
 const (
 	KeyStateUp = iota
 	KeyStateDown
-	KeyStateJustUp
 	KeyStateJustDown
+	KeyStateJustUp
 )
 
 // NewKeyManager creates a new KeyManager.
 func NewKeyManager() *KeyManager {
 	return &KeyManager{
-		mapper: make(map[Key]KeyState),
+		dirtmap: make(map[Key]Key),
+		mapper:  make(map[Key]KeyState),
 	}
 }
 
 // KeyManager tracks which keys are pressed and released at the current point of time.
 type KeyManager struct {
-	mapper map[Key]KeyState
-	mutex  sync.RWMutex
+	dirtmap map[Key]Key
+	mapper  map[Key]KeyState
+	mutex   sync.RWMutex
 }
 
 // Set is used for updating whether or not a key is held down, or not held down.
@@ -31,6 +33,7 @@ func (km *KeyManager) Set(k Key, state bool) {
 	ks := km.mapper[k]
 	ks.set(state)
 	km.mapper[k] = ks
+	km.dirtmap[k] = k
 
 	km.mutex.Unlock()
 }
@@ -48,7 +51,15 @@ func (km *KeyManager) update() {
 	km.mutex.Lock()
 
 	// Set all keys to their current states
-	for key, state := range km.mapper {
+	//for key, state := range km.mapper {
+	//	state.set(state.currentState)
+	//	km.mapper[key] = state
+	//}
+
+	for _, key := range km.dirtmap {
+		delete(km.dirtmap, key)
+
+		state := km.mapper[key]
 		state.set(state.currentState)
 		km.mapper[key] = state
 	}
