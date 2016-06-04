@@ -57,7 +57,7 @@ func (game *GameWorld) Preload() {
 	// When you add tilesets to the Tiled Editor, the location where you added them from is where the engo loader will look for them
 	// Tileset from : http://opengameart.org
 
-	if err := engo.Files.LoadMany("example.tmx", "icon.png"); err != nil {
+	if err := engo.Files.Load("example.tmx", "icon.png"); err != nil {
 		panic(err)
 	}
 }
