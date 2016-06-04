@@ -19,7 +19,7 @@ type Guy struct {
 }
 
 func (*DefaultScene) Preload() {
-	err := engo.Files.LoadMany("icon.png", "rock.png")
+	err := engo.Files.Load("icon.png", "rock.png")
 	if err != nil {
 		log.Println(err)
 	}
