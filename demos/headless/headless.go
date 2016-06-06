@@ -41,7 +41,7 @@ type Paddle struct {
 }
 
 func (pong *PongGame) Preload() {
-	err := engo.Files.LoadMany("ball.png", "paddle.png", "Roboto-Regular.ttf")
+	err := engo.Files.Load("ball.png", "paddle.png", "Roboto-Regular.ttf")
 	if err != nil {
 		log.Println(err)
 	}
