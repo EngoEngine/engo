@@ -16,6 +16,7 @@ const (
 	MouseZoomerPriority      = 110
 	EdgeScrollerPriority     = 120
 	KeyboardScrollerPriority = 130
+	EntityScrollerPriority   = 140
 )
 
 var (
@@ -30,8 +31,8 @@ type cameraEntity struct {
 	*SpaceComponent
 }
 
-// CameraSystem is a System that manages the state of the Camera
-type cameraSystem struct {
+// CameraSystem is a System that manages the state of the virtual camera
+type CameraSystem struct {
 	x, y, z  float32
 	tracking cameraEntity // The entity that is currently being followed
 
@@ -41,7 +42,7 @@ type cameraSystem struct {
 	longTasks map[CameraAxis]*CameraMessage
 }
 
-func (cam *cameraSystem) New(*ecs.World) {
+func (cam *CameraSystem) New(*ecs.World) {
 	if CameraBounds.Max.X == 0 && CameraBounds.Max.Y == 0 {
 		CameraBounds.Max = engo.Point{engo.GameWidth(), engo.GameHeight()}
 	}
@@ -94,9 +95,9 @@ func (cam *cameraSystem) New(*ecs.World) {
 	})
 }
 
-func (cam *cameraSystem) Remove(ecs.BasicEntity) {}
+func (cam *CameraSystem) Remove(ecs.BasicEntity) {}
 
-func (cam *cameraSystem) Update(dt float32) {
+func (cam *CameraSystem) Update(dt float32) {
 	for axis, longTask := range cam.longTasks {
 		if !longTask.Incremental {
 			longTask.Incremental = true
@@ -152,63 +153,63 @@ func (cam *cameraSystem) Update(dt float32) {
 	)
 }
 
-func (cam *cameraSystem) FollowEntity(basic *ecs.BasicEntity, space *SpaceComponent) {
+func (cam *CameraSystem) FollowEntity(basic *ecs.BasicEntity, space *SpaceComponent) {
 	cam.tracking = cameraEntity{basic, space}
 }
 
 // X returns the X-coordinate of the location of the Camera
-func (cam *cameraSystem) X() float32 {
+func (cam *CameraSystem) X() float32 {
 	return cam.x
 }
 
 // Y returns the Y-coordinate of the location of the Camera
-func (cam *cameraSystem) Y() float32 {
+func (cam *CameraSystem) Y() float32 {
 	return cam.y
 }
 
 // Z returns the Z-coordinate of the location of the Camera
-func (cam *cameraSystem) Z() float32 {
+func (cam *CameraSystem) Z() float32 {
 	return cam.z
 }
 
 // Angle returns the angle (in degrees) at which the Camera is rotated
-func (cam *cameraSystem) Angle() float32 {
+func (cam *CameraSystem) Angle() float32 {
 	return cam.angle
 }
 
-func (cam *cameraSystem) moveX(value float32) {
+func (cam *CameraSystem) moveX(value float32) {
 	cam.moveToX(cam.x + value)
 }
 
-func (cam *cameraSystem) moveY(value float32) {
+func (cam *CameraSystem) moveY(value float32) {
 	cam.moveToY(cam.y + value)
 }
 
-func (cam *cameraSystem) zoom(value float32) {
+func (cam *CameraSystem) zoom(value float32) {
 	cam.zoomTo(cam.z + value)
 }
 
-func (cam *cameraSystem) rotate(value float32) {
+func (cam *CameraSystem) rotate(value float32) {
 	cam.rotateTo(cam.angle + value)
 }
 
-func (cam *cameraSystem) moveToX(location float32) {
+func (cam *CameraSystem) moveToX(location float32) {
 	cam.x = mgl32.Clamp(location, CameraBounds.Min.X, CameraBounds.Max.X)
 }
 
-func (cam *cameraSystem) moveToY(location float32) {
+func (cam *CameraSystem) moveToY(location float32) {
 	cam.y = mgl32.Clamp(location, CameraBounds.Min.Y, CameraBounds.Max.Y)
 }
 
-func (cam *cameraSystem) zoomTo(zoomLevel float32) {
+func (cam *CameraSystem) zoomTo(zoomLevel float32) {
 	cam.z = mgl32.Clamp(zoomLevel, MinZoom, MaxZoom)
 }
 
-func (cam *cameraSystem) rotateTo(rotation float32) {
+func (cam *CameraSystem) rotateTo(rotation float32) {
 	cam.angle = math.Mod(rotation, 360)
 }
 
-func (cam *cameraSystem) centerCam(x, y, z float32) {
+func (cam *CameraSystem) centerCam(x, y, z float32) {
 	cam.moveToX(x)
 	cam.moveToY(y)
 	cam.zoomTo(z)
@@ -275,6 +276,41 @@ func NewKeyboardScroller(scrollSpeed float32, hori, vert string) *KeyboardScroll
 	kbs.BindKeyboard(hori, vert)
 
 	return kbs
+}
+
+// EntityScroller scrolls the camera to the position of a entity using its space component
+type EntityScroller struct {
+	*SpaceComponent
+	TrackingBounds engo.AABB
+}
+
+// New adjusts CameraBounds to the bounds of EntityScroller
+func (c *EntityScroller) New(*ecs.World) {
+	offsetX, offsetY := engo.CanvasWidth()/2, engo.CanvasHeight()/2
+	// This is to account for upper left origin
+	distY := c.TrackingBounds.Max.Y - c.TrackingBounds.Min.Y
+
+	CameraBounds.Min.X = c.TrackingBounds.Min.X + offsetX
+	CameraBounds.Min.Y = (c.TrackingBounds.Max.Y - distY) + offsetY
+
+	CameraBounds.Max.X = c.TrackingBounds.Max.X - offsetX
+	CameraBounds.Max.Y = (c.TrackingBounds.Min.Y + distY) - offsetY
+}
+
+func (*EntityScroller) Priority() int          { return EntityScrollerPriority }
+func (*EntityScroller) Remove(ecs.BasicEntity) {}
+
+// Update moves the camera to the center of the space component
+// Values are automatically clamped to TrackingBounds by the camera
+func (c *EntityScroller) Update(dt float32) {
+	width, height := c.SpaceComponent.Width, c.SpaceComponent.Height
+
+	pos := c.SpaceComponent.Position
+	trackToX := pos.X + width/2
+	trackToY := pos.Y + height/2
+
+	engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: trackToX, Incremental: false})
+	engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: trackToY, Incremental: false})
 }
 
 // EdgeScroller is a System that allows for scrolling when the cursor is near the edges of

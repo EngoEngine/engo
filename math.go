@@ -1,8 +1,14 @@
 package engo
 
 import (
+	"github.com/engoengine/glm"
 	"github.com/luxengine/math"
 )
+
+func init() {
+	// This precision / error margin is required to work with float32 within `engo.Point` when checking for equality.
+	glm.Epsilon = 1e-3
+}
 
 // AABB describes two points of a rectangle: the upper-left corner and the lower-right corner. It should always hold that
 // `Min.X <= Max.X` and `Min.Y <= Max.Y`.
@@ -69,6 +75,11 @@ func (p *Point) Subtract(p2 Point) {
 func (p *Point) Multiply(p2 Point) {
 	p.X *= p2.X
 	p.Y *= p2.Y
+}
+
+// Equal indicates whether two points have the same value, avoiding issues with float precision
+func (p *Point) Equal(p2 Point) bool {
+	return glm.FloatEqual(p.X, p2.X) && glm.FloatEqual(p.Y, p2.Y)
 }
 
 // PointDistance returns the euclidean distance between p and p2

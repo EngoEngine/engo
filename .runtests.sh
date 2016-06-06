@@ -8,6 +8,9 @@ go get -t -v ./... || exit 1
 echo "Testing engo.io/engo using coveralls"
 $HOME/gopath/bin/goveralls -service=travis-ci
 
+echo "Testing and benchmarking engo.io/engo"
+go test -v -bench=. ./... || exit 1
+
 # TODO: Fix the build so this actually passes
 # echo "Testing engo.io/engo using 'gopherjs test'"
 # gopherjs test
@@ -16,7 +19,7 @@ echo "Skipping tests for engo.io/engo using 'gopherjs test' (won't pass)"
 echo "Skipping tests for engo.io/engo using 'gomobile' (no tools exist yet)"
 
 # These can fail without us minding it
-blacklist="engo.io/engo/demos/demoutils,engo.io/engo/demos/tilemap"
+blacklist="engo.io/engo/demos/demoutils"
 
 for dir in `pwd`/demos/*/
 do

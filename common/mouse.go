@@ -103,7 +103,7 @@ type mouseEntity struct {
 type MouseSystem struct {
 	entities []mouseEntity
 	world    *ecs.World
-	camera   *cameraSystem
+	camera   *CameraSystem
 
 	mouseX    float32
 	mouseY    float32
@@ -119,7 +119,7 @@ func (m *MouseSystem) New(w *ecs.World) {
 	// First check if the CameraSystem is available
 	for _, system := range m.world.Systems() {
 		switch sys := system.(type) {
-		case *cameraSystem:
+		case *CameraSystem:
 			m.camera = sys
 		}
 	}
@@ -190,7 +190,7 @@ func (m *MouseSystem) Update(dt float32) {
 
 		if e.RenderComponent != nil {
 			// Hardcoded special case for the HUD | TODO: make generic instead of hardcoding
-			if e.RenderComponent.shader == HUDShader {
+			if e.RenderComponent.shader == HUDShader || e.RenderComponent.shader == LegacyHUDShader {
 				mx = engo.Input.Mouse.X
 				my = engo.Input.Mouse.Y
 			}
@@ -199,10 +199,9 @@ func (m *MouseSystem) Update(dt float32) {
 		// If the Mouse component is a tracker we always update it
 		// Check if the X-value is within range
 		// and if the Y-value is within range
-		pos := e.SpaceComponent.AABB()
 
 		if e.MouseComponent.Track || e.MouseComponent.startedDragging ||
-			mx > pos.Min.X && mx < pos.Max.X && my > pos.Min.Y && my < pos.Max.Y {
+			e.SpaceComponent.Contains(engo.Point{mx, my}) {
 
 			e.MouseComponent.Enter = !e.MouseComponent.Hovered
 			e.MouseComponent.Hovered = true

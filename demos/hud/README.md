@@ -9,4 +9,4 @@ For doing so, it created a green background -- which will be affected, and a vio
 These lines are key in this demo:
 
 * `hudBg.RenderComponent.SetZIndex(1)`, to ensure it's rendered on top of the default background (with z-index 0)
-* `hudBg.RenderComponent.SetShader(engo.HUDShader)`, to enable the HUDShader instead of the DefaultShader
+* `hudBg.RenderComponent.SetShader(common.HUDShader)`, to enable the HUDShader instead of the DefaultShader

@@ -58,8 +58,8 @@ func (formats *Formats) Register(ext string, loader FileLoader) {
 	formats.formats[ext] = loader
 }
 
-// Load loads the given resource into memory.
-func (formats *Formats) Load(url string) error {
+// load loads the given resource into memory.
+func (formats *Formats) load(url string) error {
 	ext := filepath.Ext(url)
 	if loader, ok := Files.formats[ext]; ok {
 		f, err := openFile(filepath.Join(formats.root, url))
@@ -73,10 +73,10 @@ func (formats *Formats) Load(url string) error {
 	return fmt.Errorf("no `FileLoader` associated with this extension: %q in url %q", ext, url)
 }
 
-// LoadMany loads the given resources into memory, stopping at the first error.
-func (formats *Formats) LoadMany(urls ...string) error {
+// Load loads the given resource(s) into memory, stopping at the first error.
+func (formats *Formats) Load(urls ...string) error {
 	for _, url := range urls {
-		err := formats.Load(url)
+		err := formats.load(url)
 		if err != nil {
 			return err
 		}
