@@ -1,6 +1,6 @@
 package engo
 
-// MessageHandler is a function that takes a `Message` parameter
+//A MessageHandler is used to dispatch a message to the subscribed handler.
 type MessageHandler func(msg Message)
 
 // A Message is used to send messages within the MessageManager

@@ -95,17 +95,17 @@ func (key KeyState) JustPressed() bool {
 	return key.State() == KeyStateJustDown
 }
 
-// JustReleased returns wether a key was just up
+// JustReleased returns whether a key was just released
 func (key KeyState) JustReleased() bool {
 	return key.State() == KeyStateJustUp
 }
 
-// Up returns wether a key is up
+// Up returns wheter a key is not being pressed
 func (key KeyState) Up() bool {
 	return key.State() == KeyStateUp
 }
 
-// Down returns wether a key is down
+// Down returns wether a key is being pressed
 func (key KeyState) Down() bool {
 	return key.State() == KeyStateDown
 }

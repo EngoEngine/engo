@@ -1,6 +1,6 @@
 package engo
 
-// Action corresponds to a control action
+// Action corresponds to a control action such as move, press, release
 type Action int
 
 // Key correspends to a keyboard key
@@ -56,23 +56,23 @@ const (
 // with engo_glfw.
 // engo_glfw redefines the variables it needs to other values during init() so
 var (
-	// Grave represents the grave keyboard key '`'
+	// Grave represents the '`' keyboard key
 	Grave Key = 192
-	// Dash represents the dash keyboard key '-'
+	// Dash represents the '-' keyboard key
 	Dash Key = 189
-	// Apostrophe represents the apostrophe keyboard key `'`
+	// Apostrophe represents the `'` keyboard key
 	Apostrophe Key = 222
-	// Semicolon represents the semicolon keyboard key ';'
+	// Semicolon represents the ';' keyboard key
 	Semicolon Key = 186
-	// Equals reprsents the equals keyboard key '='
+	// Equals reprsents the '=' keyboard key
 	Equals Key = 187
-	// Comma represents the comma keyboard key ','
+	// Comma represents the ',' keyboard key
 	Comma Key = 188
-	// Period represents the period keyboard key '.'
+	// Period represents the '.' keyboard key
 	Period Key = 190
-	// Slash represents the slash keyboard key '/'
+	// Slash represents the '/' keyboard key
 	Slash Key = 191
-	// Backslash represents the backslash keyboard key '\'
+	// Backslash represents the '\' keyboard key
 	Backslash Key = 220
 	//Backspace represents the backspace keyboard key
 	Backspace Key = 8
@@ -88,7 +88,8 @@ var (
 	Escape Key = 27
 	// Insert represents the insert keyboard key
 	Insert Key = 45
-	// PrintScreen represents the print screen keyboard key 'prntscr'
+	// PrintScreen represents the print screen keyboard key often
+	// represented by 'Prt Scrn', 'Prt Scn', or 'Print Screen'
 	PrintScreen Key = 42
 	// Delete represents the delete keyboard key
 	Delete Key = 46
@@ -112,7 +113,7 @@ var (
 	ArrowDown Key = 40
 	// ArrowUp represents the up arrow keyboard key
 	ArrowUp Key = 38
-	// LeftBracket represents the left bracket keyboard key '['
+	// LeftBracket represents the '[' keyboard key
 	LeftBracket Key = 219
 	// LeftShift represents the left shift keyboard key
 	LeftShift Key = 16
@@ -123,7 +124,7 @@ var (
 	LeftSuper Key = 73
 	// LeftAlt represents the left alt keyboard key
 	LeftAlt Key = 18
-	// RightBracket represents the right bracket keyboard key ']'
+	// RightBracket represents the ']' keyboard key
 	RightBracket Key = 221
 	// RightShift represents the right shift keyboard key
 	RightShift Key = 16
@@ -134,101 +135,101 @@ var (
 	RightSuper Key = 73
 	// RightAlt represents the left alt keyboard key
 	RightAlt Key = 18
-	// Zero represents the zero keyboard key '0'
+	// Zero represents the '0' keyboard key
 	Zero Key = 48
-	// One represents the one keyboard key '1'
+	// One represents the '1' keyboard key
 	One Key = 49
-	// Two represents the two keyboard key '2'
+	// Two represents the '2' keyboard key
 	Two Key = 50
-	// Three represents the three keyboard key '3'
+	// Three represents the '3' keyboard key
 	Three Key = 51
-	// Four represents the four keyboard key '4'
+	// Four represents the '4' keyboard key
 	Four Key = 52
-	// Five represents the five keyboard key '5'
+	// Five represents the '5' keyboard key
 	Five Key = 53
-	// Six represents the six keyboard key '6'
+	// Six represents the '6' keyboard key
 	Six Key = 54
-	// Seven represents the seven keyboard key '7'
+	// Seven represents the '7' keyboard key
 	Seven Key = 55
-	// Eight represents the eight keyboard key '8'
+	// Eight represents the '8' keyboard key
 	Eight Key = 56
-	// Nine represents the nine keyboard key '9'
+	// Nine represents the  '9' keyboard key
 	Nine Key = 57
-	// F1 represents the f1 keyboard key
+	// F1 represents the 'F1' keyboard key
 	F1 Key = 112
-	// F2 represents the f2 keyboard key
+	// F2 represents the 'F2' keyboard key
 	F2 Key = 113
-	// F3 represents the f3 keyboard key
+	// F3 represents the 'F3' keyboard key
 	F3 Key = 114
-	// F4 represents the f4 keyboard key
+	// F4 represents the 'F4' keyboard key
 	F4 Key = 115
-	// F5 represents the f5 keyboard key
+	// F5 represents the 'F5' keyboard key
 	F5 Key = 116
-	// F6 represents the f6 keyboard key
+	// F6 represents the 'F6' keyboard key
 	F6 Key = 117
-	// F7 represents the f7 keyboard key
+	// F7 represents the 'F7' keyboard key
 	F7 Key = 118
-	// F8 represents the f8 keyboard key
+	// F8 represents the 'F8' keyboard key
 	F8 Key = 119
-	// F9 represents the f9 keyboard key
+	// F9 represents the 'F9' keyboard key
 	F9 Key = 120
-	// F10 represents the f10 keyboard key
+	// F10 represents the 'F10' keyboard key
 	F10 Key = 121
-	// F11 represents the f11 keyboard key
+	// F11 represents the 'F11' keyboard key
 	F11 Key = 122
-	// F12 represents the f12 keyboard key
+	// F12 represents the 'F12' keyboard key
 	F12 Key = 123
-	// A represents the a keyboard key 'A'
+	// A represents the 'A' keyboard key
 	A Key = 65
-	// B represents the b keyboard key 'B'
+	// B represents the 'B' keyboard key
 	B Key = 66
-	// C represents the c keyboard key 'C'
+	// C represents the 'C' keyboard key
 	C Key = 67
-	// D represents the d keyboard key 'D'
+	// D represents the 'D' keyboard key '
 	D Key = 68
-	// E represents the e keyboard key 'E'
+	// E represents the 'E' keyboard key
 	E Key = 69
-	// F represents the f keyboard key 'F'
+	// F represents the 'F' keyboard key
 	F Key = 70
-	// G represents the g keyboard key 'G'
+	// G represents the 'G' keyboard key
 	G Key = 71
-	// H represents the h keyboard key 'H'
+	// H represents the 'H' keyboard key
 	H Key = 72
-	// I represents the i keyboard key 'I'
+	// I represents the 'I' keyboard key
 	I Key = 73
-	// J represents the j keyboard key 'J'
+	// J represents the 'J' keyboard key
 	J Key = 74
-	// K represents the k keyboard key 'K'
+	// K represents the 'K' keyboard key
 	K Key = 75
-	// L represents the l keyboard key 'L'
+	// L represents the 'L' keyboard key
 	L Key = 76
-	// M represents the m keyboard key 'M'
+	// M represents the 'M' keyboard key
 	M Key = 77
-	// N represents the n keyboard key 'N'
+	// N represents the 'N' keyboard key
 	N Key = 78
-	// O represents the o keyboard key 'O'
+	// O represents the 'O' keyboard key
 	O Key = 79
-	// P represents the p keyboard key 'P'
+	// P represents the 'P' keyboard key
 	P Key = 80
-	// Q represents the q keyboard key 'Q'
+	// Q represents the 'Q' keyboard key
 	Q Key = 81
-	// R represents the r keyboard key 'R'
+	// R represents the 'R' keyboard key
 	R Key = 82
-	// S represents the s keyboard key 'S'
+	// S represents the 'S' keyboard key
 	S Key = 83
-	// T represents the t keyboard key 'T'
+	// T represents the 'T' keyboard key
 	T Key = 84
-	// U represents the u keyboard key 'U'
+	// U represents the 'U' keyboard key
 	U Key = 85
-	// V represents the v keyboard key 'V'
+	// V represents the 'V' keyboard key
 	V Key = 86
-	// W represents the w keyboard key 'W'
+	// W represents the 'W' keyboard key
 	W Key = 87
-	// X represents the x keyboard key 'X'
+	// X represents the 'X' keyboard key
 	X Key = 88
-	// Y represents the y keyboard key 'Y'
+	// Y represents the 'Y' keyboard key
 	Y Key = 89
-	// Z represents the z keyboard key 'Z'
+	// Z represents the 'Z' keyboard key
 	Z Key = 90
 	// NumLock represents the NumLock keyboard key on the numpad
 	NumLock Key = 144
