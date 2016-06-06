@@ -22,7 +22,7 @@ import (
 )
 
 var (
-	// Gl is the current opengl context
+	// Gl is the current OpenGL context
 	Gl *gl.Context
 	sz size.Event
 
@@ -54,7 +54,7 @@ func WindowWidth() float32 {
 	return windowWidth
 }
 
-// WindowsHeight returns the current window width
+// WindowHeight returns the current window height
 func WindowHeight() float32 {
 	return windowHeight
 }

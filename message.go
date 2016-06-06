@@ -3,7 +3,7 @@ package engo
 // MessageHandler is a function that takes a `Message` parameter
 type MessageHandler func(msg Message)
 
-// Message represents a message acceptable by the MessageManager
+// A Message is used to send messages within the MessageManager
 type Message interface {
 	Type() string
 }

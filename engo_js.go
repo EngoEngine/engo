@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	// Gl is the current opengl context
+	// Gl is the current OpenGL context
 	Gl *gl.Context
 
 	devicePixelRatio float64
@@ -138,7 +138,7 @@ func WindowWidth() float32 {
 	return float32(dom.GetWindow().InnerWidth())
 }
 
-// WindowsHeight returns the current window width
+// WindowHeight returns the current window height
 func WindowHeight() float32 {
 	return float32(dom.GetWindow().InnerHeight())
 }
@@ -197,7 +197,7 @@ func rafPolyfill() {
 	}
 }
 
-// RunIteration runs one iteration / frame
+// RunIteration runs one iteration per frame
 func RunIteration() {
 	Time.Tick()
 	Input.update()
@@ -223,8 +223,7 @@ func cancelAnimationFrame(id int) {
 	dom.GetWindow().CancelAnimationFrame(id)
 }
 
-// RunPreparation is called only once, and is called automatically when calling Open
-// It is only here for benchmarking in combination with OpenHeadlessNoRun
+// RunPreparation is called automatically when calling Open. It should only be called once.
 func RunPreparation() {
 	Time = NewClock()
 

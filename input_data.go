@@ -6,15 +6,15 @@ type Action int
 // Key correspends to a keyboard key
 type Key int
 
-//Modifier represents a special key pressed along with another key
+// Modifier represents a special key pressed along with another key
 type Modifier int
 
 var (
-	// Move represents a move action
+	// Move is an action representing mouse movement
 	Move = Action(0)
-	// Press represents a press action
+	// Press is an action representing a mouse press/click
 	Press = Action(1)
-	// Release represents a release action
+	// Release is an action representing a mouse a release
 	Release = Action(2)
 	// Neutral represents a neutral action
 	Neutral = Action(99)
@@ -40,18 +40,23 @@ const (
 	MouseButtonRight MouseButton = 1
 	// MouseButtonMiddle represent the middle mosue button
 	MouseButtonMiddle MouseButton = 2
-	MouseButton4      MouseButton = 3
-	MouseButton5      MouseButton = 4
-	MouseButton6      MouseButton = 5
-	MouseButton7      MouseButton = 6
-	MouseButton8      MouseButton = 7
-	MouseButtonLast   MouseButton = 7
+	// MouseButton4 represents the 4th mouse button
+	MouseButton4 MouseButton = 3
+	// MouseButton5 represents the 5th mouse button
+	MouseButton5 MouseButton = 4
+	// MouseButton6 represents the 6th mouse button
+	MouseButton6 MouseButton = 5
+	// MouseButton7 represents the 7th mouse button
+	MouseButton7 MouseButton = 6
+	// MouseButton4 represents the last mouse button
+	MouseButtonLast MouseButton = 7
 )
 
 // those are default values for engo_js defined here because some of them are shared
 // with engo_glfw.
 // engo_glfw redefines the variables it needs to other values during init() so
 var (
+	// Grave represents the grave keyboard key '`'
 	Grave Key = 192
 	// Dash represents the dash keyboard key '-'
 	Dash Key = 189
@@ -225,39 +230,39 @@ var (
 	Y Key = 89
 	// Z represents the z keyboard key 'Z'
 	Z Key = 90
-	// NumLock represents the NumLock keyboard key
+	// NumLock represents the NumLock keyboard key on the numpad
 	NumLock Key = 144
-	// NumMultiply represents the NumLock keyboard key
+	// NumMultiply represents the NumMultiply keyboard key on the numpad
 	NumMultiply Key = 106
-	// NumDivide represents the NumDivide keyboard key
+	// NumDivide represents the NumDivide keyboard key on the numpad
 	NumDivide Key = 111
-	// NumAdd represents the NumAdd keyboard key
+	// NumAdd represents the NumAdd keyboard key on the numpad
 	NumAdd Key = 107
-	// NumSubtract represents the NumSubtract keyboard key
+	// NumSubtract represents the NumSubtract keyboard key on the numpad
 	NumSubtract Key = 109
-	// NumZero represents the NumZero keyboard key
+	// NumZero represents the NumZero keyboard key on the numpad
 	NumZero Key = 96
-	// NumOne represents the NumOne keyboard key
+	// NumOne represents the NumOne keyboard key on the numpad
 	NumOne Key = 97
-	// NumTwo represents the NumTwo keyboard key
+	// NumTwo represents the NumTwo keyboard key on the numpad
 	NumTwo Key = 98
-	// NumThree represents the NumThree keyboard key
+	// NumThree represents the NumThree keyboard key on the numpad
 	NumThree Key = 99
-	// NumFour represents the NumFour keyboard key
+	// NumFour represents the NumFour keyboard key on the numpad
 	NumFour Key = 100
-	// NumFive represents the NumFive keyboard key
+	// NumFive represents the NumFive keyboard key on the numpad
 	NumFive Key = 101
-	// NumSiz represents the NumSix keyboard key
+	// NumSiz represents the NumSix keyboard key on the numpad
 	NumSix Key = 102
-	// NumSeven represents the NumSeven keyboard key
+	// NumSeven represents the NumSeven keyboard key on the numpad
 	NumSeven Key = 103
-	// NumEight represents the NumEight keyboard key
+	// NumEight represents the NumEight keyboard key on the numpad
 	NumEight Key = 104
-	// NumNine represents the NumNine keyboard key
+	// NumNine represents the NumNine keyboard key on the numpad
 	NumNine Key = 105
-	// NumDecimal represents the NumDecimal keyboard key
+	// NumDecimal represents the NumDecimal keyboard key on the numpad
 	NumDecimal Key = 110
-	// NumEnter represents the NumEnter keyboard key
+	// NumEnter represents the NumEnter keyboard key on the numpad
 	NumEnter Key = 13
 )
 
