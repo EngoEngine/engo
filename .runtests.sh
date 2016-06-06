@@ -8,7 +8,7 @@ go get -t -v ./... || exit 1
 echo "Testing engo.io/engo using coveralls"
 $HOME/gopath/bin/goveralls -service=travis-ci
 
-echo "Testing engo.io/engo using 'go test'"
+echo "Testing and benchmarking engo.io/engo"
 go test -v -bench=. ./... || exit 1
 
 # TODO: Fix the build so this actually passes
