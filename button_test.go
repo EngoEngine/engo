@@ -8,8 +8,6 @@ type btnState struct {
 	justDown bool
 }
 
-////////////////
-
 // Button configuretion used when testing.
 var btnSimpleCfg = [6]Button{
 	Button{Triggers: []Key{A, C}, Name: "Button 1"},
@@ -69,8 +67,6 @@ var btnPass4 = [6]btnState{
 	btnState{down: false, justUp: false, justDown: false},
 	btnState{down: false, justUp: false, justDown: false},
 }
-
-////////////////
 
 // Checks the state of all configured buttons against the expected state.
 func runBtnChecks(msg string, t *testing.T, expect [6]btnState) {
@@ -239,8 +235,6 @@ func TestButtonComplex(t *testing.T) {
 	runBtnChecks("Pass alt (4.3)", t, btnPass4)
 }
 
-////////////////
-
 // Used to store results when benchmarking.
 var btnResult [6]btnState
 
@@ -281,8 +275,6 @@ func BenchmarkInputMgr_ButtonFilledState(b *testing.B) {
 		checkBtnConfigOptimal(b)
 	}
 }
-
-////////////////
 
 // Disabled but around when needed
 

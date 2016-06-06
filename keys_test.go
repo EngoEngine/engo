@@ -10,8 +10,6 @@ type keyState struct {
 	justDown bool
 }
 
-////////////////
-
 // Keys used when testing
 var keySimpleCfg = [12]Key{
 	A, B, C, D,
@@ -132,8 +130,6 @@ var initPass6 = [12]keyState{
 	keyState{state: KeyStateUp},
 }
 
-////////////////
-
 // Checks the state of keys in the configuration against the expected state.
 func runKeyChecks(msg string, t *testing.T, mgr *KeyManager, expect [12]keyState) {
 	for i, cd := range keySimpleCfg {
@@ -237,8 +233,6 @@ func TestKeyManager(t *testing.T) {
 	runKeyChecks("Pass (6.2)", t, mgr, initPass6)
 }
 
-////////////////
-
 // Used to store results when benchmarking.
 var keyResult [12]keyState
 
@@ -297,8 +291,6 @@ func BenchmarkKeyMgr_FilledUpdate(b *testing.B) {
 	}
 }
 
-////////////////
-
 // Slow way to check key state, checks and store them externaly.
 func checkKeyConfigSubOptimal(b *testing.B, mgr *KeyManager) {
 	for i, cd := range keySimpleCfg {
@@ -329,8 +321,6 @@ func BenchmarkKeyMgr_FilledSubOptimal(b *testing.B) {
 		checkKeyConfigSubOptimal(b, mgr)
 	}
 }
-
-////////////////
 
 // Utility function that fills the KeyManager with key states.
 func keyFillManager(mgr *KeyManager) {

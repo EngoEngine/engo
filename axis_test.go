@@ -11,8 +11,6 @@ type axKeyCfg struct {
 	Pairs []AxisKeyPair
 }
 
-////////////////
-
 // Axis configuretion used when testing.
 var axSimpleCfg = [6]axKeyCfg{
 	axKeyCfg{
@@ -148,8 +146,6 @@ var axPass8 = [6]axState{
 	axState{value: 0.0},
 	axState{value: 0.0},
 }
-
-////////////////
 
 // Checks the value of all configured axis against the expected values.
 func runAxisChecks(msg string, t *testing.T, expect [6]axState) {
@@ -343,8 +339,6 @@ func TestAxisComplex(t *testing.T) {
 	Input.update()
 	runAxisChecks("Pass (8.3)", t, axPass8)
 
-	////////////////
-
 	// Set even true pass1 alt
 	Input.update()
 	Input.keys.Set(axSimpleCfg[1].Pairs[1].Max, true)
@@ -418,8 +412,6 @@ func TestAxisComplex(t *testing.T) {
 	runAxisChecks("Pass alt (8.3)", t, axPass8)
 }
 
-////////////////
-
 // Checks the state of the two mouse axes against provided values.
 func runAxisMouse(msg string, t *testing.T, x float32, y float32) {
 
@@ -460,8 +452,6 @@ func TestAxisMouse(t *testing.T) {
 	runAxisMouse("Pass 7", t, 0.0, 0.0)
 }
 
-////////////////
-
 // Used to store results when benchmarking.
 var axResult [6]axState
 
@@ -500,8 +490,6 @@ func BenchmarkInputMgr_AxisFilledState(b *testing.B) {
 		checkAxisConfigValue(b)
 	}
 }
-
-////////////////
 
 // Disabled but around when needed
 
