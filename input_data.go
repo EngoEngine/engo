@@ -18,14 +18,18 @@ var (
 	Release = Action(2)
 	// Neutral represents a neutral action
 	Neutral = Action(99)
-	// Shift represents the shift modifier
+	// Shift represents the shift modifier.
+	// It is triggered when the shift key is pressed simultaneously with another key
 	Shift = Modifier(0x0001)
 	// Control represents the control modifier
+	// It is triggered when the ctrl key is pressed simultaneously with another key
 	Control = Modifier(0x0002)
 	// Alt represents the alt modifier
+	// It is triggered when the alt key is pressed simultaneously with another key
 	Alt = Modifier(0x0004)
 	// Super represents the super modifier
 	// (Windows key on Microsoft Windows, Command key on Apple OSX, and varies on Linux)
+	// It is triggered when the super key is pressed simultaneously with another key
 	Super = Modifier(0x0008)
 )
 
