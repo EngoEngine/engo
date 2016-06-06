@@ -5,9 +5,13 @@ import (
 )
 
 const (
+	// KeyStateUp is a state for when the key is not currently being pressed
 	KeyStateUp = iota
+	// KeyStateDown is a state for when the key is currently being pressed
 	KeyStateDown
+	// KeyStateJustDown is a state for when a key was just pressed
 	KeyStateJustDown
+	// KeyStateJustUp is a state for when a key was just released
 	KeyStateJustUp
 )
 
@@ -90,18 +94,22 @@ func (key *KeyState) State() int {
 	}
 }
 
-func (key KeyState) Up() bool {
-	return (!key.lastState && !key.currentState)
-}
-
-func (key KeyState) Down() bool {
-	return (key.lastState && key.currentState)
-}
-
+// JustPressed returns whether a key was just pressed
 func (key KeyState) JustPressed() bool {
 	return (!key.lastState && key.currentState)
 }
 
+// JustReleased returns whether a key was just released
 func (key KeyState) JustReleased() bool {
 	return (key.lastState && !key.currentState)
+}
+
+// Up returns wheter a key is not being pressed
+func (key KeyState) Up() bool {
+	return (!key.lastState && !key.currentState)
+}
+
+// Down returns wether a key is being pressed
+func (key KeyState) Down() bool {
+	return (key.lastState && key.currentState)
 }
