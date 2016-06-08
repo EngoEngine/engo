@@ -13,10 +13,18 @@ type DefaultScene struct{}
 func (*DefaultScene) Preload() {}
 func (*DefaultScene) Setup(w *ecs.World) {
 	w.AddSystem(&common.RenderSystem{})
+
+	// Register the input system responding
+	// to the input actions registered below.
 	w.AddSystem(&InputSystem{})
 
-	engo.Input.RegisterAxis("sideways", engo.AxisKeyPair{engo.A, engo.D})
+	// Register a button that is triggered when
+	// the state of 'Space' or 'Enter' is changed.
 	engo.Input.RegisterButton("action", engo.Space, engo.Enter)
+
+	// Register an axis where 'A' will return a
+	// negative value and 'D' returns a positive value.
+	engo.Input.RegisterAxis("sideways", engo.AxisKeyPair{engo.A, engo.D})
 }
 
 func (*DefaultScene) Type() string { return "Game" }
@@ -48,20 +56,21 @@ func (c *InputSystem) Remove(basic ecs.BasicEntity) {
 }
 
 func (c *InputSystem) Update(dt float32) {
-	if v := engo.Input.Axis("sideways").Value(); v != 0 {
-		fmt.Println(v)
-	}
+	// Look up the button once
+	btn := engo.Input.Button("action")
 
-	if btn := engo.Input.Button("action"); btn.Down() {
+	// And act on the current state
+	if btn.Down() {
 		fmt.Println("Still down!")
-	}
-
-	if btn := engo.Input.Button("action"); btn.JustPressed() {
+	} else if btn.JustPressed() {
 		fmt.Println("Key just pressed!")
+	} else if btn.JustReleased() {
+		fmt.Println("Key just released!")
 	}
 
-	if btn := engo.Input.Button("action"); btn.JustReleased() {
-		fmt.Println("Key just released!")
+	// Check the the axis value and act as required
+	if v := engo.Input.Axis("sideways").Value(); v != 0 {
+		fmt.Printf("Axis value: %.2f \n", v)
 	}
 }
 
