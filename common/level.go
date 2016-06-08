@@ -49,7 +49,8 @@ func (t *tile) View() (float32, float32, float32, float32) {
 
 type tile struct {
 	engo.Point
-	Image *Texture
+	Image     *Texture
+	LayerName string
 }
 
 type tilesheet struct {
@@ -100,11 +101,10 @@ func createLevelTiles(lvl *Level, layers []*layer, ts []*tile) []*tile {
 		for y := 0; y < lvl.height; y++ {
 			for x := 0; x < lvl.width; x++ {
 				idx := x + y*lvl.width
-				t := &tile{}
+				t := &tile{LayerName: lay.Name}
 				if tileIdx := int(mapping[idx]) - 1; tileIdx >= 0 {
 					t.Image = ts[tileIdx].Image
 					t.Point = engo.Point{float32(x * lvl.TileWidth), float32(y * lvl.TileHeight)}
-
 				}
 
 				tilemap = append(tilemap, t)
