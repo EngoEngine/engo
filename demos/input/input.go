@@ -68,7 +68,7 @@ func (c *InputSystem) Update(dt float32) {
 		fmt.Println("Key just released!")
 	}
 
-	// Check the the axis value and act as required
+	// Check the axis value and act as required
 	if v := engo.Input.Axis("sideways").Value(); v != 0 {
 		fmt.Printf("Axis value: %.2f \n", v)
 	}
