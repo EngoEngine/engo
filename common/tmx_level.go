@@ -191,7 +191,7 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 
 		curX := float32(tlvl.ImgLayers[i].X)
 		curY := float32(tlvl.ImgLayers[i].Y)
-		lvl.Images = append(lvl.Images, &tile{engo.Point{curX, curY}, curImg})
+		lvl.Images = append(lvl.Images, &tile{engo.Point{curX, curY}, curImg, tlvl.ImgLayers[i].Name})
 	}
 
 	return lvl, nil
