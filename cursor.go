@@ -7,10 +7,16 @@ type Cursor uint8
 const (
 	// CursorNone can be used to reset the cursor.
 	CursorNone Cursor = iota
+	// CursorArrow represents an arrow cursor
 	CursorArrow
+	// CursorCrosshair represents a crosshair cursor
 	CursorCrosshair
+	// CursorHand represents a hand cursor
 	CursorHand
+	// CursorIBeam represents an IBeam cursor
 	CursorIBeam
+	// CursorHResize represents a HResize cursor
 	CursorHResize
+	// CursorVResize represents a VResize cursor
 	CursorVResize
 )

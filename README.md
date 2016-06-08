@@ -1,5 +1,10 @@
 # Engo
-[![Join the chat at https://gitter.im/EngoEngine/engo](https://badges.gitter.im/EngoEngine/engo.svg)](https://gitter.im/EngoEngine/engo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![License](https://img.shields.io/badge/License-MIT-blue.svg) [![Build Status](https://travis-ci.org/EngoEngine/engo.svg?branch=master)](https://travis-ci.org/EngoEngine/engo) [![Build status](https://ci.appveyor.com/api/projects/status/019qc8hncmhnje83?svg=true)](https://ci.appveyor.com/project/otraore/engo) [![Go Report Card](https://goreportcard.com/badge/engo.io/engo)](https://goreportcard.com/report/engo.io/engo) [![Coverage Status](https://coveralls.io/repos/github/EngoEngine/engo/badge.svg?branch=master)](https://coveralls.io/github/EngoEngine/engo?branch=master)
+[![GoDoc](https://godoc.org/engo.io/engo?status.svg)](https://godoc.org/engo.io/engo)
+[![Join the chat at https://gitter.im/EngoEngine/engo](https://badges.gitter.im/EngoEngine/engo.svg)](https://gitter.im/EngoEngine/engo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![License](https://img.shields.io/badge/License-MIT-blue.svg)
+[![Build Status](https://travis-ci.org/EngoEngine/engo.svg?branch=master)](https://travis-ci.org/EngoEngine/engo)
+[![Build status](https://ci.appveyor.com/api/projects/status/019qc8hncmhnje83?svg=true)](https://ci.appveyor.com/project/otraore/engo)
+[![Go Report Card](https://goreportcard.com/badge/engo.io/engo)](https://goreportcard.com/report/engo.io/engo)
+[![Coverage Status](https://coveralls.io/repos/github/EngoEngine/engo/badge.svg?branch=master)](https://coveralls.io/github/EngoEngine/engo?branch=master)
 
 A cross-platform game engine written in Go following an interpretation of the Entity Component System paradigm. Engo is
 currently compilable for Mac OSX, Linux and Windows. With the release of Go 1.4, supporting Android and the inception of
@@ -44,7 +49,7 @@ The `common` package contains our ECS implementations of common game development
 1. First, you have to install some dependencies:
   1. If you're running on Debian/Ubuntu:
     `sudo apt-get install libopenal-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev xorg-dev libgl1-mesa-dev`
-  2. If you're running on Windows: download all above packages using [win-builds](http://win-builds.org/doku.php) (Open an issue to let us know about other methods)
+  2. If you're running on Windows you'll need a gcc compiler that the go tool can use and have `gcc.exe` in your PATH environmental variable. We recommend [Mingw](http://mingw-w64.org/doku.php/start) since it has been tested.
   3. If you're on OSX, you should be OK. [Open an issue if you are not](https://github.com/EngoEngine/engo/issues/new)
 2. Then, you can go get it:
 `go get -u engo.io/engo`
@@ -58,6 +63,7 @@ us a DM or [create an issue](https://github.com/EngoEngine/engo/issues/new).
 Engo is currently undergoing a lot of optimizations and constantly gets new features. However, this sometimes means things break. In order to make transitioning easier for you,
 we have a list of those changes, with the most recent being at the top. If you run into any problems, please contact us at [gitter](https://gitter.im/EngoEngine/engo).
 
+* `engo.Files.Load` and `engo.Files.LoadMany` have been merged into one function `engo.Files.Load` which does the same thing as `engo.Files.LoadMany` allowing an indefinite ammount of parameters to be passed in.
 * `engo` has been split in `engo` (which contains stuff about creating windows, starting the game, creating an OpenGL context, input handling, etc.) - and `common` (which contains a lot of common `System` implementations for common tasks (`RenderSystem`, `CameraSystem`, `AudioSystem`, etc.)
 * `engo.Width()` and `engo.Height()` have been changed to `engo.GameWidth()` and `engo.GameHeight()` respectively.
 * `RenderComponent.Scale` is now no longer a method, but a variable you can change / access directly.

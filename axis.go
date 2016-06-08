@@ -2,7 +2,9 @@ package engo
 
 // An Axis is an input which is a spectrum of values. An example of this is the horizontal movement in a game, or how far a joystick is pressed.
 type Axis struct {
-	Name  string
+	// Name represents the name of the axis (Horizontal, Vertical)
+	Name string
+	// Pairs represents the axis pairs of this acis
 	Pairs []AxisPair
 }
 
