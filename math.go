@@ -16,6 +16,12 @@ type AABB struct {
 	Min, Max Point
 }
 
+// A Container is a 2-dimensional closed shape which may contain a set of points.
+type Container interface {
+	// Contains reports whether the container contains the given point.
+	Contains(p Point) bool
+}
+
 // Point describes a coordinate in a 2 dimensional euclidean space
 // it can also be thought of as a 2 dimensional vector from the origin
 type Point struct {
@@ -113,6 +119,11 @@ func (a *Point) Normalize() (Point, float32) {
 	unit := Point{a.X / mag, a.Y / mag}
 
 	return unit, mag
+}
+
+// Within reports whether the point is contained within the given container.
+func (p Point) Within(c Container) bool {
+	return c.Contains(p)
 }
 
 // PointSide returns which side of the line l the point p sits on
