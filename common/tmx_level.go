@@ -46,8 +46,11 @@ type TMXPolyline struct {
 }
 
 type TMXObj struct {
+	Id        int           `xml:"id,attr"`
 	X         float64       `xml:"x,attr"`
 	Y         float64       `xml:"y,attr"`
+	Width     int           `xml:"width,attr"`
+	Height    int           `xml:"height,attr"`
 	Polylines []TMXPolyline `xml:"polyline"`
 }
 
@@ -173,8 +176,13 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 	if tlvl.ObjGroups != nil {
 
 		for _, o := range tlvl.ObjGroups[0].Objects {
-			p := o.Polylines[0].Points
-			lvl.LineBounds = append(lvl.LineBounds, pointStringToLines(p, o.X, o.Y)...)
+			// check if object is a Polyline object
+			if len(o.Polylines) > 0 {
+				p := o.Polylines[0].Points
+				lvl.LineBounds = append(lvl.LineBounds, pointStringToLines(p, o.X, o.Y)...)
+			} else {
+				// non-Polyline object
+			}
 		}
 	}
 
