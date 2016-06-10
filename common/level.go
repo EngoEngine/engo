@@ -6,17 +6,73 @@ import (
 )
 
 type Level struct {
-	width      int
-	height     int
-	TileWidth  int
-	TileHeight int
-	Tiles      []*tile
+	Orientation  string
+	RenderOrder  string
+	width        int
+	height       int
+	TileWidth    int
+	TileHeight   int
+	NextObjectId int
+	TileLayers   []*TileLayer
+	ImageLayers  []*ImageLayer
+	ObjectLayers []*ObjectLayer
+	// old
+	// Tiles      []*tile
+	// LineBounds []*engo.Line
+	// Images     []*tile
+}
+
+type TileLayer struct {
+	Name   string
+	Width  int
+	Height int
+	Tiles  []*tile
+}
+
+type ImageLayer struct {
+	Name   string
+	Width  int
+	Height int
+	Source string
+	Images []*tile
+}
+
+type ObjectLayer struct {
+	Name        string
+	OffSetX     float32
+	OffSetY     float32
+	Objects     []*Object
+	PolyObjects []*PolylineObject
+}
+
+type Object struct {
+	Id     int
+	Name   string
+	Type   string
+	X      float64
+	Y      float64
+	Width  int
+	Height int
+}
+
+type PolylineObject struct {
+	Id         int
+	Name       string
+	Type       string
+	X          float64
+	Y          float64
+	Points     string
 	LineBounds []*engo.Line
-	Images     []*tile
 }
 
 func (l *Level) Bounds() engo.AABB {
-	return engo.AABB{Min: engo.Point{0, 0}, Max: engo.Point{float32(l.TileWidth * l.width), float32(l.TileHeight * l.height)}}
+	return engo.AABB{
+		Min: engo.Point{0, 0},
+		Max: engo.Point{
+			float32(l.TileWidth * l.width),
+			float32(l.TileHeight * l.height),
+		},
+	}
 }
 
 func (l *Level) Width() int {
@@ -49,8 +105,7 @@ func (t *tile) View() (float32, float32, float32, float32) {
 
 type tile struct {
 	engo.Point
-	Image     *Texture
-	LayerName string
+	Image *Texture
 }
 
 type tilesheet struct {
@@ -60,6 +115,8 @@ type tilesheet struct {
 
 type layer struct {
 	Name        string
+	Width       int
+	Height      int
 	TileMapping []uint32
 }
 
@@ -93,24 +150,41 @@ func createTileset(lvl *Level, sheets []*tilesheet) []*tile {
 	return tileset
 }
 
-func createLevelTiles(lvl *Level, layers []*layer, ts []*tile) []*tile {
+// Create tile maps for each tile layer
+func createLevelTiles(lvl *Level, layers []*layer, ts []*tile) []*TileLayer {
+
+	var levelTileLayers []*TileLayer
+
 	tilemap := make([]*tile, 0)
 
-	for _, lay := range layers {
-		mapping := lay.TileMapping
-		for y := 0; y < lvl.height; y++ {
+	for _, layer := range layers {
+
+		tileLayer := &TileLayer{}
+
+		mapping := layer.TileMapping
+
+		for i := 0; i < lvl.height; i++ {
+
 			for x := 0; x < lvl.width; x++ {
-				idx := x + y*lvl.width
-				t := &tile{LayerName: lay.Name}
+				idx := x + i*lvl.width
+				t := &tile{}
+
 				if tileIdx := int(mapping[idx]) - 1; tileIdx >= 0 {
 					t.Image = ts[tileIdx].Image
-					t.Point = engo.Point{float32(x * lvl.TileWidth), float32(y * lvl.TileHeight)}
+					t.Point = engo.Point{float32(x * lvl.TileWidth), float32(i * lvl.TileHeight)}
 				}
 
 				tilemap = append(tilemap, t)
 			}
 		}
+
+		tileLayer.Name = layer.Name
+		tileLayer.Width = layer.Width
+		tileLayer.Height = layer.Height
+		tileLayer.Tiles = tilemap
+
+		levelTileLayers = append(levelTileLayers, tileLayer)
 	}
 
-	return tilemap
+	return levelTileLayers
 }
