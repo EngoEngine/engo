@@ -32,7 +32,7 @@ type TMXTileset struct {
 	Image      *TextureResource
 }
 
-type TMXLayer struct {
+type TMXTileLayer struct {
 	Name        string `xml:"name,attr"`
 	Width       int    `xml:"width,attr"`
 	Height      int    `xml:"height,attr"`
@@ -41,11 +41,14 @@ type TMXLayer struct {
 	CompData []byte `xml:"data"`
 }
 
-type TMXPolyline struct {
-	Points string `xml:"points,attr"`
+type TMXImageLayer struct {
+	Name     string      `xml:"name,attr"`
+	X        float64     `xml:"x,attr"`
+	Y        float64     `xml:"y,attr"`
+	ImageSrc TMXImageSrc `xml:"image"`
 }
 
-type TMXObj struct {
+type TMXObject struct {
 	Id        int           `xml:"id,attr"`
 	X         float64       `xml:"x,attr"`
 	Y         float64       `xml:"y,attr"`
@@ -54,31 +57,28 @@ type TMXObj struct {
 	Polylines []TMXPolyline `xml:"polyline"`
 }
 
-type TMXObjGroup struct {
-	Name    string   `xml:"name,attr"`
-	Objects []TMXObj `xml:"object"`
+type TMXPolyline struct {
+	Points string `xml:"points,attr"`
 }
 
-type TMXImgSrc struct {
+type TMXObjectGroup struct {
+	Name    string      `xml:"name,attr"`
+	Objects []TMXObject `xml:"object"`
+}
+
+type TMXImageSrc struct {
 	Source string `xml:"source,attr"`
 }
 
-type TMXImgLayer struct {
-	Name   string    `xml:"name,attr"`
-	X      float64   `xml:"x,attr"`
-	Y      float64   `xml:"y,attr"`
-	ImgSrc TMXImgSrc `xml:"image"`
-}
-
 type TMXLevel struct {
-	Width      int           `xml:"width,attr"`
-	Height     int           `xml:"height,attr"`
-	TileWidth  int           `xml:"tilewidth,attr"`
-	TileHeight int           `xml:"tileheight,attr"`
-	Tilesets   []TMXTileset  `xml:"tileset"`
-	Layers     []TMXLayer    `xml:"layer"`
-	ObjGroups  []TMXObjGroup `xml:"objectgroup"`
-	ImgLayers  []TMXImgLayer `xml:"imagelayer"`
+	Width        int              `xml:"width,attr"`
+	Height       int              `xml:"height,attr"`
+	TileWidth    int              `xml:"tilewidth,attr"`
+	TileHeight   int              `xml:"tileheight,attr"`
+	Tilesets     []TMXTileset     `xml:"tileset"`
+	TileLayers   []TMXTileLayer   `xml:"layer"`
+	ImageLayers  []TMXImageLayer  `xml:"imagelayer"`
+	ObjectGroups []TMXObjectGroup `xml:"objectgroup"`
 }
 
 type ByFirstgid []TMXTileset
@@ -89,16 +89,16 @@ func (t ByFirstgid) Less(i, j int) bool { return t[i].Firstgid < t[j].Firstgid }
 
 // MUST BE base64 ENCODED and COMPRESSED WITH zlib!
 func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
-	tlvl := &TMXLevel{}
-	lvl := &Level{}
+	tmxLevel := &TMXLevel{}
+	level := &Level{}
 
-	if err := xml.Unmarshal(tmxBytes, &tlvl); err != nil {
+	if err := xml.Unmarshal(tmxBytes, &tmxLevel); err != nil {
 		return nil, err
 	}
 
 	// Extract the tile mappings from the compressed data at each layer
-	for idx := range tlvl.Layers {
-		layer := &tlvl.Layers[idx]
+	for idx := range tmxLevel.TileLayers {
+		layer := &tmxLevel.TileLayers[idx]
 
 		// Trim leading/trailing whitespace ( inneficient )
 		layer.CompData = []byte(strings.TrimSpace(string(layer.CompData)))
@@ -134,7 +134,7 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 	}
 
 	// Load in the images needed for the tilesets
-	for k, ts := range tlvl.Tilesets {
+	for k, ts := range tmxLevel.Tilesets {
 		url := path.Join(path.Dir(tmxUrl), ts.ImageSrc.Source)
 		if err := engo.Files.Load(url); err != nil {
 			return nil, err
@@ -148,46 +148,46 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 			return nil, fmt.Errorf("resource is not of type 'TextureResource': %q", url)
 		}
 		ts.Image = &texResource
-		tlvl.Tilesets[k] = ts
+		tmxLevel.Tilesets[k] = ts
 	}
 
-	lvl.width = tlvl.Width
-	lvl.height = tlvl.Height
-	lvl.TileWidth = tlvl.TileWidth
-	lvl.TileHeight = tlvl.TileHeight
+	level.width = tmxLevel.Width
+	level.height = tmxLevel.Height
+	level.TileWidth = tmxLevel.TileWidth
+	level.TileHeight = tmxLevel.TileHeight
 
 	// get the tilesheets in order and in generic format
-	sort.Sort(ByFirstgid(tlvl.Tilesets))
-	ts := make([]*tilesheet, len(tlvl.Tilesets))
-	for i, tts := range tlvl.Tilesets {
+	sort.Sort(ByFirstgid(tmxLevel.Tilesets))
+	ts := make([]*tilesheet, len(tmxLevel.Tilesets))
+	for i, tts := range tmxLevel.Tilesets {
 		ts[i] = &tilesheet{tts.Image, tts.Firstgid}
 	}
 
-	lvlTileset := createTileset(lvl, ts)
+	levelTileset := createTileset(level, ts)
 
-	lvlLayers := make([]*layer, len(tlvl.Layers))
-	for i, tls := range tlvl.Layers {
-		lvlLayers[i] = &layer{tls.Name, tls.TileMapping}
+	levelLayers := make([]*layer, len(tmxLevel.TileLayers))
+	for i, tls := range tmxLevel.TileLayers {
+		levelLayers[i] = &layer{tls.Name, tls.TileMapping}
 	}
 
-	lvl.Tiles = createLevelTiles(lvl, lvlLayers, lvlTileset)
+	level.Tiles = createLevelTiles(level, levelLayers, levelTileset)
 
 	// check if there are no object groups
-	if tlvl.ObjGroups != nil {
+	if tmxLevel.ObjectGroups != nil {
 
-		for _, o := range tlvl.ObjGroups[0].Objects {
+		for _, o := range tmxLevel.ObjectGroups[0].Objects {
 			// check if object is a Polyline object
 			if len(o.Polylines) > 0 {
 				p := o.Polylines[0].Points
-				lvl.LineBounds = append(lvl.LineBounds, pointStringToLines(p, o.X, o.Y)...)
+				level.LineBounds = append(level.LineBounds, pointStringToLines(p, o.X, o.Y)...)
 			} else {
 				// non-Polyline object
 			}
 		}
 	}
 
-	for i := 0; i < len(tlvl.ImgLayers); i++ {
-		url := path.Base(tlvl.ImgLayers[i].ImgSrc.Source)
+	for i := 0; i < len(tmxLevel.ImageLayers); i++ {
+		url := path.Base(tmxLevel.ImageLayers[i].ImageSrc.Source)
 		if err := engo.Files.Load(url); err != nil {
 			return nil, err
 		}
@@ -197,12 +197,12 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 			return nil, err
 		}
 
-		curX := float32(tlvl.ImgLayers[i].X)
-		curY := float32(tlvl.ImgLayers[i].Y)
-		lvl.Images = append(lvl.Images, &tile{engo.Point{curX, curY}, curImg, tlvl.ImgLayers[i].Name})
+		curX := float32(tmxLevel.ImageLayers[i].X)
+		curY := float32(tmxLevel.ImageLayers[i].Y)
+		level.Images = append(level.Images, &tile{engo.Point{curX, curY}, curImg, tmxLevel.ImageLayers[i].Name})
 	}
 
-	return lvl, nil
+	return level, nil
 }
 
 func pointStringToLines(str string, xOff, yOff float64) []*engo.Line {
