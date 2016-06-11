@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="25" height="25" tilewidth="32" tileheight="32" nextobjectid="1">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="25" height="25" tilewidth="32" tileheight="32" nextobjectid="7">
  <tileset firstgid="1" name="ts1" tilewidth="32" tileheight="32" tilecount="72" columns="12">
   <image source="grass-tiles-2-small.png" width="384" height="192"/>
  </tileset>
  <tileset firstgid="73" name="ts3" tilewidth="32" tileheight="32" tilecount="64" columns="8">
   <image source="tree2-final.png" width="256" height="256"/>
  </tileset>
- <layer name="Tile Layer 1" width="25" height="25">
+ <layer name="grass" width="25" height="25">
   <data encoding="base64" compression="zlib">
-   eJztlT0OwjAMhdMsZHEWuAvdy/3PRCph6enpOUlLJRYGyxD892E7WVJKuckCkknfmhRxPqutSf1o/u763uRBdh5D2bPGfP55xGEQYz9bBxxYj/tFHOzH8SIutzXydRvkQD8T8SIeo3jKn/uh/mOuLeoz20f9QO4n1B/NpeI/ypEhl+IoUOcZzWcmOAqI13tE81lvP6rI39vzDWKs1JdoP3DGec65H6jZf7TnzsMxeveVyqs4+B7J5B9xjOZU7XkVMuLwPvQ4VB60HfVjm+SI7p8rOSKZmatZjrPvG+/LK/h95h37Vl/FMfue/zl+z/EGrkkWng==
+   eJztVcsOwzAIS3OH39nu+/9/Wic1kuXYJNp63AHRIoIxj+RorfVTDpBOenyzfVfHKXlp/kd7p/9hU/7ufJUv2wNifGzPBQ/MZ5zLy654VHV1vIZv0NkDsDpgj3Mh4jk+6FthBMXnWmCuiofD4Hpmm3k/IH83ly4+96OK0QGr6ofijTmjKB/sedUPjoUxcVbVjOM8VPu1mu8UeMOOfXHnMTeeI8c725zbas8dZ7WnYXxVPVTfsAaMkcLu7j+15ylE7Zea2YqHwlG+7l59bfJw9w/vdba5Prs8nCT5/MKjesf4rXB+iLUzB99qN88rHnfoO3nsvOd/HrV+A9pgE7E=
   </data>
  </layer>
- <layer name="Tile Layer 2" width="25" height="25">
+ <layer name="trees" width="25" height="25">
   <data encoding="base64" compression="zlib">
-   eJyd1LduxDAMgGHbS245L/FbpQypQHrvvSN1SHnu/AYsgCBEkcnwwWefLVGkxLqqqrpgCtOYwWzm/wmM1HVyuKZn44I5zGMBi1jCMhqhH6/LXNP4pTn6GFewijWsYwOb2EI7sMZO952KSdrGDnaxh30c4BBHhTxpo0Lej3GCU5zhHBe4xNXwTS5PWlfI+zVucIs73OMBj3gy1iBj1qy8P+MFr3jDOz4Ka0gxa17eP/GFb/wU4rfq2gTyrt+34i/N4eW9f6ctxN8GjJ28J1b88p0Uj7xvht/jTN5lzaw16Nrq/S/H19p/1MDqO3WVr1HKo7eHZM4jfafNzGnFr2vq7X/ZA72ebZ1jb/9bfddaQ66u3v7X6y7Fb9W1/87a/+l8ROJvAnXV+1/m0zsDdaCu+ixKXvxprX/ta5H8yz5QB+pqrSFyBmStIn0tN4fXg3RfyfW1XF+UvDMc7d0yJv38F7MKYrY=
+   eJzt1VUOAkEURNFhebi7u7u7y7K5O+jX0xNCCJWcP5JXH12DZX0mbnjghQ9+BBBEyKEbYUQQRQxxJJBEyqF+aWSQRQ55FFBEyaF+ZVRQRQ11NNBES3FD2q+NDrrooY8Bhhgpbkj7jTHBFDPMscASK8UNab81Nthihz0OOOKkuCHtd8YFV9xwxwNPvBQ3TPpJY9JPGpfGb79969KYbF0ak61LY7J1aexuXeet2N2Szluxu6X/W5HH5H9Bml/57kryBi05aII=
   </data>
  </layer>
+ <imagelayer name="clouds">
+  <image source="cloud.png" width="400" height="218"/>
+ </imagelayer>
 </map>
