@@ -77,10 +77,6 @@ func (game *GameWorld) Setup(w *ecs.World) {
 					Height:   0,
 				}
 
-				if imageLayer.Name == "clouds" {
-					tile.RenderComponent.SetZIndex(5)
-				}
-
 				tileComponents = append(tileComponents, tile)
 			}
 		}
