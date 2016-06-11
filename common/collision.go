@@ -95,7 +95,7 @@ func (sc SpaceComponent) Contains(p engo.Point) bool {
 
 	for i := 0; i < 4; i++ {
 		for j := i + 1; j < 4; j++ {
-			if t := triangleArea(points[i], points[j], p); t > halfArea || FloatEqual(t, halfArea) {
+			if t := triangleArea(points[i], points[j], p); t > halfArea || engo.FloatEqual(t, halfArea) {
 				return false
 			}
 		}
