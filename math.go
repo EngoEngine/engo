@@ -2,7 +2,7 @@ package engo
 
 import (
 	"github.com/engoengine/glm"
-	"github.com/luxengine/math"
+	"github.com/engoengine/math"
 )
 
 func init() {

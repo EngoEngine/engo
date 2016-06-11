@@ -7,8 +7,8 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"github.com/engoengine/math"
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/luxengine/math"
 )
 
 const (
