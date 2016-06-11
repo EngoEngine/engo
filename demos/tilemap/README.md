@@ -56,3 +56,20 @@ These lines are key in this demo:
         }
     }
 ```
+
+# Access object layers and do something with its regular and polyline objects
+```
+    // Access Object Layers
+    for _, objectLayer := range levelData.ObjectLayers {
+        log.Println("This object layer is called " + objectLayer.Name)
+        // Do something with every regular Object
+        for _, object := range objectLayer.Objects {
+            log.Println("This object is called " + object.Name)
+        }
+
+        // Do something with every polyline Object
+        for _, polylineObject := range objectLayer.PolyObjects {
+            log.Println("This object is called " + polylineObject.Name)
+        }
+    }
+```

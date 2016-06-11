@@ -2,6 +2,7 @@ package main
 
 import (
 	"image/color"
+	"log"
 
 	"engo.io/ecs"
 	"engo.io/engo"
@@ -90,6 +91,20 @@ func (game *GameWorld) Setup(w *ecs.World) {
 				sys.Add(&v.BasicEntity, &v.RenderComponent, &v.SpaceComponent)
 			}
 
+		}
+	}
+
+	// Access Object Layers
+	for _, objectLayer := range levelData.ObjectLayers {
+		log.Println("This object layer is called " + objectLayer.Name)
+		// Do something with every regular Object
+		for _, object := range objectLayer.Objects {
+			log.Println("This object is called " + object.Name)
+		}
+
+		// Do something with every polyline Object
+		for _, polylineObject := range objectLayer.PolyObjects {
+			log.Println("This object is called " + polylineObject.Name)
 		}
 	}
 
