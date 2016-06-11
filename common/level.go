@@ -155,9 +155,9 @@ func createLevelTiles(lvl *Level, layers []*layer, ts []*tile) []*TileLayer {
 
 	var levelTileLayers []*TileLayer
 
-	tilemap := make([]*tile, 0)
-
 	for _, layer := range layers {
+
+		tilemap := make([]*tile, 0)
 
 		tileLayer := &TileLayer{}
 
