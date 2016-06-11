@@ -10,22 +10,49 @@ These lines are key in this demo:
 * 'tmxResource := resource.(common.TMXResource)'to cast the resource to a tmx resource
 * 'levelData := tmxResource.Level' to retrieve the level from the tmx resource
 
-# Add render and space components to each tile
+# Add render and space components to each tile in each tile layer
 ```
-tileComponents := make([]*Tile, 0) 
-    for _, v := range levelData.Tiles {
-        if v.Image != nil {
+    tileComponents := make([]*Tile, 0)
+
+    for _, tileLayer := range levelData.TileLayers {
+        for _, tileElement := range tileLayer.Tiles {
+            if tileElement.Image != nil {
+
                 tile := &Tile{BasicEntity: ecs.NewBasic()}
                 tile.RenderComponent = common.RenderComponent{
-                        Drawable: v,
-                        Scale:    engo.Point{1, 1},
+                    Drawable: tileElement,
+                    Scale:    engo.Point{1, 1},
                 }
                 tile.SpaceComponent = common.SpaceComponent{
-                        Position: v.Point,
-                        Width:    0,
-                        Height:   0,
+                    Position: tileElement.Point,
+                    Width:    0,
+                    Height:   0,
                 }
+
                 tileComponents = append(tileComponents, tile)
+            }
+        }
+    }
+```
+
+# Add render and space components to each image in each image layer
+```
+    for _, imageLayer := range levelData.ImageLayers {
+        for _, imageElement := range imageLayer.Images {
+            if imageElement.Image != nil {
+                tile := &Tile{BasicEntity: ecs.NewBasic()}
+                tile.RenderComponent = common.RenderComponent{
+                    Drawable: imageElement,
+                    Scale:    engo.Point{1, 1},
+                }
+                tile.SpaceComponent = common.SpaceComponent{
+                    Position: imageElement.Point,
+                    Width:    0,
+                    Height:   0,
+                }
+
+                tileComponents = append(tileComponents, tile)
+            }
         }
     }
 ```
