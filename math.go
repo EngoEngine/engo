@@ -16,7 +16,7 @@ type AABB struct {
 	Min, Max Point
 }
 
-// A Container is a 2-dimensional closed shape which may contain a set of points.
+// A Container is a 2D closed shape which contains a set of points.
 type Container interface {
 	// Contains reports whether the container contains the given point.
 	Contains(p Point) bool
