@@ -5,7 +5,6 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
-	"github.com/engoengine/glm"
 	"github.com/engoengine/math"
 )
 
@@ -96,7 +95,7 @@ func (sc SpaceComponent) Contains(p engo.Point) bool {
 
 	for i := 0; i < 4; i++ {
 		for j := i + 1; j < 4; j++ {
-			if t := triangleArea(points[i], points[j], p); t > halfArea || glm.FloatEqual(t, halfArea) {
+			if t := triangleArea(points[i], points[j], p); t > halfArea || FloatEqual(t, halfArea) {
 				return false
 			}
 		}
