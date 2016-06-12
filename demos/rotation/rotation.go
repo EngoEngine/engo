@@ -7,7 +7,7 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/engo/common"
-	"github.com/luxengine/math"
+	"github.com/engoengine/math"
 )
 
 type Guy struct {

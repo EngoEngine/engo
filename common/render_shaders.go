@@ -9,7 +9,7 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/gl"
-	"github.com/luxengine/math"
+	"github.com/engoengine/math"
 )
 
 // UnicodeCap is the amount of unicode characters the fonts will be able to use, starting from index 0.
