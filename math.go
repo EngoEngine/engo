@@ -1,19 +1,27 @@
 package engo
 
 import (
-	"github.com/engoengine/glm"
-	"github.com/luxengine/math"
+	"github.com/engoengine/math"
 )
 
-func init() {
-	// This precision / error margin is required to work with float32 within `engo.Point` when checking for equality.
-	glm.Epsilon = 1e-3
-}
+const (
+	// Epsilon is some tiny value that determines how precisely equal we want our
+	// floats to be.
+	Epsilon float32 = 1e-3
+	// MinNormal is the smallest normal value possible.
+	MinNormal = float32(1.1754943508222875e-38) // 1 / 2**(127 - 1)
+)
 
 // AABB describes two points of a rectangle: the upper-left corner and the lower-right corner. It should always hold that
 // `Min.X <= Max.X` and `Min.Y <= Max.Y`.
 type AABB struct {
 	Min, Max Point
+}
+
+// A Container is a 2D closed shape which contains a set of points.
+type Container interface {
+	// Contains reports whether the container contains the given point.
+	Contains(p Point) bool
 }
 
 // Point describes a coordinate in a 2 dimensional euclidean space
@@ -79,7 +87,7 @@ func (p *Point) Multiply(p2 Point) {
 
 // Equal indicates whether two points have the same value, avoiding issues with float precision
 func (p *Point) Equal(p2 Point) bool {
-	return glm.FloatEqual(p.X, p2.X) && glm.FloatEqual(p.Y, p2.Y)
+	return FloatEqual(p.X, p2.X) && FloatEqual(p.Y, p2.Y)
 }
 
 // PointDistance returns the euclidean distance between p and p2
@@ -113,6 +121,11 @@ func (a *Point) Normalize() (Point, float32) {
 	unit := Point{a.X / mag, a.Y / mag}
 
 	return unit, mag
+}
+
+// Within reports whether the point is contained within the given container.
+func (p Point) Within(c Container) bool {
+	return c.Contains(p)
 }
 
 // PointSide returns which side of the line l the point p sits on
@@ -282,4 +295,32 @@ func LineTrace(tracer *Line, boundaries []*Line) Trace {
 	}
 
 	return t
+}
+
+// FloatEqual is a safe utility function to compare floats.
+// It's Taken from http://floating-point-gui.de/errors/comparison/
+//
+// It is slightly altered to not call Abs when not needed.
+func FloatEqual(a, b float32) bool {
+	return FloatEqualThreshold(a, b, Epsilon)
+}
+
+// FloatEqualThreshold is a utility function to compare floats.
+// It's Taken from http://floating-point-gui.de/errors/comparison/
+//
+// It is slightly altered to not call Abs when not needed.
+//
+// This differs from FloatEqual in that it lets you pass in your comparison threshold, so that you can adjust the comparison value to your specific needs
+func FloatEqualThreshold(a, b, epsilon float32) bool {
+	if a == b { // Handles the case of inf or shortcuts the loop when no significant error has accumulated
+		return true
+	}
+
+	diff := math.Abs(a - b)
+	if a*b == 0 || diff < MinNormal { // If a or b are 0 or both are extremely close to it
+		return diff < epsilon*epsilon
+	}
+
+	// Else compare difference
+	return diff/(math.Abs(a)+math.Abs(b)) < epsilon
 }

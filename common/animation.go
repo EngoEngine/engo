@@ -57,8 +57,6 @@ func (ac *AnimationComponent) AddAnimations(actions []*Animation) {
 }
 
 func (ac *AnimationComponent) Cell() Drawable {
-	log.Println(ac.index)
-
 	idx := ac.CurrentAnimation.Frames[ac.index]
 
 	return ac.Drawables[idx]
