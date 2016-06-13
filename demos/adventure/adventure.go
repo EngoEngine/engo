@@ -270,11 +270,13 @@ func (scene *DefaultScene) Setup(w *ecs.World) {
 	engo.Input.RegisterAxis(
 		"vertical",
 		engo.AxisKeyPair{engo.ArrowUp, engo.ArrowDown},
+		engo.AxisKeyPair{engo.W, engo.S},
 	)
 
 	engo.Input.RegisterAxis(
 		"horizontal",
 		engo.AxisKeyPair{engo.ArrowLeft, engo.ArrowRight},
+		engo.AxisKeyPair{engo.A, engo.D},
 	)
 
 	// Add EntityScroller System
