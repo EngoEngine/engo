@@ -16,13 +16,14 @@ import (
 	"engo.io/engo"
 )
 
-// Just used to create levelTileset->Image
+// TMXTilesetSrc is just used to create levelTileset->Image
 type TMXTilesetSrc struct {
 	Source string `xml:"source,attr"`
 	Width  int    `xml:"width,attr"`
 	Height int    `xml:"height,attr"`
 }
 
+// TMXTileset contains the tileset resource parsed from the TileMap XML
 type TMXTileset struct {
 	Firstgid   int           `xml:"firstgid,attr"`
 	Name       string        `xml:"name,attr"`
@@ -33,6 +34,7 @@ type TMXTileset struct {
 	Image      *TextureResource
 }
 
+// TMXTileLayer represents a tile layer parsed from the TileMap XML
 type TMXTileLayer struct {
 	Name        string `xml:"name,attr"`
 	Width       int    `xml:"width,attr"`
@@ -42,6 +44,7 @@ type TMXTileLayer struct {
 	CompData []byte `xml:"data"`
 }
 
+// TMXImageLayer represents an image layer parsed from the TileMap XML
 type TMXImageLayer struct {
 	Name     string      `xml:"name,attr"`
 	X        float64     `xml:"x,attr"`
@@ -49,7 +52,7 @@ type TMXImageLayer struct {
 	ImageSrc TMXImageSrc `xml:"image"`
 }
 
-// Following the Object Layer naming convention in Tiled
+// TMXObjectLayer following the Object Layer naming convention in Tiled
 type TMXObjectLayer struct {
 	//TODO add all object attr available in Tiled
 	// 'visible' attr only appears in XML if false --> default 1
@@ -62,6 +65,7 @@ type TMXObjectLayer struct {
 	// Opacity float32     `xml:"visible,attr"`
 }
 
+// TMXObject represents a TMX object with all default Tiled attributes
 type TMXObject struct {
 	Id       int         `xml:"id,attr"`
 	Name     string      `xml:"name,attr"`
@@ -73,16 +77,19 @@ type TMXObject struct {
 	Polyline TMXPolyline `xml:"polyline"`
 }
 
+// TMXPolyline represents a TMX Polyline object with its Points values
 type TMXPolyline struct {
 	Points string `xml:"points,attr"`
 }
 
+// TMXImageSrc represents the actual image source of an image layer
 type TMXImageSrc struct {
 	Source string `xml:"source,attr"`
 	Width  int    `xml:"width,attr"`
 	Height int    `xml:"height,attr"`
 }
 
+// TMXLevel containing all layers and default Tiled attributes
 type TMXLevel struct {
 	Orientation  string           `xml:"orientation,attr"`
 	RenderOrder  string           `xml:"renderorder,attr"`
@@ -99,8 +106,13 @@ type TMXLevel struct {
 
 type ByFirstgid []TMXTileset
 
-func (t ByFirstgid) Len() int           { return len(t) }
-func (t ByFirstgid) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
+// Len returns the length of t
+func (t ByFirstgid) Len() int { return len(t) }
+
+// Swap exchanges t's elements i and j
+func (t ByFirstgid) Swap(i, j int) { t[i], t[j] = t[j], t[i] }
+
+// Less returns if t's i Firstgid is less than t's j
 func (t ByFirstgid) Less(i, j int) bool { return t[i].Firstgid < t[j].Firstgid }
 
 // MUST BE base64 ENCODED and COMPRESSED WITH zlib!
