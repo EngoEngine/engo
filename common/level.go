@@ -7,67 +7,99 @@ import (
 
 // Level is a parsed TMX level containing all layers and default Tiled attributes
 type Level struct {
-	Orientation  string
-	RenderOrder  string
-	width        int
-	height       int
-	TileWidth    int
-	TileHeight   int
+	// Orientation is the parsed level orientation from the TMX XML, like orthogonal
+	Orientation string
+	// RenderOrder is the in Tiled specified TileMap render order, like right-down
+	RenderOrder string
+	width       int
+	height      int
+	// TileWidth defines the width of each tile in the level
+	TileWidth int
+	// TileHeight defines the height of each tile in the level
+	TileHeight int
+	// NextObjectId is the next free Object ID defined by Tiled
 	NextObjectId int
-	TileLayers   []*TileLayer
-	ImageLayers  []*ImageLayer
+	// TileLayers contains all TileLayer of the level
+	TileLayers []*TileLayer
+	// ImageLayers contains all ImageLayer of the level
+	ImageLayers []*ImageLayer
+	// ObjectLayers contains all ObjectLayer of the level
 	ObjectLayers []*ObjectLayer
-	// old
-	// Tiles      []*tile
-	// LineBounds []*engo.Line
-	// Images     []*tile
 }
 
 // TileLayer contains a list of its tiles plus all default Tiled attributes
 type TileLayer struct {
-	Name   string
-	Width  int
+	// Name defines the name of the tile layer given in the TMX XML / Tiled
+	Name string
+	// Width is the integer width of each tile in this layer
+	Width int
+	// Height is the integer height of each tile in this layer
 	Height int
-	Tiles  []*tile
+	// Tiles contains the list of tiles
+	Tiles []*tile
 }
 
 // ImageLayer contains a list of its images plus all default Tiled attributes
 type ImageLayer struct {
-	Name   string
-	Width  int
+	// Name defines the name of the image layer given in the TMX XML / Tiled
+	Name string
+	// Width is the integer width of each image in this layer
+	Width int
+	// Height is the integer height of each image in this layer
 	Height int
+	// Source contains the original image filename
 	Source string
+	// Images contains the list of all image tiles
 	Images []*tile
 }
 
 // ObjectLayer contains a list of its standard objects as well as a list of all its polyline objects
 type ObjectLayer struct {
-	Name        string
-	OffSetX     float32
-	OffSetY     float32
-	Objects     []*Object
+	// Name defines the name of the object layer given in the TMX XML / Tiled
+	Name string
+	// OffSetX is the parsed X offset for the object layer
+	OffSetX float32
+	// OffSetY is the parsed Y offset for the object layer
+	OffSetY float32
+	// Objects contains the list of (regular) Object objects
+	Objects []*Object
+	// PolyObjects contains the list of PolylineObject objects
 	PolyObjects []*PolylineObject
 }
 
 // Object is a standard TMX object with all its default Tiled attributes
 type Object struct {
-	Id     int
-	Name   string
-	Type   string
-	X      float64
-	Y      float64
-	Width  int
+	// Id is the unique ID of each object defined by Tiled
+	Id int
+	// Name defines the name of the object given in Tiled
+	Name string
+	// Type contains the string type which was given in Tiled
+	Type string
+	// X holds the X float64 coordinate of the object in the map
+	X float64
+	// X holds the X float64 coordinate of the object in the map
+	Y float64
+	// Width is the integer width of the object
+	Width int
+	// Height is the integer height of the object
 	Height int
 }
 
 // PolylineObject is a TMX polyline object with all its default Tiled attributes
 type PolylineObject struct {
-	Id         int
-	Name       string
-	Type       string
-	X          float64
-	Y          float64
-	Points     string
+	// Id is the unique ID of each polyline object defined by Tiled
+	Id int
+	// Name defines the name of the polyline object given in Tiled
+	Name string
+	// Type contains the string type which was given in Tiled
+	Type string
+	// X holds the X float64 coordinate of the polyline in the map
+	X float64
+	// Y holds the Y float64 coordinate of the polyline in the map
+	Y float64
+	// Points contains the original, unaltered points string from the TMZ XML
+	Points string
+	// LineBounds is the list of engo.Line objects generated from the points string
 	LineBounds []*engo.Line
 }
 
