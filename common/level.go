@@ -7,9 +7,9 @@ import (
 
 // Level is a parsed TMX level containing all layers and default Tiled attributes
 type Level struct {
-	// Orientation is the parsed level orientation from the TMX XML, like orthogonal
+	// Orientation is the parsed level orientation from the TMX XML, like orthogonal, isometric, etc.
 	Orientation string
-	// RenderOrder is the in Tiled specified TileMap render order, like right-down
+	// RenderOrder is the in Tiled specified TileMap render order, like right-down, right-up, etc.
 	RenderOrder string
 	width       int
 	height      int
