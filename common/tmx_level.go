@@ -18,89 +18,134 @@ import (
 
 // TMXTilesetSrc is just used to create levelTileset->Image
 type TMXTilesetSrc struct {
+	// Source holds the URI of the tileset image
 	Source string `xml:"source,attr"`
-	Width  int    `xml:"width,attr"`
-	Height int    `xml:"height,attr"`
+	// Width of each tile in the tileset image
+	Width int `xml:"width,attr"`
+	// Height of each tile in the tileset image
+	Height int `xml:"height,attr"`
 }
 
 // TMXTileset contains the tileset resource parsed from the TileMap XML
 type TMXTileset struct {
-	Firstgid   int           `xml:"firstgid,attr"`
-	Name       string        `xml:"name,attr"`
-	TileWidth  int           `xml:"tilewidth,attr"`
-	TileHeight int           `xml:"tileheight,attr"`
-	TileCount  int           `xml:"tilecount,attr"`
-	ImageSrc   TMXTilesetSrc `xml:"image"`
-	Image      *TextureResource
+	// Firstgid is the first assigned gid of the tileset
+	Firstgid int `xml:"firstgid,attr"`
+	// Name of the tileset in Tiled
+	Name string `xml:"name,attr"`
+	// TileWidth defines the width of each tile
+	TileWidth int `xml:"tilewidth,attr"`
+	// TileHeight defines the height of each tile
+	TileHeight int `xml:"tileheight,attr"`
+	// TileCount holds the total tile count in this tileset
+	TileCount int `xml:"tilecount,attr"`
+	// ImageSrc contains the TMXTilesetSrc which defines the tileset image
+	ImageSrc TMXTilesetSrc `xml:"image"`
+	// Image holds the reference of the tileset's TextureResource
+	Image *TextureResource
 }
 
 // TMXTileLayer represents a tile layer parsed from the TileMap XML
 type TMXTileLayer struct {
-	Name        string `xml:"name,attr"`
-	Width       int    `xml:"width,attr"`
-	Height      int    `xml:"height,attr"`
+	// Name of the tile layer in Tiled
+	Name string `xml:"name,attr"`
+	// Width is the integer width of each tile in this layer
+	Width int `xml:"width,attr"`
+	// Height is the integer height of each tile in this layer
+	Height int `xml:"height,attr"`
+	// TileMapping contains the generated tilemapping list
 	TileMapping []uint32
-	// This variable doesn't need to persist, used to fill TileMapping
+	// CompData is a temporary list used to fill TileMapping
 	CompData []byte `xml:"data"`
 }
 
 // TMXImageLayer represents an image layer parsed from the TileMap XML
 type TMXImageLayer struct {
-	Name     string      `xml:"name,attr"`
-	X        float64     `xml:"x,attr"`
-	Y        float64     `xml:"y,attr"`
+	// Name of the image layer in Tiled
+	Name string `xml:"name,attr"`
+	// X holds the defined X coordinate in Tiled
+	X float64 `xml:"x,attr"`
+	// Y holds the defined Y coordinate in Tiled
+	Y float64 `xml:"y,attr"`
+	// ImageSrc contains the TMXImageSrc which defines the image filename
 	ImageSrc TMXImageSrc `xml:"image"`
 }
 
 // TMXObjectLayer following the Object Layer naming convention in Tiled
 type TMXObjectLayer struct {
+	// Name of the object layer in Tiled
+	Name string `xml:"name,attr"`
+	// Objects contains the list all objects in this layer
+	Objects []TMXObject `xml:"object"`
+	// OffSetX is the parsed X offset for the object layer
+	OffSetX float32 `xml:"offsetx"`
+	// OffSetY is the parsed Y offset for the object layer
+	OffSetY float32 `xml:"offsety"`
 	//TODO add all object attr available in Tiled
 	// 'visible' attr only appears in XML if false --> default 1
 	// 'opacity' attr only appears in XML if < 1 --> default 1
-	Name    string      `xml:"name,attr"`
-	Objects []TMXObject `xml:"object"`
-	OffSetX float32     `xml:"offsetx"`
-	OffSetY float32     `xml:"offsety"`
 	// Visible int         `xml:"visible,attr"`
 	// Opacity float32     `xml:"visible,attr"`
 }
 
 // TMXObject represents a TMX object with all default Tiled attributes
 type TMXObject struct {
-	Id       int         `xml:"id,attr"`
-	Name     string      `xml:"name,attr"`
-	Type     string      `xml:"type,attr"`
-	X        float64     `xml:"x,attr"`
-	Y        float64     `xml:"y,attr"`
-	Width    int         `xml:"width,attr"`
-	Height   int         `xml:"height,attr"`
+	// Id is the unique ID of each object defined by Tiled
+	Id int `xml:"id,attr"`
+	// Name defines the name of the object given in Tiled
+	Name string `xml:"name,attr"`
+	// Type contains the string type which was given in Tiled
+	Type string `xml:"type,attr"`
+	// X holds the X float64 coordinate of the object in the map
+	X float64 `xml:"x,attr"`
+	// Y holds the Y float64 coordinate of the object in the map
+	Y float64 `xml:"y,attr"`
+	// Width is the integer width of the object
+	Width int `xml:"width,attr"`
+	// Height is the integer height of the object
+	Height int `xml:"height,attr"`
+	// Polyline contains the TMXPolyline object if the parsed object has a polyline points string
 	Polyline TMXPolyline `xml:"polyline"`
 }
 
 // TMXPolyline represents a TMX Polyline object with its Points values
 type TMXPolyline struct {
+	// Points contains the original, unaltered points string from the TMZ XML
 	Points string `xml:"points,attr"`
 }
 
 // TMXImageSrc represents the actual image source of an image layer
 type TMXImageSrc struct {
+	// Source holds the URI of the image
 	Source string `xml:"source,attr"`
-	Width  int    `xml:"width,attr"`
-	Height int    `xml:"height,attr"`
+	// Width is the integer width of the image
+	Width int `xml:"width,attr"`
+	// Height is the integer height of the image
+	Height int `xml:"height,attr"`
 }
 
 // TMXLevel containing all layers and default Tiled attributes
 type TMXLevel struct {
-	Orientation  string           `xml:"orientation,attr"`
-	RenderOrder  string           `xml:"renderorder,attr"`
-	Width        int              `xml:"width,attr"`
-	Height       int              `xml:"height,attr"`
-	TileWidth    int              `xml:"tilewidth,attr"`
-	TileHeight   int              `xml:"tileheight,attr"`
-	NextObjectId int              `xml:"nextobjectid,attr"`
-	Tilesets     []TMXTileset     `xml:"tileset"`
-	TileLayers   []TMXTileLayer   `xml:"layer"`
-	ImageLayers  []TMXImageLayer  `xml:"imagelayer"`
+	// Orientation is the parsed level orientation from the TMX XML, like orthogonal
+	Orientation string `xml:"orientation,attr"`
+	// RenderOrder is the in Tiled specified TileMap render order, like right-down
+	RenderOrder string `xml:"renderorder,attr"`
+	// Width is the integer width of the parsed level
+	Width int `xml:"width,attr"`
+	// Height is the integer height of the parsed level
+	Height int `xml:"height,attr"`
+	// TileWidth defines the width of each tile in the level
+	TileWidth int `xml:"tilewidth,attr"`
+	// TileHeight defines the height of each tile in the level
+	TileHeight int `xml:"tileheight,attr"`
+	// NextObjectId is the next free Object ID defined by Tiled
+	NextObjectId int `xml:"nextobjectid,attr"`
+	// Tilesets conatins a list of all parsed TMXTileset objects
+	Tilesets []TMXTileset `xml:"tileset"`
+	// TileLayers conatins a list of all parsed TMXTileLayer objects
+	TileLayers []TMXTileLayer `xml:"layer"`
+	// ImageLayers conatins a list of all parsed TMXImageLayer objects
+	ImageLayers []TMXImageLayer `xml:"imagelayer"`
+	// ObjectLayers conatins a list of all parsed TMXObjectLayer objects
 	ObjectLayers []TMXObjectLayer `xml:"objectgroup"`
 }
 
