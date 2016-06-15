@@ -1,395 +1,317 @@
-package engo
+package act
 
 import "testing"
 
-type keyState struct {
-	state    int
-	up       bool
-	down     bool
-	justUp   bool
-	justDown bool
+func TestActMgr(t *testing.T) {
+	mgr := NewActMgr()
+
+	mgr.Clear()
+	mgr.Update()
+
+	runActCheck("Init (0.A)", t, mgr, KeyA, StateIdle)
+	runActCheck("Init (0.F12)", t, mgr, KeyF12, StateIdle)
+	runActCheck("Init (0.Left)", t, mgr, MouseLeft, StateIdle)
+
+	mgr.Clear()
+	mgr.SetState(KeyA, true)
+	mgr.SetState(KeyF12, false)
+	mgr.Update()
+	mgr.SetState(MouseLeft, true)
+
+	runActCheck("Pass (1.A)", t, mgr, KeyA, StateJustActive)
+	runActCheck("Pass (1.F12)", t, mgr, KeyF12, StateIdle)
+	runActCheck("Pass (1.Left)", t, mgr, MouseLeft, StateIdle)
+
+	mgr.Clear()
+	mgr.Update()
+
+	runActCheck("Pass (2.A)", t, mgr, KeyA, StateActive)
+	runActCheck("Pass (2.F12)", t, mgr, KeyF12, StateIdle)
+	runActCheck("Pass (2.Left)", t, mgr, MouseLeft, StateJustActive)
+
+	mgr.Clear()
+	mgr.SetState(KeyA, false)
+	mgr.SetState(KeyF12, true)
+	mgr.Update()
+	mgr.SetState(MouseLeft, false)
+
+	runActCheck("Pass (3.A)", t, mgr, KeyA, StateJustIdle)
+	runActCheck("Pass (3.F12)", t, mgr, KeyF12, StateJustActive)
+	runActCheck("Pass (3.Left)", t, mgr, MouseLeft, StateActive)
+
+	mgr.Clear()
+	mgr.Update()
+
+	runActCheck("Pass (4.A)", t, mgr, KeyA, StateIdle)
+	runActCheck("Pass (4.F12)", t, mgr, KeyF12, StateActive)
+	runActCheck("Pass (4.Left)", t, mgr, MouseLeft, StateJustIdle)
+
+	mgr.Clear()
+	mgr.Update()
+
+	runActCheck("Pass (5.A)", t, mgr, KeyA, StateIdle)
+	runActCheck("Pass (5.F12)", t, mgr, KeyF12, StateActive)
+	runActCheck("Pass (5.Left)", t, mgr, MouseLeft, StateIdle)
+
+	mgr.Clear()
+	mgr.SetState(KeyF12, false)
+	mgr.Update()
+
+	runActCheck("Pass (6.A)", t, mgr, KeyA, StateIdle)
+	runActCheck("Pass (6.F12)", t, mgr, KeyF12, StateJustIdle)
+	runActCheck("Pass (6.Left)", t, mgr, MouseLeft, StateIdle)
+
+	mgr.Clear()
+	mgr.Update()
+
+	runActCheck("Pass (7.A)", t, mgr, KeyA, StateIdle)
+	runActCheck("Pass (7.F12)", t, mgr, KeyF12, StateIdle)
+	runActCheck("Pass (7.Left)", t, mgr, MouseLeft, StateIdle)
 }
 
-// Keys used when testing
-var keySimpleCfg = [12]Key{
-	A, B, C, D,
-	F1, F2, F3, F4,
-	Slash, NumTwo,
-	Enter, ArrowLeft,
-}
-
-// Expected key state @ pass 0
-var initPass0 = [12]keyState{
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-}
-
-// Expected key state @ pass 1
-var initPass1 = [12]keyState{
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateJustDown},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateJustDown},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateJustDown},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateJustDown},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateJustDown},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateJustDown},
-}
-
-// Expected key state @ pass 2
-var initPass2 = [12]keyState{
-	keyState{state: KeyStateJustDown},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateJustDown},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateJustDown},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateJustDown},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateJustDown},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateJustDown},
-	keyState{state: KeyStateDown},
-}
-
-// Expected key state @ pass 3
-var initPass3 = [12]keyState{
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateDown},
-}
-
-// Expected key state @ pass 4
-var initPass4 = [12]keyState{
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateJustUp},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateJustUp},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateJustUp},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateJustUp},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateJustUp},
-	keyState{state: KeyStateDown},
-	keyState{state: KeyStateJustUp},
-}
-
-// Expected key state @ pass 5
-var initPass5 = [12]keyState{
-	keyState{state: KeyStateJustUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateJustUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateJustUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateJustUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateJustUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateJustUp},
-	keyState{state: KeyStateUp},
-}
-
-// Expected key state @ pass 6
-var initPass6 = [12]keyState{
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-	keyState{state: KeyStateUp},
-}
-
-// Checks the state of keys in the configuration against the expected state.
-func runKeyChecks(msg string, t *testing.T, mgr *KeyManager, expect [12]keyState) {
-	for i, cd := range keySimpleCfg {
-		exp := expect[i]
-		sto := mgr.Get(cd)
-
-		if exp.state != sto.State() {
-			t.Error(msg, " Invalid on: ", cd, " - State")
-		}
-		if (KeyStateUp == exp.state) != sto.Up() {
-			t.Error(msg, " Invalid on: ", cd, " - Up")
-		}
-		if (KeyStateDown == exp.state) != sto.Down() {
-			t.Error(msg, " Invalid on: ", cd, " - Down")
-		}
-		if (KeyStateJustUp == exp.state) != sto.JustReleased() {
-			t.Error(msg, " Invalid on: ", cd, " - Just Up")
-		}
-		if (KeyStateJustDown == exp.state) != sto.JustPressed() {
-			t.Error(msg, " Invalid on: ", cd, " - Just Down")
-		}
+func runActCheck(msg string, t *testing.T, mgr *ActMgr, act Code, exp State) {
+	if exp != mgr.State(act) {
+		t.Error(msg, " Invalid on: State")
+	}
+	if (StateIdle == exp) != mgr.Idle(act) {
+		t.Error(msg, " - Invalid on: Idle")
+	}
+	if (StateActive == exp) != mgr.Active(act) {
+		t.Error(msg, " - Invalid on: Active")
+	}
+	if (StateJustIdle == exp) != mgr.JustIdle(act) {
+		t.Error(msg, " - Invalid on: Just Idle")
+	}
+	if (StateJustActive == exp) != mgr.JustActive(act) {
+		t.Error(msg, " - Invalid on: Just Active")
 	}
 }
 
-// This test sets up a key manager and changes the states a few times, every
-// time the state changes the results are checked against the expected outcome.
-func TestKeyManager(t *testing.T) {
-	mgr := NewKeyManager()
-	runKeyChecks("Init (0.0)", t, mgr, initPass0)
+////////////////
 
-	// Empty update pass0
-	mgr.update()
-	runKeyChecks("Pass (0.1)", t, mgr, initPass0)
-	mgr.update()
-	runKeyChecks("Pass (0.2)", t, mgr, initPass0)
-	mgr.update()
-	runKeyChecks("Pass (0.3)", t, mgr, initPass0)
+var bState [4]State
+var bResult [4]bool
 
-	// Set uneven true pass1
-	mgr.update()
+func BenchmarkActMgr_CleanSimulate(b *testing.B) {
+	mgr := NewActMgr()
 
-	mgr.Set(keySimpleCfg[1], true)
-	mgr.Set(keySimpleCfg[3], true)
-	mgr.Set(keySimpleCfg[5], true)
-	mgr.Set(keySimpleCfg[7], true)
-	mgr.Set(keySimpleCfg[9], true)
-	mgr.Set(keySimpleCfg[11], true)
-
-	runKeyChecks("Pass (1.0)", t, mgr, initPass1)
-
-	// Set even true pass2
-	mgr.update()
-
-	mgr.Set(keySimpleCfg[0], true)
-	mgr.Set(keySimpleCfg[2], true)
-	mgr.Set(keySimpleCfg[4], true)
-	mgr.Set(keySimpleCfg[6], true)
-	mgr.Set(keySimpleCfg[8], true)
-	mgr.Set(keySimpleCfg[10], true)
-
-	runKeyChecks("Pass (2.0)", t, mgr, initPass2)
-
-	// Keeps state
-	mgr.update()
-	runKeyChecks("Pass (3.0)", t, mgr, initPass3)
-	mgr.update()
-	runKeyChecks("Pass (3.1)", t, mgr, initPass3)
-	mgr.update()
-	runKeyChecks("Pass (3.2)", t, mgr, initPass3)
-
-	// Set uneven to false
-	mgr.update()
-
-	mgr.Set(keySimpleCfg[1], false)
-	mgr.Set(keySimpleCfg[3], false)
-	mgr.Set(keySimpleCfg[5], false)
-	mgr.Set(keySimpleCfg[7], false)
-	mgr.Set(keySimpleCfg[9], false)
-	mgr.Set(keySimpleCfg[11], false)
-
-	runKeyChecks("Pass (4.0)", t, mgr, initPass4)
-
-	// Set uneven to false
-	mgr.update()
-
-	mgr.Set(keySimpleCfg[0], false)
-	mgr.Set(keySimpleCfg[2], false)
-	mgr.Set(keySimpleCfg[4], false)
-	mgr.Set(keySimpleCfg[6], false)
-	mgr.Set(keySimpleCfg[8], false)
-	mgr.Set(keySimpleCfg[10], false)
-
-	runKeyChecks("Pass (5.0)", t, mgr, initPass5)
-
-	// Final keeps state
-	mgr.update()
-	runKeyChecks("Pass (6.0)", t, mgr, initPass6)
-	mgr.update()
-	runKeyChecks("Pass (6.1)", t, mgr, initPass6)
-	mgr.update()
-	runKeyChecks("Pass (6.2)", t, mgr, initPass6)
-}
-
-// Used to store results when benchmarking.
-var keyResult [12]keyState
-
-// Fast way to grab current key state, checks and store them externaly.
-func checkKeyConfigOptimal(b *testing.B, mgr *KeyManager) {
-	for i, cd := range keySimpleCfg {
-		st := mgr.Get(cd)
-		keyResult[i].up = st.Up()
-		keyResult[i].down = st.Down()
-		keyResult[i].justUp = st.JustReleased()
-		keyResult[i].justDown = st.JustPressed()
-	}
-}
-
-// Benchmark state checks with a clean manager.
-func BenchmarkKeyMgr_CleanState(b *testing.B) {
-	mgr := NewKeyManager()
+	mgr.Clear()
+	mgr.Update()
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		checkKeyConfigOptimal(b, mgr)
+		mgr.Clear()
+		mgr.Update()
+
+		bState[0] = mgr.State(KeyA)
+
+		mgr.Clear()
+		mgr.SetState(KeyA, true)
+		mgr.Update()
+
+		bState[1] = mgr.State(KeyA)
+
+		mgr.Clear()
+		mgr.Update()
+
+		bState[2] = mgr.State(KeyA)
+
+		mgr.Clear()
+		mgr.SetState(KeyA, false)
+		mgr.Update()
+
+		bState[3] = mgr.State(KeyA)
 	}
 }
 
-// Benchmark state checks with a full key manager.
-func BenchmarkKeyMgr_FilledState(b *testing.B) {
-	mgr := NewKeyManager()
-	keyFillManager(mgr)
+func BenchmarkActMgr_FilledSimulate(b *testing.B) {
+	mgr := NewActMgr()
+	fillActMgr(mgr)
+
+	mgr.Clear()
+	mgr.Update()
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		checkKeyConfigOptimal(b, mgr)
+		mgr.Clear()
+		mgr.Update()
+
+		bState[0] = mgr.State(KeyA)
+
+		mgr.Clear()
+		mgr.SetState(KeyA, true)
+		mgr.Update()
+
+		bState[1] = mgr.State(KeyA)
+
+		mgr.Clear()
+		mgr.Update()
+
+		bState[2] = mgr.State(KeyA)
+
+		mgr.Clear()
+		mgr.SetState(KeyA, false)
+		mgr.Update()
+
+		bState[3] = mgr.State(KeyA)
 	}
 }
 
-// Benchmark update with a clean manager and state checks.
-func BenchmarkKeyMgr_CleanUpdate(b *testing.B) {
-	mgr := NewKeyManager()
+// Disabled for CI - Use to diganose
+//func BenchmarkActMgr_CleanUpdate(b *testing.B) {
+//	mgr := NewActMgr()
+//
+//	mgr.Clear()
+//	mgr.Update()
+//
+//	b.ResetTimer()
+//	for n := 0; n < b.N; n++ {
+//		mgr.Clear()
+//		mgr.Update()
+//	}
+//}
 
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		mgr.update()
-		checkKeyConfigOptimal(b, mgr)
-	}
-}
+// Disabled for CI - Use to diganose
+//func BenchmarkActMgr_FilledUpdate(b *testing.B) {
+//	mgr := NewActMgr()
+//	fillActMgr(mgr)
+//
+//	mgr.Clear()
+//	mgr.Update()
+//
+//	b.ResetTimer()
+//	for n := 0; n < b.N; n++ {
+//		mgr.Clear()
+//		mgr.Update()
+//	}
+//}
 
-// Benchmark update with a full key manager and state checks.
-func BenchmarkKeyMgr_FilledUpdate(b *testing.B) {
-	mgr := NewKeyManager()
-	keyFillManager(mgr)
+// Disabled for CI - Use to diganose
+//func BenchmarkActMgr_CleanUpdateSet(b *testing.B) {
+//	mgr := NewActMgr()
+//
+//	mgr.Clear()
+//	mgr.Update()
+//
+//	b.ResetTimer()
+//	for n := 0; n < b.N; n++ {
+//		mgr.Clear()
+//		mgr.SetState(KeyA, true)
+//		mgr.Update()
+//	}
+//}
 
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		mgr.update()
-		checkKeyConfigOptimal(b, mgr)
-	}
-}
+// Disabled for CI - Usedto diganose
+//func BenchmarkActMgr_FilledUpdateSet(b *testing.B) {
+//	mgr := NewActMgr()
+//	fillActMgr(mgr)
+//
+//	mgr.Clear()
+//	mgr.Update()
+//
+//	b.ResetTimer()
+//	for n := 0; n < b.N; n++ {
+//		mgr.Clear()
+//		mgr.SetState(KeyA, true)
+//		mgr.Update()
+//	}
+//}
 
-// Slow way to check key state, checks and store them externaly.
-func checkKeyConfigSubOptimal(b *testing.B, mgr *KeyManager) {
-	for i, cd := range keySimpleCfg {
-		keyResult[i].up = mgr.Get(cd).Up()
-		keyResult[i].down = mgr.Get(cd).Down()
-		keyResult[i].justUp = mgr.Get(cd).JustReleased()
-		keyResult[i].justDown = mgr.Get(cd).JustPressed()
-	}
-}
+// Disabled for CI - Use to diganose
+//func BenchmarkActMgr_CleanUpdateState(b *testing.B) {
+//	mgr := NewActMgr()
+//
+//	mgr.Clear()
+//	mgr.Update()
+//
+//	b.ResetTimer()
+//	for n := 0; n < b.N; n++ {
+//		mgr.Clear()
+//		mgr.Update()
+//		bState[0] = mgr.State(KeyA)
+//		bResult[0] = mgr.Idle(KeyA)
+//		bResult[1] = mgr.Active(KeyA)
+//		bResult[2] = mgr.JustIdle(KeyA)
+//		bResult[3] = mgr.JustActive(KeyA)
+//	}
+//}
 
-// Benchmark sub-optimal state checks on a clean key manager.
-func BenchmarkKeyMgr_CleanSubOptimal(b *testing.B) {
-	mgr := NewKeyManager()
+// Disabled for CI - Use to diganose
+//func BenchmarkActMgr_FilledUpdateState(b *testing.B) {
+//	mgr := NewActMgr()
+//	fillActMgr(mgr)
+//
+//	mgr.Clear()
+//	mgr.Update()
+//
+//	b.ResetTimer()
+//	for n := 0; n < b.N; n++ {
+//		mgr.Clear()
+//		mgr.Update()
+//		bState[0] = mgr.State(KeyA)
+//		bResult[0] = mgr.Idle(KeyA)
+//		bResult[1] = mgr.Active(KeyA)
+//		bResult[2] = mgr.JustIdle(KeyA)
+//		bResult[3] = mgr.JustActive(KeyA)
+//	}
+//}
 
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		checkKeyConfigSubOptimal(b, mgr)
-	}
-}
+////////////////
 
-// Benchmark sub-optimal state checks on a filled key manager.
-func BenchmarkKeyMgr_FilledSubOptimal(b *testing.B) {
-	mgr := NewKeyManager()
-	keyFillManager(mgr)
+// Utility function that fills the ActMgr with code states.
+func fillActMgr(mgr *ActMgr) {
+	mgr.SetState(KeyD, false)
+	mgr.SetState(KeyE, false)
+	mgr.SetState(KeyF, false)
+	mgr.SetState(KeyG, false)
+	mgr.SetState(KeyH, false)
+	mgr.SetState(KeyI, false)
+	mgr.SetState(KeyJ, false)
+	mgr.SetState(KeyK, false)
+	mgr.SetState(KeyL, false)
+	mgr.SetState(KeyM, false)
+	mgr.SetState(KeyN, false)
+	mgr.SetState(KeyO, false)
+	mgr.SetState(KeyP, false)
+	mgr.SetState(KeyQ, false)
+	mgr.SetState(KeyR, false)
+	mgr.SetState(KeyS, false)
+	mgr.SetState(KeyT, false)
+	mgr.SetState(KeyU, false)
+	mgr.SetState(KeyV, false)
+	mgr.SetState(KeyW, false)
+	mgr.SetState(KeyX, false)
+	mgr.SetState(KeyY, false)
+	mgr.SetState(KeyZ, false)
 
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		checkKeyConfigSubOptimal(b, mgr)
-	}
-}
+	mgr.SetState(Key0, false)
+	mgr.SetState(Key1, false)
+	mgr.SetState(Key2, false)
+	mgr.SetState(Key3, false)
+	mgr.SetState(Key4, false)
+	mgr.SetState(Key5, false)
+	mgr.SetState(Key6, false)
+	mgr.SetState(Key7, false)
+	mgr.SetState(Key8, false)
+	mgr.SetState(Key9, false)
 
-// Utility function that fills the KeyManager with key states.
-func keyFillManager(mgr *KeyManager) {
-	mgr.Set(keySimpleCfg[0], false)
-	mgr.Set(keySimpleCfg[1], false)
-	mgr.Set(keySimpleCfg[2], false)
-	mgr.Set(keySimpleCfg[3], false)
-	mgr.Set(keySimpleCfg[4], false)
-	mgr.Set(keySimpleCfg[5], false)
-	mgr.Set(keySimpleCfg[6], false)
-	mgr.Set(keySimpleCfg[7], false)
-	mgr.Set(keySimpleCfg[8], false)
-	mgr.Set(keySimpleCfg[9], false)
-	mgr.Set(keySimpleCfg[10], false)
-	mgr.Set(keySimpleCfg[11], false)
+	mgr.SetState(KeyF5, false)
+	mgr.SetState(KeyF6, false)
+	mgr.SetState(KeyF7, false)
+	mgr.SetState(KeyF8, false)
+	mgr.SetState(KeyF9, false)
+	mgr.SetState(KeyF10, false)
+	mgr.SetState(KeyF11, false)
+	mgr.SetState(KeyF12, false)
 
-	mgr.Set(D, false)
-	mgr.Set(E, false)
-	mgr.Set(F, false)
-	mgr.Set(G, false)
-	mgr.Set(H, false)
-	mgr.Set(I, false)
-	mgr.Set(J, false)
-	mgr.Set(K, false)
-	mgr.Set(L, false)
-	mgr.Set(M, false)
-	mgr.Set(N, false)
-	mgr.Set(O, false)
-	mgr.Set(P, false)
-	mgr.Set(Q, false)
-	mgr.Set(R, false)
-	mgr.Set(S, false)
-
-	mgr.Set(T, false)
-	mgr.Set(U, false)
-	mgr.Set(V, false)
-	mgr.Set(W, false)
-	mgr.Set(X, false)
-	mgr.Set(Y, false)
-	mgr.Set(Z, false)
-
-	mgr.Set(Zero, false)
-	mgr.Set(One, false)
-	mgr.Set(Two, false)
-	mgr.Set(Three, false)
-	mgr.Set(Four, false)
-	mgr.Set(Five, false)
-	mgr.Set(Six, false)
-	mgr.Set(Seven, false)
-	mgr.Set(Eight, false)
-	mgr.Set(Nine, false)
-
-	mgr.Set(F5, false)
-	mgr.Set(F6, false)
-	mgr.Set(F7, false)
-	mgr.Set(F8, false)
-	mgr.Set(F9, false)
-	mgr.Set(F10, false)
-	mgr.Set(F11, false)
-	mgr.Set(F12, false)
-
-	mgr.Set(NumZero, false)
-	mgr.Set(NumOne, false)
-	mgr.Set(NumTwo, false)
-	mgr.Set(NumThree, false)
-	mgr.Set(NumFour, false)
-	mgr.Set(NumFive, false)
-	mgr.Set(NumSix, false)
-	mgr.Set(NumSeven, false)
-	mgr.Set(NumEight, false)
-	mgr.Set(NumNine, false)
+	mgr.SetState(KeyPad0, false)
+	mgr.SetState(KeyPad1, false)
+	mgr.SetState(KeyPad2, false)
+	mgr.SetState(KeyPad3, false)
+	mgr.SetState(KeyPad4, false)
+	mgr.SetState(KeyPad5, false)
+	mgr.SetState(KeyPad6, false)
+	mgr.SetState(KeyPad7, false)
+	mgr.SetState(KeyPad8, false)
+	mgr.SetState(KeyPad9, false)
 }

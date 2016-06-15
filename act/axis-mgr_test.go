@@ -1,511 +1,248 @@
-package engo
+package act
 
 import "testing"
 
-type axState struct {
-	value float32
+func TestAxisMgr(t *testing.T) {
+	amgr := NewActMgr()
+	bmgr := NewAxisMgr(amgr)
+
+	aaxi := bmgr.SetButton("Axis A", AxisPair{Min: KeyA, Max: KeyB})
+	baxi := bmgr.SetButton("Axis B", AxisPair{Min: KeyF3, Max: KeyF4})
+	caxi := bmgr.SetButton("Axis C",
+		AxisPair{Min: KeyPad0, Max: KeyPad1},
+		AxisPair{Min: MouseLeft, Max: MouseRight},
+	)
+
+	if aaxi != bmgr.GetId("Axis A") {
+		t.Error("Failed to verify id")
+	}
+
+	if bmgr.SetCodes(99, AxisPair{Min: KeyC, Max: KeyD}) {
+		t.Error("Set codes on to an invalid id ?")
+	}
+
+	if !bmgr.SetCodes(baxi, AxisPair{Min: KeyF1, Max: KeyF2}) {
+		t.Error("Failed to set codes on a valid id")
+	}
+
+	amgr.Clear()
+	amgr.Update()
+
+	runAxisCheck("Init (0.A)", t, bmgr, aaxi, StateIdle, StateIdle, StateIdle, 0.0)
+	runAxisCheck("Init (0.B)", t, bmgr, baxi, StateIdle, StateIdle, StateIdle, 0.0)
+	runAxisCheck("Init (0.C)", t, bmgr, caxi, StateIdle, StateIdle, StateIdle, 0.0)
+
+	amgr.Clear()
+	amgr.SetState(KeyA, true)
+	amgr.SetState(KeyF1, false)
+	amgr.Update()
+	amgr.SetState(MouseRight, true)
+
+	runAxisCheck("Pass (1.A)", t, bmgr, aaxi, StateJustActive, StateIdle, StateJustActive, 0.0)
+	runAxisCheck("Pass (1.B)", t, bmgr, baxi, StateIdle, StateIdle, StateIdle, 0.0)
+	runAxisCheck("Pass (1.C)", t, bmgr, caxi, StateIdle, StateIdle, StateIdle, 0.0)
+
+	amgr.Clear()
+	amgr.Update()
+
+	runAxisCheck("Pass (2.A)", t, bmgr, aaxi, StateActive, StateIdle, StateActive, -1.0)
+	runAxisCheck("Pass (2.B)", t, bmgr, baxi, StateIdle, StateIdle, StateIdle, 0.0)
+	runAxisCheck("Pass (2.C)", t, bmgr, caxi, StateIdle, StateJustActive, StateJustActive, 0.0)
+
+	amgr.Clear()
+	amgr.SetState(KeyA, false)
+	amgr.SetState(KeyF1, true)
+	amgr.Update()
+	amgr.SetState(MouseRight, false)
+
+	runAxisCheck("Pass (3.A)", t, bmgr, aaxi, StateJustIdle, StateIdle, StateJustIdle, 0.0)
+	runAxisCheck("Pass (3.B)", t, bmgr, baxi, StateJustActive, StateIdle, StateJustActive, 0.0)
+	runAxisCheck("Pass (3.C)", t, bmgr, caxi, StateIdle, StateActive, StateActive, 1.0)
+
+	amgr.Clear()
+	amgr.Update()
+
+	runAxisCheck("Pass (4.A)", t, bmgr, aaxi, StateIdle, StateIdle, StateIdle, 0.0)
+	runAxisCheck("Pass (4.B)", t, bmgr, baxi, StateActive, StateIdle, StateActive, -1.0)
+	runAxisCheck("Pass (4.C)", t, bmgr, caxi, StateIdle, StateJustIdle, StateJustIdle, 0.0)
+
+	amgr.Clear()
+	amgr.Update()
+
+	runAxisCheck("Pass (5.A)", t, bmgr, aaxi, StateIdle, StateIdle, StateIdle, 0.0)
+	runAxisCheck("Pass (5.B)", t, bmgr, baxi, StateActive, StateIdle, StateActive, -1.0)
+	runAxisCheck("Pass (5.C)", t, bmgr, caxi, StateIdle, StateIdle, StateIdle, 0.0)
+
+	amgr.Clear()
+	amgr.SetState(KeyA, true)
+	amgr.SetState(KeyB, true)
+	amgr.SetState(KeyF2, true)
+	amgr.SetState(KeyPad1, true)
+	amgr.Update()
+
+	runAxisCheck("Pass (6.A)", t, bmgr, aaxi, StateJustActive, StateJustActive, StateJustActive, 0.0)
+	runAxisCheck("Pass (6.B)", t, bmgr, baxi, StateActive, StateJustActive, StateActive, -1.0)
+	runAxisCheck("Pass (6.C)", t, bmgr, caxi, StateIdle, StateJustActive, StateJustActive, 0.0)
+
+	amgr.Clear()
+	amgr.SetState(MouseLeft, true)
+	amgr.Update()
+
+	runAxisCheck("Pass (7.A)", t, bmgr, aaxi, StateActive, StateActive, StateActive, 0.0)
+	runAxisCheck("Pass (7.B)", t, bmgr, baxi, StateActive, StateActive, StateActive, 0.0)
+	runAxisCheck("Pass (7.C)", t, bmgr, caxi, StateJustActive, StateActive, StateActive, 1.0)
+
+	amgr.Clear()
+	amgr.SetState(KeyA, false)
+	amgr.SetState(KeyF2, false)
+	amgr.Update()
+
+	runAxisCheck("Pass (8.A)", t, bmgr, aaxi, StateJustIdle, StateActive, StateActive, 1.0)
+	runAxisCheck("Pass (8.B)", t, bmgr, baxi, StateActive, StateJustIdle, StateActive, -1.0)
+	runAxisCheck("Pass (8.C)", t, bmgr, caxi, StateActive, StateActive, StateActive, 0.0)
+
+	amgr.Clear()
+	amgr.SetState(KeyB, false)
+	amgr.SetState(KeyF1, false)
+	amgr.SetState(KeyPad1, false)
+	amgr.SetState(MouseLeft, false)
+	amgr.Update()
+
+	runAxisCheck("Pass (9.A)", t, bmgr, aaxi, StateIdle, StateJustIdle, StateJustIdle, 0.0)
+	runAxisCheck("Pass (9.B)", t, bmgr, baxi, StateJustIdle, StateIdle, StateJustIdle, 0.0)
+	runAxisCheck("Pass (9.C)", t, bmgr, caxi, StateJustIdle, StateJustIdle, StateJustIdle, 0.0)
+
+	amgr.Clear()
+	amgr.Update()
+
+	runAxisCheck("Pass (10.A)", t, bmgr, aaxi, StateIdle, StateIdle, StateIdle, 0.0)
+	runAxisCheck("Pass (10.B)", t, bmgr, baxi, StateIdle, StateIdle, StateIdle, 0.0)
+	runAxisCheck("Pass (10.C)", t, bmgr, caxi, StateIdle, StateIdle, StateIdle, 0.0)
 }
 
-type axKeyCfg struct {
-	Name  string
-	Pairs []AxisKeyPair
+func runAxisCheck(msg string, t *testing.T, mgr *AxisMgr, id uintptr, min State, max State, exp State, val float32) {
+	runMinAxisCheck(msg, t, mgr, id, min)
+	runMaxAxisCheck(msg, t, mgr, id, max)
+	runValueAxisCheck(msg, t, mgr, id, exp, val)
 }
 
-// Axis configuretion used when testing.
-var axSimpleCfg = [6]axKeyCfg{
-	axKeyCfg{
-		Name: "Axis 1",
-		Pairs: []AxisKeyPair{
-			AxisKeyPair{Min: A, Max: B},
-			AxisKeyPair{Min: C, Max: D},
-		},
-	},
-	axKeyCfg{
-		Name: "Axis 2",
-		Pairs: []AxisKeyPair{
-			AxisKeyPair{Min: E, Max: F},
-			AxisKeyPair{Min: G, Max: H},
-		},
-	},
-	axKeyCfg{
-		Name: "Axis 3",
-		Pairs: []AxisKeyPair{
-			AxisKeyPair{Min: F1, Max: F2},
-			AxisKeyPair{Min: F3, Max: F4},
-		},
-	},
-	axKeyCfg{
-		Name: "Axis 4",
-		Pairs: []AxisKeyPair{
-			AxisKeyPair{Min: F5, Max: F6},
-			AxisKeyPair{Min: F7, Max: F8},
-		},
-	},
-	axKeyCfg{
-		Name: "Axis 5",
-		Pairs: []AxisKeyPair{
-			AxisKeyPair{Min: One, Max: Two},
-			AxisKeyPair{Min: Three, Max: Four},
-		},
-	},
-	axKeyCfg{
-		Name: "Axis 6",
-		Pairs: []AxisKeyPair{
-			AxisKeyPair{Min: ArrowUp, Max: ArrowDown},
-			AxisKeyPair{Min: ArrowLeft, Max: ArrowRight},
-		},
-	},
-}
-
-// Expected axes values @ pass 0
-var axPass0 = [6]axState{
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-}
-
-// Expected axes values @ pass 1
-var axPass1 = [6]axState{
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-}
-
-// Expected axes values @ pass 2
-var axPass2 = [6]axState{
-	axState{value: 0.0},
-	axState{value: 1.0},
-	axState{value: 0.0},
-	axState{value: 1.0},
-	axState{value: 0.0},
-	axState{value: 1.0},
-}
-
-// Expected axes values @ pass 3
-var axPass3 = [6]axState{
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-}
-
-// Expected axes values @ pass 4
-var axPass4 = [6]axState{
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-}
-
-// Expected axes values @ pass 5
-var axPass5 = [6]axState{
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-}
-
-// Expected axes values @ pass 6
-var axPass6 = [6]axState{
-	axState{value: 0.0},
-	axState{value: -1.0},
-	axState{value: 0.0},
-	axState{value: -1.0},
-	axState{value: 0.0},
-	axState{value: -1.0},
-}
-
-// Expected axes values @ pass 7
-var axPass7 = [6]axState{
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-}
-
-// Expected axes values @ pass 8
-var axPass8 = [6]axState{
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-}
-
-// Checks the value of all configured axis against the expected values.
-func runAxisChecks(msg string, t *testing.T, expect [6]axState) {
-	for i, cfg := range axSimpleCfg {
-		exp := expect[i]
-		axi := Input.Axis(cfg.Name)
-		if exp.value != axi.Value() {
-			t.Error(msg, " Invalid on: ", cfg.Name, " - Value")
-		}
+func runMinAxisCheck(msg string, t *testing.T, mgr *AxisMgr, id uintptr, exp State) {
+	if (StateIdle == exp) != mgr.MinIdle(id) {
+		t.Error(msg, " - Min - Invalid on: Idle")
+	}
+	if (StateActive == exp) != mgr.MinActive(id) {
+		t.Error(msg, " - Min - Invalid on: Active")
+	}
+	if (StateJustIdle == exp) != mgr.MinJustIdle(id) {
+		t.Error(msg, " - Min - Invalid on: Just Idle")
+	}
+	if (StateJustActive == exp) != mgr.MinJustActive(id) {
+		t.Error(msg, " - Min - Invalid on: Just Active")
 	}
 }
 
-// Test configured axes using a single pair on one axis.
-func TestAxisSimple(t *testing.T) {
-	Input = NewInputManager()
-
-	for _, cfg := range axSimpleCfg {
-		Input.RegisterAxis(cfg.Name, cfg.Pairs[0])
+func runMaxAxisCheck(msg string, t *testing.T, mgr *AxisMgr, id uintptr, exp State) {
+	if (StateIdle == exp) != mgr.MaxIdle(id) {
+		t.Error(msg, " - Max - Invalid on: Idle")
 	}
-
-	runAxisChecks("Init (0.0)", t, axPass0)
-
-	// Empty update pass0
-	Input.update()
-	runAxisChecks("Pass (0.1)", t, axPass0)
-	Input.update()
-	runAxisChecks("Pass (0.2)", t, axPass0)
-	Input.update()
-	runAxisChecks("Pass (0.3)", t, axPass0)
-
-	// Set even true pass1
-	Input.update()
-	Input.keys.Set(axSimpleCfg[1].Pairs[0].Max, true)
-	Input.keys.Set(axSimpleCfg[3].Pairs[0].Max, true)
-	Input.keys.Set(axSimpleCfg[5].Pairs[0].Max, true)
-
-	runAxisChecks("Pass (1.0)", t, axPass1)
-
-	// Keeps state on pass2
-	Input.update()
-	runAxisChecks("Pass (2.0)", t, axPass2)
-	Input.update()
-	runAxisChecks("Pass (2.1)", t, axPass2)
-	Input.update()
-	runAxisChecks("Pass (2.2)", t, axPass2)
-	Input.update()
-	runAxisChecks("Pass (2.3)", t, axPass2)
-
-	// Set even true pass3
-	Input.update()
-	Input.keys.Set(axSimpleCfg[1].Pairs[0].Max, false)
-	Input.keys.Set(axSimpleCfg[3].Pairs[0].Max, false)
-	Input.keys.Set(axSimpleCfg[5].Pairs[0].Max, false)
-
-	runAxisChecks("Pass (3.0)", t, axPass3)
-
-	// Keeps state on pass4
-	Input.update()
-	runAxisChecks("Pass (4.0)", t, axPass4)
-	Input.update()
-	runAxisChecks("Pass (4.1)", t, axPass4)
-	Input.update()
-	runAxisChecks("Pass (4.2)", t, axPass4)
-	Input.update()
-	runAxisChecks("Pass (4.3)", t, axPass4)
-
-	// Set even true pass5
-	Input.update()
-	Input.keys.Set(axSimpleCfg[1].Pairs[0].Min, true)
-	Input.keys.Set(axSimpleCfg[3].Pairs[0].Min, true)
-	Input.keys.Set(axSimpleCfg[5].Pairs[0].Min, true)
-
-	runAxisChecks("Pass (5.0)", t, axPass5)
-
-	// Keeps state on pass6
-	Input.update()
-	runAxisChecks("Pass (6.0)", t, axPass6)
-	Input.update()
-	runAxisChecks("Pass (6.1)", t, axPass6)
-	Input.update()
-	runAxisChecks("Pass (6.2)", t, axPass6)
-	Input.update()
-	runAxisChecks("Pass (6.3)", t, axPass6)
-
-	// Set even true pass7
-	Input.update()
-	Input.keys.Set(axSimpleCfg[1].Pairs[0].Min, false)
-	Input.keys.Set(axSimpleCfg[3].Pairs[0].Min, false)
-	Input.keys.Set(axSimpleCfg[5].Pairs[0].Min, false)
-
-	runAxisChecks("Pass (7.0)", t, axPass7)
-
-	// Keeps state on pass8
-	Input.update()
-	runAxisChecks("Pass (8.0)", t, axPass8)
-	Input.update()
-	runAxisChecks("Pass (8.1)", t, axPass8)
-	Input.update()
-	runAxisChecks("Pass (8.2)", t, axPass8)
-	Input.update()
-	runAxisChecks("Pass (8.3)", t, axPass8)
-}
-
-// Test configured axes using multiple pairs on one axis.
-func TestAxisComplex(t *testing.T) {
-	Input = NewInputManager()
-
-	for _, cfg := range axSimpleCfg {
-		Input.RegisterAxis(cfg.Name, cfg.Pairs[0], cfg.Pairs[1])
+	if (StateActive == exp) != mgr.MaxActive(id) {
+		t.Error(msg, " - Max - Invalid on: Active")
 	}
-
-	runAxisChecks("Init (0.0)", t, axPass0)
-
-	// Empty update pass0
-	Input.update()
-	runAxisChecks("Pass (0.1)", t, axPass0)
-	Input.update()
-	runAxisChecks("Pass (0.2)", t, axPass0)
-	Input.update()
-	runAxisChecks("Pass (0.3)", t, axPass0)
-
-	// Set even true pass1
-	Input.update()
-	Input.keys.Set(axSimpleCfg[1].Pairs[0].Max, true)
-	Input.keys.Set(axSimpleCfg[3].Pairs[0].Max, true)
-	Input.keys.Set(axSimpleCfg[5].Pairs[0].Max, true)
-
-	runAxisChecks("Pass (1.0)", t, axPass1)
-
-	// Keeps state on pass2
-	Input.update()
-	runAxisChecks("Pass (2.0)", t, axPass2)
-	Input.update()
-	runAxisChecks("Pass (2.1)", t, axPass2)
-	Input.update()
-	runAxisChecks("Pass (2.2)", t, axPass2)
-	Input.update()
-	runAxisChecks("Pass (2.3)", t, axPass2)
-
-	// Set even true pass3
-	Input.update()
-	Input.keys.Set(axSimpleCfg[1].Pairs[0].Max, false)
-	Input.keys.Set(axSimpleCfg[3].Pairs[0].Max, false)
-	Input.keys.Set(axSimpleCfg[5].Pairs[0].Max, false)
-
-	runAxisChecks("Pass (3.0)", t, axPass3)
-
-	// Keeps state on pass4
-	Input.update()
-	runAxisChecks("Pass (4.0)", t, axPass4)
-	Input.update()
-	runAxisChecks("Pass (4.1)", t, axPass4)
-	Input.update()
-	runAxisChecks("Pass (4.2)", t, axPass4)
-	Input.update()
-	runAxisChecks("Pass (4.3)", t, axPass4)
-
-	// Set even true pass5
-	Input.update()
-	Input.keys.Set(axSimpleCfg[1].Pairs[0].Min, true)
-	Input.keys.Set(axSimpleCfg[3].Pairs[0].Min, true)
-	Input.keys.Set(axSimpleCfg[5].Pairs[0].Min, true)
-
-	runAxisChecks("Pass (5.0)", t, axPass5)
-
-	// Keeps state on pass6
-	Input.update()
-	runAxisChecks("Pass (6.0)", t, axPass6)
-	Input.update()
-	runAxisChecks("Pass (6.1)", t, axPass6)
-	Input.update()
-	runAxisChecks("Pass (6.2)", t, axPass6)
-	Input.update()
-	runAxisChecks("Pass (6.3)", t, axPass6)
-
-	// Set even true pass7
-	Input.update()
-	Input.keys.Set(axSimpleCfg[1].Pairs[0].Min, false)
-	Input.keys.Set(axSimpleCfg[3].Pairs[0].Min, false)
-	Input.keys.Set(axSimpleCfg[5].Pairs[0].Min, false)
-
-	runAxisChecks("Pass (7.0)", t, axPass7)
-
-	// Keeps state on pass8
-	Input.update()
-	runAxisChecks("Pass (8.0)", t, axPass8)
-	Input.update()
-	runAxisChecks("Pass (8.1)", t, axPass8)
-	Input.update()
-	runAxisChecks("Pass (8.2)", t, axPass8)
-	Input.update()
-	runAxisChecks("Pass (8.3)", t, axPass8)
-
-	// Set even true pass1 alt
-	Input.update()
-	Input.keys.Set(axSimpleCfg[1].Pairs[1].Max, true)
-	Input.keys.Set(axSimpleCfg[3].Pairs[1].Max, true)
-	Input.keys.Set(axSimpleCfg[5].Pairs[1].Max, true)
-
-	runAxisChecks("Pass alt (1.0)", t, axPass1)
-
-	// Keeps state on pass2 alt
-	Input.update()
-	runAxisChecks("Pass alt (2.0)", t, axPass2)
-	Input.update()
-	runAxisChecks("Pass alt (2.1)", t, axPass2)
-	Input.update()
-	runAxisChecks("Pass alt (2.2)", t, axPass2)
-	Input.update()
-	runAxisChecks("Pass alt (2.3)", t, axPass2)
-
-	// Set even true pass3 alt
-	Input.update()
-	Input.keys.Set(axSimpleCfg[1].Pairs[1].Max, false)
-	Input.keys.Set(axSimpleCfg[3].Pairs[1].Max, false)
-	Input.keys.Set(axSimpleCfg[5].Pairs[1].Max, false)
-
-	runAxisChecks("Pass alt (3.0)", t, axPass3)
-
-	// Keeps state on pass4 alt
-	Input.update()
-	runAxisChecks("Pass alt (4.0)", t, axPass4)
-	Input.update()
-	runAxisChecks("Pass alt (4.1)", t, axPass4)
-	Input.update()
-	runAxisChecks("Pass alt (4.2)", t, axPass4)
-	Input.update()
-	runAxisChecks("Pass alt (4.3)", t, axPass4)
-
-	// Set even true pass5 alt
-	Input.update()
-	Input.keys.Set(axSimpleCfg[1].Pairs[1].Min, true)
-	Input.keys.Set(axSimpleCfg[3].Pairs[1].Min, true)
-	Input.keys.Set(axSimpleCfg[5].Pairs[1].Min, true)
-
-	runAxisChecks("Pass alt (5.0)", t, axPass5)
-
-	// Keeps state on pass6 alt
-	Input.update()
-	runAxisChecks("Pass alt (6.0)", t, axPass6)
-	Input.update()
-	runAxisChecks("Pass alt (6.1)", t, axPass6)
-	Input.update()
-	runAxisChecks("Pass alt (6.2)", t, axPass6)
-	Input.update()
-	runAxisChecks("Pass alt (6.3)", t, axPass6)
-
-	// Set even true pass7
-	Input.update()
-	Input.keys.Set(axSimpleCfg[1].Pairs[1].Min, false)
-	Input.keys.Set(axSimpleCfg[3].Pairs[1].Min, false)
-	Input.keys.Set(axSimpleCfg[5].Pairs[1].Min, false)
-
-	runAxisChecks("Pass alt (7.0)", t, axPass7)
-
-	// Keeps state on pass8 alt
-	Input.update()
-	runAxisChecks("Pass alt (8.0)", t, axPass8)
-	Input.update()
-	runAxisChecks("Pass alt (8.1)", t, axPass8)
-	Input.update()
-	runAxisChecks("Pass alt (8.2)", t, axPass8)
-	Input.update()
-	runAxisChecks("Pass alt (8.3)", t, axPass8)
-}
-
-// Checks the state of the two mouse axes against provided values.
-func runAxisMouse(msg string, t *testing.T, x float32, y float32) {
-
-	if x != Input.Axis("mouse x").Value() {
-		t.Error(msg, "Invalid x value: ", x, "!=", Input.Axis("mouse x").Value())
+	if (StateJustIdle == exp) != mgr.MaxJustIdle(id) {
+		t.Error(msg, " - Max - Invalid on: Just Idle")
 	}
-	if y != Input.Axis("mouse y").Value() {
-		t.Error(msg, "Invalid y value: ", y, "!=", Input.Axis("mouse y").Value())
+	if (StateJustActive == exp) != mgr.MaxJustActive(id) {
+		t.Error(msg, " - Max - Invalid on: Just Active")
 	}
 }
 
-// Test some state changes on the two mouse axes.
-func TestAxisMouse(t *testing.T) {
-	Input = NewInputManager()
-
-	Input.RegisterAxis("mouse x", NewAxisMouse(AxisMouseHori))
-	Input.RegisterAxis("mouse y", NewAxisMouse(AxisMouseVert))
-
-	runAxisMouse("Pass 0", t, 0.0, 0.0)
-
-	Input.Mouse.X = 1.0
-	Input.Mouse.Y = 1.0
-	runAxisMouse("Pass 1", t, 1.0, 1.0)
-
-	// Resets state to 0.0
-	runAxisMouse("Pass 2", t, 0.0, 0.0)
-	runAxisMouse("Pass 3", t, 0.0, 0.0)
-
-	Input.Mouse.Y = -1.0
-	Input.Mouse.X = -1.0
-	runAxisMouse("Pass 4", t, -2.0, -2.0)
-
-	Input.Mouse.X = 0.0
-	Input.Mouse.Y = 0.0
-	runAxisMouse("Pass 4", t, 1.0, 1.0)
-
-	runAxisMouse("Pass 6", t, 0.0, 0.0)
-	runAxisMouse("Pass 7", t, 0.0, 0.0)
-}
-
-// Used to store results when benchmarking.
-var axResult [6]axState
-
-// Fast check for all configured axes, stores the value externaly.
-func checkAxisConfigValue(b *testing.B) {
-	for i, cfg := range axSimpleCfg {
-		axResult[i].value = Input.Axis(cfg.Name).Value()
+func runValueAxisCheck(msg string, t *testing.T, mgr *AxisMgr, id uintptr, exp State, val float32) {
+	if val != mgr.Value(id) {
+		t.Error(msg, " - Val - Invalid value")
+	}
+	if (StateIdle == exp) != mgr.Idle(id) {
+		t.Error(msg, " - Val - Invalid on: Idle")
+	}
+	if (StateActive == exp) != mgr.Active(id) {
+		t.Error(msg, " - Val - Invalid on: Active")
+	}
+	if (StateJustIdle == exp) != mgr.JustIdle(id) {
+		t.Error(msg, " - Val - Invalid on: Just Idle")
+	}
+	if (StateJustActive == exp) != mgr.JustActive(id) {
+		t.Error(msg, " - Val-  Invalid on: Just Active")
 	}
 }
 
-// Benchmark values checks with a clean key manager.
-func BenchmarkInputMgr_AxisCleanState(b *testing.B) {
-	Input = NewInputManager()
+////////////////
 
-	for _, cfg := range axSimpleCfg {
-		Input.RegisterAxis(cfg.Name, cfg.Pairs[0], cfg.Pairs[1])
-	}
+func BenchmarkAxisMgr_CleanSimulate(b *testing.B) {
+	amgr := NewActMgr()
+	bmgr := NewAxisMgr(amgr)
+
+	axi := bmgr.SetButton("Axis A", AxisPair{Min: KeyA, Max: KeyB})
+
+	amgr.Clear()
+	amgr.Update()
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		checkAxisConfigValue(b)
+		amgr.Clear()
+		amgr.Update()
+
+		bResult[0] = bmgr.Idle(axi)
+
+		amgr.Clear()
+		amgr.SetState(KeyA, true)
+		amgr.Update()
+
+		bResult[1] = bmgr.Active(axi)
+
+		amgr.Clear()
+		amgr.Update()
+
+		bResult[2] = bmgr.JustIdle(axi)
+
+		amgr.Clear()
+		amgr.SetState(KeyA, false)
+		amgr.Update()
+
+		bResult[3] = bmgr.JustActive(axi)
 	}
 }
 
-// Benchmark values checks with a full key manager.
-func BenchmarkInputMgr_AxisFilledState(b *testing.B) {
-	Input = NewInputManager()
-	keyFillManager(Input.keys)
+func BenchmarkAxisMgr_FilledSimulate(b *testing.B) {
+	amgr := NewActMgr()
+	fillActMgr(amgr)
+	bmgr := NewAxisMgr(amgr)
 
-	for _, cfg := range axSimpleCfg {
-		Input.RegisterAxis(cfg.Name, cfg.Pairs[0], cfg.Pairs[1])
-	}
+	axi := bmgr.SetButton("Axis A", AxisPair{Min: KeyA, Max: KeyB})
+
+	amgr.Clear()
+	amgr.Update()
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		checkAxisConfigValue(b)
+		amgr.Clear()
+		amgr.Update()
+
+		bResult[0] = bmgr.Idle(axi)
+
+		amgr.Clear()
+		amgr.SetState(KeyA, true)
+		amgr.Update()
+
+		bResult[1] = bmgr.Active(axi)
+
+		amgr.Clear()
+		amgr.Update()
+
+		bResult[2] = bmgr.JustIdle(axi)
+
+		amgr.Clear()
+		amgr.SetState(KeyA, false)
+		amgr.Update()
+
+		bResult[3] = bmgr.JustActive(axi)
 	}
 }
-
-// Disabled but around when needed
-
-//func checkAxisMouseValue(b *testing.B) {
-//	axResult[0].value = Input.Axis("mouse x").Value()
-//	axResult[1].value = Input.Axis("mouse y").Value()
-//}
-// Benchmark sub-optimal state checks
-//func BenchmarkInputMgr_CleanMouseAxisValues(b *testing.B) {
-//	Input = NewInputManager()
-//
-//	Input.RegisterAxis("mouse x", NewAxisMouse(AxisMouseHori))
-//	Input.RegisterAxis("mouse y", NewAxisMouse(AxisMouseVert))
-//
-//	b.ResetTimer()
-//	for n := 0; n < b.N; n++ {
-//		checkAxisMouseValue(b)
-//	}
-//}

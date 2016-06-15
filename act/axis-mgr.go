@@ -1,91 +1,257 @@
-package engo
+package act
 
-// An Axis is an input which is a spectrum of values. An example of this is the horizontal movement in a game, or how far a joystick is pressed.
-type Axis struct {
-	// Name represents the name of the axis (Horizontal, Vertical)
-	Name string
-	// Pairs represents the axis pairs of this acis
-	Pairs []AxisPair
+const cfgAxisMapSize = 16
+
+type AxisMgr struct {
+	mgr *ActMgr
+
+	nameMap map[string]uintptr
+	infoMap map[uintptr]Axis
 }
 
-// Value returns the value of an Axis.
-func (a Axis) Value() float32 {
-	for _, pair := range a.Pairs {
-		v := pair.Value()
-		if v != AxisNeutral {
-			return v
+type axis struct {
+	pairs []AxisPair
+}
+
+type AxisPair struct {
+	Min Code
+	Max Code
+}
+
+////////////////
+
+func NewAxisMgr(mgr *ActMgr) *AxisMgr {
+	obj := new(AxisMgr)
+
+	obj.mgr = mgr
+
+	obj.nameMap = make(map[string]uintptr, cfgAxisMapSize)
+	obj.infoMap = make(map[uintptr]Axis, cfgAxisMapSize)
+
+	return obj
+}
+
+////////////////
+
+func (ref *AxisMgr) GetId(name string) uintptr {
+	return ref.nameMap[name]
+}
+
+func (ref *AxisMgr) SetCodes(id uintptr, act ...AxisPair) bool {
+	if axi, ok := ref.infoMap[id]; ok {
+		axi.ref.pairs = act
+		return true
+	}
+	return false
+}
+
+func (ref *AxisMgr) SetButton(name string, act ...AxisPair) uintptr {
+	if id, ok := ref.nameMap[name]; ok {
+		axi := ref.infoMap[id].ref
+		axi.pairs = act
+		return id
+	} else {
+		axi := newAxis(act)
+
+		id := axi.Id()
+		ref.nameMap[name] = id
+		ref.infoMap[id] = axi
+		return id
+	}
+}
+
+////////////////
+
+func (ref *AxisMgr) Value(id uintptr) float32 {
+	mgr := ref.mgr
+	min := float32(0.0)
+	max := float32(0.0)
+	axi := ref.infoMap[id].ref
+	for _, act := range axi.pairs {
+		if mgr.Active(act.Min) {
+			min = -1.0
+		}
+		if mgr.Active(act.Max) {
+			max = 1.0
 		}
 	}
-
-	return AxisNeutral
+	return (min + max)
 }
 
-// An AxisPair is a set of Min/Max values which could possible be used by an Axis.
-type AxisPair interface {
-	Value() float32
-}
-
-// An AxisKeyPair is a set of Min/Max values used for detecting whether or not a key has been pressed.
-type AxisKeyPair struct {
-	Min Key
-	Max Key
-}
-
-// Value returns the value of a keypress.
-func (keys AxisKeyPair) Value() float32 {
-	if Input.keys.Get(keys.Max).Down() {
-		return AxisMax
-	} else if Input.keys.Get(keys.Min).Down() {
-		return AxisMin
+func (ref *AxisMgr) Idle(id uintptr) bool {
+	mgr := ref.mgr
+	axi := ref.infoMap[id].ref
+	for _, act := range axi.pairs {
+		if !mgr.Idle(act.Min) {
+			return false
+		}
+		if !mgr.Idle(act.Max) {
+			return false
+		}
 	}
-
-	return AxisNeutral
+	return true
 }
 
-// AxisMouseDirection is the direction (X or Y) which the mouse is being tracked for.
-type AxisMouseDirection uint
-
-const (
-	// AxisMouseVert is vertical mouse axis
-	AxisMouseVert AxisMouseDirection = 0
-	// AxisMouseHori is vertical mouse axis
-	AxisMouseHori AxisMouseDirection = 1
-)
-
-// AxisMouse is an axis for a single x or y component of the Mouse. The value returned from it is
-// the delta movement, since the previous call and it is not constrained by the AxisMin and AxisMax values.
-type AxisMouse struct {
-	// direction is the value storing either AxisMouseVert and AxisMouseHori. It determines which directional
-	// component to operate on.
-	direction AxisMouseDirection
-	// old is the delta from the previous calling of Value.
-	old float32
+func (ref *AxisMgr) Active(id uintptr) bool {
+	mgr := ref.mgr
+	axi := ref.infoMap[id].ref
+	for _, act := range axi.pairs {
+		if mgr.Active(act.Min) {
+			return true
+		}
+		if mgr.Active(act.Max) {
+			return true
+		}
+	}
+	return false
 }
 
-// NewAxisMouse creates a new Mouse Axis in either direction AxisMouseVert or AxisMouseHori.
-func NewAxisMouse(d AxisMouseDirection) *AxisMouse {
-	old := Input.Mouse.Y
-	if d == AxisMouseHori {
-		old = Input.Mouse.X
+func (ref *AxisMgr) JustIdle(id uintptr) bool {
+	res := false
+	mgr := ref.mgr
+	axi := ref.infoMap[id].ref
+	for _, act := range axi.pairs {
+		min := mgr.State(act.Min)
+		if StateJustIdle == min {
+			res = true
+		} else if StateIdle != min {
+			return false
+		}
+		max := mgr.State(act.Max)
+		if StateJustIdle == max {
+			res = true
+		} else if StateIdle != max {
+			return false
+		}
 	}
-
-	return &AxisMouse{
-		direction: d,
-		old:       old,
-	}
+	return res
 }
 
-// Value returns the delta of a mouse movement.
-func (am *AxisMouse) Value() float32 {
-	var diff float32
-
-	if am.direction == AxisMouseHori {
-		diff = Input.Mouse.X - am.old
-		am.old = Input.Mouse.X
-	} else {
-		diff = Input.Mouse.Y - am.old
-		am.old = Input.Mouse.Y
+func (ref *AxisMgr) JustActive(id uintptr) bool {
+	res := false
+	mgr := ref.mgr
+	axi := ref.infoMap[id].ref
+	for _, act := range axi.pairs {
+		min := mgr.State(act.Min)
+		if StateJustActive == min {
+			res = true
+		} else if StateIdle != min {
+			return false
+		}
+		max := mgr.State(act.Max)
+		if StateJustActive == max {
+			res = true
+		} else if StateIdle != max {
+			return false
+		}
 	}
+	return res
+}
 
-	return diff
+////////////////
+
+func (ref *AxisMgr) MinIdle(id uintptr) bool {
+	mgr := ref.mgr
+	axi := ref.infoMap[id].ref
+	for _, act := range axi.pairs {
+		if !mgr.Idle(act.Min) {
+			return false
+		}
+	}
+	return true
+}
+
+func (ref *AxisMgr) MinActive(id uintptr) bool {
+	mgr := ref.mgr
+	axi := ref.infoMap[id].ref
+	for _, act := range axi.pairs {
+		if mgr.Active(act.Min) {
+			return true
+		}
+	}
+	return false
+}
+
+func (ref *AxisMgr) MinJustIdle(id uintptr) bool {
+	res := false
+	mgr := ref.mgr
+	axi := ref.infoMap[id].ref
+	for _, act := range axi.pairs {
+		min := mgr.State(act.Min)
+		if StateJustIdle == min {
+			res = true
+		} else if StateIdle != min {
+			return false
+		}
+	}
+	return res
+}
+
+func (ref *AxisMgr) MinJustActive(id uintptr) bool {
+	res := false
+	mgr := ref.mgr
+	axi := ref.infoMap[id].ref
+	for _, act := range axi.pairs {
+		min := mgr.State(act.Min)
+		if StateJustActive == min {
+			res = true
+		} else if StateIdle != min {
+			return false
+		}
+	}
+	return res
+}
+
+////////////////
+
+func (ref *AxisMgr) MaxIdle(id uintptr) bool {
+	mgr := ref.mgr
+	axi := ref.infoMap[id].ref
+	for _, act := range axi.pairs {
+		if !mgr.Idle(act.Max) {
+			return false
+		}
+	}
+	return true
+}
+
+func (ref *AxisMgr) MaxActive(id uintptr) bool {
+	mgr := ref.mgr
+	axi := ref.infoMap[id].ref
+	for _, act := range axi.pairs {
+		if mgr.Active(act.Max) {
+			return true
+		}
+	}
+	return false
+}
+
+func (ref *AxisMgr) MaxJustIdle(id uintptr) bool {
+	res := false
+	mgr := ref.mgr
+	axi := ref.infoMap[id].ref
+	for _, act := range axi.pairs {
+		max := mgr.State(act.Max)
+		if StateJustIdle == max {
+			res = true
+		} else if StateIdle != max {
+			return false
+		}
+	}
+	return res
+}
+
+func (ref *AxisMgr) MaxJustActive(id uintptr) bool {
+	res := false
+	mgr := ref.mgr
+	axi := ref.infoMap[id].ref
+	for _, act := range axi.pairs {
+		max := mgr.State(act.Max)
+		if StateJustActive == max {
+			res = true
+		} else if StateIdle != max {
+			return false
+		}
+	}
+	return res
 }

@@ -1,115 +1,111 @@
-package engo
+package act
 
-import (
-	"sync"
-)
+type Code int32
+type State uint8
 
-const (
-	// KeyStateUp is a state for when the key is not currently being pressed
-	KeyStateUp = iota
-	// KeyStateDown is a state for when the key is currently being pressed
-	KeyStateDown
-	// KeyStateJustDown is a state for when a key was just pressed
-	KeyStateJustDown
-	// KeyStateJustUp is a state for when a key was just released
-	KeyStateJustUp
-)
+const cfgCodeMapSize = 16
 
-// NewKeyManager creates a new KeyManager.
-func NewKeyManager() *KeyManager {
-	return &KeyManager{
-		dirtmap: make(map[Key]Key),
-		mapper:  make(map[Key]KeyState),
+const KeyCode = Code(1 << 16)
+const MouseCode = Code(2 << 16)
+
+const StateIdle = State(0)
+const StateActive = State(1)
+const StateJustIdle = State(2)
+const StateJustActive = State(3)
+
+////////////////
+
+type ActMgr struct {
+	codeLst []codeState
+	dirtMap map[Code]Code
+	codeMap map[Code]actState
+}
+
+type actState struct {
+	lastState bool
+	currState bool
+}
+
+type codeState struct {
+	act   Code
+	state bool
+}
+
+////////////////
+
+func NewActMgr() *ActMgr {
+	obj := new(ActMgr)
+
+	obj.dirtMap = make(map[Code]Code, cfgCodeMapSize)
+	obj.codeMap = make(map[Code]actState, cfgCodeMapSize)
+
+	return obj
+}
+
+////////////////
+
+func (ref *ActMgr) Clear() {
+	for _, act := range ref.dirtMap {
+		delete(ref.dirtMap, act)
+		st := ref.codeMap[act]
+
+		st.lastState = st.currState
+		st.currState = st.currState
+
+		ref.codeMap[act] = st
 	}
 }
 
-// KeyManager tracks which keys are pressed and released at the current point of time.
-type KeyManager struct {
-	dirtmap map[Key]Key
-	mapper  map[Key]KeyState
-	mutex   sync.RWMutex
-}
+func (ref *ActMgr) Update() {
+	for _, cs := range ref.codeLst {
+		st := ref.codeMap[cs.act]
 
-// Set is used for updating whether or not a key is held down, or not held down.
-func (km *KeyManager) Set(k Key, state bool) {
-	km.mutex.Lock()
+		st.lastState = st.currState
+		st.currState = cs.state
 
-	ks := km.mapper[k]
-	ks.set(state)
-	km.mapper[k] = ks
-	km.dirtmap[k] = k
-
-	km.mutex.Unlock()
-}
-
-// Get retrieves a keys state.
-func (km *KeyManager) Get(k Key) KeyState {
-	km.mutex.RLock()
-	ks := km.mapper[k]
-	km.mutex.RUnlock()
-
-	return ks
-}
-
-func (km *KeyManager) update() {
-	km.mutex.Lock()
-
-	// Update the state on all the dirty keys
-	for _, key := range km.dirtmap {
-		delete(km.dirtmap, key)
-
-		state := km.mapper[key]
-		state.set(state.currentState)
-		km.mapper[key] = state
+		ref.dirtMap[cs.act] = cs.act
+		ref.codeMap[cs.act] = st
 	}
-
-	km.mutex.Unlock()
+	ref.codeLst = ref.codeLst[:0]
 }
 
-// KeyState is used for detecting the state of a key press.
-type KeyState struct {
-	lastState    bool
-	currentState bool
+func (ref *ActMgr) Idle(act Code) bool {
+	st := ref.codeMap[act]
+	return (!st.lastState && !st.currState)
 }
 
-func (key *KeyState) set(state bool) {
-	key.lastState = key.currentState
-	key.currentState = state
+func (ref *ActMgr) Active(act Code) bool {
+	st := ref.codeMap[act]
+	return (st.lastState && st.currState)
 }
 
-// State returns the raw state of a key.
-func (key *KeyState) State() int {
-	if key.lastState {
-		if key.currentState {
-			return KeyStateDown
+func (ref *ActMgr) JustIdle(act Code) bool {
+	st := ref.codeMap[act]
+	return (st.lastState && !st.currState)
+}
+
+func (ref *ActMgr) JustActive(act Code) bool {
+	st := ref.codeMap[act]
+	return (!st.lastState && st.currState)
+}
+
+func (ref *ActMgr) State(act Code) State {
+	st := ref.codeMap[act]
+	if st.lastState {
+		if st.currState {
+			return StateActive
 		} else {
-			return KeyStateJustUp
+			return StateJustIdle
 		}
 	} else {
-		if key.currentState {
-			return KeyStateJustDown
+		if st.currState {
+			return StateJustActive
 		} else {
-			return KeyStateUp
+			return StateIdle
 		}
 	}
 }
 
-// JustPressed returns whether a key was just pressed
-func (key KeyState) JustPressed() bool {
-	return (!key.lastState && key.currentState)
-}
-
-// JustReleased returns whether a key was just released
-func (key KeyState) JustReleased() bool {
-	return (key.lastState && !key.currentState)
-}
-
-// Up returns wheter a key is not being pressed
-func (key KeyState) Up() bool {
-	return (!key.lastState && !key.currentState)
-}
-
-// Down returns wether a key is being pressed
-func (key KeyState) Down() bool {
-	return (key.lastState && key.currentState)
+func (ref *ActMgr) SetState(act Code, state bool) {
+	ref.codeLst = append(ref.codeLst, codeState{act: act, state: state})
 }

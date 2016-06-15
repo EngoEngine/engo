@@ -1,300 +1,231 @@
-package engo
+package act
 
 import "testing"
 
-type btnState struct {
-	down     bool
-	justUp   bool
-	justDown bool
+func TestButtonMgr(t *testing.T) {
+	amgr := NewActMgr()
+	bmgr := NewButtonMgr(amgr)
+
+	abtn := bmgr.SetButton("Button A", KeyA, KeyB)
+	bbtn := bmgr.SetButton("Button B", KeyF3, KeyF4)
+	cbtn := bmgr.SetButton("Button C", MouseLeft, MouseRight)
+
+	if abtn != bmgr.GetId("Button A") {
+		t.Error("Failed to verify id")
+	}
+
+	if bmgr.SetCodes(99, KeyC, KeyD) {
+		t.Error("Set codes on to an invalid id ?")
+	}
+
+	if !bmgr.SetCodes(bbtn, KeyF1, KeyF2) {
+		t.Error("Failed to set codes on a valid id")
+	}
+
+	amgr.Clear()
+	amgr.Update()
+
+	runButtonCheck("Init (0.A)", t, bmgr, abtn, StateIdle)
+	runButtonCheck("Init (0.B)", t, bmgr, bbtn, StateIdle)
+	runButtonCheck("Init (0.C)", t, bmgr, cbtn, StateIdle)
+
+	amgr.Clear()
+	amgr.SetState(KeyA, true)
+	amgr.SetState(KeyF1, false)
+	amgr.Update()
+	amgr.SetState(MouseLeft, true)
+
+	runButtonCheck("Pass (1.A)", t, bmgr, abtn, StateJustActive)
+	runButtonCheck("Pass (1.B)", t, bmgr, bbtn, StateIdle)
+	runButtonCheck("Pass (1.C)", t, bmgr, cbtn, StateIdle)
+
+	amgr.Clear()
+	amgr.Update()
+
+	runButtonCheck("Pass (2.A)", t, bmgr, abtn, StateActive)
+	runButtonCheck("Pass (2.B)", t, bmgr, bbtn, StateIdle)
+	runButtonCheck("Pass (2.C)", t, bmgr, cbtn, StateJustActive)
+
+	amgr.Clear()
+	amgr.SetState(KeyA, false)
+	amgr.SetState(KeyF1, true)
+	amgr.Update()
+	amgr.SetState(MouseLeft, false)
+
+	runButtonCheck("Pass (3.A)", t, bmgr, abtn, StateJustIdle)
+	runButtonCheck("Pass (3.B)", t, bmgr, bbtn, StateJustActive)
+	runButtonCheck("Pass (3.C)", t, bmgr, cbtn, StateActive)
+
+	amgr.Clear()
+	amgr.Update()
+
+	runButtonCheck("Pass (4.A)", t, bmgr, abtn, StateIdle)
+	runButtonCheck("Pass (4.B)", t, bmgr, bbtn, StateActive)
+	runButtonCheck("Pass (4.C)", t, bmgr, cbtn, StateJustIdle)
+
+	amgr.Clear()
+	amgr.Update()
+
+	runButtonCheck("Pass (5.A)", t, bmgr, abtn, StateIdle)
+	runButtonCheck("Pass (5.B)", t, bmgr, bbtn, StateActive)
+	runButtonCheck("Pass (5.C)", t, bmgr, cbtn, StateIdle)
+
+	amgr.Clear()
+	amgr.SetState(KeyF1, false)
+	amgr.Update()
+
+	runButtonCheck("Pass (6.A)", t, bmgr, abtn, StateIdle)
+	runButtonCheck("Pass (6.B)", t, bmgr, bbtn, StateJustIdle)
+	runButtonCheck("Pass (6.C)", t, bmgr, cbtn, StateIdle)
+
+	amgr.Clear()
+	amgr.Update()
+
+	runButtonCheck("Pass (7.A)", t, bmgr, abtn, StateIdle)
+	runButtonCheck("Pass (7.B)", t, bmgr, bbtn, StateIdle)
+	runButtonCheck("Pass (7.C)", t, bmgr, cbtn, StateIdle)
+
+	amgr.Clear()
+	amgr.SetState(KeyB, true)
+	amgr.SetState(KeyF2, true)
+	amgr.SetState(MouseRight, true)
+	amgr.Update()
+
+	runButtonCheck("Pass (8.A)", t, bmgr, abtn, StateJustActive)
+	runButtonCheck("Pass (8.B)", t, bmgr, bbtn, StateJustActive)
+	runButtonCheck("Pass (8.C)", t, bmgr, cbtn, StateJustActive)
+
+	amgr.Clear()
+	amgr.SetState(KeyB, false)
+	amgr.SetState(KeyF1, true)
+	amgr.SetState(MouseLeft, true)
+	amgr.Update()
+
+	runButtonCheck("Pass (9.A)", t, bmgr, abtn, StateJustIdle)
+	runButtonCheck("Pass (9.B)", t, bmgr, bbtn, StateActive)
+	runButtonCheck("Pass (9.C)", t, bmgr, cbtn, StateActive)
+
+	amgr.Clear()
+	amgr.SetState(KeyA, true)
+	amgr.SetState(KeyB, true)
+	amgr.SetState(KeyF2, false)
+	amgr.SetState(MouseLeft, false)
+	amgr.Update()
+
+	runButtonCheck("Pass (10.A)", t, bmgr, abtn, StateJustActive)
+	runButtonCheck("Pass (10.B)", t, bmgr, bbtn, StateActive)
+	runButtonCheck("Pass (10.C)", t, bmgr, cbtn, StateActive)
+
+	amgr.Clear()
+	amgr.SetState(KeyA, false)
+	amgr.SetState(MouseRight, false)
+	amgr.Update()
+
+	runButtonCheck("Pass (11.A)", t, bmgr, abtn, StateActive)
+	runButtonCheck("Pass (11.B)", t, bmgr, bbtn, StateActive)
+	runButtonCheck("Pass (11.C)", t, bmgr, cbtn, StateJustIdle)
+
+	amgr.Clear()
+	amgr.SetState(KeyB, false)
+	amgr.SetState(KeyF1, false)
+	amgr.Update()
+
+	runButtonCheck("Pass (12.A)", t, bmgr, abtn, StateJustIdle)
+	runButtonCheck("Pass (12.B)", t, bmgr, bbtn, StateJustIdle)
+	runButtonCheck("Pass (12.C)", t, bmgr, cbtn, StateIdle)
+
+	amgr.Clear()
+	amgr.Update()
+
+	runButtonCheck("Pass (13.A)", t, bmgr, abtn, StateIdle)
+	runButtonCheck("Pass (13.B)", t, bmgr, bbtn, StateIdle)
+	runButtonCheck("Pass (13.C)", t, bmgr, cbtn, StateIdle)
 }
 
-// Button configuretion used when testing.
-var btnSimpleCfg = [6]Button{
-	Button{Triggers: []Key{A, C}, Name: "Button 1"},
-	Button{Triggers: []Key{B, D}, Name: "Button 2"},
-	Button{Triggers: []Key{F2, F5}, Name: "Button 3"},
-	Button{Triggers: []Key{F4, F6}, Name: "Button 4"},
-	Button{Triggers: []Key{One, Four}, Name: "Button 5"},
-	Button{Triggers: []Key{Two, Five}, Name: "Button 6"},
-}
-
-// Expected button state @ pass 0
-var btnPass0 = [6]btnState{
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-}
-
-// Expected button state @ pass 1
-var btnPass1 = [6]btnState{
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: true},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: true},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: true},
-}
-
-// Expected button state @ pass 2
-var btnPass2 = [6]btnState{
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: true, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: true, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: true, justUp: false, justDown: false},
-}
-
-// Expected button state @ pass 3
-var btnPass3 = [6]btnState{
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: true, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: true, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: true, justDown: false},
-}
-
-// Expected button state @ pass 4
-var btnPass4 = [6]btnState{
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-}
-
-// Checks the state of all configured buttons against the expected state.
-func runBtnChecks(msg string, t *testing.T, expect [6]btnState) {
-	for i, cfg := range btnSimpleCfg {
-		exp := expect[i]
-		btn := Input.Button(cfg.Name)
-		if exp.down != btn.Down() {
-			t.Error(msg, " Invalid on: ", cfg.Name, " - Down")
-		}
-		if exp.justUp != btn.JustReleased() {
-			t.Error(msg, " Invalid on: ", cfg.Name, " - Just Up")
-		}
-		if exp.justDown != btn.JustPressed() {
-			t.Error(msg, " Invalid on: ", cfg.Name, " - Just Down")
-		}
+func runButtonCheck(msg string, t *testing.T, mgr *ButtonMgr, id uintptr, exp State) {
+	if (StateIdle == exp) != mgr.Idle(id) {
+		t.Error(msg, " - Invalid on: Idle")
+	}
+	if (StateActive == exp) != mgr.Active(id) {
+		t.Error(msg, " - Invalid on: Active")
+	}
+	if (StateJustIdle == exp) != mgr.JustIdle(id) {
+		t.Error(msg, " - Invalid on: Just Idle")
+	}
+	if (StateJustActive == exp) != mgr.JustActive(id) {
+		t.Error(msg, " - Invalid on: Just Active")
 	}
 }
 
-// Test configured axes using a single key on one button.
-func TestButtonSimple(t *testing.T) {
-	Input = NewInputManager()
+////////////////
 
-	for _, cfg := range btnSimpleCfg {
-		Input.RegisterButton(cfg.Name, cfg.Triggers[0])
-	}
+func BenchmarkButtonMgr_CleanSimulate(b *testing.B) {
+	amgr := NewActMgr()
+	bmgr := NewButtonMgr(amgr)
 
-	runBtnChecks("Init (0.0)", t, btnPass0)
+	btn := bmgr.SetButton("Button A", KeyA, KeyB)
 
-	// Empty update pass0
-	Input.update()
-	runBtnChecks("Pass (0.1)", t, btnPass0)
-	Input.update()
-	runBtnChecks("Pass (0.2)", t, btnPass0)
-	Input.update()
-	runBtnChecks("Pass (0.3)", t, btnPass0)
-
-	// Set even true pass1
-	Input.update()
-	Input.keys.Set(btnSimpleCfg[1].Triggers[0], true)
-	Input.keys.Set(btnSimpleCfg[3].Triggers[0], true)
-	Input.keys.Set(btnSimpleCfg[5].Triggers[0], true)
-
-	// FixMe: this causes an error ? Because the the static
-	// arrays get filled with values before engo rewrites them!
-	//Input.keys.Set(F10, true)
-
-	runBtnChecks("Pass (1.0)", t, btnPass1)
-
-	// Keeps state on pass2
-	Input.update()
-	runBtnChecks("Pass (2.0)", t, btnPass2)
-	Input.update()
-	runBtnChecks("Pass (2.1)", t, btnPass2)
-	Input.update()
-	runBtnChecks("Pass (2.2)", t, btnPass2)
-	Input.update()
-	runBtnChecks("Pass (2.3)", t, btnPass2)
-
-	// Set even true pass3
-	Input.update()
-	Input.keys.Set(btnSimpleCfg[1].Triggers[0], false)
-	Input.keys.Set(btnSimpleCfg[3].Triggers[0], false)
-	Input.keys.Set(btnSimpleCfg[5].Triggers[0], false)
-
-	runBtnChecks("Pass (3.0)", t, btnPass3)
-
-	// Keeps state on pass4
-	Input.update()
-	runBtnChecks("Pass (4.0)", t, btnPass4)
-	Input.update()
-	runBtnChecks("Pass (4.1)", t, btnPass4)
-	Input.update()
-	runBtnChecks("Pass (4.2)", t, btnPass4)
-	Input.update()
-	runBtnChecks("Pass (4.3)", t, btnPass4)
-}
-
-// Test configured axes using a multiple keys on one button.
-func TestButtonComplex(t *testing.T) {
-	Input = NewInputManager()
-
-	for _, cfg := range btnSimpleCfg {
-		Input.RegisterButton(cfg.Name, cfg.Triggers[0], cfg.Triggers[1])
-	}
-
-	runBtnChecks("Init (0.0)", t, btnPass0)
-
-	// Empty update pass0
-	Input.update()
-	runBtnChecks("Pass (0.1)", t, btnPass0)
-	Input.update()
-	runBtnChecks("Pass (0.2)", t, btnPass0)
-	Input.update()
-	runBtnChecks("Pass (0.3)", t, btnPass0)
-
-	// Set even true pass1
-	Input.update()
-	Input.keys.Set(btnSimpleCfg[1].Triggers[0], true)
-	Input.keys.Set(btnSimpleCfg[3].Triggers[0], true)
-	Input.keys.Set(btnSimpleCfg[5].Triggers[0], true)
-
-	runBtnChecks("Pass (1.0)", t, btnPass1)
-
-	// Keeps state on pass2
-	Input.update()
-	runBtnChecks("Pass (2.0)", t, btnPass2)
-	Input.update()
-	runBtnChecks("Pass (2.1)", t, btnPass2)
-	Input.update()
-	runBtnChecks("Pass (2.2)", t, btnPass2)
-	Input.update()
-	runBtnChecks("Pass (2.3)", t, btnPass2)
-
-	// Set even true pass3
-	Input.update()
-	Input.keys.Set(btnSimpleCfg[1].Triggers[0], false)
-	Input.keys.Set(btnSimpleCfg[3].Triggers[0], false)
-	Input.keys.Set(btnSimpleCfg[5].Triggers[0], false)
-
-	runBtnChecks("Pass (3.0)", t, btnPass3)
-
-	// Keeps state on pass4
-	Input.update()
-	runBtnChecks("Pass (4.0)", t, btnPass4)
-	Input.update()
-	runBtnChecks("Pass (4.1)", t, btnPass4)
-	Input.update()
-	runBtnChecks("Pass (4.2)", t, btnPass4)
-	Input.update()
-	runBtnChecks("Pass (4.3)", t, btnPass4)
-
-	// Set even true pass1 alt
-	Input.update()
-	Input.keys.Set(btnSimpleCfg[1].Triggers[1], true)
-	Input.keys.Set(btnSimpleCfg[3].Triggers[1], true)
-	Input.keys.Set(btnSimpleCfg[5].Triggers[1], true)
-
-	runBtnChecks("Pass alt (1.0)", t, btnPass1)
-
-	// Keeps state on pass2 alt
-	Input.update()
-	runBtnChecks("Pass alt (2.0)", t, btnPass2)
-	Input.update()
-	runBtnChecks("Pass alt (2.1)", t, btnPass2)
-	Input.update()
-	runBtnChecks("Pass alt (2.2)", t, btnPass2)
-	Input.update()
-	runBtnChecks("Pass alt (2.3)", t, btnPass2)
-
-	// Set even true pass3 alt
-	Input.update()
-	Input.keys.Set(btnSimpleCfg[1].Triggers[1], false)
-	Input.keys.Set(btnSimpleCfg[3].Triggers[1], false)
-	Input.keys.Set(btnSimpleCfg[5].Triggers[1], false)
-
-	runBtnChecks("Pass alt (3.0)", t, btnPass3)
-
-	// Keeps state on pass4 alt
-	Input.update()
-	runBtnChecks("Pass alt (4.0)", t, btnPass4)
-	Input.update()
-	runBtnChecks("Pass alt (4.1)", t, btnPass4)
-	Input.update()
-	runBtnChecks("Pass alt (4.2)", t, btnPass4)
-	Input.update()
-	runBtnChecks("Pass alt (4.3)", t, btnPass4)
-}
-
-// Used to store results when benchmarking.
-var btnResult [6]btnState
-
-func checkBtnConfigOptimal(b *testing.B) {
-	for i, cfg := range btnSimpleCfg {
-		btn := Input.Button(cfg.Name)
-		btnResult[i].down = btn.Down()
-		btnResult[i].justUp = btn.JustReleased()
-		btnResult[i].justDown = btn.JustPressed()
-	}
-}
-
-// Benchmark sub-optimal state checks
-func BenchmarkInputMgr_ButtonCleanState(b *testing.B) {
-	Input = NewInputManager()
-
-	for _, cfg := range btnSimpleCfg {
-		Input.RegisterButton(cfg.Name, cfg.Triggers[0], cfg.Triggers[1])
-	}
+	amgr.Clear()
+	amgr.Update()
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		checkBtnConfigOptimal(b)
+		amgr.Clear()
+		amgr.Update()
+
+		bResult[0] = bmgr.Idle(btn)
+
+		amgr.Clear()
+		amgr.SetState(KeyA, true)
+		amgr.Update()
+
+		bResult[1] = bmgr.Active(btn)
+
+		amgr.Clear()
+		amgr.Update()
+
+		bResult[2] = bmgr.JustIdle(btn)
+
+		amgr.Clear()
+		amgr.SetState(KeyA, false)
+		amgr.Update()
+
+		bResult[3] = bmgr.JustActive(btn)
 	}
 }
 
-// Benchmark sub-optimal state checks
-func BenchmarkInputMgr_ButtonFilledState(b *testing.B) {
-	Input = NewInputManager()
-	keyFillManager(Input.keys)
+func BenchmarkButtonMgr_FilledSimulate(b *testing.B) {
+	amgr := NewActMgr()
+	fillActMgr(amgr)
+	bmgr := NewButtonMgr(amgr)
 
-	for _, cfg := range btnSimpleCfg {
-		Input.RegisterButton(cfg.Name, cfg.Triggers[0], cfg.Triggers[1])
-	}
+	btn := bmgr.SetButton("Button A", KeyA, KeyB)
+
+	amgr.Clear()
+	amgr.Update()
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		checkBtnConfigOptimal(b)
+		amgr.Clear()
+		amgr.Update()
+
+		bResult[0] = bmgr.Idle(btn)
+
+		amgr.Clear()
+		amgr.SetState(KeyA, true)
+		amgr.Update()
+
+		bResult[1] = bmgr.Active(btn)
+
+		amgr.Clear()
+		amgr.Update()
+
+		bResult[2] = bmgr.JustIdle(btn)
+
+		amgr.Clear()
+		amgr.SetState(KeyA, false)
+		amgr.Update()
+
+		bResult[3] = bmgr.JustActive(btn)
 	}
 }
-
-// Disabled but around when needed
-
-//func checkBtnConfigSubOptimal(b *testing.B) {
-//	for i, cfg := range btnSimpleCfg {
-//		btnResult[i].down = Input.Button(cfg.Name).Down()
-//		btnResult[i].justUp = Input.Button(cfg.Name).JustReleased()
-//		btnResult[i].justDown = Input.Button(cfg.Name).JustPressed()
-//	}
-//}
-// Benchmark sub-optimal state checks
-//func BenchmarkInputMgr_ButtonSubOptimal(b *testing.B) {
-//	Input = NewInputManager()
-//
-//	for _, cfg := range btnSimpleCfg {
-//		Input.RegisterButton(cfg.Name, cfg.Triggers[0], cfg.Triggers[1])
-//	}
-//
-//	b.ResetTimer()
-//	for n := 0; n < b.N; n++ {
-//		checkBtnConfigSubOptimal(b)
-//	}
-//}
