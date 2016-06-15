@@ -6,9 +6,9 @@ func TestAxisMgr(t *testing.T) {
 	amgr := NewActMgr()
 	bmgr := NewAxisMgr(amgr)
 
-	aaxi := bmgr.SetButton("Axis A", AxisPair{Min: KeyA, Max: KeyB})
-	baxi := bmgr.SetButton("Axis B", AxisPair{Min: KeyF3, Max: KeyF4})
-	caxi := bmgr.SetButton("Axis C",
+	aaxi := bmgr.SetAxis("Axis A", AxisPair{Min: KeyA, Max: KeyB})
+	baxi := bmgr.SetAxis("Axis B", AxisPair{Min: KeyF3, Max: KeyF4})
+	caxi := bmgr.SetAxis("Axis C",
 		AxisPair{Min: KeyPad0, Max: KeyPad1},
 		AxisPair{Min: MouseLeft, Max: MouseRight},
 	)
@@ -180,7 +180,7 @@ func BenchmarkAxisMgr_CleanSimulate(b *testing.B) {
 	amgr := NewActMgr()
 	bmgr := NewAxisMgr(amgr)
 
-	axi := bmgr.SetButton("Axis A", AxisPair{Min: KeyA, Max: KeyB})
+	axi := bmgr.SetAxis("Axis A", AxisPair{Min: KeyA, Max: KeyB})
 
 	amgr.Clear()
 	amgr.Update()
@@ -216,7 +216,7 @@ func BenchmarkAxisMgr_FilledSimulate(b *testing.B) {
 	fillActMgr(amgr)
 	bmgr := NewAxisMgr(amgr)
 
-	axi := bmgr.SetButton("Axis A", AxisPair{Min: KeyA, Max: KeyB})
+	axi := bmgr.SetAxis("Axis A", AxisPair{Min: KeyA, Max: KeyB})
 
 	amgr.Clear()
 	amgr.Update()

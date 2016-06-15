@@ -45,7 +45,7 @@ func (ref *AxisMgr) SetCodes(id uintptr, act ...AxisPair) bool {
 	return false
 }
 
-func (ref *AxisMgr) SetButton(name string, act ...AxisPair) uintptr {
+func (ref *AxisMgr) SetAxis(name string, act ...AxisPair) uintptr {
 	if id, ok := ref.nameMap[name]; ok {
 		axi := ref.infoMap[id].ref
 		axi.pairs = act
