@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"engo.io/ecs"
+	"engo.io/engo/act"
 )
 
 var (
@@ -119,18 +120,28 @@ func Run(o RunOptions, defaultScene Scene) {
 	opts = o
 
 	// Create input
+	fmt.Println("==> Init input system!")
 	Input = NewInputManager()
 	if opts.StandardInputs {
 		log.Println("Using standard inputs")
 
-		Input.RegisterButton("jump", Space)
-		Input.RegisterButton("action", Enter)
+		Input.AxisMgr.SetAxis(
+			DefaultHorizontalAxis,
+			act.AxisPair{act.KeyA, act.KeyD},
+			act.AxisPair{act.KeyLeft, act.KeyRight},
+		)
+		Input.AxisMgr.SetAxis(
+			DefaultVerticalAxis,
+			act.AxisPair{act.KeyW, act.KeyS},
+			act.AxisPair{act.KeyUp, act.KeyDown},
+		)
 
-		Input.RegisterAxis(DefaultHorizontalAxis, AxisKeyPair{A, D}, AxisKeyPair{ArrowLeft, ArrowRight})
-		Input.RegisterAxis(DefaultVerticalAxis, AxisKeyPair{W, S}, AxisKeyPair{ArrowUp, ArrowDown})
+		Input.ButtonMgr.SetButton("jump", act.KeySpace)
+		Input.ButtonMgr.SetButton("action", act.KeyEnter)
 
-		Input.RegisterAxis(DefaultMouseXAxis, NewAxisMouse(AxisMouseHori))
-		Input.RegisterAxis(DefaultMouseYAxis, NewAxisMouse(AxisMouseVert))
+		// Nitya ToDo: Implement mouse axis again
+		//Input.RegisterAxis(DefaultMouseXAxis, NewAxisMouse(AxisMouseHori))
+		//Input.RegisterAxis(DefaultMouseYAxis, NewAxisMouse(AxisMouseVert))
 	}
 
 	Files.SetRoot(opts.AssetsRoot)
