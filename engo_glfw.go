@@ -18,7 +18,8 @@ import (
 
 var (
 	window *glfw.Window
-	Gl     *gl.Context
+	// Gl is the current OpenGL context
+	Gl *gl.Context
 
 	cursorArrow     *glfw.Cursor
 	cursorIBeam     *glfw.Cursor
@@ -29,8 +30,6 @@ var (
 
 	headlessWidth             = 800
 	headlessHeight            = 800
-	gameWidth, gameHeight     float32
-	windowWidth, windowHeight float32
 	canvasWidth, canvasHeight float32
 	scale                     = float32(1)
 )
@@ -201,7 +200,7 @@ func SetTitle(title string) {
 	}
 }
 
-// RunIteration runs one iteration / frame
+// RunIteration runs one iteration per frame
 func RunIteration() {
 	Time.Tick()
 
@@ -225,8 +224,7 @@ func RunIteration() {
 
 }
 
-// RunPreparation is called only once, and is called automatically when calling Open
-// It is only here for benchmarking in combination with OpenHeadlessNoRun
+// RunPreparation is called automatically when calling Open. It should only be called once.
 func RunPreparation(defaultScene Scene) {
 	Time = NewClock()
 

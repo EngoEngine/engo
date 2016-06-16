@@ -5,23 +5,29 @@ import (
 )
 
 const (
+	// KeyStateUp is a state for when the key is not currently being pressed
 	KeyStateUp = iota
+	// KeyStateDown is a state for when the key is currently being pressed
 	KeyStateDown
+	// KeyStateJustDown is a state for when a key was just pressed
 	KeyStateJustDown
+	// KeyStateJustUp is a state for when a key was just released
 	KeyStateJustUp
 )
 
 // NewKeyManager creates a new KeyManager.
 func NewKeyManager() *KeyManager {
 	return &KeyManager{
-		mapper: make(map[Key]KeyState),
+		dirtmap: make(map[Key]Key),
+		mapper:  make(map[Key]KeyState),
 	}
 }
 
 // KeyManager tracks which keys are pressed and released at the current point of time.
 type KeyManager struct {
-	mapper map[Key]KeyState
-	mutex  sync.RWMutex
+	dirtmap map[Key]Key
+	mapper  map[Key]KeyState
+	mutex   sync.RWMutex
 }
 
 // Set is used for updating whether or not a key is held down, or not held down.
@@ -31,6 +37,7 @@ func (km *KeyManager) Set(k Key, state bool) {
 	ks := km.mapper[k]
 	ks.set(state)
 	km.mapper[k] = ks
+	km.dirtmap[k] = k
 
 	km.mutex.Unlock()
 }
@@ -38,12 +45,8 @@ func (km *KeyManager) Set(k Key, state bool) {
 // Get retrieves a keys state.
 func (km *KeyManager) Get(k Key) KeyState {
 	km.mutex.RLock()
-	defer km.mutex.RUnlock()
-
-	ks, ok := km.mapper[k]
-	if !ok {
-		return KeyState{false, false}
-	}
+	ks := km.mapper[k]
+	km.mutex.RUnlock()
 
 	return ks
 }
@@ -51,8 +54,11 @@ func (km *KeyManager) Get(k Key) KeyState {
 func (km *KeyManager) update() {
 	km.mutex.Lock()
 
-	// Set all keys to their current states
-	for key, state := range km.mapper {
+	// Update the state on all the dirty keys
+	for _, key := range km.dirtmap {
+		delete(km.dirtmap, key)
+
+		state := km.mapper[key]
 		state.set(state.currentState)
 		km.mapper[key] = state
 	}
@@ -73,31 +79,37 @@ func (key *KeyState) set(state bool) {
 
 // State returns the raw state of a key.
 func (key *KeyState) State() int {
-	if !key.lastState && key.currentState {
-		return KeyStateJustDown
-	} else if key.lastState && !key.currentState {
-		return KeyStateJustUp
-	} else if key.lastState && key.currentState {
-		return KeyStateDown
-	} else if !key.lastState && !key.currentState {
-		return KeyStateUp
+	if key.lastState {
+		if key.currentState {
+			return KeyStateDown
+		} else {
+			return KeyStateJustUp
+		}
+	} else {
+		if key.currentState {
+			return KeyStateJustDown
+		} else {
+			return KeyStateUp
+		}
 	}
-
-	return KeyStateUp
 }
 
+// JustPressed returns whether a key was just pressed
 func (key KeyState) JustPressed() bool {
-	return key.State() == KeyStateJustDown
+	return (!key.lastState && key.currentState)
 }
 
+// JustReleased returns whether a key was just released
 func (key KeyState) JustReleased() bool {
-	return key.State() == KeyStateJustUp
+	return (key.lastState && !key.currentState)
 }
 
+// Up returns wheter a key is not being pressed
 func (key KeyState) Up() bool {
-	return key.State() == KeyStateUp
+	return (!key.lastState && !key.currentState)
 }
 
+// Down returns wether a key is being pressed
 func (key KeyState) Down() bool {
-	return key.State() == KeyStateDown
+	return (key.lastState && key.currentState)
 }
