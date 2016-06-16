@@ -6,7 +6,6 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/engo/act"
-	"engo.io/engo/common"
 )
 
 type DefaultScene struct{}
@@ -16,13 +15,11 @@ func (*DefaultScene) Preload() {}
 func (*DefaultScene) Setup(w *ecs.World) {
 	// Register a button that is triggered when
 	// the state of 'Space' or 'Enter' is changed.
-	engo.Input.ButtonMgr.SetButton("action", act.KeySpace, act.KeyEnter)
+	engo.Buttons.SetNamed("action", act.KeySpace, act.KeyEnter)
 
 	// Register an axis where 'A' will return a
 	// negative value and 'D' returns a positive value.
-	engo.Input.AxisMgr.SetAxis("sideways", act.AxisPair{act.KeyA, act.KeyD})
-
-	w.AddSystem(&common.RenderSystem{})
+	engo.Axes.SetNamed("sideways", act.AxisPair{act.KeyA, act.KeyD})
 
 	// Register the input system responding
 	// to the input actions registered above.
@@ -42,16 +39,16 @@ type InputSystem struct {
 }
 
 func (c *InputSystem) New(w *ecs.World) {
-	c.action = engo.Input.ButtonMgr.GetId("action")
-	c.sideways = engo.Input.AxisMgr.GetId("sideways")
+	c.action = engo.Buttons.Id("action")
+	c.sideways = engo.Axes.Id("sideways")
 
 	if 0 == c.action {
 		fmt.Println("Action button not found, using default fallback!")
-		c.action = engo.Input.ButtonMgr.SetButton("action", act.KeySpace, act.KeyEnter)
+		c.action = engo.Buttons.SetNamed("action", act.KeySpace, act.KeyEnter)
 	}
 	if 0 == c.sideways {
 		fmt.Println("Sideway axis not found, using default fallback!")
-		c.sideways = engo.Input.AxisMgr.SetAxis("sideways", act.AxisPair{act.KeyA, act.KeyD})
+		c.sideways = engo.Axes.SetNamed("sideways", act.AxisPair{act.KeyA, act.KeyD})
 	}
 }
 
@@ -75,37 +72,74 @@ func (c *InputSystem) Remove(basic ecs.BasicEntity) {
 
 func (c *InputSystem) Update(dt float32) {
 
-	// Nitya Note: Make sure to try to press both
-	// keys and just idle/active behave as expected ?
+	// Note: Most of these states are mutualy exlusive, in
+	// production code "else if" would be prefered! To demo
+	// difrent behaviors the if statements are seperated here.
+
+	// Checking specific input codes
+	if engo.Input.JustIdle(act.KeyA) {
+		fmt.Println("Key code A was just released!")
+	} // else
+	if engo.Input.JustActive(act.KeyA) {
+		fmt.Println("Key code A was just pressed!")
+	}
+
+	// Note: Make sure to try to press both keys
+	// and just idle/active behave as expected ?
 
 	// Look up the button state and act on it
-	if engo.Input.ButtonMgr.Active(c.action) {
+	if engo.Buttons.Active(c.action) {
 		fmt.Println("The action key is still down.")
-	}
-	if engo.Input.ButtonMgr.JustIdle(c.action) {
+	} // else
+	if engo.Buttons.JustIdle(c.action) {
 		fmt.Println("An action key was just released!")
-	}
-	if engo.Input.ButtonMgr.JustActive(c.action) {
+	} // else
+	if engo.Buttons.JustActive(c.action) {
 		fmt.Println("An action key was just pressed!")
 	}
 
-	// Nitya Note: Make sure to try to press both up and
-	// down at the same time, result is zero as expected ?
+	// Note: Make sure to try to press both up and down
+	// at the same time, the axis is zero as expected ?
 
 	// Check some states on the axis
-	if engo.Input.AxisMgr.JustActive(c.sideways) {
+	if engo.Axes.JustIdle(c.sideways) {
+		fmt.Println("The axis fell a sleep.")
+	} // else
+	if engo.Axes.JustActive(c.sideways) {
 		fmt.Println("The axis just woke up.")
 	}
-	if engo.Input.AxisMgr.MinJustActive(c.sideways) {
-		fmt.Println(" - The axis is going down.")
-	}
-	if engo.Input.AxisMgr.MaxJustActive(c.sideways) {
-		fmt.Println(" - The axis is going up.")
+
+	// Check the state on the min side
+	if engo.Axes.MinJustIdle(c.sideways) {
+		if engo.Axes.MaxActive(c.sideways) {
+			fmt.Println(" - The axis is going up.")
+		}
+	} // else
+	if engo.Axes.MinJustActive(c.sideways) {
+		if !engo.Axes.MaxActive(c.sideways) {
+			fmt.Println(" - The axis is going down.")
+		} else {
+			fmt.Println(" - The axis is neutralized.")
+		}
 	}
 
-	// Only log the axis value when active
-	if engo.Input.AxisMgr.Active(c.sideways) {
-		fmt.Printf(" --> Axis value: %.2f \n", engo.Input.AxisMgr.Value(c.sideways))
+	// Lets do the same for the max side
+	if engo.Axes.MaxJustIdle(c.sideways) {
+		if engo.Axes.MinActive(c.sideways) {
+			fmt.Println(" - The axis is going down.")
+		}
+	} // else
+	if engo.Axes.MaxJustActive(c.sideways) {
+		if !engo.Axes.MinActive(c.sideways) {
+			fmt.Println(" - The axis is going up.")
+		} else {
+			fmt.Println(" - The axis is neutralized.")
+		}
+	}
+
+	// Log when the axis is active
+	if engo.Axes.Active(c.sideways) {
+		fmt.Printf(" --> Axis value: %.2f \n", engo.Axes.Value(c.sideways))
 	}
 }
 
