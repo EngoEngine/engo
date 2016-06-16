@@ -6,19 +6,19 @@ func TestButtonMgr(t *testing.T) {
 	amgr := NewActMgr()
 	bmgr := NewButtonMgr(amgr)
 
-	abtn := bmgr.SetButton("Button A", KeyA, KeyB)
-	bbtn := bmgr.SetButton("Button B", KeyF3, KeyF4)
-	cbtn := bmgr.SetButton("Button C", MouseLeft, MouseRight)
+	abtn := bmgr.SetNamed("Button A", KeyA, KeyB)
+	bbtn := bmgr.SetNamed("Button B", KeyF3, KeyF4)
+	cbtn := bmgr.SetNamed("Button C", MouseLeft, MouseRight)
 
-	if abtn != bmgr.GetId("Button A") {
+	if abtn != bmgr.Id("Button A") {
 		t.Error("Failed to verify id")
 	}
 
-	if bmgr.SetCodes(99, KeyC, KeyD) {
+	if bmgr.SetId(99, KeyC, KeyD) {
 		t.Error("Set codes on to an invalid id ?")
 	}
 
-	if !bmgr.SetCodes(bbtn, KeyF1, KeyF2) {
+	if !bmgr.SetId(bbtn, KeyF1, KeyF2) {
 		t.Error("Failed to set codes on a valid id")
 	}
 
@@ -163,7 +163,7 @@ func BenchmarkButtonMgr_CleanSimulate(b *testing.B) {
 	amgr := NewActMgr()
 	bmgr := NewButtonMgr(amgr)
 
-	btn := bmgr.SetButton("Button A", KeyA, KeyB)
+	btn := bmgr.SetNamed("Button A", KeyA, KeyB)
 
 	amgr.Clear()
 	amgr.Update()
@@ -199,7 +199,7 @@ func BenchmarkButtonMgr_FilledSimulate(b *testing.B) {
 	fillActMgr(amgr)
 	bmgr := NewButtonMgr(amgr)
 
-	btn := bmgr.SetButton("Button A", KeyA, KeyB)
+	btn := bmgr.SetNamed("Button A", KeyA, KeyB)
 
 	amgr.Clear()
 	amgr.Update()

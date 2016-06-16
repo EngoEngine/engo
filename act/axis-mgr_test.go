@@ -6,22 +6,22 @@ func TestAxisMgr(t *testing.T) {
 	amgr := NewActMgr()
 	bmgr := NewAxisMgr(amgr)
 
-	aaxi := bmgr.SetAxis("Axis A", AxisPair{Min: KeyA, Max: KeyB})
-	baxi := bmgr.SetAxis("Axis B", AxisPair{Min: KeyF3, Max: KeyF4})
-	caxi := bmgr.SetAxis("Axis C",
+	aaxi := bmgr.SetNamed("Axis A", AxisPair{Min: KeyA, Max: KeyB})
+	baxi := bmgr.SetNamed("Axis B", AxisPair{Min: KeyF3, Max: KeyF4})
+	caxi := bmgr.SetNamed("Axis C",
 		AxisPair{Min: KeyPad0, Max: KeyPad1},
 		AxisPair{Min: MouseLeft, Max: MouseRight},
 	)
 
-	if aaxi != bmgr.GetId("Axis A") {
+	if aaxi != bmgr.Id("Axis A") {
 		t.Error("Failed to verify id")
 	}
 
-	if bmgr.SetCodes(99, AxisPair{Min: KeyC, Max: KeyD}) {
+	if bmgr.SetId(99, AxisPair{Min: KeyC, Max: KeyD}) {
 		t.Error("Set codes on to an invalid id ?")
 	}
 
-	if !bmgr.SetCodes(baxi, AxisPair{Min: KeyF1, Max: KeyF2}) {
+	if !bmgr.SetId(baxi, AxisPair{Min: KeyF1, Max: KeyF2}) {
 		t.Error("Failed to set codes on a valid id")
 	}
 
@@ -180,7 +180,7 @@ func BenchmarkAxisMgr_CleanSimulate(b *testing.B) {
 	amgr := NewActMgr()
 	bmgr := NewAxisMgr(amgr)
 
-	axi := bmgr.SetAxis("Axis A", AxisPair{Min: KeyA, Max: KeyB})
+	axi := bmgr.SetNamed("Axis A", AxisPair{Min: KeyA, Max: KeyB})
 
 	amgr.Clear()
 	amgr.Update()
@@ -216,7 +216,7 @@ func BenchmarkAxisMgr_FilledSimulate(b *testing.B) {
 	fillActMgr(amgr)
 	bmgr := NewAxisMgr(amgr)
 
-	axi := bmgr.SetAxis("Axis A", AxisPair{Min: KeyA, Max: KeyB})
+	axi := bmgr.SetNamed("Axis A", AxisPair{Min: KeyA, Max: KeyB})
 
 	amgr.Clear()
 	amgr.Update()
