@@ -5,6 +5,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/act"
 	"engo.io/engo/common"
 )
 
@@ -24,6 +25,11 @@ type Tile struct {
 
 type ControlSystem struct {
 	entity *Character
+
+	moveup    uintptr
+	movedown  uintptr
+	moveleft  uintptr
+	moveright uintptr
 }
 
 func (c *ControlSystem) Add(char *Character) {
@@ -37,16 +43,19 @@ func (c *ControlSystem) Remove(basic ecs.BasicEntity) {
 }
 
 func (c *ControlSystem) Update(dt float32) {
-	if engo.Input.Button("moveup").Down() {
+	//if engo.Input.Button("moveup").Down() {
+	if engo.Buttons.Active(c.moveup) {
 		c.entity.SpaceComponent.Position.Y -= 5
 	}
-	if engo.Input.Button("movedown").Down() {
+	//if engo.Input.Button("movedown").Down() {
+	if engo.Buttons.Active(c.movedown) {
 		c.entity.SpaceComponent.Position.Y += 5
 	}
-	if engo.Input.Button("moveleft").Down() {
+	//if engo.Input.Button("moveleft").Down() {
+	if engo.Buttons.Active(c.moveleft) {
 		c.entity.SpaceComponent.Position.X -= 5
 	}
-	if engo.Input.Button("moveright").Down() {
+	if engo.Buttons.Active(c.moveright) {
 		c.entity.SpaceComponent.Position.X += 5
 	}
 }
@@ -135,14 +144,16 @@ func (game *GameWorld) Setup(w *ecs.World) {
 		}
 	}
 
-	w.AddSystem(&ControlSystem{&character})
+	w.AddSystem(&ControlSystem{
+		entity:    &character,
+		moveup:    engo.Buttons.SetNamed("moveup", act.KeyUp),
+		movedown:  engo.Buttons.SetNamed("movedown", act.KeyDown),
+		moveleft:  engo.Buttons.SetNamed("moveleft", act.KeyLeft),
+		moveright: engo.Buttons.SetNamed("moveright", act.KeyRight),
+	})
 
 	// Add the EntityScroller system which contains the space component of the character and is bounded to the tmx level dimensions
 	w.AddSystem(&common.EntityScroller{SpaceComponent: &character.SpaceComponent, TrackingBounds: levelData.Bounds()})
-	engo.Input.RegisterButton("moveup", engo.ArrowUp)
-	engo.Input.RegisterButton("moveleft", engo.ArrowLeft)
-	engo.Input.RegisterButton("moveright", engo.ArrowRight)
-	engo.Input.RegisterButton("movedown", engo.ArrowDown)
 }
 
 func (game *GameWorld) Type() string { return "GameWorld" }

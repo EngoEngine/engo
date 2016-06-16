@@ -5,6 +5,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/act"
 	"engo.io/engo/common"
 )
 
@@ -14,8 +15,8 @@ var (
 	SkillAction *common.Animation
 	actions     []*common.Animation
 
-	jumpButton   = "jump"
-	actionButton = "action"
+	jumpButton   uintptr
+	actionButton uintptr
 )
 
 type DefaultScene struct{}
@@ -35,8 +36,8 @@ func (*DefaultScene) Preload() {
 	SkillAction = &common.Animation{Name: "skill", Frames: []int{44, 45, 46, 47, 48, 49, 50, 51, 52, 53}}
 	actions = []*common.Animation{StopAction, WalkAction, SkillAction}
 
-	engo.Input.RegisterButton(jumpButton, engo.Space, engo.X)
-	engo.Input.RegisterButton(actionButton, engo.D, engo.ArrowRight)
+	jumpButton = engo.Buttons.SetNamed("jump", act.KeyX, act.KeySpace)
+	actionButton = engo.Buttons.SetNamed("action", act.KeyD, act.KeyRight)
 }
 
 func (scene *DefaultScene) Setup(w *ecs.World) {
@@ -113,9 +114,9 @@ func (c *ControlSystem) Remove(basic ecs.BasicEntity) {
 
 func (c *ControlSystem) Update(dt float32) {
 	for _, e := range c.entities {
-		if engo.Input.Button(actionButton).JustPressed() {
+		if engo.Buttons.JustActive(actionButton) {
 			e.AnimationComponent.SelectAnimationByAction(WalkAction)
-		} else if engo.Input.Button(jumpButton).JustPressed() {
+		} else if engo.Buttons.JustActive(jumpButton) {
 			e.AnimationComponent.SelectAnimationByAction(SkillAction)
 		}
 	}

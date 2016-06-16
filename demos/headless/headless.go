@@ -9,6 +9,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/act"
 	"engo.io/engo/common"
 )
 
@@ -284,6 +285,21 @@ type controlEntity struct {
 
 type ControlSystem struct {
 	entities []controlEntity
+
+	vertAxis uintptr
+}
+
+func (c *ControlSystem) New(w *ecs.World) {
+	c.vertAxis = engo.Axes.Id(engo.DefaultVerticalAxis)
+
+	if 0 == c.vertAxis {
+		log.Println("Default vertical axis not found, setting up fall back!")
+		c.vertAxis = engo.Axes.SetNamed(
+			engo.DefaultVerticalAxis,
+			act.AxisPair{act.KeyW, act.KeyS},
+			act.AxisPair{act.KeyUp, act.KeyDown},
+		)
+	}
 }
 
 func (c *ControlSystem) Add(basic *ecs.BasicEntity, control *ControlComponent, space *common.SpaceComponent) {
@@ -307,8 +323,8 @@ func (c *ControlSystem) Update(dt float32) {
 	for _, e := range c.entities {
 		speed := 800 * dt
 
-		vert := engo.Input.Axis(engo.DefaultVerticalAxis)
-		e.SpaceComponent.Position.Y += speed * vert.Value()
+		vert := engo.Axes.Value(c.vertAxis)
+		e.SpaceComponent.Position.Y += speed * vert
 
 		if (e.SpaceComponent.Height + e.SpaceComponent.Position.Y) > 800 {
 			e.SpaceComponent.Position.Y = 800
