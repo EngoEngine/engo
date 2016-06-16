@@ -134,10 +134,10 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 		if a == glfw.Press {
 			Input.Mouse.Action = Press
-			Input.ActMgr.SetState((act.MouseCode | act.Code(b)), true)
+			Input.SetState((act.MouseCode | act.Code(b)), true)
 		} else {
 			Input.Mouse.Action = Release
-			Input.ActMgr.SetState((act.MouseCode | act.Code(b)), true)
+			Input.SetState((act.MouseCode | act.Code(b)), false)
 		}
 	})
 
@@ -148,9 +148,9 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 	window.SetKeyCallback(func(window *glfw.Window, k glfw.Key, s int, a glfw.Action, m glfw.ModifierKey) {
 		if a == glfw.Press {
-			Input.ActMgr.SetState((act.KeyCode | act.Code(k)), true)
+			Input.SetState((act.KeyCode | act.Code(k)), true)
 		} else if a == glfw.Release {
-			Input.ActMgr.SetState((act.KeyCode | act.Code(k)), false)
+			Input.SetState((act.KeyCode | act.Code(k)), false)
 		}
 	})
 

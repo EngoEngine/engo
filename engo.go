@@ -13,7 +13,12 @@ var (
 	Time *Clock
 
 	// Input handles all input: mouse, keyboard and touch
-	Input *InputManager
+	Input *InputMgr
+
+	// Nitya ToDo: Godoc
+
+	Axes    *act.AxisMgr
+	Buttons *act.ButtonMgr
 
 	// Mailbox is used by all Systems to communicate
 	Mailbox *MessageManager
@@ -119,31 +124,35 @@ func Run(o RunOptions, defaultScene Scene) {
 
 	opts = o
 
-	// Create input
-	fmt.Println("==> Init input system!")
-	Input = NewInputManager()
+	// Setup the input
+	Input = NewInputMgr()
+
+	Axes = Input.Axes()
+	Buttons = Input.Buttons()
+
 	if opts.StandardInputs {
 		log.Println("Using standard inputs")
 
-		Input.AxisMgr.SetAxis(
+		Axes.SetNamed(
 			DefaultHorizontalAxis,
 			act.AxisPair{act.KeyA, act.KeyD},
 			act.AxisPair{act.KeyLeft, act.KeyRight},
 		)
-		Input.AxisMgr.SetAxis(
+		Axes.SetNamed(
 			DefaultVerticalAxis,
 			act.AxisPair{act.KeyW, act.KeyS},
 			act.AxisPair{act.KeyUp, act.KeyDown},
 		)
 
-		Input.ButtonMgr.SetButton("jump", act.KeySpace)
-		Input.ButtonMgr.SetButton("action", act.KeyEnter)
+		Buttons.SetNamed("jump", act.KeySpace)
+		Buttons.SetNamed("action", act.KeyEnter)
 
 		// Nitya ToDo: Implement mouse axis again
 		//Input.RegisterAxis(DefaultMouseXAxis, NewAxisMouse(AxisMouseHori))
 		//Input.RegisterAxis(DefaultMouseYAxis, NewAxisMouse(AxisMouseVert))
 	}
 
+	// Setup the path for asset loading
 	Files.SetRoot(opts.AssetsRoot)
 
 	// And run the game

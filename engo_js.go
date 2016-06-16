@@ -85,12 +85,12 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	})
 	w.AddEventListener("keydown", false, func(ev dom.Event) {
 		ke := ev.(*dom.KeyboardEvent)
-		Input.ActMgr.SetState((act.KeyCode | act.Code(ke.KeyCode)), true)
+		Input.SetState((act.KeyCode | act.Code(ke.KeyCode)), true)
 	})
 
 	w.AddEventListener("keyup", false, func(ev dom.Event) {
 		ke := ev.(*dom.KeyboardEvent)
-		Input.ActMgr.SetState((act.KeyCode | act.Code(ke.KeyCode)), false)
+		Input.SetState((act.KeyCode | act.Code(ke.KeyCode)), false)
 	})
 
 	w.AddEventListener("mousemove", false, func(ev dom.Event) {
@@ -107,7 +107,7 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		Input.Mouse.Action = Press
 
 		// Nitya Note: The old code did not set a button value
-		Input.ActMgr.SetState((act.MouseCode | act.Code(mm.Button)), true)
+		Input.SetState((act.MouseCode | act.Code(mm.Button)), true)
 	})
 
 	w.AddEventListener("mouseup", false, func(ev dom.Event) {
@@ -117,7 +117,7 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		Input.Mouse.Action = Release
 
 		// Nitya Note: The old code did not set a button value
-		Input.ActMgr.SetState((act.MouseCode | act.Code(mm.Button)), false)
+		Input.SetState((act.MouseCode | act.Code(mm.Button)), false)
 	})
 }
 

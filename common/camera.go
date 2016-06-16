@@ -252,10 +252,10 @@ func (c *KeyboardScroller) Update(dt float32) {
 	c.keysMu.RLock()
 	defer c.keysMu.RUnlock()
 
-	vert := engo.Input.AxisMgr.Value(c.verticalAxis)
+	vert := engo.Axes.Value(c.verticalAxis)
 	engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: vert * c.ScrollSpeed * dt, Incremental: true})
 
-	hori := engo.Input.AxisMgr.Value(c.horizontalAxis)
+	hori := engo.Axes.Value(c.horizontalAxis)
 	engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: hori * c.ScrollSpeed * dt, Incremental: true})
 }
 

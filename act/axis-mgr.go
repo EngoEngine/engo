@@ -33,11 +33,11 @@ func NewAxisMgr(mgr *ActMgr) *AxisMgr {
 
 ////////////////
 
-func (ref *AxisMgr) GetId(name string) uintptr {
+func (ref *AxisMgr) Id(name string) uintptr {
 	return ref.nameMap[name]
 }
 
-func (ref *AxisMgr) SetCodes(id uintptr, act ...AxisPair) bool {
+func (ref *AxisMgr) SetId(id uintptr, act ...AxisPair) bool {
 	if axi, ok := ref.infoMap[id]; ok {
 		axi.ref.pairs = act
 		return true
@@ -45,7 +45,7 @@ func (ref *AxisMgr) SetCodes(id uintptr, act ...AxisPair) bool {
 	return false
 }
 
-func (ref *AxisMgr) SetAxis(name string, act ...AxisPair) uintptr {
+func (ref *AxisMgr) SetNamed(name string, act ...AxisPair) uintptr {
 	if id, ok := ref.nameMap[name]; ok {
 		axi := ref.infoMap[id].ref
 		axi.pairs = act

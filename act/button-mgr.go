@@ -28,11 +28,11 @@ func NewButtonMgr(mgr *ActMgr) *ButtonMgr {
 
 ////////////////
 
-func (ref *ButtonMgr) GetId(name string) uintptr {
+func (ref *ButtonMgr) Id(name string) uintptr {
 	return ref.nameMap[name]
 }
 
-func (ref *ButtonMgr) SetCodes(id uintptr, act ...Code) bool {
+func (ref *ButtonMgr) SetId(id uintptr, act ...Code) bool {
 	if btn, ok := ref.infoMap[id]; ok {
 		btn.ref.codes = act
 		return true
@@ -40,7 +40,7 @@ func (ref *ButtonMgr) SetCodes(id uintptr, act ...Code) bool {
 	return false
 }
 
-func (ref *ButtonMgr) SetButton(name string, act ...Code) uintptr {
+func (ref *ButtonMgr) SetNamed(name string, act ...Code) uintptr {
 	if id, ok := ref.nameMap[name]; ok {
 		btn := ref.infoMap[id].ref
 		btn.codes = act

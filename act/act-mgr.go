@@ -89,6 +89,8 @@ func (ref *ActMgr) JustActive(act Code) bool {
 	return (!st.lastState && st.currState)
 }
 
+////////////////
+
 func (ref *ActMgr) State(act Code) State {
 	st := ref.codeMap[act]
 	if st.lastState {
