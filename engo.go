@@ -134,22 +134,18 @@ func Run(o RunOptions, defaultScene Scene) {
 		log.Println("Using standard inputs")
 
 		Axes.SetNamed(
-			DefaultHorizontalAxis,
-			act.AxisPair{act.KeyA, act.KeyD},
-			act.AxisPair{act.KeyLeft, act.KeyRight},
-		)
-		Axes.SetNamed(
 			DefaultVerticalAxis,
 			act.AxisPair{act.KeyW, act.KeyS},
 			act.AxisPair{act.KeyUp, act.KeyDown},
 		)
+		Axes.SetNamed(
+			DefaultHorizontalAxis,
+			act.AxisPair{act.KeyA, act.KeyD},
+			act.AxisPair{act.KeyLeft, act.KeyRight},
+		)
 
 		Buttons.SetNamed("jump", act.KeySpace)
 		Buttons.SetNamed("action", act.KeyEnter)
-
-		// Nitya ToDo: Implement mouse axis again
-		//Input.RegisterAxis(DefaultMouseXAxis, NewAxisMouse(AxisMouseHori))
-		//Input.RegisterAxis(DefaultMouseYAxis, NewAxisMouse(AxisMouseVert))
 	}
 
 	// Setup the path for asset loading
