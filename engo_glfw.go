@@ -33,35 +33,6 @@ var (
 	canvasWidth, canvasHeight float32
 )
 
-// WindowResizeMessage is a message that's being dispatched whenever the game window is being resized by the gamer
-type WindowResizeMessage struct {
-	OldWidth, OldHeight int
-	NewWidth, NewHeight int
-}
-
-// IterationUpdateMessage will be used with mailbox
-type IterationUpdateMessage struct {
-	Delta float32
-}
-
-// PreparationMessage will be used with mailbox
-type PreparationMessage struct{}
-
-// Type of message that will be sent
-func (WindowResizeMessage) Type() string {
-	return "engo.WindowResizeMessage"
-}
-
-// Type of message that will be sent
-func (IterationUpdateMessage) Type() string {
-	return "engo.IterationUpdateMessage"
-}
-
-// Type of message that will be sent
-func (PreparationMessage) Type() string {
-	return "engo.PreparationMessage"
-}
-
 // fatalErr calls log.Fatal with the given error if it is non-nil.
 func fatalErr(err error) {
 	if err != nil {

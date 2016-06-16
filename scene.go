@@ -15,6 +15,7 @@ type Scene interface {
 	Setup(*ecs.World)
 }
 
+// SceneSettings is the set of settings used by the scene
 type SceneSettings struct {
 	Type       string
 	Assets     []string
@@ -46,6 +47,7 @@ type Exiter interface {
 	Exit()
 }
 
+// sceneWrapper wraps the scene with other used data
 type sceneWrapper struct {
 	scene    Scene
 	settings SceneSettings
