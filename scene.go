@@ -59,7 +59,7 @@ func CurrentScene() Scene {
 
 // SetScene sets the currentScene to the given Scene, and
 // optionally forcing to create a new ecs.World that goes with it.
-func SetScene(scene Scene, settings SceneSettings, forceNewWorld bool) {
+func SetScene(scene Scene, settings SceneSettings, forceNewWorld bool) Scene {
 	// Break down currentScene
 	if currentScene != nil {
 		if hider, ok := currentScene.(Hider); ok {
@@ -98,6 +98,8 @@ func SetScene(scene Scene, settings SceneSettings, forceNewWorld bool) {
 			shower.Show()
 		}
 	}
+
+	return scene
 }
 
 // RegisterScene registers the `Scene`, so it can later be used by `SetSceneByName`
