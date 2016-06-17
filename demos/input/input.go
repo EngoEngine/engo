@@ -15,11 +15,11 @@ func (*DefaultScene) Preload() {}
 func (*DefaultScene) Setup(w *ecs.World) {
 	// Register a button that is triggered when
 	// the state of 'Space' or 'Enter' is changed.
-	engo.Buttons.SetNamed("action", act.KeySpace, act.KeyEnter)
+	engo.Buttons.SetByName("action", act.KeySpace, act.KeyEnter)
 
 	// Register an axis where 'A' will return a
 	// negative value and 'D' returns a positive value.
-	engo.Axes.SetNamed("sideways", act.AxisPair{act.KeyA, act.KeyD})
+	engo.Axes.SetByName("sideways", act.AxisPair{act.KeyA, act.KeyD})
 
 	// Register the input system responding
 	// to the input actions registered above.
@@ -44,11 +44,11 @@ func (c *InputSystem) New(w *ecs.World) {
 
 	if 0 == c.action {
 		fmt.Println("Action button not found, using default fallback!")
-		c.action = engo.Buttons.SetNamed("action", act.KeySpace, act.KeyEnter)
+		c.action = engo.Buttons.SetByName("action", act.KeySpace, act.KeyEnter)
 	}
 	if 0 == c.sideways {
 		fmt.Println("Sideway axis not found, using default fallback!")
-		c.sideways = engo.Axes.SetNamed("sideways", act.AxisPair{act.KeyA, act.KeyD})
+		c.sideways = engo.Axes.SetByName("sideways", act.AxisPair{act.KeyA, act.KeyD})
 	}
 }
 

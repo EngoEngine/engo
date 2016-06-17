@@ -12,29 +12,24 @@ type Mouse struct {
 	Horizontal       AxisMouse
 }
 
-// Nitya Note: The mouse doc below seems off, in the old system
-// there was no way to detect mouse clicks with axis or buttons ?
-
 // InputMgr contains information about all forms of input.
 type InputMgr struct {
 	// Mouse is InputMgr's reference to the mouse. It is recommended to use the
 	// Axis and Button system if at all possible.
 	Mouse Mouse
 
-	actMgr    *act.ActMgr
-	axisMgr   *act.AxisMgr
-	buttonMgr *act.ButtonMgr
+	acts    *act.ActManager
+	axes    *act.AxisManager
+	buttons *act.ButtonManager
 }
-
-// Nitya Note: Doc NewInputMgr does not 'hold onto', it creates ?
 
 // NewInputMgr holds onto anything input related for engo
 func NewInputMgr() *InputMgr {
-	mgr := act.NewActMgr()
+	mgr := act.NewActManager()
 	obj := &InputMgr{
-		actMgr:    mgr,
-		axisMgr:   act.NewAxisMgr(mgr),
-		buttonMgr: act.NewButtonMgr(mgr),
+		acts:    mgr,
+		axes:    act.NewAxisManager(mgr),
+		buttons: act.NewButtonManager(mgr),
 	}
 
 	obj.Mouse.Vertical.direction = AxisMouseVert
@@ -43,47 +38,45 @@ func NewInputMgr() *InputMgr {
 	return obj
 }
 
-func (ref *InputMgr) Axes() *act.AxisMgr {
-	return ref.axisMgr
+func (ref *InputMgr) Axes() *act.AxisManager {
+	return ref.axes
 }
 
-func (ref *InputMgr) Buttons() *act.ButtonMgr {
-	return ref.buttonMgr
+func (ref *InputMgr) Buttons() *act.ButtonManager {
+	return ref.buttons
 }
 
 func (ref *InputMgr) clear() {
-	ref.actMgr.Clear()
+	ref.acts.Clear()
 }
 
 func (ref *InputMgr) update() {
-	ref.actMgr.Update()
+	ref.acts.Update()
 }
 
 func (ref *InputMgr) Idle(act act.Code) bool {
-	return ref.actMgr.Idle(act)
+	return ref.acts.Idle(act)
 }
 
 func (ref *InputMgr) Active(act act.Code) bool {
-	return ref.actMgr.Active(act)
+	return ref.acts.Active(act)
 }
 
 func (ref *InputMgr) JustIdle(act act.Code) bool {
-	return ref.actMgr.JustIdle(act)
+	return ref.acts.JustIdle(act)
 }
 
 func (ref *InputMgr) JustActive(act act.Code) bool {
-	return ref.actMgr.JustActive(act)
+	return ref.acts.JustActive(act)
 }
 
 func (ref *InputMgr) State(act act.Code) act.State {
-	return ref.actMgr.State(act)
+	return ref.acts.State(act)
 }
 
 func (ref *InputMgr) SetState(act act.Code, state bool) {
-	ref.actMgr.SetState(act, state)
+	ref.acts.SetState(act, state)
 }
-
-////////////////
 
 const (
 	// AxisMouseVert is vertical mouse axis

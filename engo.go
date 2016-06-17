@@ -15,10 +15,8 @@ var (
 	// Input handles all input: mouse, keyboard and touch
 	Input *InputMgr
 
-	// Nitya ToDo: Godoc
-
-	Axes    *act.AxisMgr
-	Buttons *act.ButtonMgr
+	Axes    *act.AxisManager
+	Buttons *act.ButtonManager
 
 	// Mailbox is used by all Systems to communicate
 	Mailbox *MessageManager
@@ -133,19 +131,19 @@ func Run(o RunOptions, defaultScene Scene) {
 	if opts.StandardInputs {
 		log.Println("Using standard inputs")
 
-		Axes.SetNamed(
+		Axes.SetByName(
 			DefaultVerticalAxis,
 			act.AxisPair{act.KeyW, act.KeyS},
 			act.AxisPair{act.KeyUp, act.KeyDown},
 		)
-		Axes.SetNamed(
+		Axes.SetByName(
 			DefaultHorizontalAxis,
 			act.AxisPair{act.KeyA, act.KeyD},
 			act.AxisPair{act.KeyLeft, act.KeyRight},
 		)
 
-		Buttons.SetNamed("jump", act.KeySpace)
-		Buttons.SetNamed("action", act.KeyEnter)
+		Buttons.SetByName("jump", act.KeySpace)
+		Buttons.SetByName("action", act.KeyEnter)
 	}
 
 	// Setup the path for asset loading

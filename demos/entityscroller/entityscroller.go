@@ -146,10 +146,10 @@ func (game *GameWorld) Setup(w *ecs.World) {
 
 	w.AddSystem(&ControlSystem{
 		entity:    &character,
-		moveup:    engo.Buttons.SetNamed("moveup", act.KeyUp),
-		movedown:  engo.Buttons.SetNamed("movedown", act.KeyDown),
-		moveleft:  engo.Buttons.SetNamed("moveleft", act.KeyLeft),
-		moveright: engo.Buttons.SetNamed("moveright", act.KeyRight),
+		moveup:    engo.Buttons.SetByName("moveup", act.KeyUp),
+		movedown:  engo.Buttons.SetByName("movedown", act.KeyDown),
+		moveleft:  engo.Buttons.SetByName("moveleft", act.KeyLeft),
+		moveright: engo.Buttons.SetByName("moveright", act.KeyRight),
 	})
 
 	// Add the EntityScroller system which contains the space component of the character and is bounded to the tmx level dimensions

@@ -90,7 +90,6 @@ func (s *FollowSystem) Remove(basic ecs.BasicEntity) {
 
 func (s *FollowSystem) Update(dt float32) {
 	for _, e := range s.entities {
-		// Nitya ToDo: Implement mouse axis again!
 		e.SpaceComponent.Position.X += engo.Input.Mouse.Horizontal.Value()
 		e.SpaceComponent.Position.Y += engo.Input.Mouse.Vertical.Value()
 	}

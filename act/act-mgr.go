@@ -13,9 +13,7 @@ const StateActive = State(1)
 const StateJustIdle = State(2)
 const StateJustActive = State(3)
 
-////////////////
-
-type ActMgr struct {
+type ActManager struct {
 	codeLst []codeState
 	dirtMap map[Code]Code
 	codeMap map[Code]actState
@@ -31,10 +29,8 @@ type codeState struct {
 	state bool
 }
 
-////////////////
-
-func NewActMgr() *ActMgr {
-	obj := new(ActMgr)
+func NewActManager() *ActManager {
+	obj := new(ActManager)
 
 	obj.dirtMap = make(map[Code]Code, cfgCodeMapSize)
 	obj.codeMap = make(map[Code]actState, cfgCodeMapSize)
@@ -42,9 +38,7 @@ func NewActMgr() *ActMgr {
 	return obj
 }
 
-////////////////
-
-func (ref *ActMgr) Clear() {
+func (ref *ActManager) Clear() {
 	for _, act := range ref.dirtMap {
 		delete(ref.dirtMap, act)
 		st := ref.codeMap[act]
@@ -56,7 +50,7 @@ func (ref *ActMgr) Clear() {
 	}
 }
 
-func (ref *ActMgr) Update() {
+func (ref *ActManager) Update() {
 	for _, cs := range ref.codeLst {
 		st := ref.codeMap[cs.act]
 
@@ -69,29 +63,27 @@ func (ref *ActMgr) Update() {
 	ref.codeLst = ref.codeLst[:0]
 }
 
-func (ref *ActMgr) Idle(act Code) bool {
+func (ref *ActManager) Idle(act Code) bool {
 	st := ref.codeMap[act]
 	return (!st.lastState && !st.currState)
 }
 
-func (ref *ActMgr) Active(act Code) bool {
+func (ref *ActManager) Active(act Code) bool {
 	st := ref.codeMap[act]
 	return (st.lastState && st.currState)
 }
 
-func (ref *ActMgr) JustIdle(act Code) bool {
+func (ref *ActManager) JustIdle(act Code) bool {
 	st := ref.codeMap[act]
 	return (st.lastState && !st.currState)
 }
 
-func (ref *ActMgr) JustActive(act Code) bool {
+func (ref *ActManager) JustActive(act Code) bool {
 	st := ref.codeMap[act]
 	return (!st.lastState && st.currState)
 }
 
-////////////////
-
-func (ref *ActMgr) State(act Code) State {
+func (ref *ActManager) State(act Code) State {
 	st := ref.codeMap[act]
 	if st.lastState {
 		if st.currState {
@@ -108,6 +100,6 @@ func (ref *ActMgr) State(act Code) State {
 	}
 }
 
-func (ref *ActMgr) SetState(act Code, state bool) {
+func (ref *ActManager) SetState(act Code, state bool) {
 	ref.codeLst = append(ref.codeLst, codeState{act: act, state: state})
 }

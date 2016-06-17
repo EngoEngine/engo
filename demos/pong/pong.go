@@ -122,8 +122,8 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		}
 	}
 
-	wasdId := engo.Axes.SetNamed("wasd", act.AxisPair{act.KeyW, act.KeyS})
-	arrowId := engo.Axes.SetNamed("arrow", act.AxisPair{act.KeyUp, act.KeyDown})
+	wasdId := engo.Axes.SetByName("wasd", act.AxisPair{act.KeyW, act.KeyS})
+	arrowId := engo.Axes.SetByName("arrow", act.AxisPair{act.KeyUp, act.KeyDown})
 
 	schemes := []Scheme{
 		Scheme{name: "wasd", axisid: wasdId},
@@ -368,9 +368,6 @@ func (c *ControlSystem) Remove(basic ecs.BasicEntity) {
 func (c *ControlSystem) Update(dt float32) {
 	for _, e := range c.entities {
 		speed := engo.GameWidth() * dt
-
-		// Nitya ToDo: Try to improve the behavior, for some unkown
-		// reason the new input makes this less playable then before.
 
 		vert := engo.Axes.Value(e.ControlComponent.Scheme.axisid)
 		e.SpaceComponent.Position.Y += speed * vert

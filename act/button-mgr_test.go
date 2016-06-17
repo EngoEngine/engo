@@ -3,22 +3,22 @@ package act
 import "testing"
 
 func TestButtonMgr(t *testing.T) {
-	amgr := NewActMgr()
-	bmgr := NewButtonMgr(amgr)
+	amgr := NewActManager()
+	bmgr := NewButtonManager(amgr)
 
-	abtn := bmgr.SetNamed("Button A", KeyA, KeyB)
-	bbtn := bmgr.SetNamed("Button B", KeyF3, KeyF4)
-	cbtn := bmgr.SetNamed("Button C", MouseLeft, MouseRight)
+	abtn := bmgr.SetByName("Button A", KeyA, KeyB)
+	bbtn := bmgr.SetByName("Button B", KeyF3, KeyF4)
+	cbtn := bmgr.SetByName("Button C", MouseLeft, MouseRight)
 
 	if abtn != bmgr.Id("Button A") {
 		t.Error("Failed to verify id")
 	}
 
-	if bmgr.SetId(99, KeyC, KeyD) {
+	if bmgr.SetById(99, KeyC, KeyD) {
 		t.Error("Set codes on to an invalid id ?")
 	}
 
-	if !bmgr.SetId(bbtn, KeyF1, KeyF2) {
+	if !bmgr.SetById(bbtn, KeyF1, KeyF2) {
 		t.Error("Failed to set codes on a valid id")
 	}
 
@@ -142,7 +142,7 @@ func TestButtonMgr(t *testing.T) {
 	runButtonCheck("Pass (13.C)", t, bmgr, cbtn, StateIdle)
 }
 
-func runButtonCheck(msg string, t *testing.T, mgr *ButtonMgr, id uintptr, exp State) {
+func runButtonCheck(msg string, t *testing.T, mgr *ButtonManager, id uintptr, exp State) {
 	if (StateIdle == exp) != mgr.Idle(id) {
 		t.Error(msg, " - Invalid on: Idle")
 	}
@@ -157,13 +157,11 @@ func runButtonCheck(msg string, t *testing.T, mgr *ButtonMgr, id uintptr, exp St
 	}
 }
 
-////////////////
-
 func BenchmarkButtonMgr_CleanSimulate(b *testing.B) {
-	amgr := NewActMgr()
-	bmgr := NewButtonMgr(amgr)
+	amgr := NewActManager()
+	bmgr := NewButtonManager(amgr)
 
-	btn := bmgr.SetNamed("Button A", KeyA, KeyB)
+	btn := bmgr.SetByName("Button A", KeyA, KeyB)
 
 	amgr.Clear()
 	amgr.Update()
@@ -195,11 +193,11 @@ func BenchmarkButtonMgr_CleanSimulate(b *testing.B) {
 }
 
 func BenchmarkButtonMgr_FilledSimulate(b *testing.B) {
-	amgr := NewActMgr()
+	amgr := NewActManager()
 	fillActMgr(amgr)
-	bmgr := NewButtonMgr(amgr)
+	bmgr := NewButtonManager(amgr)
 
-	btn := bmgr.SetNamed("Button A", KeyA, KeyB)
+	btn := bmgr.SetByName("Button A", KeyA, KeyB)
 
 	amgr.Clear()
 	amgr.Update()

@@ -101,7 +101,7 @@ func (c *ControlSystem) New(w *ecs.World) {
 
 	if 0 == c.vertAxis {
 		log.Println("Default vertical axis not found, setting up fall back!")
-		c.vertAxis = engo.Axes.SetNamed(
+		c.vertAxis = engo.Axes.SetByName(
 			engo.DefaultVerticalAxis,
 			act.AxisPair{act.KeyW, act.KeyS},
 			act.AxisPair{act.KeyUp, act.KeyDown},
@@ -109,7 +109,7 @@ func (c *ControlSystem) New(w *ecs.World) {
 	}
 	if 0 == c.horiAxis {
 		log.Println("Default horizontal axis not found, setting up fall back!")
-		c.horiAxis = engo.Axes.SetNamed(
+		c.horiAxis = engo.Axes.SetByName(
 			engo.DefaultHorizontalAxis,
 			act.AxisPair{act.KeyA, act.KeyD},
 			act.AxisPair{act.KeyLeft, act.KeyRight},

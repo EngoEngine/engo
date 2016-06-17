@@ -3,7 +3,7 @@ package act
 import "testing"
 
 func TestActMgr(t *testing.T) {
-	mgr := NewActMgr()
+	mgr := NewActManager()
 
 	mgr.Clear()
 	mgr.Update()
@@ -69,7 +69,7 @@ func TestActMgr(t *testing.T) {
 	runActCheck("Pass (7.Left)", t, mgr, MouseLeft, StateIdle)
 }
 
-func runActCheck(msg string, t *testing.T, mgr *ActMgr, act Code, exp State) {
+func runActCheck(msg string, t *testing.T, mgr *ActManager, act Code, exp State) {
 	if exp != mgr.State(act) {
 		t.Error(msg, " Invalid on: State")
 	}
@@ -87,13 +87,11 @@ func runActCheck(msg string, t *testing.T, mgr *ActMgr, act Code, exp State) {
 	}
 }
 
-////////////////
-
 var bState [4]State
 var bResult [4]bool
 
 func BenchmarkActMgr_CleanSimulate(b *testing.B) {
-	mgr := NewActMgr()
+	mgr := NewActManager()
 
 	mgr.Clear()
 	mgr.Update()
@@ -125,7 +123,7 @@ func BenchmarkActMgr_CleanSimulate(b *testing.B) {
 }
 
 func BenchmarkActMgr_FilledSimulate(b *testing.B) {
-	mgr := NewActMgr()
+	mgr := NewActManager()
 	fillActMgr(mgr)
 
 	mgr.Clear()
@@ -256,10 +254,8 @@ func BenchmarkActMgr_FilledSimulate(b *testing.B) {
 //	}
 //}
 
-////////////////
-
 // Utility function that fills the ActMgr with code states.
-func fillActMgr(mgr *ActMgr) {
+func fillActMgr(mgr *ActManager) {
 	mgr.SetState(KeyD, false)
 	mgr.SetState(KeyE, false)
 	mgr.SetState(KeyF, false)

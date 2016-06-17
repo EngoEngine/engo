@@ -294,7 +294,7 @@ func (c *ControlSystem) New(w *ecs.World) {
 
 	if 0 == c.vertAxis {
 		log.Println("Default vertical axis not found, setting up fall back!")
-		c.vertAxis = engo.Axes.SetNamed(
+		c.vertAxis = engo.Axes.SetByName(
 			engo.DefaultVerticalAxis,
 			act.AxisPair{act.KeyW, act.KeyS},
 			act.AxisPair{act.KeyUp, act.KeyDown},

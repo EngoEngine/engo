@@ -2,8 +2,8 @@ package act
 
 const cfgAxisMapSize = 16
 
-type AxisMgr struct {
-	mgr *ActMgr
+type AxisManager struct {
+	mgr *ActManager
 
 	nameMap map[string]uintptr
 	infoMap map[uintptr]Axis
@@ -18,10 +18,8 @@ type AxisPair struct {
 	Max Code
 }
 
-////////////////
-
-func NewAxisMgr(mgr *ActMgr) *AxisMgr {
-	obj := new(AxisMgr)
+func NewAxisManager(mgr *ActManager) *AxisManager {
+	obj := new(AxisManager)
 
 	obj.mgr = mgr
 
@@ -31,13 +29,11 @@ func NewAxisMgr(mgr *ActMgr) *AxisMgr {
 	return obj
 }
 
-////////////////
-
-func (ref *AxisMgr) Id(name string) uintptr {
+func (ref *AxisManager) Id(name string) uintptr {
 	return ref.nameMap[name]
 }
 
-func (ref *AxisMgr) SetId(id uintptr, act ...AxisPair) bool {
+func (ref *AxisManager) SetById(id uintptr, act ...AxisPair) bool {
 	if axi, ok := ref.infoMap[id]; ok {
 		axi.ref.pairs = act
 		return true
@@ -45,7 +41,7 @@ func (ref *AxisMgr) SetId(id uintptr, act ...AxisPair) bool {
 	return false
 }
 
-func (ref *AxisMgr) SetNamed(name string, act ...AxisPair) uintptr {
+func (ref *AxisManager) SetByName(name string, act ...AxisPair) uintptr {
 	if id, ok := ref.nameMap[name]; ok {
 		axi := ref.infoMap[id].ref
 		axi.pairs = act
@@ -60,9 +56,7 @@ func (ref *AxisMgr) SetNamed(name string, act ...AxisPair) uintptr {
 	}
 }
 
-////////////////
-
-func (ref *AxisMgr) Value(id uintptr) float32 {
+func (ref *AxisManager) Value(id uintptr) float32 {
 	mgr := ref.mgr
 	min := float32(0.0)
 	max := float32(0.0)
@@ -78,7 +72,7 @@ func (ref *AxisMgr) Value(id uintptr) float32 {
 	return (min + max)
 }
 
-func (ref *AxisMgr) Idle(id uintptr) bool {
+func (ref *AxisManager) Idle(id uintptr) bool {
 	mgr := ref.mgr
 	axi := ref.infoMap[id].ref
 	for _, act := range axi.pairs {
@@ -92,7 +86,7 @@ func (ref *AxisMgr) Idle(id uintptr) bool {
 	return true
 }
 
-func (ref *AxisMgr) Active(id uintptr) bool {
+func (ref *AxisManager) Active(id uintptr) bool {
 	mgr := ref.mgr
 	axi := ref.infoMap[id].ref
 	for _, act := range axi.pairs {
@@ -106,7 +100,7 @@ func (ref *AxisMgr) Active(id uintptr) bool {
 	return false
 }
 
-func (ref *AxisMgr) JustIdle(id uintptr) bool {
+func (ref *AxisManager) JustIdle(id uintptr) bool {
 	res := false
 	mgr := ref.mgr
 	axi := ref.infoMap[id].ref
@@ -127,7 +121,7 @@ func (ref *AxisMgr) JustIdle(id uintptr) bool {
 	return res
 }
 
-func (ref *AxisMgr) JustActive(id uintptr) bool {
+func (ref *AxisManager) JustActive(id uintptr) bool {
 	res := false
 	mgr := ref.mgr
 	axi := ref.infoMap[id].ref
@@ -148,9 +142,7 @@ func (ref *AxisMgr) JustActive(id uintptr) bool {
 	return res
 }
 
-////////////////
-
-func (ref *AxisMgr) MinIdle(id uintptr) bool {
+func (ref *AxisManager) MinIdle(id uintptr) bool {
 	mgr := ref.mgr
 	axi := ref.infoMap[id].ref
 	for _, act := range axi.pairs {
@@ -161,7 +153,7 @@ func (ref *AxisMgr) MinIdle(id uintptr) bool {
 	return true
 }
 
-func (ref *AxisMgr) MinActive(id uintptr) bool {
+func (ref *AxisManager) MinActive(id uintptr) bool {
 	mgr := ref.mgr
 	axi := ref.infoMap[id].ref
 	for _, act := range axi.pairs {
@@ -172,7 +164,7 @@ func (ref *AxisMgr) MinActive(id uintptr) bool {
 	return false
 }
 
-func (ref *AxisMgr) MinJustIdle(id uintptr) bool {
+func (ref *AxisManager) MinJustIdle(id uintptr) bool {
 	res := false
 	mgr := ref.mgr
 	axi := ref.infoMap[id].ref
@@ -187,7 +179,7 @@ func (ref *AxisMgr) MinJustIdle(id uintptr) bool {
 	return res
 }
 
-func (ref *AxisMgr) MinJustActive(id uintptr) bool {
+func (ref *AxisManager) MinJustActive(id uintptr) bool {
 	res := false
 	mgr := ref.mgr
 	axi := ref.infoMap[id].ref
@@ -202,9 +194,7 @@ func (ref *AxisMgr) MinJustActive(id uintptr) bool {
 	return res
 }
 
-////////////////
-
-func (ref *AxisMgr) MaxIdle(id uintptr) bool {
+func (ref *AxisManager) MaxIdle(id uintptr) bool {
 	mgr := ref.mgr
 	axi := ref.infoMap[id].ref
 	for _, act := range axi.pairs {
@@ -215,7 +205,7 @@ func (ref *AxisMgr) MaxIdle(id uintptr) bool {
 	return true
 }
 
-func (ref *AxisMgr) MaxActive(id uintptr) bool {
+func (ref *AxisManager) MaxActive(id uintptr) bool {
 	mgr := ref.mgr
 	axi := ref.infoMap[id].ref
 	for _, act := range axi.pairs {
@@ -226,7 +216,7 @@ func (ref *AxisMgr) MaxActive(id uintptr) bool {
 	return false
 }
 
-func (ref *AxisMgr) MaxJustIdle(id uintptr) bool {
+func (ref *AxisManager) MaxJustIdle(id uintptr) bool {
 	res := false
 	mgr := ref.mgr
 	axi := ref.infoMap[id].ref
@@ -241,7 +231,7 @@ func (ref *AxisMgr) MaxJustIdle(id uintptr) bool {
 	return res
 }
 
-func (ref *AxisMgr) MaxJustActive(id uintptr) bool {
+func (ref *AxisManager) MaxJustActive(id uintptr) bool {
 	res := false
 	mgr := ref.mgr
 	axi := ref.infoMap[id].ref

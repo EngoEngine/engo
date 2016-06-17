@@ -9,8 +9,6 @@ type Button struct {
 	ref *button
 }
 
-////////////////
-
 func newButton(act []Code) Button {
 	obj := new(button)
 	obj.codes = act
@@ -21,8 +19,6 @@ func newButton(act []Code) Button {
 		ref: obj,
 	}
 }
-
-////////////////
 
 func (this Button) Id() uintptr {
 	return this.id

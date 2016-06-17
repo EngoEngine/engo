@@ -3,12 +3,12 @@ package act
 import "testing"
 
 func TestAxisMgr(t *testing.T) {
-	amgr := NewActMgr()
-	bmgr := NewAxisMgr(amgr)
+	amgr := NewActManager()
+	bmgr := NewAxisManager(amgr)
 
-	aaxi := bmgr.SetNamed("Axis A", AxisPair{Min: KeyA, Max: KeyB})
-	baxi := bmgr.SetNamed("Axis B", AxisPair{Min: KeyF3, Max: KeyF4})
-	caxi := bmgr.SetNamed("Axis C",
+	aaxi := bmgr.SetByName("Axis A", AxisPair{Min: KeyA, Max: KeyB})
+	baxi := bmgr.SetByName("Axis B", AxisPair{Min: KeyF3, Max: KeyF4})
+	caxi := bmgr.SetByName("Axis C",
 		AxisPair{Min: KeyPad0, Max: KeyPad1},
 		AxisPair{Min: MouseLeft, Max: MouseRight},
 	)
@@ -17,11 +17,11 @@ func TestAxisMgr(t *testing.T) {
 		t.Error("Failed to verify id")
 	}
 
-	if bmgr.SetId(99, AxisPair{Min: KeyC, Max: KeyD}) {
+	if bmgr.SetById(99, AxisPair{Min: KeyC, Max: KeyD}) {
 		t.Error("Set codes on to an invalid id ?")
 	}
 
-	if !bmgr.SetId(baxi, AxisPair{Min: KeyF1, Max: KeyF2}) {
+	if !bmgr.SetById(baxi, AxisPair{Min: KeyF1, Max: KeyF2}) {
 		t.Error("Failed to set codes on a valid id")
 	}
 
@@ -120,13 +120,13 @@ func TestAxisMgr(t *testing.T) {
 	runAxisCheck("Pass (10.C)", t, bmgr, caxi, StateIdle, StateIdle, StateIdle, 0.0)
 }
 
-func runAxisCheck(msg string, t *testing.T, mgr *AxisMgr, id uintptr, min State, max State, exp State, val float32) {
+func runAxisCheck(msg string, t *testing.T, mgr *AxisManager, id uintptr, min State, max State, exp State, val float32) {
 	runMinAxisCheck(msg, t, mgr, id, min)
 	runMaxAxisCheck(msg, t, mgr, id, max)
 	runValueAxisCheck(msg, t, mgr, id, exp, val)
 }
 
-func runMinAxisCheck(msg string, t *testing.T, mgr *AxisMgr, id uintptr, exp State) {
+func runMinAxisCheck(msg string, t *testing.T, mgr *AxisManager, id uintptr, exp State) {
 	if (StateIdle == exp) != mgr.MinIdle(id) {
 		t.Error(msg, " - Min - Invalid on: Idle")
 	}
@@ -141,7 +141,7 @@ func runMinAxisCheck(msg string, t *testing.T, mgr *AxisMgr, id uintptr, exp Sta
 	}
 }
 
-func runMaxAxisCheck(msg string, t *testing.T, mgr *AxisMgr, id uintptr, exp State) {
+func runMaxAxisCheck(msg string, t *testing.T, mgr *AxisManager, id uintptr, exp State) {
 	if (StateIdle == exp) != mgr.MaxIdle(id) {
 		t.Error(msg, " - Max - Invalid on: Idle")
 	}
@@ -156,7 +156,7 @@ func runMaxAxisCheck(msg string, t *testing.T, mgr *AxisMgr, id uintptr, exp Sta
 	}
 }
 
-func runValueAxisCheck(msg string, t *testing.T, mgr *AxisMgr, id uintptr, exp State, val float32) {
+func runValueAxisCheck(msg string, t *testing.T, mgr *AxisManager, id uintptr, exp State, val float32) {
 	if val != mgr.Value(id) {
 		t.Error(msg, " - Val - Invalid value")
 	}
@@ -174,13 +174,11 @@ func runValueAxisCheck(msg string, t *testing.T, mgr *AxisMgr, id uintptr, exp S
 	}
 }
 
-////////////////
-
 func BenchmarkAxisMgr_CleanSimulate(b *testing.B) {
-	amgr := NewActMgr()
-	bmgr := NewAxisMgr(amgr)
+	amgr := NewActManager()
+	bmgr := NewAxisManager(amgr)
 
-	axi := bmgr.SetNamed("Axis A", AxisPair{Min: KeyA, Max: KeyB})
+	axi := bmgr.SetByName("Axis A", AxisPair{Min: KeyA, Max: KeyB})
 
 	amgr.Clear()
 	amgr.Update()
@@ -212,11 +210,11 @@ func BenchmarkAxisMgr_CleanSimulate(b *testing.B) {
 }
 
 func BenchmarkAxisMgr_FilledSimulate(b *testing.B) {
-	amgr := NewActMgr()
+	amgr := NewActManager()
 	fillActMgr(amgr)
-	bmgr := NewAxisMgr(amgr)
+	bmgr := NewAxisManager(amgr)
 
-	axi := bmgr.SetNamed("Axis A", AxisPair{Min: KeyA, Max: KeyB})
+	axi := bmgr.SetByName("Axis A", AxisPair{Min: KeyA, Max: KeyB})
 
 	amgr.Clear()
 	amgr.Update()

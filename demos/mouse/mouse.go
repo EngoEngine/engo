@@ -34,11 +34,11 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	horiAxis := engo.Axes.Id(engo.DefaultHorizontalAxis)
 	if 0 == vertAxis {
 		log.Println("Default vertical axis not found, setting up fall back!")
-		vertAxis = engo.Axes.SetNamed(engo.DefaultVerticalAxis, act.AxisPair{act.KeyW, act.KeyS}, act.AxisPair{act.KeyUp, act.KeyDown})
+		vertAxis = engo.Axes.SetByName(engo.DefaultVerticalAxis, act.AxisPair{act.KeyW, act.KeyS}, act.AxisPair{act.KeyUp, act.KeyDown})
 	}
 	if 0 == horiAxis {
 		log.Println("Default horizontal axis not found, setting up fall back!")
-		horiAxis = engo.Axes.SetNamed(engo.DefaultHorizontalAxis, act.AxisPair{act.KeyA, act.KeyD}, act.AxisPair{act.KeyLeft, act.KeyRight})
+		horiAxis = engo.Axes.SetByName(engo.DefaultHorizontalAxis, act.AxisPair{act.KeyA, act.KeyD}, act.AxisPair{act.KeyLeft, act.KeyRight})
 	}
 
 	w.AddSystem(&common.RenderSystem{})

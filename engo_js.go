@@ -106,7 +106,6 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		Input.Mouse.Y = float32(float64(mm.ClientY) * devicePixelRatio)
 		Input.Mouse.Action = Press
 
-		// Nitya Note: The old code did not set a button value
 		Input.SetState((act.MouseCode | act.Code(mm.Button)), true)
 	})
 
@@ -116,7 +115,6 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		Input.Mouse.Y = float32(float64(mm.ClientY) * devicePixelRatio)
 		Input.Mouse.Action = Release
 
-		// Nitya Note: The old code did not set a button value
 		Input.SetState((act.MouseCode | act.Code(mm.Button)), false)
 	})
 }

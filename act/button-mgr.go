@@ -2,8 +2,8 @@ package act
 
 const cfgButtonMapSize = 16
 
-type ButtonMgr struct {
-	mgr *ActMgr
+type ButtonManager struct {
+	mgr *ActManager
 
 	nameMap map[string]uintptr
 	infoMap map[uintptr]Button
@@ -13,10 +13,8 @@ type button struct {
 	codes []Code
 }
 
-////////////////
-
-func NewButtonMgr(mgr *ActMgr) *ButtonMgr {
-	obj := new(ButtonMgr)
+func NewButtonManager(mgr *ActManager) *ButtonManager {
+	obj := new(ButtonManager)
 
 	obj.mgr = mgr
 
@@ -26,13 +24,11 @@ func NewButtonMgr(mgr *ActMgr) *ButtonMgr {
 	return obj
 }
 
-////////////////
-
-func (ref *ButtonMgr) Id(name string) uintptr {
+func (ref *ButtonManager) Id(name string) uintptr {
 	return ref.nameMap[name]
 }
 
-func (ref *ButtonMgr) SetId(id uintptr, act ...Code) bool {
+func (ref *ButtonManager) SetById(id uintptr, act ...Code) bool {
 	if btn, ok := ref.infoMap[id]; ok {
 		btn.ref.codes = act
 		return true
@@ -40,7 +36,7 @@ func (ref *ButtonMgr) SetId(id uintptr, act ...Code) bool {
 	return false
 }
 
-func (ref *ButtonMgr) SetNamed(name string, act ...Code) uintptr {
+func (ref *ButtonManager) SetByName(name string, act ...Code) uintptr {
 	if id, ok := ref.nameMap[name]; ok {
 		btn := ref.infoMap[id].ref
 		btn.codes = act
@@ -55,9 +51,7 @@ func (ref *ButtonMgr) SetNamed(name string, act ...Code) uintptr {
 	}
 }
 
-////////////////
-
-func (ref *ButtonMgr) Idle(id uintptr) bool {
+func (ref *ButtonManager) Idle(id uintptr) bool {
 	mgr := ref.mgr
 	btn := ref.infoMap[id].ref
 	for _, act := range btn.codes {
@@ -68,7 +62,7 @@ func (ref *ButtonMgr) Idle(id uintptr) bool {
 	return true
 }
 
-func (ref *ButtonMgr) Active(id uintptr) bool {
+func (ref *ButtonManager) Active(id uintptr) bool {
 	mgr := ref.mgr
 	btn := ref.infoMap[id].ref
 	for _, act := range btn.codes {
@@ -79,7 +73,7 @@ func (ref *ButtonMgr) Active(id uintptr) bool {
 	return false
 }
 
-func (ref *ButtonMgr) JustIdle(id uintptr) bool {
+func (ref *ButtonManager) JustIdle(id uintptr) bool {
 	res := false
 	mgr := ref.mgr
 	btn := ref.infoMap[id].ref
@@ -94,7 +88,7 @@ func (ref *ButtonMgr) JustIdle(id uintptr) bool {
 	return res
 }
 
-func (ref *ButtonMgr) JustActive(id uintptr) bool {
+func (ref *ButtonManager) JustActive(id uintptr) bool {
 	res := false
 	mgr := ref.mgr
 	btn := ref.infoMap[id].ref

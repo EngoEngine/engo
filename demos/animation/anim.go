@@ -36,8 +36,8 @@ func (*DefaultScene) Preload() {
 	SkillAction = &common.Animation{Name: "skill", Frames: []int{44, 45, 46, 47, 48, 49, 50, 51, 52, 53}}
 	actions = []*common.Animation{StopAction, WalkAction, SkillAction}
 
-	jumpButton = engo.Buttons.SetNamed("jump", act.KeyX, act.KeySpace)
-	actionButton = engo.Buttons.SetNamed("action", act.KeyD, act.KeyRight)
+	jumpButton = engo.Buttons.SetByName("jump", act.KeyX, act.KeySpace)
+	actionButton = engo.Buttons.SetByName("action", act.KeyD, act.KeyRight)
 }
 
 func (scene *DefaultScene) Setup(w *ecs.World) {
