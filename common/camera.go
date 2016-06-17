@@ -317,7 +317,7 @@ func (c *EntityScroller) Update(dt float32) {
 // the window
 type EdgeScroller struct {
 	ScrollSpeed float32
-	EdgeMargin  float64
+	EdgeMargin  float32
 }
 
 func (*EdgeScroller) Priority() int          { return EdgeScrollerPriority }
@@ -330,13 +330,13 @@ func (c *EdgeScroller) Update(dt float32) {
 
 	if curX < c.EdgeMargin {
 		engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: -c.ScrollSpeed * dt, Incremental: true})
-	} else if curX > float64(maxX)-c.EdgeMargin {
+	} else if curX > maxX-c.EdgeMargin {
 		engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: c.ScrollSpeed * dt, Incremental: true})
 	}
 
 	if curY < c.EdgeMargin {
 		engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: -c.ScrollSpeed * dt, Incremental: true})
-	} else if curY > float64(maxY)-c.EdgeMargin {
+	} else if curY > maxY-c.EdgeMargin {
 		engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: c.ScrollSpeed * dt, Incremental: true})
 	}
 }

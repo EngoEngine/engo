@@ -32,6 +32,7 @@ var (
 	headlessWidth             = 800
 	headlessHeight            = 800
 	canvasWidth, canvasHeight float32
+	scale                     = float32(1)
 )
 
 // fatalErr calls log.Fatal with the given error if it is non-nil.
@@ -100,22 +101,28 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 	SetVSync(opts.VSync)
 
-	// TODO: verify these for retina displays
-	width, height = window.GetFramebufferSize()
-	windowWidth, windowHeight = float32(width), float32(height)
-
 	Gl = gl.NewContext()
 
-	// TODO: verify these for retina displays
+	width, height = window.GetSize()
+	windowWidth, windowHeight = float32(width), float32(height)
+
 	vp := Gl.GetViewport()
 	canvasWidth, canvasHeight = float32(vp[2]), float32(vp[3])
 
-	window.SetFramebufferSizeCallback(func(window *glfw.Window, w, h int) {
-		width, height = window.GetFramebufferSize()
-		Gl.Viewport(0, 0, width, height)
+	if windowWidth <= canvasWidth && windowHeight <= canvasHeight {
+		scale = canvasWidth / windowWidth
+	}
 
-		// TODO: when do we want to handle resizing? and who should deal with it?
-		// responder.Resize(w, h)
+	window.SetFramebufferSizeCallback(func(window *glfw.Window, w, h int) {
+		windowWidth, windowHeight = float32(w), float32(h)
+		Gl.Viewport(0, 0, w, h)
+
+		vp := Gl.GetViewport()
+		canvasWidth, canvasHeight = float32(vp[2]), float32(vp[3])
+
+		if windowWidth <= canvasWidth && windowHeight <= canvasHeight {
+			scale = canvasWidth / windowWidth
+		}
 	})
 
 	window.SetCursorPosCallback(func(window *glfw.Window, x, y float64) {
@@ -265,8 +272,9 @@ Outer:
 	ticker.Stop()
 }
 
-func CursorPos() (x, y float64) {
-	return window.GetCursorPos()
+func CursorPos() (x, y float32) {
+	w, h := window.GetCursorPos()
+	return float32(w) * scale, float32(h) * scale
 }
 
 func WindowSize() (w, h int) {
