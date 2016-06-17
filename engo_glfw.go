@@ -269,14 +269,6 @@ Outer:
 	ticker.Stop()
 }
 
-func GameWidth() float32 {
-	return gameWidth
-}
-
-func GameHeight() float32 {
-	return gameHeight
-}
-
 func CursorPos() (x, y float32) {
 	w, h := window.GetCursorPos()
 	return float32(w) * scale, float32(h) * scale
