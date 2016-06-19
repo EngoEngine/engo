@@ -117,8 +117,8 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 func DestroyWindow() {}
 
 // CursorPos returns the current cursor position
-func CursorPos() (x, y float64) {
-	return float64(Input.Mouse.X), float64(Input.Mouse.Y)
+func CursorPos() (x, y float32) {
+	return Input.Mouse.X, Input.Mouse.Y
 }
 
 // SetTitle changes the title of the page to the given string

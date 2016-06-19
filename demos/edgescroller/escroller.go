@@ -12,7 +12,7 @@ import (
 type DefaultScene struct{}
 
 var (
-	edgeMargin  float64 = 20
+	edgeMargin  float32 = 20
 	scrollSpeed float32 = 700
 
 	worldWidth  int = 800

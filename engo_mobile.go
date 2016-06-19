@@ -44,7 +44,7 @@ func WindowSize() (w, h int) {
 }
 
 // CursorPos returns the current cursor position
-func CursorPos() (x, y float64) {
+func CursorPos() (x, y float32) {
 	notImplemented("CursorPos")
 	return 0, 0
 }
