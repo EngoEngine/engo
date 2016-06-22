@@ -1,4 +1,4 @@
-//+build android
+//+build android darwin,arm darwin,arm64
 
 package engo
 
