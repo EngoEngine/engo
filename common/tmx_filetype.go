@@ -10,6 +10,7 @@ import (
 
 // TMXResource contains a level created from a Tile Map XML
 type TMXResource struct {
+	// Level holds the reference to the parsed TMX level
 	Level *Level
 	url   string
 }
