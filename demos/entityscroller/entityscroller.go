@@ -76,35 +76,55 @@ func (game *GameWorld) Setup(w *ecs.World) {
 
 	// Create render and space components for each of the tiles
 	tileComponents := make([]*Tile, 0)
-	for _, v := range levelData.Tiles {
-		if v.Image != nil {
-			tile := &Tile{BasicEntity: ecs.NewBasic()}
-			tile.RenderComponent = common.RenderComponent{
-				Drawable: v,
-				Scale:    engo.Point{1, 1},
+	for _, tileLayer := range levelData.TileLayers {
+		for _, tileElement := range tileLayer.Tiles {
+			if tileElement.Image != nil {
+
+				tile := &Tile{BasicEntity: ecs.NewBasic()}
+				tile.RenderComponent = common.RenderComponent{
+					Drawable: tileElement,
+					Scale:    engo.Point{1, 1},
+				}
+				tile.SpaceComponent = common.SpaceComponent{
+					Position: tileElement.Point,
+					Width:    0,
+					Height:   0,
+				}
+
+				if tileLayer.Name == "grass" {
+					tile.RenderComponent.SetZIndex(0)
+				}
+
+				if tileLayer.Name == "trees" {
+					tile.RenderComponent.SetZIndex(2)
+				}
+
+				tileComponents = append(tileComponents, tile)
 			}
-			tile.SpaceComponent = common.SpaceComponent{
-				Position: v.Point,
-				Width:    0,
-				Height:   0,
-			}
-			tileComponents = append(tileComponents, tile)
 		}
 	}
-	// Do the same the levels images
-	for _, v := range levelData.Images {
-		if v.Image != nil {
-			tile := &Tile{BasicEntity: ecs.NewBasic()}
-			tile.RenderComponent = common.RenderComponent{
-				Drawable: v,
-				Scale:    engo.Point{1, 1},
+
+	// Do the same for all image layers
+	for _, imageLayer := range levelData.ImageLayers {
+		for _, imageElement := range imageLayer.Images {
+			if imageElement.Image != nil {
+				tile := &Tile{BasicEntity: ecs.NewBasic()}
+				tile.RenderComponent = common.RenderComponent{
+					Drawable: imageElement,
+					Scale:    engo.Point{1, 1},
+				}
+				tile.SpaceComponent = common.SpaceComponent{
+					Position: imageElement.Point,
+					Width:    0,
+					Height:   0,
+				}
+
+				if imageLayer.Name == "clouds" {
+					tile.RenderComponent.SetZIndex(3)
+				}
+
+				tileComponents = append(tileComponents, tile)
 			}
-			tile.SpaceComponent = common.SpaceComponent{
-				Position: v.Point,
-				Width:    0,
-				Height:   0,
-			}
-			tileComponents = append(tileComponents, tile)
 		}
 	}
 
