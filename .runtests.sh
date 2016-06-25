@@ -11,6 +11,9 @@ $HOME/gopath/bin/goveralls -service=travis-ci
 echo "Testing and benchmarking engo.io/engo"
 go test -v -bench=. ./... || exit 1
 
+echo "Checking for unnecessary conversions using unconvert"
+unconvert -v engo.io/engo
+
 # TODO: Fix the build so this actually passes
 # echo "Testing engo.io/engo using 'gopherjs test'"
 # gopherjs test

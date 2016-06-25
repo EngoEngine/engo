@@ -13,6 +13,7 @@ go:
 - 1.6.2
 before_install:
 - go get golang.org/x/tools/cmd/cover
+- go get github.com/mdempsky/unconvert
 - go get github.com/mattn/goveralls
 - go get github.com/gopherjs/gopherjs
 - gopherjs get "honnef.co/go/js/dom"
