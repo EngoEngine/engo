@@ -1,4 +1,4 @@
-# Shape Demo
+# Shapes Demo
 
 ## What does it do?
 It demonstrates how one can efficiently draw various shapes in solid colors (with/without border).
