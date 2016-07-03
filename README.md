@@ -63,6 +63,7 @@ us a DM or [create an issue](https://github.com/EngoEngine/engo/issues/new).
 Engo is currently undergoing a lot of optimizations and constantly gets new features. However, this sometimes means things break. In order to make transitioning easier for you,
 we have a list of those changes, with the most recent being at the top. If you run into any problems, please contact us at [gitter](https://gitter.im/EngoEngine/engo).
 
+* `engo.PreloadedSpriteSingle` is now `engo.LoadedSprite`
 * `engo.Files.Load` and `engo.Files.LoadMany` have been merged into one function `engo.Files.Load` which does the same thing as `engo.Files.LoadMany` allowing an indefinite ammount of parameters to be passed in.
 * `engo` has been split in `engo` (which contains stuff about creating windows, starting the game, creating an OpenGL context, input handling, etc.) - and `common` (which contains a lot of common `System` implementations for common tasks (`RenderSystem`, `CameraSystem`, `AudioSystem`, etc.)
 * `engo.Width()` and `engo.Height()` have been changed to `engo.GameWidth()` and `engo.GameHeight()` respectively.
