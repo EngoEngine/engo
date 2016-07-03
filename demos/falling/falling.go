@@ -44,7 +44,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	w.AddSystem(&ControlSystem{})
 	w.AddSystem(&RockSpawnSystem{})
 
-	texture, err := common.PreloadedSpriteSingle("icon.png")
+	texture, err := common.LoadedSprite("icon.png")
 	if err != nil {
 		log.Println(err)
 	}
@@ -144,7 +144,7 @@ func (rock *RockSpawnSystem) Update(dt float32) {
 }
 
 func NewRock(world *ecs.World, position engo.Point) {
-	texture, err := common.PreloadedSpriteSingle("rock.png")
+	texture, err := common.LoadedSprite("rock.png")
 	if err != nil {
 		log.Println(err)
 	}
