@@ -46,7 +46,7 @@ func (*IconScene) Setup(w *ecs.World) {
 	w.AddSystem(&SceneSwitcherSystem{NextScene: "RockScene", WaitTime: time.Second * 3})
 
 	// Retrieve a texture
-	texture, err := common.PreloadedSpriteSingle("icon.png")
+	texture, err := common.LoadedSprite("icon.png")
 	if err != nil {
 		log.Println(err)
 	}
@@ -104,7 +104,7 @@ func (game *RockScene) Setup(w *ecs.World) {
 	w.AddSystem(&SceneSwitcherSystem{NextScene: "IconScene", WaitTime: time.Second * 3})
 
 	// Retrieve a texture
-	texture, err := common.PreloadedSpriteSingle("rock.png")
+	texture, err := common.LoadedSprite("rock.png")
 	if err != nil {
 		log.Println(err)
 	}

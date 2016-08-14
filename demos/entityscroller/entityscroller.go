@@ -129,7 +129,7 @@ func (game *GameWorld) Setup(w *ecs.World) {
 	}
 
 	character := Character{BasicEntity: ecs.NewBasic()}
-	characterTexture, err := common.PreloadedSpriteSingle("icon.png")
+	characterTexture, err := common.LoadedSprite("icon.png")
 	if err != nil {
 		panic(err)
 	}

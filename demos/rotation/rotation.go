@@ -32,7 +32,7 @@ func (game *DefaultScene) Setup(w *ecs.World) {
 	w.AddSystem(&common.RenderSystem{})
 
 	// Retrieve a texture
-	texture, err := common.PreloadedSpriteSingle("icon.png")
+	texture, err := common.LoadedSprite("icon.png")
 	if err != nil {
 		log.Println(err)
 	}
