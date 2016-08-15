@@ -32,7 +32,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	w.AddSystem(&HideSystem{})
 
 	// Retrieve a texture
-	texture, err := common.PreloadedSpriteSingle("rock.png")
+	texture, err := common.LoadedSprite("rock.png")
 	if err != nil {
 		log.Println(err)
 	}
