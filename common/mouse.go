@@ -194,6 +194,10 @@ func (m *MouseSystem) Update(dt float32) {
 				mx = engo.Input.Mouse.X
 				my = engo.Input.Mouse.Y
 			}
+
+			if e.RenderComponent.Hidden {
+				continue // skip hidden components
+			}
 		}
 
 		// If the Mouse component is a tracker we always update it
