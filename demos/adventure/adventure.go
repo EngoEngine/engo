@@ -32,6 +32,11 @@ var (
 	levelHeight float32
 )
 
+const (
+	SPEED_MESSAGE = "SpeedMessage"
+	SPEED_SCALE   = 64
+)
+
 type DefaultScene struct{}
 
 type Hero struct {
@@ -40,6 +45,7 @@ type Hero struct {
 	common.RenderComponent
 	common.SpaceComponent
 	ControlComponent
+	SpeedComponent
 }
 
 type ControlComponent struct {
@@ -130,6 +136,7 @@ func (scene *DefaultScene) Setup(w *ecs.World) {
 
 	w.AddSystem(&common.RenderSystem{})
 	w.AddSystem(&common.AnimationSystem{})
+	w.AddSystem(&SpeedSystem{})
 	w.AddSystem(&ControlSystem{})
 
 	// Setup TileMap
@@ -181,6 +188,13 @@ func (scene *DefaultScene) Setup(w *ecs.World) {
 				&hero.BasicEntity,
 				&hero.AnimationComponent,
 				&hero.ControlComponent,
+				&hero.SpaceComponent,
+			)
+
+		case *SpeedSystem:
+			sys.Add(
+				&hero.BasicEntity,
+				&hero.SpeedComponent,
 				&hero.SpaceComponent,
 			)
 		}
@@ -300,12 +314,96 @@ func (*DefaultScene) CreateHero(point engo.Point, spriteSheet *common.Spriteshee
 		Drawable: spriteSheet.Cell(0),
 		Scale:    engo.Point{1, 1},
 	}
+
+	hero.SpeedComponent = SpeedComponent{}
 	hero.AnimationComponent = common.NewAnimationComponent(spriteSheet.Drawables(), 0.1)
 
 	hero.AnimationComponent.AddAnimations(actions)
 	hero.AnimationComponent.SelectAnimationByName("downstop")
 
 	return hero
+}
+
+type SpeedMessage struct {
+	*ecs.BasicEntity
+	engo.Point
+}
+
+func (SpeedMessage) Type() string {
+	return SPEED_MESSAGE
+}
+
+type SpeedComponent struct {
+	engo.Point
+}
+
+type speedEntity struct {
+	*ecs.BasicEntity
+	*SpeedComponent
+	*common.SpaceComponent
+}
+
+type SpeedSystem struct {
+	entities []speedEntity
+}
+
+func (s *SpeedSystem) New(*ecs.World) {
+	engo.Mailbox.Listen(SPEED_MESSAGE, func(message engo.Message) {
+		speed, isSpeed := message.(SpeedMessage)
+		if isSpeed {
+			log.Println("Speed change")
+			log.Printf("%#v\n", speed.Point)
+			for _, e := range s.entities {
+				if e.ID() == speed.BasicEntity.ID() {
+					log.Println("found the entity")
+					e.SpeedComponent.Point = speed.Point
+				}
+			}
+		}
+	})
+}
+
+func (s *SpeedSystem) Add(basic *ecs.BasicEntity, speed *SpeedComponent, space *common.SpaceComponent) {
+	s.entities = append(s.entities, speedEntity{basic, speed, space})
+}
+
+func (s *SpeedSystem) Remove(basic ecs.BasicEntity) {
+	delete := -1
+	for index, e := range s.entities {
+		if e.BasicEntity.ID() == basic.ID() {
+			delete = index
+			break
+		}
+	}
+	if delete >= 0 {
+		s.entities = append(s.entities[:delete], s.entities[delete+1:]...)
+	}
+}
+
+func (s *SpeedSystem) Update(dt float32) {
+
+	for _, e := range s.entities {
+		speed := engo.GameWidth() * dt
+		e.SpaceComponent.Position.X = e.SpaceComponent.Position.X + speed*e.SpeedComponent.Point.X
+		e.SpaceComponent.Position.Y = e.SpaceComponent.Position.Y + speed*e.SpeedComponent.Point.Y
+		// log.Printf("%#v\n", e.SpeedComponent.Point)
+
+		// Add Game Border Limits
+		var heightLimit float32 = levelHeight - e.SpaceComponent.Height
+		if e.SpaceComponent.Position.Y < 0 {
+			e.SpaceComponent.Position.Y = 0
+		} else if e.SpaceComponent.Position.Y > heightLimit {
+			e.SpaceComponent.Position.Y = heightLimit
+		}
+
+		var widthLimit float32 = levelWidth - e.SpaceComponent.Width
+		if e.SpaceComponent.Position.X < 0 {
+			e.SpaceComponent.Position.X = 0
+		} else if e.SpaceComponent.Position.X > widthLimit {
+			e.SpaceComponent.Position.X = widthLimit
+		}
+	}
+
 }
 
 type controlEntity struct {
@@ -336,52 +434,66 @@ func (c *ControlSystem) Remove(basic ecs.BasicEntity) {
 	}
 }
 
+func setAnimation(e controlEntity) {
+	if engo.Input.Button(upButton).JustPressed() {
+		e.AnimationComponent.SelectAnimationByAction(WalkUpAction)
+	} else if engo.Input.Button(downButton).JustPressed() {
+		e.AnimationComponent.SelectAnimationByAction(WalkDownAction)
+	} else if engo.Input.Button(leftButton).JustPressed() {
+		e.AnimationComponent.SelectAnimationByAction(WalkLeftAction)
+	} else if engo.Input.Button(rightButton).JustPressed() {
+		e.AnimationComponent.SelectAnimationByAction(WalkRightAction)
+	}
+
+	if engo.Input.Button(upButton).JustReleased() {
+		e.AnimationComponent.SelectAnimationByAction(StopUpAction)
+	} else if engo.Input.Button(downButton).JustReleased() {
+		e.AnimationComponent.SelectAnimationByAction(StopDownAction)
+	} else if engo.Input.Button(leftButton).JustReleased() {
+		e.AnimationComponent.SelectAnimationByAction(StopLeftAction)
+	} else if engo.Input.Button(rightButton).JustReleased() {
+		e.AnimationComponent.SelectAnimationByAction(StopRightAction)
+	}
+}
+
+func getSpeed(e controlEntity) (p engo.Point, changed bool) {
+	p.X = engo.Input.Axis(e.ControlComponent.SchemeHoriz).Value()
+	p.Y = engo.Input.Axis(e.ControlComponent.SchemeVert).Value()
+	origX, origY := p.X, p.Y
+
+	if engo.Input.Button(upButton).JustPressed() {
+		p.Y = -1
+	} else if engo.Input.Button(downButton).JustPressed() {
+		p.Y = 1
+	}
+	if engo.Input.Button(leftButton).JustPressed() {
+		p.X = -1
+	} else if engo.Input.Button(rightButton).JustPressed() {
+		p.X = 1
+	}
+
+	if engo.Input.Button(upButton).JustReleased() || engo.Input.Button(downButton).JustReleased() {
+		p.Y = 0
+		changed = true
+	}
+	if engo.Input.Button(leftButton).JustReleased() || engo.Input.Button(rightButton).JustReleased() {
+		p.X = 0
+		changed = true
+	}
+	changed = changed || p.X != origX || p.Y != origY
+	return
+}
+
 func (c *ControlSystem) Update(dt float32) {
 	for _, e := range c.entities {
+		setAnimation(e)
 
-		// Add Character Movement Control
-		if engo.Input.Button(upButton).JustPressed() {
-			e.AnimationComponent.SelectAnimationByAction(WalkUpAction)
-		} else if engo.Input.Button(downButton).JustPressed() {
-			e.AnimationComponent.SelectAnimationByAction(WalkDownAction)
-		} else if engo.Input.Button(leftButton).JustPressed() {
-			e.AnimationComponent.SelectAnimationByAction(WalkLeftAction)
-		} else if engo.Input.Button(rightButton).JustPressed() {
-			e.AnimationComponent.SelectAnimationByAction(WalkRightAction)
+		if vector, changed := getSpeed(e); changed {
+			speed := dt * SPEED_SCALE
+			vector.MultiplyScalar(speed)
+			engo.Mailbox.Dispatch(SpeedMessage{e.BasicEntity, vector})
 		}
 
-		if engo.Input.Button(upButton).JustReleased() {
-			e.AnimationComponent.SelectAnimationByAction(StopUpAction)
-		} else if engo.Input.Button(downButton).JustReleased() {
-			e.AnimationComponent.SelectAnimationByAction(StopDownAction)
-		} else if engo.Input.Button(leftButton).JustReleased() {
-			e.AnimationComponent.SelectAnimationByAction(StopLeftAction)
-		} else if engo.Input.Button(rightButton).JustReleased() {
-			e.AnimationComponent.SelectAnimationByAction(StopRightAction)
-		}
-
-		speed := engo.GameWidth() * dt
-
-		vert := engo.Input.Axis(e.ControlComponent.SchemeVert)
-		e.SpaceComponent.Position.Y += speed * vert.Value()
-
-		horiz := engo.Input.Axis(e.ControlComponent.SchemeHoriz)
-		e.SpaceComponent.Position.X += speed * horiz.Value()
-
-		// Add Game Border Limits
-		var heightLimit float32 = levelHeight - e.SpaceComponent.Height
-		if e.SpaceComponent.Position.Y < 0 {
-			e.SpaceComponent.Position.Y = 0
-		} else if e.SpaceComponent.Position.Y > heightLimit {
-			e.SpaceComponent.Position.Y = heightLimit
-		}
-
-		var widthLimit float32 = levelWidth - e.SpaceComponent.Width
-		if e.SpaceComponent.Position.X < 0 {
-			e.SpaceComponent.Position.X = 0
-		} else if e.SpaceComponent.Position.X > widthLimit {
-			e.SpaceComponent.Position.X = widthLimit
-		}
 	}
 }
 
