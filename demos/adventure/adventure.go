@@ -351,11 +351,9 @@ func (s *SpeedSystem) New(*ecs.World) {
 	engo.Mailbox.Listen(SPEED_MESSAGE, func(message engo.Message) {
 		speed, isSpeed := message.(SpeedMessage)
 		if isSpeed {
-			log.Println("Speed change")
 			log.Printf("%#v\n", speed.Point)
 			for _, e := range s.entities {
 				if e.ID() == speed.BasicEntity.ID() {
-					log.Println("found the entity")
 					e.SpeedComponent.Point = speed.Point
 				}
 			}
@@ -386,7 +384,6 @@ func (s *SpeedSystem) Update(dt float32) {
 		speed := engo.GameWidth() * dt
 		e.SpaceComponent.Position.X = e.SpaceComponent.Position.X + speed*e.SpeedComponent.Point.X
 		e.SpaceComponent.Position.Y = e.SpaceComponent.Position.Y + speed*e.SpeedComponent.Point.Y
-		// log.Printf("%#v\n", e.SpeedComponent.Point)
 
 		// Add Game Border Limits
 		var heightLimit float32 = levelHeight - e.SpaceComponent.Height
