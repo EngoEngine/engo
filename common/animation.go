@@ -20,7 +20,7 @@ type AnimationComponent struct {
 	Rate             float32               // How often frames should increment, in seconds.
 	index            int                   // What frame in the is being used
 	change           float32               // The time since the last incrementation
-	def              string                // The default animation to play when nothing else is playing
+	def              *Animation            // The default animation to play when nothing else is playing
 }
 
 func NewAnimationComponent(drawables []Drawable, rate float32) AnimationComponent {
@@ -37,13 +37,13 @@ func (ac *AnimationComponent) SelectAnimationByName(name string) {
 }
 
 func (ac *AnimationComponent) SelectAnimationByAction(action *Animation) {
-	ac.SelectAnimationByName(action.Name)
+	ac.CurrentAnimation = action
+	ac.index = 0
 }
 
 func (ac *AnimationComponent) AddDefaultAnimation(action *Animation) {
-	ac.def = action.Name
-
 	ac.AddAnimation(action)
+	ac.def = action
 }
 
 func (ac *AnimationComponent) AddAnimation(action *Animation) {
@@ -110,11 +110,10 @@ func (a *AnimationSystem) Remove(basic ecs.BasicEntity) {
 func (a *AnimationSystem) Update(dt float32) {
 	for _, e := range a.entities {
 		if e.AnimationComponent.CurrentAnimation == nil {
-			if e.AnimationComponent.def == "" {
+			if e.AnimationComponent.def == nil {
 				return
 			}
-
-			e.AnimationComponent.SelectAnimationByName(e.AnimationComponent.def)
+			e.AnimationComponent.SelectAnimationByAction(e.AnimationComponent.def)
 		}
 
 		e.AnimationComponent.change += dt
