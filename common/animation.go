@@ -96,31 +96,26 @@ func (ac *AnimationComponent) NextFrame() {
 
 // AnimationSystem tracks AnimationComponents, advancing their current animation.
 type AnimationSystem struct {
-	entities []animationEntity
+	entities map[ecs.BasicEntity]animationEntity
 }
 
 type animationEntity struct {
-	*ecs.BasicEntity
 	*AnimationComponent
 	*RenderComponent
 }
 
 // Add starts tracking the given entity.
 func (a *AnimationSystem) Add(basic *ecs.BasicEntity, anim *AnimationComponent, render *RenderComponent) {
-	a.entities = append(a.entities, animationEntity{basic, anim, render})
+	if a.entities == nil {
+		a.entities = make(map[ecs.BasicEntity]animationEntity)
+	}
+	a.entities[*basic] = animationEntity{anim, render}
 }
 
 // Remove stops tracking the given entity.
 func (a *AnimationSystem) Remove(basic ecs.BasicEntity) {
-	delete := -1
-	for index, e := range a.entities {
-		if e.BasicEntity.ID() == basic.ID() {
-			delete = index
-			break
-		}
-	}
-	if delete >= 0 {
-		a.entities = append(a.entities[:delete], a.entities[delete+1:]...)
+	if a.entities != nil {
+		delete(a.entities, basic)
 	}
 }
 
