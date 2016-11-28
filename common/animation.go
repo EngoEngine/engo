@@ -6,13 +6,15 @@ import (
 	"engo.io/ecs"
 )
 
+// Animation represents properties of an animation.
 type Animation struct {
 	Name   string
 	Frames []int
 	Loop   bool
 }
 
-// Component that controls animation in rendering entities
+// AnimationComponent tracks animations of an entity it is part of.
+// This component should be created using NewAnimationComponent.
 type AnimationComponent struct {
 	Drawables        []Drawable            // Renderables
 	Animations       map[string]*Animation // All possible animations
@@ -20,9 +22,11 @@ type AnimationComponent struct {
 	Rate             float32               // How often frames should increment, in seconds.
 	index            int                   // What frame in the is being used
 	change           float32               // The time since the last incrementation
-	def              string                // The default animation to play when nothing else is playing
+	def              *Animation            // The default animation to play when nothing else is playing
 }
 
+// NewAnimationComponent creates an AnimationComponent containing all given
+// drawables. Animations will be played using the given rate.
 func NewAnimationComponent(drawables []Drawable, rate float32) AnimationComponent {
 	return AnimationComponent{
 		Animations: make(map[string]*Animation),
@@ -31,37 +35,47 @@ func NewAnimationComponent(drawables []Drawable, rate float32) AnimationComponen
 	}
 }
 
+// SelectAnimationByName sets the current animation. The name must be
+// registered.
 func (ac *AnimationComponent) SelectAnimationByName(name string) {
 	ac.CurrentAnimation = ac.Animations[name]
 	ac.index = 0
 }
 
+// SelectAnimationByAction sets the current animation.
+// An nil action value selects the default animation.
 func (ac *AnimationComponent) SelectAnimationByAction(action *Animation) {
-	ac.SelectAnimationByName(action.Name)
+	ac.CurrentAnimation = action
+	ac.index = 0
 }
 
+// AddDefaultAnimation adds an animation which is used when no other animation is playing.
 func (ac *AnimationComponent) AddDefaultAnimation(action *Animation) {
-	ac.def = action.Name
-
 	ac.AddAnimation(action)
+	ac.def = action
 }
 
+// AddAnimation registers an animation under its name, making it available
+// through SelectAnimationByName.
 func (ac *AnimationComponent) AddAnimation(action *Animation) {
 	ac.Animations[action.Name] = action
 }
 
+// AddAnimations registers all given animations.
 func (ac *AnimationComponent) AddAnimations(actions []*Animation) {
 	for _, action := range actions {
 		ac.AddAnimation(action)
 	}
 }
 
+// Cell returns the drawable for the current frame.
 func (ac *AnimationComponent) Cell() Drawable {
 	idx := ac.CurrentAnimation.Frames[ac.index]
 
 	return ac.Drawables[idx]
 }
 
+// NextFrame advances the current animation by one frame.
 func (ac *AnimationComponent) NextFrame() {
 	if len(ac.CurrentAnimation.Frames) == 0 {
 		log.Println("No data for this animation")
@@ -80,41 +94,39 @@ func (ac *AnimationComponent) NextFrame() {
 	}
 }
 
+// AnimationSystem tracks AnimationComponents, advancing their current animation.
+type AnimationSystem struct {
+	entities map[ecs.BasicEntity]animationEntity
+}
+
 type animationEntity struct {
-	*ecs.BasicEntity
 	*AnimationComponent
 	*RenderComponent
 }
 
-type AnimationSystem struct {
-	entities []animationEntity
-}
-
+// Add starts tracking the given entity.
 func (a *AnimationSystem) Add(basic *ecs.BasicEntity, anim *AnimationComponent, render *RenderComponent) {
-	a.entities = append(a.entities, animationEntity{basic, anim, render})
+	if a.entities == nil {
+		a.entities = make(map[ecs.BasicEntity]animationEntity)
+	}
+	a.entities[*basic] = animationEntity{anim, render}
 }
 
+// Remove stops tracking the given entity.
 func (a *AnimationSystem) Remove(basic ecs.BasicEntity) {
-	delete := -1
-	for index, e := range a.entities {
-		if e.BasicEntity.ID() == basic.ID() {
-			delete = index
-			break
-		}
-	}
-	if delete >= 0 {
-		a.entities = append(a.entities[:delete], a.entities[delete+1:]...)
+	if a.entities != nil {
+		delete(a.entities, basic)
 	}
 }
 
+// Update advances the animations of all tracked entities.
 func (a *AnimationSystem) Update(dt float32) {
 	for _, e := range a.entities {
 		if e.AnimationComponent.CurrentAnimation == nil {
-			if e.AnimationComponent.def == "" {
+			if e.AnimationComponent.def == nil {
 				return
 			}
-
-			e.AnimationComponent.SelectAnimationByName(e.AnimationComponent.def)
+			e.AnimationComponent.SelectAnimationByAction(e.AnimationComponent.def)
 		}
 
 		e.AnimationComponent.change += dt
