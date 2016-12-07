@@ -105,7 +105,17 @@ func (*RenderSystem) Priority() int { return RenderSystemPriority }
 func (rs *RenderSystem) New(w *ecs.World) {
 	rs.world = w
 
-	w.AddSystem(&CameraSystem{})
+	var cameraExists bool
+	for _, s := range w.Systems() {
+		if _, ok := s.(*CameraSystem); ok {
+			cameraExists = true
+			break
+		}
+	}
+
+	if !cameraExists {
+		w.AddSystem(&CameraSystem{})
+	}
 
 	if !engo.Headless() {
 		initShaders(w)
