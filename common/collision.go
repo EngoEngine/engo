@@ -6,13 +6,34 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"github.com/engoengine/math"
+	"strconv"
 )
+
+// SpaceAnchor indicates where which point the X, Y coordinates indicate
+type SpaceAnchor uint8
+
+const (
+	AnchorDefault SpaceAnchor = iota
+	AnchorTopLeft
+	AnchorTopCenter
+	AnchorTopRight
+	AnchorMiddleLeft
+	AnchorMiddleCenter
+	AnchorMiddleRight
+	AnchorBottomLeft
+	AnchorBottomCenter
+	AnchorBottomRight
+)
+
+// DefaultAnchor is the anchor that is used when no Anchor is specified
+var DefaultAnchor SpaceAnchor = AnchorTopLeft
 
 type SpaceComponent struct {
 	Position engo.Point
 	Width    float32
 	Height   float32
 	Rotation float32 // angle in degrees for the rotation to apply clockwise
+	Anchor   SpaceAnchor
 }
 
 // Center positions the space component according to its center instead of its
@@ -25,6 +46,36 @@ func (sc *SpaceComponent) Center(p engo.Point) {
 	sc.Position.Y = p.Y - yDelta
 }
 
+// TopLeft returns the most TopLeft point of the area, not taking into account any rotation
+func (sc SpaceComponent) TopLeft() engo.Point {
+	a := sc.Anchor
+	if a == AnchorDefault {
+		a = DefaultAnchor
+	}
+	switch a {
+	case AnchorTopLeft:
+		return engo.Point{X: sc.Position.X, Y: sc.Position.Y}
+	case AnchorTopCenter:
+		return engo.Point{X: sc.Position.X - sc.Width/2, Y: sc.Position.Y}
+	case AnchorTopRight:
+		return engo.Point{X: sc.Position.X - sc.Width, Y: sc.Position.Y}
+	case AnchorMiddleLeft:
+		return engo.Point{X: sc.Position.X, Y: sc.Position.Y - sc.Height/2}
+	case AnchorMiddleCenter:
+		return engo.Point{X: sc.Position.X - sc.Width/2, Y: sc.Position.Y - sc.Height/2}
+	case AnchorMiddleRight:
+		return engo.Point{X: sc.Position.X - sc.Width, Y: sc.Position.Y - sc.Height/2}
+	case AnchorBottomLeft:
+		return engo.Point{X: sc.Position.X, Y: sc.Position.Y - sc.Height}
+	case AnchorBottomCenter:
+		return engo.Point{X: sc.Position.X - sc.Width/2, Y: sc.Position.Y - sc.Height}
+	case AnchorBottomRight:
+		return engo.Point{X: sc.Position.X - sc.Width, Y: sc.Position.Y - sc.Height}
+	default:
+		panic("Anchor not supported: " + strconv.Itoa(int(a)))
+	}
+}
+
 // AABB returns the minimum and maximum point for the given SpaceComponent. It hereby takes into account the
 // rotation of the Component - it may very well be that the Minimum as given by engo.AABB, is smaller than the Position
 // of the object (i.e. when rotated).
@@ -34,9 +85,56 @@ func (sc *SpaceComponent) Center(p engo.Point) {
 // depending on the rotation of the `SpaceComponent`, this `AABB` may be larger than the original `SpaceComponent`.
 func (sc SpaceComponent) AABB() engo.AABB {
 	if sc.Rotation == 0 {
-		return engo.AABB{
-			Min: sc.Position,
-			Max: engo.Point{sc.Position.X + sc.Width, sc.Position.Y + sc.Height},
+		a := sc.Anchor
+		if a == AnchorDefault {
+			a = DefaultAnchor
+		}
+		switch a {
+		case AnchorTopLeft:
+			return engo.AABB{
+				Min: engo.Point{X: sc.Position.X, Y: sc.Position.Y},
+				Max: engo.Point{X: sc.Position.X + sc.Width, Y: sc.Position.Y + sc.Height},
+			}
+		case AnchorTopCenter:
+			return engo.AABB{
+				Min: engo.Point{X: sc.Position.X - sc.Width/2, Y: sc.Position.Y},
+				Max: engo.Point{X: sc.Position.X + sc.Width/2, Y: sc.Position.Y + sc.Height},
+			}
+		case AnchorTopRight:
+			return engo.AABB{
+				Min: engo.Point{X: sc.Position.X - sc.Width, Y: sc.Position.Y},
+				Max: engo.Point{X: sc.Position.X, Y: sc.Position.Y + sc.Height},
+			}
+		case AnchorMiddleLeft:
+			return engo.AABB{
+				Min: engo.Point{X: sc.Position.X, Y: sc.Position.Y - sc.Height/2},
+				Max: engo.Point{X: sc.Position.X + sc.Width, Y: sc.Position.Y + sc.Height/2},
+			}
+		case AnchorMiddleCenter:
+			return engo.AABB{
+				Min: engo.Point{X: sc.Position.X - sc.Width/2, Y: sc.Position.Y - sc.Height/2},
+				Max: engo.Point{X: sc.Position.X + sc.Width/2, Y: sc.Position.Y + sc.Height/2},
+			}
+		case AnchorMiddleRight:
+			return engo.AABB{
+				Min: engo.Point{X: sc.Position.X - sc.Width, Y: sc.Position.Y - sc.Height/2},
+				Max: engo.Point{X: sc.Position.X, Y: sc.Position.Y + sc.Height/2},
+			}
+		case AnchorBottomLeft:
+			return engo.AABB{
+				Min: engo.Point{X: sc.Position.X, Y: sc.Position.Y - sc.Height},
+				Max: engo.Point{X: sc.Position.X + sc.Width, Y: sc.Position.Y},
+			}
+		case AnchorBottomCenter:
+			return engo.AABB{
+				Min: engo.Point{X: sc.Position.X - sc.Width/2, Y: sc.Position.Y - sc.Height},
+				Max: engo.Point{X: sc.Position.X + sc.Width/2, Y: sc.Position.Y},
+			}
+		case AnchorBottomRight:
+			return engo.AABB{
+				Min: engo.Point{X: sc.Position.X - sc.Width, Y: sc.Position.Y - sc.Height},
+				Max: engo.Point{X: sc.Position.X, Y: sc.Position.Y},
+			}
 		}
 	}
 
@@ -63,14 +161,13 @@ func (sc SpaceComponent) AABB() engo.AABB {
 		}
 	}
 
-	return engo.AABB{engo.Point{xMin, yMin}, engo.Point{xMax, yMax}}
+	return engo.AABB{Min: engo.Point{X: xMin, Y: yMin}, Max: engo.Point{X: xMax, Y: yMax}}
 }
 
 // Corners returns the location of the four corners of the rectangular plane defined by the `SpaceComponent`, taking
 // into account any possible rotation.
 func (sc SpaceComponent) Corners() (points [4]engo.Point) {
-	points[0].X = sc.Position.X
-	points[0].Y = sc.Position.Y
+	points[0] = sc.TopLeft()
 
 	sin, cos := math.Sincos(sc.Rotation * math.Pi / 180)
 
@@ -148,15 +245,15 @@ func (c *CollisionSystem) Add(basic *ecs.BasicEntity, collision *CollisionCompon
 }
 
 func (c *CollisionSystem) Remove(basic ecs.BasicEntity) {
-	delete := -1
+	del := -1
 	for index, e := range c.entities {
 		if e.BasicEntity.ID() == basic.ID() {
-			delete = index
+			del = index
 			break
 		}
 	}
-	if delete >= 0 {
-		c.entities = append(c.entities[:delete], c.entities[delete+1:]...)
+	if del >= 0 {
+		c.entities = append(c.entities[:del], c.entities[del+1:]...)
 	}
 }
 
