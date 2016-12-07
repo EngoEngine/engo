@@ -12,6 +12,7 @@ import (
 )
 
 const (
+	CameraSystemPriority     = RenderSystemPriority + 10
 	MouseRotatorPriority     = 100
 	MouseZoomerPriority      = 110
 	EdgeScrollerPriority     = 120
@@ -147,11 +148,11 @@ func (cam *CameraSystem) Update(dt float32) {
 		return
 	}
 
-	cam.centerCam(cam.tracking.SpaceComponent.Position.X+cam.tracking.SpaceComponent.Width/2,
-		cam.tracking.SpaceComponent.Position.Y+cam.tracking.SpaceComponent.Height/2,
-		cam.z,
-	)
+	pos := cam.tracking.SpaceComponent.Centoid()
+	cam.centerCam(pos.X, pos.Y, cam.z)
 }
+
+func (cam *CameraSystem) Priority() int { return CameraSystemPriority }
 
 func (cam *CameraSystem) FollowEntity(basic *ecs.BasicEntity, space *SpaceComponent) {
 	cam.tracking = cameraEntity{basic, space}
@@ -303,14 +304,10 @@ func (*EntityScroller) Remove(ecs.BasicEntity) {}
 // Update moves the camera to the center of the space component
 // Values are automatically clamped to TrackingBounds by the camera
 func (c *EntityScroller) Update(dt float32) {
-	width, height := c.SpaceComponent.Width, c.SpaceComponent.Height
+	pos := c.SpaceComponent.Centoid()
 
-	pos := c.SpaceComponent.Position
-	trackToX := pos.X + width/2
-	trackToY := pos.Y + height/2
-
-	engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: trackToX, Incremental: false})
-	engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: trackToY, Incremental: false})
+	engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: pos.X, Incremental: false})
+	engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: pos.Y, Incremental: false})
 }
 
 // EdgeScroller is a System that allows for scrolling when the cursor is near the edges of

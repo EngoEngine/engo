@@ -46,6 +46,35 @@ func (sc *SpaceComponent) Center(p engo.Point) {
 	sc.Position.Y = p.Y - yDelta
 }
 
+func (sc *SpaceComponent) Centoid() engo.Point {
+	a := sc.Anchor
+	if a == AnchorDefault {
+		a = DefaultAnchor
+	}
+	switch a {
+	case AnchorTopLeft:
+		return engo.Point{X: sc.Position.X + sc.Width/2, Y: sc.Position.Y + sc.Height/2}
+	case AnchorTopCenter:
+		return engo.Point{X: sc.Position.X, Y: sc.Position.Y + sc.Height/2}
+	case AnchorTopRight:
+		return engo.Point{X: sc.Position.X - sc.Width/2, Y: sc.Position.Y + sc.Height/2}
+	case AnchorMiddleLeft:
+		return engo.Point{X: sc.Position.X + sc.Width/2, Y: sc.Position.Y}
+	case AnchorMiddleCenter:
+		return engo.Point{X: sc.Position.X, Y: sc.Position.Y}
+	case AnchorMiddleRight:
+		return engo.Point{X: sc.Position.X - sc.Width/2, Y: sc.Position.Y}
+	case AnchorBottomLeft:
+		return engo.Point{X: sc.Position.X + sc.Width/2, Y: sc.Position.Y - sc.Height/2}
+	case AnchorBottomCenter:
+		return engo.Point{X: sc.Position.X, Y: sc.Position.Y - sc.Height/2}
+	case AnchorBottomRight:
+		return engo.Point{X: sc.Position.X - sc.Width/2, Y: sc.Position.Y - sc.Height/2}
+	default:
+		panic("anchor not supported: " + strconv.Itoa(int(a)))
+	}
+}
+
 // TopLeft returns the most TopLeft point of the area, not taking into account any rotation
 func (sc SpaceComponent) TopLeft() engo.Point {
 	a := sc.Anchor
