@@ -22,11 +22,10 @@ this so you have a clear story in your development.
 
 ### Comments and Documentation
 
-Every PR should have godoc style comments on ever piece of code modified,
-regardless of whether or not it had documentation before.  Please leave
-the code better you found it!  Clear comments help more people contribute.
+Every PR should have godoc style comments on modified sections of code,
+regardless of whether or not it had documentation before.  Clear comments help more people contribute.
 
-If the PR breaks backwards compatibility it should be noted in the README
+If the PR breaks backwards compatibility it should be noted in the README.
 
 ### Testing
 
