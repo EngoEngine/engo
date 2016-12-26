@@ -220,10 +220,15 @@ func createLevelTiles(lvl *Level, layers []*layer, ts []*tile) []*TileLayer {
 
 				if tileIdx := int(mapping[idx]) - 1; tileIdx >= 0 {
 					t.Image = ts[tileIdx].Image
-					t.Point = engo.Point{
-						float32(x * lvl.TileWidth),
-						float32(i * lvl.TileHeight),
+					var px, py float32
+					if lvl.Orientation == "isometric" {
+						px = float32(x - i) * float32(lvl.TileWidth/2)
+						py = float32(x + i) * float32(lvl.TileHeight/2)
+					} else {
+						px = float32(x * lvl.TileWidth)
+						py = float32(i * lvl.TileHeight)
 					}
+					t.Point = engo.Point{ px, py }
 				}
 				tilemap = append(tilemap, t)
 			}
