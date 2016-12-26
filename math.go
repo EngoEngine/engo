@@ -199,8 +199,9 @@ func CrossProduct(this, that Point) float32 {
 }
 
 // LineIntersection returns the point where the line segments one and two
-// intersect
-func LineIntersection(one, two *Line) Point {
+// intersect and true if there is intersection, nil and false when line
+// segments one and two do not intersect
+func LineIntersection(one, two *Line) (Point, bool) {
 	p := one.P1
 	q := two.P1
 
@@ -225,12 +226,12 @@ func LineIntersection(one, two *Line) Point {
 
 	// Collinear
 	if rcs == 0 && qmpcr == 0 {
-		return Point{-1, -1}
+		return Point{}, false
 	}
 
 	// Parallel
 	if rcs == 0 && qmpcr != 0 {
-		return Point{-1, -1}
+		return Point{}, false
 	}
 
 	t := qmpcs / rcs
@@ -238,10 +239,10 @@ func LineIntersection(one, two *Line) Point {
 	// rcs != 0 at this point
 	if t >= 0 && t <= 1 && u >= 0 && u <= 1 {
 		// the two line segments meet at the point p + t r = q + u s.
-		return Point{p.X + t*r.X, p.Y + t*r.Y}
+		return Point{p.X + t*r.X, p.Y + t*r.Y}, true
 	}
 
-	return Point{-1, -1}
+	return Point{}, false
 }
 
 // LineTraceFraction returns the trace fraction of tracer through boundary
@@ -249,8 +250,8 @@ func LineIntersection(one, two *Line) Point {
 // 0 means tracer's origin lies on the boundary line
 func LineTraceFraction(tracer, boundary *Line) float32 {
 
-	pt := LineIntersection(tracer, boundary)
-	if pt.X == -1 && pt.Y == -1 {
+	pt, intersect := LineIntersection(tracer, boundary)
+	if !intersect {
 		return 1
 	}
 
