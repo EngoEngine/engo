@@ -81,10 +81,8 @@ func (lvl *Level)setupOrientation() error {
 			return
 		}
 		lvl.PointToMap = func(p engo.Point) (m *engo.Point) {
-			// m.X = p.X / float32(lvl.TileWidth) + p.Y / float32(lvl.TileWidth)
-			// m.Y = p.Y / float32(lvl.TileHeight) - p.X / float32(lvl.TileHeight)
-			m.X = p.X / hw
-			m.Y = p.Y / hh
+			m.X = p.X / tw
+			m.Y = p.Y / th
 			return
 		}
 	} else if lvl.Orientation == "isometric" {
