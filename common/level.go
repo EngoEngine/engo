@@ -223,9 +223,14 @@ func createLevelTiles(lvl *Level, layers []*layer, ts []*tile) []*TileLayer {
 				if tileIdx := int(mapping[idx]) - 1; tileIdx >= 0 {
 					t.Image = ts[tileIdx].Image
 					var px, py float32
+					hw := float32(lvl.TileWidth/2)
+					hh := float32(lvl.TileHeight/2)
 					if lvl.Orientation == "isometric" {
-						px = float32(x - i) * float32(lvl.TileWidth/2)
-						py = float32(x + i) * float32(lvl.TileHeight/2)
+						px = float32(x - i) * hw
+						py = float32(x + i) * hh
+					} else if lvl.Orientation == "staggered" {
+						px = (float32(x - i) * hw) + float32(i) * hw
+						py = (float32(x + i) * hh) + float32(i) * hh
 					} else {
 						px = float32(x * lvl.TileWidth)
 						py = float32(i * lvl.TileHeight)
