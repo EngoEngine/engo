@@ -93,8 +93,6 @@ func (lvl *Level)setupOrientation() error {
 			return
 		}
 		lvl.PointToMap = func(p engo.Point) (m *engo.Point) {
-			// m.X = p.X / float32(lvl.TileWidth) + p.Y / float32(lvl.TileWidth)
-			// m.Y = p.Y / float32(lvl.TileHeight) - p.X / float32(lvl.TileHeight)
 			m.X = (p.X + p.Y) / tw
 			m.Y = (p.Y - p.X) / th
 			return
@@ -111,6 +109,7 @@ func (lvl *Level)setupOrientation() error {
 			return
 		}
 		lvl.PointToMap = func(p engo.Point) (m *engo.Point) {
+			m = &engo.Point{}
 			m.Y = p.Y / hh
 			staggerX := float32(0) // no offset on even rows
 			if int(m.Y)%2 == 1 { // odd row?
