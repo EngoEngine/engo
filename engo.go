@@ -35,10 +35,15 @@ const (
 	// DefaultHorizontalAxis is the name of the default horizontal axis, as used internally in `engo` when `StandardInputs`
 	// is defined.
 	DefaultHorizontalAxis = "horizontal"
-	DefaultMouseXAxis     = "mouse x"
-	DefaultMouseYAxis     = "mouse y"
+	// DefaultMouseXAxis is the name of the default horizontal axis for the mouse, as used internally in `engo` when `StandardInputs`
+	// is defined.
+	DefaultMouseXAxis = "mouse x"
+	// DefaultMouseYAxis is the name of the default vertical axis, as used internally in `engo` when `StandardInputs`
+	// is defined.
+	DefaultMouseYAxis = "mouse y"
 )
 
+// RunOptions is a configuration object for the function run `Run`
 type RunOptions struct {
 	// NoRun indicates the Open function should return immediately, without looping
 	NoRun bool
@@ -181,7 +186,7 @@ func Headless() bool {
 	return opts.HeadlessMode
 }
 
-// ScaleOnResizes indicates whether or not the screen should resize (i.e. make things look smaller/bigger) whenever
+// ScaleOnResize indicates whether or not the screen should resize (i.e. make things look smaller/bigger) whenever
 // the window resized. If `false`, then the size of the screen does not affect the size of the things drawn - it just
 // makes less/more objects visible
 func ScaleOnResize() bool {
