@@ -15,6 +15,8 @@ type Spritesheet struct {
 	cache                 map[int]Texture // The cell cache cells
 }
 
+// NewSpritesheetFromTexture constructs a sprite sheet from a `TextureResource`.  `cellWidth`
+// and `cellHeight` define the repeating elements of the sprite sheet.
 func NewSpritesheetFromTexture(tr *TextureResource, cellWidth, cellHeight int) *Spritesheet {
 	return &Spritesheet{texture: tr.Texture,
 		width: tr.Width, height: tr.Height,
@@ -42,6 +44,7 @@ func NewSpritesheetFromFile(textureName string, cellWidth, cellHeight int) *Spri
 }
 
 // Cell gets the region at the index i, updates and pulls from cache if need be
+// The index is defined as ??? (How is this indexed?)
 func (s *Spritesheet) Cell(index int) Texture {
 	if r, ok := s.cache[index]; ok {
 		return r
@@ -58,10 +61,12 @@ func (s *Spritesheet) Cell(index int) Texture {
 	return s.cache[index]
 }
 
+// Drawable returns the `Drawable` at index ??? (how is this indexed?)
 func (s *Spritesheet) Drawable(index int) Drawable {
 	return s.Cell(index)
 }
 
+// Drawables returns all sprite cells in a slice of Drawables (why does Drawable exist?)
 func (s *Spritesheet) Drawables() []Drawable {
 	drawables := make([]Drawable, s.CellCount())
 
@@ -72,10 +77,14 @@ func (s *Spritesheet) Drawables() []Drawable {
 	return drawables
 }
 
+// CellCount is the logical count of cells in the sprite sheet.  It is the
+// count of total cells, not the count of cells with sprites in them
 func (s *Spritesheet) CellCount() int {
 	return int(s.Width()) * int(s.Height())
 }
 
+// Cells returns a packed slice of the cell textures for the sprite sheet
+// (Why should this be used? why should it be used instead of Drawable & v.v.?)
 func (s *Spritesheet) Cells() []Texture {
 	cellsNo := s.CellCount()
 	cells := make([]Texture, cellsNo)
@@ -97,6 +106,7 @@ func (s Spritesheet) Height() float32 {
 }
 
 /*
+// These have been commented out.  Should they be deleted?
 type Sprite struct {
 	Position *Point
 	Scale    *Point
