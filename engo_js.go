@@ -161,6 +161,10 @@ func CanvasHeight() float32 {
 	return float32(flt)
 }
 
+func CanvasScale() float32 {
+	return CanvasWidth()/WindowWidth()
+}
+
 func toPx(n int) string {
 	return strconv.FormatInt(int64(n), 10) + "px"
 }
