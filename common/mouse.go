@@ -92,11 +92,23 @@ type MouseComponent struct {
 	startedDragging bool
 }
 
+func (mc *MouseComponent) GetMouseComponent() *MouseComponent {
+	return mc
+}
+
 type mouseEntity struct {
 	*ecs.BasicEntity
 	*MouseComponent
 	*SpaceComponent
 	*RenderComponent
+}
+
+//Mouser is used by AddByInterface for adding objects to the system.
+type Mouser interface {
+	GetBasicEntity() *ecs.BasicEntity
+	GetMouseComponent() *MouseComponent
+	GetSpaceComponent() *SpaceComponent
+	GetRenderComponent() *RenderComponent
 }
 
 // MouseSystem listens for mouse events, and changes value for MouseComponent accordingly
@@ -138,6 +150,11 @@ func (m *MouseSystem) New(w *ecs.World) {
 // * BasicEntity is always required.
 func (m *MouseSystem) Add(basic *ecs.BasicEntity, mouse *MouseComponent, space *SpaceComponent, render *RenderComponent) {
 	m.entities = append(m.entities, mouseEntity{basic, mouse, space, render})
+}
+
+//AddByInterface allows simple adding of simple objects
+func (m *MouseSystem) AddByInterface(ob Mouser) {
+	m.Add(ob.GetBasicEntity(), ob.GetMouseComponent(), ob.GetSpaceComponent(), ob.GetRenderComponent())
 }
 
 func (m *MouseSystem) Remove(basic ecs.BasicEntity) {
