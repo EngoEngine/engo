@@ -37,10 +37,21 @@ func (ac *AudioComponent) SetVolume(volume float64) {
 	ac.player.SetVolume(volume * MasterVolume)
 }
 
+func (ac *AudioComponent) GetAudioComponent() *AudioComponent {
+	return ac
+}
+
 type audioEntity struct {
 	*ecs.BasicEntity
 	*AudioComponent
 	*SpaceComponent
+}
+
+//interface for adding audio entities using AddByInterface
+type AudioInterface interface {
+	GetBasicEntity() *ecs.BasicEntity
+	GetAudioComponent() *AudioComponent
+	GetSpaceComponent() *SpaceComponent
 }
 
 // AudioSystem is a System that allows for sound effects and / or music
@@ -67,6 +78,11 @@ func AudioSystemPreload() {
 // where it's originated from)
 func (a *AudioSystem) Add(basic *ecs.BasicEntity, audio *AudioComponent, space *SpaceComponent) {
 	a.entities = append(a.entities, audioEntity{basic, audio, space})
+}
+
+// AddByInterface is afriendly outward face for Add As long as the entity has the required components, this a simpler way to add it.
+func (a *AudioSystem) AddByInterface(ob AudioInterface) {
+	a.Add(ob.GetBasicEntity(), ob.GetAudioComponent(), ob.GetSpaceComponent())
 }
 
 func (a *AudioSystem) Remove(basic ecs.BasicEntity) {
