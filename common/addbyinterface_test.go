@@ -5,31 +5,55 @@
 package common
 
 import (
+	"engo.io/ecs"
+	"engo.io/engo"
 	"testing"
 )
 
-//Until ecs is updated, this allows us to give BasicEntity the Interface it Needs
+//Until ecs is updated with GetBasicEntity(), this allows us to give BasicEntity the Interface it Needs
 type SafeBasic struct {
-	*ecs.BasicEntity
+	ecs.BasicEntity
 }
 
-func (sb *SafeBasic) GetBasicEntity() *BasicEntity {
-	return sb.BasicEntity
+func (sb *SafeBasic) GetBasicEntity() *ecs.BasicEntity {
+	return &sb.BasicEntity
 }
 
-type alltoall struct {
+type Collidable struct {
 	*SafeBasic
-	*AnimationComponent
-	*AudioComponent
 	*SpaceComponent
-	*RenderComponent
-	*MouseComponent
+	*CollisionComponent
 }
 
-func Test_Adds(t *testing.T) {
+func Test_Collision(t *testing.T) {
 
-	ob := alltoall{
-		SafeBasic: SafeBasic{ecs.NewBasic()},
+	ob1 := Collidable{
+		SafeBasic:      &SafeBasic{ecs.NewBasic()},
+		SpaceComponent: &SpaceComponent{Width: 50, Height: 50, Position: engo.Point{50, 50}},
+		CollisionComponent: &CollisionComponent{
+			Solid: true,
+			Main:  true,
+		},
+	}
+
+	ob2 := Collidable{
+		SafeBasic:      &SafeBasic{ecs.NewBasic()},
+		SpaceComponent: &SpaceComponent{Width: 50, Height: 50, Position: engo.Point{25, 25}},
+		CollisionComponent: &CollisionComponent{
+			Solid: true,
+			Main:  false,
+		},
+	}
+
+	cs := CollisionSystem{}
+
+	cs.AddByInterface(ob1)
+	cs.AddByInterface(ob2)
+
+	if len(cs.entities) < 2 {
+		t.Log("Collision system should have 2 entites, got %d", len(cs.entities))
+		t.Fail()
+
 	}
 
 }

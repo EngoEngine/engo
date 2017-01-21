@@ -16,7 +16,7 @@ type SpaceComponent struct {
 }
 
 // GetSpaceComponent returns self, so that containers fullfill the interface, for ease of adding to systems by Interface
-func (sc *SpaceComponent) GetSpaceComponenet() *SpaceComponent {
+func (sc *SpaceComponent) GetSpaceComponent() *SpaceComponent {
 	return sc
 }
 
@@ -129,6 +129,10 @@ type CollisionComponent struct {
 	Solid, Main bool
 	Extra       engo.Point
 	Collides    bool // Collides is true if the component is colliding with something during this pass
+}
+
+func (cc *CollisionComponent) GetCollisionComponent() *CollisionComponent {
+	return cc
 }
 
 type CollisionMessage struct {
