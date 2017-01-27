@@ -62,7 +62,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		log.Println("Could not load font:", err)
 	}
 
-	ballTexture, err := common.PreloadedSpriteSingle("ball.png")
+	ballTexture, err := common.LoadedSprite("ball.png")
 	if err != nil {
 		log.Println("Could not load texture:", err)
 	}
@@ -138,7 +138,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		}
 	}
 
-	paddleTexture, err := common.PreloadedSpriteSingle("paddle.png")
+	paddleTexture, err := common.LoadedSprite("paddle.png")
 	if err != nil {
 		log.Println(err)
 	}

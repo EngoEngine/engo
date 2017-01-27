@@ -82,3 +82,52 @@ func TestPointScalarMultiplication(t *testing.T) {
 		t.Errorf("a.X should equal 18 not %v", a.Y)
 	}
 }
+
+func TestLineIntersection(t *testing.T) {
+	//Parallel lines
+	one := Line{
+		Point{0, 0},
+		Point{1, 1}}
+	two := Line{
+		Point{0, 1},
+		Point{1, 2}}
+
+	point, intersect := LineIntersection(&one, &two)
+
+	if intersect {
+		t.Errorf("Lines %v and %v should not intersect, they are parallel.  Intersection at: %v.", one, two, point)
+	}
+
+	//Collinear lines
+	one = Line{
+		Point{0, 0},
+		Point{1, 1}}
+	two = Line{
+		Point{2, 2},
+		Point{3, 3}}
+
+	point, intersect = LineIntersection(&one, &two)
+
+	if intersect {
+		t.Errorf("Lines %v and %v should not intersect, they are collinear. Intersection at: %v", one, two, point)
+	}
+
+	//intersecting lines
+	one = Line{
+		Point{0, 0},
+		Point{1, 1}}
+	two = Line{
+		Point{0, 1},
+		Point{1, 1}}
+
+	point, intersect = LineIntersection(&one, &two)
+
+	if !intersect {
+		t.Errorf("Lines %v and %v should intersect.", one, two)
+	}
+
+	if intersect && (point != Point{1, 1}) {
+		t.Errorf("Lines %v and %v should intersect at point {1, 1}, but they are intersecting at %v.", one, two, point)
+	}
+
+}

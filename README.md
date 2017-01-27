@@ -63,6 +63,7 @@ us a DM or [create an issue](https://github.com/EngoEngine/engo/issues/new).
 Engo is currently undergoing a lot of optimizations and constantly gets new features. However, this sometimes means things break. In order to make transitioning easier for you,
 we have a list of those changes, with the most recent being at the top. If you run into any problems, please contact us at [gitter](https://gitter.im/EngoEngine/engo).
 
+* `engo.PreloadedSpriteSingle` is now `engo.LoadedSprite`
 * `engo.Files.Load` and `engo.Files.LoadMany` have been merged into one function `engo.Files.Load` which does the same thing as `engo.Files.LoadMany` allowing an indefinite ammount of parameters to be passed in.
 * `engo` has been split in `engo` (which contains stuff about creating windows, starting the game, creating an OpenGL context, input handling, etc.) - and `common` (which contains a lot of common `System` implementations for common tasks (`RenderSystem`, `CameraSystem`, `AudioSystem`, etc.)
 * `engo.Width()` and `engo.Height()` have been changed to `engo.GameWidth()` and `engo.GameHeight()` respectively.
@@ -70,7 +71,6 @@ we have a list of those changes, with the most recent being at the top. If you r
 * `engo.NewRenderComponent` was removed. You can now define the values you want directly by using `engo.RenderComponent{}`. Note that the `Drawable` is still required.
 * `ecs.Entity` changed to `ecs.BasicEntity`, `world.AddEntity` is gone - **a lot** has changed here. The entire issue is described [here](https://github.com/EngoEngine/ecs/issues/13), while [this comment](https://github.com/EngoEngine/ecs/issues/13#issuecomment-210887914) in particular, should help you migrate your code.
 * Renamed `engo.io/webgl` to `engo.io/gl`, because the package handles more than only *web*gl.
-* `scene.Exit()` - a `Scene` now also requires an `Exit()` function, alongside the `Hide()` and `Show()` it already required.
 * `github.com/EngoEngine/engo` -> `engo.io/engo` - Our packages `engo`, `ecs` and `gl` should now be imported using the `engo.io` path.
 * `engi.XXX` -> `engo.XXX` - We renamed our package `engi` to `engo`.
 

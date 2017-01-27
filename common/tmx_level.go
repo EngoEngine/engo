@@ -324,7 +324,7 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 			return nil, err
 		}
 
-		curImg, err := PreloadedSpriteSingle(url)
+		curImg, err := LoadedSprite(url)
 		if err != nil {
 			return nil, err
 		}
