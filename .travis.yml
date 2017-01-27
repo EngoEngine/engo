@@ -21,7 +21,7 @@ before_install:
 - go get golang.org/x/mobile/cmd/gomobile
 - gomobile init
 - git clone https://github.com/urho3d/android-ndk.git $HOME/android-ndk-root
-- export NDK_PATH=$HOME/android-ndk-root
+- echo "$HOME/android-ndk-root" > $GOPATH/pkg/gomobile/android_ndk_root
 install:
 -
 before_script:
