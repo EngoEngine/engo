@@ -105,19 +105,19 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	width, height = window.GetSize()
 	windowWidth, windowHeight = float32(width), float32(height)
 
-	vp := Gl.GetViewport()
-	canvasWidth, canvasHeight = float32(vp[2]), float32(vp[3])
+	fw, fh := window.GetFramebufferSize()
+	canvasWidth, canvasHeight = float32(fw), float32(fh)
 
 	if windowWidth <= canvasWidth && windowHeight <= canvasHeight {
 		scale = canvasWidth / windowWidth
 	}
 
 	window.SetFramebufferSizeCallback(func(window *glfw.Window, w, h int) {
-		windowWidth, windowHeight = float32(w), float32(h)
 		Gl.Viewport(0, 0, w, h)
+		width, height = window.GetSize()
+		windowWidth, windowHeight = float32(width), float32(width)
 
-		vp := Gl.GetViewport()
-		canvasWidth, canvasHeight = float32(vp[2]), float32(vp[3])
+		canvasWidth, canvasHeight = float32(w), float32(h)
 
 		if windowWidth <= canvasWidth && windowHeight <= canvasHeight {
 			scale = canvasWidth / windowWidth
@@ -125,13 +125,13 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	})
 
 	window.SetCursorPosCallback(func(window *glfw.Window, x, y float64) {
-		Input.Mouse.X, Input.Mouse.Y = float32(x), float32(y)
+		Input.Mouse.X, Input.Mouse.Y = float32(x)*scale, float32(y)*scale
 		Input.Mouse.Action = Move
 	})
 
 	window.SetMouseButtonCallback(func(window *glfw.Window, b glfw.MouseButton, a glfw.Action, m glfw.ModifierKey) {
 		x, y := window.GetCursorPos()
-		Input.Mouse.X, Input.Mouse.Y = float32(x), float32(y)
+		Input.Mouse.X, Input.Mouse.Y = float32(x)*scale, float32(y)*scale
 
 		// this is only valid because we use an internal structure that is
 		// 100% compatible with glfw3.h
@@ -171,8 +171,8 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		windowHeight = float32(heightInt)
 
 		// TODO: verify these for retina displays & verify if needed here
-		vp := Gl.GetViewport()
-		canvasWidth, canvasHeight = float32(vp[2]), float32(vp[3])
+		fw, fh := window.GetFramebufferSize()
+		canvasWidth, canvasHeight = float32(fw), float32(fh)
 
 		if !opts.ScaleOnResize {
 			gameWidth, gameHeight = float32(widthInt), float32(heightInt)
@@ -292,6 +292,10 @@ func CanvasWidth() float32 {
 
 func CanvasHeight() float32 {
 	return canvasHeight
+}
+
+func CanvasScale() float32 {
+	return scale
 }
 
 // SetCursor sets the pointer of the mouse to the defined standard cursor
