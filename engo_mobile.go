@@ -69,6 +69,10 @@ func CanvasHeight() float32 {
 	return canvasHeight
 }
 
+func CanvasScale() float32 {
+	return CanvasWidth()/WindowWidth()
+}
+
 func DestroyWindow() { /* nothing to do here? */ }
 
 func runLoop(defaultScene Scene, headless bool) {
