@@ -41,5 +41,7 @@ func (as *AudioSystem) New(*ecs.World) {
 }
 
 func (as *AudioSystem) Add(*ecs.BasicEntity, *AudioComponent, *SpaceComponent) {}
+func (as *AudioSystem) AddByInterface(o Audioable)                             {}
 func (as *AudioSystem) Remove(basic ecs.BasicEntity)                           {}
-func (as *AudioSystem) Update(dt float32)                                      {}
+
+func (as *AudioSystem) Update(dt float32) {}
