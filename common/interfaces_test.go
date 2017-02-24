@@ -1,3 +1,5 @@
+//+build !windows,!netgo,!android
+
 package common
 
 import (
