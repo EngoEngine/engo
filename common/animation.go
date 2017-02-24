@@ -94,6 +94,11 @@ func (ac *AnimationComponent) NextFrame() {
 	}
 }
 
+// GetAnimationComponent provides container classes with interface for access to Component
+func (ac *AnimationComponent) GetAnimationComponent() *AnimationComponent {
+	return ac
+}
+
 // AnimationSystem tracks AnimationComponents, advancing their current animation.
 type AnimationSystem struct {
 	entities map[ecs.BasicEntity]animationEntity
@@ -110,6 +115,16 @@ func (a *AnimationSystem) Add(basic *ecs.BasicEntity, anim *AnimationComponent, 
 		a.entities = make(map[ecs.BasicEntity]animationEntity)
 	}
 	a.entities[*basic] = animationEntity{anim, render}
+}
+
+// AddByInterface is a Simpler outward facing equivilant of Add, as long as the object meets the interface it can be added safely. Each Component, should provide these methods, so that entities automatically fulfull the interface
+func (a *AnimationSystem) AddByInterface(ob interface {
+	GetBasicEntity() *ecs.BasicEntity
+	GetAnimationComponent() *AnimationComponent
+	GetRenderComponent() *RenderComponent
+}) {
+	a.Add(ob.GetBasicEntity(), ob.GetAnimationComponent(), ob.GetRenderComponent())
+
 }
 
 // Remove stops tracking the given entity.

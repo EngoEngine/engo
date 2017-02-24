@@ -66,10 +66,22 @@ func (r *RenderComponent) SetZIndex(index float32) {
 	engo.Mailbox.Dispatch(&renderChangeMessage{})
 }
 
+// GetRenderComponent is for AddByInterface methods and can be accessed on it's containers to get this component
+func (r *RenderComponent) GetRenderComponent() *RenderComponent {
+	return r
+}
+
 type renderEntity struct {
 	*ecs.BasicEntity
 	*RenderComponent
 	*SpaceComponent
+}
+
+//Allows AddByInterface
+type RenderInterface interface {
+	GetBasicEntity() *ecs.BasicEntity
+	GetRenderComponent() *RenderComponent
+	GetSpaceComponent() *SpaceComponent
 }
 
 type renderEntityList []renderEntity
@@ -156,6 +168,11 @@ func (rs *RenderSystem) Add(basic *ecs.BasicEntity, render *RenderComponent, spa
 
 	rs.entities = append(rs.entities, renderEntity{basic, render, space})
 	rs.sortingNeeded = true
+}
+
+//AddByInterface adds the object using the GetComponent Methods defined, to make it simpler to add normal objects to the System
+func (rs *RenderSystem) AddByInterface(ob RenderInterface) {
+	rs.Add(ob.GetBasicEntity(), ob.GetRenderComponent(), ob.GetSpaceComponent())
 }
 
 func (rs *RenderSystem) Remove(basic ecs.BasicEntity) {

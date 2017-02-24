@@ -15,6 +15,11 @@ type SpaceComponent struct {
 	Rotation float32 // angle in degrees for the rotation to apply clockwise
 }
 
+// GetSpaceComponent returns self, so that containers fullfill the interface, for ease of adding to systems by Interface
+func (sc *SpaceComponent) GetSpaceComponent() *SpaceComponent {
+	return sc
+}
+
 // Center positions the space component according to its center instead of its
 // top-left point (this avoids doing the same math each time in your systems)
 func (sc *SpaceComponent) Center(p engo.Point) {
@@ -126,6 +131,10 @@ type CollisionComponent struct {
 	Collides    bool // Collides is true if the component is colliding with something during this pass
 }
 
+func (cc *CollisionComponent) GetCollisionComponent() *CollisionComponent {
+	return cc
+}
+
 type CollisionMessage struct {
 	Entity collisionEntity
 	To     collisionEntity
@@ -139,12 +148,22 @@ type collisionEntity struct {
 	*SpaceComponent
 }
 
+type Collisioner interface {
+	GetBasicEntity() *ecs.BasicEntity
+	GetCollisionComponent() *CollisionComponent
+	GetSpaceComponent() *SpaceComponent
+}
+
 type CollisionSystem struct {
 	entities []collisionEntity
 }
 
 func (c *CollisionSystem) Add(basic *ecs.BasicEntity, collision *CollisionComponent, space *SpaceComponent) {
 	c.entities = append(c.entities, collisionEntity{basic, collision, space})
+}
+
+func (c *CollisionSystem) AddByInterface(ob Collisioner) {
+	c.Add(ob.GetBasicEntity(), ob.GetCollisionComponent(), ob.GetSpaceComponent())
 }
 
 func (c *CollisionSystem) Remove(basic ecs.BasicEntity) {
