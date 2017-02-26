@@ -105,7 +105,7 @@ func (*RenderSystem) Priority() int { return RenderSystemPriority }
 func (rs *RenderSystem) New(w *ecs.World) {
 	rs.world = w
 
-	w.AddSystem(&CameraSystem{})
+	addCameraSystemOnce(w)
 
 	if !engo.Headless() {
 		initShaders(w)
@@ -115,6 +115,19 @@ func (rs *RenderSystem) New(w *ecs.World) {
 	engo.Mailbox.Listen("renderChangeMessage", func(engo.Message) {
 		rs.sortingNeeded = true
 	})
+}
+
+func addCameraSystemOnce(w *ecs.World) {
+	camSystemAlreadyAdded := false
+	for _, system := range w.Systems() {
+		switch system.(type) {
+		case *CameraSystem:
+			camSystemAlreadyAdded = true
+		}
+	}
+	if !camSystemAlreadyAdded {
+		w.AddSystem(&CameraSystem{})
+	}
 }
 
 func (rs *RenderSystem) Add(basic *ecs.BasicEntity, render *RenderComponent, space *SpaceComponent) {
