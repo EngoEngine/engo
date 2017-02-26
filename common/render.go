@@ -8,6 +8,7 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/gl"
+	"sync"
 )
 
 const (
@@ -117,7 +118,11 @@ func (rs *RenderSystem) New(w *ecs.World) {
 	})
 }
 
+var cameraInitMutex sync.Mutex
 func addCameraSystemOnce(w *ecs.World) {
+	cameraInitMutex.Lock()
+	defer cameraInitMutex.Unlock()
+
 	camSystemAlreadyAdded := false
 	for _, system := range w.Systems() {
 		switch system.(type) {
