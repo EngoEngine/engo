@@ -20,6 +20,8 @@ before_install:
 - gopherjs get "honnef.co/go/js/xhr"
 - go get golang.org/x/mobile/cmd/gomobile
 - gomobile init
+- git clone https://github.com/urho3d/android-ndk.git $HOME/android-ndk-root
+- printf "$HOME/android-ndk-root" > $GOPATH/pkg/gomobile/android_ndk_root
 install:
 -
 before_script:
