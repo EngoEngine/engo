@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"engo.io/ecs"
 	"engo.io/engo"
 	"github.com/stretchr/testify/assert"
 )
@@ -59,4 +60,54 @@ func TestSpaceComponent_Corners(t *testing.T) {
 	for i := 0; i < 4; i++ {
 		assert.True(t, exp2[i].Equal(act2[i]), fmt.Sprintf("corner %d did not match for rotation %f (got %v expected %v)", i, space2.Rotation, act2[i], exp2[i]))
 	}
+}
+
+const (
+	Ball = 1 << iota
+	Bat
+)
+
+//Test GroupSolid working
+func Test_GroupSolid(t *testing.T) {
+	//All items in same place, have to collide
+	CE := func(m, g byte) collisionEntity {
+		nb := ecs.NewBasic()
+		return collisionEntity{
+			BasicEntity: &nb,
+			CollisionComponent: &CollisionComponent{
+				Main:  m,
+				Group: g,
+			},
+			//All objects in same position
+			SpaceComponent: &SpaceComponent{engo.Point{10, 10}, 50, 50, 0},
+		}
+	}
+	ents := []collisionEntity{
+		CE(Ball, 0),     //The Ball
+		CE(Bat, Ball),   //The Batt
+		CE(0, Ball|Bat), //The Wall
+		CE(0, 0),        //Ghost Should not collide with anything
+	}
+	sys := CollisionSystem{
+		entities: ents,
+		Solids:   Ball, //Only the ball should move as Solid
+	}
+	sys.Update(0.01)
+
+	if ents[0].Position == ents[1].Position {
+		t.Log("Ball should collide Solid")
+		t.Fail()
+	}
+
+	if ents[3].Collides {
+		t.Log("Ghost should not collide with anything")
+		t.Fail()
+	}
+	for i := 0; i < 2; i++ { //Ball and Bat
+		if !ents[i].Collides {
+			t.Logf("object %d should collides", i)
+			t.Fail()
+		}
+	}
+
 }

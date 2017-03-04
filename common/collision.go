@@ -120,8 +120,11 @@ func triangleArea(p1, p2, p3 engo.Point) float32 {
 	return (b * height) / 2
 }
 
+// CollisionComponent is used to define which items should be compared to which for a collision
 type CollisionComponent struct {
-	Solid, Main bool
+	// if a.Main & (bitwise) b.Group, items can collide
+	// if a.Main == 0, it will not loop for other items
+	Main, Group byte
 	Extra       engo.Point
 	Collides    bool // Collides is true if the component is colliding with something during this pass
 }
@@ -140,6 +143,10 @@ type collisionEntity struct {
 }
 
 type CollisionSystem struct {
+	// Solids, used to tell which collisions should be treated as solid.
+	// if a.Main & b.Group & sys.Solilds (bitwise comparison) Collisions are treated as sold.  This allows One collision system to define up to 8 collision groups and assigin items to groups using bit flags. eg
+	// sys.Solids = BallandEnemies | BallandWall (User defined bitwise constants)
+	Solids   byte
 	entities []collisionEntity
 }
 
@@ -162,7 +169,8 @@ func (c *CollisionSystem) Remove(basic ecs.BasicEntity) {
 
 func (cs *CollisionSystem) Update(dt float32) {
 	for i1, e1 := range cs.entities {
-		if !e1.CollisionComponent.Main {
+		if e1.CollisionComponent.Main == 0 {
+			//Main cannot pass bitwise comparison with any other items. Do not loop.
 			continue // with other entities
 		}
 
@@ -188,7 +196,7 @@ func (cs *CollisionSystem) Update(dt float32) {
 			otherAABB.Max.Y += offset.Y
 
 			if IsIntersecting(entityAABB, otherAABB) {
-				if e1.CollisionComponent.Solid && e2.CollisionComponent.Solid {
+				if e1.CollisionComponent.Main&e2.CollisionComponent.Group > 0 {
 					mtd := MinimumTranslation(entityAABB, otherAABB)
 					e1.SpaceComponent.Position.X += mtd.X
 					e1.SpaceComponent.Position.Y += mtd.Y
