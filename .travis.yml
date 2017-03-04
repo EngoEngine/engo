@@ -15,8 +15,6 @@ before_install:
 - go get golang.org/x/tools/cmd/cover
 - go get github.com/mdempsky/unconvert
 - go get github.com/mattn/goveralls
-- gopherjs get "honnef.co/go/js/dom"
-- gopherjs get "honnef.co/go/js/xhr"
 - go get golang.org/x/mobile/cmd/gomobile
 - gomobile init
 - git clone https://github.com/urho3d/android-ndk.git $HOME/android-ndk-root
