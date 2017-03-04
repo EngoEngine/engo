@@ -4,7 +4,6 @@ echo "Using GOPATH=$GOPATH"
 
 echo "Getting engo.io/engo using 'go get'"
 go get -t -v ./... || exit 1
-(cd $HOME/gopath/src/github.com/go-gl/mathgl/mgl32 && go generate)
 
 echo "Testing engo.io/engo using coveralls"
 $HOME/gopath/bin/goveralls -service=travis-ci
