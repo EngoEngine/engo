@@ -10,7 +10,7 @@ branch:
 language: go
 go_import_path: engo.io/engo
 go:
-- 1.8
+- 1.7
 before_install:
 - go get golang.org/x/tools/cmd/cover
 - go get github.com/mdempsky/unconvert
