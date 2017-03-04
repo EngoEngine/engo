@@ -277,7 +277,7 @@ func (t ByFirstgid) Swap(i, j int) { t[i], t[j] = t[j], t[i] }
 // Less returns if t's i Firstgid is less than t's j
 func (t ByFirstgid) Less(i, j int) bool { return t[i].Firstgid < t[j].Firstgid }
 
-// MUST BE base64 ENCODED and COMPRESSED WITH zlib!
+// createLevelFromTmx unmarshales and unpacks tmx data into a Level
 func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 	tmxLevel := &TMXLevel{}
 	level := &Level{}
