@@ -126,7 +126,9 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 	window.SetCursorPosCallback(func(window *glfw.Window, x, y float64) {
 		Input.Mouse.X, Input.Mouse.Y = float32(x)*scale, float32(y)*scale
-		Input.Mouse.Action = Move
+		if Input.Mouse.Action != Release && Input.Mouse.Action != Press {
+			Input.Mouse.Action = Move
+		}
 	})
 
 	window.SetMouseButtonCallback(func(window *glfw.Window, b glfw.MouseButton, a glfw.Action, m glfw.ModifierKey) {
