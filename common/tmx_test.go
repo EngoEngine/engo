@@ -12,6 +12,7 @@ type DecoderTest struct{
 	expected []uint32
 }
 
+// decoderTests defines Input and expected output for testing the decoder.
 var decoderTests = map[string]DecoderTest{
 	"NoTiles": DecoderTest{
 		expected: []uint32{0, 0, 0, 0},
@@ -36,6 +37,8 @@ var decoderTests = map[string]DecoderTest{
 	},
 }
 
+// TestLayerDecode tests the Later Data Decoder by feeding it encoded data
+// and checking for expected output.
 func TestLayerDecode(t *testing.T) {
 	for name, dt := range decoderTests {
 		for _, data := range dt.data {

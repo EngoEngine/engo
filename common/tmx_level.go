@@ -57,19 +57,32 @@ type TMXTileLayer struct {
 	Height int `xml:"height,attr"`
 	// TileMapping contains the generated tilemapping list
 	TileMapping []uint32
-	// CompData is a temporary list used to fill TileMapping
+	// TMXData is the encoded tile layer grid
 	Data TMXData `xml:"data"`
 }
 
-// TMXData
+// TMXData represents custom properties which "Can be used as a child
+// of the map, tileset, tile (when part of a tileset), layer, objectgroup,
+// object and imagelayer elements"
 type TMXData struct {
+	// Encoding defines the fomat of the Data field; Valid values are
+	// one of "", "base64", or "csv"
 	Encoding string `xml:"encoding,attr"`
+	// Compression defines the compression applied to base64 data
+	// valid values are one of "", "zlib", "gzip"
 	Compression string `xml:"compression,attr"`
+	// Data contains an encoded list of uint32 guids defining
+	// the tile layout of a layer
 	Data string `xml:",innerxml,"`
+	// Tiles is an array of tiles containing guids. Not set if
+	// other encodings are used
 	Tiles []TMXTile `xml:tile`
 }
 
+// TMXTile represents a single tile on a tile layer.
 type TMXTile struct {
+	// gid represents a single tile encoded with its flip
+	// orientation
 	gid uint32 `xml:gid,attr`
 }
 
