@@ -69,6 +69,12 @@ func (a *AudioSystem) Add(basic *ecs.BasicEntity, audio *AudioComponent, space *
 	a.entities = append(a.entities, audioEntity{basic, audio, space})
 }
 
+// AddByInterface adds an entity to the system using the Audioable interface. This allows for entities to be added without specifying each component
+// If you do not wish to add a SpaceComponent, call Add, with the basic, then audio components, followed by nil
+func (a *AudioSystem) AddByInterface(o Audioable) {
+	a.Add(o.GetBasicEntity(), o.GetAudioComponent(), o.GetSpaceComponent())
+}
+
 func (a *AudioSystem) Remove(basic ecs.BasicEntity) {
 	delete := -1
 	for index, e := range a.entities {
