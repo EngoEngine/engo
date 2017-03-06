@@ -124,15 +124,20 @@ func triangleArea(p1, p2, p3 engo.Point) float32 {
 type CollisionComponent struct {
 	// if a.Main & (bitwise) b.Group, items can collide
 	// if a.Main == 0, it will not loop for other items
-	Main, Group byte
+	Main, Group CollisionGroup
 	Extra       engo.Point
-	Collides    bool // Collides is true if the component is colliding with something during this pass
+	Collides    CollisionGroup // Collides is true if the component is colliding with something during this pass
 }
 
 type CollisionMessage struct {
 	Entity collisionEntity
 	To     collisionEntity
 }
+
+// CollisionGroup is intended to be used in bitwise comparisons
+// The user is expected to create a const ( a = 1 << iota \n b \n c etc)
+// for the different kinds of collisions they hope to use
+type CollisionGroup byte
 
 func (CollisionMessage) Type() string { return "CollisionMessage" }
 
@@ -143,10 +148,9 @@ type collisionEntity struct {
 }
 
 type CollisionSystem struct {
-	// Solids, used to tell which collisions should be treated as solid.
-	// if a.Main & b.Group & sys.Solilds (bitwise comparison) Collisions are treated as sold.  This allows One collision system to define up to 8 collision groups and assigin items to groups using bit flags. eg
-	// sys.Solids = BallandEnemies | BallandWall (User defined bitwise constants)
-	Solids   byte
+	// Solids, used to tell which collisions should be treated as solid by bitwise comparison.
+	// if a.Main & b.Group & sys.Solids{ Collisions are treated as solid.  }
+	Solids   CollisionGroup
 	entities []collisionEntity
 }
 
@@ -186,11 +190,15 @@ func (cs *CollisionSystem) Update(dt float32) {
 		entityAABB.Max.X += offset.X
 		entityAABB.Max.Y += offset.Y
 
-		var collided bool
+		var collided CollisionGroup
 
 		for i2, e2 := range cs.entities {
 			if i1 == i2 {
 				continue // with other entities, because we won't collide with ourselves
+			}
+			cgroup := e1.CollisionComponent.Main & e2.CollisionComponent.Group
+			if cgroup == 0 {
+				continue //Items are not in a comparible group dont bother
 			}
 
 			otherAABB := e2.SpaceComponent.AABB()
@@ -201,13 +209,14 @@ func (cs *CollisionSystem) Update(dt float32) {
 			otherAABB.Max.Y += offset.Y
 
 			if IsIntersecting(entityAABB, otherAABB) {
-				if e1.CollisionComponent.Main&e2.CollisionComponent.Group > 0 {
+				if cgroup&cs.Solids > 0 {
 					mtd := MinimumTranslation(entityAABB, otherAABB)
 					e1.SpaceComponent.Position.X += mtd.X
 					e1.SpaceComponent.Position.Y += mtd.Y
 				}
 
-				collided = true
+				//collided can now list the types of collision
+				collided = collided | cgroup
 				engo.Mailbox.Dispatch(CollisionMessage{Entity: e1, To: e2})
 			}
 		}
