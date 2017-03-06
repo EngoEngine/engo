@@ -50,7 +50,7 @@ func (pong *PongGame) Preload() {
 func (pong *PongGame) Setup(w *ecs.World) {
 	common.SetBackground(color.Black)
 	w.AddSystem(&common.RenderSystem{})
-	w.AddSystem(&common.CollisionSystem{})
+	w.AddSystem(&common.CollisionSystem{Solids: 1})
 	w.AddSystem(&SpeedSystem{})
 	w.AddSystem(&ControlSystem{})
 	w.AddSystem(&BallSystem{})
@@ -77,8 +77,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		Height:   ballTexture.Height() * ball.RenderComponent.Scale.Y,
 	}
 	ball.CollisionComponent = common.CollisionComponent{
-		Main:  true,
-		Solid: true,
+		Main: 1,
 	}
 	ball.SpeedComponent = SpeedComponent{Point: engo.Point{300, 1000}}
 
@@ -139,8 +138,7 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		}
 		paddle.ControlComponent = ControlComponent{schemes[i]}
 		paddle.CollisionComponent = common.CollisionComponent{
-			Main:  false,
-			Solid: true,
+			Group: 1,
 		}
 
 		// Add our entity to the appropriate systems

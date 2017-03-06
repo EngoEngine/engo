@@ -38,7 +38,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 
 	// Add all of the systems
 	w.AddSystem(&common.RenderSystem{})
-	w.AddSystem(&common.CollisionSystem{})
+	w.AddSystem(&common.CollisionSystem{Solids: 1})
 	w.AddSystem(&DeathSystem{})
 	w.AddSystem(&FallingSystem{})
 	w.AddSystem(&ControlSystem{})
@@ -63,8 +63,7 @@ func (*DefaultScene) Setup(w *ecs.World) {
 		Height:   texture.Height() * guy.RenderComponent.Scale.Y,
 	}
 	guy.CollisionComponent = common.CollisionComponent{
-		Solid: true,
-		Main:  true,
+		Main: 1,
 	}
 
 	// Add it to appropriate systems
@@ -159,7 +158,7 @@ func NewRock(world *ecs.World, position engo.Point) {
 		Width:    texture.Width() * rock.RenderComponent.Scale.X,
 		Height:   texture.Height() * rock.RenderComponent.Scale.Y,
 	}
-	rock.CollisionComponent = common.CollisionComponent{Solid: true}
+	rock.CollisionComponent = common.CollisionComponent{Group: 1}
 
 	for _, system := range world.Systems() {
 		switch sys := system.(type) {
