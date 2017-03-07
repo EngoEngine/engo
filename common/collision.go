@@ -5,7 +5,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
-	"github.com/engoengine/math"
+	"engo.io/engo/math"
 )
 
 type SpaceComponent struct {

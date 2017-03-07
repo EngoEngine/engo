@@ -7,7 +7,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
-	"github.com/engoengine/math"
+	"engo.io/engo/math"
 	"github.com/go-gl/mathgl/mgl32"
 )
 
