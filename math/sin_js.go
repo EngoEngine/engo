@@ -1,9 +1,9 @@
-//+build !netgo
+//+build netgo
 
 package math
 
 import (
-	engomath "github.com/engoengine/math"
+	"math"
 )
 
 // Cos returns the cosine of the radian argument x.
@@ -12,7 +12,7 @@ import (
 //	Cos(±Inf) = NaN
 //	Cos(NaN) = NaN
 func Cos(x float32) float32 {
-	return engomath.Cos(x)
+	return float32(math.Cos(float64(x)))
 }
 
 // Sin returns the sine of the radian argument x.
@@ -22,5 +22,5 @@ func Cos(x float32) float32 {
 //	Sin(±Inf) = NaN
 //	Sin(NaN) = NaN
 func Sin(x float32) float32 {
-	return engomath.Sin(x)
+	return float32(math.Sin(float64(x)))
 }

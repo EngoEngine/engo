@@ -1,9 +1,9 @@
-//+build !netgo
+//+build netgo
 
 package math
 
 import (
-	engomath "github.com/engoengine/math"
+	"math"
 )
 
 // Sqrt returns the square root of x.
@@ -14,5 +14,5 @@ import (
 //	Sqrt(x < 0) = NaN
 //	Sqrt(NaN) = NaN
 func Sqrt(x float32) float32 {
-	return engomath.Sqrt(x)
+	return float32(math.Sqrt(float64(x)))
 }
