@@ -60,3 +60,25 @@ func TestSpaceComponent_Corners(t *testing.T) {
 		assert.True(t, exp2[i].Equal(act2[i]), fmt.Sprintf("corner %d did not match for rotation %f (got %v expected %v)", i, space2.Rotation, act2[i], exp2[i]))
 	}
 }
+
+func TestSpaceComponent_Center(t *testing.T) {
+	components := []SpaceComponent{
+		SpaceComponent{Width: 0, Height: 0},
+		SpaceComponent{Width: 100, Height: 100},
+		SpaceComponent{Width: 100, Height: 200},
+	}
+	points := []engo.Point{
+		engo.Point{10, 10},
+		engo.Point{50, 50},
+		engo.Point{10, 50},
+		engo.Point{99, 99},
+	}
+
+	for _, sc := range components {
+		for _, p := range points {
+			sc.Center(p)
+			c := sc.GetCenter()
+			assert.True(t, c.Equal(p), fmt.Sprintf("center %v should be equal to point %v", c, p))
+		}
+	}
+}

@@ -25,6 +25,15 @@ func (sc *SpaceComponent) Center(p engo.Point) {
 	sc.Position.Y = p.Y - yDelta
 }
 
+// GetCenter gets the center position of the space component instead of its
+// top-left point (this avoids doing the same math each time in your systems)
+func (sc *SpaceComponent) GetCenter() engo.Point {
+	xDelta := sc.Width / 2
+	yDelta := sc.Height / 2
+	p := sc.Position
+	return engo.Point{p.X + xDelta, p.Y + yDelta}
+}
+
 // AABB returns the minimum and maximum point for the given SpaceComponent. It hereby takes into account the
 // rotation of the Component - it may very well be that the Minimum as given by engo.AABB, is smaller than the Position
 // of the object (i.e. when rotated).
