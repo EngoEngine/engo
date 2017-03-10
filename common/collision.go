@@ -15,14 +15,23 @@ type SpaceComponent struct {
 	Rotation float32 // angle in degrees for the rotation to apply clockwise
 }
 
-// Center positions the space component according to its center instead of its
+// SetCenter positions the space component according to its center instead of its
 // top-left point (this avoids doing the same math each time in your systems)
-func (sc *SpaceComponent) Center(p engo.Point) {
+func (sc *SpaceComponent) SetCenter(p engo.Point) {
 	xDelta := sc.Width / 2
 	yDelta := sc.Height / 2
 	// update position according to point being used as our center
 	sc.Position.X = p.X - xDelta
 	sc.Position.Y = p.Y - yDelta
+}
+
+// Center gets the center position of the space component instead of its
+// top-left point (this avoids doing the same math each time in your systems)
+func (sc *SpaceComponent) Center() engo.Point {
+	xDelta := sc.Width / 2
+	yDelta := sc.Height / 2
+	p := sc.Position
+	return engo.Point{p.X + xDelta, p.Y + yDelta}
 }
 
 // AABB returns the minimum and maximum point for the given SpaceComponent. It hereby takes into account the
@@ -145,6 +154,11 @@ type CollisionSystem struct {
 
 func (c *CollisionSystem) Add(basic *ecs.BasicEntity, collision *CollisionComponent, space *SpaceComponent) {
 	c.entities = append(c.entities, collisionEntity{basic, collision, space})
+}
+
+// AddByInterface Provides a simple way to add an entity to the system that satisfies Collisionable. Any entity containing, BasicEntity,CollisionComponent, and SpaceComponent anonymously, automatically does this.
+func (c *CollisionSystem) AddByInterface(o Collisionable) {
+	c.Add(o.GetBasicEntity(), o.GetCollisionComponent(), o.GetSpaceComponent())
 }
 
 func (c *CollisionSystem) Remove(basic ecs.BasicEntity) {

@@ -48,9 +48,9 @@ The `common` package contains our ECS implementations of common game development
 
 1. First, you have to install some dependencies:
   1. If you're running on Debian/Ubuntu:
-    `sudo apt-get install libopenal-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev xorg-dev libgl1-mesa-dev`
-  2. If you're running on Windows you'll need a gcc compiler that the go tool can use and have `gcc.exe` in your PATH environmental variable. We recommend [Mingw](http://mingw-w64.org/doku.php/start) since it has been tested.
-  3. If you're on OSX, you should be OK. [Open an issue if you are not](https://github.com/EngoEngine/engo/issues/new)
+    `sudo apt-get install libopenal-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev xorg-dev libgl1-mesa-dev git-all`
+  2. If you're running on Windows you'll need a gcc compiler that the go tool can use and have `gcc.exe` in your PATH environmental variable. We recommend [Mingw](http://mingw-w64.org/doku.php/start) since it has been tested. You'll also need git installed, we recommend getting it from [The official Git site](http://git-scm.com/download/win)
+  3. If you're on OSX, you will also need Git. You can find instructions [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git#Installing-on-Mac). You can also use homebrew to install git as well. [Open an issue if you have any issues](https://github.com/EngoEngine/engo/issues/new)
 2. Then, you can go get it:
 `go get -u engo.io/engo`
 3. Now, you have two choices:
