@@ -1,7 +1,7 @@
 package engo
 
 import (
-	"github.com/engoengine/math"
+	"engo.io/engo/math"
 )
 
 const (
