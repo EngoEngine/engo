@@ -739,7 +739,11 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		engo.Gl.Uniform1f(l.inBorderWidth, shape.BorderWidth/l.camera.z)
 		if shape.BorderWidth > 0 {
 			r, g, b, a := shape.BorderColor.RGBA()
-			engo.Gl.Uniform4f(l.inBorderColor, float32(r>>8), float32(g>>8), float32(b>>8), float32(a>>8))
+			// Uniform4f wants parameters in the range from 0.0 to 1.0
+			// so we convert the uint32 r g b a values returned from RGBA() (ranging from 0 to 65535)
+			// to float32 ranging from 0.0 to 1.0
+			rf, gf, bf, af := float32(r)/65535, float32(g)/65535, float32(b)/65535, float32(a)/65535
+			engo.Gl.Uniform4f(l.inBorderColor, rf, gf, bf, af)
 		}
 		engo.Gl.Uniform2f(l.inRadius, (space.Width/2)/l.camera.z, (space.Height/2)/l.camera.z)
 		engo.Gl.Uniform2f(l.inCenter, space.Width/2, space.Height/2)
