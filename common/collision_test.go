@@ -76,8 +76,8 @@ func TestSpaceComponent_Center(t *testing.T) {
 
 	for _, sc := range components {
 		for _, p := range points {
-			sc.Center(p)
-			c := sc.GetCenter()
+			sc.SetCenter(p)
+			c := sc.Center()
 			assert.True(t, c.Equal(p), fmt.Sprintf("center %v should be equal to point %v", c, p))
 		}
 	}
