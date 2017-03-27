@@ -336,7 +336,7 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 	sort.Sort(ByFirstgid(tmxLevel.Tilesets))
 	ts := make([]*tilesheet, len(tmxLevel.Tilesets))
 	for i, tts := range tmxLevel.Tilesets {
-		ts[i] = &tilesheet{tts.Image, tts.Firstgid}
+		ts[i] = &tilesheet{tts.Image, tts.TileWidth, tts.TileHeight, tts.Firstgid}
 	}
 
 	levelTileset := createTileset(level, ts)

@@ -3,12 +3,19 @@ package common
 import (
 	"engo.io/engo"
 	"engo.io/gl"
+	"fmt"
 )
 
 // Level is a parsed TMX level containing all layers and default Tiled attributes
 type Level struct {
 	// Orientation is the parsed level orientation from the TMX XML, like orthogonal, isometric, etc.
 	Orientation string
+	// MapToPoint is a pointer to a function which maps map tile coordinates to display points
+	MapToPoint func(engo.Point) (*engo.Point)
+	// PointToMap is a pointer to a function which maps display points to map coordinates
+	// return value uses engo.Point rather than int to provide sub-block accuracy.
+	PointToMap func(engo.Point) (*engo.Point)
+	// suitable for tile printing
 	// RenderOrder is the in Tiled specified TileMap render order, like right-down, right-up, etc.
 	RenderOrder string
 	width       int
@@ -26,6 +33,97 @@ type Level struct {
 	// ObjectLayers contains all ObjectLayer of the level
 	ObjectLayers []*ObjectLayer
 }
+
+// MapToPosition maps a map coordinate with subtile accuracy and return position
+// coordinate on the screen. If necessary, calls the setupOrientation function to parse the
+// level orientation string and setup the correct mapping.
+func (lvl *Level)MapToPosition(mp engo.Point) (*engo.Point, error) {
+	if lvl.MapToPoint == nil {
+		// Only attempt setup if the function pointer is nil
+		var err error
+		if err = lvl.setupOrientation(); err != nil {
+			return nil, err
+		}
+	}
+	return lvl.MapToPoint(mp), nil
+}
+
+// PositionToMap maps a screen position coordinate returns a map coordinate with subtile accuracy
+// If necessary, calls the setupOrientation function to parse the level orientation string and setup 
+// the correct mapping.
+func (lvl *Level)PositionToMap(p engo.Point) (*engo.Point, error) {
+	if lvl.PointToMap == nil {
+		// Only attempt setup if the function pointer is nil
+		var err error
+		if err = lvl.setupOrientation(); err != nil {
+			return nil, err
+		}
+	}
+	return lvl.PointToMap(p), nil
+}
+
+
+// setupOrientation is a function to setup defualt helper functions based on the
+// level orientation as defined by tmx.
+func (lvl *Level)setupOrientation() error {
+	// tile (half-)widths for isometric tilesets.
+	tw := float32(lvl.TileWidth)
+	th := float32(lvl.TileHeight)
+	hw := float32(lvl.TileWidth/2)
+	hh := float32(lvl.TileHeight/2)
+
+	// Do the string comparisons once and setup helper functions
+	if lvl.Orientation == "orthogonal" {
+		lvl.MapToPoint = func(m engo.Point) (p *engo.Point) {
+			p = &engo.Point{}
+			p.X = m.X * tw
+			p.Y = m.Y * th
+			return
+		}
+		lvl.PointToMap = func(p engo.Point) (m *engo.Point) {
+			m.X = p.X / tw
+			m.Y = p.Y / th
+			return
+		}
+	} else if lvl.Orientation == "isometric" {
+		lvl.MapToPoint = func(m engo.Point) (p *engo.Point) {
+			p = &engo.Point{}
+			p.X = (m.X - m.Y) * hw
+			p.Y = (m.X + m.Y) * hh
+			return
+		}
+		lvl.PointToMap = func(p engo.Point) (m *engo.Point) {
+			m.X = (p.X + p.Y) / tw
+			m.Y = (p.Y - p.X) / th
+			return
+		}
+	} else if lvl.Orientation == "staggered" {
+		lvl.MapToPoint = func(m engo.Point) (p *engo.Point) {
+			p = &engo.Point{}
+			staggerX := float32(0) // no offset on even rows
+			if int(m.Y)%2 == 1 { // odd row?
+				staggerX = hw
+			}
+			p.X = (m.X * tw) + staggerX
+			p.Y = m.Y * hh
+			return
+		}
+		lvl.PointToMap = func(p engo.Point) (m *engo.Point) {
+			m = &engo.Point{}
+			m.Y = p.Y / hh
+			staggerX := float32(0) // no offset on even rows
+			if int(m.Y)%2 == 1 { // odd row?
+				staggerX = hw
+			}
+			m.X = (p.X - staggerX) / tw
+			return
+		}
+	} else {
+		return fmt.Errorf("Level: Unsupported orientation %v", lvl.Orientation)
+	}
+	return nil
+}
+
 
 // TileLayer contains a list of its tiles plus all default Tiled attributes
 type TileLayer struct {
@@ -156,6 +254,8 @@ type tile struct {
 
 type tilesheet struct {
 	Image    *TextureResource
+	TileWidth int
+	TileHeight int
 	Firstgid int
 }
 
@@ -168,10 +268,10 @@ type layer struct {
 
 func createTileset(lvl *Level, sheets []*tilesheet) []*tile {
 	tileset := make([]*tile, 0)
-	tw := float32(lvl.TileWidth)
-	th := float32(lvl.TileHeight)
 
 	for _, sheet := range sheets {
+		tw := float32(sheet.TileWidth)
+		th := float32(sheet.TileHeight)
 		setWidth := sheet.Image.Width / tw
 		setHeight := sheet.Image.Height / th
 		totalTiles := int(setWidth * setHeight)
@@ -213,6 +313,7 @@ func createLevelTiles(lvl *Level, layers []*layer, ts []*tile) []*TileLayer {
 		tileLayer := &TileLayer{}
 		mapping := layer.TileMapping
 
+		// Append tiles to map in the order they should be drawn
 		for i := 0; i < lvl.height; i++ {
 			for x := 0; x < lvl.width; x++ {
 				idx := x + i*lvl.width
@@ -220,10 +321,19 @@ func createLevelTiles(lvl *Level, layers []*layer, ts []*tile) []*TileLayer {
 
 				if tileIdx := int(mapping[idx]) - 1; tileIdx >= 0 {
 					t.Image = ts[tileIdx].Image
-					t.Point = engo.Point{
-						float32(x * lvl.TileWidth),
-						float32(i * lvl.TileHeight),
-					}
+					tp, _ := lvl.MapToPosition(engo.Point{float32(x), float32(i)})
+					t.Point = *tp
+					/*var px, py float32
+					if lvl.Orientation == "isometric" {
+						px = float32(x - i) * hw
+						py = float32(x + i) * hh
+					} else if lvl.Orientation == "staggered" {
+						px = float32(x * lvl.TileWidth) + hw - staggerX
+						py = float32(i) * hh
+					} else {
+						px = float32(x * lvl.TileWidth)
+						py = float32(i * lvl.TileHeight)
+					} */
 				}
 				tilemap = append(tilemap, t)
 			}
