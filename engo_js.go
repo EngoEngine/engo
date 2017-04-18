@@ -22,6 +22,8 @@ var (
 	// Gl is the current OpenGL context
 	Gl *gl.Context
 
+	keyBuffer webKeyBuffer
+
 	devicePixelRatio float64
 )
 
@@ -84,12 +86,12 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	})
 	w.AddEventListener("keydown", false, func(ev dom.Event) {
 		ke := ev.(*dom.KeyboardEvent)
-		Input.keys.Set(Key(ke.KeyCode), true)
+		keyBuffer.append(Key(ke.KeyCode), true)
 	})
 
 	w.AddEventListener("keyup", false, func(ev dom.Event) {
 		ke := ev.(*dom.KeyboardEvent)
-		Input.keys.Set(Key(ke.KeyCode), false)
+		keyBuffer.append(Key(ke.KeyCode), false)
 	})
 
 	w.AddEventListener("mousemove", false, func(ev dom.Event) {
@@ -205,6 +207,7 @@ func rafPolyfill() {
 func RunIteration() {
 	Time.Tick()
 	Input.update()
+	keyBuffer.update()
 	currentWorld.Update(Time.Delta())
 	// TODO: this may not work, and sky-rocket the FPS
 	//  requestAnimationFrame(func(dt float32) {
@@ -295,4 +298,30 @@ func SetCursor(c Cursor) {
 	case CursorHand:
 		document.Body().Style().Set("cursor", "hand")
 	}
+}
+
+// Key state for buffering, the buffering is needed
+// because of the async nature of most web browsers.
+type webKeyState struct {
+	key   Key
+	state bool
+}
+
+// Key state buffer used to buffer key events
+// until the game loop is ready to update them.
+type webKeyBuffer struct {
+	buffer []webKeyState
+}
+
+// Pushes the states on to the input and clears the buffer.
+func (b *webKeyBuffer) update() {
+	for _, st := range b.buffer {
+		Input.keys.Set(st.key, st.state)
+	}
+	b.buffer = b.buffer[:0]
+}
+
+// Adds a new key state to the buffer
+func (b *webKeyBuffer) append(k Key, s bool) {
+	b.buffer = append(b.buffer, webKeyState{key: k, state: s})
 }
