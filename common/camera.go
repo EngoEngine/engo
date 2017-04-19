@@ -326,7 +326,7 @@ func (*EdgeScroller) Remove(ecs.BasicEntity) {}
 // TODO: Warning doesn't get the cursor position
 func (c *EdgeScroller) Update(dt float32) {
 	curX, curY := engo.CursorPos()
-	maxX, maxY := engo.CanvasWidth(), engo.CanvasHeight()
+	maxX, maxY := engo.GameWidth(), engo.GameHeight()
 
 	if curX < c.EdgeMargin {
 		engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: -c.ScrollSpeed * dt, Incremental: true})
