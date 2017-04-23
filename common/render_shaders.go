@@ -965,11 +965,11 @@ func (l *textShader) generateBufferContent(ren *RenderComponent, space *SpaceCom
 		return false
 	}
 
-	atlas, ok := atlasCache[txt.Font.URL]
+	atlas, ok := atlasCache[*txt.Font]
 	if !ok {
 		// Generate texture first
 		atlas = txt.Font.generateFontAtlas(UnicodeCap)
-		atlasCache[txt.Font.URL] = atlas
+		atlasCache[*txt.Font] = atlas
 	}
 
 	var currentX float32
@@ -1044,11 +1044,11 @@ func (l *textShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		unsupportedType(ren.Drawable)
 	}
 
-	atlas, ok := atlasCache[txt.Font.URL]
+	atlas, ok := atlasCache[*txt.Font]
 	if !ok {
 		// Generate texture first
 		atlas = txt.Font.generateFontAtlas(UnicodeCap)
-		atlasCache[txt.Font.URL] = atlas
+		atlasCache[*txt.Font] = atlas
 	}
 
 	if atlas.Texture != l.lastTexture {
@@ -1117,7 +1117,7 @@ var (
 	TextShader      = &textShader{cameraEnabled: true}
 	TextHUDShader   = &textShader{cameraEnabled: false}
 	shadersSet      bool
-	atlasCache      = make(map[string]FontAtlas)
+	atlasCache      = make(map[Font]FontAtlas)
 )
 
 var shaderInitMutex sync.Mutex
