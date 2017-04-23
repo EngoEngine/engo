@@ -5,7 +5,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
-	"github.com/engoengine/math"
+	"engo.io/engo/math"
 )
 
 // Cursor is a reference to a GLFW-cursor - to be used with the `SetCursor` method.
@@ -138,6 +138,11 @@ func (m *MouseSystem) New(w *ecs.World) {
 // * BasicEntity is always required.
 func (m *MouseSystem) Add(basic *ecs.BasicEntity, mouse *MouseComponent, space *SpaceComponent, render *RenderComponent) {
 	m.entities = append(m.entities, mouseEntity{basic, mouse, space, render})
+}
+
+// AddByInterface adds the Entity to the system as long as it satisfies, Mouseable.  Any Entity containing a BasicEntity,MouseComponent, and RenderComponent, automatically does this.
+func (m *MouseSystem) AddByInterface(o Mouseable) {
+	m.Add(o.GetBasicEntity(), o.GetMouseComponent(), o.GetSpaceComponent(), o.GetRenderComponent())
 }
 
 func (m *MouseSystem) Remove(basic ecs.BasicEntity) {

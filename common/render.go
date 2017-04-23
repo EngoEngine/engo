@@ -158,6 +158,11 @@ func (rs *RenderSystem) Add(basic *ecs.BasicEntity, render *RenderComponent, spa
 	rs.sortingNeeded = true
 }
 
+// AddByInterface adds any Renderable to the render system. Any Entity containing a BasicEntity,RenderComponent, and SpaceComponent anonymously does this automatically
+func (rs *RenderSystem) AddByInterface(o Renderable) {
+	rs.Add(o.GetBasicEntity(), o.GetRenderComponent(), o.GetSpaceComponent())
+}
+
 func (rs *RenderSystem) Remove(basic ecs.BasicEntity) {
 	var delete int = -1
 	for index, entity := range rs.entities {

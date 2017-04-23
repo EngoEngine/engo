@@ -112,6 +112,11 @@ func (a *AnimationSystem) Add(basic *ecs.BasicEntity, anim *AnimationComponent, 
 	a.entities[*basic] = animationEntity{anim, render}
 }
 
+// AddByInterface Allows an Entity to be added directly using the Animtionable interface. which every entity containing the BasicEntity,AnimationComponent,and RenderComponent anonymously, automatically satisfies.
+func (a *AnimationSystem) AddByInterface(o Animationable) {
+	a.Add(o.GetBasicEntity(), o.GetAnimationComponent(), o.GetRenderComponent())
+}
+
 // Remove stops tracking the given entity.
 func (a *AnimationSystem) Remove(basic ecs.BasicEntity) {
 	if a.entities != nil {
