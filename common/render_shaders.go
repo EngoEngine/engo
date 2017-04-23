@@ -5,11 +5,12 @@ import (
 	"image/color"
 	"log"
 	"strings"
+	"sync"
 
 	"engo.io/ecs"
 	"engo.io/engo"
-	"engo.io/gl"
 	"engo.io/engo/math"
+	"engo.io/gl"
 )
 
 // UnicodeCap is the amount of unicode characters the fonts will be able to use, starting from index 0.
@@ -1119,7 +1120,12 @@ var (
 	atlasCache      = make(map[string]FontAtlas)
 )
 
+var shaderInitMutex sync.Mutex
+
 func initShaders(w *ecs.World) error {
+	shaderInitMutex.Lock()
+	defer shaderInitMutex.Unlock()
+
 	if !shadersSet {
 		shaders := []Shader{
 			DefaultShader,
