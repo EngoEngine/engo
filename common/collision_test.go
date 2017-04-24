@@ -62,6 +62,7 @@ func TestSpaceComponent_Corners(t *testing.T) {
 	}
 }
 
+
 const (
 	Ball = 1 << iota
 	Bat
@@ -107,6 +108,29 @@ func Test_GroupSolid(t *testing.T) {
 		if ents[i].Collides == 0 {
 			t.Logf("object %d should collides", i)
 			t.Fail()
+		}
+	}
+
+}
+
+func TestSpaceComponent_Center(t *testing.T) {
+	components := []SpaceComponent{
+		SpaceComponent{Width: 0, Height: 0},
+		SpaceComponent{Width: 100, Height: 100},
+		SpaceComponent{Width: 100, Height: 200},
+	}
+	points := []engo.Point{
+		engo.Point{10, 10},
+		engo.Point{50, 50},
+		engo.Point{10, 50},
+		engo.Point{99, 99},
+	}
+
+	for _, sc := range components {
+		for _, p := range points {
+			sc.SetCenter(p)
+			c := sc.Center()
+			assert.True(t, c.Equal(p), fmt.Sprintf("center %v should be equal to point %v", c, p))
 		}
 	}
 
