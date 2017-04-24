@@ -141,6 +141,7 @@ type CollisionComponent struct {
 type CollisionMessage struct {
 	Entity collisionEntity
 	To     collisionEntity
+	Groups CollisionGroup
 }
 
 // CollisionGroup is intended to be used in bitwise comparisons
@@ -226,7 +227,7 @@ func (cs *CollisionSystem) Update(dt float32) {
 
 				//collided can now list the types of collision
 				collided = collided | cgroup
-				engo.Mailbox.Dispatch(CollisionMessage{Entity: e1, To: e2})
+				engo.Mailbox.Dispatch(CollisionMessage{Entity: e1, To: e2, Groups: cgroup})
 			}
 		}
 

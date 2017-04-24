@@ -62,7 +62,6 @@ func TestSpaceComponent_Corners(t *testing.T) {
 	}
 }
 
-
 const (
 	Ball = 1 << iota
 	Bat
