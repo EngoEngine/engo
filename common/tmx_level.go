@@ -3,7 +3,9 @@ package common
 import (
 	"bytes"
 	"compress/zlib"
+	"compress/gzip"
 	"encoding/base64"
+	"encoding/csv"
 	"encoding/binary"
 	"encoding/xml"
 	"fmt"
@@ -12,6 +14,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"errors"
 
 	"engo.io/engo"
 )
@@ -54,8 +57,135 @@ type TMXTileLayer struct {
 	Height int `xml:"height,attr"`
 	// TileMapping contains the generated tilemapping list
 	TileMapping []uint32
-	// CompData is a temporary list used to fill TileMapping
-	CompData []byte `xml:"data"`
+	// TMXData is the encoded tile layer grid
+	Data TMXData `xml:"data"`
+}
+
+// TMXData represents custom properties which "Can be used as a child
+// of the map, tileset, tile (when part of a tileset), layer, objectgroup,
+// object and imagelayer elements"
+type TMXData struct {
+	// Encoding defines the fomat of the Data field; Valid values are
+	// one of "", "base64", or "csv"
+	Encoding string `xml:"encoding,attr"`
+	// Compression defines the compression applied to base64 data
+	// valid values are one of "", "zlib", "gzip"
+	Compression string `xml:"compression,attr"`
+	// Data contains an encoded list of uint32 guids defining
+	// the tile layout of a layer
+	Data string `xml:",innerxml,"`
+	// Tiles is an array of tiles containing guids. Not set if
+	// other encodings are used
+	Tiles []TMXTile `xml:tile`
+}
+
+// TMXTile represents a single tile on a tile layer.
+type TMXTile struct {
+	// gid represents a single tile encoded with its flip
+	// orientation
+	gid uint32 `xml:gid,attr`
+}
+
+var ErrUnknownEncoding = errors.New("Unknown Encoding")
+var ErrUnknownCompression = errors.New("Unknown Compression")
+
+// tileDecode() creates a decoded array of gids from xml tile tags
+func (d *TMXData) decodeTile() ([]uint32, error) {
+	tm := make([]uint32, 0)
+	for _, t := range d.Tiles {
+		tm = append(tm, t.gid)
+	}
+	return tm, nil
+}
+
+// decodeCSV() creates a decoded array of gids from csv
+func (d *TMXData) decodeCSV() ([]uint32, error) {
+	b := strings.NewReader(strings.TrimSpace(d.Data))
+	cr := csv.NewReader(b)
+	tm := make([]uint32, 0)
+	if recs, err := cr.ReadAll(); err == nil {
+		if len(recs) < 1 {
+			return nil, errors.New("No csv records found")
+		}
+
+		for _, rec := range recs {
+			for _, id := range rec {
+				if nextInt, err := strconv.ParseUint(id, 10, 32); err == nil {
+					tm = append(tm, uint32(nextInt))
+				} else {
+					return nil, err
+				}
+			}
+		}
+		if len(tm) < 1 {
+			return nil, errors.New("No Data Returned")
+		}
+	} else {
+		return nil, err
+	}
+	return tm, nil
+}
+
+// Decode takes the encoded data from a tmx map file and
+// unpacks it an arrary of uint32 guids 
+func (d *TMXData) Decode() ([]uint32, error) {
+	// Tile tag and CSV encodings
+	if len(d.Tiles) > 0 {
+		return d.decodeTile()
+	} else if d.Encoding == "csv" {
+		return d.decodeCSV()
+	}
+
+	// Only encoding in the standard is base64
+	var breader io.Reader
+	if d.Encoding == "base64" {
+		buff, err := base64.StdEncoding.DecodeString(strings.TrimSpace(d.Data))
+		if err != nil {
+			return nil, err
+		}
+		breader = bytes.NewReader(buff)
+	} else {
+		return nil, ErrUnknownEncoding
+	}
+
+	// Setup decompression if needed
+	var zreader io.Reader
+	if d.Compression == "" {
+		zreader = breader
+	} else if d.Compression == "zlib" {
+		z, err := zlib.NewReader(breader)
+		if err != nil {
+			return nil, err
+		}
+		defer z.Close()
+		zreader = z
+	} else if d.Compression == "gzip" {
+		z, err := gzip.NewReader(breader)
+		if err != nil {
+			return nil, err
+		}
+		defer z.Close()
+		zreader = z
+	} else {
+		return nil, ErrUnknownCompression
+	}
+
+	// decode into tm and return it.
+	tm := make([]uint32, 0)
+	var nextInt uint32
+	for {
+		err := binary.Read(zreader, binary.LittleEndian, &nextInt)
+		if err != nil {
+			// EOF or unexpected EOF error
+			if err == io.EOF {
+				break
+			}
+
+			return nil, err
+		}
+		tm = append(tm, nextInt)
+	}
+	return tm, nil
 }
 
 // TMXImageLayer represents an image layer parsed from the TileMap XML
@@ -160,7 +290,7 @@ func (t ByFirstgid) Swap(i, j int) { t[i], t[j] = t[j], t[i] }
 // Less returns if t's i Firstgid is less than t's j
 func (t ByFirstgid) Less(i, j int) bool { return t[i].Firstgid < t[j].Firstgid }
 
-// MUST BE base64 ENCODED and COMPRESSED WITH zlib!
+// createLevelFromTmx unmarshales and unpacks tmx data into a Level
 func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 	tmxLevel := &TMXLevel{}
 	level := &Level{}
@@ -172,37 +302,7 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 	// Extract the tile mappings from the compressed data at each layer
 	for i := range tmxLevel.TileLayers {
 		layer := &tmxLevel.TileLayers[i]
-
-		// Trim leading/trailing whitespace ( inneficient )
-		layer.CompData = []byte(strings.TrimSpace(string(layer.CompData)))
-
-		// Decode it out of base64
-		if _, err := base64.StdEncoding.Decode(layer.CompData, layer.CompData); err != nil {
-			return nil, err
-		}
-
-		// Decompress
-		b := bytes.NewReader(layer.CompData)
-		zlr, err := zlib.NewReader(b)
-		if err != nil {
-			return nil, err
-		}
-		defer zlr.Close()
-
-		tm := make([]uint32, 0)
-		var nextInt uint32
-		for {
-			err = binary.Read(zlr, binary.LittleEndian, &nextInt)
-			if err != nil {
-				// EOF or unexpected EOF error
-				if err == io.EOF {
-					break
-				}
-
-				return nil, err
-			}
-			tm = append(tm, nextInt)
-		}
+		tm, _ := layer.Data.Decode()
 		layer.TileMapping = tm
 	}
 

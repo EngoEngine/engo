@@ -8,6 +8,7 @@ import (
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/gl"
+	"sync"
 )
 
 const (
@@ -105,7 +106,7 @@ func (*RenderSystem) Priority() int { return RenderSystemPriority }
 func (rs *RenderSystem) New(w *ecs.World) {
 	rs.world = w
 
-	w.AddSystem(&CameraSystem{})
+	addCameraSystemOnce(w)
 
 	if !engo.Headless() {
 		initShaders(w)
@@ -115,6 +116,23 @@ func (rs *RenderSystem) New(w *ecs.World) {
 	engo.Mailbox.Listen("renderChangeMessage", func(engo.Message) {
 		rs.sortingNeeded = true
 	})
+}
+
+var cameraInitMutex sync.Mutex
+func addCameraSystemOnce(w *ecs.World) {
+	cameraInitMutex.Lock()
+	defer cameraInitMutex.Unlock()
+
+	camSystemAlreadyAdded := false
+	for _, system := range w.Systems() {
+		switch system.(type) {
+		case *CameraSystem:
+			camSystemAlreadyAdded = true
+		}
+	}
+	if !camSystemAlreadyAdded {
+		w.AddSystem(&CameraSystem{})
+	}
 }
 
 func (rs *RenderSystem) Add(basic *ecs.BasicEntity, render *RenderComponent, space *SpaceComponent) {
@@ -156,6 +174,11 @@ func (rs *RenderSystem) Add(basic *ecs.BasicEntity, render *RenderComponent, spa
 
 	rs.entities = append(rs.entities, renderEntity{basic, render, space})
 	rs.sortingNeeded = true
+}
+
+// AddByInterface adds any Renderable to the render system. Any Entity containing a BasicEntity,RenderComponent, and SpaceComponent anonymously does this automatically
+func (rs *RenderSystem) AddByInterface(o Renderable) {
+	rs.Add(o.GetBasicEntity(), o.GetRenderComponent(), o.GetSpaceComponent())
 }
 
 func (rs *RenderSystem) Remove(basic ecs.BasicEntity) {
