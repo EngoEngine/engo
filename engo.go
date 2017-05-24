@@ -156,8 +156,8 @@ func SetScaleOnResize(b bool) {
 }
 
 // SetOverrideCloseAction can be used to change the value in the given `RunOpts` after already having called `engo.Run`.
-func SetOverrideCloseAction(value bool) {
-	opts.OverrideCloseAction = value
+func SetOverrideCloseAction(b bool) {
+	opts.OverrideCloseAction = b
 }
 
 // SetFPSLimit can be used to change the value in the given `RunOpts` after already having called `engo.Run`.
@@ -181,7 +181,7 @@ func Headless() bool {
 	return opts.HeadlessMode
 }
 
-// ScaleOnResizes indicates whether or not the screen should resize (i.e. make things look smaller/bigger) whenever
+// ScaleOnResize indicates whether or not the screen should resize (i.e. make things look smaller/bigger) whenever
 // the window resized. If `false`, then the size of the screen does not affect the size of the things drawn - it just
 // makes less/more objects visible
 func ScaleOnResize() bool {
