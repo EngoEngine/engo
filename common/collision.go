@@ -52,10 +52,10 @@ func (sc SpaceComponent) AABB() engo.AABB {
 	corners := sc.Corners()
 
 	var (
-		xMin float32 = -math.MaxFloat32
-		xMax float32 = math.MaxFloat32
-		yMin float32 = -math.MaxFloat32
-		yMax float32 = math.MaxFloat32
+		xMin float32 = math.MaxFloat32
+		xMax float32 = -math.MaxFloat32
+		yMin float32 = math.MaxFloat32
+		yMax float32 = -math.MaxFloat32
 	)
 
 	for i := 0; i < 4; i++ {
