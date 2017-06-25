@@ -10,8 +10,8 @@ These lines are key in this demo:
 * 'tmxResource := resource.(common.TMXResource)'to cast the resource to a tmx resource
 * 'levelData := tmxResource.Level' to retrieve the level from the tmx resource
 
-# Add render and space components to each tile in each tile layer
-```
+## Add render and space components to each tile in each tile layer
+```go
     tileComponents := make([]*Tile, 0)
 
     for _, tileLayer := range levelData.TileLayers {
@@ -35,8 +35,8 @@ These lines are key in this demo:
     }
 ```
 
-# Add render and space components to each image in each image layer
-```
+## Add render and space components to each image in each image layer
+```go
     for _, imageLayer := range levelData.ImageLayers {
         for _, imageElement := range imageLayer.Images {
             if imageElement.Image != nil {
@@ -57,8 +57,8 @@ These lines are key in this demo:
     }
 ```
 
-# Access object layers and do something with its regular and polyline objects
-```
+## Access object layers and do something with its regular and polyline objects
+```go
     // Access Object Layers
     for _, objectLayer := range levelData.ObjectLayers {
         log.Println("This object layer is called " + objectLayer.Name)
