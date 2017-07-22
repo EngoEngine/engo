@@ -108,6 +108,7 @@ func runLoop(defaultScene Scene, headless bool) {
 					a.Send(paint.Event{})
 				case lifecycle.CrossOff:
 					closeEvent()
+					Gl = nil
 				}
 
 			case size.Event:
@@ -126,9 +127,6 @@ func runLoop(defaultScene Scene, headless bool) {
 				}
 
 				RunIteration()
-				if closeGame {
-					break
-				}
 
 				fps.Draw(sz)
 
