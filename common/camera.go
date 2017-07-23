@@ -241,7 +241,7 @@ func (CameraMessage) Type() string {
 // KeyboardScroller is a System that allows for scrolling when certain keys are pressed
 type KeyboardScroller struct {
 	ScrollSpeed                  float32
-	horizontalAxis, verticalAxis string
+	horizontalAxis, verticalAxis uintptr
 	keysMu                       sync.RWMutex
 }
 
@@ -252,14 +252,14 @@ func (c *KeyboardScroller) Update(dt float32) {
 	c.keysMu.RLock()
 	defer c.keysMu.RUnlock()
 
-	vert := engo.Input.Axis(c.verticalAxis)
-	engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: vert.Value() * c.ScrollSpeed * dt, Incremental: true})
+	vert := engo.Axes.Value(c.verticalAxis)
+	engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: vert * c.ScrollSpeed * dt, Incremental: true})
 
-	hori := engo.Input.Axis(c.horizontalAxis)
-	engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: hori.Value() * c.ScrollSpeed * dt, Incremental: true})
+	hori := engo.Axes.Value(c.horizontalAxis)
+	engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: hori * c.ScrollSpeed * dt, Incremental: true})
 }
 
-func (c *KeyboardScroller) BindKeyboard(hori, vert string) {
+func (c *KeyboardScroller) BindKeyboard(hori, vert uintptr) {
 	c.keysMu.Lock()
 
 	c.verticalAxis = vert
@@ -268,7 +268,7 @@ func (c *KeyboardScroller) BindKeyboard(hori, vert string) {
 	defer c.keysMu.Unlock()
 }
 
-func NewKeyboardScroller(scrollSpeed float32, hori, vert string) *KeyboardScroller {
+func NewKeyboardScroller(scrollSpeed float32, hori, vert uintptr) *KeyboardScroller {
 	kbs := &KeyboardScroller{
 		ScrollSpeed: scrollSpeed,
 	}

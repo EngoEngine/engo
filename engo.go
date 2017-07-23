@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"engo.io/ecs"
+	"engo.io/engo/act"
 )
 
 var (
@@ -12,7 +13,10 @@ var (
 	Time *Clock
 
 	// Input handles all input: mouse, keyboard and touch
-	Input *InputManager
+	Input *InputMgr
+
+	Axes    *act.AxisManager
+	Buttons *act.ButtonManager
 
 	// Mailbox is used by all Systems to communicate
 	Mailbox *MessageManager
@@ -118,21 +122,31 @@ func Run(o RunOptions, defaultScene Scene) {
 
 	opts = o
 
-	// Create input
-	Input = NewInputManager()
+	// Setup the input
+	Input = NewInputMgr()
+
+	Axes = Input.Axes()
+	Buttons = Input.Buttons()
+
 	if opts.StandardInputs {
 		log.Println("Using standard inputs")
 
-		Input.RegisterButton("jump", Space)
-		Input.RegisterButton("action", Enter)
+		Axes.SetByName(
+			DefaultVerticalAxis,
+			act.AxisPair{act.KeyW, act.KeyS},
+			act.AxisPair{act.KeyUp, act.KeyDown},
+		)
+		Axes.SetByName(
+			DefaultHorizontalAxis,
+			act.AxisPair{act.KeyA, act.KeyD},
+			act.AxisPair{act.KeyLeft, act.KeyRight},
+		)
 
-		Input.RegisterAxis(DefaultHorizontalAxis, AxisKeyPair{A, D}, AxisKeyPair{ArrowLeft, ArrowRight})
-		Input.RegisterAxis(DefaultVerticalAxis, AxisKeyPair{W, S}, AxisKeyPair{ArrowUp, ArrowDown})
-
-		Input.RegisterAxis(DefaultMouseXAxis, NewAxisMouse(AxisMouseHori))
-		Input.RegisterAxis(DefaultMouseYAxis, NewAxisMouse(AxisMouseVert))
+		Buttons.SetByName("jump", act.KeySpace)
+		Buttons.SetByName("action", act.KeyEnter)
 	}
 
+	// Setup the path for asset loading
 	Files.SetRoot(opts.AssetsRoot)
 
 	// And run the game

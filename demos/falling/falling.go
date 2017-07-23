@@ -7,6 +7,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/act"
 	"engo.io/engo/common"
 )
 
@@ -89,6 +90,31 @@ type controlEntity struct {
 
 type ControlSystem struct {
 	entities []controlEntity
+
+	vertAxis uintptr
+	horiAxis uintptr
+}
+
+func (c *ControlSystem) New(w *ecs.World) {
+	c.vertAxis = engo.Axes.Id(engo.DefaultVerticalAxis)
+	c.horiAxis = engo.Axes.Id(engo.DefaultHorizontalAxis)
+
+	if 0 == c.vertAxis {
+		log.Println("Default vertical axis not found, setting up fall back!")
+		c.vertAxis = engo.Axes.SetByName(
+			engo.DefaultVerticalAxis,
+			act.AxisPair{act.KeyW, act.KeyS},
+			act.AxisPair{act.KeyUp, act.KeyDown},
+		)
+	}
+	if 0 == c.horiAxis {
+		log.Println("Default horizontal axis not found, setting up fall back!")
+		c.horiAxis = engo.Axes.SetByName(
+			engo.DefaultHorizontalAxis,
+			act.AxisPair{act.KeyA, act.KeyD},
+			act.AxisPair{act.KeyLeft, act.KeyRight},
+		)
+	}
 }
 
 func (c *ControlSystem) Add(basic *ecs.BasicEntity, space *common.SpaceComponent) {
@@ -112,11 +138,11 @@ func (c *ControlSystem) Update(dt float32) {
 	speed := 400 * dt
 
 	for _, e := range c.entities {
-		hori := engo.Input.Axis(engo.DefaultHorizontalAxis)
-		e.SpaceComponent.Position.X += speed * hori.Value()
+		vert := engo.Axes.Value(c.vertAxis)
+		e.SpaceComponent.Position.Y += speed * vert
 
-		vert := engo.Input.Axis(engo.DefaultVerticalAxis)
-		e.SpaceComponent.Position.Y += speed * vert.Value()
+		hori := engo.Axes.Value(c.horiAxis)
+		e.SpaceComponent.Position.X += speed * hori
 	}
 }
 

@@ -6,6 +6,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/act"
 	"engo.io/engo/common"
 )
 
@@ -28,13 +29,25 @@ func (*DefaultScene) Preload() {
 func (*DefaultScene) Setup(w *ecs.World) {
 	common.SetBackground(color.White)
 
+	// Get the default axis id's
+	vertAxis := engo.Axes.Id(engo.DefaultVerticalAxis)
+	horiAxis := engo.Axes.Id(engo.DefaultHorizontalAxis)
+	if 0 == vertAxis {
+		log.Println("Default vertical axis not found, setting up fall back!")
+		vertAxis = engo.Axes.SetByName(engo.DefaultVerticalAxis, act.AxisPair{act.KeyW, act.KeyS}, act.AxisPair{act.KeyUp, act.KeyDown})
+	}
+	if 0 == horiAxis {
+		log.Println("Default horizontal axis not found, setting up fall back!")
+		horiAxis = engo.Axes.SetByName(engo.DefaultHorizontalAxis, act.AxisPair{act.KeyA, act.KeyD}, act.AxisPair{act.KeyLeft, act.KeyRight})
+	}
+
 	w.AddSystem(&common.RenderSystem{})
 	w.AddSystem(&common.MouseSystem{})
 	w.AddSystem(&ControlSystem{})
 
 	// These are not required, but allow you to move / rotate and still see that it works
 	w.AddSystem(&common.MouseZoomer{-0.125})
-	w.AddSystem(common.NewKeyboardScroller(500, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis))
+	w.AddSystem(common.NewKeyboardScroller(500, horiAxis, vertAxis))
 	w.AddSystem(&common.MouseRotator{RotationSpeed: 0.125})
 
 	// Retrieve a texture
@@ -115,6 +128,9 @@ func main() {
 		Title:  "Mouse Demo",
 		Width:  1024,
 		Height: 640,
+
+		// Forget something
+		//StandardInputs: true,
 	}
 	engo.Run(opts, &DefaultScene{})
 }

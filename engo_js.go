@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"time"
 
+	"engo.io/engo/act"
 	"engo.io/gl"
 	"github.com/gopherjs/gopherjs/js"
 	"honnef.co/go/js/dom"
@@ -84,12 +85,12 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	})
 	w.AddEventListener("keydown", false, func(ev dom.Event) {
 		ke := ev.(*dom.KeyboardEvent)
-		Input.keys.Set(Key(ke.KeyCode), true)
+		Input.SetState((act.KeyCode | act.Code(ke.KeyCode)), true)
 	})
 
 	w.AddEventListener("keyup", false, func(ev dom.Event) {
 		ke := ev.(*dom.KeyboardEvent)
-		Input.keys.Set(Key(ke.KeyCode), false)
+		Input.SetState((act.KeyCode | act.Code(ke.KeyCode)), false)
 	})
 
 	w.AddEventListener("mousemove", false, func(ev dom.Event) {
@@ -104,6 +105,8 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		Input.Mouse.X = float32(float64(mm.ClientX) * devicePixelRatio)
 		Input.Mouse.Y = float32(float64(mm.ClientY) * devicePixelRatio)
 		Input.Mouse.Action = Press
+
+		Input.SetState((act.MouseCode | act.Code(mm.Button)), true)
 	})
 
 	w.AddEventListener("mouseup", false, func(ev dom.Event) {
@@ -111,6 +114,8 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		Input.Mouse.X = float32(float64(mm.ClientX) * devicePixelRatio)
 		Input.Mouse.Y = float32(float64(mm.ClientY) * devicePixelRatio)
 		Input.Mouse.Action = Release
+
+		Input.SetState((act.MouseCode | act.Code(mm.Button)), false)
 	})
 }
 
@@ -204,6 +209,7 @@ func rafPolyfill() {
 // RunIteration runs one iteration per frame
 func RunIteration() {
 	Time.Tick()
+	Input.clear()
 	Input.update()
 	currentWorld.Update(Time.Delta())
 	// TODO: this may not work, and sky-rocket the FPS

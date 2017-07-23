@@ -2,9 +2,11 @@ package main
 
 import (
 	"image/color"
+	"log"
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/act"
 	"engo.io/engo/common"
 )
 
@@ -36,8 +38,20 @@ func (*DefaultScene) Setup(w *ecs.World) {
 	common.SetBackground(color.White)
 	w.AddSystem(&common.RenderSystem{})
 
+	// Get the default axis id's
+	vertAxis := engo.Axes.Id(engo.DefaultVerticalAxis)
+	horiAxis := engo.Axes.Id(engo.DefaultHorizontalAxis)
+	if 0 == vertAxis {
+		log.Println("Default vertical axis not found, setting up fall back!")
+		vertAxis = engo.Axes.SetByName(engo.DefaultVerticalAxis, act.AxisPair{act.KeyW, act.KeyS}, act.AxisPair{act.KeyUp, act.KeyDown})
+	}
+	if 0 == horiAxis {
+		log.Println("Default horizontal axis not found, setting up fall back!")
+		horiAxis = engo.Axes.SetByName(engo.DefaultHorizontalAxis, act.AxisPair{act.KeyA, act.KeyD}, act.AxisPair{act.KeyLeft, act.KeyRight})
+	}
+
 	// Adding KeyboardScroller so we can actually see the difference between the HUD and non-HUD text
-	w.AddSystem(common.NewKeyboardScroller(scrollSpeed, engo.DefaultHorizontalAxis, engo.DefaultVerticalAxis))
+	w.AddSystem(common.NewKeyboardScroller(scrollSpeed, horiAxis, vertAxis))
 	w.AddSystem(&common.MouseZoomer{zoomSpeed})
 
 	fnt := &common.Font{

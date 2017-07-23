@@ -167,6 +167,7 @@ func RunIteration() {
 	Time.Tick()
 
 	if !opts.HeadlessMode {
+		Input.clear()
 		Input.update()
 	}
 

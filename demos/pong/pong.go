@@ -9,6 +9,7 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
+	"engo.io/engo/act"
 	"engo.io/engo/common"
 )
 
@@ -30,6 +31,11 @@ type Score struct {
 	ecs.BasicEntity
 	common.RenderComponent
 	common.SpaceComponent
+}
+
+type Scheme struct {
+	name   string
+	axisid uintptr
 }
 
 type Paddle struct {
@@ -116,10 +122,13 @@ func (pong *PongGame) Setup(w *ecs.World) {
 		}
 	}
 
-	engo.Input.RegisterAxis("wasd", engo.AxisKeyPair{engo.W, engo.S})
-	engo.Input.RegisterAxis("arrows", engo.AxisKeyPair{engo.ArrowUp, engo.ArrowDown})
+	wasdId := engo.Axes.SetByName("wasd", act.AxisPair{act.KeyW, act.KeyS})
+	arrowId := engo.Axes.SetByName("arrow", act.AxisPair{act.KeyUp, act.KeyDown})
 
-	schemes := []string{"wasd", "arrows"}
+	schemes := []Scheme{
+		Scheme{name: "wasd", axisid: wasdId},
+		Scheme{name: "arrow", axisid: arrowId},
+	}
 
 	score.RenderComponent = common.RenderComponent{Drawable: basicFont.Render(" ")}
 	score.SpaceComponent = common.SpaceComponent{
@@ -187,7 +196,7 @@ type SpeedComponent struct {
 }
 
 type ControlComponent struct {
-	Scheme string
+	Scheme Scheme
 
 	// oldY is (optionally) the old Y-location of the mouse / touch - used to determine drag direction
 	oldY float32
@@ -360,13 +369,13 @@ func (c *ControlSystem) Update(dt float32) {
 	for _, e := range c.entities {
 		speed := engo.GameWidth() * dt
 
-		vert := engo.Input.Axis(e.ControlComponent.Scheme)
-		e.SpaceComponent.Position.Y += speed * vert.Value()
+		vert := engo.Axes.Value(e.ControlComponent.Scheme.axisid)
+		e.SpaceComponent.Position.Y += speed * vert
 
 		var moveThisOne bool
-		if engo.Input.Mouse.X > engo.WindowWidth()/2 && e.ControlComponent.Scheme == "arrows" {
+		if engo.Input.Mouse.X > engo.WindowWidth()/2 && e.ControlComponent.Scheme.name == "arrow" {
 			moveThisOne = true
-		} else if engo.Input.Mouse.X < engo.WindowWidth()/2 && e.ControlComponent.Scheme == "wasd" {
+		} else if engo.Input.Mouse.X < engo.WindowWidth()/2 && e.ControlComponent.Scheme.name == "wasd" {
 			moveThisOne = true
 		}
 
