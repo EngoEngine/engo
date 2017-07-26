@@ -122,7 +122,7 @@ func runLoop(defaultScene Scene, headless bool) {
 				canvasHeight = float32(sz.HeightPx)
 				Gl.Viewport(0, 0, sz.WidthPx, sz.HeightPx)
 				ResizeXOffset = (gameWidth - canvasWidth)
-				+ResizeYOffset = (gameHeight - canvasHeight)
+				ResizeYOffset = (gameHeight - canvasHeight)
 			case paint.Event:
 				if e.External {
 					// As we are actively painting as fast as
