@@ -29,6 +29,9 @@ var (
 	canvasWidth, canvasHeight float32
 
 	msaaPreference int
+
+	ResizeXOffset = float32(0)
+	ResizeYOffset = float32(0)
 )
 
 // CreateWindow creates a window with the specified parameters
@@ -70,7 +73,7 @@ func CanvasHeight() float32 {
 }
 
 func CanvasScale() float32 {
-	return CanvasWidth()/WindowWidth()
+	return CanvasWidth() / WindowWidth()
 }
 
 func DestroyWindow() { /* nothing to do here? */ }
@@ -118,6 +121,8 @@ func runLoop(defaultScene Scene, headless bool) {
 				canvasWidth = float32(sz.WidthPx)
 				canvasHeight = float32(sz.HeightPx)
 				Gl.Viewport(0, 0, sz.WidthPx, sz.HeightPx)
+				ResizeXOffset = (gameWidth - canvasWidth)
+				ResizeYOffset = (gameHeight - canvasHeight)
 			case paint.Event:
 				if e.External {
 					// As we are actively painting as fast as

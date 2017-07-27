@@ -23,6 +23,9 @@ var (
 	Gl *gl.Context
 
 	devicePixelRatio float64
+
+	ResizeXOffset = float32(0)
+	ResizeYOffset = float32(0)
 )
 
 func init() {
@@ -75,6 +78,9 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	gameHeight = float32(height)
 	windowWidth = WindowWidth()
 	windowHeight = WindowHeight()
+
+	ResizeXOffset = gameWidth - CanvasWidth()
+	ResizeYOffset = gameHeight - CanvasHeight()
 
 	w := dom.GetWindow()
 	w.AddEventListener("keypress", false, func(ev dom.Event) {
@@ -162,7 +168,7 @@ func CanvasHeight() float32 {
 }
 
 func CanvasScale() float32 {
-	return CanvasWidth()/WindowWidth()
+	return 1
 }
 
 func toPx(n int) string {
