@@ -228,8 +228,8 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		s.modelMatrix[4] = ren.Scale.Y
 	}
 
-	s.modelMatrix[6] = space.Position.X + (engo.ResizeXOffset / 2.0)
-	s.modelMatrix[7] = space.Position.Y + (engo.ResizeYOffset / 2.0)
+	s.modelMatrix[6] = space.Position.X
+	s.modelMatrix[7] = space.Position.Y
 
 	engo.Gl.UniformMatrix3fv(s.matrixModel, false, s.modelMatrix)
 
@@ -705,8 +705,8 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		l.modelMatrix[4] = ren.Scale.Y
 	}
 
-	l.modelMatrix[6] = space.Position.X + (engo.ResizeXOffset / 2.0)
-	l.modelMatrix[7] = space.Position.Y + (engo.ResizeYOffset / 2.0)
+	l.modelMatrix[6] = space.Position.X
+	l.modelMatrix[7] = space.Position.Y
 
 	engo.Gl.UniformMatrix3fv(l.matrixModel, false, l.modelMatrix)
 
@@ -1070,8 +1070,8 @@ func (l *textShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		l.modelMatrix[4] = ren.Scale.Y
 	}
 
-	l.modelMatrix[6] = space.Position.X + (engo.ResizeXOffset / 2.0)
-	l.modelMatrix[7] = space.Position.Y + (engo.ResizeYOffset / 2.0)
+	l.modelMatrix[6] = space.Position.X
+	l.modelMatrix[7] = space.Position.Y
 
 	engo.Gl.UniformMatrix3fv(l.matrixModel, false, l.modelMatrix)
 	engo.Gl.DrawElements(engo.Gl.TRIANGLES, 6*len(txt.Text), engo.Gl.UNSIGNED_SHORT, 0)

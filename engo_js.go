@@ -26,6 +26,8 @@ var (
 
 	ResizeXOffset = float32(0)
 	ResizeYOffset = float32(0)
+
+	Backend string = "Web"
 )
 
 func init() {
@@ -212,6 +214,7 @@ func RunIteration() {
 	Time.Tick()
 	Input.update()
 	currentWorld.Update(Time.Delta())
+	Input.Mouse.Action = Neutral
 	// TODO: this may not work, and sky-rocket the FPS
 	//  requestAnimationFrame(func(dt float32) {
 	// 	currentWorld.Update(Time.Delta())

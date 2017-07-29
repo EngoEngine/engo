@@ -160,8 +160,17 @@ func (m *MouseSystem) Remove(basic ecs.BasicEntity) {
 
 func (m *MouseSystem) Update(dt float32) {
 	// Translate Mouse.X and Mouse.Y into "game coordinates"
-	m.mouseX = engo.Input.Mouse.X*m.camera.z*(engo.GameWidth()/engo.CanvasWidth()) + m.camera.x - (engo.GameWidth()/2)*m.camera.z
-	m.mouseY = engo.Input.Mouse.Y*m.camera.z*(engo.GameHeight()/engo.CanvasHeight()) + m.camera.y - (engo.GameHeight()/2)*m.camera.z
+	switch engo.Backend {
+	case "GLFW":
+		m.mouseX = engo.Input.Mouse.X*m.camera.z*(engo.GameWidth()/engo.CanvasWidth()) + m.camera.x - (engo.GameWidth()/2)*m.camera.z
+		m.mouseY = engo.Input.Mouse.Y*m.camera.z*(engo.GameHeight()/engo.CanvasHeight()) + m.camera.y - (engo.GameHeight()/2)*m.camera.z
+	case "Mobile":
+		m.mouseX = engo.Input.Mouse.X*m.camera.z + m.camera.x - (engo.GameWidth()/2)*m.camera.z + (engo.ResizeXOffset / 2)
+		m.mouseY = engo.Input.Mouse.Y*m.camera.z + m.camera.y - (engo.GameHeight()/2)*m.camera.z + (engo.ResizeYOffset / 2)
+	case "Web":
+		m.mouseX = engo.Input.Mouse.X*m.camera.z + m.camera.x - (engo.GameWidth()/2)*m.camera.z + (engo.ResizeXOffset / 2)
+		m.mouseY = engo.Input.Mouse.Y*m.camera.z + m.camera.y - (engo.GameHeight()/2)*m.camera.z + (engo.ResizeYOffset / 2)
+	}
 
 	// Rotate if needed
 	if m.camera.angle != 0 {

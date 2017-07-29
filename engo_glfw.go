@@ -33,8 +33,9 @@ var (
 	canvasWidth, canvasHeight float32
 	scale                     = float32(1)
 
-	ResizeXOffset = float32(0)
-	ResizeYOffset = float32(0)
+	Backend       string = "GLFW"
+	ResizeXOffset        = float32(0)
+	ResizeYOffset        = float32(0)
 )
 
 // fatalErr calls log.Fatal with the given error if it is non-nil.
@@ -117,9 +118,10 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 	window.SetFramebufferSizeCallback(func(window *glfw.Window, w, h int) {
 		Gl.Viewport(0, 0, w, h)
-		oldCanvasW, oldCanvasH := canvasWidth, canvasHeight
 		width, height = window.GetSize()
 		windowWidth, windowHeight = float32(width), float32(width)
+
+		oldCanvasW, oldCanvasH := canvasWidth, canvasHeight
 
 		canvasWidth, canvasHeight = float32(w), float32(h)
 
