@@ -29,6 +29,11 @@ var (
 	canvasWidth, canvasHeight float32
 
 	msaaPreference int
+
+	ResizeXOffset = float32(0)
+	ResizeYOffset = float32(0)
+
+	Backend string = "Mobile"
 )
 
 // CreateWindow creates a window with the specified parameters
@@ -70,7 +75,7 @@ func CanvasHeight() float32 {
 }
 
 func CanvasScale() float32 {
-	return CanvasWidth()/WindowWidth()
+	return CanvasWidth() / WindowWidth()
 }
 
 func DestroyWindow() { /* nothing to do here? */ }
@@ -118,6 +123,8 @@ func runLoop(defaultScene Scene, headless bool) {
 				canvasWidth = float32(sz.WidthPx)
 				canvasHeight = float32(sz.HeightPx)
 				Gl.Viewport(0, 0, sz.WidthPx, sz.HeightPx)
+				ResizeXOffset = (gameWidth - canvasWidth)
+				ResizeYOffset = (gameHeight - canvasHeight)
 			case paint.Event:
 				if e.External {
 					// As we are actively painting as fast as
@@ -130,11 +137,8 @@ func runLoop(defaultScene Scene, headless bool) {
 
 				fps.Draw(sz)
 
-				// Reset mouse if needed
-				if Input.Mouse.Action == Release {
-					Input.Mouse.Action = Neutral
-					a.Publish() // same as SwapBuffers
-				}
+				Input.Mouse.Action = Neutral
+				a.Publish() // same as SwapBuffers
 
 				// Drive the animation by preparing to paint the next frame
 				// after this one is shown. - FPS is ignored here!
