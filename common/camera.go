@@ -20,7 +20,13 @@ const (
 )
 
 var (
+	// MinZoom is the closest the camera position can be relative to the
+	// rendered surface. Smaller numbers of MinZoom allows greater
+	// perceived zooming "in".
 	MinZoom float32 = 0.25
+	// MaxZoom is the farthest the camera position can be relative to the
+	// rendered surface. Larger numbers of MaxZoom allows greater
+	// perceived zooming "out".
 	MaxZoom float32 = 3
 
 	CameraBounds engo.AABB
