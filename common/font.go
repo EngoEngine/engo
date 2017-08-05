@@ -95,7 +95,7 @@ func (f *Font) TextDimensions(text string) (int, int, int) {
 }
 
 func (f *Font) RenderNRGBA(text string) *image.NRGBA {
-	width, height, yBearing := f.TextDimensions(text)
+	width, _, yBearing := f.TextDimensions(text)
 	font := f.TTF
 	size := f.Size
 
@@ -118,7 +118,7 @@ func (f *Font) RenderNRGBA(text string) *image.NRGBA {
 	// Create the font context
 	c := freetype.NewContext()
 
-	nrgba := image.NewNRGBA(image.Rect(0, 0, width, height))
+	nrgba := image.NewNRGBA(image.Rect(0, 0, width, yBearing))
 	draw.Draw(nrgba, nrgba.Bounds(), bg, image.ZP, draw.Src)
 
 	c.SetDPI(dpi)
