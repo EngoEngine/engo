@@ -54,12 +54,15 @@ type MouseComponent struct {
 	// the entity space in this frame. This does not necessarily imply that
 	// the mouse button was pressed down in your entity space.
 	Hovered bool
-	// Dragged is true whenever the entity space was clicked,
+	// Dragged is true whenever the entity space was left-clicked,
 	// and then the mouse started moving (while holding)
 	Dragged bool
 	// RightClicked is true whenever the entity space was right-clicked
 	// in this frame
 	RightClicked bool
+	// RightDragged is true whenever the entity space was right-clicked,
+	// and then the mouse started moving (while holding)
+	RightDragged bool
 	// RightReleased is true whenever the right mouse button is released over
 	// the entity space in this frame. This does not necessarily imply that
 	// the mouse button was pressed down in your entity space.
@@ -90,6 +93,8 @@ type MouseComponent struct {
 
 	// startedDragging is used internally to see if *this* is the object that is being dragged
 	startedDragging bool
+	// startedRightDragging is used internally to see if *this* is the object that is being right-dragged
+	rightStartedDragging bool
 }
 
 type mouseEntity struct {
@@ -181,9 +186,10 @@ func (m *MouseSystem) Update(dt float32) {
 	for _, e := range m.entities {
 		// Reset all values except these
 		*e.MouseComponent = MouseComponent{
-			Track:           e.MouseComponent.Track,
-			Hovered:         e.MouseComponent.Hovered,
-			startedDragging: e.MouseComponent.startedDragging,
+			Track:                e.MouseComponent.Track,
+			Hovered:              e.MouseComponent.Hovered,
+			startedDragging:      e.MouseComponent.startedDragging,
+			rightStartedDragging: e.MouseComponent.rightStartedDragging,
 		}
 
 		if e.MouseComponent.Track {
@@ -239,6 +245,7 @@ func (m *MouseSystem) Update(dt float32) {
 					e.MouseComponent.startedDragging = true
 				case engo.MouseButtonRight:
 					e.MouseComponent.RightClicked = true
+					e.MouseComponent.rightStartedDragging = true
 				}
 
 				m.mouseDown = true
@@ -252,6 +259,9 @@ func (m *MouseSystem) Update(dt float32) {
 			case engo.Move:
 				if m.mouseDown && e.MouseComponent.startedDragging {
 					e.MouseComponent.Dragged = true
+				}
+				if m.mouseDown && e.MouseComponent.rightStartedDragging {
+					e.MouseComponent.RightDragged = true
 				}
 			}
 		} else {
@@ -267,6 +277,8 @@ func (m *MouseSystem) Update(dt float32) {
 			// is released
 			e.MouseComponent.Dragged = false
 			e.MouseComponent.startedDragging = false
+			// TODO maybe separate out the release into left-button release and right-button release
+			e.MouseComponent.rightStartedDragging = false
 			// mouseDown goes false as soon as one of the pressed buttons is
 			// released. Effectively ending any dragging
 			m.mouseDown = false
