@@ -70,6 +70,7 @@ func (f *Font) TextDimensions(text string) (int, int, int) {
 		maxYBearing = fixed.Int26_6(0)
 	)
 	fupe := fixed.Int26_6(fnt.FUnitsPerEm())
+
 	for _, char := range text {
 		idx := fnt.Index(char)
 		hm := fnt.HMetric(fupe, idx)
@@ -81,9 +82,14 @@ func (f *Font) TextDimensions(text string) (int, int, int) {
 			return 0, 0, 0
 		}
 		totalWidth += hm.AdvanceWidth
+
 		yB := (vm.TopSideBearing * fixed.Int26_6(size)) / fupe
 		if yB > maxYBearing {
 			maxYBearing = yB
+		}
+		dY := (vm.AdvanceHeight * fixed.Int26_6(size)) / fupe
+		if dY > totalHeight {
+			totalHeight = dY
 		}
 	}
 
@@ -95,7 +101,7 @@ func (f *Font) TextDimensions(text string) (int, int, int) {
 }
 
 func (f *Font) RenderNRGBA(text string) *image.NRGBA {
-	width, _, yBearing := f.TextDimensions(text)
+	width, height, yBearing := f.TextDimensions(text)
 	font := f.TTF
 	size := f.Size
 
@@ -118,7 +124,7 @@ func (f *Font) RenderNRGBA(text string) *image.NRGBA {
 	// Create the font context
 	c := freetype.NewContext()
 
-	nrgba := image.NewNRGBA(image.Rect(0, 0, width, yBearing))
+	nrgba := image.NewNRGBA(image.Rect(0, 0, width, height))
 	draw.Draw(nrgba, nrgba.Bounds(), bg, image.ZP, draw.Src)
 
 	c.SetDPI(dpi)
@@ -197,9 +203,9 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 
 		int26Width += hm.AdvanceWidth
 
-		atlas.Width[char] = float32(g.AdvanceWidth * fixed.Int26_6(f.Size) / fupe)
+		atlas.Width[char] = float32((g.AdvanceWidth + hm.LeftSideBearing) * fixed.Int26_6(f.Size) / fupe)
 
-		currentX = float32(int26Width * fixed.Int26_6(f.Size) / fupe)
+		currentX = float32((int26Width) * fixed.Int26_6(f.Size) / fupe)
 		if currentX > maxX {
 			maxX = currentX
 		}
