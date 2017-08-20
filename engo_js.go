@@ -305,3 +305,13 @@ func SetCursor(c Cursor) {
 		document.Body().Style().Set("cursor", "hand")
 	}
 }
+
+//SetCursorVisibility sets the visibility of the cursor.
+//If true the cursor is visible, if false the cursor is not.
+func SetCursorVisibility(visible bool) {
+	if visible {
+		document.Body().Style().Set("cursor", "default")
+	} else {
+		document.Body().Style().Set("cursor", "none")
+	}
+}
