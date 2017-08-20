@@ -30,11 +30,41 @@ func (mm *MessageManager) Listen(messageType string, handler MessageHandler) {
 	mm.listeners[messageType] = append(mm.listeners[messageType], handler)
 }
 
+// Remove removes a specific listener
+func (mm *MessageManager) Remove(messageType string, handler MessageHandler) {
+	// TODO: ...
+}
+
+// Remove removes all listeners of a message type
+func (mm *MessageManager) RemoveType(messageType string) {
+	delete(mm.listeners, messageType)
+}
+
 // WindowResizeMessage is a message that's being dispatched whenever the game window is being resized by the gamer
 type WindowResizeMessage struct {
 	OldWidth, OldHeight int
 	NewWidth, NewHeight int
 }
 
-// Type returns the type of the current object "WindowResizeMessage"
-func (WindowResizeMessage) Type() string { return "WindowResizeMessage" }
+// IterationUpdateMessage will be used with mailbox
+type IterationUpdateMessage struct {
+	Delta float32
+}
+
+// PreparationMessage will be used with mailbox
+type PreparationMessage struct{}
+
+// Type of message that will be sent
+func (WindowResizeMessage) Type() string {
+	return "engo.WindowResizeMessage"
+}
+
+// Type of message that will be sent
+func (IterationUpdateMessage) Type() string {
+	return "engo.IterationUpdateMessage"
+}
+
+// Type of message that will be sent
+func (PreparationMessage) Type() string {
+	return "engo.PreparationMessage"
+}

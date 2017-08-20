@@ -11,14 +11,15 @@ var scenes = make(map[string]*sceneWrapper)
 // Scene represents a screen ingame.
 // i.e.: main menu, settings, but also the game itself
 type Scene interface {
-	// Preload is called before loading resources
-	Preload()
-
 	// Setup is called before the main loop
 	Setup(*ecs.World)
+}
 
-	// Type returns a unique string representation of the Scene, used to identify it
-	Type() string
+// SceneSettings is the set of settings used by the scene
+type SceneSettings struct {
+	Type       string
+	Assets     []string
+	Background color.Color
 }
 
 // Shower is an optional interface a Scene can implement, indicating it'll have custom behavior
@@ -46,10 +47,11 @@ type Exiter interface {
 	Exit()
 }
 
+// sceneWrapper wraps the scene with other used data
 type sceneWrapper struct {
-	scene   Scene
-	world   *ecs.World
-	mailbox *MessageManager
+	scene    Scene
+	settings SceneSettings
+	world    *ecs.World
 }
 
 // CurrentScene returns the SceneWorld that is currently active
@@ -59,7 +61,7 @@ func CurrentScene() Scene {
 
 // SetScene sets the currentScene to the given Scene, and
 // optionally forcing to create a new ecs.World that goes with it.
-func SetScene(s Scene, forceNewWorld bool) {
+func SetScene(scene Scene, settings SceneSettings, forceNewWorld bool) Scene {
 	// Break down currentScene
 	if currentScene != nil {
 		if hider, ok := currentScene.(Hider); ok {
@@ -68,10 +70,10 @@ func SetScene(s Scene, forceNewWorld bool) {
 	}
 
 	// Register Scene if needed
-	wrapper, registered := scenes[s.Type()]
+	wrapper, registered := scenes[settings.Type]
 	if !registered {
-		RegisterScene(s)
-		wrapper = scenes[s.Type()]
+		RegisterScene(scene, settings)
+		wrapper = scenes[settings.Type]
 	}
 
 	// Initialize new Scene / World if needed
@@ -79,46 +81,60 @@ func SetScene(s Scene, forceNewWorld bool) {
 
 	if wrapper.world == nil || forceNewWorld {
 		wrapper.world = &ecs.World{}
-		wrapper.mailbox = &MessageManager{}
-
 		doSetup = true
 	}
 
+	// Cache the settings
+	wrapper.settings = settings
+
 	// Do the switch
-	currentScene = s
+	currentScene = scene
 	currentWorld = wrapper.world
-	Mailbox = wrapper.mailbox
 
 	// doSetup is true whenever we're (re)initializing the Scene
 	if doSetup {
-		s.Preload()
-
-		wrapper.mailbox.listeners = make(map[string][]MessageHandler)
-
-		s.Setup(wrapper.world)
+		SetupScene(wrapper)
+		scene.Setup(wrapper.world)
 	} else {
 		if shower, ok := currentScene.(Shower); ok {
 			shower.Show()
 		}
 	}
+
+	return scene
 }
 
 // RegisterScene registers the `Scene`, so it can later be used by `SetSceneByName`
-func RegisterScene(s Scene) {
-	_, ok := scenes[s.Type()]
+func RegisterScene(scene Scene, settings SceneSettings) {
+	_, ok := scenes[settings.Type]
 	if !ok {
-		scenes[s.Type()] = &sceneWrapper{scene: s}
+		scenes[settings.Type] = &sceneWrapper{scene: scene}
+	}
+}
+
+// SetupScene setups a scene
+func SetupScene(wrapper *sceneWrapper) {
+	settings := wrapper.settings
+
+	// First lets preload whatever is needed
+	engo.Files.LoadMany(settings.Assets...)
+
+	// Now lets add the systems
+	world := wrapper.world
+
+	if settings.Background != nil {
+		common.SetBackground(settings.Background)
 	}
 }
 
 // SetSceneByName does a lookup for the `Scene` where its `Type()` equals `name`, and then sets it as current `Scene`
 func SetSceneByName(name string, forceNewWorld bool) error {
-	scene, ok := scenes[name]
+	wrapper, ok := scenes[name]
 	if !ok {
 		return fmt.Errorf("scene not registered: %s", name)
 	}
 
-	SetScene(scene.scene, forceNewWorld)
+	SetScene(wrapper.scene, wrapper.settings, forceNewWorld)
 
 	return nil
 }

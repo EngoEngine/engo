@@ -95,10 +95,8 @@ type RunOptions struct {
 	AssetsRoot string
 }
 
-// Run is called to create a window, initialize everything, and start the main loop. Once this function returns,
-// the game window has been closed already. You can supply a lot of options within `RunOptions`, and your starting
-// `Scene` should be defined in `defaultScene`.
-func Run(o RunOptions, defaultScene Scene) {
+// Init initializes the project. You can supply a lot of options within `RunOptions`.
+func Init(o engo.RunOptions) {
 	// Setting defaults
 	if o.FPSLimit == 0 {
 		o.FPSLimit = 60
@@ -118,6 +116,16 @@ func Run(o RunOptions, defaultScene Scene) {
 
 	opts = o
 
+	// TODO: We may need to check this later on for platform
+	InitGl()
+
+	Mailbox = &MessageManager{}
+}
+
+// Run is called to create a window, initialize everything, and start the main loop. Once this function returns,
+// the game window has been closed already. You can supply a lot of options within `RunOptions`, and your starting
+// `Scene` should be defined in `defaultScene`.
+func Run() {
 	// Create input
 	Input = NewInputManager()
 	if opts.StandardInputs {
@@ -138,14 +146,14 @@ func Run(o RunOptions, defaultScene Scene) {
 	// And run the game
 	if opts.HeadlessMode {
 		if !opts.NoRun {
-			runHeadless(defaultScene)
+			runHeadless()
 		}
 	} else {
 		CreateWindow(opts.Title, opts.Width, opts.Height, opts.Fullscreen, opts.MSAA)
 		defer DestroyWindow()
 
 		if !opts.NoRun {
-			runLoop(defaultScene, false)
+			runLoop(false)
 		}
 	}
 }
@@ -203,6 +211,7 @@ func GameHeight() float32 {
 	return gameHeight
 }
 
+// Closes the window
 func closeEvent() {
 	for _, scenes := range scenes {
 		if exiter, ok := scenes.scene.(Exiter); ok {
@@ -217,6 +226,7 @@ func closeEvent() {
 	}
 }
 
-func runHeadless(defaultScene Scene) {
-	runLoop(defaultScene, true)
+// Run the project headless
+func runHeadless() {
+	runLoop(true)
 }

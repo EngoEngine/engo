@@ -45,6 +45,7 @@ func fatalErr(err error) {
 	}
 }
 
+// CreateWindow creates a Gl window
 func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	err := glfw.Init()
 	fatalErr(err)
@@ -199,10 +200,12 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	})
 }
 
+// DestroyWindow destroys the gl window
 func DestroyWindow() {
 	glfw.Terminate()
 }
 
+// SetTitle sets the title of the window
 func SetTitle(title string) {
 	if opts.HeadlessMode {
 		log.Println("Title set to:", title)
@@ -221,8 +224,10 @@ func RunIteration() {
 		glfw.PollEvents()
 	}
 
-	// Then update the world and all Systems
-	currentWorld.Update(Time.Delta())
+	// Announce that the loop happened
+	Mailbox.Dispatch(IterationUpdateMessage{
+		Delta: engo.Time.Delta(),
+	})
 
 	// Lastly, forget keypresses and swap buffers
 	if !opts.HeadlessMode {
@@ -236,17 +241,17 @@ func RunIteration() {
 }
 
 // RunPreparation is called automatically when calling Open. It should only be called once.
-func RunPreparation(defaultScene Scene) {
+func RunPreparation() {
 	Time = NewClock()
 
 	// Default WorldBounds values
 	//WorldBounds.Max = Point{GameWidth(), GameHeight()}
 	// TODO: move this to appropriate location
 
-	SetScene(defaultScene, false)
+	Mailbox.Dispatch(PreparationMessage{})
 }
 
-func runLoop(defaultScene Scene, headless bool) {
+func runLoop(headless bool) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	signal.Notify(c, syscall.SIGTERM)
@@ -255,7 +260,7 @@ func runLoop(defaultScene Scene, headless bool) {
 		closeEvent()
 	}()
 
-	RunPreparation(defaultScene)
+	RunPreparation()
 	ticker := time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
 
 	// Start tick, minimize the delta
@@ -331,6 +336,7 @@ func SetCursor(c Cursor) {
 	window.SetCursor(cur)
 }
 
+// SetVSync sets Gl vsync
 func SetVSync(enabled bool) {
 	opts.VSync = enabled
 	if opts.VSync {
@@ -340,7 +346,8 @@ func SetVSync(enabled bool) {
 	}
 }
 
-func init() {
+// Initializes application
+func InitGl() {
 	runtime.LockOSThread()
 
 	Grave = Key(glfw.KeyGraveAccent)
