@@ -87,6 +87,9 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	if opts.HeadlessMode {
 		glfw.WindowHint(glfw.Visible, glfw.False)
 	}
+	if opts.NotResizable {
+		glfw.WindowHint(glfw.Resizable, glfw.False)
+	}
 
 	glfw.WindowHint(glfw.ContextVersionMajor, 2)
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
@@ -337,6 +340,16 @@ func SetVSync(enabled bool) {
 		glfw.SwapInterval(1)
 	} else {
 		glfw.SwapInterval(0)
+	}
+}
+
+//SetCursorVisibility sets the visibility of the cursor.
+//If true the cursor is visible, if false the cursor is not.
+func SetCursorVisibility(visible bool) {
+	if visible {
+		glfw.GetCurrentContext().SetInputMode(glfw.CursorMode, glfw.CursorNormal)
+	} else {
+		glfw.GetCurrentContext().SetInputMode(glfw.CursorMode, glfw.CursorHidden)
 	}
 }
 
