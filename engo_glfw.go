@@ -343,6 +343,16 @@ func SetVSync(enabled bool) {
 	}
 }
 
+//SetCursorVisibility sets the visibility of the cursor.
+//If true the cursor is visible, if false the cursor is not.
+func SetCursorVisibility(visible bool) {
+	if visible {
+		glfw.GetCurrentContext().SetInputMode(glfw.CursorMode, glfw.CursorNormal)
+	} else {
+		glfw.GetCurrentContext().SetInputMode(glfw.CursorMode, glfw.CursorHidden)
+	}
+}
+
 func init() {
 	runtime.LockOSThread()
 
