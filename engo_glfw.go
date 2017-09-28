@@ -32,6 +32,10 @@ var (
 	headlessHeight            = 800
 	canvasWidth, canvasHeight float32
 	scale                     = float32(1)
+
+	Backend       string = "GLFW"
+	ResizeXOffset        = float32(0)
+	ResizeYOffset        = float32(0)
 )
 
 // fatalErr calls log.Fatal with the given error if it is non-nil.
@@ -83,6 +87,9 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	if opts.HeadlessMode {
 		glfw.WindowHint(glfw.Visible, glfw.False)
 	}
+	if opts.NotResizable {
+		glfw.WindowHint(glfw.Resizable, glfw.False)
+	}
 
 	glfw.WindowHint(glfw.ContextVersionMajor, 2)
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
@@ -117,7 +124,12 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		width, height = window.GetSize()
 		windowWidth, windowHeight = float32(width), float32(width)
 
+		oldCanvasW, oldCanvasH := canvasWidth, canvasHeight
+
 		canvasWidth, canvasHeight = float32(w), float32(h)
+
+		ResizeXOffset += oldCanvasW - canvasWidth
+		ResizeYOffset += oldCanvasH - canvasHeight
 
 		if windowWidth <= canvasWidth && windowHeight <= canvasHeight {
 			scale = canvasWidth / windowWidth
@@ -328,6 +340,16 @@ func SetVSync(enabled bool) {
 		glfw.SwapInterval(1)
 	} else {
 		glfw.SwapInterval(0)
+	}
+}
+
+//SetCursorVisibility sets the visibility of the cursor.
+//If true the cursor is visible, if false the cursor is not.
+func SetCursorVisibility(visible bool) {
+	if visible {
+		glfw.GetCurrentContext().SetInputMode(glfw.CursorMode, glfw.CursorNormal)
+	} else {
+		glfw.GetCurrentContext().SetInputMode(glfw.CursorMode, glfw.CursorHidden)
 	}
 }
 
