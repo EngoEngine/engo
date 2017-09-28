@@ -136,46 +136,49 @@ func addCameraSystemOnce(w *ecs.World) {
 }
 
 func (rs *RenderSystem) Add(basic *ecs.BasicEntity, render *RenderComponent, space *SpaceComponent) {
-	if rs.EntityExists(basic) == -1 {
-		// Setting default shader
-		if render.shader == nil {
-			switch render.Drawable.(type) {
-			case Triangle:
-				render.shader = LegacyShader
-			case Circle:
-				render.shader = LegacyShader
-			case Rectangle:
-				render.shader = LegacyShader
-			case ComplexTriangles:
-				render.shader = LegacyShader
-			case Text:
-				render.shader = TextShader
-			default:
-				render.shader = DefaultShader
-			}
-		}
-
-		// This is to prevent users from using the wrong one
-		if render.shader == HUDShader {
-			switch render.Drawable.(type) {
-			case Triangle:
-				render.shader = LegacyHUDShader
-			case Circle:
-				render.shader = LegacyHUDShader
-			case Rectangle:
-				render.shader = LegacyHUDShader
-			case ComplexTriangles:
-				render.shader = LegacyHUDShader
-			case Text:
-				render.shader = TextHUDShader
-			default:
-				render.shader = HUDShader
-			}
-		}
-
-		rs.entities = append(rs.entities, renderEntity{basic, render, space})
-		rs.sortingNeeded = true
+	// Do nothing if entity already exists
+	if rs.EntityExists(basic) >= 0 {
+		return
 	}
+	
+	// Setting default shader
+	if render.shader == nil {
+		switch render.Drawable.(type) {
+		case Triangle:
+			render.shader = LegacyShader
+		case Circle:
+			render.shader = LegacyShader
+		case Rectangle:
+			render.shader = LegacyShader
+		case ComplexTriangles:
+			render.shader = LegacyShader
+		case Text:
+			render.shader = TextShader
+		default:
+			render.shader = DefaultShader
+		}
+	}
+
+	// This is to prevent users from using the wrong one
+	if render.shader == HUDShader {
+		switch render.Drawable.(type) {
+		case Triangle:
+			render.shader = LegacyHUDShader
+		case Circle:
+			render.shader = LegacyHUDShader
+		case Rectangle:
+			render.shader = LegacyHUDShader
+		case ComplexTriangles:
+			render.shader = LegacyHUDShader
+		case Text:
+			render.shader = TextHUDShader
+		default:
+			render.shader = HUDShader
+		}
+	}
+	
+	rs.entities = append(rs.entities, renderEntity{basic, render, space})
+	rs.sortingNeeded = true
 }
 
 // EntityExists looks if the entity is already into the System's entities. It will return the index >= 0 of the object into de rs.entities or -1 if it could not be found.
@@ -183,7 +186,6 @@ func (rs *RenderSystem) EntityExists(basic *ecs.BasicEntity) int {
 	for index, entity := range rs.entities {
 		if entity.ID() == basic.ID() {
 			return index
-			break
 		}
 	}
 
