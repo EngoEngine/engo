@@ -96,6 +96,9 @@ type RunOptions struct {
 	// mobile (Android/iOS), because they **require** all assets to be within the `assets` directory. You may however
 	// use any subfolder-structure within that `assets` directory.
 	AssetsRoot string
+
+	// MobileWidth and MobileHeight are the width and height given from the Android/iOS OpenGL Surface used for Gomobile bind
+	MobileWidth, MobileHeight int
 }
 
 // Run is called to create a window, initialize everything, and start the main loop. Once this function returns,
