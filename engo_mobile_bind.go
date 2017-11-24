@@ -99,7 +99,7 @@ func RunPreparation(defaultScene Scene) {
 	SetScene(defaultScene, false)
 }
 
-// RunIteration runs ever time android calls to update the screen
+// RunIteration runs every time android calls to update the screen
 func RunIteration() {
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
@@ -111,10 +111,12 @@ func RunIteration() {
 			case <-worker.WorkAvailable():
 				worker.DoWork()
 			case <-drawDone:
+				Input.Mouse.Action = Neutral
 				return
 			}
 		}
 	case <-time.After(500 * time.Millisecond):
+		Input.Mouse.Action = Neutral
 		return
 	}
 }
@@ -137,7 +139,7 @@ func openFile(url string) (io.ReadCloser, error) {
 	return nil, errors.New("binding does not open files this way. utilize go-bindata instead")
 }
 
-// mobileDraw runs once per frame. RunIteration for most other backends
+// mobileDraw runs once per frame. RunIteration for the other backends
 func mobileDraw(defaultScene Scene) {
 	if !initalized {
 		var ctx mgl.Context
@@ -160,8 +162,6 @@ func mobileDraw(defaultScene Scene) {
 		Input.update()
 	}
 
-	Input.Mouse.Action = Neutral
-
 	// Then update the world and all Systems
 	currentWorld.Update(Time.Delta())
 }
@@ -178,4 +178,11 @@ func TouchEvent(x, y, action int) {
 	case 2:
 		Input.Mouse.Action = Move
 	}
+}
+
+//MobileStop handles when the game is closed
+func MobileStop() {
+	closeEvent()
+	Gl = nil
+	worker = nil
 }
