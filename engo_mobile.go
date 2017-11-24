@@ -1,4 +1,4 @@
-//+build android !mobilebind
+//+build android,!mobilebind
 
 package engo
 
