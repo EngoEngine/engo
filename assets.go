@@ -79,6 +79,15 @@ func (formats *Formats) Load(urls ...string) error {
 	return nil
 }
 
+// LoadBinData loads a resource when you already have the reader for it.
+func (formats *Formats) LoadReaderData(url string, f io.Reader) error {
+	ext := filepath.Ext(url)
+	if loader, ok := Files.formats[ext]; ok {
+		return loader.Load(url, f)
+	}
+	return fmt.Errorf("no `FileLoader` associated with this extension: %q in url %q", ext, url)
+}
+
 // Unload releases the given resource from memory.
 func (formats *Formats) Unload(url string) error {
 	ext := filepath.Ext(url)
