@@ -1,4 +1,4 @@
-//+build netgo windows android
+//+build netgo windows android darwin,arm darwin,arm64
 
 package common
 
