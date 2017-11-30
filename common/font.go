@@ -192,7 +192,6 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 
 		atlas.Width[i] = float32(adv.Ceil())
 		atlas.Height[i] = float32(lineHeight.Ceil()) + lineBuffer
-		fmt.Println(float32(lineHeight.Ceil()))
 		atlas.XLocation[i] = currentX
 		atlas.YLocation[i] = currentY
 
