@@ -182,6 +182,7 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 	})
 
 	lineHeight := d.Face.Metrics().Height
+	lineBuffer := float32(lineHeight.Ceil()) / 2
 
 	for i := 0; i < c; i++ {
 		_, adv, ok := d.Face.GlyphBounds(rune(i))
@@ -190,7 +191,8 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 		}
 
 		atlas.Width[i] = float32(adv.Ceil())
-		atlas.Height[i] = float32(lineHeight.Ceil()) + 5
+		atlas.Height[i] = float32(lineHeight.Ceil()) + lineBuffer
+		fmt.Println(float32(lineHeight.Ceil()))
 		atlas.XLocation[i] = currentX
 		atlas.YLocation[i] = currentY
 
@@ -200,8 +202,8 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 				atlas.TotalWidth = currentX
 			}
 			currentX = 0
-			currentY += float32(lineHeight.Ceil()) + 5
-			atlas.TotalHeight += float32(lineHeight.Ceil()) + 5
+			currentY += float32(lineHeight.Ceil()) + lineBuffer
+			atlas.TotalHeight += float32(lineHeight.Ceil()) + lineBuffer
 		}
 	}
 
@@ -221,7 +223,7 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 		currentX += float32(adv.Ceil())
 		if currentX > 255 || i == c-1 {
 			currentX = 0
-			currentY += float32(lineHeight.Ceil()) + 5
+			currentY += float32(lineHeight.Ceil()) + lineBuffer
 		}
 	}
 
