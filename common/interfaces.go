@@ -1,13 +1,27 @@
-// interfaces.go is intended to provide a simple means of adding components to each system
+// interfaces.go is intended to provide a simple means of adding components to
+// each system
+//
 // Getters
-// These are added functions to each class to allow them to meet the interfaces we use with AddByInterface methods on each system
+//
+// These are added functions to each class to allow them to meet the interfaces
+// we use with AddByInterface methods on each system.
+//
 // Faces
-// The interfaces that end in "Face" are all met by a specific component, which can be composed into an Entity
-// The word Get is used because, otherwise it would collide with the name of the object, when stored anonymously in a parent entity
+//
+// The interfaces that end in "Face" are all met by a specific component, which
+// can be composed into an Entity. The word Get is used because, otherwise it
+// would collide with the name of the object, when stored anonymously in a
+// parent entity.
+//
 // Ables
-// The interfaces that end in "able" are those required by a specific system, and if an an object meets this interface it can be added to that system
-// Note: *able* is used not *er* because they don't really do thing anything
-// Note: The names have not been contracted for consistency, the interface is *Collisionable* not *Collidable*
+//
+// The interfaces that end in "able" are those required by a specific system,
+// and if an an object meets this interface it can be added to that system.
+//
+// Note: *able* is used not *er* because they don't really do thing anything.
+//
+// Note: The names have not been contracted for consistency, the interface is
+// *Collisionable* not *Collidable*.
 package common
 
 import "engo.io/ecs"
