@@ -3,7 +3,7 @@ package engo
 const (
 	// AxisMax is the maximum value a joystick or keypress axis will reach
 	AxisMax float32 = 1
-	// AxisMin is the value an axis returns if there has been to state change.
+	// AxisNeutral is the value an axis returns if there has been to state change.
 	AxisNeutral float32 = 0
 	// AxisMin is the minimum value a joystick or keypress axis will reach
 	AxisMin float32 = -1
@@ -59,6 +59,8 @@ func (im *InputManager) Button(name string) Button {
 	return im.buttons[name]
 }
 
+// Mouse holds the state of a Mouse.  It is usex extensivly in the Axis system,
+// which should be prefered.
 type Mouse struct {
 	X, Y             float32
 	ScrollX, ScrollY float32
