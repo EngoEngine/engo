@@ -27,8 +27,8 @@ func (sc *SpaceComponent) SetCenter(p engo.Point) {
 		return
 	}
 	sin, cos := math.Sincos(sc.Rotation * math.Pi / 180)
-	xDelta += (sc.Width*cos - sc.Height*sin) / 2
-	yDelta += (sc.Height*cos + sc.Width*sin) / 2
+	xDelta = (sc.Width*cos - sc.Height*sin) / 2
+	yDelta = (sc.Height*cos + sc.Width*sin) / 2
 	sc.Position.X = p.X - xDelta
 	sc.Position.Y = p.Y - yDelta
 }
@@ -43,8 +43,8 @@ func (sc *SpaceComponent) Center() engo.Point {
 		return engo.Point{p.X + xDelta, p.Y + yDelta}
 	}
 	sin, cos := math.Sincos(sc.Rotation * math.Pi / 180)
-	xDelta += (sc.Width*cos - sc.Height*sin) / 2
-	yDelta += (sc.Height*cos + sc.Width*sin) / 2
+	xDelta = (sc.Width*cos - sc.Height*sin) / 2
+	yDelta = (sc.Height*cos + sc.Width*sin) / 2
 	return engo.Point{p.X + xDelta, p.Y + yDelta}
 }
 
