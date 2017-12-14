@@ -12,31 +12,31 @@ import (
 type Spritesheet struct {
 	texture       *gl.Texture     // The original texture
 	width, height float32         // The dimensions of the total texture
-	cells         []Sprite        // The dimensions of each sprite
+	cells         []SpriteRegion  // The dimensions of each sprite
 	cache         map[int]Texture // The cell cache cells
 }
 
 // Sprite holds the position data for each sprite on the sheet
-type Sprite struct {
+type SpriteRegion struct {
 	Position      engo.Point
 	Width, Height int
 }
 
 // NewAsymmetricSpriteSheetFromTexture creates a new AsymmetricSpriteSheet from a
 // TextureResource. The data provided is the location and size of the sprites
-func NewAsymmetricSpritesheetFromTexture(tr *TextureResource, sprites []Sprite) *Spritesheet {
+func NewAsymmetricSpritesheetFromTexture(tr *TextureResource, spriteRegions []SpriteRegion) *Spritesheet {
 	return &Spritesheet{
 		texture: tr.Texture,
 		width:   tr.Width,
 		height:  tr.Height,
-		cells:   sprites,
+		cells:   spriteRegions,
 		cache:   make(map[int]Texture),
 	}
 }
 
 // NewAsymmetricSpriteSheetFromFile creates a new AsymmetricSpriteSheet from a
 // file name. The data provided is the location and size of the sprites
-func NewAsymmetricSpritesheetFromFile(textureName string, sprites []Sprite) *Spritesheet {
+func NewAsymmetricSpritesheetFromFile(textureName string, spriteRegions []SpriteRegion) *Spritesheet {
 	res, err := engo.Files.Resource(textureName)
 	if err != nil {
 		log.Println("[WARNING] [NewAsymmetricSpritesheetFromFile]: Received error:", err)
@@ -49,13 +49,13 @@ func NewAsymmetricSpritesheetFromFile(textureName string, sprites []Sprite) *Spr
 		return nil
 	}
 
-	return NewAsymmetricSpritesheetFromTexture(&img, sprites)
+	return NewAsymmetricSpritesheetFromTexture(&img, spriteRegions)
 }
 
 // NewSpritesheetFromTexture creates a new spritesheet from a texture resource.
 func NewSpritesheetFromTexture(tr *TextureResource, cellWidth, cellHeight int) *Spritesheet {
-	sprites := generateSprites(tr.Width, tr.Height, cellWidth, cellHeight, 0, 0)
-	return NewAsymmetricSpritesheetFromTexture(tr, sprites)
+	spriteRegions := generateSymmetricSpriteRegions(tr.Width, tr.Height, cellWidth, cellHeight, 0, 0)
+	return NewAsymmetricSpritesheetFromTexture(tr, spriteRegions)
 }
 
 // NewSpritesheetFromFile is a simple handler for creating a new spritesheet from a file
@@ -80,8 +80,8 @@ func NewSpritesheetFromFile(textureName string, cellWidth, cellHeight int) *Spri
 // This sheet has sprites of a uniform width and height, but also have borders around
 // each sprite to prevent bleeding over
 func NewSpritesheetWithBorderFromTexture(tr *TextureResource, cellWidth, cellHeight, borderWidth, borderHeight int) *Spritesheet {
-	sprites := generateSprites(tr.Width, tr.Height, cellWidth, cellHeight, borderWidth, borderHeight)
-	return NewAsymmetricSpritesheetFromTexture(tr, sprites)
+	spriteRegions := generateSymmetricSpriteRegions(tr.Width, tr.Height, cellWidth, cellHeight, borderWidth, borderHeight)
+	return NewAsymmetricSpritesheetFromTexture(tr, spriteRegions)
 }
 
 // NewSpritesheetWithBorderFromFile creates a new spritesheet from a file
@@ -173,21 +173,21 @@ func (s Spritesheet) Height() float32 {
 	return s.height / s.Cell(0).Height()
 }
 
-func generateSprites(totalWidth, totalHeight float32, cellWidth, cellHeight, borderWidth, borderHeight int) []Sprite {
-	var sprites []Sprite
+func generateSymmetricSpriteRegions(totalWidth, totalHeight float32, cellWidth, cellHeight, borderWidth, borderHeight int) []SpriteRegion {
+	var spriteRegions []SpriteRegion
 
 	for y := 0; y <= int(math.Floor(totalHeight-1)); y += cellHeight + borderHeight {
 		for x := 0; x <= int(math.Floor(totalWidth-1)); x += cellWidth + borderWidth {
-			sprite := Sprite{
+			spriteRegion := SpriteRegion{
 				Position: engo.Point{float32(x), float32(y)},
 				Width:    cellWidth,
 				Height:   cellHeight,
 			}
-			sprites = append(sprites, sprite)
+			spriteRegions = append(spriteRegions, spriteRegion)
 		}
 	}
 
-	return sprites
+	return spriteRegions
 }
 
 /*
