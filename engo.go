@@ -57,6 +57,9 @@ type RunOptions struct {
 	// VSync indicates whether or not OpenGL should wait for the monitor to swp the buffers
 	VSync bool
 
+	// Resizable indicates whether or not the Window should be resizable.  Defaults to `true`.
+	NotResizable bool
+
 	// ScaleOnResize indicates whether or not engo should make things larger/smaller whenever the screen resizes
 	ScaleOnResize bool
 
@@ -93,6 +96,9 @@ type RunOptions struct {
 	// mobile (Android/iOS), because they **require** all assets to be within the `assets` directory. You may however
 	// use any subfolder-structure within that `assets` directory.
 	AssetsRoot string
+
+	// MobileWidth and MobileHeight are the width and height given from the Android/iOS OpenGL Surface used for Gomobile bind
+	MobileWidth, MobileHeight int
 }
 
 // Run is called to create a window, initialize everything, and start the main loop. Once this function returns,

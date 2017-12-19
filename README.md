@@ -53,6 +53,9 @@ The `common` package contains our ECS implementations of common game development
   3. If you're on OSX, you will also need Git. You can find instructions [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git#Installing-on-Mac). You can also use homebrew to install git as well. [Open an issue if you have any issues](https://github.com/EngoEngine/engo/issues/new)
 2. Then, you can go get it:
 `go get -u engo.io/engo`
+  1. You may also want to get the dependencies of platform specific builds, so that build tools like godef can use them:
+  `go get -u -tags netgo ./...`
+  `go get -u -tags android ./...`
 3. Now, you have two choices:
   1. Visit [our website](https://engo.io/), which hosts a full-blown tutorial series on how to create your own game, and on top of that, has some conceptual explanations;
   2. Check out some demos in our [demos folder](https://github.com/EngoEngine/engo/tree/master/demos).
@@ -76,7 +79,7 @@ we have a list of those changes, with the most recent being at the top. If you r
 
 ## History
 
-Engo, originally known as `Engi` was written by [ajhager](https://github.com/ajhager) as a general purpose Go game engine. With a desire to build it into an "ECS" game engine, it was forked to `github.com/paked/engi`. After passing through several iterations, it was decided that the project would be rebranded and rereleased as Engo on its own GitHub organisation.
+Engo, originally known as `Engi` was written by [ajhager](https://github.com/ajhager) as a general purpose Go game engine. With a desire to build it into an "ECS" game engine, it was forked to `github.com/paked/engi`. After passing through several iterations, it was decided that the project would be rebranded and rereleased as Engo on its own GitHub organization.
 
 ## Credits
 

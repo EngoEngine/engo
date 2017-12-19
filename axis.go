@@ -80,11 +80,11 @@ func (am *AxisMouse) Value() float32 {
 	var diff float32
 
 	if am.direction == AxisMouseHori {
-		diff = Input.Mouse.X - am.old
-		am.old = Input.Mouse.X
+		diff = Input.Mouse.X - am.old + (ResizeXOffset / 2)
+		am.old = Input.Mouse.X + (ResizeXOffset / 2)
 	} else {
-		diff = Input.Mouse.Y - am.old
-		am.old = Input.Mouse.Y
+		diff = Input.Mouse.Y - am.old + (ResizeYOffset / 2)
+		am.old = Input.Mouse.Y + (ResizeYOffset / 2)
 	}
 
 	return diff

@@ -70,6 +70,7 @@ func (f *Font) TextDimensions(text string) (int, int, int) {
 		maxYBearing = fixed.Int26_6(0)
 	)
 	fupe := fixed.Int26_6(fnt.FUnitsPerEm())
+
 	for _, char := range text {
 		idx := fnt.Index(char)
 		hm := fnt.HMetric(fupe, idx)
@@ -81,9 +82,14 @@ func (f *Font) TextDimensions(text string) (int, int, int) {
 			return 0, 0, 0
 		}
 		totalWidth += hm.AdvanceWidth
+
 		yB := (vm.TopSideBearing * fixed.Int26_6(size)) / fupe
 		if yB > maxYBearing {
 			maxYBearing = yB
+		}
+		dY := (vm.AdvanceHeight * fixed.Int26_6(size)) / fupe
+		if dY > totalHeight {
+			totalHeight = dY
 		}
 	}
 
@@ -156,96 +162,73 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 		Height:    make([]float32, c),
 	}
 
-	var (
-		int26Width  fixed.Int26_6
-		int26Height fixed.Int26_6
+	currentX := float32(0)
+	currentY := float32(0)
 
-		totalHeight fixed.Int26_6
+	// Default colors
+	if f.FG == nil {
+		f.FG = color.NRGBA{0, 0, 0, 0}
+	}
+	if f.BG == nil {
+		f.BG = color.NRGBA{0, 0, 0, 0}
+	}
 
-		fupe        = fixed.Int26_6(f.TTF.FUnitsPerEm())
-		maxYBearing = fixed.Int26_6(0)
+	d := &font.Drawer{}
+	d.Src = image.NewUniform(f.FG)
+	d.Face = truetype.NewFace(f.TTF, &truetype.Options{
+		Size:    f.Size,
+		DPI:     dpi,
+		Hinting: font.HintingNone,
+	})
 
-		currentX float32
-		maxX     float32
-
-		totalString string // TODO; string is immutable, so this is relatively inefficient; see also where we use `totalString += string(char)`
-		subString   string
-
-		drawCurY int
-	)
-
-	// The "full image"
-	nrgba := image.NewNRGBA(image.Rect(0, 0, 1200, 5000)) // way too big; hopefully
+	lineHeight := d.Face.Metrics().Height
+	lineBuffer := float32(lineHeight.Ceil()) / 2
 
 	for i := 0; i < c; i++ {
-		char := rune(i)
-		totalString += string(char)
-		subString += string(char)
-		atlas.XLocation[char] = currentX
-		atlas.YLocation[char] = float32(drawCurY)
-
-		idx := f.TTF.Index(char)
-		hm := f.TTF.HMetric(fupe, idx)
-		vm := f.TTF.VMetric(fupe, idx)
-
-		g := truetype.GlyphBuf{}
-		err := g.Load(f.TTF, fupe, idx, font.HintingNone)
-		if err != nil {
-			log.Println("Error creating font atlas:", err)
-			return atlas
+		_, adv, ok := d.Face.GlyphBounds(rune(i))
+		if !ok {
+			continue
 		}
 
-		int26Width += hm.AdvanceWidth
+		atlas.Width[i] = float32(adv.Ceil())
+		atlas.Height[i] = float32(lineHeight.Ceil()) + lineBuffer
+		atlas.XLocation[i] = currentX
+		atlas.YLocation[i] = currentY
 
-		atlas.Width[char] = float32(g.AdvanceWidth * fixed.Int26_6(f.Size) / fupe)
-
-		currentX = float32(int26Width * fixed.Int26_6(f.Size) / fupe)
-		if currentX > maxX {
-			maxX = currentX
-		}
-
-		yB := vm.TopSideBearing - g.Bounds.Min.Y
-		if yB > maxYBearing {
-			maxYBearing = yB
-		}
-		atlas.Height[char] = float32(yB * fixed.Int26_6(f.Size) / fupe)
-
-		if int(int26Width*fixed.Int26_6(f.Size)/fupe) > 1024 {
-			// Now let's draw these chars!
-			subimg := f.RenderNRGBA(subString)
-			// TODO: optimize this, because `f.RenderNRGBA` also allocates a new image, while we could be drawing to this one directly.
-			draw.Draw(nrgba, image.Rect(0, drawCurY, subimg.Bounds().Max.X, drawCurY+subimg.Bounds().Max.Y), subimg, image.ZP, draw.Src)
-			drawCurY += subimg.Bounds().Max.Y
-
-			int26Height += maxYBearing
-			totalHeight += maxYBearing
-			maxYBearing = fixed.Int26_6(0)
-
-			subString = ""
-			int26Width = 0
+		currentX += float32(adv.Ceil())
+		if currentX > 255 || i >= c-1 {
+			if currentX > atlas.TotalWidth {
+				atlas.TotalWidth = currentX
+			}
 			currentX = 0
+			currentY += float32(lineHeight.Ceil()) + lineBuffer
+			atlas.TotalHeight += float32(lineHeight.Ceil()) + lineBuffer
 		}
 	}
 
-	// Draw the last line as well
-	subimg := f.RenderNRGBA(subString)
-	// TODO: optimize this, because `f.RenderNRGBA` also allocates a new image, while we could be drawing to this one directly.
-	draw.Draw(nrgba, image.Rect(0, drawCurY, subimg.Bounds().Max.X, drawCurY+subimg.Bounds().Max.Y), subimg, image.ZP, draw.Src)
-	drawCurY += subimg.Bounds().Max.Y
-
-	int26Height += maxYBearing
-	totalHeight += maxYBearing
-	maxYBearing = fixed.Int26_6(0)
-
-	atlas.TotalWidth = maxX
-	atlas.TotalHeight = float32(drawCurY)
-
 	// Create texture
 	actual := image.NewNRGBA(image.Rect(0, 0, int(atlas.TotalWidth), int(atlas.TotalHeight)))
-	draw.Draw(actual, actual.Bounds(), nrgba, image.ZP, draw.Src)
+	d.Dst = actual
+
+	currentX = 0
+	currentY = float32(lineHeight.Ceil())
+	for i := 0; i < c; i++ {
+		_, adv, ok := d.Face.GlyphBounds(rune(i))
+		if !ok {
+			continue
+		}
+		d.Dot = fixed.P(int(currentX), int(currentY))
+		d.DrawBytes([]byte{byte(i)})
+		currentX += float32(adv.Ceil())
+		if currentX > 255 || i == c-1 {
+			currentX = 0
+			currentY += float32(lineHeight.Ceil()) + lineBuffer
+		}
+	}
 
 	imObj := NewImageObject(actual)
 	atlas.Texture = NewTextureSingle(imObj).id
+
 	return atlas
 }
 
