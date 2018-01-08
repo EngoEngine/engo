@@ -432,7 +432,7 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 		}
 
 		// create image tile
-		imageTile := &tile{
+		imageTile := &Tile{
 			engo.Point{float32(tmxImageLayer.X), float32(tmxImageLayer.Y)},
 			curImg,
 		}
