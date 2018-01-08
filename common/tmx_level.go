@@ -341,7 +341,7 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 		ts[i] = &tilesheet{tts.Image, tts.Firstgid}
 	}
 
-	levelTileset := createTileset(level, ts)
+	level.Tileset = createTileset(level, ts)
 
 	levelTileLayers := make([]*layer, len(tmxLevel.TileLayers))
 	for i, tileLayer := range tmxLevel.TileLayers {
@@ -353,8 +353,8 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 		}
 	}
 
-	// create tile layers with tiles
-	level.TileLayers = createLevelTiles(level, levelTileLayers, levelTileset)
+	// create Tile layers with tiles
+	level.TileLayers = createLevelTiles(level, levelTileLayers, level.Tileset)
 
 	// create object layers
 	for _, objectLayer := range tmxLevel.ObjectLayers {

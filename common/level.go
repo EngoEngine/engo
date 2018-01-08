@@ -19,6 +19,8 @@ type Level struct {
 	TileHeight int
 	// NextObjectId is the next free Object ID defined by Tiled
 	NextObjectId int
+	// Tileset maps tile IDs to their texture
+	Tileset map[int]*Tile
 	// TileLayers contains all TileLayer of the level
 	TileLayers []*TileLayer
 	// ImageLayers contains all ImageLayer of the level
@@ -166,8 +168,8 @@ type layer struct {
 	TileMapping []uint32
 }
 
-func createTileset(lvl *Level, sheets []*tilesheet) []*Tile {
-	tileset := make([]*Tile, 0)
+func createTileset(lvl *Level, sheets []*tilesheet) map[int]*Tile {
+	tileset := make(map[int]*Tile)
 	tw := float32(lvl.TileWidth)
 	th := float32(lvl.TileHeight)
 
@@ -197,14 +199,14 @@ func createTileset(lvl *Level, sheets []*tilesheet) []*Tile {
 					engo.Point{u2, v2},
 				},
 			}
-			tileset = append(tileset, t)
+			tileset[sheet.Firstgid + i] = t
 		}
 	}
 
 	return tileset
 }
 
-func createLevelTiles(lvl *Level, layers []*layer, ts []*Tile) []*TileLayer {
+func createLevelTiles(lvl *Level, layers []*layer, ts map[int]*Tile) []*TileLayer {
 	var levelTileLayers []*TileLayer
 
 	// Create a TileLayer for each provided layer
@@ -218,7 +220,7 @@ func createLevelTiles(lvl *Level, layers []*layer, ts []*Tile) []*TileLayer {
 				idx := x + i*lvl.width
 				t := &Tile{}
 
-				if tileIdx := int(mapping[idx]) - 1; tileIdx >= 0 {
+				if tileIdx := int(mapping[idx]); tileIdx >= 1 {
 					t.Image = ts[tileIdx].Image
 					t.Point = engo.Point{
 						float32(x * lvl.TileWidth),
