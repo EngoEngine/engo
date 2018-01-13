@@ -159,6 +159,8 @@ type Tile struct {
 type tilesheet struct {
 	Image    *TextureResource
 	Firstgid int
+	Width    int
+	Height   int
 }
 
 type layer struct {
@@ -170,10 +172,14 @@ type layer struct {
 
 func createTileset(lvl *Level, sheets []*tilesheet) map[int]*Tile {
 	tileset := make(map[int]*Tile)
-	tw := float32(lvl.TileWidth)
-	th := float32(lvl.TileHeight)
+	deftw := float32(lvl.TileWidth)
+	defth := float32(lvl.TileHeight)
 
 	for _, sheet := range sheets {
+		var tw, th = deftw, defth
+		if (sheet.Height != 0 && sheet.Width != 0) {
+			tw, th = float32(sheet.Width), float32(sheet.Height)
+		}
 		setWidth := sheet.Image.Width / tw
 		setHeight := sheet.Image.Height / th
 		totalTiles := int(setWidth * setHeight)
