@@ -1,20 +1,19 @@
-//+build !windows,!netgo,!android
+//+build !windows,!android
 
 package common
 
 import (
 	"bytes"
 	"fmt"
-	"io"
-	"io/ioutil"
 
+	"engo.io/audio"
 	"engo.io/engo"
 )
 
 // AudioResource is a wrapper for `*Player` which is being passed by the the `engo.Files.Resource` method in the
 // case of `.wav` files.
 type AudioResource struct {
-	Player *Player
+	Player *audio.Player
 	url    string
 }
 
@@ -25,23 +24,6 @@ func (f AudioResource) URL() string {
 // audioLoader is responsible for managing `.wav` files within `engo.Files`
 type audioLoader struct {
 	audios map[string]AudioResource
-}
-
-// Load processes the data stream and parses it as an audio file
-func (i *audioLoader) Load(url string, data io.Reader) error {
-	audioBytes, err := ioutil.ReadAll(data)
-	if err != nil {
-		return err
-	}
-
-	audioBuffer := bytes.NewReader(audioBytes)
-	player, err := NewPlayer(&readSeekCloserBuffer{audioBuffer}, 0, 0)
-	if err != nil {
-		return fmt.Errorf("%s (are you running `core.AudioSystemPreload()` before preloading .wav files?)", err.Error())
-	}
-
-	i.audios[url] = AudioResource{Player: player, url: url}
-	return nil
 }
 
 // Load removes the preloaded audio file from the cache
