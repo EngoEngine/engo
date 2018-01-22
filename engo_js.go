@@ -10,6 +10,7 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 
 	"engo.io/gl"
@@ -28,6 +29,9 @@ var (
 	ResizeYOffset = float32(0)
 
 	Backend string = "Web"
+
+	poll     = make(map[int]bool)
+	pollLock sync.Mutex
 )
 
 func init() {
@@ -92,12 +96,20 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	})
 	w.AddEventListener("keydown", false, func(ev dom.Event) {
 		ke := ev.(*dom.KeyboardEvent)
-		Input.keys.Set(Key(ke.KeyCode), true)
+		go func(i int) {
+			pollLock.Lock()
+			poll[i] = true
+			pollLock.Unlock()
+		}(ke.KeyCode)
 	})
 
 	w.AddEventListener("keyup", false, func(ev dom.Event) {
 		ke := ev.(*dom.KeyboardEvent)
-		Input.keys.Set(Key(ke.KeyCode), false)
+		go func(i int) {
+			pollLock.Lock()
+			poll[i] = false
+			pollLock.Unlock()
+		}(ke.KeyCode)
 	})
 
 	w.AddEventListener("mousemove", false, func(ev dom.Event) {
@@ -213,6 +225,7 @@ func rafPolyfill() {
 func RunIteration() {
 	Time.Tick()
 	Input.update()
+	jsPollKeys()
 	currentWorld.Update(Time.Delta())
 	Input.Mouse.Action = Neutral
 	// TODO: this may not work, and sky-rocket the FPS
@@ -225,6 +238,21 @@ func RunIteration() {
 	// 	}
 	// 	Time.Tick()
 	// })
+}
+
+// jsPollKeys polls the keys collected by the javascript callback
+// this ensures the keys only get updated once per frame, since the
+// callback has no information about the frames and is invoked several
+// times between frames. This makes Input.Button.JustPressed and JustReleased
+// able to return true properly.
+func jsPollKeys() {
+	pollLock.Lock()
+	defer pollLock.Unlock()
+
+	for key, state := range poll {
+		Input.keys.Set(Key(key), state)
+		delete(poll, key)
+	}
 }
 
 func requestAnimationFrame(callback func(float32)) int {
