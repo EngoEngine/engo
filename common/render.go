@@ -5,13 +5,15 @@ import (
 	"image/color"
 	"sort"
 
+	"sync"
+
 	"engo.io/ecs"
 	"engo.io/engo"
 	"engo.io/gl"
-	"sync"
 )
 
 const (
+	// RenderSystemPriority is the priority of the RenderSystem
 	RenderSystemPriority = -1000
 )
 
@@ -21,6 +23,7 @@ func (renderChangeMessage) Type() string {
 	return "renderChangeMessage"
 }
 
+// Drawable is that which can be rendered to OpenGL.
 type Drawable interface {
 	Texture() *gl.Texture
 	Width() float32
@@ -29,15 +32,21 @@ type Drawable interface {
 	Close()
 }
 
+// TextureRepeating is the method used to repeat a texture in OpenGL.
 type TextureRepeating uint8
 
 const (
+	// ClampToEdge stretches the texture to the edge of the viewport.
 	ClampToEdge TextureRepeating = iota
+	// ClampToBorder stretches the texture to the border of the viewpport.
 	ClampToBorder
+	// Repeat repeats the texture until the border of the viewport.
 	Repeat
+	// MirroredRepeat repeats a mirror image of the texture until the border of the viewport.
 	MirroredRepeat
 )
 
+// RenderComponent is the component needed to render an entity.
 type RenderComponent struct {
 	// Hidden is used to prevent drawing by OpenGL
 	Hidden bool
@@ -57,11 +66,14 @@ type RenderComponent struct {
 	bufferContent []float32
 }
 
+// SetShader sets the shader used by the RenderComponent.
 func (r *RenderComponent) SetShader(s Shader) {
 	r.shader = s
 	engo.Mailbox.Dispatch(&renderChangeMessage{})
 }
 
+// SetZIndex sets the order that the RenderComponent is drawn to the screen. Higher z-indices are drawn on top of
+// lower ones if they overlap.
 func (r *RenderComponent) SetZIndex(index float32) {
 	r.zIndex = index
 	engo.Mailbox.Dispatch(&renderChangeMessage{})
@@ -83,7 +95,7 @@ func (r renderEntityList) Less(i, j int) bool {
 	// Sort by shader-pointer if they have the same zIndex
 	if r[i].RenderComponent.zIndex == r[j].RenderComponent.zIndex {
 		// TODO: optimize this for performance
-		return fmt.Sprintf("%p", r[i].RenderComponent.shader) < fmt.Sprintf("%p", r[j].RenderComponent.shader)
+		return fmt.Sprintf("%p", &r[i].RenderComponent.shader) < fmt.Sprintf("%p", &r[j].RenderComponent.shader)
 	}
 
 	return r[i].RenderComponent.zIndex < r[j].RenderComponent.zIndex
@@ -93,6 +105,7 @@ func (r renderEntityList) Swap(i, j int) {
 	r[i], r[j] = r[j], r[i]
 }
 
+// RenderSystem is the system that draws entities on the OpenGL surface.
 type RenderSystem struct {
 	entities renderEntityList
 	world    *ecs.World
@@ -101,8 +114,10 @@ type RenderSystem struct {
 	currentShader Shader
 }
 
+// Priority implements the ecs.Prioritizer interface.
 func (*RenderSystem) Priority() int { return RenderSystemPriority }
 
+// New initializes the RenderSystem
 func (rs *RenderSystem) New(w *ecs.World) {
 	rs.world = w
 
@@ -119,6 +134,7 @@ func (rs *RenderSystem) New(w *ecs.World) {
 }
 
 var cameraInitMutex sync.Mutex
+
 func addCameraSystemOnce(w *ecs.World) {
 	cameraInitMutex.Lock()
 	defer cameraInitMutex.Unlock()
@@ -135,12 +151,13 @@ func addCameraSystemOnce(w *ecs.World) {
 	}
 }
 
+// Add adds an entity to the RenderSystem. The entity needs a basic, render, and space component to be added to the system.
 func (rs *RenderSystem) Add(basic *ecs.BasicEntity, render *RenderComponent, space *SpaceComponent) {
 	// Do nothing if entity already exists
 	if rs.EntityExists(basic) >= 0 {
 		return
 	}
-	
+
 	// Setting default shader
 	if render.shader == nil {
 		switch render.Drawable.(type) {
@@ -176,7 +193,7 @@ func (rs *RenderSystem) Add(basic *ecs.BasicEntity, render *RenderComponent, spa
 			render.shader = HUDShader
 		}
 	}
-	
+
 	rs.entities = append(rs.entities, renderEntity{basic, render, space})
 	rs.sortingNeeded = true
 }
@@ -197,14 +214,16 @@ func (rs *RenderSystem) AddByInterface(o Renderable) {
 	rs.Add(o.GetBasicEntity(), o.GetRenderComponent(), o.GetSpaceComponent())
 }
 
+// Remove removes an entity from the RenderSystem
 func (rs *RenderSystem) Remove(basic ecs.BasicEntity) {
-	var delete int = rs.EntityExists(&basic)
+	var delete = rs.EntityExists(&basic)
 	if delete >= 0 {
 		rs.entities = append(rs.entities[:delete], rs.entities[delete+1:]...)
 		rs.sortingNeeded = true
 	}
 }
 
+// Update draws the entities in the RenderSystem to the OpenGL Surface.
 func (rs *RenderSystem) Update(dt float32) {
 	if engo.Headless() {
 		return
@@ -237,7 +256,7 @@ func (rs *RenderSystem) Update(dt float32) {
 
 		// Setting default scale to 1
 		if e.RenderComponent.Scale.X == 0 && e.RenderComponent.Scale.Y == 0 {
-			e.RenderComponent.Scale = engo.Point{1, 1}
+			e.RenderComponent.Scale = engo.Point{X: 1, Y: 1}
 		}
 
 		// Setting default to white
@@ -254,6 +273,7 @@ func (rs *RenderSystem) Update(dt float32) {
 	}
 }
 
+// SetBackground sets the OpenGL ClearColor to the provided color.
 func SetBackground(c color.Color) {
 	if !engo.Headless() {
 		r, g, b, a := c.RGBA()

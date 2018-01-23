@@ -15,6 +15,7 @@ const (
 	defaultHeightModifier float32 = 1
 )
 
+// MasterVolume provides a number that all underlying player volumes are scaled by
 var MasterVolume float64 = 1
 
 // ReadSeekCloser is an io.ReadSeeker and io.Closer.
@@ -32,6 +33,7 @@ type AudioComponent struct {
 	RawVolume  float64
 }
 
+// SetVolume sets the AudioComponent's volume
 func (ac *AudioComponent) SetVolume(volume float64) {
 	ac.RawVolume = volume
 	ac.player.SetVolume(volume * MasterVolume)
@@ -75,6 +77,7 @@ func (a *AudioSystem) AddByInterface(o Audioable) {
 	a.Add(o.GetBasicEntity(), o.GetAudioComponent(), o.GetSpaceComponent())
 }
 
+// Remove removes an entity from the AudioSystem
 func (a *AudioSystem) Remove(basic ecs.BasicEntity) {
 	delete := -1
 	for index, e := range a.entities {
@@ -88,6 +91,7 @@ func (a *AudioSystem) Remove(basic ecs.BasicEntity) {
 	}
 }
 
+// New initializes the AudioSystem
 func (a *AudioSystem) New(w *ecs.World) {
 	a.cachedVolume = MasterVolume
 
@@ -125,6 +129,7 @@ func (a *AudioSystem) New(w *ecs.World) {
 	})
 }
 
+// Update is called once per frame, and updates/plays the entities in the AudioSystem
 func (a *AudioSystem) Update(dt float32) {
 	for _, e := range a.entities {
 		if e.AudioComponent.player == nil {

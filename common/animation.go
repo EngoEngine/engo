@@ -82,7 +82,7 @@ func (ac *AnimationComponent) NextFrame() {
 		return
 	}
 
-	ac.index += 1
+	ac.index++
 	ac.change = 0
 	if ac.index >= len(ac.CurrentAnimation.Frames) {
 		ac.index = 0

@@ -12,6 +12,7 @@ const (
 	defaultHeightModifier float32 = 1
 )
 
+// MasterVolume provides a number that all underlying player volumes are scaled by
 var MasterVolume float64 = 1
 
 // ReadSeekCloser is an io.ReadSeeker and io.Closer.
@@ -36,11 +37,19 @@ type AudioSystem struct {
 	HeightModifier float32
 }
 
+// New is not implemented
 func (as *AudioSystem) New(*ecs.World) {
 	notImplemented("audio")
 }
 
+// Add is not implemented
 func (as *AudioSystem) Add(*ecs.BasicEntity, *AudioComponent, *SpaceComponent) {}
-func (as *AudioSystem) AddByInterface(o Audioable)                             {}
-func (as *AudioSystem) Remove(basic ecs.BasicEntity)                           {}
-func (as *AudioSystem) Update(dt float32)                                      {}
+
+// AddByInterface is not implemented
+func (as *AudioSystem) AddByInterface(o Audioable) {}
+
+// Remove is no implemented
+func (as *AudioSystem) Remove(basic ecs.BasicEntity) {}
+
+// Update is not implemented
+func (as *AudioSystem) Update(dt float32) {}

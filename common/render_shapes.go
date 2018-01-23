@@ -7,16 +7,18 @@ import (
 	"engo.io/gl"
 )
 
+// TriangleType is the type of triangle: Right or Isosceles.
 type TriangleType uint8
 
 const (
-	// Indicates a Triangle where two sides have equal length
+	// TriangleIsosceles indicates a Triangle where two sides have equal length
 	TriangleIsosceles TriangleType = iota
-	// Indicates a Triangles where one angle is at 90 degrees
+	// TriangleRight indicates a Triangles where one angle is at 90 degrees
 	TriangleRight
 )
 
-// Triangle is a basic triangular form; the "point" of the triangle is pointing to the top
+// Triangle is a basic triangular form; the "point" of the triangle is pointing to the top. The dimensions are controlled
+// by the SpaceComponent.
 type Triangle struct {
 	TriangleType TriangleType
 
@@ -24,11 +26,20 @@ type Triangle struct {
 	BorderColor color.Color
 }
 
-func (Triangle) Texture() *gl.Texture                       { return nil }
-func (Triangle) Width() float32                             { return 0 }
-func (Triangle) Height() float32                            { return 0 }
+// Texture always returns nil. Triangle is drawable without a Texture. This implements the Drawable interface.
+func (Triangle) Texture() *gl.Texture { return nil }
+
+// Width always returns 0. This implements the Drawable interface.
+func (Triangle) Width() float32 { return 0 }
+
+// Height always returns 0. This implements the Drawable interface.
+func (Triangle) Height() float32 { return 0 }
+
+// View always returns 0, 0, 1, 1. This implements the Drawable interface.
 func (Triangle) View() (float32, float32, float32, float32) { return 0, 0, 1, 1 }
-func (Triangle) Close()                                     {}
+
+// Close does nothing, because there's no Texture on the GPU. This implements the Drawable interface.
+func (Triangle) Close() {}
 
 // Rectangle is a basic rectangular form; the dimensions are controlled via the `SpaceComponent`.
 type Rectangle struct {
@@ -36,11 +47,20 @@ type Rectangle struct {
 	BorderColor color.Color
 }
 
-func (Rectangle) Texture() *gl.Texture                       { return nil }
-func (Rectangle) Width() float32                             { return 0 }
-func (Rectangle) Height() float32                            { return 0 }
+// Texture always returns nil. Rectangle is drawable without a Texture. This implements the Drawable interface.
+func (Rectangle) Texture() *gl.Texture { return nil }
+
+// Width always returns 0. This implements the Drawable interface.
+func (Rectangle) Width() float32 { return 0 }
+
+// Height always returns 0. This implements the Drawable interface.
+func (Rectangle) Height() float32 { return 0 }
+
+// View always returns 0, 0, 1, 1. This implements the Drawable interface.
 func (Rectangle) View() (float32, float32, float32, float32) { return 0, 0, 1, 1 }
-func (Rectangle) Close()                                     {}
+
+// Close does nothing, because there's no Texture on the GPU. This implements the Drawable interface.
+func (Rectangle) Close() {}
 
 // Circle is a basic circular form; the dimensions / radius are controlled via the `SpaceComponent`.
 // This was made possible by the shared knowledge of Olivier Gagnon (@hydroflame).
@@ -49,11 +69,20 @@ type Circle struct {
 	BorderColor color.Color
 }
 
-func (Circle) Texture() *gl.Texture                       { return nil }
-func (Circle) Width() float32                             { return 0 }
-func (Circle) Height() float32                            { return 0 }
+// Texture always returns nil. Circle is drawable without a Texture. This implements the Drawable interface.
+func (Circle) Texture() *gl.Texture { return nil }
+
+// Width always returns 0. This implements the Drawable interface.
+func (Circle) Width() float32 { return 0 }
+
+// Height always returns 0. This implements the Drawable interface.
+func (Circle) Height() float32 { return 0 }
+
+// View always returns 0, 0, 1, 1. This implements the Drawable interface.
 func (Circle) View() (float32, float32, float32, float32) { return 0, 0, 1, 1 }
-func (Circle) Close()                                     {}
+
+// Close does nothing, because there's no Texture on the GPU. This implements the Drawable interface.
+func (Circle) Close() {}
 
 // ComplexTriangles is a complex form, made out of triangles.
 type ComplexTriangles struct {
@@ -68,8 +97,17 @@ type ComplexTriangles struct {
 	BorderColor color.Color
 }
 
-func (ComplexTriangles) Texture() *gl.Texture                       { return nil }
-func (ComplexTriangles) Width() float32                             { return 0 }
-func (ComplexTriangles) Height() float32                            { return 0 }
+// Texture always returns nil. ComplexTriangles is drawable without a Texture. This implements the Drawable interface.
+func (ComplexTriangles) Texture() *gl.Texture { return nil }
+
+// Width always returns 0. This implements the Drawable interface.
+func (ComplexTriangles) Width() float32 { return 0 }
+
+// Height always returns 0. This implements the Drawable interface.
+func (ComplexTriangles) Height() float32 { return 0 }
+
+// View always returns 0, 0, 1, 1. This implements the Drawable interface.
 func (ComplexTriangles) View() (float32, float32, float32, float32) { return 0, 0, 1, 1 }
-func (ComplexTriangles) Close()                                     {}
+
+// Close does nothing, because there's no Texture on the GPU. This implements the Drawable interface.
+func (ComplexTriangles) Close() {}

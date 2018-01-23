@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
+	// imported to decode jpegs and upload them to the GPU.
 	_ "image/jpeg"
+	// imported to decode .pngs and upload them to the GPU.
 	_ "image/png"
+	// imported to decode .gifs and uppload them to the GPU.
 	_ "image/gif"
 	"io"
 
@@ -13,6 +16,7 @@ import (
 	"engo.io/gl"
 )
 
+// TextureResource is the resource used by the RenderSystem. It uses .jpg, .gif, and .png images
 type TextureResource struct {
 	Texture *gl.Texture
 	Width   float32
@@ -20,6 +24,7 @@ type TextureResource struct {
 	url     string
 }
 
+// URL is the file path of the TextureResource
 func (t TextureResource) URL() string {
 	return t.url
 }
@@ -57,6 +62,7 @@ func (i *imageLoader) Resource(url string) (engo.Resource, error) {
 	return texture, nil
 }
 
+// Image holds data and properties of an .jpg, .gif, or .png file
 type Image interface {
 	Data() interface{}
 	Width() int
@@ -94,7 +100,7 @@ func NewTextureResource(img Image) TextureResource {
 // NewTextureSingle sends the image to the GPU and returns a `Texture` with a viewport for single-sprite images
 func NewTextureSingle(img Image) Texture {
 	id := UploadTexture(img)
-	return Texture{id, float32(img.Width()), float32(img.Height()), engo.AABB{Max: engo.Point{1.0, 1.0}}}
+	return Texture{id, float32(img.Width()), float32(img.Height()), engo.AABB{Max: engo.Point{X: 1.0, Y: 1.0}}}
 }
 
 // ImageToNRGBA takes a given `image.Image` and converts it into an `image.NRGBA`. Especially useful when transforming
@@ -144,7 +150,7 @@ func LoadedSprite(url string) (*Texture, error) {
 		return nil, fmt.Errorf("resource not of type `TextureResource`: %s", url)
 	}
 
-	return &Texture{img.Texture, img.Width, img.Height, engo.AABB{Max: engo.Point{1.0, 1.0}}}, nil
+	return &Texture{img.Texture, img.Width, img.Height, engo.AABB{Max: engo.Point{X: 1.0, Y: 1.0}}}, nil
 }
 
 // Texture represents a texture loaded in the GPU RAM (by using OpenGL), which defined dimensions and viewport
@@ -165,17 +171,20 @@ func (t Texture) Height() float32 {
 	return t.height
 }
 
+// Texture returns the OpenGL ID of the Texture.
 func (t Texture) Texture() *gl.Texture {
 	return t.id
 }
 
-func (r Texture) View() (float32, float32, float32, float32) {
-	return r.viewport.Min.X, r.viewport.Min.Y, r.viewport.Max.X, r.viewport.Max.Y
+// View returns the viewport properties of the Texture. The order is Min.X, Min.Y, Max.X, Max.Y.
+func (t Texture) View() (float32, float32, float32, float32) {
+	return t.viewport.Min.X, t.viewport.Min.Y, t.viewport.Max.X, t.viewport.Max.Y
 }
 
-func (r Texture) Close() {
+// Close removes the Texture data from the GPU.
+func (t Texture) Close() {
 	if !engo.Headless() {
-		engo.Gl.DeleteTexture(r.id)
+		engo.Gl.DeleteTexture(t.id)
 	}
 }
 

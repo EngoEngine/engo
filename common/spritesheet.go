@@ -16,13 +16,13 @@ type Spritesheet struct {
 	cache         map[int]Texture // The cell cache cells
 }
 
-// Sprite holds the position data for each sprite on the sheet
+// SpriteRegion holds the position data for each sprite on the sheet
 type SpriteRegion struct {
 	Position      engo.Point
 	Width, Height int
 }
 
-// NewAsymmetricSpriteSheetFromTexture creates a new AsymmetricSpriteSheet from a
+// NewAsymmetricSpritesheetFromTexture creates a new AsymmetricSpriteSheet from a
 // TextureResource. The data provided is the location and size of the sprites
 func NewAsymmetricSpritesheetFromTexture(tr *TextureResource, spriteRegions []SpriteRegion) *Spritesheet {
 	return &Spritesheet{
@@ -34,7 +34,7 @@ func NewAsymmetricSpritesheetFromTexture(tr *TextureResource, spriteRegions []Sp
 	}
 }
 
-// NewAsymmetricSpriteSheetFromFile creates a new AsymmetricSpriteSheet from a
+// NewAsymmetricSpritesheetFromFile creates a new AsymmetricSpriteSheet from a
 // file name. The data provided is the location and size of the sprites
 func NewAsymmetricSpritesheetFromFile(textureName string, spriteRegions []SpriteRegion) *Spritesheet {
 	res, err := engo.Files.Resource(textureName)
@@ -179,7 +179,7 @@ func generateSymmetricSpriteRegions(totalWidth, totalHeight float32, cellWidth, 
 	for y := 0; y <= int(math.Floor(totalHeight-1)); y += cellHeight + borderHeight {
 		for x := 0; x <= int(math.Floor(totalWidth-1)); x += cellWidth + borderWidth {
 			spriteRegion := SpriteRegion{
-				Position: engo.Point{float32(x), float32(y)},
+				Position: engo.Point{X: float32(x), Y: float32(y)},
 				Width:    cellWidth,
 				Height:   cellHeight,
 			}

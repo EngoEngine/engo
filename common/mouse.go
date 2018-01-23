@@ -12,15 +12,23 @@ import (
 type Cursor uint8
 
 const (
+	//CursorNone is no visible cursor.
 	CursorNone = iota
+	//CursorArrow is an arrow cursor.
 	CursorArrow
+	//CursorCrosshair is a crosshair cursor.
 	CursorCrosshair
+	//CursorHand is a hand cursor.
 	CursorHand
+	//CursorIBeam is a text-editor I cursor.
 	CursorIBeam
+	//CursorHResize is the horizontal resize window cursor.
 	CursorHResize
+	//CursorVResize is the vertical resize window cursor.
 	CursorVResize
 )
 
+// MouseSystemPriority is the priority of the MouseSystem
 const MouseSystemPriority = 100
 
 // Mouse is the representation of the physical mouse
@@ -118,6 +126,7 @@ type MouseSystem struct {
 // Priority returns a priority higher than most, to ensure that this System runs before all others
 func (m *MouseSystem) Priority() int { return MouseSystemPriority }
 
+// New initializes the MouseSystem. It is run before any updates.
 func (m *MouseSystem) New(w *ecs.World) {
 	m.world = w
 
@@ -150,8 +159,9 @@ func (m *MouseSystem) AddByInterface(o Mouseable) {
 	m.Add(o.GetBasicEntity(), o.GetMouseComponent(), o.GetSpaceComponent(), o.GetRenderComponent())
 }
 
+// Remove removes an entity from the MouseSystem.
 func (m *MouseSystem) Remove(basic ecs.BasicEntity) {
-	var delete int = -1
+	var delete = -1
 	for index, entity := range m.entities {
 		if entity.ID() == basic.ID() {
 			delete = index
@@ -163,6 +173,7 @@ func (m *MouseSystem) Remove(basic ecs.BasicEntity) {
 	}
 }
 
+// Update updates all the entities in the MouseSystem.
 func (m *MouseSystem) Update(dt float32) {
 	// Translate Mouse.X and Mouse.Y into "game coordinates"
 	switch engo.Backend {
@@ -225,7 +236,7 @@ func (m *MouseSystem) Update(dt float32) {
 		// and if the Y-value is within range
 
 		if e.MouseComponent.Track || e.MouseComponent.startedDragging ||
-			e.SpaceComponent.Contains(engo.Point{mx, my}) {
+			e.SpaceComponent.Contains(engo.Point{X: mx, Y: my}) {
 
 			e.MouseComponent.Enter = !e.MouseComponent.Hovered
 			e.MouseComponent.Hovered = true
