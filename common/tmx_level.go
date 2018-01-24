@@ -102,14 +102,22 @@ func (d *TMXData) decodeTile() ([]uint32, error) {
 func (d *TMXData) decodeCSV() ([]uint32, error) {
 	b := strings.NewReader(strings.TrimSpace(d.Data))
 	cr := csv.NewReader(b)
+	// We allow variable number of fields per record to allow line ending commas and then
+	// empty strings appearing as a field. Later, we filter empty strings. This trick is
+	// needed to allow TilEd-style CSVs with line-ending commas but no comma at the end
+	// of last line.
+	cr.FieldsPerRecord = -1
 	tm := make([]uint32, 0)
 	if recs, err := cr.ReadAll(); err == nil {
 		if len(recs) < 1 {
 			return nil, errors.New("No csv records found")
 		}
-
 		for _, rec := range recs {
-			for _, id := range rec {
+			for i, id := range rec {
+				// An empty string appearing after last comma. We filter it.
+				if id == "" && i == len(rec)-1 {
+					continue
+				}
 				if nextInt, err := strconv.ParseUint(id, 10, 32); err == nil {
 					tm = append(tm, uint32(nextInt))
 				} else {
@@ -304,7 +312,10 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 	// Extract the tile mappings from the compressed data at each layer
 	for i := range tmxLevel.TileLayers {
 		layer := &tmxLevel.TileLayers[i]
-		tm, _ := layer.Data.Decode()
+		tm, err := layer.Data.Decode()
+		if err != nil {
+			return nil, err
+		}
 		layer.TileMapping = tm
 	}
 
@@ -338,10 +349,10 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 	sort.Sort(ByFirstgid(tmxLevel.Tilesets))
 	ts := make([]*tilesheet, len(tmxLevel.Tilesets))
 	for i, tts := range tmxLevel.Tilesets {
-		ts[i] = &tilesheet{tts.Image, tts.Firstgid}
+		ts[i] = &tilesheet{tts.Image, tts.Firstgid, tts.TileWidth, tts.TileHeight}
 	}
 
-	levelTileset := createTileset(level, ts)
+	level.Tileset = createTileset(level, ts)
 
 	levelTileLayers := make([]*layer, len(tmxLevel.TileLayers))
 	for i, tileLayer := range tmxLevel.TileLayers {
@@ -353,8 +364,8 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 		}
 	}
 
-	// create tile layers with tiles
-	level.TileLayers = createLevelTiles(level, levelTileLayers, levelTileset)
+	// create Tile layers with tiles
+	level.TileLayers = createLevelTiles(level, levelTileLayers, level.Tileset)
 
 	// create object layers
 	for _, objectLayer := range tmxLevel.ObjectLayers {
@@ -432,7 +443,7 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 		}
 
 		// create image tile
-		imageTile := &tile{
+		imageTile := &Tile{
 			engo.Point{float32(tmxImageLayer.X), float32(tmxImageLayer.Y)},
 			curImg,
 		}

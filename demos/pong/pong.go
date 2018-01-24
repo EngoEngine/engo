@@ -120,23 +120,6 @@ func (pong *PongGame) Setup(w *ecs.World) {
 
 	schemes := []string{"wasd", "arrows"}
 
-	score.RenderComponent = common.RenderComponent{Drawable: basicFont.Render(" ")}
-	score.SpaceComponent = common.SpaceComponent{
-		Position: engo.Point{100, 100},
-		Width:    100,
-		Height:   100,
-	}
-
-	// Add our entity to the appropriate systems
-	for _, system := range w.Systems() {
-		switch sys := system.(type) {
-		case *common.RenderSystem:
-			sys.Add(&score.BasicEntity, &score.RenderComponent, &score.SpaceComponent)
-		case *ScoreSystem:
-			sys.Add(&score.BasicEntity, &score.RenderComponent, &score.SpaceComponent)
-		}
-	}
-
 	paddleTexture, err := common.LoadedSprite("paddle.png")
 	if err != nil {
 		log.Println(err)

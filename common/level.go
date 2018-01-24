@@ -19,6 +19,8 @@ type Level struct {
 	TileHeight int
 	// NextObjectId is the next free Object ID defined by Tiled
 	NextObjectId int
+	// Tileset maps tile IDs to their texture
+	Tileset map[int]*Tile
 	// TileLayers contains all TileLayer of the level
 	TileLayers []*TileLayer
 	// ImageLayers contains all ImageLayer of the level
@@ -36,7 +38,7 @@ type TileLayer struct {
 	// Height is the integer height of each tile in this layer
 	Height int
 	// Tiles contains the list of tiles
-	Tiles []*tile
+	Tiles []*Tile
 }
 
 // ImageLayer contains a list of its images plus all default Tiled attributes
@@ -50,7 +52,7 @@ type ImageLayer struct {
 	// Source contains the original image filename
 	Source string
 	// Images contains the list of all image tiles
-	Images []*tile
+	Images []*Tile
 }
 
 // ObjectLayer contains a list of its standard objects as well as a list of all its polyline objects
@@ -125,31 +127,31 @@ func (l *Level) Height() int {
 }
 
 // Height returns the integer height of the tile
-func (t *tile) Height() float32 {
+func (t *Tile) Height() float32 {
 	return t.Image.Height()
 }
 
 // Width returns the integer width of the tile
-func (t *tile) Width() float32 {
+func (t *Tile) Width() float32 {
 	return t.Image.Width()
 }
 
 // Texture returns the tile's Image texture
-func (t *tile) Texture() *gl.Texture {
+func (t *Tile) Texture() *gl.Texture {
 	return t.Image.id
 }
 
 // Close deletes the stored texture of a tile
-func (t *tile) Close() {
+func (t *Tile) Close() {
 	t.Image.Close()
 }
 
 // View returns the tile's viewport's min and max X & Y
-func (t *tile) View() (float32, float32, float32, float32) {
+func (t *Tile) View() (float32, float32, float32, float32) {
 	return t.Image.View()
 }
 
-type tile struct {
+type Tile struct {
 	engo.Point
 	Image *Texture
 }
@@ -157,6 +159,8 @@ type tile struct {
 type tilesheet struct {
 	Image    *TextureResource
 	Firstgid int
+	Width    int
+	Height   int
 }
 
 type layer struct {
@@ -166,18 +170,22 @@ type layer struct {
 	TileMapping []uint32
 }
 
-func createTileset(lvl *Level, sheets []*tilesheet) []*tile {
-	tileset := make([]*tile, 0)
-	tw := float32(lvl.TileWidth)
-	th := float32(lvl.TileHeight)
+func createTileset(lvl *Level, sheets []*tilesheet) map[int]*Tile {
+	tileset := make(map[int]*Tile)
+	deftw := float32(lvl.TileWidth)
+	defth := float32(lvl.TileHeight)
 
 	for _, sheet := range sheets {
+		var tw, th = deftw, defth
+		if (sheet.Height != 0 && sheet.Width != 0) {
+			tw, th = float32(sheet.Width), float32(sheet.Height)
+		}
 		setWidth := sheet.Image.Width / tw
 		setHeight := sheet.Image.Height / th
 		totalTiles := int(setWidth * setHeight)
 
 		for i := 0; i < totalTiles; i++ {
-			t := &tile{}
+			t := &Tile{}
 			x := float32(i%int(setWidth)) * tw
 			y := float32(i/int(setWidth)) * th
 
@@ -197,28 +205,28 @@ func createTileset(lvl *Level, sheets []*tilesheet) []*tile {
 					engo.Point{u2, v2},
 				},
 			}
-			tileset = append(tileset, t)
+			tileset[sheet.Firstgid + i] = t
 		}
 	}
 
 	return tileset
 }
 
-func createLevelTiles(lvl *Level, layers []*layer, ts []*tile) []*TileLayer {
+func createLevelTiles(lvl *Level, layers []*layer, ts map[int]*Tile) []*TileLayer {
 	var levelTileLayers []*TileLayer
 
 	// Create a TileLayer for each provided layer
 	for _, layer := range layers {
-		tilemap := make([]*tile, 0)
+		tilemap := make([]*Tile, 0)
 		tileLayer := &TileLayer{}
 		mapping := layer.TileMapping
 
 		for i := 0; i < lvl.height; i++ {
 			for x := 0; x < lvl.width; x++ {
 				idx := x + i*lvl.width
-				t := &tile{}
+				t := &Tile{}
 
-				if tileIdx := int(mapping[idx]) - 1; tileIdx >= 0 {
+				if tileIdx := int(mapping[idx]); tileIdx >= 1 {
 					t.Image = ts[tileIdx].Image
 					t.Point = engo.Point{
 						float32(x * lvl.TileWidth),
