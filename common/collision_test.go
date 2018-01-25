@@ -70,7 +70,7 @@ const (
 //Test GroupSolid working
 func Test_GroupSolid(t *testing.T) {
 	//All items in same place, have to collide
-	CE := func(m, g byte) collisionEntity {
+	CE := func(m, g CollisionGroup) collisionEntity {
 		nb := ecs.NewBasic()
 		return collisionEntity{
 			BasicEntity: &nb,
@@ -99,12 +99,12 @@ func Test_GroupSolid(t *testing.T) {
 		t.Fail()
 	}
 
-	if ents[3].Collides {
+	if ents[3].Collides != 0 {
 		t.Log("Ghost should not collide with anything")
 		t.Fail()
 	}
 	for i := 0; i < 2; i++ { //Ball and Bat
-		if !ents[i].Collides {
+		if ents[i].Collides == 0 {
 			t.Logf("object %d should collides", i)
 			t.Fail()
 		}
