@@ -20,6 +20,9 @@ var (
 	dpi = float64(72)
 )
 
+// Font keeps track of a specific Font. Fonts are explicit instances of a font file,
+// including the Size and Color. A separate font will have to be generated to get
+// different sizes and colors of the same font file.
 type Font struct {
 	URL  string
 	Size float64
@@ -61,6 +64,8 @@ func (f *Font) CreatePreloaded() error {
 	return nil
 }
 
+// TextDimensions returns the total width, total height and total line size
+// of the input string written out in the Font.
 func (f *Font) TextDimensions(text string) (int, int, int) {
 	fnt := f.TTF
 	size := f.Size
@@ -100,6 +105,7 @@ func (f *Font) TextDimensions(text string) (int, int, int) {
 	return int(totalWidth), int(totalHeight), int(maxYBearing)
 }
 
+// RenderNRGBA returns an *image.NRGBA in the Font based on the input string.
 func (f *Font) RenderNRGBA(text string) *image.NRGBA {
 	width, height, yBearing := f.TextDimensions(text)
 	font := f.TTF
@@ -145,6 +151,7 @@ func (f *Font) RenderNRGBA(text string) *image.NRGBA {
 	return nrgba
 }
 
+// Render returns a Texture in the Font based on the input string.
 func (f *Font) Render(text string) Texture {
 	nrgba := f.RenderNRGBA(text)
 
@@ -268,8 +275,18 @@ type Text struct {
 	RightToLeft bool
 }
 
-func (Text) Texture() *gl.Texture                       { return nil }
-func (Text) Width() float32                             { return 0 }
-func (Text) Height() float32                            { return 0 }
+// Texture returns nil because the Text is generated from a FontAtlas. This implements the common.Drawable interface.
+func (Text) Texture() *gl.Texture { return nil }
+
+// Width returns 0 because the Text is generated from a FontAtlas. This implements the common.Drawable interface.
+func (Text) Width() float32 { return 0 }
+
+// Height returns 0 because the Text is generated from a FontAtlas. This implements the common.Drawable interface.
+func (Text) Height() float32 { return 0 }
+
+// View returns 0, 0, 1, 1 because the Text is generated from a FontAtlas. This implements the common.Drawable interface.
 func (Text) View() (float32, float32, float32, float32) { return 0, 0, 1, 1 }
-func (Text) Close()                                     {}
+
+// Close does nothing because the Text is generated from a FontAtlas. There is no underlying texture to close.
+// This implements the common.Drawable interface.
+func (Text) Close() {}

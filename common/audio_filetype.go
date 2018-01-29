@@ -18,6 +18,7 @@ type AudioResource struct {
 	url    string
 }
 
+// URL returns the file url of the AudioResource
 func (f AudioResource) URL() string {
 	return f.url
 }
@@ -66,6 +67,7 @@ type readSeekCloserBuffer struct {
 }
 
 func (r *readSeekCloserBuffer) Close() error {
+	r.inner = nil
 	return nil
 }
 

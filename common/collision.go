@@ -8,11 +8,12 @@ import (
 	"engo.io/engo/math"
 )
 
+// SpaceComponent keeps track of the position, size, and rotation of entities.
 type SpaceComponent struct {
 	Position engo.Point
 	Width    float32
 	Height   float32
-	Rotation float32 // angle in degrees for the rotation to apply clockwise
+	Rotation float32 // angle in degrees for the rotation to apply clockwise.
 }
 
 // SetCenter positions the space component according to its center instead of its
@@ -40,12 +41,12 @@ func (sc *SpaceComponent) Center() engo.Point {
 	yDelta := sc.Height / 2
 	p := sc.Position
 	if sc.Rotation == 0 {
-		return engo.Point{p.X + xDelta, p.Y + yDelta}
+		return engo.Point{X: p.X + xDelta, Y: p.Y + yDelta}
 	}
 	sin, cos := math.Sincos(sc.Rotation * math.Pi / 180)
 	xDelta = (sc.Width*cos - sc.Height*sin) / 2
 	yDelta = (sc.Height*cos + sc.Width*sin) / 2
-	return engo.Point{p.X + xDelta, p.Y + yDelta}
+	return engo.Point{X: p.X + xDelta, Y: p.Y + yDelta}
 }
 
 // AABB returns the minimum and maximum point for the given SpaceComponent. It hereby takes into account the
@@ -59,7 +60,7 @@ func (sc SpaceComponent) AABB() engo.AABB {
 	if sc.Rotation == 0 {
 		return engo.AABB{
 			Min: sc.Position,
-			Max: engo.Point{sc.Position.X + sc.Width, sc.Position.Y + sc.Height},
+			Max: engo.Point{X: sc.Position.X + sc.Width, Y: sc.Position.Y + sc.Height},
 		}
 	}
 
@@ -86,7 +87,7 @@ func (sc SpaceComponent) AABB() engo.AABB {
 		}
 	}
 
-	return engo.AABB{engo.Point{xMin, yMin}, engo.Point{xMax, yMax}}
+	return engo.AABB{Max: engo.Point{X: xMin, Y: yMin}, Min: engo.Point{X: xMax, Y: yMax}}
 }
 
 // Corners returns the location of the four corners of the rectangular plane defined by the `SpaceComponent`, taking
@@ -143,15 +144,24 @@ func triangleArea(p1, p2, p3 engo.Point) float32 {
 	return (b * height) / 2
 }
 
-// CollisionComponent is used to define which items should be compared to which for a collision
+// CollisionComponent keeps track of the entity's collisions.
+//
+// Main tells the system to check all collisions against this entity.
+//
+// Group tells which collision group his entity belongs to.
+//
+// Extra is the allowed buffer for detecting collisions.
+//
+// Collides is all the groups this component collides with ORed together
 type CollisionComponent struct {
 	// if a.Main & (bitwise) b.Group, items can collide
 	// if a.Main == 0, it will not loop for other items
 	Main, Group CollisionGroup
 	Extra       engo.Point
-	Collides    CollisionGroup // Collides is true if the component is colliding with something during this pass
+	Collides    CollisionGroup
 }
 
+// CollisionMessage is sent whenever a collision is detected by the CollisionSystem.
 type CollisionMessage struct {
 	Entity collisionEntity
 	To     collisionEntity
@@ -163,6 +173,7 @@ type CollisionMessage struct {
 // for the different kinds of collisions they hope to use
 type CollisionGroup byte
 
+// Type implements the engo.Message interface
 func (CollisionMessage) Type() string { return "CollisionMessage" }
 
 type collisionEntity struct {
@@ -171,13 +182,17 @@ type collisionEntity struct {
 	*SpaceComponent
 }
 
+// CollisionSystem is a system that detects collisions between entities, sends a message if collisions
+// are detected, and updates their SpaceComponent so entities cannot pass through Solids.
 type CollisionSystem struct {
 	// Solids, used to tell which collisions should be treated as solid by bitwise comparison.
 	// if a.Main & b.Group & sys.Solids{ Collisions are treated as solid.  }
-	Solids   CollisionGroup
+	Solids CollisionGroup
+
 	entities []collisionEntity
 }
 
+// Add adds an entity to the CollisionSystem. To be added, the entity has to have a basic, collision, and space component.
 func (c *CollisionSystem) Add(basic *ecs.BasicEntity, collision *CollisionComponent, space *SpaceComponent) {
 	c.entities = append(c.entities, collisionEntity{basic, collision, space})
 }
@@ -187,6 +202,7 @@ func (c *CollisionSystem) AddByInterface(o Collisionable) {
 	c.Add(o.GetBasicEntity(), o.GetCollisionComponent(), o.GetSpaceComponent())
 }
 
+// Remove removes an entity from the CollisionSystem.
 func (c *CollisionSystem) Remove(basic ecs.BasicEntity) {
 	delete := -1
 	for index, e := range c.entities {
@@ -200,15 +216,17 @@ func (c *CollisionSystem) Remove(basic ecs.BasicEntity) {
 	}
 }
 
-func (cs *CollisionSystem) Update(dt float32) {
-	for i1, e1 := range cs.entities {
+// Update checks the entities for collision with eachother. Only Main entities are check for collision explicitly.
+// If one of the entities are solid, the SpaceComponent is adjusted so that the other entities don't pass through it.
+func (c *CollisionSystem) Update(dt float32) {
+	for i1, e1 := range c.entities {
 		if e1.CollisionComponent.Main == 0 {
 			//Main cannot pass bitwise comparison with any other items. Do not loop.
 			continue // with other entities
 		}
 
 		entityAABB := e1.SpaceComponent.AABB()
-		offset := engo.Point{e1.CollisionComponent.Extra.X / 2, e1.CollisionComponent.Extra.Y / 2}
+		offset := engo.Point{X: e1.CollisionComponent.Extra.X / 2, Y: e1.CollisionComponent.Extra.Y / 2}
 		entityAABB.Min.X -= offset.X
 		entityAABB.Min.Y -= offset.Y
 		entityAABB.Max.X += offset.X
@@ -216,7 +234,7 @@ func (cs *CollisionSystem) Update(dt float32) {
 
 		var collided CollisionGroup
 
-		for i2, e2 := range cs.entities {
+		for i2, e2 := range c.entities {
 			if i1 == i2 {
 				continue // with other entities, because we won't collide with ourselves
 			}
@@ -226,14 +244,14 @@ func (cs *CollisionSystem) Update(dt float32) {
 			}
 
 			otherAABB := e2.SpaceComponent.AABB()
-			offset = engo.Point{e2.CollisionComponent.Extra.X / 2, e2.CollisionComponent.Extra.Y / 2}
+			offset = engo.Point{X: e2.CollisionComponent.Extra.X / 2, Y: e2.CollisionComponent.Extra.Y / 2}
 			otherAABB.Min.X -= offset.X
 			otherAABB.Min.Y -= offset.Y
 			otherAABB.Max.X += offset.X
 			otherAABB.Max.Y += offset.Y
 
 			if IsIntersecting(entityAABB, otherAABB) {
-				if cgroup&cs.Solids > 0 {
+				if cgroup&c.Solids > 0 {
 					mtd := MinimumTranslation(entityAABB, otherAABB)
 					e1.SpaceComponent.Position.X += mtd.X
 					e1.SpaceComponent.Position.Y += mtd.Y
@@ -249,6 +267,7 @@ func (cs *CollisionSystem) Update(dt float32) {
 	}
 }
 
+// IsIntersecting tells if two engo.AABBs intersect.
 func IsIntersecting(rect1 engo.AABB, rect2 engo.AABB) bool {
 	if rect1.Max.X > rect2.Min.X && rect1.Min.X < rect2.Max.X && rect1.Max.Y > rect2.Min.Y && rect1.Min.Y < rect2.Max.Y {
 		return true
@@ -257,6 +276,7 @@ func IsIntersecting(rect1 engo.AABB, rect2 engo.AABB) bool {
 	return false
 }
 
+// MinimumTranslation tells how much an entity has to move to no longer overlap another entity.
 func MinimumTranslation(rect1 engo.AABB, rect2 engo.AABB) engo.Point {
 	mtd := engo.Point{}
 

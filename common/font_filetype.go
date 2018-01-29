@@ -17,6 +17,7 @@ type FontResource struct {
 	url  string
 }
 
+// URL returns the file path for the FontResource.
 func (f FontResource) URL() string {
 	return f.url
 }

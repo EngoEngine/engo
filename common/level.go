@@ -108,10 +108,10 @@ type PolylineObject struct {
 // Bounds returns the level boundaries as an engo.AABB object
 func (l *Level) Bounds() engo.AABB {
 	return engo.AABB{
-		Min: engo.Point{0, 0},
+		Min: engo.Point{X: 0, Y: 0},
 		Max: engo.Point{
-			float32(l.TileWidth * l.width),
-			float32(l.TileHeight * l.height),
+			X: float32(l.TileWidth * l.width),
+			Y: float32(l.TileHeight * l.height),
 		},
 	}
 }
@@ -151,6 +151,7 @@ func (t *Tile) View() (float32, float32, float32, float32) {
 	return t.Image.View()
 }
 
+// Tile represents a tile in the TMX map.
 type Tile struct {
 	engo.Point
 	Image *Texture
@@ -177,7 +178,7 @@ func createTileset(lvl *Level, sheets []*tilesheet) map[int]*Tile {
 
 	for _, sheet := range sheets {
 		var tw, th = deftw, defth
-		if (sheet.Height != 0 && sheet.Width != 0) {
+		if sheet.Height != 0 && sheet.Width != 0 {
 			tw, th = float32(sheet.Width), float32(sheet.Height)
 		}
 		setWidth := sheet.Image.Width / tw
@@ -189,23 +190,23 @@ func createTileset(lvl *Level, sheets []*tilesheet) map[int]*Tile {
 			x := float32(i%int(setWidth)) * tw
 			y := float32(i/int(setWidth)) * th
 
-			invTexWidth := 1.0 / float32(sheet.Image.Width)
-			invTexHeight := 1.0 / float32(sheet.Image.Height)
+			invTexWidth := 1.0 / sheet.Image.Width
+			invTexHeight := 1.0 / sheet.Image.Height
 
-			u := float32(x) * invTexWidth
-			v := float32(y) * invTexHeight
-			u2 := float32(x+tw) * invTexWidth
-			v2 := float32(y+th) * invTexHeight
+			u := x * invTexWidth
+			v := y * invTexHeight
+			u2 := (x + tw) * invTexWidth
+			v2 := (y + th) * invTexHeight
 			t.Image = &Texture{
 				id:     sheet.Image.Texture,
 				width:  tw,
 				height: th,
 				viewport: engo.AABB{
-					engo.Point{u, v},
-					engo.Point{u2, v2},
+					Min: engo.Point{X: u, Y: v},
+					Max: engo.Point{X: u2, Y: v2},
 				},
 			}
-			tileset[sheet.Firstgid + i] = t
+			tileset[sheet.Firstgid+i] = t
 		}
 	}
 
@@ -229,8 +230,8 @@ func createLevelTiles(lvl *Level, layers []*layer, ts map[int]*Tile) []*TileLaye
 				if tileIdx := int(mapping[idx]); tileIdx >= 1 {
 					t.Image = ts[tileIdx].Image
 					t.Point = engo.Point{
-						float32(x * lvl.TileWidth),
-						float32(i * lvl.TileHeight),
+						X: float32(x * lvl.TileWidth),
+						Y: float32(i * lvl.TileHeight),
 					}
 				}
 				tilemap = append(tilemap, t)

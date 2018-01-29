@@ -86,7 +86,10 @@ type TMXTile struct {
 	gid uint32 `xml:gid,attr`
 }
 
+// ErrUnknownEncoding is when the encoding of the TMX is unsupported.
 var ErrUnknownEncoding = errors.New("Unknown Encoding")
+
+// ErrUnknownCompression is when the compression of the TMX is unsupported.
 var ErrUnknownCompression = errors.New("Unknown Compression")
 
 // tileDecode() creates a decoded array of gids from xml tile tags
@@ -118,10 +121,10 @@ func (d *TMXData) decodeCSV() ([]uint32, error) {
 				if id == "" && i == len(rec)-1 {
 					continue
 				}
-				if nextInt, err := strconv.ParseUint(id, 10, 32); err == nil {
+				if nextInt, err2 := strconv.ParseUint(id, 10, 32); err == nil {
 					tm = append(tm, uint32(nextInt))
 				} else {
-					return nil, err
+					return nil, err2
 				}
 			}
 		}
@@ -135,7 +138,7 @@ func (d *TMXData) decodeCSV() ([]uint32, error) {
 }
 
 // Decode takes the encoded data from a tmx map file and
-// unpacks it an arrary of uint32 guids
+// unpacks it an array of uint32 guids
 func (d *TMXData) Decode() ([]uint32, error) {
 	// Tile tag and CSV encodings
 	if len(d.Tiles) > 0 {
@@ -279,16 +282,17 @@ type TMXLevel struct {
 	TileHeight int `xml:"tileheight,attr"`
 	// NextObjectId is the next free Object ID defined by Tiled
 	NextObjectId int `xml:"nextobjectid,attr"`
-	// Tilesets conatins a list of all parsed TMXTileset objects
+	// Tilesets contains a list of all parsed TMXTileset objects
 	Tilesets []TMXTileset `xml:"tileset"`
-	// TileLayers conatins a list of all parsed TMXTileLayer objects
+	// TileLayers contains a list of all parsed TMXTileLayer objects
 	TileLayers []TMXTileLayer `xml:"layer"`
-	// ImageLayers conatins a list of all parsed TMXImageLayer objects
+	// ImageLayers contains a list of all parsed TMXImageLayer objects
 	ImageLayers []TMXImageLayer `xml:"imagelayer"`
-	// ObjectLayers conatins a list of all parsed TMXObjectLayer objects
+	// ObjectLayers contains a list of all parsed TMXObjectLayer objects
 	ObjectLayers []TMXObjectLayer `xml:"objectgroup"`
 }
 
+// ByFirstgid is a []TMXTileset sorted by First gid
 type ByFirstgid []TMXTileset
 
 // Len returns the length of t
@@ -301,7 +305,7 @@ func (t ByFirstgid) Swap(i, j int) { t[i], t[j] = t[j], t[i] }
 func (t ByFirstgid) Less(i, j int) bool { return t[i].Firstgid < t[j].Firstgid }
 
 // createLevelFromTmx unmarshales and unpacks tmx data into a Level
-func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
+func createLevelFromTmx(tmxBytes []byte, tmxURL string) (*Level, error) {
 	tmxLevel := &TMXLevel{}
 	level := &Level{}
 
@@ -321,7 +325,7 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 
 	// Load in the images needed for the tilesets
 	for i, ts := range tmxLevel.Tilesets {
-		url := path.Join(path.Dir(tmxUrl), ts.ImageSrc.Source)
+		url := path.Join(path.Dir(tmxURL), ts.ImageSrc.Source)
 		if err := engo.Files.Load(url); err != nil {
 			return nil, err
 		}
@@ -444,7 +448,7 @@ func createLevelFromTmx(tmxBytes []byte, tmxUrl string) (*Level, error) {
 
 		// create image tile
 		imageTile := &Tile{
-			engo.Point{float32(tmxImageLayer.X), float32(tmxImageLayer.Y)},
+			engo.Point{X: float32(tmxImageLayer.X), Y: float32(tmxImageLayer.Y)},
 			curImg,
 		}
 
@@ -474,9 +478,9 @@ func pointStringToLines(str string, xOff, yOff float64) []*engo.Line {
 		x2 := float32(floatPts[i+1][0] + xOff)
 		y2 := float32(floatPts[i+1][1] + yOff)
 
-		p1 := engo.Point{x1, y1}
-		p2 := engo.Point{x2, y2}
-		newLine := &engo.Line{p1, p2}
+		p1 := engo.Point{X: x1, Y: y1}
+		p2 := engo.Point{X: x2, Y: y2}
+		newLine := &engo.Line{P1: p1, P2: p2}
 
 		lines[i] = newLine
 	}

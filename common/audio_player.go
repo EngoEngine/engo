@@ -26,6 +26,7 @@ const (
 	Stereo16
 )
 
+// String implements the fmt.Stringer interface
 func (f Format) String() string { return formatStrings[f] }
 
 // formatBytes is the product of bytes per sample and number of channels.
@@ -62,6 +63,7 @@ const (
 	Stopped
 )
 
+//String implements the fmt.Stringer interface.
 func (s State) String() string { return stateStrings[s] }
 
 var stateStrings = [...]string{

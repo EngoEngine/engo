@@ -22,6 +22,7 @@
 //
 // Note: The names have not been contracted for consistency, the interface is
 // *Collisionable* not *Collidable*.
+
 package common
 
 import "engo.io/ecs"
@@ -60,7 +61,7 @@ func (c *CollisionComponent) GetCollisionComponent() *CollisionComponent {
 
 // Faces
 
-// BasicFace is the means of accessing the ecs.BasicEntity class , it also has the ID method, to simplfy, finding an item within a system
+// BasicFace is the means of accessing the ecs.BasicEntity class , it also has the ID method, to simplify, finding an item within a system
 type BasicFace interface {
 	ID() uint64
 	GetBasicEntity() *ecs.BasicEntity

@@ -12,11 +12,21 @@ import (
 )
 
 const (
-	MouseRotatorPriority     = 100
-	MouseZoomerPriority      = 110
-	EdgeScrollerPriority     = 120
+	// MouseRotatorPriority is the priority for the MouseRotatorSystem.
+	// Priorities determine the order in which the system is updated.
+	MouseRotatorPriority = 100
+	// MouseZoomerPriority is the priority for he MouseZoomerSystem.
+	// Priorities determine the order in which the system is updated.
+	MouseZoomerPriority = 110
+	// EdgeScrollerPriority is the priority for the EdgeScrollerSystem.
+	// Priorities determine the order in which the system is updated.
+	EdgeScrollerPriority = 120
+	// KeyboardScrollerPriority is the priority for the KeyboardScrollerSystem.
+	// Priorities determine the order in which the system is updated.
 	KeyboardScrollerPriority = 130
-	EntityScrollerPriority   = 140
+	// EntityScrollerPriority is the priority for the EntityScrollerSystem.
+	// Priorities determine the order in which the system is updated.
+	EntityScrollerPriority = 140
 )
 
 var (
@@ -29,6 +39,7 @@ var (
 	// perceived zooming "out".
 	MaxZoom float32 = 3
 
+	// CameraBounds is the bounding box of the camera
 	CameraBounds engo.AABB
 )
 
@@ -37,7 +48,7 @@ type cameraEntity struct {
 	*SpaceComponent
 }
 
-// CameraSystem is a System that manages the state of the virtual camera
+// CameraSystem is a System that manages the state of the virtual camera.
 type CameraSystem struct {
 	x, y, z  float32
 	tracking cameraEntity // The entity that is currently being followed
@@ -48,9 +59,10 @@ type CameraSystem struct {
 	longTasks map[CameraAxis]*CameraMessage
 }
 
+// New initializes the CameraSystem.
 func (cam *CameraSystem) New(*ecs.World) {
 	if CameraBounds.Max.X == 0 && CameraBounds.Max.Y == 0 {
-		CameraBounds.Max = engo.Point{engo.GameWidth(), engo.GameHeight()}
+		CameraBounds.Max = engo.Point{X: engo.GameWidth(), Y: engo.GameHeight()}
 	}
 
 	cam.x = CameraBounds.Max.X / 2
@@ -101,8 +113,11 @@ func (cam *CameraSystem) New(*ecs.World) {
 	})
 }
 
+// Remove does nothing since the CameraSystem has only one entity, the camera itself.
+// This is here to implement the ecs.System interface.
 func (cam *CameraSystem) Remove(ecs.BasicEntity) {}
 
+// Update updates the camera. lLong tasks are attempted to update incrementally in batches.
 func (cam *CameraSystem) Update(dt float32) {
 	for axis, longTask := range cam.longTasks {
 		if !longTask.Incremental {
@@ -159,26 +174,28 @@ func (cam *CameraSystem) Update(dt float32) {
 	)
 }
 
+// FollowEntity sets the camera to follow the entity with BasicEntity basic
+// and SpaceComponent space.
 func (cam *CameraSystem) FollowEntity(basic *ecs.BasicEntity, space *SpaceComponent) {
 	cam.tracking = cameraEntity{basic, space}
 }
 
-// X returns the X-coordinate of the location of the Camera
+// X returns the X-coordinate of the location of the Camera.
 func (cam *CameraSystem) X() float32 {
 	return cam.x
 }
 
-// Y returns the Y-coordinate of the location of the Camera
+// Y returns the Y-coordinate of the location of the Camera.
 func (cam *CameraSystem) Y() float32 {
 	return cam.y
 }
 
-// Z returns the Z-coordinate of the location of the Camera
+// Z returns the Z-coordinate of the location of the Camera.
 func (cam *CameraSystem) Z() float32 {
 	return cam.z
 }
 
-// Angle returns the angle (in degrees) at which the Camera is rotated
+// Angle returns the angle (in degrees) at which the Camera is rotated.
 func (cam *CameraSystem) Angle() float32 {
 	return cam.angle
 }
@@ -221,17 +238,22 @@ func (cam *CameraSystem) centerCam(x, y, z float32) {
 	cam.zoomTo(z)
 }
 
-// CameraAxis is the axis at which the Camera can/has to move
+// CameraAxis is the axis at which the Camera can/has to move.
 type CameraAxis uint8
 
 const (
+	// XAxis is the x-axis of the camera
 	XAxis CameraAxis = iota
+	// YAxis is the y-axis of the camera.
 	YAxis
+	// ZAxis is the z-axis of the camera.
 	ZAxis
+	// Angle is the angle the camera is rotated by.
 	Angle
 )
 
-// CameraMessage is a message that can be sent to the Camera (and other Systemers), to indicate movement
+// CameraMessage is a message that can be sent to the Camera (and other Systemers),
+// to indicate movement.
 type CameraMessage struct {
 	Axis        CameraAxis
 	Value       float32
@@ -240,20 +262,26 @@ type CameraMessage struct {
 	speed       float32
 }
 
+// Type implements the engo.Message interface.
 func (CameraMessage) Type() string {
 	return "CameraMessage"
 }
 
-// KeyboardScroller is a System that allows for scrolling when certain keys are pressed
+// KeyboardScroller is a System that allows for scrolling when certain keys are pressed.
 type KeyboardScroller struct {
 	ScrollSpeed                  float32
 	horizontalAxis, verticalAxis string
 	keysMu                       sync.RWMutex
 }
 
-func (*KeyboardScroller) Priority() int          { return KeyboardScrollerPriority }
+// Priority implememts the ecs.Prioritizer interface.
+func (*KeyboardScroller) Priority() int { return KeyboardScrollerPriority }
+
+// Remove does nothing because the KeyboardScroller system has no entities. It implements the
+// ecs.System interface.
 func (*KeyboardScroller) Remove(ecs.BasicEntity) {}
 
+// Update updates the camera based on keyboard input.
 func (c *KeyboardScroller) Update(dt float32) {
 	c.keysMu.RLock()
 	defer c.keysMu.RUnlock()
@@ -265,6 +293,7 @@ func (c *KeyboardScroller) Update(dt float32) {
 	engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: hori.Value() * c.ScrollSpeed * dt, Incremental: true})
 }
 
+// BindKeyboard sets the vertical and horizontal axes used by the KeyboardScroller.
 func (c *KeyboardScroller) BindKeyboard(hori, vert string) {
 	c.keysMu.Lock()
 
@@ -274,6 +303,8 @@ func (c *KeyboardScroller) BindKeyboard(hori, vert string) {
 	defer c.keysMu.Unlock()
 }
 
+// NewKeyboardScroller creates a new KeyboardScroller system using the provided scrollSpeed,
+// and horizontal and vertical axes.
 func NewKeyboardScroller(scrollSpeed float32, hori, vert string) *KeyboardScroller {
 	kbs := &KeyboardScroller{
 		ScrollSpeed: scrollSpeed,
@@ -284,13 +315,13 @@ func NewKeyboardScroller(scrollSpeed float32, hori, vert string) *KeyboardScroll
 	return kbs
 }
 
-// EntityScroller scrolls the camera to the position of a entity using its space component
+// EntityScroller scrolls the camera to the position of a entity using its space component.
 type EntityScroller struct {
 	*SpaceComponent
 	TrackingBounds engo.AABB
 }
 
-// New adjusts CameraBounds to the bounds of EntityScroller
+// New adjusts CameraBounds to the bounds of EntityScroller.
 func (c *EntityScroller) New(*ecs.World) {
 	offsetX, offsetY := engo.CanvasWidth()/2, engo.CanvasHeight()/2
 	// This is to account for upper left origin
@@ -303,11 +334,15 @@ func (c *EntityScroller) New(*ecs.World) {
 	CameraBounds.Max.Y = (c.TrackingBounds.Min.Y + distY) - offsetY
 }
 
-func (*EntityScroller) Priority() int          { return EntityScrollerPriority }
+// Priority implements the ecs.Prioritizer interface.
+func (*EntityScroller) Priority() int { return EntityScrollerPriority }
+
+// Remove does nothing because the EntityScroller system has no entities. This implements
+// the ecs.System interface.
 func (*EntityScroller) Remove(ecs.BasicEntity) {}
 
-// Update moves the camera to the center of the space component
-// Values are automatically clamped to TrackingBounds by the camera
+// Update moves the camera to the center of the space component.
+// Values are automatically clamped to TrackingBounds by the camera.
 func (c *EntityScroller) Update(dt float32) {
 	width, height := c.SpaceComponent.Width, c.SpaceComponent.Height
 
@@ -320,15 +355,21 @@ func (c *EntityScroller) Update(dt float32) {
 }
 
 // EdgeScroller is a System that allows for scrolling when the cursor is near the edges of
-// the window
+// the window.
 type EdgeScroller struct {
 	ScrollSpeed float32
 	EdgeMargin  float32
 }
 
-func (*EdgeScroller) Priority() int          { return EdgeScrollerPriority }
+// Priority implements the ecs.Prioritizer interface.
+func (*EdgeScroller) Priority() int { return EdgeScrollerPriority }
+
+// Remove does nothing because EdgeScroller has no entities. It implements the ecs.System
+// interface.
 func (*EdgeScroller) Remove(ecs.BasicEntity) {}
 
+// Update moves the camera based on the position of the mouse. If the mouse is on the edge
+// of the screen, the camera moves towards that edge.
 // TODO: Warning doesn't get the cursor position
 func (c *EdgeScroller) Update(dt float32) {
 	curX, curY := engo.CursorPos()
@@ -347,21 +388,27 @@ func (c *EdgeScroller) Update(dt float32) {
 	}
 }
 
-// MouseZoomer is a System that allows for zooming when the scroll wheel is used
+// MouseZoomer is a System that allows for zooming when the scroll wheel is used.
 type MouseZoomer struct {
 	ZoomSpeed float32
 }
 
-func (*MouseZoomer) Priority() int          { return MouseZoomerPriority }
+// Priority implements the ecs.Prioritizer interface.
+func (*MouseZoomer) Priority() int { return MouseZoomerPriority }
+
+// Remove does nothing because MouseZoomer has no entities. This implements the
+// ecs.System interface.
 func (*MouseZoomer) Remove(ecs.BasicEntity) {}
 
+// Update zooms the camera in and out based on the movement of the scroll wheel.
 func (c *MouseZoomer) Update(float32) {
 	if engo.Input.Mouse.ScrollY != 0 {
 		engo.Mailbox.Dispatch(CameraMessage{Axis: ZAxis, Value: engo.Input.Mouse.ScrollY * c.ZoomSpeed, Incremental: true})
 	}
 }
 
-// MouseRotator is a System that allows for zooming when the scroll wheel is used
+// MouseRotator is a System that allows for rotating the camera based on pressing
+// down the scroll wheel.
 type MouseRotator struct {
 	// RotationSpeed indicates the speed at which the rotation should happen. This is being used together with the
 	// movement by the mouse on the X-axis, to compute the actual rotation.
@@ -371,9 +418,14 @@ type MouseRotator struct {
 	pressed bool
 }
 
-func (*MouseRotator) Priority() int          { return MouseRotatorPriority }
+// Priority implements the ecs.Prioritizer interface.
+func (*MouseRotator) Priority() int { return MouseRotatorPriority }
+
+// Remove does nothing because MouseRotator has no entities. This implements the ecs.System
+// interface.
 func (*MouseRotator) Remove(ecs.BasicEntity) {}
 
+// Update rotates the camera if the scroll wheel is pressed down.
 func (c *MouseRotator) Update(float32) {
 	if engo.Input.Mouse.Button == engo.MouseButtonMiddle && engo.Input.Mouse.Action == engo.Press {
 		c.pressed = true

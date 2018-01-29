@@ -18,6 +18,15 @@ var UnicodeCap = 200
 
 const bufferSize = 10000
 
+// Shader when implemented can be used in the RenderSystem as an OpenGl Shader.
+//
+// Setup holds the actual OpenGL shader data, and prepares any matrices and OpenGL calls for use.
+//
+// Pre is called just before the Draw step.
+//
+// Draw is the Draw step.
+//
+// Post is called just after the Draw step.
 type Shader interface {
 	Setup(*ecs.World) error
 	Pre()
@@ -1110,14 +1119,20 @@ func colorToFloat32(c color.Color) float32 {
 }
 
 var (
-	DefaultShader   = &basicShader{cameraEnabled: true}
-	HUDShader       = &basicShader{cameraEnabled: false}
-	LegacyShader    = &legacyShader{cameraEnabled: true}
+	// DefaultShader is the shader picked when no other shader is used.
+	DefaultShader = &basicShader{cameraEnabled: true}
+	// HUDShader is the shader used for HUD elements.
+	HUDShader = &basicShader{cameraEnabled: false}
+	// LegacyShader is the shader used for drawing shapes.
+	LegacyShader = &legacyShader{cameraEnabled: true}
+	// LegacyHUDShader is the shader used for drawing shapes on the HUD.
 	LegacyHUDShader = &legacyShader{cameraEnabled: false}
-	TextShader      = &textShader{cameraEnabled: true}
-	TextHUDShader   = &textShader{cameraEnabled: false}
-	shadersSet      bool
-	atlasCache      = make(map[Font]FontAtlas)
+	// TextShader is the shader used to draw fonts from a FontAtlas
+	TextShader = &textShader{cameraEnabled: true}
+	// TextHUDShader is the shader used to draw fonts from a FontAtlas on the HUD.
+	TextHUDShader = &textShader{cameraEnabled: false}
+	shadersSet    bool
+	atlasCache    = make(map[Font]FontAtlas)
 )
 
 var shaderInitMutex sync.Mutex
@@ -1183,8 +1198,9 @@ type VertexShaderCompilationError struct {
 	OpenGLError string
 }
 
+// Error implements the error interface.
 func (v VertexShaderCompilationError) Error() string {
-	return fmt.Sprintf("an error occured compiling the vertex shader: %s", strings.Trim(v.OpenGLError, "\r\n"))
+	return fmt.Sprintf("an error occurred compiling the vertex shader: %s", strings.Trim(v.OpenGLError, "\r\n"))
 }
 
 // FragmentShaderCompilationError is returned whenever the `LoadShader` method was unable to compile your Fragment-shader (GLSL)
@@ -1192,6 +1208,7 @@ type FragmentShaderCompilationError struct {
 	OpenGLError string
 }
 
+// Error implements the error interface.
 func (f FragmentShaderCompilationError) Error() string {
-	return fmt.Sprintf("an error occured compiling the fragment shader: %s", strings.Trim(f.OpenGLError, "\r\n"))
+	return fmt.Sprintf("an error occurred compiling the fragment shader: %s", strings.Trim(f.OpenGLError, "\r\n"))
 }
