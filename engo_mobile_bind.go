@@ -186,3 +186,8 @@ func MobileStop() {
 	Gl = nil
 	worker = nil
 }
+
+// IsAndroidChrome tells if the browser is Chrome for android
+func IsAndroidChrome() bool {
+	return false
+}

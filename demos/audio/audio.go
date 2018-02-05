@@ -9,43 +9,54 @@ import (
 	"engo.io/engo/common"
 )
 
-type DefaultScene struct{}
+type DefaultScene struct {
+	audioSys *common.AudioSystem
+}
 
 type Whoop struct {
 	ecs.BasicEntity
 	common.AudioComponent
 }
 
-func (*DefaultScene) Preload() {
-	common.AudioSystemPreload()
-
+func (s *DefaultScene) Preload() {
 	err := engo.Files.Load("326488.wav")
 	if err != nil {
 		log.Println(err)
 	}
 }
 
-func (*DefaultScene) Setup(w *ecs.World) {
+func (s *DefaultScene) Setup(w *ecs.World) {
 	common.SetBackground(color.White)
+	s.audioSys = &common.AudioSystem{}
 
 	w.AddSystem(&common.RenderSystem{})
-	w.AddSystem(&common.AudioSystem{})
-	w.AddSystem(&WhoopSystem{})
+	w.AddSystem(s.audioSys)
+	//w.AddSystem(&WhoopSystem{})
 
 	whoop := Whoop{BasicEntity: ecs.NewBasic()}
-	whoop.AudioComponent = common.AudioComponent{File: "326488.wav", Repeat: true, Background: true, RawVolume: 1}
+	whoopPlayer, err := common.LoadedPlayer("326488.wav")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	whoop.AudioComponent = common.AudioComponent{Repeat: true, Player: whoopPlayer}
+	whoop.AudioComponent.SetVolume(0.99)
+	whoopPlayer.Play()
 
 	// Let's add our whoop to the appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
 		case *common.AudioSystem:
-			// Note we are giving a `nil` reference to the `SpeedComponent`. This is because the documentation of the
-			// AudioSystem says the `SpeedComponent` is only required when `AudioComponent.Background` is `false`.
-			// In our case, it is `true` (it's a background noise, i.e. not tied to a location in the game world),
-			// so we can omit it.
-			sys.Add(&whoop.BasicEntity, &whoop.AudioComponent, nil)
+			sys.Add(&whoop.BasicEntity, &whoop.AudioComponent)
 		}
 	}
+}
+
+func (d *DefaultScene) Hide() {
+	d.audioSys.OtoPlayer.Close()
+}
+
+func (d *DefaultScene) Exit() {
+	d.audioSys.OtoPlayer.Close()
 }
 
 func (*DefaultScene) Type() string { return "Game" }

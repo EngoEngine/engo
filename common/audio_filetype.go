@@ -1,5 +1,3 @@
-//+build !windows,!netgo,!android
-
 package common
 
 import (
@@ -7,58 +5,96 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"path/filepath"
 
 	"engo.io/engo"
+	"engo.io/engo/common/decode/mp3"
+	"engo.io/engo/common/decode/vorbis"
+	"engo.io/engo/common/decode/wav"
 )
 
-// AudioResource is a wrapper for `*Player` which is being passed by the the `engo.Files.Resource` method in the
-// case of `.wav` files.
-type AudioResource struct {
-	Player *Player
-	url    string
-}
-
-// URL returns the file url of the AudioResource
-func (f AudioResource) URL() string {
-	return f.url
-}
-
-// audioLoader is responsible for managing `.wav` files within `engo.Files`
+// audioLoader is responsible for managing audio files within `engo.Files`
 type audioLoader struct {
-	audios map[string]AudioResource
+	audios map[string]*Player
 }
 
 // Load processes the data stream and parses it as an audio file
-func (i *audioLoader) Load(url string, data io.Reader) error {
+func (a *audioLoader) Load(url string, data io.Reader) error {
+	var err error
 	audioBytes, err := ioutil.ReadAll(data)
 	if err != nil {
 		return err
 	}
 
 	audioBuffer := bytes.NewReader(audioBytes)
-	player, err := NewPlayer(&readSeekCloserBuffer{audioBuffer}, 0, 0)
-	if err != nil {
-		return fmt.Errorf("%s (are you running `core.AudioSystemPreload()` before preloading .wav files?)", err.Error())
+
+	var player *Player
+	switch filepath.Ext(url) {
+	case ".wav":
+		d, err := wav.Decode(&readSeekCloserBuffer{audioBuffer}, SampleRate)
+		if err != nil {
+			return err
+		}
+
+		player, err = newPlayer(d, url)
+		if err != nil {
+			return err
+		}
+	case ".mp3":
+		d, err := mp3.Decode(&readSeekCloserBuffer{audioBuffer}, SampleRate)
+		if err != nil {
+			return err
+		}
+
+		player, err = newPlayer(d, url)
+		if err != nil {
+			return err
+		}
+	case ".ogg":
+		d, err := vorbis.Decode(&readSeekCloserBuffer{audioBuffer}, SampleRate)
+		if err != nil {
+			return err
+		}
+
+		player, err = newPlayer(d, url)
+		if err != nil {
+			return err
+		}
 	}
 
-	i.audios[url] = AudioResource{Player: player, url: url}
+	a.audios[url] = player
 	return nil
 }
 
 // Load removes the preloaded audio file from the cache
-func (l *audioLoader) Unload(url string) error {
-	delete(l.audios, url)
+func (a *audioLoader) Unload(url string) error {
+	delete(a.audios, url)
 	return nil
 }
 
 // Resource retrieves the preloaded audio file, passed as a `AudioResource`
-func (l *audioLoader) Resource(url string) (engo.Resource, error) {
-	texture, ok := l.audios[url]
+func (a *audioLoader) Resource(url string) (engo.Resource, error) {
+	texture, ok := a.audios[url]
 	if !ok {
 		return nil, fmt.Errorf("resource not loaded by `FileLoader`: %q", url)
 	}
 
 	return texture, nil
+}
+
+// LoadedPlayer retrieves the *audio.Player created from the URL
+func LoadedPlayer(url string) (*Player, error) {
+	res, err := engo.Files.Resource(url)
+	if err != nil {
+		return nil, err
+	}
+
+	audioRes, ok := res.(*Player)
+	if !ok {
+		return nil, fmt.Errorf("resource not of type `*Player`: %s", url)
+	}
+
+	return audioRes, nil
 }
 
 // readSeekCloserBuffer is a wrapper to create a ReadSeekCloser
@@ -80,5 +116,5 @@ func (r *readSeekCloserBuffer) Seek(offset int64, whence int) (int64, error) {
 }
 
 func init() {
-	engo.Files.Register(".wav", &audioLoader{audios: make(map[string]AudioResource)})
+	engo.Files.Register(".wav", &audioLoader{audios: make(map[string]*Player)})
 }

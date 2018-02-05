@@ -10,6 +10,7 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -342,4 +343,16 @@ func SetCursorVisibility(visible bool) {
 	} else {
 		document.Body().Style().Set("cursor", "none")
 	}
+}
+
+// IsAndroidChrome tells if the browser is Chrome for android
+func IsAndroidChrome() bool {
+	ua := js.Global.Get("navigator").Get("userAgent").String()
+	if !strings.Contains(ua, "Android") {
+		return false
+	}
+	if !strings.Contains(ua, "Chrome") {
+		return false
+	}
+	return true
 }

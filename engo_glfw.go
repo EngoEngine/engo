@@ -485,3 +485,8 @@ func (i *ImageRGBA) Height() int {
 func openFile(url string) (io.ReadCloser, error) {
 	return os.Open(url)
 }
+
+// IsAndroidChrome tells if the browser is Chrome for android
+func IsAndroidChrome() bool {
+	return false
+}

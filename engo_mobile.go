@@ -201,3 +201,8 @@ func openFile(url string) (io.ReadCloser, error) {
 
 	return asset.Open(usedUrl)
 }
+
+// IsAndroidChrome tells if the browser is Chrome for android
+func IsAndroidChrome() bool {
+	return false
+}

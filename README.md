@@ -16,7 +16,7 @@ This table shows the current state of what's working and what's not. We are aimi
 | Aspect/Target | Linux | Windows | OSX | WebGL | Android | iOS* |
 | ------------- | ----- | ------- | --- | ----- | ------- | ---  |
 | Compilation   | Yes   | Yes     | Yes | Yes   | Yes     | ?    |
-| AudioSystem   | Yes   | No      | Yes | No    | No      | ?    |
+| AudioSystem   | Yes   | Yes     | Yes | Yes   | Yes     | ?    |
 | RenderSystem  | Yes   | Yes     | Yes | Yes   | Yes     | ?    |
 | XXXXXSystem   | Yes   | Yes     | Yes | Yes   | Yes     | ?    |
 

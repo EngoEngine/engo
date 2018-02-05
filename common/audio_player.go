@@ -1,383 +1,304 @@
-//+build !windows,!netgo,!android
-
 package common
 
-// Taken from golang.org/x/mobile/exp/audio
-
 import (
-	"bytes"
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
-	"sync"
+	"runtime"
 	"time"
 
-	"golang.org/x/mobile/exp/audio/al"
+	"engo.io/engo"
+	"engo.io/engo/common/decode/convert"
 )
 
-// Format represents a PCM data format.
-type Format int
+// SampleRate is the sample rate at which the player plays audio. Any audios
+// resource that is added to the system is resampled to this sample rate. To
+// change the sample rate, you must do so BEFORE adding the audio system to the world.
+var SampleRate = 44100
 
-const (
-	Mono8 Format = iota + 1
-	Mono16
-	Stereo8
-	Stereo16
-)
-
-// String implements the fmt.Stringer interface
-func (f Format) String() string { return formatStrings[f] }
-
-// formatBytes is the product of bytes per sample and number of channels.
-var formatBytes = [...]int64{
-	Mono8:    1,
-	Mono16:   2,
-	Stereo8:  2,
-	Stereo16: 4,
-}
-
-var formatCodes = [...]uint32{
-	Mono8:    al.FormatMono8,
-	Mono16:   al.FormatMono16,
-	Stereo8:  al.FormatStereo8,
-	Stereo16: al.FormatStereo16,
-}
-
-var formatStrings = [...]string{
-	0:        "unknown",
-	Mono8:    "mono8",
-	Mono16:   "mono16",
-	Stereo8:  "stereo8",
-	Stereo16: "stereo16",
-}
-
-// State indicates the current playing state of the player.
-type State int
-
-const (
-	Unknown State = iota
-	Initial
-	Playing
-	Paused
-	Stopped
-)
-
-//String implements the fmt.Stringer interface.
-func (s State) String() string { return stateStrings[s] }
-
-var stateStrings = [...]string{
-	Unknown: "unknown",
-	Initial: "initial",
-	Playing: "playing",
-	Paused:  "paused",
-	Stopped: "stopped",
-}
-
-var codeToState = map[int32]State{
-	0:          Unknown,
-	al.Initial: Initial,
-	al.Playing: Playing,
-	al.Paused:  Paused,
-	al.Stopped: Stopped,
-}
-
-type track struct {
-	format           Format
-	samplesPerSecond int64
-	src              ReadSeekCloser
-
-	// hasHeader represents whether the audio source contains
-	// a PCM header. If true, the audio data starts 44 bytes
-	// later in the source.
-	hasHeader bool
-}
-
-// Player is a basic audio player that plays PCM data.
-// Operations on a nil *Player are no-op, a nil *Player can
-// be used for testing purposes.
+// Player holds the underlying audio data and plays/pauses/stops/rewinds/seeks it.
 type Player struct {
-	t      *track
-	source al.Source
+	players    *players
+	src        convert.ReadSeekCloser
+	url        string
+	srcEOF     bool
+	sampleRate int
 
-	mu        sync.Mutex
-	prep      bool
-	bufs      []al.Buffer // buffers are created and queued to source during prepare.
-	sizeBytes int64       // size of the audio source
+	buf    []byte
+	pos    int64
+	volume float64
+
+	closeCh         chan struct{}
+	closedCh        chan struct{}
+	readLoopEndedCh chan struct{}
+	seekCh          chan seekArgs
+	seekedCh        chan error
+	proceedCh       chan []int16
+	proceededCh     chan proceededValues
+	syncCh          chan func()
 }
 
-// NewPlayer returns a new Player.
-// It initializes the underlying audio devices and the related resources.
-// If zero values are provided for format and sample rate values, the player
-// determines them from the source's WAV header.
-// An error is returned if the format and sample rate can't be determined.
-//
-// The audio package is only designed for small audio sources.
-func NewPlayer(src ReadSeekCloser, format Format, samplesPerSecond int64) (*Player, error) {
-	s := al.GenSources(1)
-	if code := al.Error(); code != 0 {
-		return nil, fmt.Errorf("audio: cannot generate an audio source [err=%x]", code)
+type seekArgs struct {
+	offset int64
+	whence int
+}
+
+type proceededValues struct {
+	buf []int16
+	err error
+}
+
+// URL implements the engo.Resource interface. It retrieves the player's source url.
+func (p *Player) URL() string {
+	return p.url
+}
+
+func newPlayer(src convert.ReadSeekCloser, url string) (*Player, error) {
+	if thePlayers.hasSource(src) {
+		return nil, errors.New("audio: src cannot be shared with another player")
 	}
+
 	p := &Player{
-		t:      &track{format: format, src: src, samplesPerSecond: samplesPerSecond},
-		source: s[0],
+		players:         thePlayers,
+		src:             src,
+		url:             url,
+		sampleRate:      SampleRate,
+		buf:             []byte{},
+		volume:          1,
+		closeCh:         make(chan struct{}),
+		closedCh:        make(chan struct{}),
+		readLoopEndedCh: make(chan struct{}),
+		seekCh:          make(chan seekArgs),
+		seekedCh:        make(chan error),
+		proceedCh:       make(chan []int16),
+		proceededCh:     make(chan proceededValues),
+		syncCh:          make(chan func()),
 	}
-	if err := p.discoverHeader(); err != nil {
+	// Get the current position of the source.
+	pos, err := p.src.Seek(0, io.SeekCurrent)
+	if err != nil {
 		return nil, err
 	}
-	if p.t.format == 0 {
-		return nil, errors.New("audio: cannot determine the format")
-	}
-	if p.t.samplesPerSecond == 0 {
-		return nil, errors.New("audio: cannot determine the sample rate")
-	}
+	p.pos = pos
+	runtime.SetFinalizer(p, (*Player).Close)
+
+	go func() {
+		p.readLoop()
+	}()
 	return p, nil
 }
 
-// headerSize is the size of WAV headers.
-// See http://www.topherlee.com/software/pcm-tut-wavformat.html.
-const headerSize = 44
-
-var (
-	riffHeader = []byte("RIFF")
-	waveHeader = []byte("WAVE")
-)
-
-func (p *Player) discoverHeader() error {
-	buf := make([]byte, headerSize)
-	if n, _ := io.ReadFull(p.t.src, buf); n != headerSize {
-		// No header present or read error.
-		return nil
-	}
-	if !(bytes.Equal(buf[0:4], riffHeader) && bytes.Equal(buf[8:12], waveHeader)) {
-		return nil
-	}
-	p.t.hasHeader = true
-	var format Format
-	switch channels, depth := buf[22], buf[34]; {
-	case channels == 1 && depth == 8:
-		format = Mono8
-	case channels == 1 && depth == 16:
-		format = Mono16
-	case channels == 2 && depth == 8:
-		format = Stereo8
-	case channels == 2 && depth == 16:
-		format = Stereo16
-	default:
-		return fmt.Errorf("audio: unsupported format; num of channels=%d, bit rate=%d", channels, depth)
-	}
-	if p.t.format == 0 {
-		p.t.format = format
-	}
-	if p.t.format != format {
-		return fmt.Errorf("audio: given format %v does not match header %v", p.t.format, format)
-	}
-	sampleRate := int64(buf[24]) | int64(buf[25])<<8 | int64(buf[26])<<16 | int64(buf[27])<<24
-	if p.t.samplesPerSecond == 0 {
-		p.t.samplesPerSecond = sampleRate
-	}
-	if p.t.samplesPerSecond != sampleRate {
-		return fmt.Errorf("audio: given sample rate %v does not match header %v", p.t.samplesPerSecond, sampleRate)
-	}
-	return nil
-}
-
-func (p *Player) prepare(background bool, offset int64, force bool) error {
-	p.mu.Lock()
-	if !force && p.prep {
-		p.mu.Unlock()
-		return nil
-	}
-	p.mu.Unlock()
-
-	if p.t.hasHeader {
-		offset += headerSize
-	}
-	if _, err := p.t.src.Seek(offset, 0); err != nil {
-		return err
-	}
-	var bufs []al.Buffer
-	// TODO(jbd): Limit the number of buffers in use, unqueue and reuse
-	// the existing buffers as buffers are processed.
-	buf := make([]byte, 128*1024)
-	size := offset
-	for {
-		n, err := p.t.src.Read(buf)
-		if n > 0 {
-			size += int64(n)
-			b := al.GenBuffers(1)
-			if !background && p.t.format == Stereo16 {
-				inputBuffer := bytes.NewBuffer(buf)
-				outputBuffer := new(bytes.Buffer)
-				var left, right int16
-
-				// TODO: this might not be the best way to convert Stereo16 to Mono16, but it's something
-				for converted := 0; converted < n; converted += 4 {
-					binary.Read(inputBuffer, binary.LittleEndian, &left)
-					binary.Read(inputBuffer, binary.LittleEndian, &right)
-
-					binary.Write(outputBuffer, binary.LittleEndian, int16((int32(left)+int32(right))/2))
-				}
-				b[0].BufferData(formatCodes[Mono16], outputBuffer.Bytes(), int32(p.t.samplesPerSecond/2))
-
-			} else {
-				b[0].BufferData(formatCodes[p.t.format], buf[:n], int32(p.t.samplesPerSecond))
-			}
-			bufs = append(bufs, b[0])
-		}
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-	}
-
-	p.mu.Lock()
-	if len(p.bufs) > 0 {
-		p.source.UnqueueBuffers(p.bufs...)
-		al.DeleteBuffers(p.bufs...)
-	}
-	p.sizeBytes = size
-	p.bufs = bufs
-	p.prep = true
-	if len(bufs) > 0 {
-		p.source.QueueBuffers(bufs...)
-	}
-	p.mu.Unlock()
-	return nil
-}
-
-// Play buffers the source audio to the audio device and starts
-// to play the source.
-// If the player paused or stopped, it reuses the previously buffered
-// resources to keep playing from the time it has paused or stopped.
-func (p *Player) Play(background bool) error {
-	if p == nil {
-		return nil
-	}
-	// Prepares if the track hasn't been buffered before.
-	if err := p.prepare(background, 0, false); err != nil {
-		return err
-	}
-	al.PlaySources(p.source)
-	return lastErr()
-}
-
-// Pause pauses the player.
-func (p *Player) Pause() error {
-	if p == nil {
-		return nil
-	}
-	al.PauseSources(p.source)
-	return lastErr()
-}
-
-// Stop stops the player.
-func (p *Player) Stop() error {
-	if p == nil {
-		return nil
-	}
-	al.StopSources(p.source)
-	return lastErr()
-}
-
-// Seek moves the play head to the given offset relative to the start of the source.
-func (p *Player) Seek(background bool, offset time.Duration) error {
-	if p == nil {
-		return nil
-	}
-	if err := p.Stop(); err != nil {
-		return err
-	}
-	size := durToByteOffset(p.t, offset)
-	if err := p.prepare(background, size, true); err != nil {
-		return err
-	}
-	al.PlaySources(p.source)
-	return lastErr()
-}
-
-// Current returns the current playback position of the audio that is being played.
-func (p *Player) Current() time.Duration {
-	if p == nil {
-		return 0
-	}
-	// TODO(jbd): Current never returns the Total when the playing is finished.
-	// OpenAL may be returning the last buffer's start point as an OffsetByte.
-	return byteOffsetToDur(p.t, int64(p.source.OffsetByte()))
-}
-
-// Total returns the total duration of the audio source.
-func (p *Player) Total(background bool) time.Duration {
-	if p == nil {
-		return 0
-	}
-	// Prepare is required to determine the length of the source.
-	// We need to read the entire source to calculate the length.
-	p.prepare(background, 0, false)
-	return byteOffsetToDur(p.t, p.sizeBytes)
-}
-
-// Volume returns the current player volume. The range of the volume is [0, 1].
-func (p *Player) Volume() float64 {
-	if p == nil {
-		return 0
-	}
-
-	return float64(p.source.Gain())
-}
-
-// SetVolume sets the volume of the player. The range of the volume is [0, 1].
-func (p *Player) SetVolume(vol float64) {
-	if p == nil {
-		return
-	}
-	p.source.SetGain(float32(vol))
-}
-
-// State returns the player's current state.
-func (p *Player) State() State {
-	if p == nil {
-		return Unknown
-	}
-	return codeToState[p.source.State()]
-}
-
-// Close closes the device and frees the underlying resources
-// used by the player.
-// It should be called as soon as the player is not in-use anymore.
+// Close removes the player from the players, which are currently playing players.
+// it then finalizes and frees the data from the player.
 func (p *Player) Close() error {
-	if p == nil {
+	runtime.SetFinalizer(p, nil)
+	p.players.removePlayer(p)
+
+	select {
+	case p.closeCh <- struct{}{}:
+		<-p.closedCh
 		return nil
+	case <-p.readLoopEndedCh:
+		return fmt.Errorf("audio: the player is already closed")
 	}
-	if p.source != 0 {
-		al.DeleteSources(p.source)
+}
+
+func (p *Player) bufferToInt16(lengthInBytes int) ([]int16, error) {
+	select {
+	case p.proceedCh <- make([]int16, lengthInBytes/2):
+		r := <-p.proceededCh
+		return r.buf, r.err
+	case <-p.readLoopEndedCh:
+		return nil, fmt.Errorf("audio: the player is already closed")
 	}
-	p.mu.Lock()
-	if len(p.bufs) > 0 {
-		al.DeleteBuffers(p.bufs...)
-	}
-	p.mu.Unlock()
-	p.t.src.Close()
+}
+
+// Play plays the player's audio.
+func (p *Player) Play() error {
+	p.players.addPlayer(p)
 	return nil
 }
 
-func byteOffsetToDur(t *track, offset int64) time.Duration {
-	return time.Duration(offset * formatBytes[t.format] * int64(time.Second) / t.samplesPerSecond)
-}
+func (p *Player) readLoop() {
+	defer func() {
+		// Note: the error is ignored
+		p.src.Close()
+		// Receiving from a closed channel returns quickly
+		// i.e. `case <-p.readLoopEndedCh:` can check if this loops is ended.
+		close(p.readLoopEndedCh)
+	}()
 
-func durToByteOffset(t *track, dur time.Duration) int64 {
-	return int64(dur) * t.samplesPerSecond / (formatBytes[t.format] * int64(time.Second))
-}
+	t := time.After(0)
+	var readErr error
+	for {
+		select {
+		case <-p.closeCh:
+			p.closedCh <- struct{}{}
+			return
 
-// lastErr returns the last error or nil if the last operation
-// has been successful.
-func lastErr() error {
-	if code := al.Error(); code != 0 {
-		return fmt.Errorf("audio: openal failed with %x", code)
+		case s := <-p.seekCh:
+			pos, err := p.src.Seek(s.offset, s.whence)
+			p.buf = nil
+			p.pos = pos
+			p.srcEOF = false
+			p.seekedCh <- err
+			t = time.After(time.Millisecond)
+			break
+
+		case <-t:
+			// If the buffer has 1 second, that's enough.
+			if len(p.buf) >= p.sampleRate*bytesPerSample*channelNum {
+				t = time.After(100 * time.Millisecond)
+				break
+			}
+
+			// Try to read the buffer for 1/60[s].
+			s := 60
+			if engo.Backend == "Web" {
+				s = 20
+				if engo.IsAndroidChrome() {
+					s = 10
+				}
+			}
+			l := p.sampleRate * bytesPerSample * channelNum / s
+			l &= mask
+			buf := make([]byte, l)
+			n, err := p.src.Read(buf)
+
+			p.buf = append(p.buf, buf[:n]...)
+			if err == io.EOF {
+				p.srcEOF = true
+			}
+			if p.srcEOF && len(p.buf) == 0 {
+				t = nil
+				break
+			}
+			if err != nil && err != io.EOF {
+				readErr = err
+				t = nil
+				break
+			}
+			if engo.Backend == "web" {
+				t = time.After(10 * time.Millisecond)
+			} else {
+				t = time.After(time.Millisecond)
+			}
+
+		case buf := <-p.proceedCh:
+			if readErr != nil {
+				p.proceededCh <- proceededValues{buf, readErr}
+				return
+			}
+
+			lengthInBytes := len(buf) * 2
+			l := lengthInBytes
+
+			if len(p.buf) < lengthInBytes && !p.srcEOF {
+				p.proceededCh <- proceededValues{buf, nil}
+				break
+			}
+			if l > len(p.buf) {
+				l = len(p.buf)
+			}
+			for i := 0; i < l/2; i++ {
+				buf[i] = int16(p.buf[2*i]) | (int16(p.buf[2*i+1]) << 8)
+				buf[i] = int16(float64(buf[i]) * p.volume)
+			}
+			p.pos += int64(l)
+			p.buf = p.buf[l:]
+
+			p.proceededCh <- proceededValues{buf, nil}
+
+		case f := <-p.syncCh:
+			f()
+		}
 	}
+}
+
+func (p *Player) sync(f func()) bool {
+	ch := make(chan struct{})
+	ff := func() {
+		f()
+		close(ch)
+	}
+	select {
+	case p.syncCh <- ff:
+		<-ch
+		return true
+	case <-p.readLoopEndedCh:
+		return false
+	}
+}
+
+func (p *Player) eof() bool {
+	r := false
+	p.sync(func() {
+		r = p.srcEOF && len(p.buf) == 0
+	})
+	return r
+}
+
+// IsPlaying returns boolean indicating whether the player is playing.
+func (p *Player) IsPlaying() bool {
+	return p.players.hasPlayer(p)
+}
+
+// Rewind rewinds the current position to the start.
+//
+// Rewind returns error when seeking the source stream returns error.
+func (p *Player) Rewind() error {
+	return p.Seek(0)
+}
+
+// Seek seeks the position with the given offset.
+//
+// Seek returns error when seeking the source stream returns error.
+func (p *Player) Seek(offset time.Duration) error {
+	o := int64(offset) * bytesPerSample * channelNum * int64(p.sampleRate) / int64(time.Second)
+	o &= mask
+	select {
+	case p.seekCh <- seekArgs{o, io.SeekStart}:
+		return <-p.seekedCh
+	case <-p.readLoopEndedCh:
+		return fmt.Errorf("audio: the player is already closed")
+	}
+}
+
+// Pause pauses the playing.
+//
+// Pause always returns nil.
+func (p *Player) Pause() error {
+	p.players.removePlayer(p)
 	return nil
 }
 
-// TODO(jbd): Close the device.
+// Current returns the current position.
+func (p *Player) Current() time.Duration {
+	sample := int64(0)
+	p.sync(func() {
+		sample = p.pos / bytesPerSample / channelNum
+	})
+	return time.Duration(sample) * time.Second / time.Duration(p.sampleRate)
+}
+
+// Volume returns the current volume of this player [0-1].
+func (p *Player) Volume() float64 {
+	v := 0.0
+	p.sync(func() {
+		v = p.volume
+	})
+	return v
+}
+
+// SetVolume sets the volume of this player.
+// volume must be in between 0 and 1. This function panics otherwise.
+func (p *Player) setVolume(volume float64) {
+	// The condition must be true when volume is NaN.
+	if !(0 <= volume && volume <= 1) {
+		panic("audio: volume must be in between 0 and 1")
+	}
+
+	p.sync(func() {
+		p.volume = volume
+	})
+}
