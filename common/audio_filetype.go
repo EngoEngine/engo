@@ -117,4 +117,6 @@ func (r *readSeekCloserBuffer) Seek(offset int64, whence int) (int64, error) {
 
 func init() {
 	engo.Files.Register(".wav", &audioLoader{audios: make(map[string]*Player)})
+	engo.Files.Register(".mp3", &audioLoader{audios: make(map[string]*Player)})
+	engo.Files.Register(".ogg", &audioLoader{audios: make(map[string]*Player)})
 }

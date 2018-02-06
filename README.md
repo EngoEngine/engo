@@ -48,7 +48,7 @@ The `common` package contains our ECS implementations of common game development
 
 1. First, you have to install some dependencies:
   1. If you're running on Debian/Ubuntu:
-    `sudo apt-get install libopenal-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev xorg-dev libgl1-mesa-dev git-all`
+    `sudo apt-get install libasound2-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev xorg-dev libgl1-mesa-dev git-all`
   2. If you're running on Windows you'll need a gcc compiler that the go tool can use and have `gcc.exe` in your PATH environmental variable. We recommend [Mingw](http://mingw-w64.org/doku.php/start) since it has been tested. You'll also need git installed, we recommend getting it from [The official Git site](http://git-scm.com/download/win)
   3. If you're on OSX, you will also need Git. You can find instructions [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git#Installing-on-Mac). You can also use homebrew to install git as well. [Open an issue if you have any issues](https://github.com/EngoEngine/engo/issues/new)
 2. Then, you can go get it:
@@ -94,3 +94,5 @@ Thank you to everyone who has worked on, or with `Engo`. None of this would be p
 
 These are 3rd party projects that have made `engo` possible.
 - The original [engi](https://github.com/ajhager/engi) game engine which engo was based off of ([BSD license](https://github.com/ajhager/engi/blob/master/LICENSE))
+- [Oto](https://github.com/hajimehoshi/oto), a low-level cross-platform library to play sound. The AudioSystem uses this and is based on
+the audio package used in [Ebiten](https://github.com/hajimehoshi/ebiten).
