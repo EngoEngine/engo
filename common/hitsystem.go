@@ -7,10 +7,13 @@ import (
 
 type HitGroup byte
 
+//HitBox is currently a simple bounds rect.
+//I hope to add a possibility of internal rects, for more fine grain hit tests at some point
 type HitBox struct {
 	x, y, w, h float32
 }
 
+//Hit tests whether this Hitbox, has an area collision with another HitBox
 func (a HitBox) Hit(b HitBox) bool {
 	if a.x > b.x+b.w {
 		return false
@@ -27,9 +30,14 @@ func (a HitBox) Hit(b HitBox) bool {
 	return true
 }
 
-//Minimum step a needs to take to get off of B
+//MinimumStepOffD calculates the mininum step this HitBox needs to take to get off of 'b'
+//Return dx, dy
 func (a HitBox) MinimumStepOffD(b HitBox) (float32, float32) {
-	angle := 0 // top
+	//angle and dist are the current winners
+	//0 = up, 1 = right ...
+
+	// top
+	angle := 0
 	dist := a.y + a.h - b.y
 
 	// right
@@ -57,6 +65,8 @@ func (a HitBox) MinimumStepOffD(b HitBox) (float32, float32) {
 
 }
 
+//Hitable is the main interface for the HitSystem
+//Entities can implement the methods by containing Components that implement them
 type Hitable interface {
 	ID() uint64
 	GetHitBox() HitBox
@@ -64,24 +74,30 @@ type Hitable interface {
 	Push(float32, float32)
 }
 
+//HitMessage the message for the engo Messagebox
 type HitMessage struct {
 	Mainob  Hitable
 	Groupob Hitable
 }
 
+//Type fulfils the engo Messagebox interface
 func (HitMessage) Type() string {
 	return "HitMessage"
 }
 
+//HitSystem is the replacement system for the CollisionSystem
+//It runs on interfaces instead of directly working on Components
 type HitSystem struct {
 	Solid    HitGroup
 	Entities []Hitable
 }
 
+//Add adds a hitable entity to the system
 func (hs *HitSystem) Add(h Hitable) {
 	hs.Entities = append(hs.Entities, h)
 }
 
+//Remove removes a hitable entity from the system
 func (hs *HitSystem) Remove(be ecs.BasicEntity) {
 	id := be.ID()
 	del := -1
@@ -94,13 +110,9 @@ func (hs *HitSystem) Remove(be ecs.BasicEntity) {
 	hs.Entities = append(hs.Entities[:del], hs.Entities[del+1:]...)
 }
 
-//Dispatch is to enable testing without the full engo system running
-func (hs *HitSystem) Dispatch(m engo.Message) {
-	if engo.Mailbox != nil {
-		engo.Mailbox.Dispatch(m)
-	}
-}
-
+//Update, checks all 'main' entities against all other entities, to see if any collide
+//if they do dispatches a message
+//if the collision is 'Solid' moves the main item off of the other.
 func (hs *HitSystem) Update(dt float32) {
 	for _, v := range hs.Entities {
 		mg, _ := v.HitGroups()
@@ -121,7 +133,10 @@ func (hs *HitSystem) Update(dt float32) {
 				continue
 			}
 			//is a Hit
-			hs.Dispatch(HitMessage{Mainob: v, Groupob: gob})
+			if engo.Mailbox != nil { // Workaround for safe testing
+				engo.Mailbox.Dispatch(HitMessage{Mainob: v, Groupob: gob})
+			}
+
 			if mg&gg&hs.Solid != 0 {
 				dx, dy := vhb.MinimumStepOffD(ghb)
 				v.Push(dx, dy)

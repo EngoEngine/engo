@@ -63,6 +63,8 @@ func (hm *hitme) HitGroups() (HitGroup, HitGroup) {
 	return hm.main, hm.group
 }
 
+//Test_Update creates a system, sends it objects, calls update once,
+//then sees if it has done what it should to the objects
 func Test_Update(t *testing.T) {
 	hent := func(x, y, w, h float32, gm, gg HitGroup) *hitme {
 		nb := ecs.NewBasic()
