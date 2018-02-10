@@ -276,17 +276,76 @@ type Text struct {
 }
 
 // Texture returns nil because the Text is generated from a FontAtlas. This implements the common.Drawable interface.
-func (Text) Texture() *gl.Texture { return nil }
+func (t Text) Texture() *gl.Texture { return nil }
 
-// Width returns 0 because the Text is generated from a FontAtlas. This implements the common.Drawable interface.
-func (Text) Width() float32 { return 0 }
+// Width returns the width of the Text generated from a FontAtlas. This implements the common.Drawable interface.
+func (t Text) Width() float32 {
+	atlas, ok := atlasCache[*t.Font]
+	if !ok {
+		// Generate texture first
+		atlas = t.Font.generateFontAtlas(200)
+		atlasCache[*t.Font] = atlas
+	}
 
-// Height returns 0 because the Text is generated from a FontAtlas. This implements the common.Drawable interface.
-func (Text) Height() float32 { return 0 }
+	var currentX float32
+	var greatestX float32
+
+	for _, char := range t.Text {
+		// TODO: this might not work for all characters
+		switch {
+		case char == '\n':
+			if currentX > greatestX {
+				greatestX = currentX
+			}
+			currentX = 0
+			//currentY += atlas.Height[char] + txt.LineSpacing*atlas.Height[char]
+			continue
+		case char < 32: // all system stuff should be ignored
+			continue
+		}
+
+		currentX += atlas.Width[char] + float32(t.Font.Size)*t.LetterSpacing
+	}
+	if currentX > greatestX {
+		return currentX
+	}
+	return greatestX
+}
+
+// Height returns the height the Text generated from a FontAtlas. This implements the common.Drawable interface.
+func (t Text) Height() float32 {
+	atlas, ok := atlasCache[*t.Font]
+	if !ok {
+		// Generate texture first
+		atlas = t.Font.generateFontAtlas(200)
+		atlasCache[*t.Font] = atlas
+	}
+
+	var currentY float32
+	var totalY float32
+	var tallest float32
+
+	for _, char := range t.Text {
+		// TODO: this might not work for all characters
+		switch {
+		case char == '\n':
+			totalY += tallest
+			tallest = float32(0)
+			continue
+		case char < 32: // all system stuff should be ignored
+			continue
+		}
+		currentY = atlas.Height[char] + t.LineSpacing*atlas.Height[char]
+		if currentY > tallest {
+			tallest = currentY
+		}
+	}
+	return totalY + tallest
+}
 
 // View returns 0, 0, 1, 1 because the Text is generated from a FontAtlas. This implements the common.Drawable interface.
-func (Text) View() (float32, float32, float32, float32) { return 0, 0, 1, 1 }
+func (t Text) View() (float32, float32, float32, float32) { return 0, 0, 1, 1 }
 
 // Close does nothing because the Text is generated from a FontAtlas. There is no underlying texture to close.
 // This implements the common.Drawable interface.
-func (Text) Close() {}
+func (t Text) Close() {}
