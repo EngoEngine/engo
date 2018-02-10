@@ -259,6 +259,9 @@ func (c *CollisionSystem) Update(dt float32) {
 						e1.SpaceComponent.Position.Y += mtd.Y / 2
 						e2.SpaceComponent.Position.X -= mtd.X / 2
 						e2.SpaceComponent.Position.Y -= mtd.Y / 2
+						//As the entities are no longer overlapping
+						//e2 wont collide as main
+						engo.Mailbox.Dispatch(CollisionMessage{Entity: e2, To: e1, Groups: cgroup})
 					} else {
 						//collision with one main
 						e1.SpaceComponent.Position.X += mtd.X
