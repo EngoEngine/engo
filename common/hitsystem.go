@@ -71,7 +71,7 @@ type Hitable interface {
 	ID() uint64
 	GetHitBox() HitBox
 	HitGroups() (HitGroup, HitGroup)
-	Push(float32, float32)
+	Shunt(float32, float32)
 }
 
 //HitMessage the message for the engo Messagebox
@@ -115,31 +115,38 @@ func (hs *HitSystem) Remove(be ecs.BasicEntity) {
 //if the collision is 'Solid' moves the main item off of the other.
 func (hs *HitSystem) Update(dt float32) {
 	for _, v := range hs.Entities {
-		mg, _ := v.HitGroups()
+		vmain, vgrp := v.HitGroups()
 		vhb := v.GetHitBox()
-		if mg == 0 {
+		if vmain == 0 {
 			continue
 		}
-		for _, gob := range hs.Entities {
-			if gob == v {
+		for _, e2 := range hs.Entities {
+			if e2 == v {
 				continue
 			}
-			_, gg := gob.HitGroups()
-			if mg&gg == 0 {
+			e2main, e2grp := e2.HitGroups()
+			if vmain&e2grp == 0 {
 				continue
 			}
-			ghb := gob.GetHitBox()
+			ghb := e2.GetHitBox()
 			if !vhb.Hit(ghb) {
 				continue
 			}
 			//is a Hit
 			if engo.Mailbox != nil { // Workaround for safe testing
-				engo.Mailbox.Dispatch(HitMessage{Mainob: v, Groupob: gob})
+				engo.Mailbox.Dispatch(HitMessage{Mainob: v, Groupob: e2})
 			}
 
-			if mg&gg&hs.Solid != 0 {
+			if vmain&e2grp&hs.Solid != 0 {
 				dx, dy := vhb.MinimumStepOffD(ghb)
-				v.Push(dx, dy)
+				if e2main&vgrp&hs.Solid != 0 {
+					//collision is between equals
+					v.Shunt(dx/2, dy/2)
+					e2.Shunt(-dx/2, -dy/2)
+					engo.Mailbox.Dispatch(HitMessage{Mainob: e2, Groupob: v})
+				} else {
+					v.Shunt(dx, dy)
+				}
 			}
 		}
 

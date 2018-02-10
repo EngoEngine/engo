@@ -44,9 +44,9 @@ type hitme struct {
 	main, group HitGroup
 }
 
-//Push moves the hitbox
+//Shunt moves the hitbox
 //In a full system the SpaceComponent should provide this method
-func (hm *hitme) Push(dx, dy float32) {
+func (hm *hitme) Shunt(dx, dy float32) {
 	hm.box.x += dx
 	hm.box.y += dy
 }
