@@ -253,7 +253,7 @@ func (c *CollisionSystem) Update(dt float32) {
 			if IsIntersecting(entityAABB, otherAABB) {
 				if cgroup&c.Solids > 0 {
 					mtd := MinimumTranslation(entityAABB, otherAABB)
-					if e2.CollisionComponent.Main&e2.CollisionComponent.Group&c.Solids != 0 {
+					if e2.CollisionComponent.Main&e1.CollisionComponent.Group&c.Solids != 0 {
 						//collision of equals (both main)
 						e1.SpaceComponent.Position.X += mtd.X / 2
 						e1.SpaceComponent.Position.Y += mtd.Y / 2
