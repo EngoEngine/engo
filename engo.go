@@ -158,6 +158,8 @@ func Run(o RunOptions, defaultScene Scene) {
 
 		if !opts.NoRun {
 			runHeadless(defaultScene)
+		} else {
+			SetScene(defaultScene, false)
 		}
 	} else {
 		CreateWindow(opts.Title, opts.Width, opts.Height, opts.Fullscreen, opts.MSAA)
