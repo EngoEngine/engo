@@ -25,6 +25,8 @@ var (
 	closeGame                 bool
 	gameWidth, gameHeight     float32
 	windowWidth, windowHeight float32
+	headlessWidth             = 800
+	headlessHeight            = 800
 )
 
 const (
