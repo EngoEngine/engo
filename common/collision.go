@@ -253,8 +253,20 @@ func (c *CollisionSystem) Update(dt float32) {
 			if IsIntersecting(entityAABB, otherAABB) {
 				if cgroup&c.Solids > 0 {
 					mtd := MinimumTranslation(entityAABB, otherAABB)
-					e1.SpaceComponent.Position.X += mtd.X
-					e1.SpaceComponent.Position.Y += mtd.Y
+					if e2.CollisionComponent.Main&e1.CollisionComponent.Group&c.Solids != 0 {
+						//collision of equals (both main)
+						e1.SpaceComponent.Position.X += mtd.X / 2
+						e1.SpaceComponent.Position.Y += mtd.Y / 2
+						e2.SpaceComponent.Position.X -= mtd.X / 2
+						e2.SpaceComponent.Position.Y -= mtd.Y / 2
+						//As the entities are no longer overlapping
+						//e2 wont collide as main
+						engo.Mailbox.Dispatch(CollisionMessage{Entity: e2, To: e1, Groups: cgroup})
+					} else {
+						//collision with one main
+						e1.SpaceComponent.Position.X += mtd.X
+						e1.SpaceComponent.Position.Y += mtd.Y
+					}
 				}
 
 				//collided can now list the types of collision
