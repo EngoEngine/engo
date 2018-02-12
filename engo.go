@@ -25,6 +25,8 @@ var (
 	closeGame                 bool
 	gameWidth, gameHeight     float32
 	windowWidth, windowHeight float32
+	headlessWidth             = 800
+	headlessHeight            = 800
 )
 
 const (
@@ -143,8 +145,23 @@ func Run(o RunOptions, defaultScene Scene) {
 
 	// And run the game
 	if opts.HeadlessMode {
+		if opts.Width == 0 {
+			opts.Width = headlessWidth
+		}
+		if opts.Height == 0 {
+			opts.Height = headlessHeight
+		}
+		windowWidth = float32(opts.Width)
+		windowHeight = float32(opts.Height)
+		gameWidth = float32(opts.Width)
+		gameHeight = float32(opts.Height)
+		canvasWidth = float32(opts.Width)
+		canvasHeight = float32(opts.Height)
+
 		if !opts.NoRun {
 			runHeadless(defaultScene)
+		} else {
+			SetScene(defaultScene, true)
 		}
 	} else {
 		CreateWindow(opts.Title, opts.Width, opts.Height, opts.Fullscreen, opts.MSAA)
