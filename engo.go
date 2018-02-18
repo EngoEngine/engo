@@ -25,6 +25,7 @@ var (
 	closeGame                 bool
 	gameWidth, gameHeight     float32
 	windowWidth, windowHeight float32
+	canvasWidth, canvasHeight float32
 	headlessWidth             = 800
 	headlessHeight            = 800
 )

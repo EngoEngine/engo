@@ -17,8 +17,6 @@ var (
 	Gl     *gl.Context
 	worker mgl.Worker
 
-	canvasWidth, canvasHeight float32
-
 	msaaPreference int
 
 	ResizeXOffset = float32(0)
