@@ -26,8 +26,6 @@ var (
 	Gl *gl.Context
 	sz size.Event
 
-	canvasWidth, canvasHeight float32
-
 	msaaPreference int
 
 	ResizeXOffset = float32(0)
