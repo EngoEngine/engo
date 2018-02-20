@@ -28,10 +28,7 @@ var (
 	cursorHResize   *glfw.Cursor
 	cursorVResize   *glfw.Cursor
 
-	headlessWidth             = 800
-	headlessHeight            = 800
-	canvasWidth, canvasHeight float32
-	scale                     = float32(1)
+	scale = float32(1)
 
 	Backend       string = "GLFW"
 	ResizeXOffset        = float32(0)
