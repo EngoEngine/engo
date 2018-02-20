@@ -51,14 +51,6 @@ func (s *DefaultScene) Setup(w *ecs.World) {
 	}
 }
 
-func (d *DefaultScene) Hide() {
-	d.audioSys.OtoPlayer.Close()
-}
-
-func (d *DefaultScene) Exit() {
-	d.audioSys.OtoPlayer.Close()
-}
-
 func (*DefaultScene) Type() string { return "Game" }
 
 type WhoopSystem struct {

@@ -3,6 +3,7 @@ package common
 import (
 	"io"
 	"log"
+	"runtime"
 
 	"engo.io/ecs"
 	"github.com/hajimehoshi/oto"
@@ -43,15 +44,18 @@ type AudioSystem struct {
 	OtoPlayer *oto.Player
 }
 
-// New is called when the AudioSystem is added to the world. If you use multiple scenes
-// make sure you add a Hide method to it and close the OtoPlayer. To be completely safe, also
-// add Exit methods to your scenes that close it.
+// New is called when the AudioSystem is added to the world.
 func (a *AudioSystem) New(w *ecs.World) {
 	var err error
 	a.OtoPlayer, err = oto.NewPlayer(SampleRate, channelNum, bytesPerSample, 8192)
 	if err != nil {
 		log.Printf("audio error. Unable to create new OtoPlayer: %v \n\r", err)
 	}
+	runtime.SetFinalizer(a.OtoPlayer, func(p *oto.Player) {
+		if err := p.Close(); err != nil {
+			log.Printf("audio error. Unable to close OtoPlayer: %v \n\r", err)
+		}
+	})
 }
 
 // Add adds a new entity to the AudioSystem. AudioComponent is always required, and the SpaceComponent is
