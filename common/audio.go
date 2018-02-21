@@ -53,6 +53,13 @@ func (a *AudioSystem) Add(basic *ecs.BasicEntity, audio *AudioComponent) {
 	a.entities = append(a.entities, audioEntity{basic, audio})
 }
 
+// AddByInterface Allows an Entity to be added directly using the Audioable interface,
+// which every entity containing the BasicEntity and AnimationComponent anonymously,
+// automatically satisfies.
+func (a *AudioSystem) AddByInterface(o Audioable) {
+	a.Add(o.GetBasicEntity(), o.GetAudioComponent())
+}
+
 // Remove removes an entity from the AudioSystem
 func (a *AudioSystem) Remove(basic ecs.BasicEntity) {
 	delete := -1
@@ -75,6 +82,13 @@ func (a *AudioSystem) Update(dt float32) {
 
 	if _, err := a.otoPlayer.Write(buf); err != nil {
 		log.Printf("error copying to OtoPlayer: %v \r\n", err)
+	}
+
+	if masterVolumeChanged {
+		for _, e := range a.entities {
+			e.Player.SetVolume(e.Player.GetVolume())
+		}
+		masterVolumeChanged = false
 	}
 }
 

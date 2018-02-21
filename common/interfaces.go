@@ -118,7 +118,6 @@ type Mouseable interface {
 type Audioable interface {
 	BasicFace
 	AudioFace
-	SpaceFace
 }
 
 // Renderable is the required interface for the RenderSystem.AddByInterface method
