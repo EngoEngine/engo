@@ -297,10 +297,7 @@ func (p *Player) SetVolume(volume float64) {
 	})
 }
 
-var (
-	masterVolume        float64
-	masterVolumeChanged bool
-)
+var masterVolume float64
 
 // SetMasterVolume sets the master volume. The masterVolume is multiplied by all
 // the other volumes to get the volume of each entity played.
@@ -311,7 +308,6 @@ func SetMasterVolume(volume float64) {
 		return
 	}
 	masterVolume = volume
-	masterVolumeChanged = true
 }
 
 // GetMasterVolume gets the master volume of the audio system.

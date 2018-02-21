@@ -83,13 +83,6 @@ func (a *AudioSystem) Update(dt float32) {
 	if _, err := a.otoPlayer.Write(buf); err != nil {
 		log.Printf("error copying to OtoPlayer: %v \r\n", err)
 	}
-
-	if masterVolumeChanged {
-		for _, e := range a.entities {
-			e.Player.SetVolume(e.Player.GetVolume())
-		}
-		masterVolumeChanged = false
-	}
 }
 
 // Read reads from all the currently playing entities and combines them into a

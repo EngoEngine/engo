@@ -92,21 +92,21 @@ func (w *WhoopSystem) Update(dt float32) {
 		}
 	}
 	d := float64(dt * 0.1)
-	master := common.GetMasterVolume()
+	volume := w.player.GetVolume()
 	if w.goingUp {
-		master += d
+		volume += d
 	} else {
-		master -= d
+		volume -= d
 	}
 
-	if master < 0 {
-		common.SetMasterVolume(0.0)
+	if volume < 0 {
+		w.player.SetVolume(0.0)
 		w.goingUp = true
-	} else if master > 1 {
-		common.SetMasterVolume(1.0)
+	} else if volume > 1 {
+		w.player.SetVolume(1.0)
 		w.goingUp = false
 	} else {
-		common.SetMasterVolume(master)
+		w.player.SetVolume(volume)
 	}
 }
 
