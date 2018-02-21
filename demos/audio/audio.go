@@ -9,9 +9,7 @@ import (
 	"engo.io/engo/common"
 )
 
-type DefaultScene struct {
-	audioSys *common.AudioSystem
-}
+type DefaultScene struct{}
 
 type Whoop struct {
 	ecs.BasicEntity
@@ -23,30 +21,52 @@ func (s *DefaultScene) Preload() {
 	if err != nil {
 		log.Println(err)
 	}
+	err = engo.Files.Load("326064.wav")
+	if err != nil {
+		log.Println(err)
+	}
+
+	engo.Input.RegisterButton("whoop", engo.Space)
 }
 
 func (s *DefaultScene) Setup(w *ecs.World) {
 	common.SetBackground(color.White)
-	s.audioSys = &common.AudioSystem{}
 
 	w.AddSystem(&common.RenderSystem{})
-	w.AddSystem(s.audioSys)
-	//w.AddSystem(&WhoopSystem{})
+	w.AddSystem(&common.AudioSystem{})
+	w.AddSystem(&WhoopSystem{})
 
-	whoop := Whoop{BasicEntity: ecs.NewBasic()}
-	whoopPlayer, err := common.LoadedPlayer("326488.wav")
+	birds := Whoop{BasicEntity: ecs.NewBasic()}
+	birdPlayer, err := common.LoadedPlayer("326488.wav")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	whoop.AudioComponent = common.AudioComponent{Repeat: true, Player: whoopPlayer}
-	whoop.AudioComponent.SetVolume(0.99)
-	whoopPlayer.Play()
+	birds.AudioComponent = common.AudioComponent{Player: birdPlayer}
+	birdPlayer.Play()
+	birdPlayer.Repeat = true
+
+	// Let's add our birds to the appropriate systems
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *common.AudioSystem:
+			sys.Add(&birds.BasicEntity, &birds.AudioComponent)
+		}
+	}
+
+	whoop := Whoop{BasicEntity: ecs.NewBasic()}
+	whoopPlayer, err := common.LoadedPlayer("326064.wav")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	whoop.AudioComponent = common.AudioComponent{Player: whoopPlayer}
 
 	// Let's add our whoop to the appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
 		case *common.AudioSystem:
 			sys.Add(&whoop.BasicEntity, &whoop.AudioComponent)
+		case *WhoopSystem:
+			sys.Add(&whoop.AudioComponent)
 		}
 	}
 }
@@ -55,25 +75,38 @@ func (*DefaultScene) Type() string { return "Game" }
 
 type WhoopSystem struct {
 	goingUp bool
+	player  *common.Player
 }
 
-// Remove is empty, because this system doesn't do anything with entities (note there's no `Add` method either)
+func (w *WhoopSystem) Add(audio *common.AudioComponent) {
+	w.player = audio.Player
+}
+
 func (w *WhoopSystem) Remove(basic ecs.BasicEntity) {}
 
 func (w *WhoopSystem) Update(dt float32) {
+	if btn := engo.Input.Button("whoop"); btn.JustPressed() {
+		if !w.player.IsPlaying() {
+			w.player.Rewind()
+			w.player.Play()
+		}
+	}
 	d := float64(dt * 0.1)
+	master := common.GetMasterVolume()
 	if w.goingUp {
-		common.MasterVolume += d
+		master += d
 	} else {
-		common.MasterVolume -= d
+		master -= d
 	}
 
-	if common.MasterVolume < 0 {
-		common.MasterVolume = 0
+	if master < 0 {
+		common.SetMasterVolume(0.0)
 		w.goingUp = true
-	} else if common.MasterVolume > 1 {
-		common.MasterVolume = 1
+	} else if master > 1 {
+		common.SetMasterVolume(1.0)
 		w.goingUp = false
+	} else {
+		common.SetMasterVolume(master)
 	}
 }
 

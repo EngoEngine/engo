@@ -9,7 +9,7 @@ package mp3
 import (
 	"github.com/hajimehoshi/go-mp3"
 
-	"engo.io/engo/common/decode/convert"
+	"engo.io/engo/common/internal/decode/convert"
 )
 
 // Stream is a decoded stream.

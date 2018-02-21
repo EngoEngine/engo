@@ -1,14 +1,14 @@
 package common
 
 import (
-	"errors"
 	"fmt"
 	"io"
+	"log"
 	"runtime"
 	"time"
 
 	"engo.io/engo"
-	"engo.io/engo/common/decode/convert"
+	"engo.io/engo/common/internal/decode/convert"
 )
 
 // SampleRate is the sample rate at which the player plays audio. Any audios
@@ -18,7 +18,9 @@ var SampleRate = 44100
 
 // Player holds the underlying audio data and plays/pauses/stops/rewinds/seeks it.
 type Player struct {
-	players    *players
+	isPlaying bool
+	Repeat    bool
+
 	src        convert.ReadSeekCloser
 	url        string
 	srcEOF     bool
@@ -54,12 +56,7 @@ func (p *Player) URL() string {
 }
 
 func newPlayer(src convert.ReadSeekCloser, url string) (*Player, error) {
-	if thePlayers.hasSource(src) {
-		return nil, errors.New("audio: src cannot be shared with another player")
-	}
-
 	p := &Player{
-		players:         thePlayers,
 		src:             src,
 		url:             url,
 		sampleRate:      SampleRate,
@@ -88,11 +85,11 @@ func newPlayer(src convert.ReadSeekCloser, url string) (*Player, error) {
 	return p, nil
 }
 
-// Close removes the player from the players, which are currently playing players.
+// Close removes the player from the audio system's players, which are currently playing players.
 // it then finalizes and frees the data from the player.
 func (p *Player) Close() error {
 	runtime.SetFinalizer(p, nil)
-	p.players.removePlayer(p)
+	p.isPlaying = false
 
 	select {
 	case p.closeCh <- struct{}{}:
@@ -114,9 +111,8 @@ func (p *Player) bufferToInt16(lengthInBytes int) ([]int16, error) {
 }
 
 // Play plays the player's audio.
-func (p *Player) Play() error {
-	p.players.addPlayer(p)
-	return nil
+func (p *Player) Play() {
+	p.isPlaying = true
 }
 
 func (p *Player) readLoop() {
@@ -240,7 +236,7 @@ func (p *Player) eof() bool {
 
 // IsPlaying returns boolean indicating whether the player is playing.
 func (p *Player) IsPlaying() bool {
-	return p.players.hasPlayer(p)
+	return p.isPlaying
 }
 
 // Rewind rewinds the current position to the start.
@@ -265,11 +261,8 @@ func (p *Player) Seek(offset time.Duration) error {
 }
 
 // Pause pauses the playing.
-//
-// Pause always returns nil.
-func (p *Player) Pause() error {
-	p.players.removePlayer(p)
-	return nil
+func (p *Player) Pause() {
+	p.isPlaying = false
 }
 
 // Current returns the current position.
@@ -281,8 +274,8 @@ func (p *Player) Current() time.Duration {
 	return time.Duration(sample) * time.Second / time.Duration(p.sampleRate)
 }
 
-// Volume returns the current volume of this player [0-1].
-func (p *Player) Volume() float64 {
+// GetVolume gets the Player's volume
+func (p *Player) GetVolume() float64 {
 	v := 0.0
 	p.sync(func() {
 		v = p.volume
@@ -290,15 +283,34 @@ func (p *Player) Volume() float64 {
 	return v
 }
 
-// SetVolume sets the volume of this player.
-// volume must be in between 0 and 1. This function panics otherwise.
-func (p *Player) setVolume(volume float64) {
+// SetVolume sets the Player's volume
+// volume can only be set from 0 to 1
+func (p *Player) SetVolume(volume float64) {
 	// The condition must be true when volume is NaN.
 	if !(0 <= volume && volume <= 1) {
-		panic("audio: volume must be in between 0 and 1")
+		log.Println("Volume can only be set between zero and one. Volume was not set.")
+		return
 	}
 
 	p.sync(func() {
-		p.volume = volume
+		p.volume = volume * masterVolume
 	})
+}
+
+var masterVolume float64
+
+// SetMasterVolume sets the master volume. The masterVolume is multiplied by all
+// the other volumes to get the volume of each entity played.
+// Value must be between 0 and 1 or else it doesn't set.
+func SetMasterVolume(volume float64) {
+	if volume <= 0 || volume >= 1 {
+		log.Println("Master Volume can only be set between zero and one. Volume was not set.")
+		return
+	}
+	masterVolume = volume
+}
+
+// GetMasterVolume gets the master volume of the audio system.
+func GetMasterVolume() float64 {
+	return masterVolume
 }

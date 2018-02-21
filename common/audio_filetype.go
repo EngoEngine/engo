@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 
 	"engo.io/engo"
-	"engo.io/engo/common/decode/mp3"
-	"engo.io/engo/common/decode/vorbis"
-	"engo.io/engo/common/decode/wav"
+	"engo.io/engo/common/internal/decode/mp3"
+	"engo.io/engo/common/internal/decode/vorbis"
+	"engo.io/engo/common/internal/decode/wav"
 )
 
 // audioLoader is responsible for managing audio files within `engo.Files`
