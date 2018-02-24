@@ -150,7 +150,7 @@ func (p *Player) readLoop() {
 
 			// Try to read the buffer for 1/60[s].
 			s := 60
-			if engo.Backend == "Web" {
+			if engo.CurrentBackEnd == engo.BackEndWeb {
 				s = 20
 				if engo.IsAndroidChrome() {
 					s = 10
@@ -174,7 +174,7 @@ func (p *Player) readLoop() {
 				t = nil
 				break
 			}
-			if engo.Backend == "web" {
+			if engo.CurrentBackEnd == engo.BackEndWeb {
 				t = time.After(10 * time.Millisecond)
 			} else {
 				t = time.After(time.Millisecond)

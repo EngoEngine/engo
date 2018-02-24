@@ -82,16 +82,13 @@ func (key *KeyState) State() int {
 	if key.lastState {
 		if key.currentState {
 			return KeyStateDown
-		} else {
-			return KeyStateJustUp
 		}
-	} else {
-		if key.currentState {
-			return KeyStateJustDown
-		} else {
-			return KeyStateUp
-		}
+		return KeyStateJustUp
 	}
+	if key.currentState {
+		return KeyStateJustDown
+	}
+	return KeyStateUp
 }
 
 // JustPressed returns whether a key was just pressed

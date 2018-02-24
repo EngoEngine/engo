@@ -7,6 +7,18 @@ import (
 	"engo.io/ecs"
 )
 
+// BackEnd represents the back end used for the window management / GL Surface
+type BackEnd uint
+
+const (
+	// BackEndGLFW uses glfw
+	BackEndGLFW BackEnd = iota
+	// BackEndWeb uses gopherjs
+	BackEndWeb
+	// BackEndMobile uses gomobile
+	BackEndMobile
+)
+
 var (
 	// Time is the active FPS counter
 	Time *Clock
@@ -28,6 +40,15 @@ var (
 	canvasWidth, canvasHeight float32
 	headlessWidth             = 800
 	headlessHeight            = 800
+
+	// CurrentBackEnd is the current back end used for window management
+	CurrentBackEnd BackEnd
+	// ResizeXOffset is how far the screen moves from (0,0) being the top-left corner
+	// when the window is resized
+	ResizeXOffset = float32(0)
+	// ResizeYOffset is how far the screen moves from (0,0) being the top-left corner
+	// when the window is resized
+	ResizeYOffset = float32(0)
 )
 
 const (
@@ -38,10 +59,13 @@ const (
 	// DefaultHorizontalAxis is the name of the default horizontal axis, as used internally in `engo` when `StandardInputs`
 	// is defined.
 	DefaultHorizontalAxis = "horizontal"
-	DefaultMouseXAxis     = "mouse x"
-	DefaultMouseYAxis     = "mouse y"
+	// DefaultMouseXAxis is the name of the default horizontal mouse axis
+	DefaultMouseXAxis = "mouse x"
+	// DefaultMouseYAxis is the name of the default vertical mouse axis
+	DefaultMouseYAxis = "mouse y"
 )
 
+// RunOptions are the options used to Run engo
 type RunOptions struct {
 	// NoRun indicates the Open function should return immediately, without looping
 	NoRun bool
@@ -205,7 +229,7 @@ func Headless() bool {
 	return opts.HeadlessMode
 }
 
-// ScaleOnResizes indicates whether or not the screen should resize (i.e. make things look smaller/bigger) whenever
+// ScaleOnResize indicates whether or not the screen should resize (i.e. make things look smaller/bigger) whenever
 // the window resized. If `false`, then the size of the screen does not affect the size of the things drawn - it just
 // makes less/more objects visible
 func ScaleOnResize() bool {

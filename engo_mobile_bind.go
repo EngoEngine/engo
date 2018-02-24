@@ -19,11 +19,6 @@ var (
 
 	msaaPreference int
 
-	ResizeXOffset = float32(0)
-	ResizeYOffset = float32(0)
-
-	Backend string = "Mobile"
-
 	drawEvent  = make(chan struct{})
 	drawDone   = make(chan struct{})
 	initalized = false
@@ -31,6 +26,7 @@ var (
 
 // CreateWindow creates a window with the specified parameters
 func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
+	CurrentBackEnd = BackEndMobile
 	gameWidth = float32(width)
 	gameHeight = float32(height)
 	msaaPreference = msaa
@@ -67,10 +63,12 @@ func CanvasHeight() float32 {
 	return canvasHeight
 }
 
+// CanvasScale is the current scale of the canvas from the original window size
 func CanvasScale() float32 {
 	return CanvasWidth() / WindowWidth()
 }
 
+// DestroyWindow destroies the window.
 func DestroyWindow() { /* nothing to do here? */ }
 
 func runLoop(defaultScene Scene, headless bool) {
