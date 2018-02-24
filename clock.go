@@ -33,7 +33,7 @@ func NewClock() *Clock {
 func (c *Clock) Tick() {
 	currStamp := time.Now().UnixNano()
 
-	c.counter += 1
+	c.counter++
 
 	c.deltaStamp = currStamp - c.frameStamp
 	c.frameStamp = currStamp

@@ -29,10 +29,6 @@ var (
 	cursorVResize   *glfw.Cursor
 
 	scale = float32(1)
-
-	Backend       string = "GLFW"
-	ResizeXOffset        = float32(0)
-	ResizeYOffset        = float32(0)
 )
 
 // fatalErr calls log.Fatal with the given error if it is non-nil.
@@ -42,7 +38,9 @@ func fatalErr(err error) {
 	}
 }
 
+// CreateWindow sets up the GLFW window and prepares the OpenGL surface for rendering
 func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
+	CurrentBackEnd = BackEndGLFW
 	err := glfw.Init()
 	fatalErr(err)
 
@@ -199,10 +197,12 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	})
 }
 
+// DestroyWindow handles the termination of windows
 func DestroyWindow() {
 	glfw.Terminate()
 }
 
+// SetTitle sets the title of the window
 func SetTitle(title string) {
 	if opts.HeadlessMode {
 		log.Println("Title set to:", title)
@@ -280,31 +280,38 @@ Outer:
 	ticker.Stop()
 }
 
+// CursorPos returns the current cursor position
 func CursorPos() (x, y float32) {
 	w, h := window.GetCursorPos()
 	return float32(w) * scale, float32(h) * scale
 }
 
+// WindowSize gets the current window size
 func WindowSize() (w, h int) {
 	return window.GetSize()
 }
 
+// WindowWidth gets the current window width
 func WindowWidth() float32 {
 	return windowWidth
 }
 
+// WindowHeight gets the current window height
 func WindowHeight() float32 {
 	return windowHeight
 }
 
+// CanvasWidth gets the width of the current OpenGL Framebuffer
 func CanvasWidth() float32 {
 	return canvasWidth
 }
 
+// CanvasHeight gets the height of the current OpenGL Framebuffer
 func CanvasHeight() float32 {
 	return canvasHeight
 }
 
+// CanvasScale gets the ratio of the canvas to the window sizes
 func CanvasScale() float32 {
 	return scale
 }
@@ -331,6 +338,7 @@ func SetCursor(c Cursor) {
 	window.SetCursor(cur)
 }
 
+// SetVSync sets whether or not to use VSync
 func SetVSync(enabled bool) {
 	opts.VSync = enabled
 	if opts.VSync {
@@ -458,22 +466,27 @@ func init() {
 	NumEnter = Key(glfw.KeyKPEnter)
 }
 
+// NewImageRGBA gets a new *ImageRGBA from an *image.RGBA
 func NewImageRGBA(img *image.RGBA) *ImageRGBA {
 	return &ImageRGBA{img}
 }
 
+// ImageRGBA is a wrapper for *image.RGBA
 type ImageRGBA struct {
 	data *image.RGBA
 }
 
+// Data returns the underlying *image.RGBA
 func (i *ImageRGBA) Data() interface{} {
 	return i.data
 }
 
+// Width returns the width of the underlying *image.RGBA
 func (i *ImageRGBA) Width() int {
 	return i.data.Rect.Max.X
 }
 
+// Height returns the height of the underlying *image.RGBA
 func (i *ImageRGBA) Height() int {
 	return i.data.Rect.Max.Y
 }

@@ -100,25 +100,24 @@ func (p *Point) PointDistanceSquared(p2 Point) float32 {
 	return (p.X-p2.X)*(p.X-p2.X) + (p.Y-p2.Y)*(p.Y-p2.Y)
 }
 
-// ProjectOnto returns the vector produced by projecting a on to b
-func (a *Point) ProjectOnto(b Point) Point {
-	dot := a.X*b.X + a.Y*b.Y
-	proj := Point{
-		dot / (b.X*b.X + b.Y*b.Y) * b.X,
-		dot / (b.X*b.X + b.Y*b.Y) * b.Y,
+// ProjectOnto returns the vector produced by projecting p on to p2
+func (p *Point) ProjectOnto(p2 Point) Point {
+	dot := p.X*p2.X + p.Y*p2.Y
+	return Point{
+		dot / (p2.X*p2.X + p2.Y*p2.Y) * p2.X,
+		dot / (p2.X*p2.X + p2.Y*p2.Y) * p2.Y,
 	}
-	return proj
 }
 
-// Normalize returns the unit vector from a, and its magnitude.
+// Normalize returns the unit vector from p, and its magnitude.
 // if you try to normalize the null vector, the return value will be null values
-func (a *Point) Normalize() (Point, float32) {
-	if a.X == 0 && a.Y == 0 {
-		return *a, 0
+func (p *Point) Normalize() (Point, float32) {
+	if p.X == 0 && p.Y == 0 {
+		return *p, 0
 	}
 
-	mag := math.Sqrt(a.X*a.X + a.Y*a.Y)
-	unit := Point{a.X / mag, a.Y / mag}
+	mag := math.Sqrt(p.X*p.X + p.Y*p.Y)
+	unit := Point{p.X / mag, p.Y / mag}
 
 	return unit, mag
 }

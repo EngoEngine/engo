@@ -26,11 +26,6 @@ var (
 
 	devicePixelRatio float64
 
-	ResizeXOffset = float32(0)
-	ResizeYOffset = float32(0)
-
-	Backend string = "Web"
-
 	poll     = make(map[int]bool)
 	pollLock sync.Mutex
 )
@@ -44,6 +39,7 @@ var document = dom.GetWindow().Document().(dom.HTMLDocument)
 
 // CreateWindow creates a window with the specified parameters
 func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
+	CurrentBackEnd = BackEndWeb
 	canvas := document.CreateElement("canvas").(*dom.HTMLCanvasElement)
 
 	devicePixelRatio = js.Global.Get("devicePixelRatio").Float()
@@ -135,6 +131,7 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	})
 }
 
+// DestroyWindow handles destroying the window when done
 func DestroyWindow() {}
 
 // CursorPos returns the current cursor position

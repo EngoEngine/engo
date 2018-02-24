@@ -79,7 +79,7 @@ func (formats *Formats) Load(urls ...string) error {
 	return nil
 }
 
-// LoadBinData loads a resource when you already have the reader for it.
+// LoadReaderData loads a resource when you already have the reader for it.
 func (formats *Formats) LoadReaderData(url string, f io.Reader) error {
 	ext := filepath.Ext(url)
 	if loader, ok := Files.formats[ext]; ok {
