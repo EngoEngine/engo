@@ -16,34 +16,57 @@ type Whoop struct {
 	common.AudioComponent
 }
 
-func (*DefaultScene) Preload() {
-	common.AudioSystemPreload()
-
+func (s *DefaultScene) Preload() {
 	err := engo.Files.Load("326488.wav")
 	if err != nil {
 		log.Println(err)
 	}
+	err = engo.Files.Load("326064.wav")
+	if err != nil {
+		log.Println(err)
+	}
+
+	engo.Input.RegisterButton("whoop", engo.Space)
 }
 
-func (*DefaultScene) Setup(w *ecs.World) {
+func (s *DefaultScene) Setup(w *ecs.World) {
 	common.SetBackground(color.White)
 
 	w.AddSystem(&common.RenderSystem{})
 	w.AddSystem(&common.AudioSystem{})
 	w.AddSystem(&WhoopSystem{})
 
+	birds := Whoop{BasicEntity: ecs.NewBasic()}
+	birdPlayer, err := common.LoadedPlayer("326488.wav")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	birds.AudioComponent = common.AudioComponent{Player: birdPlayer}
+	birdPlayer.Play()
+	birdPlayer.Repeat = true
+
+	// Let's add our birds to the appropriate systems
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *common.AudioSystem:
+			sys.Add(&birds.BasicEntity, &birds.AudioComponent)
+		}
+	}
+
 	whoop := Whoop{BasicEntity: ecs.NewBasic()}
-	whoop.AudioComponent = common.AudioComponent{File: "326488.wav", Repeat: true, Background: true, RawVolume: 1}
+	whoopPlayer, err := common.LoadedPlayer("326064.wav")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	whoop.AudioComponent = common.AudioComponent{Player: whoopPlayer}
 
 	// Let's add our whoop to the appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
 		case *common.AudioSystem:
-			// Note we are giving a `nil` reference to the `SpeedComponent`. This is because the documentation of the
-			// AudioSystem says the `SpeedComponent` is only required when `AudioComponent.Background` is `false`.
-			// In our case, it is `true` (it's a background noise, i.e. not tied to a location in the game world),
-			// so we can omit it.
-			sys.Add(&whoop.BasicEntity, &whoop.AudioComponent, nil)
+			sys.Add(&whoop.BasicEntity, &whoop.AudioComponent)
+		case *WhoopSystem:
+			sys.Add(&whoop.AudioComponent)
 		}
 	}
 }
@@ -52,25 +75,38 @@ func (*DefaultScene) Type() string { return "Game" }
 
 type WhoopSystem struct {
 	goingUp bool
+	player  *common.Player
 }
 
-// Remove is empty, because this system doesn't do anything with entities (note there's no `Add` method either)
+func (w *WhoopSystem) Add(audio *common.AudioComponent) {
+	w.player = audio.Player
+}
+
 func (w *WhoopSystem) Remove(basic ecs.BasicEntity) {}
 
 func (w *WhoopSystem) Update(dt float32) {
+	if btn := engo.Input.Button("whoop"); btn.JustPressed() {
+		if !w.player.IsPlaying() {
+			w.player.Rewind()
+			w.player.Play()
+		}
+	}
 	d := float64(dt * 0.1)
+	volume := w.player.GetVolume()
 	if w.goingUp {
-		common.MasterVolume += d
+		volume += d
 	} else {
-		common.MasterVolume -= d
+		volume -= d
 	}
 
-	if common.MasterVolume < 0 {
-		common.MasterVolume = 0
+	if volume < 0 {
+		w.player.SetVolume(0.0)
 		w.goingUp = true
-	} else if common.MasterVolume > 1 {
-		common.MasterVolume = 1
+	} else if volume > 1 {
+		w.player.SetVolume(1.0)
 		w.goingUp = false
+	} else {
+		w.player.SetVolume(volume)
 	}
 }
 
