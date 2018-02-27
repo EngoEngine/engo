@@ -26,7 +26,7 @@ func TestClockFPS(t *testing.T) {
 		<-time.After(time.Second / 6)
 		clock.Tick()
 	}
-	if !FloatEqual(clock.FPS(), float32(6)) {
+	if !FloatEqualThreshold(clock.FPS(), float32(6), 1e0) {
 		t.Errorf("Clock's FPS did not match 6 fps, was %v", clock.FPS())
 	}
 }
@@ -34,7 +34,7 @@ func TestClockFPS(t *testing.T) {
 func TestClockTime(t *testing.T) {
 	clock := NewClock()
 	<-time.After(1 * time.Second)
-	if !FloatEqual(clock.Time(), float32(1)) {
+	if !FloatEqualThreshold(clock.Time(), float32(1), 1e0) {
 		t.Errorf("Clock's duration from Time did not match 1 second, was %v", clock.Time())
 	}
 }
