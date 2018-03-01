@@ -218,12 +218,6 @@ func SetFPSLimit(limit int) error {
 	return nil
 }
 
-// SetHeadless sets the headless-mode variable - should be used before calling `Run`, and will be overridden by the
-// value within the `RunOpts` once you call `engo.Run`.
-func SetHeadless(b bool) {
-	opts.HeadlessMode = b
-}
-
 // Headless indicates whether or not OpenGL-calls should be made
 func Headless() bool {
 	return opts.HeadlessMode
