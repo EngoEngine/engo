@@ -76,6 +76,7 @@ we have a list of those changes, with the most recent being at the top. If you r
 * Renamed `engo.io/webgl` to `engo.io/gl`, because the package handles more than only *web*gl.
 * `github.com/EngoEngine/engo` -> `engo.io/engo` - Our packages `engo`, `ecs` and `gl` should now be imported using the `engo.io` path.
 * `engi.XXX` -> `engo.XXX` - We renamed our package `engi` to `engo`.
+* SetHeadless() was removed as it never actually did anything. It would set the opion but then it would be reset when Run was called.
 
 ## History
 
