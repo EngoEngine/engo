@@ -466,31 +466,6 @@ func init() {
 	NumEnter = Key(glfw.KeyKPEnter)
 }
 
-// NewImageRGBA gets a new *ImageRGBA from an *image.RGBA
-func NewImageRGBA(img *image.RGBA) *ImageRGBA {
-	return &ImageRGBA{img}
-}
-
-// ImageRGBA is a wrapper for *image.RGBA
-type ImageRGBA struct {
-	data *image.RGBA
-}
-
-// Data returns the underlying *image.RGBA
-func (i *ImageRGBA) Data() interface{} {
-	return i.data
-}
-
-// Width returns the width of the underlying *image.RGBA
-func (i *ImageRGBA) Width() int {
-	return i.data.Rect.Max.X
-}
-
-// Height returns the height of the underlying *image.RGBA
-func (i *ImageRGBA) Height() int {
-	return i.data.Rect.Max.Y
-}
-
 // openFile is the desktop-specific way of opening a file
 func openFile(url string) (io.ReadCloser, error) {
 	return os.Open(url)
