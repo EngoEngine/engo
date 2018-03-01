@@ -3,7 +3,6 @@
 package engo
 
 import (
-	"image"
 	"io"
 	"log"
 	"os"
