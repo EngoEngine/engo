@@ -1,3 +1,5 @@
+//+build !appveyor
+
 package common
 
 import (
