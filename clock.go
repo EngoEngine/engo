@@ -4,6 +4,22 @@ import (
 	"time"
 )
 
+// timer is a wrapper for time.Now().UnixNano() so we can test
+// this wihout relying on time
+type timer interface {
+	Now() int64
+}
+
+// realTime is the actual timer that uses time.Now().UnixNano()
+type realTime struct{}
+
+// Now implements the timer interface
+func (realTime) Now() int64 {
+	return time.Now().UnixNano()
+}
+
+var theTimer timer = realTime{}
+
 // The amound of nano seconds in a second.
 const secondsInNano int64 = 1000000000
 
@@ -21,7 +37,7 @@ type Clock struct {
 // NewClock creates a new timer which allows you to measure ticks per seconds. Be sure to call `Tick()` whenever you
 // want a tick to occur - it does not automatically tick each frame.
 func NewClock() *Clock {
-	currStamp := time.Now().UnixNano()
+	currStamp := theTimer.Now()
 
 	clock := new(Clock)
 	clock.frameStamp = currStamp
@@ -31,7 +47,7 @@ func NewClock() *Clock {
 
 // Tick indicates a new tick/frame has occurred.
 func (c *Clock) Tick() {
-	currStamp := time.Now().UnixNano()
+	currStamp := theTimer.Now()
 
 	c.counter++
 
@@ -58,6 +74,6 @@ func (c *Clock) FPS() float32 {
 
 // Time is the number of seconds the clock has been running
 func (c *Clock) Time() float32 {
-	currStamp := time.Now().UnixNano()
+	currStamp := theTimer.Now()
 	return float32(float64(currStamp-c.startStamp) / float64(secondsInNano))
 }
