@@ -77,6 +77,7 @@ we have a list of those changes, with the most recent being at the top. If you r
 * `github.com/EngoEngine/engo` -> `engo.io/engo` - Our packages `engo`, `ecs` and `gl` should now be imported using the `engo.io` path.
 * `engi.XXX` -> `engo.XXX` - We renamed our package `engi` to `engo`.
 * SetHeadless() was removed as it never actually did anything. It would set the opion but then it would be reset when Run was called.
+* Demos now require the build tag `demo`. This is so you can easily `go get engo.io/engo ./...` without waiting on building all the demos.
 
 ## History
 

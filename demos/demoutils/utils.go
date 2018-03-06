@@ -1,3 +1,5 @@
+//+build demo
+
 package demoutils
 
 import (
