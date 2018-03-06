@@ -2,39 +2,31 @@ sudo: false
 addons:
   apt_packages:
   - libgl1-mesa-dev
-#  - libopenal-dev
   - libasound2-dev
   - xorg-dev
-branch:
+branches:
   only:
   - master
 language: go
 go_import_path: engo.io/engo
 go:
-- 1.7
-before_install:
-- go get golang.org/x/tools/cmd/cover
-- go get github.com/mdempsky/unconvert
-- go get github.com/mattn/goveralls
-# - go get github.com/gopherjs/gopherjs
-# - gopherjs get "honnef.co/go/js/dom"
-# - gopherjs get "honnef.co/go/js/xhr"
-- go get golang.org/x/mobile/cmd/gomobile
-- gomobile init
-- git clone https://github.com/Noofbiz/android-ndk.git $HOME/android-ndk-root
-- printf "$HOME/android-ndk-root" > $GOPATH/pkg/gomobile/android_ndk_root
+- "1.10"
+before_install: ./.before_install.sh
 install:
 -
 before_script:
 - export DISPLAY=:99.0
 - sh -e /etc/init.d/xvfb start
 - sleep 3
-script: "./.runtests.sh"
-cache:
-  apt: true
-  directories:
-  - "$GOPATH/pkg/gomobile"
-
+script: ./.runtests.sh
+matrix:
+  include:
+#   - env: TEST_TYPE=android_test
+    - env: TEST_TYPE=android_build
+    - env: TEST_TYPE=linux_test
+    - env: TEST_TYPE=linux_build
+    - env: TEST_TYPE=js_test
+    - env: TEST_TYPE=js_build
 env:
   global:
     secure: BVZrmTzkg/CPF6QDsQWyh/K+bd4yU3N3PFzcERaO6i32ln+uqaejhMtCsTXrr439vKH33DF5BFG34W+K4IbqwQyBgzjzUnotPXcWtXSuiojSOmCWkuw8qiPBuVTAsahBhP6N11LgUAcgkfAl968CkfIN3I7gBF916PFsefZtn6s=
