@@ -8,6 +8,7 @@ branches:
   only:
   - master
 language: go
+go_import_path: engo.io/engo
 go:
 - 1.7
 before_install: ./.before_install.sh
