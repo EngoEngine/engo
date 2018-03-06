@@ -3,7 +3,7 @@
 echo "Using GOPATH=$GOPATH"
 
 echo "Getting engo.io/engo using 'go get'"
-go get -t -v -x ./... || exit 1
+go get -t -v engo.io/engo ./... || exit 1
 
 # These can fail without us minding it
 blacklist="engo.io/engo/demos/demoutils"
