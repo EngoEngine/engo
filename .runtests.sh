@@ -8,7 +8,7 @@ go get -t -v ./... || exit 1
 # These can fail without us minding it
 blacklist="engo.io/engo/demos/demoutils"
 
-if [$TEST_TYPE = linux_test]
+if [$TEST_TYPE=linux_test]
 then
     echo "Testing engo.io/engo using coveralls"
     $HOME/gopath/bin/goveralls -service=travis-ci
@@ -18,7 +18,7 @@ then
 
     echo "Checking for unnecessary conversions using unconvert"
     unconvert -v engo.io/engo
-elif [$TEST_TYPE = linux_build]
+elif [$TEST_TYPE=linux_build]
 then
     for dir in `pwd`/demos/*/
     do
@@ -41,13 +41,13 @@ then
         mkdir -p "$outdir/linux/"
         go build -o "$outdir/linux/${dir}" -tags demo ${dir} || exit 1
     done
-elif [$TEST_TYPE = js_test]
+elif [$TEST_TYPE=js_test]
 then
     # TODO: Fix the build so this actually passes
     # echo "Testing engo.io/engo using 'gopherjs test'"
     # gopherjs test
     echo "Skipping tests for engo.io/engo using 'gopherjs test' (won't pass)"
-elif [$TEST_TYPE = js_build]
+elif [$TEST_TYPE=js_build]
 then
     for dir in `pwd`/demos/*/
     do
@@ -70,10 +70,10 @@ then
         mkdir -p "$outdir/gopherjs/"
         gopherjs build -o "$outdir/gopherjs/${dir}" -tags demo ${dir} || exit 1
     done
-elif [$TEST_TYPE = android_test]
+elif [$TEST_TYPE=android_test]
 then
     echo "Skipping tests for engo.io/engo using 'gomobile' (no tools exist yet)"
-elif [$TEST_TYPE = android_build]
+elif [$TEST_TYPE=android_build]
 then
     for dir in `pwd`/demos/*/
     do
