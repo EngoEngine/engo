@@ -68,7 +68,7 @@ then
 
         # Creating the output directory, attempting to build and exit 1 if it failed
         mkdir -p "$outdir/gopherjs/"
-        gopherjs build -o "$outdir/gopherjs/${dir}" -tags demo ${dir} || exit 1
+        gopherjs build -o "$outdir/gopherjs/${dir}" --tags demo ${dir} || exit 1
     done
 elif [ "$TEST_TYPE" == "android_test" ]
 then

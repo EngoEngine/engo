@@ -124,7 +124,7 @@ func TestSetFPSLimit(t *testing.T) {
 	if err := SetFPSLimit(-5); err == nil {
 		t.Error("Error wasn't recieved when SetFPSLimit was set to a negative number.")
 	} else if err.Error() != expected {
-		t.Error("Wrong error recieved when SetFPSLimit was set to a negative number. want %v, got %v", expected, err.Error())
+		t.Errorf("Wrong error recieved when SetFPSLimit was set to a negative number. want %v, got %v", expected, err.Error())
 	}
 }
 
