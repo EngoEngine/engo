@@ -10,7 +10,7 @@ branches:
 language: go
 go_import_path: engo.io/engo
 go:
-- 1.7
+- "1.10"
 before_install: ./.before_install.sh
 install:
 -
@@ -25,7 +25,7 @@ matrix:
     - env: TEST_TYPE=android_build
     - env: TEST_TYPE=linux_test
     - env: TEST_TYPE=linux_build
-    - env: TEST_TYPE=js_test
+#   - env: TEST_TYPE=js_test
     - env: TEST_TYPE=js_build
 env:
   global:
