@@ -159,7 +159,7 @@ func mobileDraw(defaultScene Scene) {
 	}
 
 	// Then update the world and all Systems
-	currentWorld.Update(Time.Delta())
+	currentUpdater.Update(Time.Delta())
 }
 
 //TouchEvent handles the touch events sent from Android and puts them in the InputManager

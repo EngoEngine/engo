@@ -224,7 +224,7 @@ func RunIteration() {
 	Time.Tick()
 	Input.update()
 	jsPollKeys()
-	currentWorld.Update(Time.Delta())
+	currentUpdater.Update(Time.Delta())
 	Input.Mouse.Action = Neutral
 	// TODO: this may not work, and sky-rocket the FPS
 	//  requestAnimationFrame(func(dt float32) {

@@ -171,8 +171,7 @@ func RunIteration() {
 	}
 
 	// Then update the world and all Systems
-	currentWorld.Update(Time.Delta())
-
+	currentUpdater.Update(Time.Delta())
 }
 
 // SetCursor changes the cursor - not yet implemented

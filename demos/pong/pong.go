@@ -49,7 +49,9 @@ func (pong *PongGame) Preload() {
 	}
 }
 
-func (pong *PongGame) Setup(w *ecs.World) {
+func (pong *PongGame) Setup(u engo.Updater) {
+	w, _ := u.(*ecs.World)
+
 	common.SetBackground(color.Black)
 	w.AddSystem(&common.RenderSystem{})
 	w.AddSystem(&common.CollisionSystem{Solids: 1})

@@ -29,8 +29,8 @@ var (
 	// Mailbox is used by all Systems to communicate
 	Mailbox *MessageManager
 
-	currentWorld *ecs.World
-	currentScene Scene
+	currentUpdater Updater
+	currentScene   Scene
 
 	opts                      RunOptions
 	resetLoopTicker           = make(chan bool, 1)
@@ -126,6 +126,11 @@ type RunOptions struct {
 
 	// MobileWidth and MobileHeight are the width and height given from the Android/iOS OpenGL Surface used for Gomobile bind
 	MobileWidth, MobileHeight int
+
+	// Update is the function called each frame during the runLoop to update all of the
+	// systems. If left blank, it defaults to &ecs.World{}. Use this if you plan on utilizing
+	// engo's window / GL management but don't want to use the ECS paradigm.
+	Update Updater
 }
 
 // Run is called to create a window, initialize everything, and start the main loop. Once this function returns,
@@ -149,6 +154,10 @@ func Run(o RunOptions, defaultScene Scene) {
 		o.AssetsRoot = "assets"
 	}
 
+	if o.Update == nil {
+		o.Update = &ecs.World{}
+	}
+
 	opts = o
 
 	// Create input
@@ -167,6 +176,7 @@ func Run(o RunOptions, defaultScene Scene) {
 	}
 
 	Files.SetRoot(opts.AssetsRoot)
+	currentUpdater = opts.Update
 
 	// And run the game
 	if opts.HeadlessMode {

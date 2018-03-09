@@ -13,7 +13,8 @@ import (
 type DefaultScene struct{}
 
 func (*DefaultScene) Preload() {}
-func (*DefaultScene) Setup(w *ecs.World) {
+func (*DefaultScene) Setup(u engo.Updater) {
+	w, _ := u.(*ecs.World)
 	w.AddSystem(&common.RenderSystem{})
 }
 

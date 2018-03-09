@@ -27,7 +27,9 @@ func (game *DefaultScene) Preload() {
 	}
 }
 
-func (game *DefaultScene) Setup(w *ecs.World) {
+func (game *DefaultScene) Setup(u engo.Updater) {
+	w, _ := u.(*ecs.World)
+
 	common.SetBackground(color.White)
 
 	w.AddSystem(&RotationSystem{})

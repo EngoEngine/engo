@@ -14,7 +14,7 @@ type testScene struct{}
 
 func (*testScene) Preload() {}
 
-func (t *testScene) Setup(w *ecs.World) {}
+func (t *testScene) Setup(u Updater) {}
 
 func (*testScene) Type() string { return "testScene" }
 
@@ -167,7 +167,8 @@ type testRunScene struct {
 
 func (*testRunScene) Preload() {}
 
-func (t *testRunScene) Setup(w *ecs.World) {
+func (t *testRunScene) Setup(u Updater) {
+	w, _ := u.(*ecs.World)
 	w.AddSystem(&testUpdate{updates: t.updates})
 }
 
