@@ -48,7 +48,9 @@ type cameraEntity struct {
 	*SpaceComponent
 }
 
-// CameraSystem is a System that manages the state of the virtual camera.
+// CameraSystem is a System that manages the state of the virtual camera. Only
+// one CameraSystem can be in a World at a time. If more than one CameraSystem
+// is added to the World, it will panic.
 type CameraSystem struct {
 	x, y, z  float32
 	tracking cameraEntity // The entity that is currently being followed
@@ -60,7 +62,18 @@ type CameraSystem struct {
 }
 
 // New initializes the CameraSystem.
-func (cam *CameraSystem) New(*ecs.World) {
+func (cam *CameraSystem) New(w *ecs.World) {
+	num := 0
+	for _, sys := range w.Systems() {
+		switch sys.(type) {
+		case *CameraSystem:
+			num++
+		}
+	}
+	if num > 0 { //initalizer is called before added to w.systems
+		warning("More than one CameraSystem was added to the World. The RenderSystem adds a CameraSystem if none exist when it's added.")
+	}
+
 	if CameraBounds.Max.X == 0 && CameraBounds.Max.Y == 0 {
 		CameraBounds.Max = engo.Point{X: engo.GameWidth(), Y: engo.GameHeight()}
 	}

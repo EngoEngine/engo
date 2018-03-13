@@ -1,6 +1,9 @@
 package common
 
 import (
+	"bytes"
+	"log"
+	"strings"
 	"testing"
 
 	"engo.io/ecs"
@@ -158,4 +161,21 @@ func TestCameraZoomTo(t *testing.T) {
 
 	cam.zoomTo(-10)
 	assert.Equal(t, cam.Z(), MinZoom, "Zooming too far, should get us to the maximum distance")
+}
+
+func TestCameraAddOnlyOne(t *testing.T) {
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+
+	engo.Mailbox = &engo.MessageManager{}
+	CameraBounds = engo.AABB{Min: engo.Point{X: 0, Y: 0}, Max: engo.Point{X: 300, Y: 300}}
+	w := &ecs.World{}
+
+	w.AddSystem(&CameraSystem{})
+	w.AddSystem(&CameraSystem{})
+
+	expected := "More than one CameraSystem was added to the World. The RenderSystem adds a CameraSystem if none exist when it's added.\n"
+	if !strings.HasSuffix(buf.String(), expected) {
+		t.Error("adding more than one CameraSystem did not write expected output to log")
+	}
 }
