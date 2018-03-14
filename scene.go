@@ -2,8 +2,7 @@ package engo
 
 import (
 	"fmt"
-
-	"engo.io/ecs"
+	"reflect"
 )
 
 var scenes = make(map[string]*sceneWrapper)
@@ -15,7 +14,7 @@ type Scene interface {
 	Preload()
 
 	// Setup is called before the main loop
-	Setup(*ecs.World)
+	Setup(Updater)
 
 	// Type returns a unique string representation of the Scene, used to identify it
 	Type() string
@@ -46,9 +45,16 @@ type Exiter interface {
 	Exit()
 }
 
+// Updater is an interface for what handles your game's Update during each frame.
+// typically, this will be an *ecs.World, but you can implement your own Upodater
+// and use engo without using engo's ecs
+type Updater interface {
+	Update(float32)
+}
+
 type sceneWrapper struct {
 	scene   Scene
-	world   *ecs.World
+	update  Updater
 	mailbox *MessageManager
 }
 
@@ -77,8 +83,10 @@ func SetScene(s Scene, forceNewWorld bool) {
 	// Initialize new Scene / World if needed
 	var doSetup bool
 
-	if wrapper.world == nil || forceNewWorld {
-		wrapper.world = &ecs.World{}
+	if wrapper.update == nil || forceNewWorld {
+		t := reflect.Indirect(reflect.ValueOf(currentUpdater)).Type()
+		v := reflect.New(t)
+		wrapper.update = v.Interface().(Updater)
 		wrapper.mailbox = &MessageManager{}
 
 		doSetup = true
@@ -86,7 +94,7 @@ func SetScene(s Scene, forceNewWorld bool) {
 
 	// Do the switch
 	currentScene = s
-	currentWorld = wrapper.world
+	currentUpdater = wrapper.update
 	Mailbox = wrapper.mailbox
 
 	// doSetup is true whenever we're (re)initializing the Scene
@@ -95,7 +103,7 @@ func SetScene(s Scene, forceNewWorld bool) {
 
 		wrapper.mailbox.listeners = make(map[string][]MessageHandler)
 
-		s.Setup(wrapper.world)
+		s.Setup(wrapper.update)
 	} else {
 		if shower, ok := currentScene.(Shower); ok {
 			shower.Show()

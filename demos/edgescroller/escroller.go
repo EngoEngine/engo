@@ -24,7 +24,9 @@ var (
 func (*DefaultScene) Preload() {}
 
 // Setup is called before the main loop is started
-func (*DefaultScene) Setup(w *ecs.World) {
+func (*DefaultScene) Setup(u engo.Updater) {
+	w, _ := u.(*ecs.World)
+
 	common.SetBackground(color.White)
 	w.AddSystem(&common.RenderSystem{})
 

@@ -64,7 +64,9 @@ func (game *GameWorld) Preload() {
 	}
 }
 
-func (game *GameWorld) Setup(w *ecs.World) {
+func (game *GameWorld) Setup(u engo.Updater) {
+	w, _ := u.(*ecs.World)
+
 	common.SetBackground(color.RGBA{0x00, 0x00, 0x00, 0x00})
 
 	w.AddSystem(&common.RenderSystem{})

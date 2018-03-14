@@ -66,6 +66,10 @@ us a DM or [create an issue](https://github.com/EngoEngine/engo/issues/new).
 Engo is currently undergoing a lot of optimizations and constantly gets new features. However, this sometimes means things break. In order to make transitioning easier for you,
 we have a list of those changes, with the most recent being at the top. If you run into any problems, please contact us at [gitter](https://gitter.im/EngoEngine/engo).
 
+* Scenes now have `Setup(Updater)` instead of `Setup(*ecs.World)` to entirely separate engo from the ecs paradigm. ecs is no longer
+required to use the GL Context / Window / Input / Runloop management of engo.
+* Demos now require the build tag `demo`. This is so you can easily `go get engo.io/engo ./...` without waiting on building all the demos.
+* SetHeadless() was removed as it never actually did anything. It would set the opion but then it would be reset when Run was called.
 * `engo.PreloadedSpriteSingle` is now `engo.LoadedSprite`
 * `engo.Files.Load` and `engo.Files.LoadMany` have been merged into one function `engo.Files.Load` which does the same thing as `engo.Files.LoadMany` allowing an indefinite ammount of parameters to be passed in.
 * `engo` has been split in `engo` (which contains stuff about creating windows, starting the game, creating an OpenGL context, input handling, etc.) - and `common` (which contains a lot of common `System` implementations for common tasks (`RenderSystem`, `CameraSystem`, `AudioSystem`, etc.)
@@ -76,8 +80,6 @@ we have a list of those changes, with the most recent being at the top. If you r
 * Renamed `engo.io/webgl` to `engo.io/gl`, because the package handles more than only *web*gl.
 * `github.com/EngoEngine/engo` -> `engo.io/engo` - Our packages `engo`, `ecs` and `gl` should now be imported using the `engo.io` path.
 * `engi.XXX` -> `engo.XXX` - We renamed our package `engi` to `engo`.
-* SetHeadless() was removed as it never actually did anything. It would set the opion but then it would be reset when Run was called.
-* Demos now require the build tag `demo`. This is so you can easily `go get engo.io/engo ./...` without waiting on building all the demos.
 
 ## History
 

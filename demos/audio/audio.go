@@ -31,7 +31,9 @@ func (s *DefaultScene) Preload() {
 	engo.Input.RegisterButton("whoop", engo.Space)
 }
 
-func (s *DefaultScene) Setup(w *ecs.World) {
+func (s *DefaultScene) Setup(u engo.Updater) {
+	w, _ := u.(*ecs.World)
+
 	common.SetBackground(color.White)
 
 	w.AddSystem(&common.RenderSystem{})

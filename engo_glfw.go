@@ -221,7 +221,7 @@ func RunIteration() {
 	}
 
 	// Then update the world and all Systems
-	currentWorld.Update(Time.Delta())
+	currentUpdater.Update(Time.Delta())
 
 	// Lastly, forget keypresses and swap buffers
 	if !opts.HeadlessMode {

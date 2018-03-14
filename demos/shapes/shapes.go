@@ -29,7 +29,9 @@ type MyShape struct {
 func (*DefaultScene) Preload() {}
 
 // Setup is called before the main loop is started
-func (*DefaultScene) Setup(w *ecs.World) {
+func (*DefaultScene) Setup(u engo.Updater) {
+	w, _ := u.(*ecs.World)
+
 	common.SetBackground(color.RGBA{55, 55, 55, 255})
 	w.AddSystem(&common.RenderSystem{})
 
