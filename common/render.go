@@ -36,8 +36,10 @@ type Drawable interface {
 type TextureRepeating uint8
 
 const (
+	// NoRepeat does not repeat the texture.
+	NoRepeat TextureRepeating = iota
 	// ClampToEdge stretches the texture to the edge of the viewport.
-	ClampToEdge TextureRepeating = iota
+	ClampToEdge
 	// ClampToBorder stretches the texture to the border of the viewpport.
 	ClampToBorder
 	// Repeat repeats the texture until the border of the viewport.
@@ -56,7 +58,9 @@ type RenderComponent struct {
 	Color color.Color
 	// Drawable refers to the Texture that should be drawn
 	Drawable Drawable
-	// Repeat defines how to repeat the Texture if the viewport of the texture is larger than the texture itself
+	// Repeat defines how to repeat the Texture if the SpaceComponent of the entity
+	// is larger than the texture itself, after applying scale. Defaults to NoRepeat
+	// which allows the texture to draw entirely without regard to th SpaceComponent
 	Repeat TextureRepeating
 
 	shader Shader

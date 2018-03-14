@@ -209,6 +209,8 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 	if s.lastRepeating != ren.Repeat {
 		var val int
 		switch ren.Repeat {
+		case NoRepeat:
+			val = engo.Gl.CLAMP_TO_EDGE
 		case ClampToEdge:
 			val = engo.Gl.CLAMP_TO_EDGE
 		case ClampToBorder:
@@ -285,7 +287,16 @@ func (s *basicShader) generateBufferContent(ren *RenderComponent, space *SpaceCo
 
 	tint := colorToFloat32(ren.Color)
 
-	u, v, u2, v2 := ren.Drawable.View()
+	var u, v float32
+	u2 := float32(1)
+	v2 := float32(1)
+
+	if ren.Repeat != NoRepeat {
+		u2 = space.Width / (ren.Drawable.Width() * ren.Scale.X)
+		w *= u2
+		v2 = space.Width / (ren.Drawable.Height() * ren.Scale.Y)
+		h *= v2
+	}
 
 	var changed bool
 
