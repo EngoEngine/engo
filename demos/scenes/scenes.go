@@ -40,7 +40,9 @@ func (*IconScene) Preload() {
 	}
 }
 
-func (*IconScene) Setup(w *ecs.World) {
+func (*IconScene) Setup(u engo.Updater) {
+	w, _ := u.(*ecs.World)
+
 	common.SetBackground(color.White)
 
 	w.AddSystem(&common.RenderSystem{})
@@ -98,7 +100,9 @@ func (*RockScene) Preload() {
 	}
 }
 
-func (game *RockScene) Setup(w *ecs.World) {
+func (game *RockScene) Setup(u engo.Updater) {
+	w, _ := u.(*ecs.World)
+
 	common.SetBackground(color.White)
 
 	w.AddSystem(&common.RenderSystem{})

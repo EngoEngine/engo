@@ -14,7 +14,7 @@ type testScene struct{}
 
 func (*testScene) Preload() {}
 
-func (t *testScene) Setup(w *ecs.World) {}
+func (t *testScene) Setup(u engo.Updater) {}
 
 func (*testScene) Type() string { return "testScene" }
 
