@@ -105,7 +105,9 @@ func (r renderEntityList) Swap(i, j int) {
 	r[i], r[j] = r[j], r[i]
 }
 
-// RenderSystem is the system that draws entities on the OpenGL surface.
+// RenderSystem is the system that draws entities on the OpenGL surface. It requires
+// a CameraSystem to work. If a CameraSystem is not in the World when you add RenderSystem
+// one is automatically added to the world.
 type RenderSystem struct {
 	entities renderEntityList
 	world    *ecs.World
