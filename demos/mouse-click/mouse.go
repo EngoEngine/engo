@@ -67,7 +67,7 @@ func (*DefaultScene) Setup(u engo.Updater) {
 		Font: fnt,
 		Text: "RMB: (0, 0)",
 	}
-	label2.SpaceComponent.Position = engo.Point{500, 0}
+	label2.SpaceComponent.Position = engo.Point{0, 150}
 	label2.SetShader(common.HUDShader)
 	label2.ClickComponent.label = "right click"
 
