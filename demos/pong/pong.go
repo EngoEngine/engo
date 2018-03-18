@@ -119,8 +119,8 @@ func (pong *PongGame) Setup(u engo.Updater) {
 		}
 	}
 
-	engo.Input.RegisterAxis("wasd", engo.AxisKeyPair{engo.W, engo.S})
-	engo.Input.RegisterAxis("arrows", engo.AxisKeyPair{engo.ArrowUp, engo.ArrowDown})
+	engo.Input.RegisterAxis("wasd", engo.AxisKeyPair{engo.KeyW, engo.KeyS})
+	engo.Input.RegisterAxis("arrows", engo.AxisKeyPair{engo.KeyArrowUp, engo.KeyArrowDown})
 
 	schemes := []string{"wasd", "arrows"}
 

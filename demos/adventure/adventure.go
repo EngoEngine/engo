@@ -127,10 +127,10 @@ func (*DefaultScene) Preload() {
 		WalkRightAction,
 	}
 
-	engo.Input.RegisterButton(upButton, engo.W, engo.ArrowUp)
-	engo.Input.RegisterButton(leftButton, engo.A, engo.ArrowLeft)
-	engo.Input.RegisterButton(rightButton, engo.D, engo.ArrowRight)
-	engo.Input.RegisterButton(downButton, engo.S, engo.ArrowDown)
+	engo.Input.RegisterButton(upButton, engo.KeyW, engo.KeyArrowUp)
+	engo.Input.RegisterButton(leftButton, engo.KeyA, engo.KeyArrowLeft)
+	engo.Input.RegisterButton(rightButton, engo.KeyD, engo.KeyArrowRight)
+	engo.Input.RegisterButton(downButton, engo.KeyS, engo.KeyArrowDown)
 }
 
 func (scene *DefaultScene) Setup(u engo.Updater) {
@@ -287,14 +287,14 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 	// Setup character and movement
 	engo.Input.RegisterAxis(
 		"vertical",
-		engo.AxisKeyPair{engo.ArrowUp, engo.ArrowDown},
-		engo.AxisKeyPair{engo.W, engo.S},
+		engo.AxisKeyPair{engo.KeyArrowUp, engo.KeyArrowDown},
+		engo.AxisKeyPair{engo.KeyW, engo.KeyS},
 	)
 
 	engo.Input.RegisterAxis(
 		"horizontal",
-		engo.AxisKeyPair{engo.ArrowLeft, engo.ArrowRight},
-		engo.AxisKeyPair{engo.A, engo.D},
+		engo.AxisKeyPair{engo.KeyArrowLeft, engo.KeyArrowRight},
+		engo.AxisKeyPair{engo.KeyA, engo.KeyD},
 	)
 
 	// Add EntityScroller System

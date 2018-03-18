@@ -19,8 +19,8 @@ func (*DefaultScene) Setup(u engo.Updater) {
 	w.AddSystem(&common.RenderSystem{})
 	w.AddSystem(&InputSystem{})
 
-	engo.Input.RegisterAxis("sideways", engo.AxisKeyPair{engo.A, engo.D})
-	engo.Input.RegisterButton("action", engo.Space, engo.Enter)
+	engo.Input.RegisterAxis("sideways", engo.AxisKeyPair{engo.KeyA, engo.KeyD})
+	engo.Input.RegisterButton("action", engo.KeySpace, engo.KeyEnter)
 }
 
 func (*DefaultScene) Type() string { return "Game" }
