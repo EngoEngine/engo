@@ -287,9 +287,7 @@ func (s *basicShader) generateBufferContent(ren *RenderComponent, space *SpaceCo
 
 	tint := colorToFloat32(ren.Color)
 
-	var u, v float32
-	u2 := float32(1)
-	v2 := float32(1)
+	u, v, u2, v2 := ren.Drawable.View()
 
 	if ren.Repeat != NoRepeat {
 		u2 = space.Width / (ren.Drawable.Width() * ren.Scale.X)
