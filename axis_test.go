@@ -16,43 +16,43 @@ var axSimpleCfg = [6]axKeyCfg{
 	axKeyCfg{
 		Name: "Axis 1",
 		Pairs: []AxisKeyPair{
-			AxisKeyPair{Min: A, Max: B},
-			AxisKeyPair{Min: C, Max: D},
+			AxisKeyPair{Min: KeyA, Max: KeyB},
+			AxisKeyPair{Min: KeyC, Max: KeyD},
 		},
 	},
 	axKeyCfg{
 		Name: "Axis 2",
 		Pairs: []AxisKeyPair{
-			AxisKeyPair{Min: E, Max: F},
-			AxisKeyPair{Min: G, Max: H},
+			AxisKeyPair{Min: KeyE, Max: KeyF},
+			AxisKeyPair{Min: KeyG, Max: KeyH},
 		},
 	},
 	axKeyCfg{
 		Name: "Axis 3",
 		Pairs: []AxisKeyPair{
-			AxisKeyPair{Min: F1, Max: F2},
-			AxisKeyPair{Min: F3, Max: F4},
+			AxisKeyPair{Min: KeyF1, Max: KeyF2},
+			AxisKeyPair{Min: KeyF3, Max: KeyF4},
 		},
 	},
 	axKeyCfg{
 		Name: "Axis 4",
 		Pairs: []AxisKeyPair{
-			AxisKeyPair{Min: F5, Max: F6},
-			AxisKeyPair{Min: F7, Max: F8},
+			AxisKeyPair{Min: KeyF5, Max: KeyF6},
+			AxisKeyPair{Min: KeyF7, Max: KeyF8},
 		},
 	},
 	axKeyCfg{
 		Name: "Axis 5",
 		Pairs: []AxisKeyPair{
-			AxisKeyPair{Min: One, Max: Two},
-			AxisKeyPair{Min: Three, Max: Four},
+			AxisKeyPair{Min: KeyOne, Max: KeyTwo},
+			AxisKeyPair{Min: KeyThree, Max: KeyFour},
 		},
 	},
 	axKeyCfg{
 		Name: "Axis 6",
 		Pairs: []AxisKeyPair{
-			AxisKeyPair{Min: ArrowUp, Max: ArrowDown},
-			AxisKeyPair{Min: ArrowLeft, Max: ArrowRight},
+			AxisKeyPair{Min: KeyArrowUp, Max: KeyArrowDown},
+			AxisKeyPair{Min: KeyArrowLeft, Max: KeyArrowRight},
 		},
 	},
 }

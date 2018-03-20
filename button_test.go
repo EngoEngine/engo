@@ -10,12 +10,12 @@ type btnState struct {
 
 // Button configuretion used when testing.
 var btnSimpleCfg = [6]Button{
-	Button{Triggers: []Key{A, C}, Name: "Button 1"},
-	Button{Triggers: []Key{B, D}, Name: "Button 2"},
-	Button{Triggers: []Key{F2, F5}, Name: "Button 3"},
-	Button{Triggers: []Key{F4, F6}, Name: "Button 4"},
-	Button{Triggers: []Key{One, Four}, Name: "Button 5"},
-	Button{Triggers: []Key{Two, Five}, Name: "Button 6"},
+	Button{Triggers: []Key{KeyA, KeyC}, Name: "Button 1"},
+	Button{Triggers: []Key{KeyB, KeyD}, Name: "Button 2"},
+	Button{Triggers: []Key{KeyF2, KeyF5}, Name: "Button 3"},
+	Button{Triggers: []Key{KeyF4, KeyF6}, Name: "Button 4"},
+	Button{Triggers: []Key{KeyOne, KeyFour}, Name: "Button 5"},
+	Button{Triggers: []Key{KeyTwo, KeyFive}, Name: "Button 6"},
 }
 
 // Expected button state @ pass 0

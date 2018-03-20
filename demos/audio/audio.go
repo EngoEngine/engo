@@ -28,7 +28,7 @@ func (s *DefaultScene) Preload() {
 		log.Println(err)
 	}
 
-	engo.Input.RegisterButton("whoop", engo.Space)
+	engo.Input.RegisterButton("whoop", engo.KeySpace)
 }
 
 func (s *DefaultScene) Setup(u engo.Updater) {

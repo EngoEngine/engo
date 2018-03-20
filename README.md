@@ -66,6 +66,7 @@ us a DM or [create an issue](https://github.com/EngoEngine/engo/issues/new).
 Engo is currently undergoing a lot of optimizations and constantly gets new features. However, this sometimes means things break. In order to make transitioning easier for you,
 we have a list of those changes, with the most recent being at the top. If you run into any problems, please contact us at [gitter](https://gitter.im/EngoEngine/engo).
 
+* Keyboard keys `Key` are now prefixed with the word Key. Instead of `A` the key is `KeyA`, for example.
 * Scenes now have `Setup(Updater)` instead of `Setup(*ecs.World)` to entirely separate engo from the ecs paradigm. ecs is no longer
 required to use the GL Context / Window / Input / Runloop management of engo.
 * Demos now require the build tag `demo`. This is so you can easily `go get engo.io/engo ./...` without waiting on building all the demos.

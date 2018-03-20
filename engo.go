@@ -165,11 +165,11 @@ func Run(o RunOptions, defaultScene Scene) {
 	if opts.StandardInputs {
 		log.Println("Using standard inputs")
 
-		Input.RegisterButton("jump", Space)
-		Input.RegisterButton("action", Enter)
+		Input.RegisterButton("jump", KeySpace)
+		Input.RegisterButton("action", KeyEnter)
 
-		Input.RegisterAxis(DefaultHorizontalAxis, AxisKeyPair{A, D}, AxisKeyPair{ArrowLeft, ArrowRight})
-		Input.RegisterAxis(DefaultVerticalAxis, AxisKeyPair{W, S}, AxisKeyPair{ArrowUp, ArrowDown})
+		Input.RegisterAxis(DefaultHorizontalAxis, AxisKeyPair{KeyA, KeyD}, AxisKeyPair{KeyArrowLeft, KeyArrowRight})
+		Input.RegisterAxis(DefaultVerticalAxis, AxisKeyPair{KeyW, KeyS}, AxisKeyPair{KeyArrowUp, KeyArrowDown})
 
 		Input.RegisterAxis(DefaultMouseXAxis, NewAxisMouse(AxisMouseHori))
 		Input.RegisterAxis(DefaultMouseYAxis, NewAxisMouse(AxisMouseVert))

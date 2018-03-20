@@ -163,10 +163,10 @@ func (game *GameWorld) Setup(u engo.Updater) {
 
 	// Add the EntityScroller system which contains the space component of the character and is bounded to the tmx level dimensions
 	w.AddSystem(&common.EntityScroller{SpaceComponent: &character.SpaceComponent, TrackingBounds: levelData.Bounds()})
-	engo.Input.RegisterButton("moveup", engo.ArrowUp)
-	engo.Input.RegisterButton("moveleft", engo.ArrowLeft)
-	engo.Input.RegisterButton("moveright", engo.ArrowRight)
-	engo.Input.RegisterButton("movedown", engo.ArrowDown)
+	engo.Input.RegisterButton("moveup", engo.KeyArrowUp)
+	engo.Input.RegisterButton("moveleft", engo.KeyArrowLeft)
+	engo.Input.RegisterButton("moveright", engo.KeyArrowRight)
+	engo.Input.RegisterButton("movedown", engo.KeyArrowDown)
 }
 
 func (game *GameWorld) Type() string { return "GameWorld" }

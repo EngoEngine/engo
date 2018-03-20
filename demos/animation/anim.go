@@ -37,8 +37,8 @@ func (*DefaultScene) Preload() {
 	SkillAction = &common.Animation{Name: "skill", Frames: []int{44, 45, 46, 47, 48, 49, 50, 51, 52, 53}}
 	actions = []*common.Animation{StopAction, WalkAction, SkillAction}
 
-	engo.Input.RegisterButton(jumpButton, engo.Space, engo.X)
-	engo.Input.RegisterButton(actionButton, engo.D, engo.ArrowRight)
+	engo.Input.RegisterButton(jumpButton, engo.KeySpace, engo.KeyX)
+	engo.Input.RegisterButton(actionButton, engo.KeyD, engo.KeyArrowRight)
 }
 
 func (scene *DefaultScene) Setup(u engo.Updater) {
