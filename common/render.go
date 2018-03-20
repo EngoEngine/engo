@@ -48,6 +48,16 @@ const (
 	MirroredRepeat
 )
 
+// ZoomFilter is a filter used when zooming in or out of a texture.
+type ZoomFilter uint8
+
+const (
+	// FilterNearest is a simple nearest neighbor algorithm
+	FilterNearest ZoomFilter = iota
+	// FilterLinear is a bilinear interpolation algorithm
+	FilterLinear
+)
+
 // RenderComponent is the component needed to render an entity.
 type RenderComponent struct {
 	// Hidden is used to prevent drawing by OpenGL
@@ -64,6 +74,9 @@ type RenderComponent struct {
 	// Do not set to anything other than NoRepeat for textures in a sprite sheet.
 	// This does not yet work with sprite sheets.
 	Repeat TextureRepeating
+
+	magFilter, minFilter               ZoomFilter
+	magFilterChanged, minFilterChanged bool
 
 	shader Shader
 	zIndex float32
@@ -83,6 +96,18 @@ func (r *RenderComponent) SetShader(s Shader) {
 func (r *RenderComponent) SetZIndex(index float32) {
 	r.zIndex = index
 	engo.Mailbox.Dispatch(&renderChangeMessage{})
+}
+
+// SetMinFilter sets the ZoomFilter used for minimizing the RenderComponent
+func (r *RenderComponent) SetMinFilter(z ZoomFilter) {
+	r.minFilter = z
+	r.minFilterChanged = true
+}
+
+// SetMagFilter sets the ZoomFilter used for magnifying the RenderComponent
+func (r *RenderComponent) SetMagFilter(z ZoomFilter) {
+	r.magFilter = z
+	r.magFilterChanged = true
 }
 
 type renderEntity struct {
