@@ -61,6 +61,8 @@ type RenderComponent struct {
 	// Repeat defines how to repeat the Texture if the SpaceComponent of the entity
 	// is larger than the texture itself, after applying scale. Defaults to NoRepeat
 	// which allows the texture to draw entirely without regard to th SpaceComponent
+	// Do not set to anything other than NoRepeat for textures in a sprite sheet.
+	// This does not yet work with sprite sheets.
 	Repeat TextureRepeating
 
 	shader Shader
