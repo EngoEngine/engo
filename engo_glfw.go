@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -28,6 +29,10 @@ var (
 
 	scale = float32(1)
 )
+
+func init() {
+	runtime.LockOSThread()
+}
 
 // fatalErr calls log.Fatal with the given error if it is non-nil.
 func fatalErr(err error) {
