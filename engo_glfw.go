@@ -135,7 +135,7 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	})
 
 	window.SetCursorPosCallback(func(window *glfw.Window, x, y float64) {
-		Input.Mouse.X, Input.Mouse.Y = float32(x)*scale, float32(y)*scale
+		Input.Mouse.X, Input.Mouse.Y = float32(x)*scale/opts.GlobalScale.X, float32(y)*scale/opts.GlobalScale.Y
 		if Input.Mouse.Action != Release && Input.Mouse.Action != Press {
 			Input.Mouse.Action = Move
 		}
@@ -143,7 +143,7 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 	window.SetMouseButtonCallback(func(window *glfw.Window, b glfw.MouseButton, a glfw.Action, m glfw.ModifierKey) {
 		x, y := window.GetCursorPos()
-		Input.Mouse.X, Input.Mouse.Y = float32(x)*scale, float32(y)*scale
+		Input.Mouse.X, Input.Mouse.Y = float32(x)*scale/opts.GlobalScale.X, float32(y)*scale/opts.GlobalScale.Y
 
 		// this is only valid because we use an internal structure that is
 		// 100% compatible with glfw3.h

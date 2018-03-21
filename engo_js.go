@@ -111,22 +111,22 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 	w.AddEventListener("mousemove", false, func(ev dom.Event) {
 		mm := ev.(*dom.MouseEvent)
-		Input.Mouse.X = float32(float64(mm.ClientX) * devicePixelRatio)
-		Input.Mouse.Y = float32(float64(mm.ClientY) * devicePixelRatio)
+		Input.Mouse.X = float32(float64(mm.ClientX)*devicePixelRatio) / opts.GlobalScale.X
+		Input.Mouse.Y = float32(float64(mm.ClientY)*devicePixelRatio) / opts.GlobalScale.Y
 		//Mouse.Action = MOVE
 	})
 
 	w.AddEventListener("mousedown", false, func(ev dom.Event) {
 		mm := ev.(*dom.MouseEvent)
-		Input.Mouse.X = float32(float64(mm.ClientX) * devicePixelRatio)
-		Input.Mouse.Y = float32(float64(mm.ClientY) * devicePixelRatio)
+		Input.Mouse.X = float32(float64(mm.ClientX)*devicePixelRatio) / opts.GlobalScale.X
+		Input.Mouse.Y = float32(float64(mm.ClientY)*devicePixelRatio) / opts.GlobalScale.Y
 		Input.Mouse.Action = Press
 	})
 
 	w.AddEventListener("mouseup", false, func(ev dom.Event) {
 		mm := ev.(*dom.MouseEvent)
-		Input.Mouse.X = float32(float64(mm.ClientX) * devicePixelRatio)
-		Input.Mouse.Y = float32(float64(mm.ClientY) * devicePixelRatio)
+		Input.Mouse.X = float32(float64(mm.ClientX)*devicePixelRatio) / opts.GlobalScale.X
+		Input.Mouse.Y = float32(float64(mm.ClientY)*devicePixelRatio) / opts.GlobalScale.Y
 		Input.Mouse.Action = Release
 	})
 }
@@ -136,7 +136,7 @@ func DestroyWindow() {}
 
 // CursorPos returns the current cursor position
 func CursorPos() (x, y float32) {
-	return Input.Mouse.X, Input.Mouse.Y
+	return Input.Mouse.X * opts.GlobalScale.X, Input.Mouse.Y * opts.GlobalScale.Y
 }
 
 // SetTitle changes the title of the page to the given string

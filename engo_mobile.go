@@ -140,8 +140,8 @@ func runLoop(defaultScene Scene, headless bool) {
 				// after this one is shown. - FPS is ignored here!
 				a.Send(paint.Event{})
 			case touch.Event:
-				Input.Mouse.X = e.X
-				Input.Mouse.Y = e.Y
+				Input.Mouse.X = e.X / opts.GlobalScale.X
+				Input.Mouse.Y = e.Y / opts.GlobalScale.Y
 				switch e.Type {
 				case touch.TypeBegin:
 					Input.Mouse.Action = Press

@@ -214,11 +214,23 @@ func (cam *CameraSystem) Angle() float32 {
 }
 
 func (cam *CameraSystem) moveX(value float32) {
-	cam.moveToX(cam.x + value)
+	if cam.x+(value*engo.GetGlobalScale().X) > CameraBounds.Max.X*engo.GetGlobalScale().X {
+		cam.x = CameraBounds.Max.X * engo.GetGlobalScale().X
+	} else if cam.x+(value*engo.GetGlobalScale().X) < CameraBounds.Min.X*engo.GetGlobalScale().X {
+		cam.x = CameraBounds.Min.X * engo.GetGlobalScale().X
+	} else {
+		cam.x += value * engo.GetGlobalScale().X
+	}
 }
 
 func (cam *CameraSystem) moveY(value float32) {
-	cam.moveToY(cam.y + value)
+	if cam.y+(value*engo.GetGlobalScale().Y) > CameraBounds.Max.Y*engo.GetGlobalScale().Y {
+		cam.y = CameraBounds.Max.Y * engo.GetGlobalScale().Y
+	} else if cam.y+(value*engo.GetGlobalScale().Y) < CameraBounds.Min.Y*engo.GetGlobalScale().Y {
+		cam.y = CameraBounds.Min.Y * engo.GetGlobalScale().Y
+	} else {
+		cam.y += value * engo.GetGlobalScale().Y
+	}
 }
 
 func (cam *CameraSystem) zoom(value float32) {
@@ -230,11 +242,11 @@ func (cam *CameraSystem) rotate(value float32) {
 }
 
 func (cam *CameraSystem) moveToX(location float32) {
-	cam.x = mgl32.Clamp(location, CameraBounds.Min.X, CameraBounds.Max.X)
+	cam.x = mgl32.Clamp(location*engo.GetGlobalScale().X, CameraBounds.Min.X*engo.GetGlobalScale().X, CameraBounds.Max.X*engo.GetGlobalScale().X)
 }
 
 func (cam *CameraSystem) moveToY(location float32) {
-	cam.y = mgl32.Clamp(location, CameraBounds.Min.Y, CameraBounds.Max.Y)
+	cam.y = mgl32.Clamp(location*engo.GetGlobalScale().Y, CameraBounds.Min.Y*engo.GetGlobalScale().Y, CameraBounds.Max.Y*engo.GetGlobalScale().Y)
 }
 
 func (cam *CameraSystem) zoomTo(zoomLevel float32) {
@@ -337,14 +349,12 @@ type EntityScroller struct {
 // New adjusts CameraBounds to the bounds of EntityScroller.
 func (c *EntityScroller) New(*ecs.World) {
 	offsetX, offsetY := engo.CanvasWidth()/2, engo.CanvasHeight()/2
-	// This is to account for upper left origin
-	distY := c.TrackingBounds.Max.Y - c.TrackingBounds.Min.Y
 
-	CameraBounds.Min.X = c.TrackingBounds.Min.X + offsetX
-	CameraBounds.Min.Y = (c.TrackingBounds.Max.Y - distY) + offsetY
+	CameraBounds.Min.X = c.TrackingBounds.Min.X + (offsetX / engo.GetGlobalScale().X)
+	CameraBounds.Min.Y = c.TrackingBounds.Min.Y + (offsetY / engo.GetGlobalScale().Y)
 
-	CameraBounds.Max.X = c.TrackingBounds.Max.X - offsetX
-	CameraBounds.Max.Y = (c.TrackingBounds.Min.Y + distY) - offsetY
+	CameraBounds.Max.X = c.TrackingBounds.Max.X - (offsetX / engo.GetGlobalScale().X)
+	CameraBounds.Max.Y = c.TrackingBounds.Max.Y - (offsetY / engo.GetGlobalScale().Y)
 }
 
 // Priority implements the ecs.Prioritizer interface.

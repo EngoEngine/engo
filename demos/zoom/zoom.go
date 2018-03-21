@@ -32,6 +32,14 @@ func (*DefaultScene) Setup(u engo.Updater) {
 
 	// Create the background; this way we'll see when we actually zoom
 	demoutils.NewBackground(w, worldWidth, worldHeight, color.RGBA{102, 153, 0, 255}, color.RGBA{102, 173, 0, 255})
+
+	// Center camera if GlobalScale is Setup
+	engo.Mailbox.Dispatch(common.CameraMessage{Axis: common.XAxis,
+		Value:       float32(worldWidth) / 2,
+		Incremental: false})
+	engo.Mailbox.Dispatch(common.CameraMessage{Axis: common.YAxis,
+		Value:       float32(worldHeight) / 2,
+		Incremental: false})
 }
 
 func (*DefaultScene) Type() string { return "Game" }

@@ -427,6 +427,8 @@ func runAxisMouse(msg string, t *testing.T, x float32, y float32) {
 func TestAxisMouse(t *testing.T) {
 	Input = NewInputManager()
 
+	SetGlobalScale(Point{1, 1})
+
 	Input.RegisterAxis("mouse x", NewAxisMouse(AxisMouseHori))
 	Input.RegisterAxis("mouse y", NewAxisMouse(AxisMouseVert))
 

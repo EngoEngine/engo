@@ -178,14 +178,14 @@ func (m *MouseSystem) Update(dt float32) {
 	// Translate Mouse.X and Mouse.Y into "game coordinates"
 	switch engo.CurrentBackEnd {
 	case engo.BackEndGLFW:
-		m.mouseX = engo.Input.Mouse.X*m.camera.z*(engo.GameWidth()/engo.CanvasWidth()) + m.camera.x - (engo.GameWidth()/2)*m.camera.z
-		m.mouseY = engo.Input.Mouse.Y*m.camera.z*(engo.GameHeight()/engo.CanvasHeight()) + m.camera.y - (engo.GameHeight()/2)*m.camera.z
+		m.mouseX = engo.Input.Mouse.X*m.camera.Z()*(engo.GameWidth()/engo.CanvasWidth()) + (m.camera.X()-(engo.GameWidth()/2)*m.camera.Z())/engo.GetGlobalScale().X
+		m.mouseY = engo.Input.Mouse.Y*m.camera.Z()*(engo.GameHeight()/engo.CanvasHeight()) + (m.camera.Y()-(engo.GameHeight()/2)*m.camera.Z())/engo.GetGlobalScale().Y
 	case engo.BackEndMobile:
-		m.mouseX = engo.Input.Mouse.X*m.camera.z + m.camera.x - (engo.GameWidth()/2)*m.camera.z + (engo.ResizeXOffset / 2)
-		m.mouseY = engo.Input.Mouse.Y*m.camera.z + m.camera.y - (engo.GameHeight()/2)*m.camera.z + (engo.ResizeYOffset / 2)
+		m.mouseX = engo.Input.Mouse.X*m.camera.Z() + (m.camera.X()-(engo.GameWidth()/2)*m.camera.Z()+(engo.ResizeXOffset/2))/engo.GetGlobalScale().X
+		m.mouseY = engo.Input.Mouse.Y*m.camera.Z() + (m.camera.Y()-(engo.GameHeight()/2)*m.camera.Z()+(engo.ResizeYOffset/2))/engo.GetGlobalScale().Y
 	case engo.BackEndWeb:
-		m.mouseX = engo.Input.Mouse.X*m.camera.z + m.camera.x - (engo.GameWidth()/2)*m.camera.z + (engo.ResizeXOffset / 2)
-		m.mouseY = engo.Input.Mouse.Y*m.camera.z + m.camera.y - (engo.GameHeight()/2)*m.camera.z + (engo.ResizeYOffset / 2)
+		m.mouseX = engo.Input.Mouse.X*m.camera.Z() + (m.camera.X()-(engo.GameWidth()/2)*m.camera.Z()+(engo.ResizeXOffset/2))/engo.GetGlobalScale().X
+		m.mouseY = engo.Input.Mouse.Y*m.camera.Z() + (m.camera.Y()-(engo.GameHeight()/2)*m.camera.Z()+(engo.ResizeYOffset/2))/engo.GetGlobalScale().X
 	}
 
 	// Rotate if needed
@@ -234,7 +234,6 @@ func (m *MouseSystem) Update(dt float32) {
 		// If the Mouse component is a tracker we always update it
 		// Check if the X-value is within range
 		// and if the Y-value is within range
-
 		if e.MouseComponent.Track || e.MouseComponent.startedDragging ||
 			e.SpaceComponent.Contains(engo.Point{X: mx, Y: my}) {
 

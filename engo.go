@@ -81,6 +81,13 @@ type RunOptions struct {
 
 	Width, Height int
 
+	// GlobalScale scales all size/render components by the scale factor
+	// Any point passed less than or equal to zero will result in the scale being set to
+	// engo.Point{1, 1}.
+	// All the systems in common should scale themselves accordingly (collision, camera, render, etc)
+	// However, custom systems should be aware of this if this is set.
+	GlobalScale Point
+
 	// VSync indicates whether or not OpenGL should wait for the monitor to swp the buffers
 	VSync bool
 
@@ -156,6 +163,10 @@ func Run(o RunOptions, defaultScene Scene) {
 
 	if o.Update == nil {
 		o.Update = &ecs.World{}
+	}
+
+	if o.GlobalScale.X <= 0 || o.GlobalScale.Y <= 0 {
+		o.GlobalScale = Point{X: 1, Y: 1}
 	}
 
 	opts = o
@@ -271,4 +282,20 @@ func closeEvent() {
 
 func runHeadless(defaultScene Scene) {
 	runLoop(defaultScene, true)
+}
+
+// GetGlobalScale returns the GlobalScale factor set in the RunOptions or via
+// SetGlobalScale()
+func GetGlobalScale() Point {
+	return opts.GlobalScale
+}
+
+// SetGlobalScale sets the GlobalScale to the given dimensions. If either dimension is
+// less than or equal to zero, GlobalScale is set to (1, 1).
+func SetGlobalScale(p Point) {
+	if p.X <= 0 || p.Y <= 0 {
+		opts.GlobalScale = Point{X: 1, Y: 1}
+		return
+	}
+	opts.GlobalScale = p
 }
