@@ -225,6 +225,30 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_T, val)
 	}
 
+	if ren.magFilterChanged {
+		var val int
+		switch ren.magFilter {
+		case FilterNearest:
+			val = engo.Gl.NEAREST
+		case FilterLinear:
+			val = engo.Gl.LINEAR
+		}
+		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_MAG_FILTER, val)
+		ren.magFilterChanged = false
+	}
+
+	if ren.minFilterChanged {
+		var val int
+		switch ren.minFilter {
+		case FilterNearest:
+			val = engo.Gl.NEAREST
+		case FilterLinear:
+			val = engo.Gl.LINEAR
+		}
+		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_MIN_FILTER, val)
+		ren.minFilterChanged = false
+	}
+
 	if space.Rotation != 0 {
 		sin, cos := math.Sincos(space.Rotation * math.Pi / 180)
 
