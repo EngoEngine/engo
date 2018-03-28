@@ -198,7 +198,8 @@ func (c *CollisionSystem) Add(basic *ecs.BasicEntity, collision *CollisionCompon
 }
 
 // AddByInterface Provides a simple way to add an entity to the system that satisfies Collisionable. Any entity containing, BasicEntity,CollisionComponent, and SpaceComponent anonymously, automatically does this.
-func (c *CollisionSystem) AddByInterface(o Collisionable) {
+func (c *CollisionSystem) AddByInterface(i ecs.Identifier) {
+	o, _ := i.(Collisionable)
 	c.Add(o.GetBasicEntity(), o.GetCollisionComponent(), o.GetSpaceComponent())
 }
 
