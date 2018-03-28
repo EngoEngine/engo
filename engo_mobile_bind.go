@@ -164,8 +164,8 @@ func mobileDraw(defaultScene Scene) {
 
 //TouchEvent handles the touch events sent from Android and puts them in the InputManager
 func TouchEvent(x, y, action int) {
-	Input.Mouse.X = float32(x)
-	Input.Mouse.Y = float32(y)
+	Input.Mouse.X = float32(x) / opts.GlobalScale.X
+	Input.Mouse.Y = float32(y) / opts.GlobalScale.Y
 	switch action {
 	case 0:
 		Input.Mouse.Action = Press

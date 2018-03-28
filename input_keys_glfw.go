@@ -54,7 +54,7 @@ const (
 	KeyPause Key = Key(glfw.KeyPause)
 	// KeyScrollLock represents the scroll lock keyboard key
 	KeyScrollLock Key = Key(glfw.KeyScrollLock)
-	// KeyAllowLeft represents the arrow left keyboard key
+	// KeyArrowLeft represents the arrow left keyboard key
 	KeyArrowLeft Key = Key(glfw.KeyLeft)
 	// KeyArrowRight represents the arrow right keyboard key
 	KeyArrowRight Key = Key(glfw.KeyRight)

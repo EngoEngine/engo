@@ -252,19 +252,19 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 	if space.Rotation != 0 {
 		sin, cos := math.Sincos(space.Rotation * math.Pi / 180)
 
-		s.modelMatrix[0] = ren.Scale.X * cos
-		s.modelMatrix[1] = ren.Scale.X * sin
-		s.modelMatrix[3] = ren.Scale.Y * -sin
-		s.modelMatrix[4] = ren.Scale.Y * cos
+		s.modelMatrix[0] = ren.Scale.X * engo.GetGlobalScale().X * cos
+		s.modelMatrix[1] = ren.Scale.X * engo.GetGlobalScale().X * sin
+		s.modelMatrix[3] = ren.Scale.Y * engo.GetGlobalScale().Y * -sin
+		s.modelMatrix[4] = ren.Scale.Y * engo.GetGlobalScale().Y * cos
 	} else {
-		s.modelMatrix[0] = ren.Scale.X
+		s.modelMatrix[0] = ren.Scale.X * engo.GetGlobalScale().X
 		s.modelMatrix[1] = 0
 		s.modelMatrix[3] = 0
-		s.modelMatrix[4] = ren.Scale.Y
+		s.modelMatrix[4] = ren.Scale.Y * engo.GetGlobalScale().Y
 	}
 
-	s.modelMatrix[6] = space.Position.X
-	s.modelMatrix[7] = space.Position.Y
+	s.modelMatrix[6] = space.Position.X * engo.GetGlobalScale().X
+	s.modelMatrix[7] = space.Position.Y * engo.GetGlobalScale().Y
 
 	engo.Gl.UniformMatrix3fv(s.matrixModel, false, s.modelMatrix)
 
@@ -736,19 +736,19 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 	if space.Rotation != 0 {
 		sin, cos := math.Sincos(space.Rotation * math.Pi / 180)
 
-		l.modelMatrix[0] = ren.Scale.X * cos
-		l.modelMatrix[1] = ren.Scale.X * sin
-		l.modelMatrix[3] = ren.Scale.Y * -sin
-		l.modelMatrix[4] = ren.Scale.Y * cos
+		l.modelMatrix[0] = ren.Scale.X * engo.GetGlobalScale().X * cos
+		l.modelMatrix[1] = ren.Scale.X * engo.GetGlobalScale().X * sin
+		l.modelMatrix[3] = ren.Scale.Y * engo.GetGlobalScale().Y * -sin
+		l.modelMatrix[4] = ren.Scale.Y * engo.GetGlobalScale().Y * cos
 	} else {
-		l.modelMatrix[0] = ren.Scale.X
+		l.modelMatrix[0] = ren.Scale.X * engo.GetGlobalScale().X
 		l.modelMatrix[1] = 0
 		l.modelMatrix[3] = 0
-		l.modelMatrix[4] = ren.Scale.Y
+		l.modelMatrix[4] = ren.Scale.Y * engo.GetGlobalScale().Y
 	}
 
-	l.modelMatrix[6] = space.Position.X
-	l.modelMatrix[7] = space.Position.Y
+	l.modelMatrix[6] = space.Position.X * engo.GetGlobalScale().X
+	l.modelMatrix[7] = space.Position.Y * engo.GetGlobalScale().Y
 
 	engo.Gl.UniformMatrix3fv(l.matrixModel, false, l.modelMatrix)
 
@@ -1101,19 +1101,19 @@ func (l *textShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 	if space.Rotation != 0 {
 		sin, cos := math.Sincos(space.Rotation * math.Pi / 180)
 
-		l.modelMatrix[0] = ren.Scale.X * cos
-		l.modelMatrix[1] = ren.Scale.X * sin
-		l.modelMatrix[3] = ren.Scale.Y * -sin
-		l.modelMatrix[4] = ren.Scale.Y * cos
+		l.modelMatrix[0] = ren.Scale.X * engo.GetGlobalScale().X * cos
+		l.modelMatrix[1] = ren.Scale.X * engo.GetGlobalScale().X * sin
+		l.modelMatrix[3] = ren.Scale.Y * engo.GetGlobalScale().Y * -sin
+		l.modelMatrix[4] = ren.Scale.Y * engo.GetGlobalScale().Y * cos
 	} else {
-		l.modelMatrix[0] = ren.Scale.X
+		l.modelMatrix[0] = ren.Scale.X * engo.GetGlobalScale().X
 		l.modelMatrix[1] = 0
 		l.modelMatrix[3] = 0
-		l.modelMatrix[4] = ren.Scale.Y
+		l.modelMatrix[4] = ren.Scale.Y * engo.GetGlobalScale().Y
 	}
 
-	l.modelMatrix[6] = space.Position.X
-	l.modelMatrix[7] = space.Position.Y
+	l.modelMatrix[6] = space.Position.X * engo.GetGlobalScale().X
+	l.modelMatrix[7] = space.Position.Y * engo.GetGlobalScale().Y
 
 	engo.Gl.UniformMatrix3fv(l.matrixModel, false, l.modelMatrix)
 	engo.Gl.DrawElements(engo.Gl.TRIANGLES, 6*len(txt.Text), engo.Gl.UNSIGNED_SHORT, 0)

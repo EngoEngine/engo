@@ -16,6 +16,7 @@ var cam *CameraSystem
 func initialize() {
 	engo.Mailbox = &engo.MessageManager{}
 	CameraBounds = engo.AABB{Min: engo.Point{X: 0, Y: 0}, Max: engo.Point{X: 300, Y: 300}}
+	engo.SetGlobalScale(engo.Point{X: 1, Y: 1})
 	w := &ecs.World{}
 
 	cam = &CameraSystem{}
