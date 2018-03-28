@@ -11,7 +11,11 @@ then
     gopherjs get "honnef.co/go/js/xhr"
 elif [ "$TEST_TYPE" == "android_test" ] || [ "$TEST_TYPE" == "android_build" ]
 then
-    go get golang.org/x/mobile/cmd/gomobile
+    git clone https://github.com/golang/mobile.git $GOPATH/src/golang.org/x/mobile
+    cd $GOPATH/src/golang.org/x/mobile/cmd/gomobile
+    git reset --hard 598bfe4b20d39a660581f014b68e60c5ad425336
+    go install
+    cd ~
     gomobile init
     git clone https://github.com/Noofbiz/android-ndk.git $HOME/android-ndk-root
     printf "$HOME/android-ndk-root" > $GOPATH/pkg/gomobile/android_ndk_root
