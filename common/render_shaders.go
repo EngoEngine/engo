@@ -1022,12 +1022,15 @@ func (l *textShader) generateBufferContent(ren *RenderComponent, space *SpaceCom
 		modifier = -1
 	}
 
+	letterSpace := float32(txt.Font.Size) * txt.LetterSpacing
+	lineSpace := txt.LineSpacing * atlas.Height['X']
+
 	for index, char := range txt.Text {
 		// TODO: this might not work for all characters
 		switch {
 		case char == '\n':
 			currentX = 0
-			currentY += atlas.Height[char] + txt.LineSpacing*atlas.Height[char]
+			currentY += atlas.Height['X'] + lineSpace
 			continue
 		case char < 32: // all system stuff should be ignored
 			continue
@@ -1043,27 +1046,27 @@ func (l *textShader) generateBufferContent(ren *RenderComponent, space *SpaceCom
 		setBufferValue(buffer, 4+offset, tint, &changed)
 
 		// These five are at 1, 0:
-		setBufferValue(buffer, 5+offset, currentX+atlas.Width[char], &changed)
+		setBufferValue(buffer, 5+offset, currentX+atlas.Width[char]+letterSpace, &changed)
 		setBufferValue(buffer, 6+offset, currentY, &changed)
 		setBufferValue(buffer, 7+offset, (atlas.XLocation[char]+atlas.Width[char])/atlas.TotalWidth, &changed)
 		setBufferValue(buffer, 8+offset, atlas.YLocation[char]/atlas.TotalHeight, &changed)
 		setBufferValue(buffer, 9+offset, tint, &changed)
 
 		// These five are at 1, 1:
-		setBufferValue(buffer, 10+offset, currentX+atlas.Width[char], &changed)
-		setBufferValue(buffer, 11+offset, currentY+atlas.Height[char], &changed)
+		setBufferValue(buffer, 10+offset, currentX+atlas.Width[char]+letterSpace, &changed)
+		setBufferValue(buffer, 11+offset, currentY+atlas.Height[char]+lineSpace, &changed)
 		setBufferValue(buffer, 12+offset, (atlas.XLocation[char]+atlas.Width[char])/atlas.TotalWidth, &changed)
 		setBufferValue(buffer, 13+offset, (atlas.YLocation[char]+atlas.Height[char])/atlas.TotalHeight, &changed)
 		setBufferValue(buffer, 14+offset, tint, &changed)
 
 		// These five are at 0, 1:
 		setBufferValue(buffer, 15+offset, currentX, &changed)
-		setBufferValue(buffer, 16+offset, currentY+atlas.Height[char], &changed)
+		setBufferValue(buffer, 16+offset, currentY+atlas.Height[char]+lineSpace, &changed)
 		setBufferValue(buffer, 17+offset, atlas.XLocation[char]/atlas.TotalWidth, &changed)
 		setBufferValue(buffer, 18+offset, (atlas.YLocation[char]+atlas.Height[char])/atlas.TotalHeight, &changed)
 		setBufferValue(buffer, 19+offset, tint, &changed)
 
-		currentX += modifier * (atlas.Width[char] + float32(txt.Font.Size)*txt.LetterSpacing)
+		currentX += modifier * (atlas.Width[char] + letterSpace)
 	}
 
 	return changed
@@ -1098,6 +1101,9 @@ func (l *textShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		l.lastTexture = atlas.Texture
 	}
 
+	engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_S, engo.Gl.CLAMP_TO_EDGE)
+	engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_T, engo.Gl.CLAMP_TO_EDGE)
+
 	if space.Rotation != 0 {
 		sin, cos := math.Sincos(space.Rotation * math.Pi / 180)
 
@@ -1116,6 +1122,7 @@ func (l *textShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 	l.modelMatrix[7] = space.Position.Y * engo.GetGlobalScale().Y
 
 	engo.Gl.UniformMatrix3fv(l.matrixModel, false, l.modelMatrix)
+
 	engo.Gl.DrawElements(engo.Gl.TRIANGLES, 6*len(txt.Text), engo.Gl.UNSIGNED_SHORT, 0)
 }
 

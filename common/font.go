@@ -29,6 +29,7 @@ type Font struct {
 	BG   color.Color
 	FG   color.Color
 	TTF  *truetype.Font
+	face font.Face
 }
 
 // Create is for loading fonts from the disk, given a location
@@ -44,6 +45,11 @@ func (f *Font) Create() error {
 		return err
 	}
 	f.TTF = ttf
+	f.face = truetype.NewFace(f.TTF, &truetype.Options{
+		Size:    f.Size,
+		DPI:     dpi,
+		Hinting: font.HintingFull,
+	})
 
 	return nil
 }
@@ -55,54 +61,35 @@ func (f *Font) CreatePreloaded() error {
 		return err
 	}
 
-	font, ok := fontres.(FontResource)
+	fnt, ok := fontres.(FontResource)
 	if !ok {
 		return fmt.Errorf("preloaded font is not of type `*truetype.Font`: %s", f.URL)
 	}
 
-	f.TTF = font.Font
+	f.TTF = fnt.Font
+	f.face = truetype.NewFace(f.TTF, &truetype.Options{
+		Size:    f.Size,
+		DPI:     dpi,
+		Hinting: font.HintingFull,
+	})
 	return nil
 }
 
 // TextDimensions returns the total width, total height and total line size
 // of the input string written out in the Font.
 func (f *Font) TextDimensions(text string) (int, int, int) {
-	fnt := f.TTF
-	size := f.Size
-	var (
-		totalWidth  = fixed.Int26_6(0)
-		totalHeight = fixed.Int26_6(size)
-		maxYBearing = fixed.Int26_6(0)
-	)
-	fupe := fixed.Int26_6(fnt.FUnitsPerEm())
-
+	m := f.face.Metrics()
+	totalHeight := m.Height
+	maxYBearing := m.Ascent
+	var totalWidth fixed.Int26_6
 	for _, char := range text {
-		idx := fnt.Index(char)
-		hm := fnt.HMetric(fupe, idx)
-		vm := fnt.VMetric(fupe, idx)
-		g := truetype.GlyphBuf{}
-		err := g.Load(fnt, fupe, idx, font.HintingNone)
-		if err != nil {
-			log.Println(err)
-			return 0, 0, 0
+		adv, ok := f.face.GlyphAdvance(char)
+		if !ok {
+			continue
 		}
-		totalWidth += hm.AdvanceWidth
-
-		yB := (vm.TopSideBearing * fixed.Int26_6(size)) / fupe
-		if yB > maxYBearing {
-			maxYBearing = yB
-		}
-		dY := (vm.AdvanceHeight * fixed.Int26_6(size)) / fupe
-		if dY > totalHeight {
-			totalHeight = dY
-		}
+		totalWidth += adv
 	}
-
-	// Scale to actual pixel size
-	totalWidth *= fixed.Int26_6(size)
-	totalWidth /= fupe
-
-	return int(totalWidth), int(totalHeight), int(maxYBearing)
+	return totalWidth.Ceil(), totalHeight.Ceil(), maxYBearing.Ceil()
 }
 
 // RenderNRGBA returns an *image.NRGBA in the Font based on the input string.
@@ -190,23 +177,26 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 
 	lineHeight := d.Face.Metrics().Height
 	lineBuffer := float32(lineHeight.Ceil()) / 2
+	xBuffer := float32(10)
 
 	for i := 0; i < c; i++ {
 		_, adv, ok := d.Face.GlyphBounds(rune(i))
 		if !ok {
 			continue
 		}
+		currentX += xBuffer
 
 		atlas.Width[i] = float32(adv.Ceil())
 		atlas.Height[i] = float32(lineHeight.Ceil()) + lineBuffer
 		atlas.XLocation[i] = currentX
 		atlas.YLocation[i] = currentY
 
-		currentX += float32(adv.Ceil())
-		if currentX > 255 || i >= c-1 {
-			if currentX > atlas.TotalWidth {
-				atlas.TotalWidth = currentX
-			}
+		if currentX > atlas.TotalWidth {
+			atlas.TotalWidth = currentX
+		}
+
+		currentX += float32(adv.Ceil()) + xBuffer
+		if currentX > 1024 || i >= c-1 {
 			currentX = 0
 			currentY += float32(lineHeight.Ceil()) + lineBuffer
 			atlas.TotalHeight += float32(lineHeight.Ceil()) + lineBuffer
@@ -215,6 +205,7 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 
 	// Create texture
 	actual := image.NewNRGBA(image.Rect(0, 0, int(atlas.TotalWidth), int(atlas.TotalHeight)))
+	draw.Draw(actual, actual.Bounds(), image.NewUniform(f.BG), image.ZP, draw.Src)
 	d.Dst = actual
 
 	currentX = 0
@@ -224,10 +215,11 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 		if !ok {
 			continue
 		}
+		currentX += xBuffer
 		d.Dot = fixed.P(int(currentX), int(currentY))
 		d.DrawBytes([]byte{byte(i)})
-		currentX += float32(adv.Ceil())
-		if currentX > 255 || i == c-1 {
+		currentX += float32(adv.Ceil()) + xBuffer
+		if currentX > 1024 || i == c-1 {
 			currentX = 0
 			currentY += float32(lineHeight.Ceil()) + lineBuffer
 		}
@@ -298,7 +290,6 @@ func (t Text) Width() float32 {
 				greatestX = currentX
 			}
 			currentX = 0
-			//currentY += atlas.Height[char] + txt.LineSpacing*atlas.Height[char]
 			continue
 		case char < 32: // all system stuff should be ignored
 			continue
