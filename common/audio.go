@@ -56,7 +56,8 @@ func (a *AudioSystem) Add(basic *ecs.BasicEntity, audio *AudioComponent) {
 // AddByInterface Allows an Entity to be added directly using the Audioable interface,
 // which every entity containing the BasicEntity and AnimationComponent anonymously,
 // automatically satisfies.
-func (a *AudioSystem) AddByInterface(o Audioable) {
+func (a *AudioSystem) AddByInterface(i ecs.Identifier) {
+	o, _ := i.(Audioable)
 	a.Add(o.GetBasicEntity(), o.GetAudioComponent())
 }
 
