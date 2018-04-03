@@ -243,7 +243,8 @@ func (rs *RenderSystem) EntityExists(basic *ecs.BasicEntity) int {
 }
 
 // AddByInterface adds any Renderable to the render system. Any Entity containing a BasicEntity,RenderComponent, and SpaceComponent anonymously does this automatically
-func (rs *RenderSystem) AddByInterface(o Renderable) {
+func (rs *RenderSystem) AddByInterface(i ecs.Identifier) {
+	o, _ := i.(Renderable)
 	rs.Add(o.GetBasicEntity(), o.GetRenderComponent(), o.GetSpaceComponent())
 }
 

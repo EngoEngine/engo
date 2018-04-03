@@ -155,7 +155,8 @@ func (m *MouseSystem) Add(basic *ecs.BasicEntity, mouse *MouseComponent, space *
 }
 
 // AddByInterface adds the Entity to the system as long as it satisfies, Mouseable.  Any Entity containing a BasicEntity,MouseComponent, and RenderComponent, automatically does this.
-func (m *MouseSystem) AddByInterface(o Mouseable) {
+func (m *MouseSystem) AddByInterface(i ecs.Identifier) {
+	o, _ := i.(Mouseable)
 	m.Add(o.GetBasicEntity(), o.GetMouseComponent(), o.GetSpaceComponent(), o.GetRenderComponent())
 }
 

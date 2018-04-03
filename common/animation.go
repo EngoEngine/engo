@@ -113,7 +113,8 @@ func (a *AnimationSystem) Add(basic *ecs.BasicEntity, anim *AnimationComponent, 
 }
 
 // AddByInterface Allows an Entity to be added directly using the Animtionable interface. which every entity containing the BasicEntity,AnimationComponent,and RenderComponent anonymously, automatically satisfies.
-func (a *AnimationSystem) AddByInterface(o Animationable) {
+func (a *AnimationSystem) AddByInterface(i ecs.Identifier) {
+	o, _ := i.(Animationable)
 	a.Add(o.GetBasicEntity(), o.GetAnimationComponent(), o.GetRenderComponent())
 }
 

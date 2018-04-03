@@ -22,6 +22,11 @@
 //
 // Note: The names have not been contracted for consistency, the interface is
 // *Collisionable* not *Collidable*.
+//
+// Not-Ables
+//
+// The Not-Ables are interfaces of components used to flag entities to not add to the system,
+// for use with the ecs.World.AddSystemInterface
 
 package common
 
@@ -132,4 +137,56 @@ type Collisionable interface {
 	BasicFace
 	CollisionFace
 	SpaceFace
+}
+
+// Not-Ables
+
+type NotAnimationComponent struct{}
+
+func (n *NotAnimationComponent) GetNotAnimationComponent() *NotAnimationComponent {
+	return n
+}
+
+type NotAnimationable interface {
+	GetNotAnimationComponent() *NotAnimationComponent
+}
+
+type NotMouseComponent struct{}
+
+func (n *NotMouseComponent) GetNotMouseComponent() *NotMouseComponent {
+	return n
+}
+
+type NotMouseable interface {
+	GetNotMouseComponent() *NotMouseComponent
+}
+
+type NotAudioComponent struct{}
+
+func (n *NotAudioComponent) GetNotAudioComponent() *NotAudioComponent {
+	return n
+}
+
+type NotAudioable interface {
+	GetNotAudioComponent() *NotAudioComponent
+}
+
+type NotRenderComponent struct{}
+
+func (n *NotRenderComponent) GetNotRenderComponent() *NotRenderComponent {
+	return n
+}
+
+type NotRenderable interface {
+	GetNotRenderComponent() *NotRenderComponent
+}
+
+type NotCollisionComponent struct{}
+
+func (n *NotCollisionComponent) GetNotCollisionComponent() *NotCollisionComponent {
+	return n
+}
+
+type NotCollisionable interface {
+	GetNotCollisionComponent() *NotCollisionComponent
 }
