@@ -562,7 +562,7 @@ func (l *legacyShader) computeBufferSize(draw Drawable) int {
 	case Triangle:
 		return 18
 	case Rectangle:
-		return 24
+		return 36
 	case Circle:
 		return 12
 	case ComplexTriangles:
@@ -678,22 +678,43 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 
 		if shape.BorderWidth > 0 {
 			borderTint := colorToFloat32(shape.BorderColor)
+			halfWidth := shape.BorderWidth / 2
 
-			//setBufferValue(buffer, 12, 0, &changed)
+			//Top
+			setBufferValue(buffer, 12, -halfWidth, &changed)
 			//setBufferValue(buffer, 13, 0, &changed)
 			setBufferValue(buffer, 14, borderTint, &changed)
 
-			setBufferValue(buffer, 15, w, &changed)
+			setBufferValue(buffer, 15, w+halfWidth, &changed)
 			//setBufferValue(buffer, 16, 0, &changed)
 			setBufferValue(buffer, 17, borderTint, &changed)
 
+			//Right
 			setBufferValue(buffer, 18, w, &changed)
-			setBufferValue(buffer, 19, h, &changed)
+			//setBufferValue(buffer, 19, 0, &changed)
 			setBufferValue(buffer, 20, borderTint, &changed)
 
-			//setBufferValue(buffer, 21, 0, &changed)
+			setBufferValue(buffer, 21, w, &changed)
 			setBufferValue(buffer, 22, h, &changed)
 			setBufferValue(buffer, 23, borderTint, &changed)
+
+			//Bottom
+			setBufferValue(buffer, 24, w+halfWidth, &changed)
+			setBufferValue(buffer, 25, h, &changed)
+			setBufferValue(buffer, 26, borderTint, &changed)
+
+			setBufferValue(buffer, 27, -halfWidth, &changed)
+			setBufferValue(buffer, 28, h, &changed)
+			setBufferValue(buffer, 29, borderTint, &changed)
+
+			//Left
+			//setBufferValue(buffer, 30, 0, &changed)
+			setBufferValue(buffer, 31, h, &changed)
+			setBufferValue(buffer, 32, borderTint, &changed)
+
+			//setBufferValue(buffer, 33, 0, &changed)
+			//setBufferValue(buffer, 34, 0, &changed)
+			setBufferValue(buffer, 35, borderTint, &changed)
 		}
 
 	case ComplexTriangles:
@@ -776,7 +797,7 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 				borderWidth /= l.camera.z
 			}
 			engo.Gl.LineWidth(borderWidth)
-			engo.Gl.DrawArrays(engo.Gl.LINE_LOOP, 4, 4)
+			engo.Gl.DrawArrays(engo.Gl.LINES, 4, 8)
 		}
 	case Circle:
 		engo.Gl.Uniform1f(l.inBorderWidth, shape.BorderWidth/l.camera.z)
