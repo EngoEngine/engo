@@ -368,11 +368,6 @@ type legacyShader struct {
 	matrixProjection *gl.UniformLocation
 	matrixView       *gl.UniformLocation
 	matrixModel      *gl.UniformLocation
-	inRadius         *gl.UniformLocation
-	inCenter         *gl.UniformLocation
-	inViewport       *gl.UniformLocation
-	inBorderWidth    *gl.UniformLocation
-	inBorderColor    *gl.UniformLocation
 
 	projectionMatrix []float32
 	viewMatrix       []float32
@@ -393,35 +388,14 @@ attribute vec4 in_Color;
 uniform mat3 matrixProjection;
 uniform mat3 matrixView;
 uniform mat3 matrixModel;
-uniform vec2 in_Radius;
-uniform vec2 in_Center;
-uniform vec2 in_Viewport;
-uniform float in_BorderWidth;
-uniform vec4 in_BorderColor;
 
 varying vec4 var_Color;
-varying vec2 var_Radius;
-varying vec2 var_Center;
-varying float var_BorderWidth;
-varying vec4 var_BorderColor;
 
 void main() {
   var_Color = in_Color;
 
   vec3 matr = matrixProjection * matrixView * matrixModel * vec3(in_Position, 1.0);
   gl_Position = vec4(matr.xy, 0, matr.z);
-
-  if (in_Radius.x > 0.0 && in_Radius.y > 0.0)
-  {
-    var_Radius = in_Radius;
-    var_BorderWidth = in_BorderWidth;
-    var_BorderColor = in_BorderColor;
-
-    vec3 vecCenter = (matrixProjection * matrixView * matrixModel * vec3(in_Center, 1.0));
-    var_Center = (vecCenter.xy/vecCenter.z + vec2(1.0, 1.0)) * in_Viewport / vec2(2.0);
-  } else {
-    var_Radius = vec2(0.0, 0.0);
-  }
 }
 `, `
 #ifdef GL_ES
@@ -432,28 +406,9 @@ precision mediump float;
 #endif
 
 varying vec4 var_Color;
-varying vec2 var_Radius;
-varying vec2 var_Center;
-varying float var_BorderWidth;
-varying vec4 var_BorderColor;
 
 void main (void) {
   gl_FragColor = var_Color;
-
-  float halfBorder = var_BorderWidth / 2.0;
-
-  if (var_Radius.x > 0.0 && var_Radius.y > 0.0)
-  {
-    if (pow(gl_FragCoord.x - var_Center.x, 2.0) / pow(var_Radius.x - halfBorder, 2.0) + pow(gl_FragCoord.y - var_Center.y, 2.0) / pow(var_Radius.y - halfBorder, 2.0) > 1.0)
-    {
-      if (pow(gl_FragCoord.x - var_Center.x, 2.0) / pow(var_Radius.x + halfBorder, 2.0) + pow(gl_FragCoord.y - var_Center.y, 2.0) / pow(var_Radius.y + halfBorder, 2.0) > 1.0)
-	  {
-	    gl_FragColor.w = 0.0;
-	  } else {
-	    gl_FragColor = var_BorderColor;
-	  }
-    }
-  }
 }`)
 
 	if err != nil {
@@ -474,11 +429,6 @@ void main (void) {
 	l.matrixProjection = engo.Gl.GetUniformLocation(l.program, "matrixProjection")
 	l.matrixView = engo.Gl.GetUniformLocation(l.program, "matrixView")
 	l.matrixModel = engo.Gl.GetUniformLocation(l.program, "matrixModel")
-	l.inRadius = engo.Gl.GetUniformLocation(l.program, "in_Radius")
-	l.inCenter = engo.Gl.GetUniformLocation(l.program, "in_Center")
-	l.inViewport = engo.Gl.GetUniformLocation(l.program, "in_Viewport")
-	l.inBorderWidth = engo.Gl.GetUniformLocation(l.program, "in_BorderWidth")
-	l.inBorderColor = engo.Gl.GetUniformLocation(l.program, "in_BorderColor")
 
 	l.projectionMatrix = make([]float32, 9)
 	l.projectionMatrix[8] = 1
@@ -539,7 +489,6 @@ func (l *legacyShader) Pre() {
 
 	engo.Gl.UniformMatrix3fv(l.matrixProjection, false, l.projectionMatrix)
 	engo.Gl.UniformMatrix3fv(l.matrixView, false, l.viewMatrix)
-	engo.Gl.Uniform2f(l.inViewport, engo.GameWidth(), engo.GameHeight()) // TODO: canvasWidth/Height
 }
 
 func (l *legacyShader) updateBuffer(ren *RenderComponent, space *SpaceComponent) {
@@ -564,7 +513,7 @@ func (l *legacyShader) computeBufferSize(draw Drawable) int {
 	case Rectangle:
 		return 36
 	case Circle:
-		return 12
+		return 1800
 	case ComplexTriangles:
 		return len(shape.Points) * 6
 	default:
@@ -642,23 +591,31 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 		}
 
 	case Circle:
-		halfWidth := shape.BorderWidth / 2
-		setBufferValue(buffer, 0, -halfWidth, &changed)
-		setBufferValue(buffer, 1, -halfWidth, &changed)
-		setBufferValue(buffer, 2, tint, &changed)
-
-		setBufferValue(buffer, 3, w+halfWidth, &changed)
-		setBufferValue(buffer, 4, -halfWidth, &changed)
-		setBufferValue(buffer, 5, tint, &changed)
-
-		setBufferValue(buffer, 6, w+halfWidth, &changed)
-		setBufferValue(buffer, 7, h+halfWidth, &changed)
-		setBufferValue(buffer, 8, tint, &changed)
-
-		setBufferValue(buffer, 9, -halfWidth, &changed)
-		setBufferValue(buffer, 10, h+halfWidth, &changed)
-		setBufferValue(buffer, 11, tint, &changed)
-
+		theta := float32(2.0 * math.Pi / 300.0)
+		s, c := math.Sincos(theta)
+		x := w / 2
+		cx := w / 2
+		y := float32(0.0)
+		cy := h / 2
+		t := float32(0.0)
+		var borderTint float32
+		hasBorder := shape.BorderWidth > 0
+		if hasBorder {
+			borderTint = colorToFloat32(shape.BorderColor)
+		}
+		for i := 0; i < 300; i++ {
+			setBufferValue(buffer, i*3, x+cx, &changed)
+			setBufferValue(buffer, i*3+1, y+cy, &changed)
+			setBufferValue(buffer, i*3+2, tint, &changed)
+			if hasBorder {
+				setBufferValue(buffer, i*3+900, x+cx, &changed)
+				setBufferValue(buffer, i*3+901, y+cy, &changed)
+				setBufferValue(buffer, i*3+902, borderTint, &changed)
+			}
+			t = x
+			x = c*x - s*y
+			y = s*t + c*y
+		}
 	case Rectangle:
 		//setBufferValue(buffer, 0, 0, &changed)
 		//setBufferValue(buffer, 1, 0, &changed)
@@ -775,7 +732,6 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 
 	switch shape := ren.Drawable.(type) {
 	case Triangle:
-		engo.Gl.Uniform2f(l.inRadius, 0, 0)
 		engo.Gl.DrawArrays(engo.Gl.TRIANGLES, 0, 3)
 
 		if shape.BorderWidth > 0 {
@@ -787,7 +743,6 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 			engo.Gl.DrawArrays(engo.Gl.LINE_LOOP, 3, 3)
 		}
 	case Rectangle:
-		engo.Gl.Uniform2f(l.inRadius, 0, 0)
 		engo.Gl.BindBuffer(engo.Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectanglesVBO)
 		engo.Gl.DrawElements(engo.Gl.TRIANGLES, 6, engo.Gl.UNSIGNED_SHORT, 0)
 
@@ -800,21 +755,17 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 			engo.Gl.DrawArrays(engo.Gl.LINES, 4, 8)
 		}
 	case Circle:
-		engo.Gl.Uniform1f(l.inBorderWidth, shape.BorderWidth/l.camera.z)
+		// Circle stuff!
+		engo.Gl.DrawArrays(engo.Gl.TRIANGLE_FAN, 0, 300)
 		if shape.BorderWidth > 0 {
-			r, g, b, a := shape.BorderColor.RGBA()
-			// Uniform4f wants parameters in the range from 0.0 to 1.0
-			// so we convert the uint32 r g b a values returned from RGBA() (ranging from 0 to 65535)
-			// to float32 ranging from 0.0 to 1.0
-			rf, gf, bf, af := float32(r)/65535, float32(g)/65535, float32(b)/65535, float32(a)/65535
-			engo.Gl.Uniform4f(l.inBorderColor, rf, gf, bf, af)
+			borderWidth := shape.BorderWidth
+			if l.cameraEnabled {
+				borderWidth /= l.camera.z
+			}
+			engo.Gl.LineWidth(borderWidth)
+			engo.Gl.DrawArrays(engo.Gl.LINE_LOOP, 300, 300)
 		}
-		engo.Gl.Uniform2f(l.inRadius, (space.Width/2)/l.camera.z, (space.Height/2)/l.camera.z)
-		engo.Gl.Uniform2f(l.inCenter, space.Width/2, space.Height/2)
-		engo.Gl.BindBuffer(engo.Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectanglesVBO)
-		engo.Gl.DrawElements(engo.Gl.TRIANGLES, 6, engo.Gl.UNSIGNED_SHORT, 0)
 	case ComplexTriangles:
-		engo.Gl.Uniform2f(l.inRadius, 0, 0)
 		engo.Gl.DrawArrays(engo.Gl.TRIANGLES, 0, len(shape.Points))
 
 		if shape.BorderWidth > 0 {
