@@ -78,18 +78,42 @@ func (f *Font) CreatePreloaded() error {
 // TextDimensions returns the total width, total height and total line size
 // of the input string written out in the Font.
 func (f *Font) TextDimensions(text string) (int, int, int) {
-	m := f.face.Metrics()
-	totalHeight := m.Height
-	maxYBearing := m.Ascent
-	var totalWidth fixed.Int26_6
+	fnt := f.TTF
+	size := f.Size
+	var (
+		totalWidth  = fixed.Int26_6(0)
+		totalHeight = fixed.Int26_6(size)
+		maxYBearing = fixed.Int26_6(0)
+	)
+	fupe := fixed.Int26_6(fnt.FUnitsPerEm())
+
 	for _, char := range text {
-		adv, ok := f.face.GlyphAdvance(char)
-		if !ok {
-			continue
+		idx := fnt.Index(char)
+		hm := fnt.HMetric(fupe, idx)
+		vm := fnt.VMetric(fupe, idx)
+		g := truetype.GlyphBuf{}
+		err := g.Load(fnt, fupe, idx, font.HintingNone)
+		if err != nil {
+			log.Println(err)
+			return 0, 0, 0
 		}
-		totalWidth += adv
+		totalWidth += hm.AdvanceWidth
+
+		yB := (vm.TopSideBearing * fixed.Int26_6(size)) / fupe
+		if yB > maxYBearing {
+			maxYBearing = yB
+		}
+		dY := (vm.AdvanceHeight * fixed.Int26_6(size)) / fupe
+		if dY > totalHeight {
+			totalHeight = dY
+		}
 	}
-	return totalWidth.Ceil(), totalHeight.Ceil(), maxYBearing.Ceil()
+
+	// Scale to actual pixel size
+	totalWidth *= fixed.Int26_6(size)
+	totalWidth /= fupe
+
+	return int(totalWidth), int(totalHeight), int(maxYBearing)
 }
 
 // RenderNRGBA returns an *image.NRGBA in the Font based on the input string.
