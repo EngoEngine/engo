@@ -1,4 +1,4 @@
-//+build netgo android
+//+build netgo android ios darwin,arm darwin,arm64
 
 package engo
 

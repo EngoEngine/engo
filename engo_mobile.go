@@ -1,4 +1,5 @@
-//+build android,!mobilebind
+//+build android darwin,arm darwin,arm64 ios
+//+build !mobilebind
 
 package engo
 
