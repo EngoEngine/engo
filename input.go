@@ -12,6 +12,7 @@ const (
 // NewInputManager holds onto anything input related for engo
 func NewInputManager() *InputManager {
 	return &InputManager{
+		Touches: make(map[int]Point),
 		axes:    make(map[string]Axis),
 		buttons: make(map[string]Button),
 		keys:    NewKeyManager(),
@@ -23,6 +24,11 @@ type InputManager struct {
 	// Mouse is InputManager's reference to the mouse. It is recommended to use the
 	// Axis and Button system if at all possible.
 	Mouse Mouse
+
+	// Touches is the touches on the screen. There can be up to 5 recorded in Android,
+	// and up to 4 on iOS. GLFW can also keep track of the touches. The latest touch is also
+	// recorded in the Mouse so that touches readily work with the common.MouseSystem
+	Touches map[int]Point
 
 	axes    map[string]Axis
 	buttons map[string]Button

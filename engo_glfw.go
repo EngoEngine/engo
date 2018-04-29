@@ -1,4 +1,5 @@
-//+build !netgo,!android
+// +build darwin,!arm,!arm64 linux windows
+// +build !ios,!android,!netgo
 
 package engo
 

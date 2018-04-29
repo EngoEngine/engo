@@ -1,4 +1,5 @@
-//+build android,!mobilebind
+//+build android darwin,arm darwin,arm64 ios
+//+build !mobilebind
 
 package engo
 
@@ -142,13 +143,23 @@ func runLoop(defaultScene Scene, headless bool) {
 			case touch.Event:
 				Input.Mouse.X = e.X / opts.GlobalScale.X
 				Input.Mouse.Y = e.Y / opts.GlobalScale.Y
+				id := int(e.Sequence)
 				switch e.Type {
 				case touch.TypeBegin:
 					Input.Mouse.Action = Press
+					Input.Touches[id] = Point{
+						X: float32(e.X) / opts.GlobalScale.X,
+						Y: float32(e.Y) / opts.GlobalScale.Y,
+					}
 				case touch.TypeMove:
 					Input.Mouse.Action = Move
+					Input.Touches[id] = Point{
+						X: float32(e.X) / opts.GlobalScale.X,
+						Y: float32(e.Y) / opts.GlobalScale.Y,
+					}
 				case touch.TypeEnd:
 					Input.Mouse.Action = Release
+					delete(Input.Touches, id)
 				}
 			}
 		}
