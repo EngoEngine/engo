@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"time"
 
 	"engo.io/gl"
 	"golang.org/x/mobile/app"
@@ -17,9 +18,6 @@ import (
 	"golang.org/x/mobile/event/paint"
 	"golang.org/x/mobile/event/size"
 	"golang.org/x/mobile/event/touch"
-	"golang.org/x/mobile/exp/app/debug"
-	"golang.org/x/mobile/exp/gl/glutil"
-	mobilegl "golang.org/x/mobile/gl"
 )
 
 var (
@@ -88,8 +86,7 @@ func runLoop(defaultScene Scene, headless bool) {
 
 	app.Main(func(a app.App) {
 		var (
-			images *glutil.Images
-			fps    *debug.FPS
+			ticker *time.Ticker
 		)
 
 		for e := range a.Events() {
@@ -100,9 +97,7 @@ func runLoop(defaultScene Scene, headless bool) {
 					Gl = gl.NewContext(e.DrawContext)
 					RunPreparation(defaultScene)
 
-					images = glutil.NewImages(e.DrawContext.(mobilegl.Context))
-					fps = debug.NewFPS(images)
-
+					ticker = time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
 					// Start tick, minimize the delta
 					Time.Tick()
 
@@ -110,6 +105,7 @@ func runLoop(defaultScene Scene, headless bool) {
 					a.Send(paint.Event{})
 				case lifecycle.CrossOff:
 					closeEvent()
+					ticker.Stop()
 					Gl = nil
 				}
 
@@ -130,9 +126,13 @@ func runLoop(defaultScene Scene, headless bool) {
 					continue
 				}
 
-				RunIteration()
-
-				fps.Draw(sz)
+				select {
+				case <-ticker.C:
+					RunIteration()
+				case <-resetLoopTicker:
+					ticker.Stop()
+					ticker = time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
+				}
 
 				Input.Mouse.Action = Neutral
 				a.Publish() // same as SwapBuffers

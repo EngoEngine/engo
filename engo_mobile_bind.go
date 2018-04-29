@@ -17,6 +17,8 @@ var (
 	Gl     *gl.Context
 	worker mgl.Worker
 
+	ticker *time.Ticker
+
 	msaaPreference int
 
 	drawEvent  = make(chan struct{})
@@ -149,15 +151,20 @@ func mobileDraw(defaultScene Scene) {
 
 	if !initalized {
 		RunPreparation(defaultScene)
+		ticker = time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
 		initalized = true
 	}
 
+	select {
+	case <-ticker.C:
+	case <-resetLoopTicker:
+		ticker.Stop()
+		ticker = time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
+	}
 	Time.Tick()
-
 	if !opts.HeadlessMode {
 		Input.update()
 	}
-
 	// Then update the world and all Systems
 	currentUpdater.Update(Time.Delta())
 }
@@ -165,6 +172,7 @@ func mobileDraw(defaultScene Scene) {
 //MobileStop handles when the game is closed
 func MobileStop() {
 	closeEvent()
+	ticker.Stop()
 	Gl = nil
 	worker = nil
 }
