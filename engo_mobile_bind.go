@@ -162,20 +162,6 @@ func mobileDraw(defaultScene Scene) {
 	currentUpdater.Update(Time.Delta())
 }
 
-//TouchEvent handles the touch events sent from Android and puts them in the InputManager
-func TouchEvent(x, y, action int) {
-	Input.Mouse.X = float32(x) / opts.GlobalScale.X
-	Input.Mouse.Y = float32(y) / opts.GlobalScale.Y
-	switch action {
-	case 0:
-		Input.Mouse.Action = Press
-	case 1:
-		Input.Mouse.Action = Release
-	case 2:
-		Input.Mouse.Action = Move
-	}
-}
-
 //MobileStop handles when the game is closed
 func MobileStop() {
 	closeEvent()
