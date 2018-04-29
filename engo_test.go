@@ -216,3 +216,22 @@ func TestOverrideCloseAction(t *testing.T) {
 		t.Error("calling closeEvent with Override set did not write expected output to log")
 	}
 }
+
+func TestSetGlobalScale(t *testing.T) {
+	data := []struct {
+		in  Point
+		exp Point
+	}{
+		{Point{X: 5, Y: 5}, Point{X: 5, Y: 5}},
+		{Point{X: -5, Y: 5}, Point{X: 1, Y: 1}},
+		{Point{X: 5, Y: -5}, Point{X: 1, Y: 1}},
+		{Point{X: -5, Y: -5}, Point{X: 1, Y: 1}},
+	}
+
+	for _, d := range data {
+		SetGlobalScale(d.in)
+		if opts.GlobalScale.X != d.exp.X || opts.GlobalScale.Y != d.exp.Y {
+			t.Errorf("SetGlobalScale did not set properly. was: %v, expected: %v", opts.GlobalScale, d.exp)
+		}
+	}
+}
