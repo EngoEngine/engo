@@ -41,7 +41,7 @@ type Line struct {
 type Trace struct {
 	Fraction    float32
 	EndPosition Point
-	*Line
+	Line
 }
 
 // Set sets the coordinates of p to x and y
@@ -101,11 +101,16 @@ func (p *Point) PointDistanceSquared(p2 Point) float32 {
 }
 
 // ProjectOnto returns the vector produced by projecting p on to p2
+// returns an empty Point if they can't project onto one another
 func (p *Point) ProjectOnto(p2 Point) Point {
 	dot := p.X*p2.X + p.Y*p2.Y
+	denom := p2.X*p2.X + p2.Y*p2.Y
+	if FloatEqual(denom, 0) {
+		return Point{}
+	}
 	return Point{
-		dot / (p2.X*p2.X + p2.Y*p2.Y) * p2.X,
-		dot / (p2.X*p2.X + p2.Y*p2.Y) * p2.Y,
+		dot / denom * p2.X,
+		dot / denom * p2.Y,
 	}
 }
 
@@ -128,6 +133,8 @@ func (p Point) Within(c Container) bool {
 }
 
 // PointSide returns which side of the line l the point p sits on
+// true means the point is below/left of the line
+// false means the point is above/right of the line or touching the line
 func (l *Line) PointSide(point Point) bool {
 	one := (point.X - l.P1.X) * (l.P2.Y - l.P1.Y)
 	two := (point.Y - l.P1.Y) * (l.P2.X - l.P1.X)
@@ -135,12 +142,13 @@ func (l *Line) PointSide(point Point) bool {
 	return math.Signbit(one - two)
 }
 
-// Angle returns the euclidean angle of l relative to Y = 0
+// Angle returns the euclidean angle of l relative to X = 0
+// The return angle is in radians and goes counter-clockwise and returns [-pi, pi]
 func (l *Line) Angle() float32 {
 	return math.Atan2(l.P1.X-l.P2.X, l.P1.Y-l.P2.Y)
 }
 
-// PointDistance Returns the squared euclidean distance from the point p to the
+// PointDistance Returns the euclidean distance from the point p to the
 // line segment l
 func (l *Line) PointDistance(point Point) float32 {
 	return math.Sqrt(l.PointDistanceSquared(point))
@@ -200,7 +208,7 @@ func CrossProduct(this, that Point) float32 {
 // LineIntersection returns the point where the line segments one and two
 // intersect and true if there is intersection, nil and false when line
 // segments one and two do not intersect
-func LineIntersection(one, two *Line) (Point, bool) {
+func LineIntersection(one, two Line) (Point, bool) {
 	p := one.P1
 	q := two.P1
 
@@ -223,19 +231,9 @@ func LineIntersection(one, two *Line) (Point, bool) {
 	qmpcr := CrossProduct(qmp, r)
 	rcs := CrossProduct(r, s)
 
-	// Collinear
-	if rcs == 0 && qmpcr == 0 {
-		return Point{}, false
-	}
-
-	// Parallel
-	if rcs == 0 && qmpcr != 0 {
-		return Point{}, false
-	}
-
 	t := qmpcs / rcs
 	u := qmpcr / rcs
-	// rcs != 0 at this point
+	// if rcs == 0 then it's either collinear or parallel. It'll be +/- inf, so it'll skip this statement and return at the end
 	if t >= 0 && t <= 1 && u >= 0 && u <= 1 {
 		// the two line segments meet at the point p + t r = q + u s.
 		return Point{p.X + t*r.X, p.Y + t*r.Y}, true
@@ -247,8 +245,7 @@ func LineIntersection(one, two *Line) (Point, bool) {
 // LineTraceFraction returns the trace fraction of tracer through boundary
 // 1 means no intersection
 // 0 means tracer's origin lies on the boundary line
-func LineTraceFraction(tracer, boundary *Line) float32 {
-
+func LineTraceFraction(tracer, boundary Line) float32 {
 	pt, intersect := LineIntersection(tracer, boundary)
 	if !intersect {
 		return 1
@@ -257,32 +254,19 @@ func LineTraceFraction(tracer, boundary *Line) float32 {
 	traceMag := tracer.P1.PointDistance(pt)
 	lineMag := tracer.P1.PointDistance(tracer.P2)
 
-	if traceMag > lineMag {
-		return 1
-	}
-
-	if lineMag == 0 {
-		return 0
-	}
-
 	return traceMag / lineMag
 }
 
 // LineTrace runs a series of line traces from tracer to each boundary line
 // and returns the nearest trace values
-func LineTrace(tracer *Line, boundaries []*Line) Trace {
+func LineTrace(tracer Line, boundaries []Line) Trace {
 	var t Trace
+	t.Fraction = math.Inf(1)
 
 	for _, cl := range boundaries {
-		//TODO why are some lines nil here?
-		//fmt.Println("Line:", cl)
-		if cl == nil {
-			continue
-		}
-
 		fraction := LineTraceFraction(tracer, cl)
 
-		if t.Line == nil || fraction < t.Fraction {
+		if fraction < t.Fraction {
 			t.Fraction = fraction
 			t.Line = cl
 
@@ -314,6 +298,10 @@ func FloatEqual(a, b float32) bool {
 func FloatEqualThreshold(a, b, epsilon float32) bool {
 	if a == b { // Handles the case of inf or shortcuts the loop when no significant error has accumulated
 		return true
+	}
+
+	if math.IsNaN(a) || math.IsNaN(b) {
+		return false // Can't be equal if NaN
 	}
 
 	diff := math.Abs(a - b)

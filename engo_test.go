@@ -18,6 +18,22 @@ func (t *testScene) Setup(u Updater) {}
 
 func (*testScene) Type() string { return "testScene" }
 
+type testScene2 struct{}
+
+func (*testScene2) Preload() {}
+
+func (*testScene2) Setup(u Updater) {}
+
+func (*testScene2) Type() string { return "testScene2" }
+
+func (*testScene2) Hide() {
+	log.Println("Hiding testScene2.")
+}
+
+func (*testScene2) Show() {
+	log.Println("Showing testScene2.")
+}
+
 // The tests for engo.go all have to use the headless option. Non-headless stuff is not
 // testable via the cl only, and those are taken care of by building the demos via Travis CI
 func TestRunHeadlessNoRunDefaults(t *testing.T) {
@@ -214,5 +230,71 @@ func TestOverrideCloseAction(t *testing.T) {
 
 	if !strings.HasSuffix(buf.String(), expected) {
 		t.Error("calling closeEvent with Override set did not write expected output to log")
+	}
+}
+
+func TestSetGlobalScale(t *testing.T) {
+	data := []struct {
+		in  Point
+		exp Point
+	}{
+		{Point{X: 5, Y: 5}, Point{X: 5, Y: 5}},
+		{Point{X: -5, Y: 5}, Point{X: 1, Y: 1}},
+		{Point{X: 5, Y: -5}, Point{X: 1, Y: 1}},
+		{Point{X: -5, Y: -5}, Point{X: 1, Y: 1}},
+	}
+
+	for _, d := range data {
+		SetGlobalScale(d.in)
+		if opts.GlobalScale.X != d.exp.X || opts.GlobalScale.Y != d.exp.Y {
+			t.Errorf("SetGlobalScale did not set properly. was: %v, expected: %v", opts.GlobalScale, d.exp)
+		}
+	}
+}
+
+func TestSceneSwitching(t *testing.T) {
+	RegisterScene(&testScene2{})
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	Run(RunOptions{
+		NoRun:        true,
+		HeadlessMode: true,
+	}, &testScene{})
+	SetSceneByName("testScene2", false)
+	if CurrentScene().Type() != "testScene2" {
+		t.Errorf("CurrentScene got wrong scene. was: %v, expected: %v", CurrentScene().Type(), "testScene2")
+	}
+	SetSceneByName("testScene", false)
+	expected := "Hiding testScene2.\n"
+	if !strings.HasSuffix(buf.String(), expected) {
+		t.Errorf("Did not properly set testScene1 and hide testScene2. was %v, expected: %v", buf.String(), expected)
+	}
+	buf.Reset()
+	SetSceneByName("testScene2", false)
+	expected = "Showing testScene2.\n"
+	if !strings.HasSuffix(buf.String(), expected) {
+		t.Errorf("Did not properly set and show testScene2. was: %v, expected: %v", buf.String(), expected)
+	}
+	err := SetSceneByName("doesNotExistScene", true)
+	if err == nil {
+		t.Error("No error when setting scene that doesn't exist.")
+	}
+	expected = "scene not registered:"
+	if !strings.HasPrefix(err.Error(), expected) {
+		t.Errorf("Did not recieve correct error for setting a scene that doesn't exist. was: %v, expected:%v", err.Error(), expected)
+	}
+}
+
+func TestUtils(t *testing.T) {
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	expectedImpl := "is not yet implemented on this platform\n"
+	expectedType := "type not supported\n"
+	if notImplemented("testing "); !strings.HasSuffix(buf.String(), expectedImpl) {
+		t.Errorf("Did not properly log notImplemented. got: %v", buf.String())
+	}
+	buf.Reset()
+	if unsupportedType(); !strings.HasSuffix(buf.String(), expectedType) {
+		t.Errorf("Did not properly log unsupportedType. got: %v", buf.String())
 	}
 }
