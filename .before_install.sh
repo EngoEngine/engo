@@ -22,6 +22,9 @@ then
 elif [ "$TEST_TYPE" == "linux_test" ] || [ "$TEST_TYPE" == "linux_build" ]
 then
     echo "nothing more to add for linux"
+elif [ "$TEST_TYPE" == "traffic_manager" ]
+then
+    go get github.com/EngoEngine/TrafficManager
 else
     echo "environment variable TEST_TYPE was not set"
 fi
