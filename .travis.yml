@@ -27,6 +27,7 @@ matrix:
     - env: TEST_TYPE=linux_build
     - env: TEST_TYPE=js_test
     - env: TEST_TYPE=js_build
+    - env: TEST_TYPE=traffic_manager
 env:
   global:
     secure: BVZrmTzkg/CPF6QDsQWyh/K+bd4yU3N3PFzcERaO6i32ln+uqaejhMtCsTXrr439vKH33DF5BFG34W+K4IbqwQyBgzjzUnotPXcWtXSuiojSOmCWkuw8qiPBuVTAsahBhP6N11LgUAcgkfAl968CkfIN3I7gBF916PFsefZtn6s=

@@ -96,6 +96,16 @@ then
         mkdir -p `dirname "$outdir/android/${dir}.apk"`
         gomobile build -o "$outdir/android/${dir}.apk" -target android -tags demo ${dir} || exit 1
     done
+elif [ "$TEST_TYPE" == "traffic_manager" ]
+then
+    branches='01-hello-world 02-first-system 03-camera-movement 04-hud'
+    cd $HOME/gopath/src/github.com/EngoEngine/TrafficManager
+    for branch in $branches
+    do
+        echo "Verifying ${branch} ..."
+        git checkout ${branch}
+        go build -o "tmp/go-builds/${branch}" || exit 1
+    done
 else
     echo "environment variable TEST_TYPE was not set"
 fi
