@@ -159,7 +159,7 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 	spriteSheet := common.NewSpritesheetFromFile(model, width, height)
 
 	hero := scene.CreateHero(
-		engo.Point{engo.CanvasWidth() / 2, engo.CanvasHeight() / 2},
+		engo.Point{engo.GameWidth() / 2, engo.GameHeight() / 2},
 		spriteSheet,
 	)
 

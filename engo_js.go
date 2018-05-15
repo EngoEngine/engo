@@ -43,8 +43,8 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	canvas := document.CreateElement("canvas").(*dom.HTMLCanvasElement)
 
 	devicePixelRatio = js.Global.Get("devicePixelRatio").Float()
-	canvas.Width = int(float64(width)*devicePixelRatio + 0.5)   // Nearest non-negative int.
-	canvas.Height = int(float64(height)*devicePixelRatio + 0.5) // Nearest non-negative int.
+	canvas.Width = int(float64(width) + 0.5)   // Nearest non-negative int.
+	canvas.Height = int(float64(height) + 0.5) // Nearest non-negative int.
 	canvas.Style().SetProperty("width", fmt.Sprintf("%vpx", width), "")
 	canvas.Style().SetProperty("height", fmt.Sprintf("%vpx", height), "")
 	log.Println("devicePixelRatio", devicePixelRatio)
@@ -111,22 +111,22 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 	w.AddEventListener("mousemove", false, func(ev dom.Event) {
 		mm := ev.(*dom.MouseEvent)
-		Input.Mouse.X = float32(float64(mm.ClientX)*devicePixelRatio) / opts.GlobalScale.X
-		Input.Mouse.Y = float32(float64(mm.ClientY)*devicePixelRatio) / opts.GlobalScale.Y
+		Input.Mouse.X = float32(float64(mm.ClientX)) / opts.GlobalScale.X
+		Input.Mouse.Y = float32(float64(mm.ClientY)) / opts.GlobalScale.Y
 		//Mouse.Action = MOVE
 	})
 
 	w.AddEventListener("mousedown", false, func(ev dom.Event) {
 		mm := ev.(*dom.MouseEvent)
-		Input.Mouse.X = float32(float64(mm.ClientX)*devicePixelRatio) / opts.GlobalScale.X
-		Input.Mouse.Y = float32(float64(mm.ClientY)*devicePixelRatio) / opts.GlobalScale.Y
+		Input.Mouse.X = float32(float64(mm.ClientX)) / opts.GlobalScale.X
+		Input.Mouse.Y = float32(float64(mm.ClientY)) / opts.GlobalScale.Y
 		Input.Mouse.Action = Press
 	})
 
 	w.AddEventListener("mouseup", false, func(ev dom.Event) {
 		mm := ev.(*dom.MouseEvent)
-		Input.Mouse.X = float32(float64(mm.ClientX)*devicePixelRatio) / opts.GlobalScale.X
-		Input.Mouse.Y = float32(float64(mm.ClientY)*devicePixelRatio) / opts.GlobalScale.Y
+		Input.Mouse.X = float32(float64(mm.ClientX)) / opts.GlobalScale.X
+		Input.Mouse.Y = float32(float64(mm.ClientY)) / opts.GlobalScale.Y
 		Input.Mouse.Action = Release
 	})
 }
