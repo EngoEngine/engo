@@ -52,8 +52,9 @@ type cameraEntity struct {
 // one CameraSystem can be in a World at a time. If more than one CameraSystem
 // is added to the World, it will panic.
 type CameraSystem struct {
-	x, y, z  float32
-	tracking cameraEntity // The entity that is currently being followed
+	x, y, z       float32
+	tracking      cameraEntity // The entity that is currently being followed
+	trackRotation bool         // Rotate with the entity
 
 	// angle is the angle of the camera, in degrees (not radians!)
 	angle float32
@@ -185,12 +186,16 @@ func (cam *CameraSystem) Update(dt float32) {
 		cam.tracking.SpaceComponent.Position.Y+cam.tracking.SpaceComponent.Height/2,
 		cam.z,
 	)
+	if cam.trackRotation {
+		cam.rotateTo(cam.tracking.SpaceComponent.Rotation)
+	}
 }
 
 // FollowEntity sets the camera to follow the entity with BasicEntity basic
 // and SpaceComponent space.
-func (cam *CameraSystem) FollowEntity(basic *ecs.BasicEntity, space *SpaceComponent) {
+func (cam *CameraSystem) FollowEntity(basic *ecs.BasicEntity, space *SpaceComponent, trackRotation bool) {
 	cam.tracking = cameraEntity{basic, space}
+	cam.trackRotation = trackRotation
 }
 
 // X returns the X-coordinate of the location of the Camera.
@@ -344,6 +349,7 @@ func NewKeyboardScroller(scrollSpeed float32, hori, vert string) *KeyboardScroll
 type EntityScroller struct {
 	*SpaceComponent
 	TrackingBounds engo.AABB
+	Rotation       bool
 }
 
 // New adjusts CameraBounds to the bounds of EntityScroller.
@@ -375,6 +381,9 @@ func (c *EntityScroller) Update(dt float32) {
 
 	engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: trackToX, Incremental: false})
 	engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: trackToY, Incremental: false})
+	if c.Rotation {
+		engo.Mailbox.Dispatch(CameraMessage{Axis: Angle, Value: c.SpaceComponent.Rotation, Incremental: false})
+	}
 }
 
 // EdgeScroller is a System that allows for scrolling when the cursor is near the edges of
