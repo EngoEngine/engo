@@ -316,11 +316,13 @@ func (c *KeyboardScroller) Update(dt float32) {
 	c.keysMu.RLock()
 	defer c.keysMu.RUnlock()
 
-	vert := engo.Input.Axis(c.verticalAxis)
-	engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: vert.Value() * c.ScrollSpeed * dt, Incremental: true})
-
-	hori := engo.Input.Axis(c.horizontalAxis)
-	engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: hori.Value() * c.ScrollSpeed * dt, Incremental: true})
+	m := engo.Point{
+		X: engo.Input.Axis(c.horizontalAxis).Value(),
+		Y: engo.Input.Axis(c.verticalAxis).Value(),
+	}
+	n, _ := m.Normalize()
+	engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: n.X * c.ScrollSpeed * dt, Incremental: true})
+	engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: n.Y * c.ScrollSpeed * dt, Incremental: true})
 }
 
 // BindKeyboard sets the vertical and horizontal axes used by the KeyboardScroller.
@@ -405,15 +407,29 @@ func (*EdgeScroller) Remove(ecs.BasicEntity) {}
 // TODO: Warning doesn't get the cursor position
 func (c *EdgeScroller) Update(dt float32) {
 	curX, curY := engo.CursorPos()
-	maxX, maxY := engo.CanvasWidth(), engo.CanvasHeight()
+	maxX, maxY := engo.GameWidth(), engo.GameHeight()
 
-	if curX < c.EdgeMargin {
+	if curX < c.EdgeMargin && curY < c.EdgeMargin {
+		s := math.Sqrt(2)
+		engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: -c.ScrollSpeed * dt / s, Incremental: true})
+		engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: -c.ScrollSpeed * dt / s, Incremental: true})
+	} else if curX < c.EdgeMargin && curY > maxY-c.EdgeMargin {
+		s := math.Sqrt(2)
+		engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: -c.ScrollSpeed * dt / s, Incremental: true})
+		engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: c.ScrollSpeed * dt / s, Incremental: true})
+	} else if curX > maxX-c.EdgeMargin && curY < c.EdgeMargin {
+		s := math.Sqrt(2)
+		engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: c.ScrollSpeed * dt / s, Incremental: true})
+		engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: -c.ScrollSpeed * dt / s, Incremental: true})
+	} else if curX > maxX-c.EdgeMargin && curY > maxY-c.EdgeMargin {
+		s := math.Sqrt(2)
+		engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: c.ScrollSpeed * dt / s, Incremental: true})
+		engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: c.ScrollSpeed * dt / s, Incremental: true})
+	} else if curX < c.EdgeMargin {
 		engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: -c.ScrollSpeed * dt, Incremental: true})
 	} else if curX > maxX-c.EdgeMargin {
 		engo.Mailbox.Dispatch(CameraMessage{Axis: XAxis, Value: c.ScrollSpeed * dt, Incremental: true})
-	}
-
-	if curY < c.EdgeMargin {
+	} else if curY < c.EdgeMargin {
 		engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: -c.ScrollSpeed * dt, Incremental: true})
 	} else if curY > maxY-c.EdgeMargin {
 		engo.Mailbox.Dispatch(CameraMessage{Axis: YAxis, Value: c.ScrollSpeed * dt, Incremental: true})

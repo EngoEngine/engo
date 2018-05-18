@@ -491,10 +491,10 @@ func (c *ControlSystem) Update(dt float32) {
 
 		if vector, changed := getSpeed(e); changed {
 			speed := dt * SPEED_SCALE
+			vector, _ = vector.Normalize()
 			vector.MultiplyScalar(speed)
 			engo.Mailbox.Dispatch(SpeedMessage{e.BasicEntity, vector})
 		}
-
 	}
 }
 
