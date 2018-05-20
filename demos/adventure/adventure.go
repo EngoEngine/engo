@@ -448,12 +448,48 @@ func setAnimation(e controlEntity) {
 
 	if engo.Input.Button(upButton).JustReleased() {
 		e.AnimationComponent.SelectAnimationByAction(StopUpAction)
+		if engo.Input.Button(leftButton).Down() {
+			e.AnimationComponent.SelectAnimationByAction(WalkLeftAction)
+		} else if engo.Input.Button(rightButton).Down() {
+			e.AnimationComponent.SelectAnimationByAction(WalkRightAction)
+		} else if engo.Input.Button(upButton).Down() {
+			e.AnimationComponent.SelectAnimationByAction(WalkUpAction)
+		} else if engo.Input.Button(downButton).Down() {
+			e.AnimationComponent.SelectAnimationByAction(WalkDownAction)
+		}
 	} else if engo.Input.Button(downButton).JustReleased() {
 		e.AnimationComponent.SelectAnimationByAction(StopDownAction)
+		if engo.Input.Button(leftButton).Down() {
+			e.AnimationComponent.SelectAnimationByAction(WalkLeftAction)
+		} else if engo.Input.Button(rightButton).Down() {
+			e.AnimationComponent.SelectAnimationByAction(WalkRightAction)
+		} else if engo.Input.Button(upButton).Down() {
+			e.AnimationComponent.SelectAnimationByAction(WalkUpAction)
+		} else if engo.Input.Button(downButton).Down() {
+			e.AnimationComponent.SelectAnimationByAction(WalkDownAction)
+		}
 	} else if engo.Input.Button(leftButton).JustReleased() {
 		e.AnimationComponent.SelectAnimationByAction(StopLeftAction)
+		if engo.Input.Button(leftButton).Down() {
+			e.AnimationComponent.SelectAnimationByAction(WalkLeftAction)
+		} else if engo.Input.Button(rightButton).Down() {
+			e.AnimationComponent.SelectAnimationByAction(WalkRightAction)
+		} else if engo.Input.Button(upButton).Down() {
+			e.AnimationComponent.SelectAnimationByAction(WalkUpAction)
+		} else if engo.Input.Button(downButton).Down() {
+			e.AnimationComponent.SelectAnimationByAction(WalkDownAction)
+		}
 	} else if engo.Input.Button(rightButton).JustReleased() {
 		e.AnimationComponent.SelectAnimationByAction(StopRightAction)
+		if engo.Input.Button(leftButton).Down() {
+			e.AnimationComponent.SelectAnimationByAction(WalkLeftAction)
+		} else if engo.Input.Button(rightButton).Down() {
+			e.AnimationComponent.SelectAnimationByAction(WalkRightAction)
+		} else if engo.Input.Button(upButton).Down() {
+			e.AnimationComponent.SelectAnimationByAction(WalkUpAction)
+		} else if engo.Input.Button(downButton).Down() {
+			e.AnimationComponent.SelectAnimationByAction(WalkDownAction)
+		}
 	}
 }
 
@@ -476,10 +512,28 @@ func getSpeed(e controlEntity) (p engo.Point, changed bool) {
 	if engo.Input.Button(upButton).JustReleased() || engo.Input.Button(downButton).JustReleased() {
 		p.Y = 0
 		changed = true
+		if engo.Input.Button(upButton).Down() {
+			p.Y = -1
+		} else if engo.Input.Button(downButton).Down() {
+			p.Y = 1
+		} else if engo.Input.Button(leftButton).Down() {
+			p.X = -1
+		} else if engo.Input.Button(rightButton).Down() {
+			p.X = 1
+		}
 	}
 	if engo.Input.Button(leftButton).JustReleased() || engo.Input.Button(rightButton).JustReleased() {
 		p.X = 0
 		changed = true
+		if engo.Input.Button(leftButton).Down() {
+			p.X = -1
+		} else if engo.Input.Button(rightButton).Down() {
+			p.X = 1
+		} else if engo.Input.Button(upButton).Down() {
+			p.Y = -1
+		} else if engo.Input.Button(downButton).Down() {
+			p.Y = 1
+		}
 	}
 	changed = changed || p.X != origX || p.Y != origY
 	return
