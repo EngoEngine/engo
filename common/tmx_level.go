@@ -45,6 +45,8 @@ type TMXTileset struct {
 	ImageSrc TMXTilesetSrc `xml:"image"`
 	// Image holds the reference of the tileset's TextureResource
 	Image *TextureResource
+	// Tiles are any tiles inside the tileset
+	Tiles []TMXTile `xml:"tile"`
 }
 
 // TMXTileLayer represents a tile layer parsed from the TileMap XML
@@ -76,7 +78,7 @@ type TMXData struct {
 	Data string `xml:",innerxml,"`
 	// Tiles is an array of tiles containing guids. Not set if
 	// other encodings are used
-	Tiles []TMXTile `xml:tile`
+	Tiles []TMXTile `xml:"tile"`
 }
 
 // TMXTile represents a single tile on a tile layer.
@@ -84,6 +86,10 @@ type TMXTile struct {
 	// gid represents a single tile encoded with its flip
 	// orientation
 	gid uint32 `xml:gid,attr`
+	// ImageSrc is the image on the tile
+	ImageSrc TMXImageSrc `xml:"image"`
+	// Image holds the reference of the tileset's TextureResource
+	Image *TextureResource
 }
 
 // ErrUnknownEncoding is when the encoding of the TMX is unsupported.
@@ -304,6 +310,21 @@ func (t ByFirstgid) Swap(i, j int) { t[i], t[j] = t[j], t[i] }
 // Less returns if t's i Firstgid is less than t's j
 func (t ByFirstgid) Less(i, j int) bool { return t[i].Firstgid < t[j].Firstgid }
 
+func getTextureResourcesFromTmx(url string) (*TextureResource, error) {
+	if err := engo.Files.Load(url); err != nil {
+		return nil, err
+	}
+	image, err := engo.Files.Resource(url)
+	if err != nil {
+		return nil, err
+	}
+	texResource, ok := image.(TextureResource)
+	if !ok {
+		return nil, fmt.Errorf("resource is not of type 'TextureResource': %q", url)
+	}
+	return &texResource, nil
+}
+
 // createLevelFromTmx unmarshales and unpacks tmx data into a Level
 func createLevelFromTmx(tmxBytes []byte, tmxURL string) (*Level, error) {
 	tmxLevel := &TMXLevel{}
@@ -325,19 +346,22 @@ func createLevelFromTmx(tmxBytes []byte, tmxURL string) (*Level, error) {
 
 	// Load in the images needed for the tilesets
 	for i, ts := range tmxLevel.Tilesets {
-		url := path.Join(path.Dir(tmxURL), ts.ImageSrc.Source)
-		if err := engo.Files.Load(url); err != nil {
-			return nil, err
+		for j, tile := range ts.Tiles {
+			texResource, err := getTextureResourcesFromTmx(path.Join(path.Dir(tmxURL), tile.ImageSrc.Source))
+			if err != nil {
+				return nil, err
+			}
+			ts.Tiles[j].Image = texResource
 		}
-		image, err := engo.Files.Resource(url)
+		if ts.ImageSrc.Source == "" {
+			tmxLevel.Tilesets[i] = ts
+			continue
+		}
+		texResource, err := getTextureResourcesFromTmx(path.Join(path.Dir(tmxURL), ts.ImageSrc.Source))
 		if err != nil {
 			return nil, err
 		}
-		texResource, ok := image.(TextureResource)
-		if !ok {
-			return nil, fmt.Errorf("resource is not of type 'TextureResource': %q", url)
-		}
-		ts.Image = &texResource
+		ts.Image = texResource
 		tmxLevel.Tilesets[i] = ts
 	}
 
@@ -353,7 +377,14 @@ func createLevelFromTmx(tmxBytes []byte, tmxURL string) (*Level, error) {
 	sort.Sort(ByFirstgid(tmxLevel.Tilesets))
 	ts := make([]*tilesheet, len(tmxLevel.Tilesets))
 	for i, tts := range tmxLevel.Tilesets {
-		ts[i] = &tilesheet{tts.Image, tts.Firstgid, tts.TileWidth, tts.TileHeight}
+		tiles := make([]Tile, 0)
+		for _, t := range tts.Tiles {
+			tile := Tile{}
+			tile.Image = &Texture{t.Image.Texture, t.Image.Width, t.Image.Height, engo.AABB{Max: engo.Point{X: 1.0, Y: 1.0}}}
+			tile.Point = engo.Point{X: 0, Y: 0}
+			tiles = append(tiles, tile)
+		}
+		ts[i] = &tilesheet{tts.Image, tts.Firstgid, tts.TileWidth, tts.TileHeight, tiles}
 	}
 
 	level.Tileset = createTileset(level, ts)
