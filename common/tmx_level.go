@@ -400,7 +400,7 @@ func createLevelFromTmx(tmxBytes []byte, tmxURL string) (*Level, error) {
 	}
 
 	// create Tile layers with tiles
-	level.TileLayers = createLevelTiles(level, levelTileLayers, level.Tileset)
+	level.TileLayers, level.tilemap = createLevelTiles(level, levelTileLayers, level.Tileset)
 
 	// create object layers
 	for _, objectLayer := range tmxLevel.ObjectLayers {
