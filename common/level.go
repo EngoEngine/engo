@@ -2,6 +2,7 @@ package common
 
 import (
 	"engo.io/engo"
+	"engo.io/engo/math"
 	"engo.io/gl"
 )
 
@@ -27,6 +28,8 @@ type Level struct {
 	ImageLayers []*ImageLayer
 	// ObjectLayers contains all ObjectLayer of the level
 	ObjectLayers []*ObjectLayer
+	// tilemap maps tile map position to the tile at that location
+	tilemap map[mapPoint]*Tile
 }
 
 // TileLayer contains a list of its tiles plus all default Tiled attributes
@@ -105,15 +108,70 @@ type PolylineObject struct {
 	LineBounds []*engo.Line
 }
 
+type mapPoint struct {
+	X, Y int
+}
+
 // Bounds returns the level boundaries as an engo.AABB object
 func (l *Level) Bounds() engo.AABB {
-	return engo.AABB{
-		Min: engo.Point{X: 0, Y: 0},
-		Max: engo.Point{
-			X: float32(l.TileWidth * l.width),
-			Y: float32(l.TileHeight * l.height),
-		},
+	switch l.Orientation {
+	case "orthogonal":
+		return engo.AABB{
+			Min: l.screenPoint(engo.Point{X: 0, Y: 0}),
+			Max: l.screenPoint(engo.Point{X: float32(l.width), Y: float32(l.height)}),
+		}
+	case "isometric":
+		xMin := l.screenPoint(engo.Point{X: 0, Y: float32(l.height)}).X + float32(l.TileWidth)/2
+		xMax := l.screenPoint(engo.Point{X: float32(l.width), Y: 0}).X + float32(l.TileWidth)/2
+		yMin := l.screenPoint(engo.Point{X: 0, Y: 0}).Y
+		yMax := l.screenPoint(engo.Point{X: float32(l.width), Y: float32(l.height)}).Y + float32(l.TileHeight)/2
+		return engo.AABB{
+			Min: engo.Point{X: xMin, Y: yMin},
+			Max: engo.Point{X: xMax, Y: yMax},
+		}
 	}
+	return engo.AABB{}
+}
+
+// mapPoint returns the map point of the passed in screen point
+func (l *Level) mapPoint(screenPt engo.Point) engo.Point {
+	switch l.Orientation {
+	case "orthogonal":
+		screenPt.Multiply(engo.Point{X: 1 / float32(l.TileWidth), Y: 1 / float32(l.TileHeight)})
+		return screenPt
+	case "isometric":
+		return engo.Point{
+			X: (screenPt.X / float32(l.TileWidth)) + (screenPt.Y / float32(l.TileHeight)),
+			Y: (screenPt.Y / float32(l.TileHeight)) - (screenPt.X / float32(l.TileWidth)),
+		}
+	}
+	return engo.Point{X: 0, Y: 0}
+}
+
+// screenPoint returns the screen point of the passed in map point
+func (l *Level) screenPoint(mapPt engo.Point) engo.Point {
+	switch l.Orientation {
+	case "orthogonal":
+		mapPt.Multiply(engo.Point{X: float32(l.TileWidth), Y: float32(l.TileHeight)})
+		return mapPt
+	case "isometric":
+		return engo.Point{
+			X: (mapPt.X - mapPt.Y) * float32(l.TileWidth) / 2,
+			Y: (mapPt.X + mapPt.Y) * float32(l.TileHeight) / 2,
+		}
+	}
+	return engo.Point{X: 0, Y: 0}
+}
+
+func (l *Level) GetTile(pt engo.Point) *Tile {
+	mp := l.mapPoint(pt)
+	x := int(math.Floor(mp.X))
+	y := int(math.Floor(mp.Y))
+	t, ok := l.tilemap[mapPoint{X: x, Y: y}]
+	if !ok {
+		return nil
+	}
+	return t
 }
 
 // Width returns the integer width of the level
@@ -223,8 +281,9 @@ func createTileset(lvl *Level, sheets []*tilesheet) map[int]*Tile {
 	return tileset
 }
 
-func createLevelTiles(lvl *Level, layers []*layer, ts map[int]*Tile) []*TileLayer {
+func createLevelTiles(lvl *Level, layers []*layer, ts map[int]*Tile) ([]*TileLayer, map[mapPoint]*Tile) {
 	var levelTileLayers []*TileLayer
+	tileMapper := make(map[mapPoint]*Tile)
 
 	// Create a TileLayer for each provided layer
 	for _, layer := range layers {
@@ -235,16 +294,15 @@ func createLevelTiles(lvl *Level, layers []*layer, ts map[int]*Tile) []*TileLaye
 		for i := 0; i < lvl.height; i++ {
 			for x := 0; x < lvl.width; x++ {
 				idx := x + i*lvl.width
+				idxPt := mapPoint{X: x, Y: i}
 				t := &Tile{}
 
 				if tileIdx := int(mapping[idx]); tileIdx >= 1 {
 					t.Image = ts[tileIdx].Image
-					t.Point = engo.Point{
-						X: float32(x * lvl.TileWidth),
-						Y: float32(i * lvl.TileHeight),
-					}
+					t.Point = lvl.screenPoint(engo.Point{X: float32(x), Y: float32(i)})
 				}
 				tilemap = append(tilemap, t)
+				tileMapper[idxPt] = t
 			}
 		}
 
@@ -256,5 +314,5 @@ func createLevelTiles(lvl *Level, layers []*layer, ts map[int]*Tile) []*TileLaye
 		levelTileLayers = append(levelTileLayers, tileLayer)
 	}
 
-	return levelTileLayers
+	return levelTileLayers, tileMapper
 }
