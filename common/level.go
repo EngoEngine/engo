@@ -162,6 +162,7 @@ type tilesheet struct {
 	Firstgid int
 	Width    int
 	Height   int
+	Tiles    []Tile
 }
 
 type layer struct {
@@ -178,8 +179,16 @@ func createTileset(lvl *Level, sheets []*tilesheet) map[int]*Tile {
 
 	for _, sheet := range sheets {
 		var tw, th = deftw, defth
+		curGid := sheet.Firstgid
 		if sheet.Height != 0 && sheet.Width != 0 {
 			tw, th = float32(sheet.Width), float32(sheet.Height)
+		}
+		for i, _ := range sheet.Tiles {
+			tileset[curGid] = &sheet.Tiles[i]
+			curGid++
+		}
+		if sheet.Image == nil {
+			continue
 		}
 		setWidth := sheet.Image.Width / tw
 		setHeight := sheet.Image.Height / th
@@ -206,7 +215,8 @@ func createTileset(lvl *Level, sheets []*tilesheet) map[int]*Tile {
 					Max: engo.Point{X: u2, Y: v2},
 				},
 			}
-			tileset[sheet.Firstgid+i] = t
+			tileset[curGid] = t
+			curGid++
 		}
 	}
 
