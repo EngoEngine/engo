@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" tiledversion="1.1.5" orientation="isometric" renderorder="right-down" width="10" height="10" tilewidth="126" tileheight="63" infinite="0" nextobjectid="1">
+ <tileset firstgid="1" name="coll" tilewidth="133" tileheight="99" tilecount="9" columns="0">
+  <grid orientation="isometric" width="1" height="1"/>
+  <tile id="0">
+   <properties>
+    <property name="walkable" type="bool" value="false"/>
+   </properties>
+   <image width="132" height="99" source="isometricLandscape/landscapeTiles_043.png"/>
+  </tile>
+  <tile id="1">
+   <properties>
+    <property name="walkable" type="bool" value="false"/>
+   </properties>
+   <image width="132" height="99" source="isometricLandscape/landscapeTiles_095.png"/>
+  </tile>
+  <tile id="2">
+   <properties>
+    <property name="walkable" type="bool" value="false"/>
+   </properties>
+   <image width="133" height="99" source="isometricLandscape/landscapeTiles_071.png"/>
+  </tile>
+  <tile id="3">
+   <properties>
+    <property name="walkable" type="bool" value="true"/>
+   </properties>
+   <image width="132" height="99" source="isometricLandscape/landscapeTiles_075.png"/>
+  </tile>
+  <tile id="4">
+   <properties>
+    <property name="walkable" type="bool" value="false"/>
+   </properties>
+   <image width="133" height="99" source="isometricLandscape/landscapeTiles_078.png"/>
+  </tile>
+  <tile id="5">
+   <properties>
+    <property name="walkable" type="bool" value="false"/>
+   </properties>
+   <image width="133" height="99" source="isometricLandscape/landscapeTiles_079.png"/>
+  </tile>
+  <tile id="6">
+   <properties>
+    <property name="walkable" type="bool" value="true"/>
+   </properties>
+   <image width="132" height="99" source="isometricLandscape/landscapeTiles_080.png"/>
+  </tile>
+  <tile id="7">
+   <properties>
+    <property name="walkable" type="bool" value="false"/>
+   </properties>
+   <image width="133" height="99" source="isometricLandscape/landscapeTiles_086.png"/>
+  </tile>
+  <tile id="8">
+   <properties>
+    <property name="walkable" type="bool" value="true"/>
+   </properties>
+   <image width="132" height="83" source="isometricLandscape/landscapeTiles_058.png"/>
+  </tile>
+ </tileset>
+ <layer name="Tile Layer 1" width="10" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYWBgYBnEmBmIGZEwTBxZjA2IWYkwi4MG7mMnEjMRiQE3LwGP
+  </data>
+ </layer>
+</map>
