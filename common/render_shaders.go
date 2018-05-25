@@ -597,7 +597,6 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 		cx := w / 2
 		y := float32(0.0)
 		cy := h / 2
-		t := float32(0.0)
 		var borderTint float32
 		hasBorder := shape.BorderWidth > 0
 		if hasBorder {
@@ -612,7 +611,7 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 				setBufferValue(buffer, i*3+901, y+cy, &changed)
 				setBufferValue(buffer, i*3+902, borderTint, &changed)
 			}
-			t = x
+			t := x
 			x = c*x - s*y
 			y = s*t + c*y
 		}

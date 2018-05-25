@@ -85,7 +85,7 @@ type TMXData struct {
 type TMXTile struct {
 	// gid represents a single tile encoded with its flip
 	// orientation
-	gid uint32 `xml:gid,attr`
+	Gid uint32 `xml:"gid,attr"`
 	// ImageSrc is the image on the tile
 	ImageSrc TMXImageSrc `xml:"image"`
 	// Image holds the reference of the tileset's TextureResource
@@ -102,7 +102,7 @@ var ErrUnknownCompression = errors.New("Unknown Compression")
 func (d *TMXData) decodeTile() ([]uint32, error) {
 	tm := make([]uint32, 0)
 	for _, t := range d.Tiles {
-		tm = append(tm, t.gid)
+		tm = append(tm, t.Gid)
 	}
 	return tm, nil
 }
