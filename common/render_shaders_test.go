@@ -1,4 +1,4 @@
-//+build !appveyor
+//+build !appveyor,!jstesting
 
 package common
 
