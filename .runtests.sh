@@ -43,10 +43,20 @@ then
     done
 elif [ "$TEST_TYPE" == "js_test" ]
 then
-    # TODO: Fix the build so this actually passes
-    # echo "Testing engo.io/engo using 'gopherjs test'"
-    # gopherjs test
-    echo "Skipping tests for engo.io/engo using 'gopherjs test' (won't pass)"
+    echo "Getting and installing node.js"
+    wget https://raw.githubusercontent.com/creationix/nvm/v0.33.11/nvm.sh -O ~/.nvm/nvm.sh
+    source ~/.nvm/nvm.sh
+    nvm install 5
+    npm install -g source-map-support
+    echo "Setting up node.js for gopherjs testing"
+    cd $GOPATH/src/github.com/gopherjs/gopherjs/node-syscall/
+    npm install -g node-gyp
+    node-gyp rebuild
+    mkdir -p ~/.node_libraries/
+    cp build/Release/syscall.node ~/.node_libraries/syscall.node
+    echo "Testing engo using gopherjs test"
+    cd $GOPATH/src/engo.io/engo
+    gopherjs test -v --tags=jstesting --bench=. ./... || exit 1
 elif [ "$TEST_TYPE" == "js_build" ]
 then
     for dir in `pwd`/demos/*/
@@ -109,6 +119,3 @@ then
 else
     echo "environment variable TEST_TYPE was not set"
 fi
-
-# Test the TrafficManager as well
-# TODO
