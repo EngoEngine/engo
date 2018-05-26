@@ -6,6 +6,11 @@ import (
 	"engo.io/gl"
 )
 
+const (
+	orth = "orthogonal"
+	iso  = "isometric"
+)
+
 // Level is a parsed TMX level containing all layers and default Tiled attributes
 type Level struct {
 	// Orientation is the parsed level orientation from the TMX XML, like orthogonal, isometric, etc.
@@ -115,12 +120,12 @@ type mapPoint struct {
 // Bounds returns the level boundaries as an engo.AABB object
 func (l *Level) Bounds() engo.AABB {
 	switch l.Orientation {
-	case "orthogonal":
+	case orth:
 		return engo.AABB{
 			Min: l.screenPoint(engo.Point{X: 0, Y: 0}),
 			Max: l.screenPoint(engo.Point{X: float32(l.width), Y: float32(l.height)}),
 		}
-	case "isometric":
+	case iso:
 		xMin := l.screenPoint(engo.Point{X: 0, Y: float32(l.height)}).X + float32(l.TileWidth)/2
 		xMax := l.screenPoint(engo.Point{X: float32(l.width), Y: 0}).X + float32(l.TileWidth)/2
 		yMin := l.screenPoint(engo.Point{X: 0, Y: 0}).Y
@@ -136,10 +141,10 @@ func (l *Level) Bounds() engo.AABB {
 // mapPoint returns the map point of the passed in screen point
 func (l *Level) mapPoint(screenPt engo.Point) engo.Point {
 	switch l.Orientation {
-	case "orthogonal":
+	case orth:
 		screenPt.Multiply(engo.Point{X: 1 / float32(l.TileWidth), Y: 1 / float32(l.TileHeight)})
 		return screenPt
-	case "isometric":
+	case iso:
 		return engo.Point{
 			X: (screenPt.X / float32(l.TileWidth)) + (screenPt.Y / float32(l.TileHeight)),
 			Y: (screenPt.Y / float32(l.TileHeight)) - (screenPt.X / float32(l.TileWidth)),
@@ -151,10 +156,10 @@ func (l *Level) mapPoint(screenPt engo.Point) engo.Point {
 // screenPoint returns the screen point of the passed in map point
 func (l *Level) screenPoint(mapPt engo.Point) engo.Point {
 	switch l.Orientation {
-	case "orthogonal":
+	case orth:
 		mapPt.Multiply(engo.Point{X: float32(l.TileWidth), Y: float32(l.TileHeight)})
 		return mapPt
-	case "isometric":
+	case iso:
 		return engo.Point{
 			X: (mapPt.X - mapPt.Y) * float32(l.TileWidth) / 2,
 			Y: (mapPt.X + mapPt.Y) * float32(l.TileHeight) / 2,
@@ -163,6 +168,7 @@ func (l *Level) screenPoint(mapPt engo.Point) engo.Point {
 	return engo.Point{X: 0, Y: 0}
 }
 
+// GetTile returns a *Tile at the given point (in space / render coordinates).
 func (l *Level) GetTile(pt engo.Point) *Tile {
 	mp := l.mapPoint(pt)
 	x := int(math.Floor(mp.X))
@@ -241,7 +247,7 @@ func createTileset(lvl *Level, sheets []*tilesheet) map[int]*Tile {
 		if sheet.Height != 0 && sheet.Width != 0 {
 			tw, th = float32(sheet.Width), float32(sheet.Height)
 		}
-		for i, _ := range sheet.Tiles {
+		for i := range sheet.Tiles {
 			tileset[curGid] = &sheet.Tiles[i]
 			curGid++
 		}

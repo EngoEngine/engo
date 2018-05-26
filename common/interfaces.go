@@ -141,52 +141,77 @@ type Collisionable interface {
 
 // Not-Ables
 
+// NotAnimationComponent is used to flag an entity as not in the AnimationSystem
+// even if it has the proper components
 type NotAnimationComponent struct{}
 
+// GetNotAnimationComponent implements the NotAnimationable interface
 func (n *NotAnimationComponent) GetNotAnimationComponent() *NotAnimationComponent {
 	return n
 }
 
+// NotAnimationable is an interface used to flag an entity as not in the
+// AnimationSystem even if it has the proper components
 type NotAnimationable interface {
 	GetNotAnimationComponent() *NotAnimationComponent
 }
 
+// NotMouseComponent is used to flag an entity as not in the MouseSystem even if
+// it has the proper components
 type NotMouseComponent struct{}
 
+// GetNotMouseComponent implements the NotMouseable interface
 func (n *NotMouseComponent) GetNotMouseComponent() *NotMouseComponent {
 	return n
 }
 
+// NotMouseable is an interface used to flag an entity as not in the MouseSystem
+// even if it has the proper components
 type NotMouseable interface {
 	GetNotMouseComponent() *NotMouseComponent
 }
 
+// NotAudioComponent is used to flag an entity as not in the AudioSystem even if
+// it has the proper components
 type NotAudioComponent struct{}
 
+// GetNotAudioComponent implements the NotAudioable interface
 func (n *NotAudioComponent) GetNotAudioComponent() *NotAudioComponent {
 	return n
 }
 
+// NotAudioable is an interface used to flag an entity as not in the AudioSystem
+// even if it has the proper components
 type NotAudioable interface {
 	GetNotAudioComponent() *NotAudioComponent
 }
 
+// NotRenderComponent is used to flag an entity as not in the RenderSystem even
+// if it has the proper components
 type NotRenderComponent struct{}
 
+// GetNotRenderComponent implements the NotRenderable interface
 func (n *NotRenderComponent) GetNotRenderComponent() *NotRenderComponent {
 	return n
 }
 
+// NotRenderable is an interface used to flag an entity as not in the
+// Rendersystem even if it has the proper components
 type NotRenderable interface {
 	GetNotRenderComponent() *NotRenderComponent
 }
 
+// NotCollisionComponent is used to flag an entity as not in the CollisionSystem
+// even if it has the proper components
 type NotCollisionComponent struct{}
 
+// GetNotCollisionComponent implements the NotCollisionable interface
 func (n *NotCollisionComponent) GetNotCollisionComponent() *NotCollisionComponent {
 	return n
 }
 
+// NotCollisionable is an interface used to flag an entity as not in the
+// CollisionSystem even if it has the proper components
 type NotCollisionable interface {
 	GetNotCollisionComponent() *NotCollisionComponent
 }
