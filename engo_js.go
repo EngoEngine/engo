@@ -28,17 +28,14 @@ var (
 
 	poll     = make(map[int]bool)
 	pollLock sync.Mutex
+
+	document dom.HTMLDocument
 )
-
-func init() {
-	rafPolyfill()
-}
-
-//var canvas *js.Object
-var document = dom.GetWindow().Document().(dom.HTMLDocument)
 
 // CreateWindow creates a window with the specified parameters
 func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
+	document = dom.GetWindow().Document().(dom.HTMLDocument)
+	rafPolyfill()
 	CurrentBackEnd = BackEndWeb
 	canvas := document.CreateElement("canvas").(*dom.HTMLCanvasElement)
 
@@ -266,9 +263,11 @@ func cancelAnimationFrame(id int) {
 func RunPreparation() {
 	Time = NewClock()
 
-	dom.GetWindow().AddEventListener("onbeforeunload", false, func(e dom.Event) {
-		dom.GetWindow().Alert("You're closing")
-	})
+	if !opts.HeadlessMode {
+		dom.GetWindow().AddEventListener("onbeforeunload", false, func(e dom.Event) {
+			dom.GetWindow().Alert("You're closing")
+		})
+	}
 }
 
 func runLoop(defaultScene Scene, headless bool) {
