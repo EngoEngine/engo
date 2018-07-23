@@ -753,3 +753,18 @@ func TestLineTrace(t *testing.T) {
 		}
 	}
 }
+
+func TestPointMethodChain(t *testing.T) {
+	p1 := Point{X: 2, Y: 2}
+	p2 := Point{X: 5, Y: 5}
+
+	p1.Add(p2).Multiply(p2).Subtract(*p2.MultiplyScalar(8)).AddScalar(10).SubtractScalar(3)
+
+	if p1.X != 2 {
+		t.Errorf("Point method chain failed. p1.X should be 2, not %v", p1.X)
+	}
+
+	if p1.Y != 2 {
+		t.Errorf("Point method chain failed. p1.Y should be 2, not %v", p1.Y)
+	}
+}
