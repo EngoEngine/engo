@@ -45,44 +45,51 @@ type Trace struct {
 }
 
 // Set sets the coordinates of p to x and y
-func (p *Point) Set(x, y float32) {
+func (p *Point) Set(x, y float32) *Point {
 	p.X = x
 	p.Y = y
+	return p
 }
 
 // AddScalar adds s to each component of p
-func (p *Point) AddScalar(s float32) {
+func (p *Point) AddScalar(s float32) *Point {
 	p.X += s
 	p.Y += s
+	return p
 }
 
 // SubtractScalar subtracts s from each component of p
-func (p *Point) SubtractScalar(s float32) {
+func (p *Point) SubtractScalar(s float32) *Point {
 	p.AddScalar(-s)
+	return p
 }
 
 // MultiplyScalar multiplies each component of p by s
-func (p *Point) MultiplyScalar(s float32) {
+func (p *Point) MultiplyScalar(s float32) *Point {
 	p.X *= s
 	p.Y *= s
+	return p
 }
 
 // Add sets the components of p to the pointwise summation of p + p2
-func (p *Point) Add(p2 Point) {
+func (p *Point) Add(p2 Point) *Point {
 	p.X += p2.X
 	p.Y += p2.Y
+	return p
 }
 
 // Subtract sets the components of p to the pointwise difference of p - p2
-func (p *Point) Subtract(p2 Point) {
+func (p *Point) Subtract(p2 Point) *Point {
 	p.X -= p2.X
 	p.Y -= p2.Y
+	return p
 }
 
 // Multiply sets the components of p to the pointwise product of p * p2
-func (p *Point) Multiply(p2 Point) {
+func (p *Point) Multiply(p2 Point) *Point {
 	p.X *= p2.X
 	p.Y *= p2.Y
+	return p
 }
 
 // Equal indicates whether two points have the same value, avoiding issues with float precision
