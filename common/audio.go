@@ -5,6 +5,7 @@ import (
 	"runtime"
 
 	"engo.io/ecs"
+	"engo.io/engo"
 
 	"github.com/hajimehoshi/oto"
 )
@@ -31,12 +32,19 @@ type AudioSystem struct {
 	entities []audioEntity
 
 	otoPlayer *oto.Player
+	bufsize   int
 }
 
 // New is called when the AudioSystem is added to the world.
 func (a *AudioSystem) New(w *ecs.World) {
 	var err error
-	a.otoPlayer, err = oto.NewPlayer(SampleRate, channelNum, bytesPerSample, 8192)
+	switch engo.CurrentBackEnd {
+	case engo.BackEndMobile:
+		a.bufsize = 12288
+	default:
+		a.bufsize = 8192
+	}
+	a.otoPlayer, err = oto.NewPlayer(SampleRate, channelNum, bytesPerSample, a.bufsize)
 	if err != nil {
 		log.Printf("audio error. Unable to create new OtoPlayer: %v \n\r", err)
 	}
@@ -77,8 +85,7 @@ func (a *AudioSystem) Remove(basic ecs.BasicEntity) {
 
 // Update is called once per frame, and updates/plays the players in the AudioSystem
 func (a *AudioSystem) Update(dt float32) {
-
-	buf := make([]byte, 4096)
+	buf := make([]byte, a.bufsize)
 	a.read(buf)
 
 	if _, err := a.otoPlayer.Write(buf); err != nil {

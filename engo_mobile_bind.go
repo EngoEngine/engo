@@ -109,12 +109,10 @@ func RunIteration() {
 			case <-worker.WorkAvailable():
 				worker.DoWork()
 			case <-drawDone:
-				Input.Mouse.Action = Neutral
 				return
 			}
 		}
 	case <-time.After(500 * time.Millisecond):
-		Input.Mouse.Action = Neutral
 		return
 	}
 }
@@ -167,6 +165,7 @@ func mobileDraw(defaultScene Scene) {
 	}
 	// Then update the world and all Systems
 	currentUpdater.Update(Time.Delta())
+	Input.Mouse.Action = Neutral
 }
 
 //MobileStop handles when the game is closed
