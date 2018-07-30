@@ -7,6 +7,7 @@ go get github.com/mattn/goveralls
 if [ "$TEST_TYPE" == "js_test" ] || [ "$TEST_TYPE" == "js_build" ]
 then
     go get github.com/gopherjs/gopherjs
+    go get github.com/gopherjs/gopherwasm/js
     gopherjs get "honnef.co/go/js/dom"
     gopherjs get "honnef.co/go/js/xhr"
 elif [ "$TEST_TYPE" == "android_test" ] || [ "$TEST_TYPE" == "android_build" ]
