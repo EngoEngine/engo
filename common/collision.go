@@ -273,6 +273,14 @@ func (c *CollisionSystem) Update(dt float32) {
 				//collided can now list the types of collision
 				collided = collided | cgroup
 				engo.Mailbox.Dispatch(CollisionMessage{Entity: e1, To: e2, Groups: cgroup})
+
+				//update the position tracker of e1
+				entityAABB = e1.SpaceComponent.AABB()
+				offset := engo.Point{X: e1.CollisionComponent.Extra.X / 2, Y: e1.CollisionComponent.Extra.Y / 2}
+				entityAABB.Min.X -= offset.X
+				entityAABB.Min.Y -= offset.Y
+				entityAABB.Max.X += offset.X
+				entityAABB.Max.Y += offset.Y
 			}
 		}
 

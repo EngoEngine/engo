@@ -397,6 +397,82 @@ func TestLineAngle(t *testing.T) {
 	}
 }
 
+func TestLineAngleDeg(t *testing.T) {
+	data := []struct {
+		l   Line
+		exp float32
+	}{
+		{
+			l: Line{
+				P1: Point{X: 0, Y: 0},
+				P2: Point{X: 0, Y: 0},
+			},
+			exp: 0,
+		},
+		{
+			l: Line{
+				P1: Point{X: 0, Y: 0},
+				P2: Point{X: 0, Y: -1},
+			},
+			exp: 0,
+		},
+		{
+			l: Line{
+				P1: Point{X: 0, Y: 0},
+				P2: Point{X: 1, Y: 0},
+			},
+			exp: 90,
+		},
+		{
+			l: Line{
+				P1: Point{X: 0, Y: 0},
+				P2: Point{X: 0, Y: 1},
+			},
+			exp: 180,
+		},
+		{
+			l: Line{
+				P1: Point{X: 0, Y: 0},
+				P2: Point{X: -1, Y: 0},
+			},
+			exp: 270,
+		},
+		{
+			l: Line{
+				P1: Point{X: 0, Y: 0},
+				P2: Point{X: 2, Y: -2},
+			},
+			exp: 45,
+		},
+		{
+			l: Line{
+				P1: Point{X: 0, Y: 0},
+				P2: Point{X: 2, Y: 2},
+			},
+			exp: 135,
+		},
+		{
+			l: Line{
+				P1: Point{X: 0, Y: 0},
+				P2: Point{X: -0.7071068, Y: 0.7071067},
+			},
+			exp: 225,
+		},
+		{
+			l: Line{
+				P1: Point{X: 0, Y: 0},
+				P2: Point{X: -2, Y: -2},
+			},
+			exp: 315,
+		},
+	}
+	for _, d := range data {
+		if res := d.l.AngleDeg(); !FloatEqual(res, d.exp) {
+			t.Errorf("Test Line.AngleDeg failed. l: %v, wanted: %v, got: %v", d.l, d.exp, res)
+		}
+	}
+}
+
 func TestLinePointDistance(t *testing.T) {
 	data := []struct {
 		l   Line

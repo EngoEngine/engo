@@ -148,6 +148,29 @@ func (l *Line) Angle() float32 {
 	return math.Atan2(l.P1.X-l.P2.X, l.P1.Y-l.P2.Y)
 }
 
+//AngleDeg returns the angle in degrees
+func (l *Line) AngleDeg() float32 {
+	x := l.P2.X - l.P1.X
+	y := l.P2.Y - l.P1.Y
+	if x == 0 {
+		if y > 0 {
+			return 180
+		} else {
+			return 0
+		}
+	}
+
+	deg := math.Atan(x/y) * 180 / math.Pi
+	if x > 0 && y < 0 {
+		deg = -deg
+	} else if x < 0 && y < 0 {
+		deg = 360 - deg
+	} else {
+		deg = 180 - deg
+	}
+	return deg
+}
+
 // PointDistance Returns the euclidean distance from the point p to the
 // line segment l
 func (l *Line) PointDistance(point Point) float32 {
