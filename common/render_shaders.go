@@ -138,18 +138,6 @@ void main (void) {
 	s.modelMatrix[4] = 1
 	s.modelMatrix[8] = 1
 
-	if s.cameraEnabled {
-		for _, system := range w.Systems() {
-			switch sys := system.(type) {
-			case *CameraSystem:
-				s.camera = sys
-			}
-		}
-		if s.camera == nil {
-			log.Println("WARNING: BasicShader has CameraEnabled, but CameraSystem was not found")
-		}
-	}
-
 	return nil
 }
 
@@ -442,18 +430,6 @@ void main (void) {
 	l.modelMatrix[0] = 1
 	l.modelMatrix[4] = 1
 	l.modelMatrix[8] = 1
-
-	if l.cameraEnabled {
-		for _, system := range w.Systems() {
-			switch sys := system.(type) {
-			case *CameraSystem:
-				l.camera = sys
-			}
-		}
-		if l.camera == nil {
-			log.Println("WARNING: BasicShader has CameraEnabled, but CameraSystem was not found")
-		}
-	}
 
 	return nil
 }
@@ -897,18 +873,6 @@ void main (void) {
 	l.modelMatrix[4] = 1
 	l.modelMatrix[8] = 1
 
-	if l.cameraEnabled {
-		for _, system := range w.Systems() {
-			switch sys := system.(type) {
-			case *CameraSystem:
-				l.camera = sys
-			}
-		}
-		if l.camera == nil {
-			log.Println("WARNING: TextShader has CameraEnabled, but CameraSystem was not found")
-		}
-	}
-
 	return nil
 }
 
@@ -1202,6 +1166,31 @@ func LoadShader(vertSrc, fragSrc string) (*gl.Program, error) {
 	engo.Gl.LinkProgram(program)
 
 	return program, nil
+}
+
+func newCamera(w *ecs.World) {
+	shaderInitMutex.Lock()
+	defer shaderInitMutex.Unlock()
+	var cam *CameraSystem
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *CameraSystem:
+			cam = sys
+		}
+	}
+	if cam == nil {
+		log.Println("Camera system was not found when changing scene!")
+		return
+	}
+	if DefaultShader.cameraEnabled {
+		DefaultShader.camera = cam
+	}
+	if LegacyShader.cameraEnabled {
+		LegacyShader.camera = cam
+	}
+	if TextShader.cameraEnabled {
+		TextShader.camera = cam
+	}
 }
 
 // VertexShaderCompilationError is returned whenever the `LoadShader` method was unable to compile your Vertex-shader (GLSL)

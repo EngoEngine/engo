@@ -143,8 +143,8 @@ type RenderSystem struct {
 	entities renderEntityList
 	world    *ecs.World
 
-	sortingNeeded bool
-	currentShader Shader
+	sortingNeeded, newCamera bool
+	currentShader            Shader
 }
 
 // Priority implements the ecs.Prioritizer interface.
@@ -153,6 +153,10 @@ func (*RenderSystem) Priority() int { return RenderSystemPriority }
 // New initializes the RenderSystem
 func (rs *RenderSystem) New(w *ecs.World) {
 	rs.world = w
+
+	engo.Mailbox.Listen("NewCameraMessage", func(engo.Message) {
+		rs.newCamera = true
+	})
 
 	addCameraSystemOnce(w)
 
@@ -266,6 +270,11 @@ func (rs *RenderSystem) Update(dt float32) {
 	if rs.sortingNeeded {
 		sort.Sort(rs.entities)
 		rs.sortingNeeded = false
+	}
+
+	if rs.newCamera {
+		newCamera(rs.world)
+		rs.newCamera = false
 	}
 
 	engo.Gl.Clear(engo.Gl.COLOR_BUFFER_BIT)
