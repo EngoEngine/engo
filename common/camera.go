@@ -125,6 +125,8 @@ func (cam *CameraSystem) New(w *ecs.World) {
 			}
 		}
 	})
+
+	engo.Mailbox.Dispatch(NewCameraMessage{})
 }
 
 // Remove does nothing since the CameraSystem has only one entity, the camera itself.
@@ -295,6 +297,15 @@ type CameraMessage struct {
 // Type implements the engo.Message interface.
 func (CameraMessage) Type() string {
 	return "CameraMessage"
+}
+
+// NewCameraMessage is a message that is sent out whenever the camera system changes,
+// such as when a new world is created or scenes are switched.
+type NewCameraMessage struct{}
+
+// Type implements the engo.Message interface.
+func (NewCameraMessage) Type() string {
+	return "NewCameraMessage"
 }
 
 // KeyboardScroller is a System that allows for scrolling when certain keys are pressed.
