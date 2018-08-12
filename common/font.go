@@ -215,11 +215,12 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 		atlas.XLocation[i] = currentX
 		atlas.YLocation[i] = currentY
 
+		currentX += float32(adv.Ceil()) + xBuffer
+
 		if currentX > atlas.TotalWidth {
 			atlas.TotalWidth = currentX
 		}
 
-		currentX += float32(adv.Ceil()) + xBuffer
 		if currentX > 1024 || i >= c-1 {
 			currentX = 0
 			currentY += float32(lineHeight.Ceil()) + lineBuffer
@@ -232,21 +233,13 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 	draw.Draw(actual, actual.Bounds(), image.NewUniform(f.BG), image.ZP, draw.Src)
 	d.Dst = actual
 
-	currentX = 0
-	currentY = float32(lineHeight.Ceil())
 	for i := 0; i < c; i++ {
-		_, adv, ok := d.Face.GlyphBounds(rune(i))
+		_, _, ok := d.Face.GlyphBounds(rune(i))
 		if !ok {
 			continue
 		}
-		currentX += xBuffer
-		d.Dot = fixed.P(int(currentX), int(currentY))
+		d.Dot = fixed.P(int(atlas.XLocation[i]), int(atlas.YLocation[i]+float32(lineHeight.Ceil())))
 		d.DrawBytes([]byte{byte(i)})
-		currentX += float32(adv.Ceil()) + xBuffer
-		if currentX > 1024 || i == c-1 {
-			currentX = 0
-			currentY += float32(lineHeight.Ceil()) + lineBuffer
-		}
 	}
 
 	imObj := NewImageObject(actual)
