@@ -48,12 +48,14 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	err := glfw.Init()
 	fatalErr(err)
 
-	cursorArrow = glfw.CreateStandardCursor(int(glfw.ArrowCursor))
-	cursorIBeam = glfw.CreateStandardCursor(int(glfw.IBeamCursor))
-	cursorCrosshair = glfw.CreateStandardCursor(int(glfw.CrosshairCursor))
-	cursorHand = glfw.CreateStandardCursor(int(glfw.HandCursor))
-	cursorHResize = glfw.CreateStandardCursor(int(glfw.HResizeCursor))
-	cursorVResize = glfw.CreateStandardCursor(int(glfw.VResizeCursor))
+	if !opts.HeadlessMode {
+		cursorArrow = glfw.CreateStandardCursor(int(glfw.ArrowCursor))
+		cursorIBeam = glfw.CreateStandardCursor(int(glfw.IBeamCursor))
+		cursorCrosshair = glfw.CreateStandardCursor(int(glfw.CrosshairCursor))
+		cursorHand = glfw.CreateStandardCursor(int(glfw.HandCursor))
+		cursorHResize = glfw.CreateStandardCursor(int(glfw.HResizeCursor))
+		cursorVResize = glfw.CreateStandardCursor(int(glfw.VResizeCursor))
+	}
 
 	monitor := glfw.GetPrimaryMonitor()
 
@@ -94,6 +96,11 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
 
 	glfw.WindowHint(glfw.Samples, msaa)
+
+	if opts.HeadlessMode {
+		Gl = gl.NewContext()
+		return
+	}
 
 	window, err = glfw.CreateWindow(width, height, title, monitor, nil)
 	fatalErr(err)

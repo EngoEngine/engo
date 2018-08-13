@@ -51,7 +51,8 @@ us a DM or [create an issue](https://github.com/EngoEngine/engo/issues/new).
 Engo is always undergoing a lot of optimizations and constantly gets new features. However, this sometimes means things break. In order to make transitioning easier for you,
 we have a list of those changes, with the most recent being at the top. If you run into any problems, please contact us at [gitter](https://gitter.im/EngoEngine/engo).
 
-* No breaking changes yet!
+* TMXObject Width and Height is in pixels, and can be fractional. This has changed from an int to a float64.
+* TMXTileset now uses a Spritesheet instead of a Texture. This helps keep track of the guid better and allows the gid to not start at zero and have skips in it, as well as for borders and spacing in the tile sheet.
 
 ## Roadmap to v1.1
 A list of issues for v1.1 can be found [here](https://github.com/EngoEngine/engo/issues/552). There's always room

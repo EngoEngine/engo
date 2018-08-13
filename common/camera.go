@@ -367,7 +367,7 @@ type EntityScroller struct {
 
 // New adjusts CameraBounds to the bounds of EntityScroller.
 func (c *EntityScroller) New(*ecs.World) {
-	offsetX, offsetY := engo.GameWidth()/2, engo.GameWidth()/2
+	offsetX, offsetY := engo.GameWidth()/2, engo.GameHeight()/2
 
 	CameraBounds.Min.X = c.TrackingBounds.Min.X + (offsetX / engo.GetGlobalScale().X)
 	CameraBounds.Min.Y = c.TrackingBounds.Min.Y + (offsetY / engo.GetGlobalScale().Y)
