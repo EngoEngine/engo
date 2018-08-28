@@ -485,9 +485,9 @@ func (l *legacyShader) updateBuffer(ren *RenderComponent, space *SpaceComponent)
 func (l *legacyShader) computeBufferSize(draw Drawable) int {
 	switch shape := draw.(type) {
 	case Triangle:
-		return 18
+		return 65
 	case Rectangle:
-		return 36
+		return 90
 	case Circle:
 		return 1800
 	case ComplexTriangles:
@@ -523,18 +523,38 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 
 			if shape.BorderWidth > 0 {
 				borderTint := colorToFloat32(shape.BorderColor)
+				b := shape.BorderWidth
+				s, c := math.Sincos(math.Atan(2 * h / w))
 
-				setBufferValue(buffer, 9, w/2, &changed)
-				//setBufferValue(buffer, 10, 0, &changed)
-				setBufferValue(buffer, 11, borderTint, &changed)
+				pts := [][]float32{
+					//Left
+					{w / 2, 0},
+					{0, h},
+					{b, h},
+					{b, h},
+					{(w / 2) + b*c, b * s},
+					{w / 2, 0},
+					//Right
+					{w / 2, 0},
+					{w, h},
+					{w - b, h},
+					{w - b, h},
+					{(w / 2) - b*c, b * s},
+					{w / 2, 0},
+					//Bottom
+					{0, h},
+					{w, h},
+					{b * c, h - b*s},
+					{b * c, h - b*s},
+					{w - b*c, h - b*s},
+					{w, h},
+				}
 
-				setBufferValue(buffer, 12, w, &changed)
-				setBufferValue(buffer, 13, h, &changed)
-				setBufferValue(buffer, 14, borderTint, &changed)
-
-				//setBufferValue(buffer, 15, 0, &changed)
-				setBufferValue(buffer, 16, h, &changed)
-				setBufferValue(buffer, 17, borderTint, &changed)
+				for i, p := range pts {
+					setBufferValue(buffer, 9+3*i, p[0], &changed)
+					setBufferValue(buffer, 10+3*i, p[1], &changed)
+					setBufferValue(buffer, 11+3*i, borderTint, &changed)
+				}
 			}
 		case TriangleRight:
 			//setBufferValue(buffer, 0, 0, &changed)
@@ -551,18 +571,37 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 
 			if shape.BorderWidth > 0 {
 				borderTint := colorToFloat32(shape.BorderColor)
+				b := shape.BorderWidth
 
-				//setBufferValue(buffer, 9, 0, &changed)
-				//setBufferValue(buffer, 10, 0, &changed)
-				setBufferValue(buffer, 11, borderTint, &changed)
+				pts := [][]float32{
+					//Left
+					{0, 0},
+					{0, h},
+					{b, h},
+					{b, h},
+					{b, b * h / w},
+					{0, 0},
+					//Right
+					{0, 0},
+					{w, h},
+					{w - b, h},
+					{w - b, h},
+					{0, b},
+					{0, 0},
+					//Bottom
+					{0, h},
+					{w, h},
+					{w - b*w/h, h - b},
+					{w - b*w/h, h - b},
+					{0, h - b},
+					{0, h},
+				}
 
-				setBufferValue(buffer, 12, w, &changed)
-				setBufferValue(buffer, 13, h, &changed)
-				setBufferValue(buffer, 14, borderTint, &changed)
-
-				//setBufferValue(buffer, 15, 0, &changed)
-				setBufferValue(buffer, 16, h, &changed)
-				setBufferValue(buffer, 17, borderTint, &changed)
+				for i, p := range pts {
+					setBufferValue(buffer, 9+3*i, p[0], &changed)
+					setBufferValue(buffer, 10+3*i, p[1], &changed)
+					setBufferValue(buffer, 11+3*i, borderTint, &changed)
+				}
 			}
 		}
 
@@ -571,16 +610,18 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 		s, c := math.Sincos(theta)
 		x := w / 2
 		cx := w / 2
+		bx := shape.BorderWidth
 		y := float32(0.0)
 		cy := h / 2
+		by := shape.BorderWidth
 		var borderTint float32
 		hasBorder := shape.BorderWidth > 0
 		if hasBorder {
 			borderTint = colorToFloat32(shape.BorderColor)
 		}
 		for i := 0; i < 300; i++ {
-			setBufferValue(buffer, i*3, x+cx, &changed)
-			setBufferValue(buffer, i*3+1, y+cy, &changed)
+			setBufferValue(buffer, i*3, x+cx-bx/2, &changed)
+			setBufferValue(buffer, i*3+1, y+cy-by/2, &changed)
 			setBufferValue(buffer, i*3+2, tint, &changed)
 			if hasBorder {
 				setBufferValue(buffer, i*3+900, x+cx, &changed)
@@ -588,9 +629,13 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 				setBufferValue(buffer, i*3+902, borderTint, &changed)
 			}
 			t := x
+			bt := bx
 			x = c*x - s*y
+			bx = c*bx - s*by
 			y = s*t + c*y
+			by = s*bt + c*by
 		}
+
 	case Rectangle:
 		//setBufferValue(buffer, 0, 0, &changed)
 		//setBufferValue(buffer, 1, 0, &changed)
@@ -604,49 +649,57 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 		setBufferValue(buffer, 7, h, &changed)
 		setBufferValue(buffer, 8, tint, &changed)
 
-		//setBufferValue(buffer, 9, 0, &changed)
+		setBufferValue(buffer, 9, w, &changed)
 		setBufferValue(buffer, 10, h, &changed)
 		setBufferValue(buffer, 11, tint, &changed)
 
+		//setBufferValue(buffer, 12, 0, &changed)
+		setBufferValue(buffer, 13, h, &changed)
+		setBufferValue(buffer, 14, tint, &changed)
+
+		//setBufferValue(buffer, 15, 0, &changed)
+		//setBufferValue(buffer, 16, 0, &changed)
+		setBufferValue(buffer, 17, tint, &changed)
+
 		if shape.BorderWidth > 0 {
 			borderTint := colorToFloat32(shape.BorderColor)
-			halfWidth := shape.BorderWidth / 2
+			b := shape.BorderWidth
+			pts := [][]float32{
+				//Top
+				{0, 0},
+				{w, 0},
+				{w, b},
+				{w, b},
+				{0, b},
+				{0, 0},
+				//Right
+				{w - b, b},
+				{w, b},
+				{w, h - b},
+				{w, h - b},
+				{w - b, h - b},
+				{w - b, b},
+				//Bottom
+				{w, h - b},
+				{w, h},
+				{0, h},
+				{0, h},
+				{0, h - b},
+				{w, h - b},
+				//Left
+				{0, b},
+				{b, b},
+				{b, h - b},
+				{b, h - b},
+				{0, h - b},
+				{0, b},
+			}
 
-			//Top
-			setBufferValue(buffer, 12, -halfWidth, &changed)
-			//setBufferValue(buffer, 13, 0, &changed)
-			setBufferValue(buffer, 14, borderTint, &changed)
-
-			setBufferValue(buffer, 15, w+halfWidth, &changed)
-			//setBufferValue(buffer, 16, 0, &changed)
-			setBufferValue(buffer, 17, borderTint, &changed)
-
-			//Right
-			setBufferValue(buffer, 18, w, &changed)
-			//setBufferValue(buffer, 19, 0, &changed)
-			setBufferValue(buffer, 20, borderTint, &changed)
-
-			setBufferValue(buffer, 21, w, &changed)
-			setBufferValue(buffer, 22, h, &changed)
-			setBufferValue(buffer, 23, borderTint, &changed)
-
-			//Bottom
-			setBufferValue(buffer, 24, w+halfWidth, &changed)
-			setBufferValue(buffer, 25, h, &changed)
-			setBufferValue(buffer, 26, borderTint, &changed)
-
-			setBufferValue(buffer, 27, -halfWidth, &changed)
-			setBufferValue(buffer, 28, h, &changed)
-			setBufferValue(buffer, 29, borderTint, &changed)
-
-			//Left
-			//setBufferValue(buffer, 30, 0, &changed)
-			setBufferValue(buffer, 31, h, &changed)
-			setBufferValue(buffer, 32, borderTint, &changed)
-
-			//setBufferValue(buffer, 33, 0, &changed)
-			//setBufferValue(buffer, 34, 0, &changed)
-			setBufferValue(buffer, 35, borderTint, &changed)
+			for i, p := range pts {
+				setBufferValue(buffer, 18+3*i, p[0], &changed)
+				setBufferValue(buffer, 19+3*i, p[1], &changed)
+				setBufferValue(buffer, 20+3*i, borderTint, &changed)
+			}
 		}
 
 	case ComplexTriangles:
@@ -707,39 +760,23 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 
 	switch shape := ren.Drawable.(type) {
 	case Triangle:
-		engo.Gl.DrawArrays(engo.Gl.TRIANGLES, 0, 3)
-
+		num := 3
 		if shape.BorderWidth > 0 {
-			borderWidth := shape.BorderWidth
-			if l.cameraEnabled {
-				borderWidth /= l.camera.z
-			}
-			engo.Gl.LineWidth(borderWidth)
-			engo.Gl.DrawArrays(engo.Gl.LINE_LOOP, 3, 3)
+			num = 21
 		}
+		engo.Gl.DrawArrays(engo.Gl.TRIANGLES, 0, num)
 	case Rectangle:
-		engo.Gl.BindBuffer(engo.Gl.ELEMENT_ARRAY_BUFFER, l.indicesRectanglesVBO)
-		engo.Gl.DrawElements(engo.Gl.TRIANGLES, 6, engo.Gl.UNSIGNED_SHORT, 0)
-
+		num := 6
 		if shape.BorderWidth > 0 {
-			borderWidth := shape.BorderWidth
-			if l.cameraEnabled {
-				borderWidth /= l.camera.z
-			}
-			engo.Gl.LineWidth(borderWidth)
-			engo.Gl.DrawArrays(engo.Gl.LINES, 4, 8)
+			num = 30
 		}
+		engo.Gl.DrawArrays(engo.Gl.TRIANGLES, 0, num)
 	case Circle:
 		// Circle stuff!
-		engo.Gl.DrawArrays(engo.Gl.TRIANGLE_FAN, 0, 300)
 		if shape.BorderWidth > 0 {
-			borderWidth := shape.BorderWidth
-			if l.cameraEnabled {
-				borderWidth /= l.camera.z
-			}
-			engo.Gl.LineWidth(borderWidth)
-			engo.Gl.DrawArrays(engo.Gl.LINE_LOOP, 300, 300)
+			engo.Gl.DrawArrays(engo.Gl.TRIANGLE_FAN, 300, 300)
 		}
+		engo.Gl.DrawArrays(engo.Gl.TRIANGLE_FAN, 0, 300)
 	case ComplexTriangles:
 		engo.Gl.DrawArrays(engo.Gl.TRIANGLES, 0, len(shape.Points))
 
