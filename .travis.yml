@@ -10,7 +10,7 @@ branches:
 language: go
 go_import_path: engo.io/engo
 go:
-- "1.10"
+- "1.11"
 before_install: ./.before_install.sh
 install:
 -
