@@ -22,7 +22,7 @@ script: ./.runtests.sh
 matrix:
   include:
 #   - env: TEST_TYPE=android_test
-    - env: TEST_TYPE=android_build
+#   - env: TEST_TYPE=android_build
     - env: TEST_TYPE=linux_test
     - env: TEST_TYPE=linux_build
     - env: TEST_TYPE=js_test
