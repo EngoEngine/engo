@@ -30,9 +30,9 @@ var (
 	// Mailbox is used by all Systems to communicate
 	Mailbox *MessageManager
 
-	currentUpdater Updater
-	currentScene   Scene
-
+	currentUpdater            Updater
+	currentScene              Scene
+	sceneMutex                *sync.RWMutex
 	opts                      RunOptions
 	resetLoopTicker           = make(chan bool, 1)
 	closeGame                 bool
@@ -146,6 +146,8 @@ type RunOptions struct {
 // the game window has been closed already. You can supply a lot of options within `RunOptions`, and your starting
 // `Scene` should be defined in `defaultScene`.
 func Run(o RunOptions, defaultScene Scene) {
+	closerMutex, sceneMutex = &sync.RWMutex{}, &sync.RWMutex{}
+
 	// Setting defaults
 	if o.FPSLimit == 0 {
 		o.FPSLimit = 60
@@ -271,11 +273,13 @@ func GameHeight() float32 {
 }
 
 func closeEvent() {
+	sceneMutex.RLock()
 	for _, scenes := range scenes {
 		if exiter, ok := scenes.scene.(Exiter); ok {
 			exiter.Exit()
 		}
 	}
+	sceneMutex.RUnlock()
 
 	if !opts.OverrideCloseAction {
 		Exit()
