@@ -1,8 +1,9 @@
-package engo // import "engo.io/engo"
+package engo
 
 import (
 	"fmt"
 	"log"
+	"sync"
 
 	"engo.io/ecs"
 )
@@ -35,6 +36,7 @@ var (
 	opts                      RunOptions
 	resetLoopTicker           = make(chan bool, 1)
 	closeGame                 bool
+	closerMutex               *sync.RWMutex
 	gameWidth, gameHeight     float32
 	windowWidth, windowHeight float32
 	canvasWidth, canvasHeight float32
@@ -253,7 +255,9 @@ func ScaleOnResize() bool {
 
 // Exit is the safest way to close your game, as `engo` will correctly attempt to close all windows, handlers and contexts
 func Exit() {
+	closerMutex.Lock()
 	closeGame = true
+	closerMutex.Unlock()
 }
 
 // GameWidth returns the current game width
