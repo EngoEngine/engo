@@ -270,9 +270,12 @@ Outer:
 		select {
 		case <-ticker.C:
 			RunIteration()
+			closerMutex.RLock()
 			if closeGame {
+				closerMutex.RUnlock()
 				break Outer
 			}
+			closerMutex.RUnlock()
 			if !headless && window.ShouldClose() {
 				closeEvent()
 			}
