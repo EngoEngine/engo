@@ -28,7 +28,8 @@ var (
 	Input *InputManager
 
 	// Mailbox is used by all Systems to communicate
-	Mailbox *MessageManager
+	Mailbox      *MessageManager
+	messageMutex *sync.RWMutex
 
 	currentUpdater            Updater
 	currentScene              Scene
@@ -146,8 +147,13 @@ type RunOptions struct {
 // the game window has been closed already. You can supply a lot of options within `RunOptions`, and your starting
 // `Scene` should be defined in `defaultScene`.
 func Run(o RunOptions, defaultScene Scene) {
-	closerMutex, sceneMutex = &sync.RWMutex{}, &sync.RWMutex{}
-	fmt.Println("myEngo!")
+	// Setting up the mutexes
+	closerMutex,
+		sceneMutex,
+		messageMutex =
+		&sync.RWMutex{},
+		&sync.RWMutex{},
+		&sync.RWMutex{}
 
 	// Setting defaults
 	if o.FPSLimit == 0 {
