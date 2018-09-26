@@ -28,8 +28,7 @@ var (
 	Input *InputManager
 
 	// Mailbox is used by all Systems to communicate
-	Mailbox      *MessageManager
-	messageMutex *sync.RWMutex
+	Mailbox *MessageManager
 
 	currentUpdater            Updater
 	currentScene              Scene
@@ -151,7 +150,6 @@ func Run(o RunOptions, defaultScene Scene) {
 	closerMutex,
 		sceneMutex,
 		messageMutex =
-		&sync.RWMutex{},
 		&sync.RWMutex{},
 		&sync.RWMutex{}
 
