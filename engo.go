@@ -147,6 +147,7 @@ type RunOptions struct {
 // `Scene` should be defined in `defaultScene`.
 func Run(o RunOptions, defaultScene Scene) {
 	closerMutex, sceneMutex = &sync.RWMutex{}, &sync.RWMutex{}
+	fmt.Println("myEngo!")
 
 	// Setting defaults
 	if o.FPSLimit == 0 {
