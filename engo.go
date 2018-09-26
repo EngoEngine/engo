@@ -146,12 +146,10 @@ type RunOptions struct {
 // the game window has been closed already. You can supply a lot of options within `RunOptions`, and your starting
 // `Scene` should be defined in `defaultScene`.
 func Run(o RunOptions, defaultScene Scene) {
-	// Setting up the mutexes
-	closerMutex,
-		sceneMutex,
-		messageMutex =
-		&sync.RWMutex{},
-		&sync.RWMutex{}
+
+	// Setting up the mutexes to prevent
+	// race conditions
+	closerMutex, sceneMutex = &sync.RWMutex{}, &sync.RWMutex{}
 
 	// Setting defaults
 	if o.FPSLimit == 0 {

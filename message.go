@@ -12,6 +12,10 @@ type Message interface {
 
 // MessageManager manages messages and subscribed handlers
 type MessageManager struct {
+
+	// this mutex will prevent race
+	// conditions on listeners and
+	// sync its state across the game
 	sync.RWMutex
 	listeners map[string][]MessageHandler
 }
