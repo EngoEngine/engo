@@ -105,11 +105,6 @@ func (game *GameWorld) Setup(u engo.Updater) {
 		for _, object := range objectLayer.Objects {
 			log.Println("This object is called " + object.Name)
 		}
-
-		// Do something with every polyline Object
-		for _, polylineObject := range objectLayer.PolyObjects {
-			log.Println("This object is called " + polylineObject.Name)
-		}
 	}
 
 }

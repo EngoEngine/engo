@@ -48,6 +48,11 @@ func (formats *Formats) SetRoot(root string) {
 	formats.root = root
 }
 
+// GetRoot returns the folder currently set at root.
+func (formats *Formats) GetRoot() string {
+	return formats.root
+}
+
 // Register registers a resource loader for the given file format.
 func (formats *Formats) Register(ext string, loader FileLoader) {
 	formats.formats[ext] = loader

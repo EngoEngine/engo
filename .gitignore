@@ -1,5 +1,6 @@
 *.js
 *.js.map
+*.json
 
 *.sublime*
 

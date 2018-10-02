@@ -9,6 +9,7 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -295,8 +296,10 @@ Outer:
 }
 
 func openFile(url string) (io.ReadCloser, error) {
+	if Headless() { // Headless would be node.js
+		return os.Open(url)
+	}
 	req := xhr.NewRequest("GET", url)
-
 	req.ResponseType = xhr.ArrayBuffer
 
 	if err := req.Send(""); err != nil {
