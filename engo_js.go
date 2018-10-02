@@ -296,12 +296,8 @@ Outer:
 }
 
 func openFile(url string) (io.ReadCloser, error) {
-	if Headless() {
-		_, err := os.Open(url)
-		if err != nil {
-			return nil, err
-		}
-		return noCloseReadCloser{bytes.NewReader([]byte{})}, nil
+	if Headless() { // Headless would be node.js
+		return os.Open(url)
 	}
 	req := xhr.NewRequest("GET", url)
 	req.ResponseType = xhr.ArrayBuffer
