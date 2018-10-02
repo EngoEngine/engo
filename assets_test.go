@@ -12,8 +12,22 @@ import (
 	"testing"
 )
 
+type assetTestScene struct{}
+
+func (*assetTestScene) Preload() {}
+
+func (*assetTestScene) Setup(Updater) {}
+
+func (*assetTestScene) Type() string { return "testScene" }
+
 // TestSetRoot makes sure set root sets Files.root to the proper value.
 func TestFilesSetRoot(t *testing.T) {
+	// Start an instance of engo
+	Run(RunOptions{
+		NoRun:        true,
+		HeadlessMode: true,
+	}, &assetTestScene{})
+
 	Files.SetRoot("testing")
 	if Files.root != "testing" {
 		t.Errorf("Root was not set to %v, it was %v instead", "testing", Files.root)
