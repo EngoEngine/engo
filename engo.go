@@ -32,11 +32,11 @@ var (
 
 	currentUpdater            Updater
 	currentScene              Scene
-	sceneMutex                *sync.RWMutex
+	sceneMutex                = &sync.RWMutex{}
 	opts                      RunOptions
 	resetLoopTicker           = make(chan bool, 1)
 	closeGame                 bool
-	closerMutex               *sync.RWMutex
+	closerMutex               = &sync.RWMutex{}
 	gameWidth, gameHeight     float32
 	windowWidth, windowHeight float32
 	canvasWidth, canvasHeight float32
@@ -146,11 +146,6 @@ type RunOptions struct {
 // the game window has been closed already. You can supply a lot of options within `RunOptions`, and your starting
 // `Scene` should be defined in `defaultScene`.
 func Run(o RunOptions, defaultScene Scene) {
-
-	// Setting up the mutexes to prevent
-	// race conditions
-	closerMutex, sceneMutex = &sync.RWMutex{}, &sync.RWMutex{}
-
 	// Setting defaults
 	if o.FPSLimit == 0 {
 		o.FPSLimit = 60
