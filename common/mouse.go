@@ -178,7 +178,7 @@ func (m *MouseSystem) Remove(basic ecs.BasicEntity) {
 func (m *MouseSystem) Update(dt float32) {
 	// Translate Mouse.X and Mouse.Y into "game coordinates"
 	switch engo.CurrentBackEnd {
-	case engo.BackEndGLFW:
+	case engo.BackEndGLFW, engo.BackEndSDL:
 		m.mouseX = engo.Input.Mouse.X*m.camera.Z() + (m.camera.X()-(engo.GameWidth()/2)*m.camera.Z())/engo.GetGlobalScale().X
 		m.mouseY = engo.Input.Mouse.Y*m.camera.Z() + (m.camera.Y()-(engo.GameHeight()/2)*m.camera.Z())/engo.GetGlobalScale().Y
 	case engo.BackEndMobile:

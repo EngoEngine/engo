@@ -1,5 +1,5 @@
 // +build darwin,!arm,!arm64 linux windows
-// +build !ios,!android,!netgo
+// +build !ios,!android,!netgo,!sdl
 
 package engo
 
@@ -243,17 +243,11 @@ func RunIteration() {
 
 		window.SwapBuffers()
 	}
-
 }
 
 // RunPreparation is called automatically when calling Open. It should only be called once.
 func RunPreparation(defaultScene Scene) {
 	Time = NewClock()
-
-	// Default WorldBounds values
-	//WorldBounds.Max = Point{GameWidth(), GameHeight()}
-	// TODO: move this to appropriate location
-
 	SetScene(defaultScene, false)
 }
 
