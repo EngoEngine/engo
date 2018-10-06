@@ -74,10 +74,16 @@ func SetScene(s Scene, forceNewWorld bool) {
 	}
 
 	// Register Scene if needed
+	sceneMutex.RLock()
 	wrapper, registered := scenes[s.Type()]
+	sceneMutex.RUnlock()
+
 	if !registered {
 		RegisterScene(s)
+
+		sceneMutex.RLock()
 		wrapper = scenes[s.Type()]
+		sceneMutex.RUnlock()
 	}
 
 	// Initialize new Scene / World if needed
@@ -113,15 +119,21 @@ func SetScene(s Scene, forceNewWorld bool) {
 
 // RegisterScene registers the `Scene`, so it can later be used by `SetSceneByName`
 func RegisterScene(s Scene) {
+	sceneMutex.RLock()
 	_, ok := scenes[s.Type()]
+	sceneMutex.RUnlock()
 	if !ok {
+		sceneMutex.Lock()
 		scenes[s.Type()] = &sceneWrapper{scene: s}
+		sceneMutex.Unlock()
 	}
 }
 
 // SetSceneByName does a lookup for the `Scene` where its `Type()` equals `name`, and then sets it as current `Scene`
 func SetSceneByName(name string, forceNewWorld bool) error {
+	sceneMutex.RLock()
 	scene, ok := scenes[name]
+	sceneMutex.RUnlock()
 	if !ok {
 		return fmt.Errorf("scene not registered: %s", name)
 	}

@@ -1,4 +1,4 @@
-//+build !appveyor,!jstesting
+//+build nottesting
 
 package common
 

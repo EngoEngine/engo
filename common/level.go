@@ -24,17 +24,23 @@ type Level struct {
 	// TileHeight defines the height of each tile in the level
 	TileHeight int
 	// NextObjectId is the next free Object ID defined by Tiled
-	NextObjectId int
-	// Tileset maps tile IDs to their texture
-	Tileset map[int]*Tile
+	NextObjectID int
 	// TileLayers contains all TileLayer of the level
 	TileLayers []*TileLayer
 	// ImageLayers contains all ImageLayer of the level
 	ImageLayers []*ImageLayer
 	// ObjectLayers contains all ObjectLayer of the level
 	ObjectLayers []*ObjectLayer
-	// tilemap maps tile map position to the tile at that location
-	tilemap map[mapPoint]*Tile
+	// Properties are custom properties of the level
+	Properties  []Property
+	resourceMap map[uint32]Texture
+	pointMap    map[mapPoint]*Tile
+}
+
+// Property is any custom property. The Type corresponds to the type (int,
+// float, etc) stored in the Value as a string
+type Property struct {
+	Name, Type, Value string
 }
 
 // TileLayer contains a list of its tiles plus all default Tiled attributes
@@ -47,74 +53,123 @@ type TileLayer struct {
 	Height int
 	// Tiles contains the list of tiles
 	Tiles []*Tile
+	// Opacity is the opacity of the layer from [0,1]
+	Opacity float32
+	// Visible is if the layer is visible
+	Visible bool
+	// X is the x position of the tile layer
+	X float32
+	// Y is the y position of the tile layer
+	Y float32
+	// XOffset is the x-offset of the tile layer
+	OffSetX float32
+	// YOffset is the y-offset of the tile layer
+	OffSetY float32
+	// Properties are the custom properties of the layer
+	Properties []Property
 }
 
 // ImageLayer contains a list of its images plus all default Tiled attributes
 type ImageLayer struct {
 	// Name defines the name of the image layer given in the TMX XML / Tiled
 	Name string
-	// Width is the integer width of each image in this layer
-	Width int
-	// Height is the integer height of each image in this layer
-	Height int
 	// Source contains the original image filename
 	Source string
 	// Images contains the list of all image tiles
 	Images []*Tile
+	// Opacity is the opacity of the layer from [0,1]
+	Opacity float32
+	// Visible is if the layer is visible
+	Visible bool
+	// XOffset is the x-offset of the layer
+	OffSetX float32
+	// YOffset is the y-offset of the layer
+	OffSetY float32
+	// Properties are the custom properties of the layer
+	Properties []Property
 }
 
 // ObjectLayer contains a list of its standard objects as well as a list of all its polyline objects
 type ObjectLayer struct {
 	// Name defines the name of the object layer given in the TMX XML / Tiled
 	Name string
+	// Color is the color of the object
+	Color string
 	// OffSetX is the parsed X offset for the object layer
 	OffSetX float32
 	// OffSetY is the parsed Y offset for the object layer
 	OffSetY float32
+	// Opacity is the opacity of the layer from [0,1]
+	Opacity float32
+	// Visible is if the layer is visible
+	Visible bool
+	// Properties are the custom properties of the layer
+	Properties []Property
 	// Objects contains the list of (regular) Object objects
 	Objects []*Object
-	// PolyObjects contains the list of PolylineObject objects
-	PolyObjects []*PolylineObject
+	// DrawOrder is whether the objects are drawn according to the order of
+	// appearance (“index”) or sorted by their y-coordinate (“topdown”).
+	// Defaults to “topdown”.
+	DrawOrder string
 }
 
 // Object is a standard TMX object with all its default Tiled attributes
 type Object struct {
-	// Id is the unique ID of each object defined by Tiled
-	Id int
+	// ID is the unique ID of each object defined by Tiled
+	ID uint32
 	// Name defines the name of the object given in Tiled
 	Name string
 	// Type contains the string type which was given in Tiled
 	Type string
 	// X holds the X float64 coordinate of the object in the map
-	X float64
+	X float32
 	// X holds the X float64 coordinate of the object in the map
-	Y float64
-	// Width is the integer width of the object
-	Width int
-	// Height is the integer height of the object
-	Height int
+	Y float32
+	// Width is the width of the object in pixels
+	Width float32
+	// Height is the height of the object in pixels
+	Height float32
+	// Properties are the custom properties of the object
+	Properties []Property
+	// Tiles are the tiles, if any, associated with the object
+	Tiles []*Tile
+	// Lines are the lines, if any, associated with the object
+	Lines []TMXLine
+	// Ellipses are the ellipses, if any, associated with the object
+	Ellipses []TMXCircle
+	// Text is the text, if any, associated with the object
+	Text []TMXText
 }
 
-// PolylineObject is a TMX polyline object with all its default Tiled attributes
-type PolylineObject struct {
-	// Id is the unique ID of each polyline object defined by Tiled
-	Id int
-	// Name defines the name of the polyline object given in Tiled
-	Name string
-	// Type contains the string type which was given in Tiled
-	Type string
-	// X holds the X float64 coordinate of the polyline in the map
-	X float64
-	// Y holds the Y float64 coordinate of the polyline in the map
-	Y float64
-	// Points contains the original, unaltered points string from the TMZ XML
-	Points string
-	// LineBounds is the list of engo.Line objects generated from the points string
-	LineBounds []*engo.Line
+// TMXCircle is a circle from the tmx map
+// TODO: create a tile instead using the Shape (maybe a render component?)
+type TMXCircle struct {
+	X, Y, Width, Height float32
 }
 
-type mapPoint struct {
-	X, Y int
+// TMXLine is a line from the tmx map
+// TODO: create a tile or render coponent instead?
+type TMXLine struct {
+	Lines []*engo.Line
+	Type  string
+}
+
+// TMXText is text associated with a Tiled Map. It should contain all the
+// information needed to render text.
+// TODO: create a tile instead and have the text rendered as a texture
+type TMXText struct {
+	Bold       bool
+	Color      string
+	FontFamily string
+	Halign     string
+	Italic     bool
+	Kerning    bool
+	Size       float32
+	Strikeout  bool
+	Underline  bool
+	Valign     string
+	WordWrap   bool
+	CharData   string
 }
 
 // Bounds returns the level boundaries as an engo.AABB object
@@ -168,12 +223,16 @@ func (l *Level) screenPoint(mapPt engo.Point) engo.Point {
 	return engo.Point{X: 0, Y: 0}
 }
 
+type mapPoint struct {
+	X, Y int
+}
+
 // GetTile returns a *Tile at the given point (in space / render coordinates).
 func (l *Level) GetTile(pt engo.Point) *Tile {
 	mp := l.mapPoint(pt)
 	x := int(math.Floor(mp.X))
 	y := int(math.Floor(mp.Y))
-	t, ok := l.tilemap[mapPoint{X: x, Y: y}]
+	t, ok := l.pointMap[mapPoint{X: x, Y: y}]
 	if !ok {
 		return nil
 	}
@@ -219,106 +278,4 @@ func (t *Tile) View() (float32, float32, float32, float32) {
 type Tile struct {
 	engo.Point
 	Image *Texture
-}
-
-type tilesheet struct {
-	Image    *TextureResource
-	Firstgid int
-	Width    int
-	Height   int
-	Tiles    []Tile
-}
-
-type layer struct {
-	Name        string
-	Width       int
-	Height      int
-	TileMapping []uint32
-}
-
-func createTileset(lvl *Level, sheets []*tilesheet) map[int]*Tile {
-	tileset := make(map[int]*Tile)
-	deftw := float32(lvl.TileWidth)
-	defth := float32(lvl.TileHeight)
-
-	for _, sheet := range sheets {
-		var tw, th = deftw, defth
-		curGid := sheet.Firstgid
-		if sheet.Height != 0 && sheet.Width != 0 {
-			tw, th = float32(sheet.Width), float32(sheet.Height)
-		}
-		for i := range sheet.Tiles {
-			tileset[curGid] = &sheet.Tiles[i]
-			curGid++
-		}
-		if sheet.Image == nil {
-			continue
-		}
-		setWidth := sheet.Image.Width / tw
-		setHeight := sheet.Image.Height / th
-		totalTiles := int(setWidth * setHeight)
-
-		for i := 0; i < totalTiles; i++ {
-			t := &Tile{}
-			x := float32(i%int(setWidth)) * tw
-			y := float32(i/int(setWidth)) * th
-
-			invTexWidth := 1.0 / sheet.Image.Width
-			invTexHeight := 1.0 / sheet.Image.Height
-
-			u := x * invTexWidth
-			v := y * invTexHeight
-			u2 := (x + tw) * invTexWidth
-			v2 := (y + th) * invTexHeight
-			t.Image = &Texture{
-				id:     sheet.Image.Texture,
-				width:  tw,
-				height: th,
-				viewport: engo.AABB{
-					Min: engo.Point{X: u, Y: v},
-					Max: engo.Point{X: u2, Y: v2},
-				},
-			}
-			tileset[curGid] = t
-			curGid++
-		}
-	}
-
-	return tileset
-}
-
-func createLevelTiles(lvl *Level, layers []*layer, ts map[int]*Tile) ([]*TileLayer, map[mapPoint]*Tile) {
-	var levelTileLayers []*TileLayer
-	tileMapper := make(map[mapPoint]*Tile)
-
-	// Create a TileLayer for each provided layer
-	for _, layer := range layers {
-		tilemap := make([]*Tile, 0)
-		tileLayer := &TileLayer{}
-		mapping := layer.TileMapping
-
-		for i := 0; i < lvl.height; i++ {
-			for x := 0; x < lvl.width; x++ {
-				idx := x + i*lvl.width
-				idxPt := mapPoint{X: x, Y: i}
-				t := &Tile{}
-
-				if tileIdx := int(mapping[idx]); tileIdx >= 1 {
-					t.Image = ts[tileIdx].Image
-					t.Point = lvl.screenPoint(engo.Point{X: float32(x), Y: float32(i)})
-				}
-				tilemap = append(tilemap, t)
-				tileMapper[idxPt] = t
-			}
-		}
-
-		tileLayer.Name = layer.Name
-		tileLayer.Width = layer.Width
-		tileLayer.Height = layer.Height
-		tileLayer.Tiles = tilemap
-
-		levelTileLayers = append(levelTileLayers, tileLayer)
-	}
-
-	return levelTileLayers, tileMapper
 }

@@ -3,7 +3,6 @@ package common
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	"engo.io/engo"
 )
@@ -28,12 +27,7 @@ type tmxLoader struct {
 
 // Load will load the tmx file and any other image resources that are needed
 func (t *tmxLoader) Load(url string, data io.Reader) error {
-	tmxBytes, err := ioutil.ReadAll(data)
-	if err != nil {
-		return err
-	}
-
-	lvl, err := createLevelFromTmx(tmxBytes, url)
+	lvl, err := createLevelFromTmx(data, url)
 	if err != nil {
 		return err
 	}

@@ -3,6 +3,7 @@ package engo // import "engo.io/engo"
 import (
 	"fmt"
 	"log"
+	"sync"
 
 	"engo.io/ecs"
 )
@@ -29,12 +30,13 @@ var (
 	// Mailbox is used by all Systems to communicate
 	Mailbox *MessageManager
 
-	currentUpdater Updater
-	currentScene   Scene
-
+	currentUpdater            Updater
+	currentScene              Scene
+	sceneMutex                = &sync.RWMutex{}
 	opts                      RunOptions
 	resetLoopTicker           = make(chan bool, 1)
 	closeGame                 bool
+	closerMutex               = &sync.RWMutex{}
 	gameWidth, gameHeight     float32
 	windowWidth, windowHeight float32
 	canvasWidth, canvasHeight float32
@@ -253,7 +255,9 @@ func ScaleOnResize() bool {
 
 // Exit is the safest way to close your game, as `engo` will correctly attempt to close all windows, handlers and contexts
 func Exit() {
+	closerMutex.Lock()
 	closeGame = true
+	closerMutex.Unlock()
 }
 
 // GameWidth returns the current game width
@@ -267,11 +271,13 @@ func GameHeight() float32 {
 }
 
 func closeEvent() {
+	sceneMutex.RLock()
 	for _, scenes := range scenes {
 		if exiter, ok := scenes.scene.(Exiter); ok {
 			exiter.Exit()
 		}
 	}
+	sceneMutex.RUnlock()
 
 	if !opts.OverrideCloseAction {
 		Exit()
