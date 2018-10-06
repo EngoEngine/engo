@@ -8,14 +8,15 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
-	"engo.io/engo/common"
+	"engo.io/engo/audio"
+	"engo.io/engo/render"
 )
 
 type DefaultScene struct{}
 
 type Whoop struct {
 	ecs.BasicEntity
-	common.AudioComponent
+	audio.AudioComponent
 }
 
 func (s *DefaultScene) Preload() {
@@ -34,40 +35,40 @@ func (s *DefaultScene) Preload() {
 func (s *DefaultScene) Setup(u engo.Updater) {
 	w, _ := u.(*ecs.World)
 
-	common.SetBackground(color.White)
+	render.SetBackground(color.White)
 
-	w.AddSystem(&common.RenderSystem{})
-	w.AddSystem(&common.AudioSystem{})
+	w.AddSystem(&render.RenderSystem{})
+	w.AddSystem(&audio.AudioSystem{})
 	w.AddSystem(&WhoopSystem{})
 
 	birds := Whoop{BasicEntity: ecs.NewBasic()}
-	birdPlayer, err := common.LoadedPlayer("326488.wav")
+	birdPlayer, err := audio.LoadedPlayer("326488.wav")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	birds.AudioComponent = common.AudioComponent{Player: birdPlayer}
+	birds.AudioComponent = audio.AudioComponent{Player: birdPlayer}
 	birdPlayer.Play()
 	birdPlayer.Repeat = true
 
 	// Let's add our birds to the appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *common.AudioSystem:
+		case *audio.AudioSystem:
 			sys.Add(&birds.BasicEntity, &birds.AudioComponent)
 		}
 	}
 
 	whoop := Whoop{BasicEntity: ecs.NewBasic()}
-	whoopPlayer, err := common.LoadedPlayer("326064.wav")
+	whoopPlayer, err := audio.LoadedPlayer("326064.wav")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	whoop.AudioComponent = common.AudioComponent{Player: whoopPlayer}
+	whoop.AudioComponent = audio.AudioComponent{Player: whoopPlayer}
 
 	// Let's add our whoop to the appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *common.AudioSystem:
+		case *audio.AudioSystem:
 			sys.Add(&whoop.BasicEntity, &whoop.AudioComponent)
 		case *WhoopSystem:
 			sys.Add(&whoop.AudioComponent)
@@ -79,10 +80,10 @@ func (*DefaultScene) Type() string { return "Game" }
 
 type WhoopSystem struct {
 	goingUp bool
-	player  *common.Player
+	player  *audio.Player
 }
 
-func (w *WhoopSystem) Add(audio *common.AudioComponent) {
+func (w *WhoopSystem) Add(audio *audio.AudioComponent) {
 	w.player = audio.Player
 }
 
@@ -119,6 +120,7 @@ func main() {
 		Title:  "Audio Demo",
 		Width:  1024,
 		Height: 640,
+		AssetsRoot:    "assets/",
 	}
 	engo.Run(opts, &DefaultScene{})
 }
