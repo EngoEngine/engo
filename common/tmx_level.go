@@ -98,7 +98,7 @@ func createLevelFromTmx(r io.Reader, tmxURL string) (*Level, error) {
 			tl.Height = tmxLevel.Height
 		}
 		tl.Properties = getProperties(l.Properties)
-		tl.Tiles = level.unpackTiles(0, 0, tl.Height, tl.Width, l.Data)
+		tl.Tiles = level.unpackTiles(0, 0, tl.Width, tl.Height, l.Data)
 		level.TileLayers = append(level.TileLayers, tl)
 	}
 
