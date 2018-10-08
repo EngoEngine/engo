@@ -7,7 +7,9 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
-	"engo.io/engo/common"
+	"engo.io/engo/math2d"
+	"engo.io/engo/render"
+	"engo.io/engo/common2"
 )
 
 var (
@@ -16,7 +18,7 @@ var (
 	leftButton  = "left"
 	rightButton = "right"
 
-	levelData *common.Level
+	levelData *render.Level
 )
 
 const (
@@ -28,8 +30,8 @@ type DefaultScene struct{}
 
 type Car struct {
 	ecs.BasicEntity
-	common.RenderComponent
-	common.SpaceComponent
+	render.RenderComponent
+	common2.SpaceComponent
 	ControlComponent
 	SpeedComponent
 }
@@ -37,13 +39,13 @@ type Car struct {
 type ControlComponent struct {
 	SchemeVert  string
 	SchemeHoriz string
-	TileLayer   *common.TileLayer
+	TileLayer   *render.TileLayer
 }
 
 type Tile struct {
 	ecs.BasicEntity
-	common.RenderComponent
-	common.SpaceComponent
+	render.RenderComponent
+	common2.SpaceComponent
 }
 
 func (*DefaultScene) Preload() {
@@ -64,9 +66,9 @@ func (*DefaultScene) Preload() {
 func (scene *DefaultScene) Setup(u engo.Updater) {
 	w, _ := u.(*ecs.World)
 
-	common.SetBackground(color.White)
+	render.SetBackground(color.White)
 
-	w.AddSystem(&common.RenderSystem{})
+	w.AddSystem(&render.RenderSystem{})
 	w.AddSystem(&SpeedSystem{})
 	w.AddSystem(&ControlSystem{})
 
@@ -75,22 +77,22 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 	if err != nil {
 		panic(err)
 	}
-	tmxResource := resource.(common.TMXResource)
+	tmxResource := resource.(render.TMXResource)
 	levelData = tmxResource.Level
 
 	// Create Hero
-	spriteSheet := common.NewSpritesheetFromFile("orange_vehicles.png", 32, 32)
+	spriteSheet := render.NewSpritesheetFromFile("orange_vehicles.png", 32, 32)
 
 	car := &Car{BasicEntity: ecs.NewBasic()}
 
-	car.SpaceComponent = common.SpaceComponent{
-		Position: engo.Point{X: 0, Y: 0},
+	car.SpaceComponent = common2.SpaceComponent{
+		Position: math2d.Point{X: 0, Y: 0},
 		Width:    float32(32) * 4,
 		Height:   float32(32) * 4,
 	}
-	car.RenderComponent = common.RenderComponent{
+	car.RenderComponent = render.RenderComponent{
 		Drawable: spriteSheet.Cell(0),
-		Scale:    engo.Point{4, 4},
+		Scale:    math2d.Point{4, 4},
 	}
 
 	car.SpeedComponent = SpeedComponent{}
@@ -105,7 +107,7 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 	// Add our hero to the appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *common.RenderSystem:
+		case *render.RenderSystem:
 			sys.Add(
 				&car.BasicEntity,
 				&car.RenderComponent,
@@ -136,12 +138,12 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 
 			if tileElement.Image != nil {
 				tile := &Tile{BasicEntity: ecs.NewBasic()}
-				tile.RenderComponent = common.RenderComponent{
+				tile.RenderComponent = render.RenderComponent{
 					Drawable: tileElement,
-					Scale:    engo.Point{1, 1},
+					Scale:    math2d.Point{1, 1},
 				}
 				tile.SetZIndex(0)
-				tile.SpaceComponent = common.SpaceComponent{
+				tile.SpaceComponent = common2.SpaceComponent{
 					Position: tileElement.Point,
 					Width:    0,
 					Height:   0,
@@ -155,7 +157,7 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 	// Add each of the tiles entities and its components to the render system
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *common.RenderSystem:
+		case *render.RenderSystem:
 			for _, v := range tileComponents {
 				sys.Add(&v.BasicEntity, &v.RenderComponent, &v.SpaceComponent)
 			}
@@ -176,7 +178,7 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 	)
 
 	// Add EntityScroller System
-	w.AddSystem(&common.EntityScroller{
+	w.AddSystem(&render.EntityScroller{
 		SpaceComponent: &car.SpaceComponent,
 		TrackingBounds: levelData.Bounds(),
 	})
@@ -186,7 +188,7 @@ func (*DefaultScene) Type() string { return "DefaultScene" }
 
 type SpeedMessage struct {
 	*ecs.BasicEntity
-	engo.Point
+	math2d.Point
 }
 
 func (SpeedMessage) Type() string {
@@ -194,13 +196,13 @@ func (SpeedMessage) Type() string {
 }
 
 type SpeedComponent struct {
-	engo.Point
+	math2d.Point
 }
 
 type speedEntity struct {
 	*ecs.BasicEntity
 	*SpeedComponent
-	*common.SpaceComponent
+	*common2.SpaceComponent
 }
 
 type SpeedSystem struct {
@@ -220,7 +222,7 @@ func (s *SpeedSystem) New(*ecs.World) {
 	})
 }
 
-func (s *SpeedSystem) Add(basic *ecs.BasicEntity, speed *SpeedComponent, space *common.SpaceComponent) {
+func (s *SpeedSystem) Add(basic *ecs.BasicEntity, speed *SpeedComponent, space *common2.SpaceComponent) {
 	s.entities = append(s.entities, speedEntity{basic, speed, space})
 }
 
@@ -244,11 +246,11 @@ func (s *SpeedSystem) Update(dt float32) {
 		e.SpaceComponent.Position.X = e.SpaceComponent.Position.X + speed*e.SpeedComponent.Point.X
 		e.SpaceComponent.Position.Y = e.SpaceComponent.Position.Y + speed*e.SpeedComponent.Point.Y
 
-		var t *common.Tile
+		var t *render.Tile
 		if e.SpaceComponent.Position.X >= 0 {
 			t = levelData.GetTile(e.SpaceComponent.Center())
 		} else {
-			t = levelData.GetTile(engo.Point{
+			t = levelData.GetTile(math2d.Point{
 				X: e.SpaceComponent.Position.X - float32(levelData.TileWidth),
 				Y: e.SpaceComponent.Position.Y + float32(levelData.TileHeight),
 			})
@@ -263,14 +265,14 @@ func (s *SpeedSystem) Update(dt float32) {
 type controlEntity struct {
 	*ecs.BasicEntity
 	*ControlComponent
-	*common.SpaceComponent
+	*common2.SpaceComponent
 }
 
 type ControlSystem struct {
 	entities []controlEntity
 }
 
-func (c *ControlSystem) Add(basic *ecs.BasicEntity, control *ControlComponent, space *common.SpaceComponent) {
+func (c *ControlSystem) Add(basic *ecs.BasicEntity, control *ControlComponent, space *common2.SpaceComponent) {
 	c.entities = append(c.entities, controlEntity{basic, control, space})
 }
 
@@ -287,7 +289,7 @@ func (c *ControlSystem) Remove(basic ecs.BasicEntity) {
 	}
 }
 
-func getSpeed(e controlEntity) (p engo.Point, changed bool) {
+func getSpeed(e controlEntity) (p math2d.Point, changed bool) {
 	p.X = engo.Input.Axis(e.ControlComponent.SchemeHoriz).Value()
 	p.Y = engo.Input.Axis(e.ControlComponent.SchemeVert).Value()
 	origX, origY := p.X, p.Y
@@ -349,6 +351,7 @@ func main() {
 		Title:  "My Little Isometric Adventure",
 		Width:  500,
 		Height: 500,
+		AssetsRoot: "assets/",
 	}
 	engo.Run(opts, &DefaultScene{})
 }

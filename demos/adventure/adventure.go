@@ -8,20 +8,22 @@ import (
 
 	"engo.io/ecs"
 	"engo.io/engo"
-	"engo.io/engo/common"
+	"engo.io/engo/math2d"
+	"engo.io/engo/render"
+	"engo.io/engo/common2"
 )
 
 var (
-	WalkUpAction    *common.Animation
-	WalkDownAction  *common.Animation
-	WalkLeftAction  *common.Animation
-	WalkRightAction *common.Animation
-	StopUpAction    *common.Animation
-	StopDownAction  *common.Animation
-	StopLeftAction  *common.Animation
-	StopRightAction *common.Animation
-	SkillAction     *common.Animation
-	actions         []*common.Animation
+	WalkUpAction    *render.Animation
+	WalkDownAction  *render.Animation
+	WalkLeftAction  *render.Animation
+	WalkRightAction *render.Animation
+	StopUpAction    *render.Animation
+	StopDownAction  *render.Animation
+	StopLeftAction  *render.Animation
+	StopRightAction *render.Animation
+	SkillAction     *render.Animation
+	actions         []*render.Animation
 
 	upButton    = "up"
 	downButton  = "down"
@@ -43,9 +45,9 @@ type DefaultScene struct{}
 
 type Hero struct {
 	ecs.BasicEntity
-	common.AnimationComponent
-	common.RenderComponent
-	common.SpaceComponent
+	render.AnimationComponent
+	render.RenderComponent
+	common2.SpaceComponent
 	ControlComponent
 	SpeedComponent
 }
@@ -57,9 +59,9 @@ type ControlComponent struct {
 
 type Tile struct {
 	ecs.BasicEntity
-	common.RenderComponent
-	common.SpaceComponent
-	common.CollisionComponent
+	render.RenderComponent
+	common2.SpaceComponent
+	common2.CollisionComponent
 }
 
 func (*DefaultScene) Preload() {
@@ -72,51 +74,51 @@ func (*DefaultScene) Preload() {
 		panic(err)
 	}
 
-	StopUpAction = &common.Animation{
+	StopUpAction = &render.Animation{
 		Name:   "upstop",
 		Frames: []int{37},
 	}
 
-	StopDownAction = &common.Animation{
+	StopDownAction = &render.Animation{
 		Name:   "downstop",
 		Frames: []int{1},
 	}
 
-	StopLeftAction = &common.Animation{
+	StopLeftAction = &render.Animation{
 		Name:   "leftstop",
 		Frames: []int{13},
 	}
 
-	StopRightAction = &common.Animation{
+	StopRightAction = &render.Animation{
 		Name:   "rightstop",
 		Frames: []int{25},
 	}
 
-	WalkUpAction = &common.Animation{
+	WalkUpAction = &render.Animation{
 		Name:   "up",
 		Frames: []int{36, 37, 38},
 		Loop:   true,
 	}
 
-	WalkDownAction = &common.Animation{
+	WalkDownAction = &render.Animation{
 		Name:   "down",
 		Frames: []int{0, 1, 2},
 		Loop:   true,
 	}
 
-	WalkLeftAction = &common.Animation{
+	WalkLeftAction = &render.Animation{
 		Name:   "left",
 		Frames: []int{12, 13, 14},
 		Loop:   true,
 	}
 
-	WalkRightAction = &common.Animation{
+	WalkRightAction = &render.Animation{
 		Name:   "right",
 		Frames: []int{24, 25, 26},
 		Loop:   true,
 	}
 
-	actions = []*common.Animation{
+	actions = []*render.Animation{
 		StopUpAction,
 		StopDownAction,
 		StopLeftAction,
@@ -136,10 +138,10 @@ func (*DefaultScene) Preload() {
 func (scene *DefaultScene) Setup(u engo.Updater) {
 	w, _ := u.(*ecs.World)
 
-	common.SetBackground(color.White)
+	render.SetBackground(color.White)
 
-	w.AddSystem(&common.RenderSystem{})
-	w.AddSystem(&common.AnimationSystem{})
+	w.AddSystem(&render.RenderSystem{})
+	w.AddSystem(&render.AnimationSystem{})
 	w.AddSystem(&SpeedSystem{})
 	w.AddSystem(&ControlSystem{})
 
@@ -148,7 +150,7 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 	if err != nil {
 		panic(err)
 	}
-	tmxResource := resource.(common.TMXResource)
+	tmxResource := resource.(render.TMXResource)
 	levelData := tmxResource.Level
 
 	// Extract Map Size
@@ -156,10 +158,10 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 	levelHeight = levelData.Bounds().Max.Y
 
 	// Create Hero
-	spriteSheet := common.NewSpritesheetFromFile(model, width, height)
+	spriteSheet := render.NewSpritesheetFromFile(model, width, height)
 
 	hero := scene.CreateHero(
-		engo.Point{engo.GameWidth() / 2, engo.GameHeight() / 2},
+		math2d.Point{engo.GameWidth() / 2, engo.GameHeight() / 2},
 		spriteSheet,
 	)
 
@@ -173,14 +175,14 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 	// Add our hero to the appropriate systems
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *common.RenderSystem:
+		case *render.RenderSystem:
 			sys.Add(
 				&hero.BasicEntity,
 				&hero.RenderComponent,
 				&hero.SpaceComponent,
 			)
 
-		case *common.AnimationSystem:
+		case *render.AnimationSystem:
 			sys.Add(
 				&hero.BasicEntity,
 				&hero.AnimationComponent,
@@ -212,11 +214,11 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 
 			if tileElement.Image != nil {
 				tile := &Tile{BasicEntity: ecs.NewBasic()}
-				tile.RenderComponent = common.RenderComponent{
+				tile.RenderComponent = render.RenderComponent{
 					Drawable: tileElement,
-					Scale:    engo.Point{1, 1},
+					Scale:    math2d.Point{1, 1},
 				}
-				tile.SpaceComponent = common.SpaceComponent{
+				tile.SpaceComponent = common2.SpaceComponent{
 					Position: tileElement.Point,
 					Width:    0,
 					Height:   0,
@@ -240,11 +242,11 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 
 			if imageElement.Image != nil {
 				tile := &Tile{BasicEntity: ecs.NewBasic()}
-				tile.RenderComponent = common.RenderComponent{
+				tile.RenderComponent = render.RenderComponent{
 					Drawable: imageElement,
-					Scale:    engo.Point{1, 1},
+					Scale:    math2d.Point{1, 1},
 				}
-				tile.SpaceComponent = common.SpaceComponent{
+				tile.SpaceComponent = common2.SpaceComponent{
 					Position: imageElement.Point,
 					Width:    0,
 					Height:   0,
@@ -262,7 +264,7 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 	// Add each of the tiles entities and its components to the render system
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
-		case *common.RenderSystem:
+		case *render.RenderSystem:
 			for _, v := range tileComponents {
 				sys.Add(&v.BasicEntity, &v.RenderComponent, &v.SpaceComponent)
 			}
@@ -293,7 +295,7 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 	)
 
 	// Add EntityScroller System
-	w.AddSystem(&common.EntityScroller{
+	w.AddSystem(&render.EntityScroller{
 		SpaceComponent: &hero.SpaceComponent,
 		TrackingBounds: levelData.Bounds(),
 	})
@@ -301,21 +303,21 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 
 func (*DefaultScene) Type() string { return "DefaultScene" }
 
-func (*DefaultScene) CreateHero(point engo.Point, spriteSheet *common.Spritesheet) *Hero {
+func (*DefaultScene) CreateHero(point math2d.Point, spriteSheet *render.Spritesheet) *Hero {
 	hero := &Hero{BasicEntity: ecs.NewBasic()}
 
-	hero.SpaceComponent = common.SpaceComponent{
+	hero.SpaceComponent = common2.SpaceComponent{
 		Position: point,
 		Width:    float32(width),
 		Height:   float32(height),
 	}
-	hero.RenderComponent = common.RenderComponent{
+	hero.RenderComponent = render.RenderComponent{
 		Drawable: spriteSheet.Cell(0),
-		Scale:    engo.Point{1, 1},
+		Scale:    math2d.Point{1, 1},
 	}
 
 	hero.SpeedComponent = SpeedComponent{}
-	hero.AnimationComponent = common.NewAnimationComponent(spriteSheet.Drawables(), 0.1)
+	hero.AnimationComponent = render.NewAnimationComponent(spriteSheet.Drawables(), 0.1)
 
 	hero.AnimationComponent.AddAnimations(actions)
 	hero.AnimationComponent.SelectAnimationByName("downstop")
@@ -325,7 +327,7 @@ func (*DefaultScene) CreateHero(point engo.Point, spriteSheet *common.Spriteshee
 
 type SpeedMessage struct {
 	*ecs.BasicEntity
-	engo.Point
+	math2d.Point
 }
 
 func (SpeedMessage) Type() string {
@@ -333,13 +335,13 @@ func (SpeedMessage) Type() string {
 }
 
 type SpeedComponent struct {
-	engo.Point
+	math2d.Point
 }
 
 type speedEntity struct {
 	*ecs.BasicEntity
 	*SpeedComponent
-	*common.SpaceComponent
+	*common2.SpaceComponent
 }
 
 type SpeedSystem struct {
@@ -360,7 +362,7 @@ func (s *SpeedSystem) New(*ecs.World) {
 	})
 }
 
-func (s *SpeedSystem) Add(basic *ecs.BasicEntity, speed *SpeedComponent, space *common.SpaceComponent) {
+func (s *SpeedSystem) Add(basic *ecs.BasicEntity, speed *SpeedComponent, space *common2.SpaceComponent) {
 	s.entities = append(s.entities, speedEntity{basic, speed, space})
 }
 
@@ -404,16 +406,16 @@ func (s *SpeedSystem) Update(dt float32) {
 
 type controlEntity struct {
 	*ecs.BasicEntity
-	*common.AnimationComponent
+	*render.AnimationComponent
 	*ControlComponent
-	*common.SpaceComponent
+	*common2.SpaceComponent
 }
 
 type ControlSystem struct {
 	entities []controlEntity
 }
 
-func (c *ControlSystem) Add(basic *ecs.BasicEntity, anim *common.AnimationComponent, control *ControlComponent, space *common.SpaceComponent) {
+func (c *ControlSystem) Add(basic *ecs.BasicEntity, anim *render.AnimationComponent, control *ControlComponent, space *common2.SpaceComponent) {
 	c.entities = append(c.entities, controlEntity{basic, anim, control, space})
 }
 
@@ -488,7 +490,7 @@ func setAnimation(e controlEntity) {
 	}
 }
 
-func getSpeed(e controlEntity) (p engo.Point, changed bool) {
+func getSpeed(e controlEntity) (p math2d.Point, changed bool) {
 	p.X = engo.Input.Axis(e.ControlComponent.SchemeHoriz).Value()
 	p.Y = engo.Input.Axis(e.ControlComponent.SchemeVert).Value()
 	origX, origY := p.X, p.Y
@@ -552,6 +554,7 @@ func main() {
 		Title:  "My Little Adventure",
 		Width:  500,
 		Height: 500,
+		AssetsRoot:    "assets/",
 	}
 	engo.Run(opts, &DefaultScene{})
 }
