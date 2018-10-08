@@ -18,6 +18,8 @@ const (
 	BackEndWeb
 	// BackEndMobile uses gomobile
 	BackEndMobile
+	// BackEndSDL uses sdl2
+	BackEndSDL
 )
 
 var (
