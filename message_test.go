@@ -53,14 +53,6 @@ func TestMessageCounterWithRemoval(t *testing.T) {
 	}
 }
 
-func TestRemovalOfNonexistentHandler(t *testing.T) {
-	mailbox := &MessageManager{}
-	err := mailbox.StopListen("testMessageCounter", MessageHandlerId(42))
-	if err == nil {
-		t.Error("StopListen should return an error in case the handler to remove doesn't exist")
-	}
-}
-
 func TestMessageListenOnce(t *testing.T) {
 	mailbox := &MessageManager{}
 	msg := testMessageCounter{}

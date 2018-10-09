@@ -1,7 +1,6 @@
 package engo
 
 import (
-	"errors"
 	"sync"
 )
 
@@ -37,12 +36,14 @@ type MessageManager struct {
 	// conditions on listeners and
 	// sync its state across the game
 	sync.RWMutex
-	listeners map[string][]HandlerIDPair
+	listeners        map[string][]HandlerIDPair
+	handlersToRemove map[string][]MessageHandlerId
 }
 
 // Dispatch sends a message to all subscribed handlers of the message's type
 func (mm *MessageManager) Dispatch(message Message) {
 	mm.Lock()
+	mm.clearRemovedHandlers()
 	handlers := mm.listeners[message.Type()]
 	mm.Unlock()
 
@@ -67,9 +68,34 @@ func (mm *MessageManager) Listen(messageType string, handler MessageHandler) Mes
 	return handlerID
 }
 
+// ListenOnce is a convenience wrapper around StopListen() to only listen to a specified message once
+func (mm *MessageManager) ListenOnce(messageType string, handler MessageHandler) {
+	handlerId := MessageHandlerId(0)
+	handlerId = mm.Listen(messageType, func(msg Message) {
+		handler(msg)
+		mm.StopListen(messageType, handlerId)
+	})
+}
+
 // StopListen removes a previously added handler from the listener queue
-func (mm *MessageManager) StopListen(messageType string, handlerId MessageHandlerId) error {
-	// first, we need to find the handler to remove or return an error if that's not possible
+func (mm *MessageManager) StopListen(messageType string, handlerId MessageHandlerId) {
+	if mm.handlersToRemove == nil {
+		mm.handlersToRemove = make(map[string][]MessageHandlerId)
+	}
+	mm.handlersToRemove[messageType] = append(mm.handlersToRemove[messageType], handlerId)
+}
+
+// Will deleted all queued handlers that are scheduled for removal due to StopListen()
+func (mm *MessageManager) clearRemovedHandlers() {
+	for messageType, handlerList := range mm.handlersToRemove {
+		for _, handlerId := range handlerList {
+			mm.removeHandler(messageType, handlerId)
+		}
+	}
+}
+
+// Removes a single handler from the handler queue, called during cleanup of all handlers scheduled for removal
+func (mm *MessageManager) removeHandler(messageType string, handlerId MessageHandlerId) {
 	indexOfHandler := -1
 	for i, activeHandler := range mm.listeners[messageType] {
 		if activeHandler.MessageHandlerId == handlerId {
@@ -77,19 +103,11 @@ func (mm *MessageManager) StopListen(messageType string, handlerId MessageHandle
 			break
 		}
 	}
+	// A handler might have already been removed during a previous Dispatch(), no action necessary
 	if indexOfHandler == -1 {
-		return errors.New("Trying to remove handler that does not exist")
+		return
 	}
 	mm.listeners[messageType] = append(mm.listeners[messageType][:indexOfHandler], mm.listeners[messageType][indexOfHandler+1:]...)
-	return nil
-}
-
-func (mm *MessageManager) ListenOnce(messageType string, handler MessageHandler) {
-	handlerId := MessageHandlerId(0)
-	handlerId = mm.Listen(messageType, func(msg Message) {
-		handler(msg)
-		mm.StopListen(messageType, handlerId)
-	})
 }
 
 // WindowResizeMessage is a message that's being dispatched whenever the game window is being resized by the gamer
