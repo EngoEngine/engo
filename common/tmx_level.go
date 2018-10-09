@@ -184,6 +184,7 @@ func createLevelFromTmx(r io.Reader, tmxURL string) (*Level, error) {
 				text.CharData = t.CharData
 				object.Text = append(object.Text, text)
 			}
+			ol.Objects = append(ol.Objects, &object)
 		}
 		level.ObjectLayers = append(level.ObjectLayers, ol)
 	}
