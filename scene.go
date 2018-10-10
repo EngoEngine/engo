@@ -107,7 +107,7 @@ func SetScene(s Scene, forceNewWorld bool) {
 	if doSetup {
 		s.Preload()
 
-		wrapper.mailbox.listeners = make(map[string][]MessageHandler)
+		wrapper.mailbox.listeners = make(map[string][]HandlerIDPair)
 
 		s.Setup(wrapper.update)
 	} else {
