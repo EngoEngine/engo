@@ -92,6 +92,7 @@ func (mm *MessageManager) clearRemovedHandlers() {
 			mm.removeHandler(messageType, handlerId)
 		}
 	}
+	mm.handlersToRemove = make(map[string][]MessageHandlerId)
 }
 
 // Removes a single handler from the handler queue, called during cleanup of all handlers scheduled for removal
