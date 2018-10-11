@@ -243,8 +243,8 @@ func RunIteration() {
 		Input.Mouse.ScrollX, Input.Mouse.ScrollY = 0, 0
 		Input.Mouse.Action = Neutral
 
-		window.SwapBuffers()
 		glfwMojaveFix.UpdateNSGLContext(*window)
+		window.SwapBuffers()
 	}
 }
 
