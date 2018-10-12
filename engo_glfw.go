@@ -14,6 +14,8 @@ import (
 
 	"engo.io/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
+
+	"github.com/Noofbiz/glfwMojaveFix"
 )
 
 var (
@@ -241,6 +243,7 @@ func RunIteration() {
 		Input.Mouse.ScrollX, Input.Mouse.ScrollY = 0, 0
 		Input.Mouse.Action = Neutral
 
+		glfwMojaveFix.UpdateNSGLContext(*window)
 		window.SwapBuffers()
 	}
 }
