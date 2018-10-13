@@ -13,6 +13,7 @@ import (
 
 	"engo.io/gl"
 
+	"github.com/Noofbiz/sdlMojaveFix"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -216,6 +217,7 @@ func RunIteration() {
 		Input.Mouse.ScrollX, Input.Mouse.ScrollY = 0, 0
 		Input.Mouse.Action = Neutral
 
+		sdlMojaveFix.UpdateNSGLContext(sdlGLContext)
 		window.GLSwap()
 	}
 }
