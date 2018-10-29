@@ -20,6 +20,8 @@ const (
 	BackEndMobile
 	// BackEndSDL uses sdl2
 	BackEndSDL
+	// BackEndHeadless does not use a window manager for the backend
+	BackEndHeadless
 )
 
 var (
