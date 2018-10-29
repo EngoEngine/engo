@@ -1,9 +1,5 @@
 package engo
 
-import (
-	"sync"
-)
-
 //A MessageHandler is used to dispatch a message to the subscribed handler.
 type MessageHandler func(msg Message)
 
@@ -32,33 +28,26 @@ type Message interface {
 
 // MessageManager manages messages and subscribed handlers
 type MessageManager struct {
-	// this mutex will prevent race
-	// conditions on listeners and
-	// sync its state across the game
-	sync.RWMutex
 	listeners        map[string][]HandlerIDPair
 	handlersToRemove map[string][]MessageHandlerId
 }
 
 // Dispatch sends a message to all subscribed handlers of the message's type
 func (mm *MessageManager) Dispatch(message Message) {
-	mm.Lock()
 	mm.clearRemovedHandlers()
 	handlers := mm.listeners[message.Type()]
-	mm.Unlock()
 
-	mm.RLock()
-	defer mm.RUnlock()
 	for _, handler := range handlers {
 		handler.MessageHandler(message)
 	}
-
 }
 
-// Listen subscribes to the specified message type and calls the specified handler when fired
+// Listen subscribes to the specified message type and calls the specified handler when fired.
+// To prevent any data races, be aware that these listeners occur as callbacks and can be
+// executed at any time. If variables are altered in the handler, utilize channels, locks,
+// semaphores, or any other method necessary to ensure the memory is not altered by multiple
+// functions simultaneously.
 func (mm *MessageManager) Listen(messageType string, handler MessageHandler) MessageHandlerId {
-	mm.Lock()
-	defer mm.Unlock()
 	if mm.listeners == nil {
 		mm.listeners = make(map[string][]HandlerIDPair)
 	}
