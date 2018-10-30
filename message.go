@@ -15,6 +15,7 @@ var currentHandlerId MessageHandlerId
 func init() {
 	currentHandlerId = 0
 }
+
 func getNewHandlerId() MessageHandlerId {
 	currentHandlerId++
 	return currentHandlerId
@@ -41,14 +42,16 @@ type MessageManager struct {
 }
 
 // Dispatch sends a message to all subscribed handlers of the message's type
+// To prevent any data races, be aware that these listeners occur as callbacks and can be
+// executed at any time. If variables are altered in the handler, utilize channels, locks,
+// semaphores, or any other method necessary to ensure the memory is not altered by multiple
+// functions simultaneously.
 func (mm *MessageManager) Dispatch(message Message) {
 	mm.Lock()
 	mm.clearRemovedHandlers()
 	handlers := mm.listeners[message.Type()]
 	mm.Unlock()
 
-	mm.RLock()
-	defer mm.RUnlock()
 	for _, handler := range handlers {
 		handler.MessageHandler(message)
 	}
