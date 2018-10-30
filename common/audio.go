@@ -31,8 +31,9 @@ type audioEntity struct {
 type AudioSystem struct {
 	entities []audioEntity
 
-	otoPlayer *oto.Player
-	bufsize   int
+	otoPlayer               *oto.Player
+	bufsize                 int
+	audioReadC, audioCloser chan struct{}
 }
 
 // New is called when the AudioSystem is added to the world.
@@ -48,11 +49,30 @@ func (a *AudioSystem) New(w *ecs.World) {
 	if err != nil {
 		log.Printf("audio error. Unable to create new OtoPlayer: %v \n\r", err)
 	}
+	a.audioCloser = make(chan struct{})
 	runtime.SetFinalizer(a.otoPlayer, func(p *oto.Player) {
 		if err := p.Close(); err != nil {
 			log.Printf("audio error. Unable to close OtoPlayer: %v \n\r", err)
 		}
+		close(a.audioCloser)
 	})
+	// run oto on a separate thread so it doesn't slow down updates
+	a.audioReadC = make(chan struct{}, 10)
+	go func() {
+		for {
+			select {
+			case <-a.audioReadC:
+				buf := make([]byte, a.bufsize)
+				a.read(buf)
+
+				if _, err := a.otoPlayer.Write(buf); err != nil {
+					log.Printf("error copying to OtoPlayer: %v \r\n", err)
+				}
+			case <-a.audioCloser:
+				return
+			}
+		}
+	}()
 	masterVolume = 1
 }
 
@@ -85,11 +105,9 @@ func (a *AudioSystem) Remove(basic ecs.BasicEntity) {
 
 // Update is called once per frame, and updates/plays the players in the AudioSystem
 func (a *AudioSystem) Update(dt float32) {
-	buf := make([]byte, a.bufsize)
-	a.read(buf)
-
-	if _, err := a.otoPlayer.Write(buf); err != nil {
-		log.Printf("error copying to OtoPlayer: %v \r\n", err)
+	select {
+	case a.audioReadC <- struct{}{}:
+	default:
 	}
 }
 
