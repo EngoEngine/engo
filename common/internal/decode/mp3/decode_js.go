@@ -12,7 +12,7 @@ import (
 
 	"engo.io/engo/common/internal/decode/convert"
 
-	"github.com/gopherjs/gopherjs/js"
+	"github.com/gopherjs/gopherwasm/js"
 )
 
 // TODO: This just uses decodeAudioData, that can treat audio files other than MP3.
@@ -146,21 +146,29 @@ func Decode(src convert.ReadSeekCloser, sr int) (*Stream, error) {
 	return s, nil
 }
 
-var offlineAudioContextClass *js.Object
+var offlineAudioContextClass js.Value
 
 func init() {
-	if klass := js.Global.Get("OfflineAudioContext"); klass != js.Undefined {
+	if klass := js.Global().Get("OfflineAudioContext"); klass != js.Undefined() {
 		offlineAudioContextClass = klass
 		return
 	}
-	if klass := js.Global.Get("webkitOfflineAudioContext"); klass != js.Undefined {
+	if klass := js.Global().Get("webkitOfflineAudioContext"); klass != js.Undefined() {
 		offlineAudioContextClass = klass
 		return
 	}
 }
 
+func float32ArrayToSlice(arr js.Value) []float32 {
+	f := make([]float32, arr.Length())
+	a := js.TypedArrayOf(f)
+	a.Call("set", arr)
+	a.Release()
+	return f
+}
+
 func decode(sr int, buf []byte, try int) (*Stream, error) {
-	if offlineAudioContextClass == nil {
+	if offlineAudioContextClass == js.Null() {
 		return nil, errors.New("audio/mp3: OfflineAudioContext is not available")
 	}
 
@@ -173,27 +181,33 @@ func decode(sr int, buf []byte, try int) (*Stream, error) {
 
 	// TODO: 1 is a correct second argument?
 	oc := offlineAudioContextClass.New(2, 1, sr)
-	oc.Call("decodeAudioData", js.NewArrayBuffer(buf), func(buf *js.Object) {
-		s.leftData = buf.Call("getChannelData", 0).Interface().([]float32)
+	u8 := js.TypedArrayOf(buf)
+	a := u8.Get("buffer").Call("slice", u8.Get("byteOffset"), u8.Get("byteOffset").Int()+u8.Get("byteLength").Int())
+
+	oc.Call("decodeAudioData", a, js.NewCallback(func(args []js.Value) {
+		buf := args[0]
+		s.leftData = float32ArrayToSlice(buf.Call("getChannelData", 0))
 		switch n := buf.Get("numberOfChannels").Int(); n {
 		case 1:
 			s.rightData = s.leftData
 			close(ch)
 		case 2:
-			s.rightData = buf.Call("getChannelData", 1).Interface().([]float32)
+			s.rightData = float32ArrayToSlice(buf.Call("getChannelData", 1))
 			close(ch)
 		default:
 			ch <- fmt.Errorf("audio/mp3: number of channels must be 1 or 2 but %d", n)
 		}
-	}, func(err *js.Object) {
-		if err != nil {
+	}), js.NewCallback(func(args []js.Value) {
+		err := args[0]
+		if err != js.Null() || err != js.Undefined() {
 			ch <- fmt.Errorf("audio/mp3: decodeAudioData failed: %v", err)
 		} else {
 			// On Safari, error value might be null and it is needed to retry decoding
 			// from the next frame (#438).
 			ch <- errTryAgain
 		}
-	})
+	}))
+	u8.Release()
 
 	timeout := time.Duration(math.Pow(2, float64(try))) * time.Second
 
