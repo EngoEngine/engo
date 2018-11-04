@@ -34,7 +34,6 @@ type AudioSystem struct {
 	otoPlayer               *oto.Player
 	bufsize                 int
 	audioReadC, audioCloser chan struct{}
-	isMobile                bool
 }
 
 // New is called when the AudioSystem is added to the world.
@@ -42,7 +41,6 @@ func (a *AudioSystem) New(w *ecs.World) {
 	var err error
 	switch engo.CurrentBackEnd {
 	case engo.BackEndMobile:
-		a.isMobile = true
 		a.bufsize = 12288
 	default:
 		a.bufsize = 8192
@@ -50,15 +48,6 @@ func (a *AudioSystem) New(w *ecs.World) {
 	a.otoPlayer, err = oto.NewPlayer(SampleRate, channelNum, bytesPerSample, a.bufsize)
 	if err != nil {
 		log.Printf("audio error. Unable to create new OtoPlayer: %v \n\r", err)
-	}
-	if a.isMobile {
-		runtime.SetFinalizer(a.otoPlayer, func(p *oto.Player) {
-			if err := p.Close(); err != nil {
-				log.Printf("audio error. Unable to close OtoPlayer: %v \n\r", err)
-			}
-		})
-		masterVolume = 1
-		return
 	}
 	a.audioCloser = make(chan struct{})
 	runtime.SetFinalizer(a.otoPlayer, func(p *oto.Player) {
@@ -116,19 +105,11 @@ func (a *AudioSystem) Remove(basic ecs.BasicEntity) {
 
 // Update is called once per frame, and updates/plays the players in the AudioSystem
 func (a *AudioSystem) Update(dt float32) {
-	if a.isMobile {
-		buf := make([]byte, a.bufsize)
-		a.read(buf)
-
-		if _, err := a.otoPlayer.Write(buf); err != nil {
-			log.Printf("error copying to OtoPlayer: %v \r\n", err)
-		}
-		return
-	}
 	select {
 	case a.audioReadC <- struct{}{}:
 	default:
 	}
+	return
 }
 
 // Read reads from all the currently playing entities and combines them into a
