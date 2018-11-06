@@ -74,15 +74,18 @@ type RenderComponent struct {
 	// Do not set to anything other than NoRepeat for textures in a sprite sheet.
 	// This does not yet work with sprite sheets.
 	Repeat TextureRepeating
+	// Buffer represents the buffer object itself
+	// Avoid using it unless your are writing a custom shader
+	Buffer *gl.Buffer
+	// BufferContent contains the buffer data
+	// Avoid using it unless your are writing a custom shader
+	BufferContent []float32
 
 	magFilter, minFilter               ZoomFilter
 	magFilterChanged, minFilterChanged bool
 
 	shader Shader
 	zIndex float32
-
-	buffer        *gl.Buffer
-	bufferContent []float32
 }
 
 // SetShader sets the shader used by the RenderComponent.
