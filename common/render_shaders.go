@@ -177,15 +177,15 @@ func (s *basicShader) Pre() {
 }
 
 func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
-	if s.lastBuffer != ren.buffer || ren.buffer == nil {
+	if s.lastBuffer != ren.Buffer || ren.Buffer == nil {
 		s.updateBuffer(ren, space)
 
-		engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.buffer)
+		engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.Buffer)
 		engo.Gl.VertexAttribPointer(s.inPosition, 2, engo.Gl.FLOAT, false, 20, 0)
 		engo.Gl.VertexAttribPointer(s.inTexCoords, 2, engo.Gl.FLOAT, false, 20, 8)
 		engo.Gl.VertexAttribPointer(s.inColor, 4, engo.Gl.UNSIGNED_BYTE, true, 20, 16)
 
-		s.lastBuffer = ren.buffer
+		s.lastBuffer = ren.Buffer
 	}
 
 	if s.lastTexture != ren.Drawable.Texture() {
@@ -276,19 +276,19 @@ func (s *basicShader) Post() {
 }
 
 func (s *basicShader) updateBuffer(ren *RenderComponent, space *SpaceComponent) {
-	if len(ren.bufferContent) == 0 {
-		ren.bufferContent = make([]float32, 20) // because we add 20 elements to it
+	if len(ren.BufferContent) == 0 {
+		ren.BufferContent = make([]float32, 20) // because we add 20 elements to it
 	}
 
-	if changed := s.generateBufferContent(ren, space, ren.bufferContent); !changed {
+	if changed := s.generateBufferContent(ren, space, ren.BufferContent); !changed {
 		return
 	}
 
-	if ren.buffer == nil {
-		ren.buffer = engo.Gl.CreateBuffer()
+	if ren.Buffer == nil {
+		ren.Buffer = engo.Gl.CreateBuffer()
 	}
-	engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.buffer)
-	engo.Gl.BufferData(engo.Gl.ARRAY_BUFFER, ren.bufferContent, engo.Gl.STATIC_DRAW)
+	engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.Buffer)
+	engo.Gl.BufferData(engo.Gl.ARRAY_BUFFER, ren.BufferContent, engo.Gl.STATIC_DRAW)
 }
 
 func (s *basicShader) generateBufferContent(ren *RenderComponent, space *SpaceComponent, buffer []float32) bool {
@@ -468,18 +468,18 @@ func (l *legacyShader) Pre() {
 }
 
 func (l *legacyShader) updateBuffer(ren *RenderComponent, space *SpaceComponent) {
-	if len(ren.bufferContent) == 0 {
-		ren.bufferContent = make([]float32, l.computeBufferSize(ren.Drawable)) // because we add at most this many elements to it
+	if len(ren.BufferContent) == 0 {
+		ren.BufferContent = make([]float32, l.computeBufferSize(ren.Drawable)) // because we add at most this many elements to it
 	}
-	if changed := l.generateBufferContent(ren, space, ren.bufferContent); !changed {
+	if changed := l.generateBufferContent(ren, space, ren.BufferContent); !changed {
 		return
 	}
 
-	if ren.buffer == nil {
-		ren.buffer = engo.Gl.CreateBuffer()
+	if ren.Buffer == nil {
+		ren.Buffer = engo.Gl.CreateBuffer()
 	}
-	engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.buffer)
-	engo.Gl.BufferData(engo.Gl.ARRAY_BUFFER, ren.bufferContent, engo.Gl.STATIC_DRAW)
+	engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.Buffer)
+	engo.Gl.BufferData(engo.Gl.ARRAY_BUFFER, ren.BufferContent, engo.Gl.STATIC_DRAW)
 }
 
 func (l *legacyShader) computeBufferSize(draw Drawable) int {
@@ -729,14 +729,14 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 }
 
 func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
-	if l.lastBuffer != ren.buffer || ren.buffer == nil {
+	if l.lastBuffer != ren.Buffer || ren.Buffer == nil {
 		l.updateBuffer(ren, space)
 
-		engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.buffer)
+		engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.Buffer)
 		engo.Gl.VertexAttribPointer(l.inPosition, 2, engo.Gl.FLOAT, false, 12, 0)
 		engo.Gl.VertexAttribPointer(l.inColor, 4, engo.Gl.UNSIGNED_BYTE, true, 12, 8)
 
-		l.lastBuffer = ren.buffer
+		l.lastBuffer = ren.Buffer
 	}
 
 	if space.Rotation != 0 {
@@ -955,18 +955,18 @@ func (l *textShader) updateBuffer(ren *RenderComponent, space *SpaceComponent) {
 		return
 	}
 
-	if len(ren.bufferContent) < 20*len(txt.Text) {
-		ren.bufferContent = make([]float32, 20*len(txt.Text)) // TODO: update this to actual value?
+	if len(ren.BufferContent) < 20*len(txt.Text) {
+		ren.BufferContent = make([]float32, 20*len(txt.Text)) // TODO: update this to actual value?
 	}
-	if changed := l.generateBufferContent(ren, space, ren.bufferContent); !changed {
+	if changed := l.generateBufferContent(ren, space, ren.BufferContent); !changed {
 		return
 	}
 
-	if ren.buffer == nil {
-		ren.buffer = engo.Gl.CreateBuffer()
+	if ren.Buffer == nil {
+		ren.Buffer = engo.Gl.CreateBuffer()
 	}
-	engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.buffer)
-	engo.Gl.BufferData(engo.Gl.ARRAY_BUFFER, ren.bufferContent, engo.Gl.STATIC_DRAW)
+	engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.Buffer)
+	engo.Gl.BufferData(engo.Gl.ARRAY_BUFFER, ren.BufferContent, engo.Gl.STATIC_DRAW)
 }
 
 func (l *textShader) generateBufferContent(ren *RenderComponent, space *SpaceComponent, buffer []float32) bool {
@@ -1045,15 +1045,15 @@ func (l *textShader) generateBufferContent(ren *RenderComponent, space *SpaceCom
 }
 
 func (l *textShader) Draw(ren *RenderComponent, space *SpaceComponent) {
-	if l.lastBuffer != ren.buffer || ren.buffer == nil {
+	if l.lastBuffer != ren.Buffer || ren.Buffer == nil {
 		l.updateBuffer(ren, space)
 
-		engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.buffer)
+		engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.Buffer)
 		engo.Gl.VertexAttribPointer(l.inPosition, 2, engo.Gl.FLOAT, false, 20, 0)
 		engo.Gl.VertexAttribPointer(l.inTexCoords, 2, engo.Gl.FLOAT, false, 20, 8)
 		engo.Gl.VertexAttribPointer(l.inColor, 4, engo.Gl.UNSIGNED_BYTE, true, 20, 16)
 
-		l.lastBuffer = ren.buffer
+		l.lastBuffer = ren.Buffer
 	}
 
 	txt, ok := ren.Drawable.(Text)
