@@ -87,7 +87,7 @@ func (sc SpaceComponent) AABB() engo.AABB {
 		}
 	}
 
-	return engo.AABB{Max: engo.Point{X: xMin, Y: yMin}, Min: engo.Point{X: xMax, Y: yMax}}
+	return engo.AABB{Min: engo.Point{X: xMin, Y: yMin}, Max: engo.Point{X: xMax, Y: yMax}}
 }
 
 // Corners returns the location of the four corners of the rectangular plane defined by the `SpaceComponent`, taking
