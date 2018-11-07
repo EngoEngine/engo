@@ -108,7 +108,7 @@ then
     done
 elif [ "$TEST_TYPE" == "traffic_manager" ]
 then
-    branches='01-hello-world 02-first-system 03-camera-movement 04-hud'
+    branches='01-hello-world 02-first-system 03-camera-movement 04-hud 05-tilemaps 06-spritesheets-and-automated-city-building 07-hud-text'
     cd $HOME/gopath/src/github.com/EngoEngine/TrafficManager
     for branch in $branches
     do
