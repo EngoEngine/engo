@@ -1145,7 +1145,21 @@ var (
 	TextHUDShader = &textShader{cameraEnabled: false}
 	shadersSet    bool
 	atlasCache    = make(map[Font]FontAtlas)
+	shaders       = []Shader{
+		DefaultShader,
+		HUDShader,
+		LegacyShader,
+		LegacyHUDShader,
+		TextShader,
+		TextHUDShader,
+	}
 )
+
+// AddShader adds a shader to the list of shaders for initalization. They should
+// be added before the Rendersystem is added, such as in the scene's Preload.
+func AddShader(s Shader) {
+	shaders = append(shaders, s)
+}
 
 var shaderInitMutex sync.Mutex
 
@@ -1154,14 +1168,6 @@ func initShaders(w *ecs.World) error {
 	defer shaderInitMutex.Unlock()
 
 	if !shadersSet {
-		shaders := []Shader{
-			DefaultShader,
-			HUDShader,
-			LegacyShader,
-			LegacyHUDShader,
-			TextShader,
-			TextHUDShader,
-		}
 		var err error
 
 		for _, shader := range shaders {
