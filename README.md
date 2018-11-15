@@ -55,6 +55,7 @@ we have a list of those changes, with the most recent being at the top. If you r
 * TMXTileset now uses a Spritesheet instead of a Texture. This helps keep track of the guid better and allows the gid to not start at zero and have skips in it, as well as for borders and spacing in the tile sheet.
 * TMX Level's objects have all been rolled into Object rather than have separate things like "PolyLineObject". This is to be
 consistent with the TMX format.
+* The Shader interface now has a `SetCamera(*CameraSystem)` method. This method allows shaders to automatically update the camera system as it changes, such as between scenes or when the camera system is added.
 
 ## Roadmap to v1.1
 A list of issues for v1.1 can be found [here](https://github.com/EngoEngine/engo/issues/552). There's always room

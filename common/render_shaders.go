@@ -32,6 +32,7 @@ type Shader interface {
 	Pre()
 	Draw(*RenderComponent, *SpaceComponent)
 	Post()
+	SetCamera(*CameraSystem)
 }
 
 type basicShader struct {
@@ -335,6 +336,12 @@ func (s *basicShader) generateBufferContent(ren *RenderComponent, space *SpaceCo
 	setBufferValue(buffer, 19, tint, &changed)
 
 	return changed
+}
+
+func (s *basicShader) SetCamera(c *CameraSystem) {
+	if s.cameraEnabled {
+		s.camera = c
+	}
 }
 
 func setBufferValue(buffer []float32, index int, value float32, changed *bool) {
@@ -806,6 +813,12 @@ func (l *legacyShader) Post() {
 	engo.Gl.Disable(engo.Gl.BLEND)
 }
 
+func (l *legacyShader) SetCamera(c *CameraSystem) {
+	if l.cameraEnabled {
+		l.camera = c
+	}
+}
+
 type textShader struct {
 	program *gl.Program
 
@@ -1114,6 +1127,12 @@ func (l *textShader) Post() {
 	engo.Gl.Disable(engo.Gl.BLEND)
 }
 
+func (l *textShader) SetCamera(c *CameraSystem) {
+	if l.cameraEnabled {
+		l.camera = c
+	}
+}
+
 // colorToFloat32 returns the float32 representation of the given color
 func colorToFloat32(c color.Color) float32 {
 	colorR, colorG, colorB, colorA := c.RGBA()
@@ -1225,14 +1244,8 @@ func newCamera(w *ecs.World) {
 		log.Println("Camera system was not found when changing scene!")
 		return
 	}
-	if DefaultShader.cameraEnabled {
-		DefaultShader.camera = cam
-	}
-	if LegacyShader.cameraEnabled {
-		LegacyShader.camera = cam
-	}
-	if TextShader.cameraEnabled {
-		TextShader.camera = cam
+	for _, shader := range shaders {
+		shader.SetCamera(cam)
 	}
 }
 
