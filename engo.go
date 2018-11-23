@@ -144,6 +144,10 @@ type RunOptions struct {
 	// systems. If left blank, it defaults to &ecs.World{}. Use this if you plan on utilizing
 	// engo's window / GL management but don't want to use the ECS paradigm.
 	Update Updater
+
+	// UseVulkan is a boolean that determines whether the OpenGL or Vulkan setup for
+	// the window should be used. Defaults to OpenGL.
+	UseVulkan bool
 }
 
 // Run is called to create a window, initialize everything, and start the main loop. Once this function returns,
