@@ -18,7 +18,8 @@ import (
 )
 
 var (
-	window *sdl.Window
+	// Window is the sdl Window used for engo
+	Window *sdl.Window
 
 	cursorNone      *sdl.Cursor
 	cursorArrow     *sdl.Cursor
@@ -72,30 +73,30 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 
 	SetVSync(opts.VSync)
 
-	window, err = sdl.CreateWindow(title, sdl.WINDOWPOS_UNDEFINED,
+	Window, err = sdl.CreateWindow(title, sdl.WINDOWPOS_UNDEFINED,
 		sdl.WINDOWPOS_UNDEFINED, int32(width), int32(height), sdl.WINDOW_OPENGL)
 	fatalErr(err)
 
-	sdlGLContext, err = window.GLCreateContext()
+	sdlGLContext, err = Window.GLCreateContext()
 	fatalErr(err)
 
 	Gl = gl.NewContext()
 
 	if fullscreen {
-		window.SetFullscreen(sdl.WINDOW_FULLSCREEN)
+		Window.SetFullscreen(sdl.WINDOW_FULLSCREEN)
 	}
 	if opts.NotResizable {
-		window.SetResizable(false)
+		Window.SetResizable(false)
 	} else {
-		window.SetResizable(true)
+		Window.SetResizable(true)
 	}
 
 	gameWidth, gameHeight = float32(width), float32(height)
 
-	w, h := window.GetSize()
+	w, h := Window.GetSize()
 	windowWidth, windowHeight = float32(w), float32(h)
 
-	fw, fh := window.GLGetDrawableSize()
+	fw, fh := Window.GLGetDrawableSize()
 	canvasWidth, canvasHeight = float32(fw), float32(fh)
 
 	if windowWidth <= canvasWidth && windowHeight <= canvasHeight {
@@ -106,7 +107,7 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 // DestroyWindow handles the termination of windows
 func DestroyWindow() {
 	sdl.GLDeleteContext(sdlGLContext)
-	window.Destroy()
+	Window.Destroy()
 	sdl.Quit()
 }
 
@@ -115,7 +116,7 @@ func SetTitle(title string) {
 	if opts.HeadlessMode {
 		log.Println("Title set to:", title)
 	} else {
-		window.SetTitle(title)
+		Window.SetTitle(title)
 	}
 }
 
@@ -174,8 +175,8 @@ func RunIteration() {
 				}
 			case *sdl.WindowEvent:
 				if e.Event == sdl.WINDOWEVENT_RESIZED {
-					w, h := window.GetSize()
-					fw, fh := window.GLGetDrawableSize()
+					w, h := Window.GetSize()
+					fw, fh := Window.GLGetDrawableSize()
 
 					message := WindowResizeMessage{
 						OldWidth:  int(windowWidth),
@@ -218,7 +219,7 @@ func RunIteration() {
 		Input.Mouse.Action = Neutral
 
 		sdlMojaveFix.UpdateNSGLContext(sdlGLContext)
-		window.GLSwap()
+		Window.GLSwap()
 	}
 }
 
@@ -271,7 +272,7 @@ func CursorPos() (x, y float32) {
 
 // WindowSize gets the current window size
 func WindowSize() (w, h int) {
-	width, height := window.GetSize()
+	width, height := Window.GetSize()
 	return int(width), int(height)
 }
 
