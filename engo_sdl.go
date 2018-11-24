@@ -18,7 +18,8 @@ import (
 )
 
 var (
-	window *sdl.Window
+	// Window is the sdl Window used for engo
+	Window *sdl.Window
 
 	cursorNone      *sdl.Cursor
 	cursorArrow     *sdl.Cursor
@@ -62,51 +63,78 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		cursorVResize = sdl.CreateSystemCursor(sdl.SYSTEM_CURSOR_SIZEWE)
 	}
 
-	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 2)
-	sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 1)
+	if opts.UseVulkan {
+		Window, err = sdl.CreateWindow(title, sdl.WINDOWPOS_UNDEFINED,
+			sdl.WINDOWPOS_UNDEFINED, int32(width), int32(height), sdl.WINDOW_VULKAN)
+		fatalErr(err)
 
-	if msaa > 0 {
-		sdl.GLSetAttribute(sdl.GL_MULTISAMPLEBUFFERS, 1)
-		sdl.GLSetAttribute(sdl.GL_MULTISAMPLESAMPLES, msaa)
-	}
+		if fullscreen {
+			Window.SetFullscreen(sdl.WINDOW_FULLSCREEN)
+		}
+		if opts.NotResizable {
+			Window.SetResizable(false)
+		} else {
+			Window.SetResizable(true)
+		}
 
-	SetVSync(opts.VSync)
+		gameWidth, gameHeight = float32(width), float32(height)
 
-	window, err = sdl.CreateWindow(title, sdl.WINDOWPOS_UNDEFINED,
-		sdl.WINDOWPOS_UNDEFINED, int32(width), int32(height), sdl.WINDOW_OPENGL)
-	fatalErr(err)
+		w, h := Window.GetSize()
+		windowWidth, windowHeight = float32(w), float32(h)
 
-	sdlGLContext, err = window.GLCreateContext()
-	fatalErr(err)
+		fw, fh := Window.VulkanGetDrawableSize()
+		canvasWidth, canvasHeight = float32(fw), float32(fh)
 
-	Gl = gl.NewContext()
-
-	if fullscreen {
-		window.SetFullscreen(sdl.WINDOW_FULLSCREEN)
-	}
-	if opts.NotResizable {
-		window.SetResizable(false)
+		if windowWidth <= canvasWidth && windowHeight <= canvasHeight {
+			scale = canvasWidth / windowWidth
+		}
 	} else {
-		window.SetResizable(true)
-	}
+		sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 2)
+		sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 1)
 
-	gameWidth, gameHeight = float32(width), float32(height)
+		if msaa > 0 {
+			sdl.GLSetAttribute(sdl.GL_MULTISAMPLEBUFFERS, 1)
+			sdl.GLSetAttribute(sdl.GL_MULTISAMPLESAMPLES, msaa)
+		}
 
-	w, h := window.GetSize()
-	windowWidth, windowHeight = float32(w), float32(h)
+		SetVSync(opts.VSync)
 
-	fw, fh := window.GLGetDrawableSize()
-	canvasWidth, canvasHeight = float32(fw), float32(fh)
+		Window, err = sdl.CreateWindow(title, sdl.WINDOWPOS_UNDEFINED,
+			sdl.WINDOWPOS_UNDEFINED, int32(width), int32(height), sdl.WINDOW_OPENGL)
+		fatalErr(err)
 
-	if windowWidth <= canvasWidth && windowHeight <= canvasHeight {
-		scale = canvasWidth / windowWidth
+		sdlGLContext, err = Window.GLCreateContext()
+		fatalErr(err)
+
+		Gl = gl.NewContext()
+
+		if fullscreen {
+			Window.SetFullscreen(sdl.WINDOW_FULLSCREEN)
+		}
+		if opts.NotResizable {
+			Window.SetResizable(false)
+		} else {
+			Window.SetResizable(true)
+		}
+
+		gameWidth, gameHeight = float32(width), float32(height)
+
+		w, h := Window.GetSize()
+		windowWidth, windowHeight = float32(w), float32(h)
+
+		fw, fh := Window.GLGetDrawableSize()
+		canvasWidth, canvasHeight = float32(fw), float32(fh)
+
+		if windowWidth <= canvasWidth && windowHeight <= canvasHeight {
+			scale = canvasWidth / windowWidth
+		}
 	}
 }
 
 // DestroyWindow handles the termination of windows
 func DestroyWindow() {
 	sdl.GLDeleteContext(sdlGLContext)
-	window.Destroy()
+	Window.Destroy()
 	sdl.Quit()
 }
 
@@ -115,7 +143,7 @@ func SetTitle(title string) {
 	if opts.HeadlessMode {
 		log.Println("Title set to:", title)
 	} else {
-		window.SetTitle(title)
+		Window.SetTitle(title)
 	}
 }
 
@@ -174,35 +202,62 @@ func RunIteration() {
 				}
 			case *sdl.WindowEvent:
 				if e.Event == sdl.WINDOWEVENT_RESIZED {
-					w, h := window.GetSize()
-					fw, fh := window.GLGetDrawableSize()
+					if opts.UseVulkan {
+						w, h := Window.GetSize()
+						fw, fh := Window.VulkanGetDrawableSize()
 
-					message := WindowResizeMessage{
-						OldWidth:  int(windowWidth),
-						OldHeight: int(windowHeight),
-						NewWidth:  int(w),
-						NewHeight: int(h),
+						message := WindowResizeMessage{
+							OldWidth:  int(windowWidth),
+							OldHeight: int(windowHeight),
+							NewWidth:  int(w),
+							NewHeight: int(h),
+						}
+						windowWidth, windowHeight = float32(w), float32(h)
+						oldCanvasW, oldCanvasH := canvasWidth, canvasHeight
+						canvasWidth, canvasHeight = float32(fw), float32(fh)
+
+						ResizeXOffset += oldCanvasW - canvasWidth
+						ResizeYOffset += oldCanvasH - canvasHeight
+
+						if !opts.ScaleOnResize {
+							gameWidth, gameHeight = float32(w), float32(h)
+						}
+
+						if windowWidth <= canvasWidth && windowHeight <= canvasHeight {
+							scale = canvasWidth / windowWidth
+						}
+						Mailbox.Dispatch(message)
+					} else {
+						w, h := Window.GetSize()
+						fw, fh := Window.GLGetDrawableSize()
+
+						message := WindowResizeMessage{
+							OldWidth:  int(windowWidth),
+							OldHeight: int(windowHeight),
+							NewWidth:  int(w),
+							NewHeight: int(h),
+						}
+
+						Gl.Viewport(0, 0, int(fw), int(fh))
+						windowWidth, windowHeight = float32(w), float32(h)
+
+						oldCanvasW, oldCanvasH := canvasWidth, canvasHeight
+
+						canvasWidth, canvasHeight = float32(fw), float32(fh)
+
+						ResizeXOffset += oldCanvasW - canvasWidth
+						ResizeYOffset += oldCanvasH - canvasHeight
+
+						if !opts.ScaleOnResize {
+							gameWidth, gameHeight = float32(w), float32(h)
+						}
+
+						if windowWidth <= canvasWidth && windowHeight <= canvasHeight {
+							scale = canvasWidth / windowWidth
+						}
+
+						Mailbox.Dispatch(message)
 					}
-
-					Gl.Viewport(0, 0, int(fw), int(fh))
-					windowWidth, windowHeight = float32(w), float32(h)
-
-					oldCanvasW, oldCanvasH := canvasWidth, canvasHeight
-
-					canvasWidth, canvasHeight = float32(fw), float32(fh)
-
-					ResizeXOffset += oldCanvasW - canvasWidth
-					ResizeYOffset += oldCanvasH - canvasHeight
-
-					if !opts.ScaleOnResize {
-						gameWidth, gameHeight = float32(w), float32(h)
-					}
-
-					if windowWidth <= canvasWidth && windowHeight <= canvasHeight {
-						scale = canvasWidth / windowWidth
-					}
-
-					Mailbox.Dispatch(message)
 				}
 			}
 		}
@@ -218,7 +273,10 @@ func RunIteration() {
 		Input.Mouse.Action = Neutral
 
 		sdlMojaveFix.UpdateNSGLContext(sdlGLContext)
-		window.GLSwap()
+
+		if !opts.UseVulkan {
+			Window.GLSwap()
+		}
 	}
 }
 
@@ -271,7 +329,7 @@ func CursorPos() (x, y float32) {
 
 // WindowSize gets the current window size
 func WindowSize() (w, h int) {
-	width, height := window.GetSize()
+	width, height := Window.GetSize()
 	return int(width), int(height)
 }
 
