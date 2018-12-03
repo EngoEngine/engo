@@ -164,7 +164,9 @@ func (rs *RenderSystem) New(w *ecs.World) {
 	addCameraSystemOnce(w)
 
 	if !engo.Headless() {
-		initShaders(w)
+		if err := initShaders(w); err != nil {
+			panic(err)
+		}
 		engo.Gl.Enable(engo.Gl.MULTISAMPLE)
 	}
 
