@@ -3,6 +3,7 @@ package engo
 import (
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 )
 
@@ -58,9 +59,20 @@ func (formats *Formats) Register(ext string, loader FileLoader) {
 	formats.formats[ext] = loader
 }
 
+// getExt returns the extension of the file(including extensions with `.` in them) from the given url.
+func getExt(path string) string {
+	ext := ""
+	for i := len(path) - 1; i >= 0 && !os.IsPathSeparator(path[i]); i-- {
+		if path[i] == '.' {
+			ext = path[i:]
+		}
+	}
+	return ext
+}
+
 // load loads the given resource into memory.
 func (formats *Formats) load(url string) error {
-	ext := filepath.Ext(url)
+	ext := getExt(url)
 	if loader, ok := Files.formats[ext]; ok {
 		f, err := openFile(filepath.Join(formats.root, url))
 		if err != nil {
@@ -86,7 +98,7 @@ func (formats *Formats) Load(urls ...string) error {
 
 // LoadReaderData loads a resource when you already have the reader for it.
 func (formats *Formats) LoadReaderData(url string, f io.Reader) error {
-	ext := filepath.Ext(url)
+	ext := getExt(url)
 	if loader, ok := Files.formats[ext]; ok {
 		return loader.Load(url, f)
 	}
@@ -95,7 +107,7 @@ func (formats *Formats) LoadReaderData(url string, f io.Reader) error {
 
 // Unload releases the given resource from memory.
 func (formats *Formats) Unload(url string) error {
-	ext := filepath.Ext(url)
+	ext := getExt(url)
 	if loader, ok := Files.formats[ext]; ok {
 		return loader.Unload(url)
 	}
@@ -104,7 +116,7 @@ func (formats *Formats) Unload(url string) error {
 
 // Resource returns the given resource, and an error if it didn't succeed.
 func (formats *Formats) Resource(url string) (Resource, error) {
-	ext := filepath.Ext(url)
+	ext := getExt(url)
 	if loader, ok := Files.formats[ext]; ok {
 		return loader.Resource(url)
 	}
