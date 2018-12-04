@@ -149,13 +149,16 @@ func (l *Line) PointSide(point Point) bool {
 	return math.Signbit(one - two)
 }
 
-// Angle returns the euclidean angle of l relative to X = 0
-// The return angle is in radians and goes counter-clockwise and returns [-pi, pi]
+// Angle returns the euclidean angle of l in radians relative to a vertical line, going
+// positive as you head towards the positive x-axis (clockwise) and negative
+// as you head towards the negative x-axis. Values returned are [-pi, pi].
 func (l *Line) Angle() float32 {
 	return math.Atan2(l.P1.X-l.P2.X, l.P1.Y-l.P2.Y)
 }
 
-//AngleDeg returns the angle in degrees
+// AngleDeg returns the euclidean angle of l in degrees relative to a vertical line, going
+// positive as you head towards the positive x-axis (clockwise) and negative
+// as you head towards the negative x-axis. Values returned are [-180, 180].
 func (l *Line) AngleDeg() float32 {
 	x := l.P2.X - l.P1.X
 	y := l.P2.Y - l.P1.Y
