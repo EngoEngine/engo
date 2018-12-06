@@ -165,9 +165,8 @@ func (l *Line) AngleDeg() float32 {
 	if x == 0 {
 		if y > 0 {
 			return 180
-		} else {
-			return 0
 		}
+		return 0
 	}
 
 	deg := math.Atan(x/y) * 180 / math.Pi
