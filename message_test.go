@@ -33,7 +33,7 @@ func TestMessageCounterSimple(t *testing.T) {
 func TestMessageCounterWithRemoval(t *testing.T) {
 	mailbox := &MessageManager{}
 	msg := testMessageCounter{}
-	handlerId := mailbox.Listen("testMessageCounter", func(message Message) {
+	handlerID := mailbox.Listen("testMessageCounter", func(message Message) {
 		m, ok := message.(*testMessageCounter)
 		if !ok {
 			t.Error("Message should be of type testMessageCounter")
@@ -45,7 +45,7 @@ func TestMessageCounterWithRemoval(t *testing.T) {
 		t.Error("Message should have been received 1 times by now")
 	}
 
-	mailbox.StopListen("testMessageCounter", handlerId)
+	mailbox.StopListen("testMessageCounter", handlerID)
 
 	mailbox.Dispatch(&msg)
 	if msg.counter != 1 {
