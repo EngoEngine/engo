@@ -7,18 +7,18 @@ import (
 //A MessageHandler is used to dispatch a message to the subscribed handler.
 type MessageHandler func(msg Message)
 
-// in order to track handlers, each handler will get a unique ID
+// MessageHandlerId is used to track handlers, each handler will get a unique ID
 type MessageHandlerId uint64
 
-var currentHandlerId MessageHandlerId
+var currentHandlerID MessageHandlerId
 
 func init() {
-	currentHandlerId = 0
+	currentHandlerID = 0
 }
 
-func getNewHandlerId() MessageHandlerId {
-	currentHandlerId++
-	return currentHandlerId
+func getNewHandlerID() MessageHandlerId {
+	currentHandlerID++
+	return currentHandlerID
 }
 
 type HandlerIDPair struct {
@@ -47,13 +47,17 @@ type MessageManager struct {
 // semaphores, or any other method necessary to ensure the memory is not altered by multiple
 // functions simultaneously.
 func (mm *MessageManager) Dispatch(message Message) {
-	mm.Lock()
+	mm.RLock()
 	mm.clearRemovedHandlers()
-	handlers := mm.listeners[message.Type()]
-	mm.Unlock()
+	handlers := make([]MessageHandler, len(mm.listeners[message.Type()]))
+	pairs := mm.listeners[message.Type()]
+	for i := range pairs {
+		handlers[i] = pairs[i].MessageHandler
+	}
+	mm.RUnlock()
 
 	for _, handler := range handlers {
-		handler.MessageHandler(message)
+		handler(message)
 	}
 
 }
@@ -65,44 +69,44 @@ func (mm *MessageManager) Listen(messageType string, handler MessageHandler) Mes
 	if mm.listeners == nil {
 		mm.listeners = make(map[string][]HandlerIDPair)
 	}
-	handlerID := getNewHandlerId()
-	newHandlerIdPair := HandlerIDPair{MessageHandlerId: handlerID, MessageHandler: handler}
-	mm.listeners[messageType] = append(mm.listeners[messageType], newHandlerIdPair)
+	handlerID := getNewHandlerID()
+	newHandlerIDPair := HandlerIDPair{MessageHandlerId: handlerID, MessageHandler: handler}
+	mm.listeners[messageType] = append(mm.listeners[messageType], newHandlerIDPair)
 	return handlerID
 }
 
 // ListenOnce is a convenience wrapper around StopListen() to only listen to a specified message once
 func (mm *MessageManager) ListenOnce(messageType string, handler MessageHandler) {
-	handlerId := MessageHandlerId(0)
-	handlerId = mm.Listen(messageType, func(msg Message) {
+	handlerID := MessageHandlerId(0)
+	handlerID = mm.Listen(messageType, func(msg Message) {
 		handler(msg)
-		mm.StopListen(messageType, handlerId)
+		mm.StopListen(messageType, handlerID)
 	})
 }
 
 // StopListen removes a previously added handler from the listener queue
-func (mm *MessageManager) StopListen(messageType string, handlerId MessageHandlerId) {
+func (mm *MessageManager) StopListen(messageType string, handlerID MessageHandlerId) {
 	if mm.handlersToRemove == nil {
 		mm.handlersToRemove = make(map[string][]MessageHandlerId)
 	}
-	mm.handlersToRemove[messageType] = append(mm.handlersToRemove[messageType], handlerId)
+	mm.handlersToRemove[messageType] = append(mm.handlersToRemove[messageType], handlerID)
 }
 
 // Will deleted all queued handlers that are scheduled for removal due to StopListen()
 func (mm *MessageManager) clearRemovedHandlers() {
 	for messageType, handlerList := range mm.handlersToRemove {
-		for _, handlerId := range handlerList {
-			mm.removeHandler(messageType, handlerId)
+		for _, handlerID := range handlerList {
+			mm.removeHandler(messageType, handlerID)
 		}
 	}
 	mm.handlersToRemove = make(map[string][]MessageHandlerId)
 }
 
 // Removes a single handler from the handler queue, called during cleanup of all handlers scheduled for removal
-func (mm *MessageManager) removeHandler(messageType string, handlerId MessageHandlerId) {
+func (mm *MessageManager) removeHandler(messageType string, handlerID MessageHandlerId) {
 	indexOfHandler := -1
 	for i, activeHandler := range mm.listeners[messageType] {
-		if activeHandler.MessageHandlerId == handlerId {
+		if activeHandler.MessageHandlerId == handlerID {
 			indexOfHandler = i
 			break
 		}

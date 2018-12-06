@@ -1,4 +1,4 @@
-// package convert resamples and converts audio data
+// Package convert resamples and converts audio data
 package convert
 
 import (
