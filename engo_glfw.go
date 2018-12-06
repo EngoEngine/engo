@@ -270,26 +270,21 @@ func runLoop(defaultScene Scene, headless bool) {
 	// Start tick, minimize the delta
 	Time.Tick()
 
-Outer:
 	for {
 		select {
 		case <-ticker.C:
 			RunIteration()
-			closerMutex.RLock()
-			if closeGame {
-				closerMutex.RUnlock()
-				break Outer
-			}
-			closerMutex.RUnlock()
 			if !headless && Window.ShouldClose() {
 				closeEvent()
 			}
 		case <-resetLoopTicker:
 			ticker.Stop()
 			ticker = time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
+		case <-closeGame:
+			ticker.Stop()
+			return
 		}
 	}
-	ticker.Stop()
 }
 
 // CursorPos returns the current cursor position

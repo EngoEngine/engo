@@ -284,20 +284,18 @@ func runLoop(defaultScene Scene, headless bool) {
 	// Start tick, minimize the delta
 	Time.Tick()
 
-Outer:
 	for {
 		select {
 		case <-ticker.C:
-			if closeGame {
-				break Outer
-			}
 			RunIteration()
 		case <-resetLoopTicker:
 			ticker.Stop()
 			ticker = time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
+		case <-closeGame:
+			ticker.Stop()
+			return
 		}
 	}
-	ticker.Stop()
 }
 
 func openFile(url string) (io.ReadCloser, error) {
