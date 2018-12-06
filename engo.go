@@ -39,8 +39,7 @@ var (
 	sceneMutex                = &sync.RWMutex{}
 	opts                      RunOptions
 	resetLoopTicker           = make(chan bool, 1)
-	closeGame                 bool
-	closerMutex               = &sync.RWMutex{}
+	closeGame                 = make(chan struct{})
 	gameWidth, gameHeight     float32
 	windowWidth, windowHeight float32
 	canvasWidth, canvasHeight float32
@@ -263,9 +262,7 @@ func ScaleOnResize() bool {
 
 // Exit is the safest way to close your game, as `engo` will correctly attempt to close all windows, handlers and contexts
 func Exit() {
-	closerMutex.Lock()
-	closeGame = true
-	closerMutex.Unlock()
+	close(closeGame)
 }
 
 // GameWidth returns the current game width

@@ -157,9 +157,7 @@ func RunIteration() {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch e := event.(type) {
 			case *sdl.QuitEvent:
-				closerMutex.Lock()
-				closeGame = true
-				closerMutex.Unlock()
+				Exit()
 				return
 			case *sdl.KeyboardEvent:
 				key := Key(e.Keysym.Sym)
@@ -301,24 +299,19 @@ func runLoop(defaultScene Scene, headless bool) {
 	// Start tick, minimize the delta
 	Time.Tick()
 
-Outer:
 	for {
 		select {
 		case <-ticker.C:
 			RunIteration()
-			closerMutex.RLock()
-			if closeGame {
-				closerMutex.RUnlock()
-				closeEvent()
-				break Outer
-			}
-			closerMutex.RUnlock()
 		case <-resetLoopTicker:
 			ticker.Stop()
 			ticker = time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
+		case <-closeGame:
+			ticker.Stop()
+			closeEvent()
+			return
 		}
 	}
-	ticker.Stop()
 }
 
 // CursorPos returns the current cursor position
