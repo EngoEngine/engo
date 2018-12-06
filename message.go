@@ -47,13 +47,17 @@ type MessageManager struct {
 // semaphores, or any other method necessary to ensure the memory is not altered by multiple
 // functions simultaneously.
 func (mm *MessageManager) Dispatch(message Message) {
-	mm.Lock()
+	mm.RLock()
 	mm.clearRemovedHandlers()
-	handlers := mm.listeners[message.Type()]
-	mm.Unlock()
+	handlers := make([]MessageHandler, len(mm.listeners[message.Type()]))
+	pairs := mm.listeners[message.Type()]
+	for i := range pairs {
+		handlers[i] = pairs[i].MessageHandler
+	}
+	mm.RUnlock()
 
 	for _, handler := range handlers {
-		handler.MessageHandler(message)
+		handler(message)
 	}
 
 }
