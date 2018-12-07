@@ -16,7 +16,52 @@ import (
 // UnicodeCap is the amount of unicode characters the fonts will be able to use, starting from index 0.
 var UnicodeCap = 200
 
-const bufferSize = 10000
+const (
+	// MaxSprites is the maximum number of sprites that can comprise a single batch.
+	// 32767 is the max vertex index in OpenGL. Since each sprite has 4 vertices,
+	// 32767 / 4 = 8191 max sprites.
+	MaxSprites = 8191
+	spriteSize = 20
+
+	bufferSize = 10000
+
+	defaultVertexShader = `
+	attribute vec2 in_Position;
+	attribute vec2 in_TexCoords;
+	attribute vec4 in_Color;
+	
+	uniform mat3 matrixProjView;
+	
+	varying vec4 var_Color;
+	varying vec2 var_TexCoords;
+	
+	void main() {
+	  var_Color = in_Color;
+	  var_TexCoords = in_TexCoords;
+	
+	  vec3 matr = matrixProjView * vec3(in_Position, 1.0);
+	  gl_Position = vec4(matr.xy, 0, matr.z);
+	}
+`
+
+	defaultFragmentShader = `
+	#ifdef GL_ES
+	#define LOWP lowp
+	precision mediump float;
+	#else
+	#define LOWP
+	#endif
+	
+	varying vec4 var_Color;
+	varying vec2 var_TexCoords;
+	
+	uniform sampler2D uf_Texture;
+	
+	void main (void) {
+	  gl_FragColor = var_Color * texture2D(uf_Texture, var_TexCoords);
+	}
+`
+)
 
 // Shader when implemented can be used in the RenderSystem as an OpenGl Shader.
 //
@@ -36,75 +81,48 @@ type Shader interface {
 }
 
 type basicShader struct {
-	indices  []uint16
-	indexVBO *gl.Buffer
-	program  *gl.Program
+	BatchSize int
 
+	indices     []uint16
+	indexBuffer *gl.Buffer
+	program     *gl.Program
+
+	vertices      []float32
+	vertexBuffer  *gl.Buffer
 	lastTexture   *gl.Texture
-	lastBuffer    *gl.Buffer
 	lastRepeating TextureRepeating
 
 	inPosition  int
 	inTexCoords int
 	inColor     int
 
-	matrixProjection *gl.UniformLocation
-	matrixView       *gl.UniformLocation
-	matrixModel      *gl.UniformLocation
+	matrixProjView *gl.UniformLocation
 
-	projectionMatrix []float32
-	viewMatrix       []float32
-	modelMatrix      []float32
+	projectionMatrix *engo.Matrix
+	viewMatrix       *engo.Matrix
+	modelMatrix      *engo.Matrix
 
 	camera        *CameraSystem
 	cameraEnabled bool
+
+	idx int
 }
 
 func (s *basicShader) Setup(w *ecs.World) error {
-	var err error
-	s.program, err = LoadShader(`
-attribute vec2 in_Position;
-attribute vec2 in_TexCoords;
-attribute vec4 in_Color;
-
-uniform mat3 matrixProjection;
-uniform mat3 matrixView;
-uniform mat3 matrixModel;
-
-varying vec4 var_Color;
-varying vec2 var_TexCoords;
-
-void main() {
-  var_Color = in_Color;
-  var_TexCoords = in_TexCoords;
-
-  vec3 matr = matrixProjection * matrixView * matrixModel * vec3(in_Position, 1.0);
-  gl_Position = vec4(matr.xy, 0, matr.z);
-}
-`, `
-#ifdef GL_ES
-#define LOWP lowp
-precision mediump float;
-#else
-#define LOWP
-#endif
-
-varying vec4 var_Color;
-varying vec2 var_TexCoords;
-
-uniform sampler2D uf_Texture;
-
-void main (void) {
-  gl_FragColor = var_Color * texture2D(uf_Texture, var_TexCoords);
-}`)
-
-	if err != nil {
-		return err
+	if s.BatchSize > MaxSprites {
+		return fmt.Errorf("%d is greater than the maximum batch size of %d", s.BatchSize, MaxSprites)
 	}
-
-	// Create and populate indices buffer
-	s.indices = make([]uint16, 6*bufferSize)
-	for i, j := 0, 0; i < bufferSize*6; i, j = i+6, j+4 {
+	if s.BatchSize <= 0 {
+		s.BatchSize = MaxSprites
+	}
+	// Create the vertex buffer for batching.
+	s.vertices = make([]float32, s.BatchSize*spriteSize)
+	s.vertexBuffer = engo.Gl.CreateBuffer()
+	// Create and populate indices buffer. The size of the buffer depends on the batch size.
+	// These should never change, so we can just initialize them once here and be done with it.
+	numIndicies := s.BatchSize * 6
+	s.indices = make([]uint16, numIndicies)
+	for i, j := 0, 0; i < numIndicies; i, j = i+6, j+4 {
 		s.indices[i+0] = uint16(j + 0)
 		s.indices[i+1] = uint16(j + 1)
 		s.indices[i+2] = uint16(j + 2)
@@ -112,90 +130,77 @@ void main (void) {
 		s.indices[i+4] = uint16(j + 2)
 		s.indices[i+5] = uint16(j + 3)
 	}
-	s.indexVBO = engo.Gl.CreateBuffer()
-	engo.Gl.BindBuffer(engo.Gl.ELEMENT_ARRAY_BUFFER, s.indexVBO)
+	var err error
+	s.program, err = LoadShader(defaultVertexShader, defaultFragmentShader)
+	if err != nil {
+		return err
+	}
+	s.indexBuffer = engo.Gl.CreateBuffer()
+	engo.Gl.BindBuffer(engo.Gl.ELEMENT_ARRAY_BUFFER, s.indexBuffer)
 	engo.Gl.BufferData(engo.Gl.ELEMENT_ARRAY_BUFFER, s.indices, engo.Gl.STATIC_DRAW)
 
-	// Define things that should be read from the texture buffer
 	s.inPosition = engo.Gl.GetAttribLocation(s.program, "in_Position")
 	s.inTexCoords = engo.Gl.GetAttribLocation(s.program, "in_TexCoords")
 	s.inColor = engo.Gl.GetAttribLocation(s.program, "in_Color")
 
-	// Define things that should be set per draw
-	s.matrixProjection = engo.Gl.GetUniformLocation(s.program, "matrixProjection")
-	s.matrixView = engo.Gl.GetUniformLocation(s.program, "matrixView")
-	s.matrixModel = engo.Gl.GetUniformLocation(s.program, "matrixModel")
+	s.matrixProjView = engo.Gl.GetUniformLocation(s.program, "matrixProjView")
 
-	s.projectionMatrix = make([]float32, 9)
-	s.projectionMatrix[8] = 1
-
-	s.viewMatrix = make([]float32, 9)
-	s.viewMatrix[0] = 1
-	s.viewMatrix[4] = 1
-	s.viewMatrix[8] = 1
-
-	s.modelMatrix = make([]float32, 9)
-	s.modelMatrix[0] = 1
-	s.modelMatrix[4] = 1
-	s.modelMatrix[8] = 1
-
+	s.projectionMatrix = engo.IdentityMatrix()
+	s.viewMatrix = engo.IdentityMatrix()
+	s.modelMatrix = engo.IdentityMatrix()
 	return nil
 }
 
 func (s *basicShader) Pre() {
 	engo.Gl.Enable(engo.Gl.BLEND)
 	engo.Gl.BlendFunc(engo.Gl.SRC_ALPHA, engo.Gl.ONE_MINUS_SRC_ALPHA)
-
 	// Enable shader and buffer, enable attributes in shader
 	engo.Gl.UseProgram(s.program)
-	engo.Gl.BindBuffer(engo.Gl.ELEMENT_ARRAY_BUFFER, s.indexVBO)
+	engo.Gl.BindBuffer(engo.Gl.ELEMENT_ARRAY_BUFFER, s.indexBuffer)
 	engo.Gl.EnableVertexAttribArray(s.inPosition)
 	engo.Gl.EnableVertexAttribArray(s.inTexCoords)
 	engo.Gl.EnableVertexAttribArray(s.inColor)
-
+	// (Re)initialize the projection matrix.
+	s.projectionMatrix.Identity()
 	if engo.ScaleOnResize() {
-		s.projectionMatrix[0] = 1 / (engo.GameWidth() / 2)
-		s.projectionMatrix[4] = 1 / (-engo.GameHeight() / 2)
+		s.projectionMatrix.Scale(1/(engo.GameWidth()/2), 1/(-engo.GameHeight()/2))
 	} else {
-		s.projectionMatrix[0] = 1 / (engo.CanvasWidth() / (2 * engo.CanvasScale()))
-		s.projectionMatrix[4] = 1 / (-engo.CanvasHeight() / (2 * engo.CanvasScale()))
+		s.projectionMatrix.Scale(1/(engo.CanvasWidth()/(2*engo.CanvasScale())), 1/(-engo.CanvasHeight()/(2*engo.CanvasScale())))
 	}
-
+	// (Re)initialize the view matrix
+	s.viewMatrix.Identity()
 	if s.cameraEnabled {
-		s.viewMatrix[1], s.viewMatrix[0] = math.Sincos(s.camera.angle * math.Pi / 180)
-		s.viewMatrix[3] = -s.viewMatrix[1]
-		s.viewMatrix[4] = s.viewMatrix[0]
-		s.viewMatrix[6] = -s.camera.x
-		s.viewMatrix[7] = -s.camera.y
-		s.viewMatrix[8] = s.camera.z
+		s.viewMatrix.Translate(-s.camera.x, -s.camera.y).Rotate(s.camera.angle)
 	} else {
-		s.viewMatrix[6] = -1 / s.projectionMatrix[0]
-		s.viewMatrix[7] = 1 / s.projectionMatrix[4]
+		scaleX, scaleY := s.projectionMatrix.ScaleComponent()
+		s.viewMatrix.Translate(-1/scaleX, 1/scaleY)
 	}
+	// The matrixProjView shader uniform is projection * view.
+	// We do the multiplication on the CPU instead of sending each matrix to the shader and letting the GPU do the multiplication,
+	// because it's likely faster to do the multiplication client side and send the result over the shader bus than to send two separate
+	// buffers over the bus and then do the multiplication on the GPU.
+	pv := s.projectionMatrix.Multiply(s.viewMatrix)
+	engo.Gl.UniformMatrix3fv(s.matrixProjView, false, pv.Val[:])
 
-	engo.Gl.UniformMatrix3fv(s.matrixProjection, false, s.projectionMatrix)
-	engo.Gl.UniformMatrix3fv(s.matrixView, false, s.viewMatrix)
+	// Since we are batching client side, we only have one VBO, so we can just bind it now and use it for the entire frame.
+	engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, s.vertexBuffer)
+	engo.Gl.VertexAttribPointer(s.inPosition, 2, engo.Gl.FLOAT, false, 20, 0)
+	engo.Gl.VertexAttribPointer(s.inTexCoords, 2, engo.Gl.FLOAT, false, 20, 8)
+	engo.Gl.VertexAttribPointer(s.inColor, 4, engo.Gl.UNSIGNED_BYTE, true, 20, 16)
 }
 
 func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
-	if s.lastBuffer != ren.Buffer || ren.Buffer == nil {
-		s.updateBuffer(ren, space)
-
-		engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.Buffer)
-		engo.Gl.VertexAttribPointer(s.inPosition, 2, engo.Gl.FLOAT, false, 20, 0)
-		engo.Gl.VertexAttribPointer(s.inTexCoords, 2, engo.Gl.FLOAT, false, 20, 8)
-		engo.Gl.VertexAttribPointer(s.inColor, 4, engo.Gl.UNSIGNED_BYTE, true, 20, 16)
-
-		s.lastBuffer = ren.Buffer
-	}
-
+	// If our texture (or any of its properties) has changed or we've reached the end of our buffer, flush before moving on.
 	if s.lastTexture != ren.Drawable.Texture() {
+		s.flush()
 		engo.Gl.BindTexture(engo.Gl.TEXTURE_2D, ren.Drawable.Texture())
-
 		s.lastTexture = ren.Drawable.Texture()
+	} else if s.idx == len(s.vertices) {
+		s.flush()
 	}
 
 	if s.lastRepeating != ren.Repeat {
+		s.flush()
 		var val int
 		switch ren.Repeat {
 		case NoRepeat:
@@ -209,12 +214,12 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		case MirroredRepeat:
 			val = engo.Gl.MIRRORED_REPEAT
 		}
-
 		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_S, val)
 		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_T, val)
 	}
 
 	if ren.magFilterChanged {
+		s.flush()
 		var val int
 		switch ren.magFilter {
 		case FilterNearest:
@@ -227,6 +232,7 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 	}
 
 	if ren.minFilterChanged {
+		s.flush()
 		var val int
 		switch ren.minFilter {
 		case FilterNearest:
@@ -238,31 +244,14 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		ren.minFilterChanged = false
 	}
 
-	if space.Rotation != 0 {
-		sin, cos := math.Sincos(space.Rotation * math.Pi / 180)
-
-		s.modelMatrix[0] = ren.Scale.X * engo.GetGlobalScale().X * cos
-		s.modelMatrix[1] = ren.Scale.X * engo.GetGlobalScale().X * sin
-		s.modelMatrix[3] = ren.Scale.Y * engo.GetGlobalScale().Y * -sin
-		s.modelMatrix[4] = ren.Scale.Y * engo.GetGlobalScale().Y * cos
-	} else {
-		s.modelMatrix[0] = ren.Scale.X * engo.GetGlobalScale().X
-		s.modelMatrix[1] = 0
-		s.modelMatrix[3] = 0
-		s.modelMatrix[4] = ren.Scale.Y * engo.GetGlobalScale().Y
-	}
-
-	s.modelMatrix[6] = space.Position.X * engo.GetGlobalScale().X
-	s.modelMatrix[7] = space.Position.Y * engo.GetGlobalScale().Y
-
-	engo.Gl.UniformMatrix3fv(s.matrixModel, false, s.modelMatrix)
-
-	engo.Gl.DrawElements(engo.Gl.TRIANGLES, 6, engo.Gl.UNSIGNED_SHORT, 0)
+	// Update the vertex buffer data.
+	s.updateBuffer(ren, space)
+	s.idx += 20
 }
 
 func (s *basicShader) Post() {
+	s.flush()
 	s.lastTexture = nil
-	s.lastBuffer = nil
 
 	// Cleanup
 	engo.Gl.DisableVertexAttribArray(s.inPosition)
@@ -276,20 +265,43 @@ func (s *basicShader) Post() {
 	engo.Gl.Disable(engo.Gl.BLEND)
 }
 
-func (s *basicShader) updateBuffer(ren *RenderComponent, space *SpaceComponent) {
-	if len(ren.BufferContent) == 0 {
-		ren.BufferContent = make([]float32, 20) // because we add 20 elements to it
-	}
-
-	if changed := s.generateBufferContent(ren, space, ren.BufferContent); !changed {
+func (s *basicShader) flush() {
+	// If we haven't rendered anything yet, no point in flushing.
+	if s.idx == 0 {
 		return
 	}
-
-	if ren.Buffer == nil {
-		ren.Buffer = engo.Gl.CreateBuffer()
+	engo.Gl.BufferData(engo.Gl.ARRAY_BUFFER, s.vertices, engo.Gl.STATIC_DRAW)
+	// We only want to draw the indicies up to the number of sprites in the current batch.
+	count := s.idx / 20 * 6
+	engo.Gl.DrawElements(engo.Gl.TRIANGLES, count, engo.Gl.UNSIGNED_SHORT, 0)
+	s.idx = 0
+	// We need to reset the vertex buffer so that when we start drawing again, we don't accidentally use junk data.
+	// The "simpler" way to do this would be to just create a new slice with make(), however that would cause the
+	// previous slice to be marked for garbage collection and we'd prefer to keep the GC activity to a minimum.
+	for i := range s.vertices {
+		s.vertices[i] = 0
 	}
-	engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.Buffer)
-	engo.Gl.BufferData(engo.Gl.ARRAY_BUFFER, ren.BufferContent, engo.Gl.STATIC_DRAW)
+}
+
+func (s *basicShader) updateBuffer(ren *RenderComponent, space *SpaceComponent) {
+	// For backwards compatibility, ren.Buffer is set to the VBO and ren.BufferContent
+	// is set to the slice of the vertex buffer for the current sprite. This same slice is
+	// populated with vertex data via generateBufferContent.
+	ren.Buffer = s.vertexBuffer
+	ren.BufferContent = s.vertices[s.idx : s.idx+20]
+	s.generateBufferContent(ren, space, ren.BufferContent)
+}
+
+func (s *basicShader) makeModelMatrix(ren *RenderComponent, space *SpaceComponent) *engo.Matrix {
+	// Instead of creating a new model matrix every time, we instead store a global one as a struct member
+	// and just reset it for every sprite. This prevents us from allocating a bunch of new Matrix instances in memory
+	// ultimately saving on GC activity.
+	s.modelMatrix.Identity().Translate(space.Position.X, space.Position.Y)
+	if space.Rotation != 0 {
+		s.modelMatrix.Rotate(space.Rotation)
+	}
+	s.modelMatrix.Scale(ren.Scale.X, ren.Scale.Y)
+	return s.modelMatrix
 }
 
 func (s *basicShader) generateBufferContent(ren *RenderComponent, space *SpaceComponent, buffer []float32) bool {
@@ -335,12 +347,32 @@ func (s *basicShader) generateBufferContent(ren *RenderComponent, space *SpaceCo
 	setBufferValue(buffer, 18, v2, &changed)
 	setBufferValue(buffer, 19, tint, &changed)
 
+	// Since each sprite in the batch has a different transform, we can't just send the model matrix into
+	// the shader and let the GPU take care of it. Instead, we need to multiply the current sprite's model matrix
+	// with the position component for each vertex of the current sprite on the CPU, and send the transformed
+	// positions to the shader directly.
+	modelMatrix := s.makeModelMatrix(ren, space)
+	s.multModel(modelMatrix, buffer[:2])
+	s.multModel(modelMatrix, buffer[5:7])
+	s.multModel(modelMatrix, buffer[10:12])
+	s.multModel(modelMatrix, buffer[15:17])
 	return changed
 }
 
+func (s *basicShader) multModel(m *engo.Matrix, v []float32) {
+	tmp := engo.MultiplyMatrixVector(m, v)
+	v[0] = tmp[0]
+	v[1] = tmp[1]
+}
+
 func (s *basicShader) SetCamera(c *CameraSystem) {
+	s.camera = c
+	s.cameraEnabled = c != nil
 	if s.cameraEnabled {
-		s.camera = c
+		s.viewMatrix.Identity().Translate(-s.camera.x, -s.camera.y).Rotate(s.camera.angle)
+	} else {
+		scaleX, scaleY := s.projectionMatrix.ScaleComponent()
+		s.viewMatrix.Translate(-1/scaleX, 1/scaleY)
 	}
 }
 

@@ -128,9 +128,14 @@ func (r renderEntityList) Len() int {
 func (r renderEntityList) Less(i, j int) bool {
 	// Sort by shader-pointer if they have the same zIndex
 	if r[i].RenderComponent.zIndex == r[j].RenderComponent.zIndex {
-		// TODO: optimize this for performance
+		// // TODO: optimize this for performance
 		p1 := fmt.Sprintf("%p", r[i].RenderComponent.shader)
 		p2 := fmt.Sprintf("%p", r[j].RenderComponent.shader)
+		// Sort by texture if shader is the same
+		// fmt.Println(p1, p2)
+		if p1 == p2 {
+			return fmt.Sprintf("%p", r[i].RenderComponent.Drawable.Texture()) < fmt.Sprintf("%p", r[j].RenderComponent.Drawable.Texture())
+		}
 		return p1 < p2
 	}
 
