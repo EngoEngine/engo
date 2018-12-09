@@ -275,7 +275,9 @@ func runLoop(defaultScene Scene, headless bool) {
 		case <-ticker.C:
 			RunIteration()
 			if !headless && Window.ShouldClose() {
+				ticker.Stop()
 				closeEvent()
+				return
 			}
 		case <-resetLoopTicker:
 			ticker.Stop()
