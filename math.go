@@ -10,6 +10,21 @@ const (
 	Epsilon float32 = 1e-3
 	// MinNormal is the smallest normal value possible.
 	MinNormal = float32(1.1754943508222875e-38) // 1 / 2**(127 - 1)
+
+	// RadToDeg is multiplied with a radian value to get the equivalant value in degrees.
+	RadToDeg = 180 / math.Pi
+	// DegToRad is multiplied with a degree value to get the equivalent value in radians.
+	DegToRad = math.Pi / 180
+	// Matrix row/column indexes
+	m00 = 0
+	m01 = 3
+	m02 = 6
+	m10 = 1
+	m11 = 4
+	m12 = 7
+	m20 = 2
+	m21 = 5
+	m22 = 8
 )
 
 // AABB describes two points of a rectangle: the upper-left corner and the lower-right corner. It should always hold that
@@ -28,6 +43,12 @@ type Container interface {
 // it can also be thought of as a 2 dimensional vector from the origin
 type Point struct {
 	X, Y float32
+}
+
+// Matrix describes a 3x3 column-major matrix useful for 2D transformations.
+type Matrix struct {
+	Val [9]float32
+	tmp [9]float32
 }
 
 // Line describes a line segment on a 2 dimensional euclidean space
@@ -139,6 +160,120 @@ func (p Point) Within(c Container) bool {
 	return c.Contains(p)
 }
 
+// Set sets the matrix to the given float slice and returns the matrix. The float
+// slice must have at least 9 elements. If the float slie contains more than 9 elements,
+// only the first 9 will be copied.
+func (m *Matrix) Set(val []float32) *Matrix {
+	copy(m.Val[:], val)
+	return m
+}
+
+// Identity sets the matrix to the Identity matrix and returns the matrix.
+func (m *Matrix) Identity() *Matrix {
+	m.Val[m00] = 1
+	m.Val[m10] = 0
+	m.Val[m20] = 0
+	m.Val[m01] = 0
+	m.Val[m11] = 1
+	m.Val[m21] = 0
+	m.Val[m02] = 0
+	m.Val[m12] = 0
+	m.Val[m22] = 1
+	return m
+}
+
+// Multiply postmultiplies m matrix with m2 and stores the result in m, returning m.
+func (m *Matrix) Multiply(m2 *Matrix) *Matrix {
+	multiplyMatricies(m.Val[:], m2.Val[:])
+	return m
+}
+
+// Translate translates m by the point (x, y).
+func (m *Matrix) Translate(x, y float32) *Matrix {
+	m.tmp[m00] = 1
+	m.tmp[m10] = 0
+	m.tmp[m20] = 0
+
+	m.tmp[m01] = 0
+	m.tmp[m11] = 1
+	m.tmp[m21] = 0
+
+	m.tmp[m02] = x
+	m.tmp[m12] = y
+	m.tmp[m22] = 1
+
+	multiplyMatricies(m.Val[:], m.tmp[:])
+	return m
+}
+
+// TranslatePoint translates m by the point p.
+func (m *Matrix) TranslatePoint(p *Point) *Matrix {
+	return m.Translate(p.X, p.Y)
+}
+
+// Scale scales m by x and y.
+func (m *Matrix) Scale(x, y float32) *Matrix {
+	m.tmp[m00] = x
+	m.tmp[m10] = 0
+	m.tmp[m20] = 0
+
+	m.tmp[m01] = 0
+	m.tmp[m11] = y
+	m.tmp[m21] = 0
+
+	m.tmp[m02] = 0
+	m.tmp[m12] = 0
+	m.tmp[m22] = 1
+	multiplyMatricies(m.Val[:], m.tmp[:])
+	return m
+}
+
+// ScaleComponent returns the current scale component of m.
+func (m *Matrix) ScaleComponent() (x, y float32) {
+	return m.Val[m00], m.Val[m11]
+}
+
+// TranslationComponent returns the current translation component of m.
+func (m *Matrix) TranslationComponent() (x, y float32) {
+	return m.Val[m02], m.Val[m12]
+}
+
+// RotationComponent returns the current rotation component of min degrees.
+func (m *Matrix) RotationComponent() float32 {
+	return m.RotationComponentRad() * RadToDeg
+}
+
+// RotationComponentRad returns the current rotation component of m in radians.
+func (m *Matrix) RotationComponentRad() float32 {
+	return math.Atan2(m.Val[m10], m.Val[m00])
+}
+
+// Rotate rorates m counter-clockwise by deg degrees.
+func (m *Matrix) Rotate(deg float32) *Matrix {
+	return m.RotateRad(deg * DegToRad)
+}
+
+// RotateRad rotates m counter-clockwise by rad radians.
+func (m *Matrix) RotateRad(rad float32) *Matrix {
+	if rad == 0 {
+		return m
+	}
+	sin, cos := math.Sincos(rad)
+	m.tmp[m00] = cos
+	m.tmp[m10] = sin
+	m.tmp[m20] = 0
+
+	m.tmp[m01] = -sin
+	m.tmp[m11] = cos
+	m.tmp[m21] = 0
+
+	m.tmp[m02] = 0
+	m.tmp[m12] = 0
+	m.tmp[m22] = 1
+	multiplyMatricies(m.Val[:], m.tmp[:])
+	return m
+}
+
 // PointSide returns which side of the line l the point p sits on
 // true means the point is below/left of the line
 // false means the point is above/right of the line or touching the line
@@ -224,6 +359,11 @@ func (l *Line) Normal() Point {
 	unit, _ := inverse.Normalize()
 
 	return unit
+}
+
+// IdentityMatrix returns a new identity matrix.
+func IdentityMatrix() *Matrix {
+	return new(Matrix).Identity()
 }
 
 // DotProduct returns the dot product between this and that
@@ -343,4 +483,40 @@ func FloatEqualThreshold(a, b, epsilon float32) bool {
 
 	// Else compare difference
 	return diff/(math.Abs(a)+math.Abs(b)) < epsilon
+}
+
+func multiplyMatricies(m1, m2 []float32) {
+	v00 := m1[m00]*m2[m00] + m1[m01]*m2[m10] + m1[m02]*m2[m20]
+	v01 := m1[m00]*m2[m01] + m1[m01]*m2[m11] + m1[m02]*m2[m21]
+	v02 := m1[m00]*m2[m02] + m1[m01]*m2[m12] + m1[m02]*m2[m22]
+
+	v10 := m1[m10]*m2[m00] + m1[m11]*m2[m10] + m1[m12]*m2[m20]
+	v11 := m1[m10]*m2[m01] + m1[m11]*m2[m11] + m1[m12]*m2[m21]
+	v12 := m1[m10]*m2[m02] + m1[m11]*m2[m12] + m1[m12]*m2[m22]
+
+	v20 := m1[m20]*m2[m00] + m1[m21]*m2[m10] + m1[m22]*m2[m20]
+	v21 := m1[m20]*m2[m01] + m1[m21]*m2[m11] + m1[m22]*m2[m21]
+	v22 := m1[m20]*m2[m02] + m1[m21]*m2[m12] + m1[m22]*m2[m22]
+	m1[m00] = v00
+	m1[m10] = v10
+	m1[m20] = v20
+	m1[m01] = v01
+	m1[m11] = v11
+	m1[m21] = v21
+	m1[m02] = v02
+	m1[m12] = v12
+	m1[m22] = v22
+}
+
+// MultiplyMatrixVector multiplies the matrix m with the float32 vector v and returns the result.
+// The size of vector v MUST be 2 or 3. If v is size 2, a 3rd component is automatically added with
+// value of 1.0.
+func MultiplyMatrixVector(m *Matrix, v []float32) []float32 {
+	if len(v) == 2 {
+		v = []float32{v[0], v[1], 1}
+	}
+	v00 := m.Val[m00]*v[m00] + m.Val[m01]*v[m10] + m.Val[m02]*v[m20]
+	v10 := m.Val[m10]*v[m00] + m.Val[m11]*v[m10] + m.Val[m12]*v[m20]
+	v20 := m.Val[m20]*v[m00] + m.Val[m21]*v[m10] + m.Val[m22]*v[m20]
+	return []float32{v00, v10, v20}
 }
