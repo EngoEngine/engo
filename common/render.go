@@ -129,7 +129,9 @@ func (r renderEntityList) Less(i, j int) bool {
 	// Sort by shader-pointer if they have the same zIndex
 	if r[i].RenderComponent.zIndex == r[j].RenderComponent.zIndex {
 		// TODO: optimize this for performance
-		return fmt.Sprintf("%p", &r[i].RenderComponent.shader) < fmt.Sprintf("%p", &r[j].RenderComponent.shader)
+		p1 := fmt.Sprintf("%p", r[i].RenderComponent.shader)
+		p2 := fmt.Sprintf("%p", r[j].RenderComponent.shader)
+		return p1 < p2
 	}
 
 	return r[i].RenderComponent.zIndex < r[j].RenderComponent.zIndex
