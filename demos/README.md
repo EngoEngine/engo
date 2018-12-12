@@ -74,6 +74,10 @@ Play music and sounds on different events.
 
 Scroll by using mouse movement.
 
+### [Entity Scroller](entityscroller)
+
+Scroll according to movement of an entity.
+
 ### [Keyboard Scroller](keyboardscroller)
 
 Scroll using the keyboard.
