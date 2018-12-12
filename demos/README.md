@@ -4,10 +4,6 @@ Each of these demos showcases a small concept or feature of `engo`, or even a mo
 
 ## Conceptual
 
-### [Entity](entity)
-
-Learn how entities are represented and what they do.
-
 ### [Headless](headless)
 
 Run `engo` without a graphical display. Useful for servers and testing.
@@ -77,6 +73,10 @@ Play music and sounds on different events.
 ### [Edge Scroller](edgescroller)
 
 Scroll by using mouse movement.
+
+### [Entity Scroller](entityscroller)
+
+Scroll according to movement of an entity.
 
 ### [Keyboard Scroller](keyboardscroller)
 
