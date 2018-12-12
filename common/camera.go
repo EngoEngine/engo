@@ -386,6 +386,10 @@ func (*EntityScroller) Remove(ecs.BasicEntity) {}
 // Update moves the camera to the center of the space component.
 // Values are automatically clamped to TrackingBounds by the camera.
 func (c *EntityScroller) Update(dt float32) {
+	if c.SpaceComponent == nil {
+		return
+	}
+	
 	width, height := c.SpaceComponent.Width, c.SpaceComponent.Height
 
 	pos := c.SpaceComponent.Position
