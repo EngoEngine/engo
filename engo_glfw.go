@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"engo.io/gl"
-	"github.com/go-gl/glfw/v3.1/glfw"
+	"github.com/go-gl/glfw/v3.2/glfw"
 
 	"github.com/Noofbiz/glfwMojaveFix"
 )
@@ -52,12 +52,12 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	fatalErr(err)
 
 	if !opts.HeadlessMode {
-		cursorArrow = glfw.CreateStandardCursor(int(glfw.ArrowCursor))
-		cursorIBeam = glfw.CreateStandardCursor(int(glfw.IBeamCursor))
-		cursorCrosshair = glfw.CreateStandardCursor(int(glfw.CrosshairCursor))
-		cursorHand = glfw.CreateStandardCursor(int(glfw.HandCursor))
-		cursorHResize = glfw.CreateStandardCursor(int(glfw.HResizeCursor))
-		cursorVResize = glfw.CreateStandardCursor(int(glfw.VResizeCursor))
+		cursorArrow = glfw.CreateStandardCursor(glfw.ArrowCursor)
+		cursorIBeam = glfw.CreateStandardCursor(glfw.IBeamCursor)
+		cursorCrosshair = glfw.CreateStandardCursor(glfw.CrosshairCursor)
+		cursorHand = glfw.CreateStandardCursor(glfw.HandCursor)
+		cursorHResize = glfw.CreateStandardCursor(glfw.HResizeCursor)
+		cursorVResize = glfw.CreateStandardCursor(glfw.VResizeCursor)
 	}
 
 	monitor := glfw.GetPrimaryMonitor()
