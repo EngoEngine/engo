@@ -208,7 +208,8 @@ func TestRunHeadless(t *testing.T) {
 	testChan := make(chan struct{})
 	go func() {
 		Run(RunOptions{
-			HeadlessMode: true,
+			HeadlessMode:        true,
+			OverrideCloseAction: true,
 		}, &testRunScene{1})
 		testChan <- struct{}{}
 	}()
@@ -223,13 +224,24 @@ func TestRunHeadless(t *testing.T) {
 func TestOverrideCloseAction(t *testing.T) {
 	var buf bytes.Buffer
 	log.SetOutput(&buf)
-	opts.OverrideCloseAction = true
 	expected := "[WARNING] default close action set to false, please make sure you manually handle this\n"
 
-	closeEvent()
+	testChan := make(chan struct{})
+	go func() {
+		Run(RunOptions{
+			HeadlessMode:        true,
+			OverrideCloseAction: true,
+		}, &testRunScene{1})
+		testChan <- struct{}{}
+	}()
+	select {
+	case <-testChan:
+	case <-time.After(1 * time.Second):
+		t.Error("Timed out while waiting for Headless Run to return from loop. Exit wasn't called within 1 second.")
+	}
 
 	if !strings.HasSuffix(buf.String(), expected) {
-		t.Error("calling closeEvent with Override set did not write expected output to log")
+		t.Errorf("calling closeEvent with Override set did not write expected output to log. Wanted: %v, got: %v", expected, buf.String())
 	}
 }
 

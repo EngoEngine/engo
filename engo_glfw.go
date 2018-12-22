@@ -209,6 +209,11 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		// it's like KeyCallback, but for specific characters instead of keys...?
 		// responder.Type(char)
 	})
+	Window.SetCloseCallback(func(Window *glfw.Window) {
+		go func() {
+			closeGame <- struct{}{}
+		}()
+	})
 }
 
 // DestroyWindow handles the termination of windows
@@ -274,16 +279,12 @@ func runLoop(defaultScene Scene, headless bool) {
 		select {
 		case <-ticker.C:
 			RunIteration()
-			if !headless && Window.ShouldClose() {
-				ticker.Stop()
-				closeEvent()
-				return
-			}
 		case <-resetLoopTicker:
 			ticker.Stop()
 			ticker = time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
 		case <-closeGame:
 			ticker.Stop()
+			closeEvent()
 			return
 		}
 	}

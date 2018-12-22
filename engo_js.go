@@ -293,6 +293,7 @@ func runLoop(defaultScene Scene, headless bool) {
 			ticker = time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
 		case <-closeGame:
 			ticker.Stop()
+			closeEvent()
 			return
 		}
 	}
