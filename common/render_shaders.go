@@ -29,16 +29,16 @@ const (
 	attribute vec2 in_Position;
 	attribute vec2 in_TexCoords;
 	attribute vec4 in_Color;
-	
+
 	uniform mat3 matrixProjView;
-	
+
 	varying vec4 var_Color;
 	varying vec2 var_TexCoords;
-	
+
 	void main() {
 	  var_Color = in_Color;
 	  var_TexCoords = in_TexCoords;
-	
+
 	  vec3 matr = matrixProjView * vec3(in_Position, 1.0);
 	  gl_Position = vec4(matr.xy, 0, matr.z);
 	}
@@ -51,12 +51,12 @@ const (
 	#else
 	#define LOWP
 	#endif
-	
+
 	varying vec4 var_Color;
 	varying vec2 var_TexCoords;
-	
+
 	uniform sampler2D uf_Texture;
-	
+
 	void main (void) {
 	  gl_FragColor = var_Color * texture2D(uf_Texture, var_TexCoords);
 	}
@@ -170,6 +170,7 @@ func (s *basicShader) Pre() {
 	// (Re)initialize the view matrix
 	s.viewMatrix.Identity()
 	if s.cameraEnabled {
+		s.viewMatrix.Scale(1/s.camera.z, 1/s.camera.z)
 		s.viewMatrix.Translate(-s.camera.x, -s.camera.y).Rotate(s.camera.angle)
 	} else {
 		scaleX, scaleY := s.projectionMatrix.ScaleComponent()
@@ -296,7 +297,7 @@ func (s *basicShader) makeModelMatrix(ren *RenderComponent, space *SpaceComponen
 	// Instead of creating a new model matrix every time, we instead store a global one as a struct member
 	// and just reset it for every sprite. This prevents us from allocating a bunch of new Matrix instances in memory
 	// ultimately saving on GC activity.
-	s.modelMatrix.Identity().Translate(space.Position.X, space.Position.Y)
+	s.modelMatrix.Identity().Scale(engo.GetGlobalScale().X, engo.GetGlobalScale().Y).Translate(space.Position.X, space.Position.Y)
 	if space.Rotation != 0 {
 		s.modelMatrix.Rotate(space.Rotation)
 	}
