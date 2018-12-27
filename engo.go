@@ -22,6 +22,8 @@ const (
 	BackEndSDL
 	// BackEndHeadless does not use a window manager for the backend
 	BackEndHeadless
+	// BackEndVulkan uses glfw 3.3 from vulkan-go and vulkan as a render surface
+	BackEndVulkan
 )
 
 var (
@@ -40,6 +42,7 @@ var (
 	opts                      RunOptions
 	resetLoopTicker           = make(chan bool, 1)
 	closeGame                 = make(chan struct{})
+	closeGameOnce             sync.Once
 	gameWidth, gameHeight     float32
 	windowWidth, windowHeight float32
 	canvasWidth, canvasHeight float32
@@ -262,7 +265,9 @@ func ScaleOnResize() bool {
 
 // Exit is the safest way to close your game, as `engo` will correctly attempt to close all windows, handlers and contexts
 func Exit() {
-	close(closeGame)
+	closeGameOnce.Do(func() {
+		close(closeGame)
+	})
 }
 
 // GameWidth returns the current game width

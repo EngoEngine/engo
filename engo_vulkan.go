@@ -1,5 +1,4 @@
-// +build darwin,!arm,!arm64 linux windows
-// +build !ios,!android,!netgo,!sdl,!headless,!vulkan
+//+build vulkan
 
 package engo
 
@@ -12,17 +11,13 @@ import (
 	"syscall"
 	"time"
 
-	"engo.io/gl"
-	"github.com/go-gl/glfw/v3.2/glfw"
-
-	"github.com/Noofbiz/glfwMojaveFix"
+	"github.com/vulkan-go/glfw/v3.3/glfw"
+	vk "github.com/vulkan-go/vulkan"
 )
 
 var (
 	// Window is the glfw.Window used for engo
 	Window *glfw.Window
-	// Gl is the current OpenGL context
-	Gl *gl.Context
 
 	cursorArrow     *glfw.Cursor
 	cursorIBeam     *glfw.Cursor
@@ -47,17 +42,20 @@ func fatalErr(err error) {
 
 // CreateWindow sets up the GLFW window and prepares the OpenGL surface for rendering
 func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
-	CurrentBackEnd = BackEndGLFW
+	CurrentBackEnd = BackEndVulkan
 	err := glfw.Init()
 	fatalErr(err)
 
+	vk.SetGetInstanceProcAddr(glfw.GetVulkanGetInstanceProcAddress())
+	fatalErr(vk.Init())
+
 	if !opts.HeadlessMode {
-		cursorArrow = glfw.CreateStandardCursor(glfw.ArrowCursor)
-		cursorIBeam = glfw.CreateStandardCursor(glfw.IBeamCursor)
-		cursorCrosshair = glfw.CreateStandardCursor(glfw.CrosshairCursor)
-		cursorHand = glfw.CreateStandardCursor(glfw.HandCursor)
-		cursorHResize = glfw.CreateStandardCursor(glfw.HResizeCursor)
-		cursorVResize = glfw.CreateStandardCursor(glfw.VResizeCursor)
+		cursorArrow = glfw.CreateStandardCursor(int(glfw.ArrowCursor))
+		cursorIBeam = glfw.CreateStandardCursor(int(glfw.IBeamCursor))
+		cursorCrosshair = glfw.CreateStandardCursor(int(glfw.CrosshairCursor))
+		cursorHand = glfw.CreateStandardCursor(int(glfw.HandCursor))
+		cursorHResize = glfw.CreateStandardCursor(int(glfw.HResizeCursor))
+		cursorVResize = glfw.CreateStandardCursor(int(glfw.VResizeCursor))
 	}
 
 	monitor := glfw.GetPrimaryMonitor()
@@ -95,28 +93,18 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		glfw.WindowHint(glfw.Resizable, glfw.False)
 	}
 
-	glfw.WindowHint(glfw.ContextVersionMajor, 2)
-	glfw.WindowHint(glfw.ContextVersionMinor, 1)
-
-	glfw.WindowHint(glfw.Samples, msaa)
+	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
 
 	if opts.HeadlessMode {
-		Gl = gl.NewContext()
 		return
 	}
 
 	Window, err = glfw.CreateWindow(width, height, title, monitor, nil)
 	fatalErr(err)
 
-	Window.MakeContextCurrent()
-
 	if !fullscreen {
 		Window.SetPos((mode.Width-width)/2, (mode.Height-height)/2)
 	}
-
-	SetVSync(opts.VSync)
-
-	Gl = gl.NewContext()
 
 	width, height = Window.GetSize()
 	windowWidth, windowHeight = float32(width), float32(height)
@@ -129,7 +117,6 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	}
 
 	Window.SetFramebufferSizeCallback(func(Window *glfw.Window, w, h int) {
-		Gl.Viewport(0, 0, w, h)
 		width, height = Window.GetSize()
 		windowWidth, windowHeight = float32(width), float32(width)
 
@@ -247,9 +234,6 @@ func RunIteration() {
 		// reset values to avoid catching the same "signal" twice
 		Input.Mouse.ScrollX, Input.Mouse.ScrollY = 0, 0
 		Input.Mouse.Action = Neutral
-
-		glfwMojaveFix.UpdateNSGLContext(*Window)
-		Window.SwapBuffers()
 	}
 }
 
@@ -345,16 +329,6 @@ func SetCursor(c Cursor) {
 		cur = cursorVResize
 	}
 	Window.SetCursor(cur)
-}
-
-// SetVSync sets whether or not to use VSync
-func SetVSync(enabled bool) {
-	opts.VSync = enabled
-	if opts.VSync {
-		glfw.SwapInterval(1)
-	} else {
-		glfw.SwapInterval(0)
-	}
 }
 
 //SetCursorVisibility sets the visibility of the cursor.

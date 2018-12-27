@@ -130,9 +130,7 @@ func RunIteration() {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch e := event.(type) {
 			case *sdl.QuitEvent:
-				go func() {
-					closeGame <- struct{}{}
-				}()
+				Exit()
 			case *sdl.KeyboardEvent:
 				key := Key(e.Keysym.Sym)
 				if e.GetType() == sdl.KEYUP {
