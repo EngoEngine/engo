@@ -87,10 +87,11 @@ type basicShader struct {
 	indexBuffer *gl.Buffer
 	program     *gl.Program
 
-	vertices      []float32
-	vertexBuffer  *gl.Buffer
-	lastTexture   *gl.Texture
-	lastRepeating TextureRepeating
+	vertices                     []float32
+	vertexBuffer                 *gl.Buffer
+	lastTexture                  *gl.Texture
+	lastRepeating                TextureRepeating
+	lastMagFilter, lastMinFilter ZoomFilter
 
 	inPosition  int
 	inTexCoords int
@@ -219,7 +220,7 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_T, val)
 	}
 
-	if ren.magFilterChanged {
+	if s.lastMagFilter != ren.magFilter {
 		s.flush()
 		var val int
 		switch ren.magFilter {
@@ -229,10 +230,9 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 			val = engo.Gl.LINEAR
 		}
 		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_MAG_FILTER, val)
-		ren.magFilterChanged = false
 	}
 
-	if ren.minFilterChanged {
+	if s.lastMinFilter != ren.minFilter {
 		s.flush()
 		var val int
 		switch ren.minFilter {
@@ -242,7 +242,6 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 			val = engo.Gl.LINEAR
 		}
 		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_MIN_FILTER, val)
-		ren.minFilterChanged = false
 	}
 
 	// Update the vertex buffer data.

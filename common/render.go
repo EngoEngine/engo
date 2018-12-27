@@ -81,8 +81,7 @@ type RenderComponent struct {
 	// Avoid using it unless your are writing a custom shader
 	BufferContent []float32
 
-	magFilter, minFilter               ZoomFilter
-	magFilterChanged, minFilterChanged bool
+	magFilter, minFilter ZoomFilter
 
 	shader Shader
 	zIndex float32
@@ -104,13 +103,13 @@ func (r *RenderComponent) SetZIndex(index float32) {
 // SetMinFilter sets the ZoomFilter used for minimizing the RenderComponent
 func (r *RenderComponent) SetMinFilter(z ZoomFilter) {
 	r.minFilter = z
-	r.minFilterChanged = true
+	engo.Mailbox.Dispatch(renderChangeMessage{})
 }
 
 // SetMagFilter sets the ZoomFilter used for magnifying the RenderComponent
 func (r *RenderComponent) SetMagFilter(z ZoomFilter) {
 	r.magFilter = z
-	r.magFilterChanged = true
+	engo.Mailbox.Dispatch(renderChangeMessage{})
 }
 
 type renderEntity struct {
@@ -134,7 +133,19 @@ func (r renderEntityList) Less(i, j int) bool {
 		// Sort by texture if shader is the same
 		// fmt.Println(p1, p2)
 		if p1 == p2 {
-			return fmt.Sprintf("%p", r[i].RenderComponent.Drawable.Texture()) < fmt.Sprintf("%p", r[j].RenderComponent.Drawable.Texture())
+			t1 := fmt.Sprintf("%p", r[i].RenderComponent.Drawable.Texture())
+			t2 := fmt.Sprintf("%p", r[j].RenderComponent.Drawable.Texture())
+			// Sort by magFilter if they're the same texture
+			if t1 == t2 {
+				mag1 := r[i].RenderComponent.magFilter
+				mag2 := r[j].RenderComponent.magFilter
+				// Sort by minFilter if they're the same magFilter
+				if mag1 == mag2 {
+					return r[i].RenderComponent.minFilter < r[j].RenderComponent.minFilter
+				}
+				return mag1 < mag2
+			}
+			return t1 < t2
 		}
 		return p1 < p2
 	}
