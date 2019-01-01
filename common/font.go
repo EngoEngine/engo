@@ -248,6 +248,12 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 	return atlas
 }
 
+// GenerateFontAtlas generates the font atlas for this given font, using the first `c` Unicode characters.
+// This should only be used if you are writing your own custom text shader.
+func (f *Font) GenerateFontAtlas(c int) FontAtlas {
+	return f.generateFontAtlas(c)
+}
+
 // A FontAtlas is a representation of some of the Font characters, as an image
 type FontAtlas struct {
 	Texture *gl.Texture
