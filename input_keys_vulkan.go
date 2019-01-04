@@ -1,9 +1,8 @@
-// +build darwin,!arm,!arm64 linux windows
-// +build !ios,!android,!netgo,!sdl,!headless,!vulkan
+// +build vulkan
 
 package engo
 
-import "github.com/go-gl/glfw/v3.2/glfw"
+import "github.com/vulkan-go/glfw/v3.3/glfw"
 
 const (
 	// KeyGrave represents the '`' keyboard key

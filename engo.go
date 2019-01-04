@@ -22,6 +22,8 @@ const (
 	BackEndSDL
 	// BackEndHeadless does not use a window manager for the backend
 	BackEndHeadless
+	// BackEndVulkan uses glfw 3.3 from vulkan-go and vulkan as a render surface
+	BackEndVulkan
 )
 
 var (
@@ -40,6 +42,7 @@ var (
 	opts                      RunOptions
 	resetLoopTicker           = make(chan bool, 1)
 	closeGame                 = make(chan struct{})
+	closeGameOnce             sync.Once
 	gameWidth, gameHeight     float32
 	windowWidth, windowHeight float32
 	canvasWidth, canvasHeight float32
@@ -144,9 +147,9 @@ type RunOptions struct {
 	// engo's window / GL management but don't want to use the ECS paradigm.
 	Update Updater
 
-	// UseVulkan is a boolean that determines whether the OpenGL or Vulkan setup for
-	// the window should be used. Defaults to OpenGL.
-	UseVulkan bool
+	// ApplicationXXXVersion is the major, minor, and revision versions of the game.
+	// defaults to 0.0.0
+	ApplicationMajorVersion, ApplicationMinorVersion, ApplicationRevisionVersion int
 }
 
 // Run is called to create a window, initialize everything, and start the main loop. Once this function returns,
@@ -262,7 +265,9 @@ func ScaleOnResize() bool {
 
 // Exit is the safest way to close your game, as `engo` will correctly attempt to close all windows, handlers and contexts
 func Exit() {
-	close(closeGame)
+	closeGameOnce.Do(func() {
+		close(closeGame)
+	})
 }
 
 // GameWidth returns the current game width
@@ -309,4 +314,14 @@ func SetGlobalScale(p Point) {
 		return
 	}
 	opts.GlobalScale = p
+}
+
+// GetTitle returns the title of the game.
+func GetTitle() string {
+	return opts.Title
+}
+
+// GetApplicationVersion returns the major, minor, and revision of the game.
+func GetApplicationVersion() [3]int {
+	return [3]int{opts.ApplicationMajorVersion, opts.ApplicationMinorVersion, opts.ApplicationRevisionVersion}
 }
