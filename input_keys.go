@@ -1,4 +1,4 @@
-//+build netgo android ios darwin,arm darwin,arm64 headless
+//+build js android ios darwin,arm darwin,arm64 headless
 
 package engo
 

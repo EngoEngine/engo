@@ -1,5 +1,5 @@
 // +build darwin,!arm,!arm64 linux windows
-// +build !ios,!android,!netgo,!sdl,!headless,!vulkan
+// +build !ios,!android,!js,!sdl,!headless,!vulkan
 
 package engo
 

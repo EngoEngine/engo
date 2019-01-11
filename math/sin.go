@@ -1,5 +1,3 @@
-//+build !netgo
-
 package math
 
 import (
