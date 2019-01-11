@@ -39,7 +39,7 @@ The `common` package contains our ECS implementations of common game development
 2. Then, you can go get it:
 `go get -u engo.io/engo`
   1. You may also want to get the dependencies of platform specific builds, so that build tools like godef can use them:
-  `go get -u -tags netgo ./...`
+  `go get -u -tags js ./...`
   `go get -u -tags android ./...`
 3. Now, you have two choices:
   1. Visit [our website](https://engo.io/), which hosts a full-blown tutorial series on how to create your own game, and on top of that, has some conceptual explanations;

@@ -1,4 +1,4 @@
-//+build netgo
+//+build js
 
 package engo
 
