@@ -38,6 +38,9 @@ type AudioSystem struct {
 
 // New is called when the AudioSystem is added to the world.
 func (a *AudioSystem) New(w *ecs.World) {
+	if engo.Headless() {
+		return
+	}
 	var err error
 	switch engo.CurrentBackEnd {
 	case engo.BackEndMobile:
@@ -105,6 +108,9 @@ func (a *AudioSystem) Remove(basic ecs.BasicEntity) {
 
 // Update is called once per frame, and updates/plays the players in the AudioSystem
 func (a *AudioSystem) Update(dt float32) {
+	if engo.Headless() {
+		return
+	}
 	select {
 	case a.audioReadC <- struct{}{}:
 	default:

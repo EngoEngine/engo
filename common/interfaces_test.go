@@ -1,31 +1,14 @@
-//+build !windows,!netgo,!android
-
 package common
 
 import (
 	"testing"
 
 	"engo.io/ecs"
+	"engo.io/engo"
 )
 
-// SafeBasic is to provide a BasicEntity until ecs is updated to provide the GetBasicEntity method
-type SafeBasic struct {
-	ecs.BasicEntity
-}
-
-//Satisfy BasicFace interface
-func (sb *SafeBasic) GetBasicEntity() *ecs.BasicEntity {
-	return &sb.BasicEntity
-}
-
-func NewSafeBasic() SafeBasic {
-	return SafeBasic{
-		BasicEntity: ecs.NewBasic(),
-	}
-}
-
 type EveryComp struct {
-	SafeBasic
+	ecs.BasicEntity
 	AnimationComponent
 	MouseComponent
 	RenderComponent
@@ -34,75 +17,116 @@ type EveryComp struct {
 	AudioComponent
 }
 
-// Test_Every Creates an Everything component and tries to add and then remove it from each system to each system using AddByInterface.
+type TestInterfaceScene struct {
+	failed bool
+	reason string
+}
+
+func (*TestInterfaceScene) Type() string { return "TestInterfaceScene" }
+
+func (*TestInterfaceScene) Preload() {}
+
+func (s *TestInterfaceScene) Setup(u engo.Updater) {
+	w, _ := u.(*ecs.World)
+
+	asys := AnimationSystem{}
+	var a *Animationable
+	var nota *NotAnimationable
+	w.AddSystemInterface(&asys, a, nota)
+
+	msys := MouseSystem{}
+	var m *Mouseable
+	var notm *NotMouseable
+	w.AddSystemInterface(&msys, m, notm)
+
+	rsys := RenderSystem{}
+	var r *Renderable
+	var notr *NotRenderable
+	w.AddSystemInterface(&rsys, r, notr)
+
+	csys := CollisionSystem{}
+	var c *Collisionable
+	var notc *NotCollisionable
+	w.AddSystemInterface(&csys, c, notc)
+
+	audsys := AudioSystem{}
+	var aud *Audioable
+	var notaud *NotAudioable
+	w.AddSystemInterface(&audsys, aud, notaud)
+
+	e := &EveryComp{BasicEntity: ecs.NewBasic()}
+	w.AddEntity(e)
+
+	if len(asys.entities) != 1 {
+		s.failed = true
+		s.reason = "did not add entity to animation system"
+		return
+	}
+	asys.Remove(e.BasicEntity)
+	if len(asys.entities) != 0 {
+		s.failed = true
+		s.reason = "did not remove entry from animation system"
+		return
+	}
+
+	if len(msys.entities) != 1 {
+		s.failed = true
+		s.reason = "did not add entity to mouse system"
+		return
+	}
+	msys.Remove(e.BasicEntity)
+	if len(msys.entities) != 0 {
+		s.failed = true
+		s.reason = "did not remove entry from mouse system"
+		return
+	}
+
+	if len(rsys.entities) != 1 {
+		s.failed = true
+		s.reason = "did not add entity to render system"
+		return
+	}
+	rsys.Remove(e.BasicEntity)
+	if len(rsys.entities) != 0 {
+		s.failed = true
+		s.reason = "did not remove entry from render system"
+		return
+	}
+
+	if len(csys.entities) != 1 {
+		s.failed = true
+		s.reason = "did not add entity to collision system"
+		return
+	}
+	csys.Remove(e.BasicEntity)
+	if len(csys.entities) != 0 {
+		s.failed = true
+		s.reason = "did not remove entry from collision system"
+		return
+	}
+
+	if len(audsys.entities) != 1 {
+		s.failed = true
+		s.reason = "did not add entity to audio system"
+		return
+	}
+	audsys.Remove(e.BasicEntity)
+	if len(audsys.entities) != 0 {
+		s.failed = true
+		s.reason = "did not remove entry from audio system"
+		return
+	}
+}
+
+// TestEveryInterface Creates an Everything component and tries to add and then remove it from each system to each system using AddByInterface.
 // I can't test adding things that don't work as the code won't compile
-func Test_Every(t *testing.T) {
-	e := &EveryComp{
-		SafeBasic: NewSafeBasic(),
+func TestEveryInterface(t *testing.T) {
+	s := &TestInterfaceScene{}
+	engo.Run(engo.RunOptions{
+		NoRun:        true,
+		HeadlessMode: true,
+	}, s)
+	if s.failed {
+		t.Errorf("failed to test every interface. Reason: %v", s.reason)
 	}
-
-	//Wanted to use a loop to do this, but each "AddByInterface" is actually different nmind
-
-	//AnimationSystem
-	as := &AnimationSystem{}
-	as.AddByInterface(e)
-	if len(as.entities) != 1 {
-		t.Logf("AnimationSystem should have 1 entity, got %d", len(as.entities))
-		t.Fail()
-	}
-	as.Remove(*e.GetBasicEntity())
-	if len(as.entities) > 0 {
-		t.Logf("AnimationSystem should now be empty")
-		t.Fail()
-	}
-
-	//MouseSystem
-	ms := &MouseSystem{}
-	ms.AddByInterface(e)
-	if len(ms.entities) != 1 {
-		t.Logf("MouseSystem should have 1 entity, got %d", len(ms.entities))
-		t.Fail()
-	}
-	ms.Remove(*e.GetBasicEntity())
-	if len(ms.entities) > 0 {
-		t.Logf("MouseSystem should now be empty")
-		t.Fail()
-	}
-	//AudioSystem
-	aus := &AudioSystem{}
-	aus.AddByInterface(e)
-	if len(aus.entities) != 1 {
-		t.Logf("AudioSystem should have 1 entity, got %d", len(aus.entities))
-		t.Fail()
-	}
-	aus.Remove(*e.GetBasicEntity())
-	if len(aus.entities) > 0 {
-		t.Logf("AudioSystem should now be empty")
-		t.Fail()
-	}
-	//RenderSystem
-	rs := &RenderSystem{}
-	rs.AddByInterface(e)
-	if len(rs.entities) != 1 {
-		t.Logf("RenderSystem should have 1 entity, got %d", len(rs.entities))
-		t.Fail()
-	}
-	rs.Remove(*e.GetBasicEntity())
-	if len(rs.entities) > 0 {
-		t.Logf("RenderSystem should now be empty")
-		t.Fail()
-	}
-	//CollisionSystem
-	cs := &CollisionSystem{}
-	cs.AddByInterface(e)
-	if len(cs.entities) != 1 {
-		t.Logf("CollisionSystem should have 1 entity, got %d", len(cs.entities))
-		t.Fail()
-	}
-	cs.Remove(*e.GetBasicEntity())
-	if len(cs.entities) > 0 {
-		t.Logf("CollisionSystem should now be empty")
-		t.Fail()
-	}
-
 }
