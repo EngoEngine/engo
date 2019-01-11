@@ -162,6 +162,7 @@ func (r renderEntityList) Swap(i, j int) {
 // one is automatically added to the world.
 type RenderSystem struct {
 	entities renderEntityList
+	ids      map[uint64]struct{}
 	world    *ecs.World
 
 	sortingNeeded, newCamera bool
@@ -174,6 +175,7 @@ func (*RenderSystem) Priority() int { return RenderSystemPriority }
 // New initializes the RenderSystem
 func (rs *RenderSystem) New(w *ecs.World) {
 	rs.world = w
+	rs.ids = make(map[uint64]struct{})
 
 	engo.Mailbox.Listen("NewCameraMessage", func(engo.Message) {
 		rs.newCamera = true
@@ -214,9 +216,11 @@ func addCameraSystemOnce(w *ecs.World) {
 // Add adds an entity to the RenderSystem. The entity needs a basic, render, and space component to be added to the system.
 func (rs *RenderSystem) Add(basic *ecs.BasicEntity, render *RenderComponent, space *SpaceComponent) {
 	// Do nothing if entity already exists
-	if rs.EntityExists(basic) >= 0 {
+	if _, ok := rs.ids[basic.ID()]; ok {
 		return
 	}
+
+	rs.ids[basic.ID()] = struct{}{}
 
 	// Setting default shader
 	if render.shader == nil {
@@ -277,11 +281,12 @@ func (rs *RenderSystem) AddByInterface(i ecs.Identifier) {
 
 // Remove removes an entity from the RenderSystem
 func (rs *RenderSystem) Remove(basic ecs.BasicEntity) {
-	var delete = rs.EntityExists(&basic)
-	if delete >= 0 {
-		rs.entities = append(rs.entities[:delete], rs.entities[delete+1:]...)
+	var d = rs.EntityExists(&basic)
+	if d >= 0 {
+		rs.entities = append(rs.entities[:d], rs.entities[d+1:]...)
 		rs.sortingNeeded = true
 	}
+	delete(rs.ids, basic.ID())
 }
 
 // Update draws the entities in the RenderSystem to the OpenGL Surface.
