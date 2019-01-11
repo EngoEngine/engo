@@ -14,6 +14,10 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/engoengine/math v1.0.1 h1:yccKgzzHH76GEqJ/mt59egRl70fTbDEM6Fvy20jGgTA=
 github.com/engoengine/math v1.0.1/go.mod h1:5Q4qHspv3qnO83hv09Z2dNHaVqo+7YI5WWDIEXY/HE4=
+github.com/engoengine/math v1.0.2 h1:FVZnYrp9mK2nx/bqEy2q5WP62qZj8K/sWup/dpCG3Mg=
+github.com/engoengine/math v1.0.2/go.mod h1:5Q4qHspv3qnO83hv09Z2dNHaVqo+7YI5WWDIEXY/HE4=
+github.com/engoengine/math v1.0.3 h1:aJS5cRpYZqkwSt6qMumHsR/o4xWw8XWJkdzDMfnE8Z0=
+github.com/engoengine/math v1.0.3/go.mod h1:5Q4qHspv3qnO83hv09Z2dNHaVqo+7YI5WWDIEXY/HE4=
 github.com/go-gl/gl v0.0.0-20181026044259-55b76b7df9d2 h1:78Hza2KHn2PX1jdydQnffaU2A/xM0g3Nx1xmMdep9Gk=
 github.com/go-gl/gl v0.0.0-20181026044259-55b76b7df9d2/go.mod h1:482civXOzJJCPzJ4ZOX/pwvXBWSnzD4OKMdH4ClKGbk=
 github.com/go-gl/glfw v0.0.0-20181014061658-691ee1b84c51 h1:elGSwayRx7uAsfA5PnVKeTHh+AVsUTmas0CkHOw/DSk=

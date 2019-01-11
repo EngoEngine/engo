@@ -7,7 +7,7 @@ require (
 	github.com/Noofbiz/sdlMojaveFix v0.0.0-20181012231542-be64a2a84d07
 	github.com/Noofbiz/tmx v0.0.0-20181001154436-c9ede7f431ca
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/engoengine/math v1.0.1
+	github.com/engoengine/math v1.0.3
 	github.com/go-gl/gl v0.0.0-20181026044259-55b76b7df9d2 // indirect
 	github.com/go-gl/glfw v0.0.0-20181014061658-691ee1b84c51
 	github.com/go-gl/mathgl v0.0.0-20180804195959-cdf14b6b8f8a
