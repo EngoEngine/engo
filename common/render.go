@@ -319,7 +319,7 @@ func (rs *RenderSystem) Update(dt float32) {
 		shader := e.RenderComponent.shader
 
 		cullingShader, isCullingShader := shader.(CullingShader)
-		if isCullingShader {
+		if isCullingShader && shader != rs.currentShader {
 			if _, isPrepared := preparedCullingShaders[cullingShader]; !isPrepared {
 				cullingShader.PrepareCulling()
 				preparedCullingShaders[cullingShader] = struct{}{}
