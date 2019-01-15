@@ -307,6 +307,8 @@ func (rs *RenderSystem) Update(dt float32) {
 
 	engo.Gl.Clear(engo.Gl.COLOR_BUFFER_BIT)
 
+	preparedCullingShaders := make(map[CullingShader]struct{})
+
 	// TODO: it's linear for now, but that might very well be a bad idea
 	for _, e := range rs.entities {
 		if e.RenderComponent.Hidden {
@@ -315,6 +317,18 @@ func (rs *RenderSystem) Update(dt float32) {
 
 		// Retrieve a shader, may be the default one -- then use it if we aren't already using it
 		shader := e.RenderComponent.shader
+
+		cullingShader, isCullingShader := shader.(CullingShader)
+		if isCullingShader {
+			if _, isPrepared := preparedCullingShaders[cullingShader]; !isPrepared {
+				cullingShader.PrepareCulling()
+				preparedCullingShaders[cullingShader] = struct{}{}
+			}
+		}
+
+		if isCullingShader && !cullingShader.ShouldDraw(e.RenderComponent, e.SpaceComponent) {
+			continue
+		}
 
 		// Change Shader if we have to
 		if shader != rs.currentShader {
