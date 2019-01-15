@@ -172,6 +172,7 @@ func (s *basicShader) Pre() {
 	engo.Gl.EnableVertexAttribArray(s.inPosition)
 	engo.Gl.EnableVertexAttribArray(s.inTexCoords)
 	engo.Gl.EnableVertexAttribArray(s.inColor)
+	s.PrepareCulling()
 
 	// The matrixProjView shader uniform is projection * view.
 	// We do the multiplication on the CPU instead of sending each matrix to the shader and letting the GPU do the multiplication,
@@ -214,13 +215,13 @@ func (s *basicShader) ShouldDraw(rc *RenderComponent, sc *SpaceComponent) bool {
 	aabb.Min.Multiply(rc.Scale)
 	aabb.Max.Multiply(rc.Scale)
 
-	minVtx := engo.MultiplyMatrixVector(s.cullingMatrix, []float32{aabb.Min.X, aabb.Min.Y})
-	maxVtx := engo.MultiplyMatrixVector(s.cullingMatrix, []float32{aabb.Max.X, aabb.Max.Y})
+	min := aabb.Min.MultiplyMatrixVector(s.cullingMatrix)
+	max := aabb.Max.MultiplyMatrixVector(s.cullingMatrix)
 
-	return !((minVtx[0] < -1 && maxVtx[0] < -1) || // Both points left of the "viewport"
-		(minVtx[0] > 1 && maxVtx[0] > 1) || // Both points right of the "viewport"
-		(minVtx[1] < -1 && maxVtx[1] < -1) || // Both points above of the "viewport"
-		(minVtx[1] > 1 && maxVtx[1] > 1)) // Both points below of the "viewport"
+	return !((min.X < -1 && max.X < -1) || // Both points left of the "viewport"
+		(min.X > 1 && max.X > 1) || // Both points right of the "viewport"
+		(min.Y < -1 && max.Y < -1) || // Both points above of the "viewport"
+		(min.Y > 1 && max.Y > 1)) // Both points below of the "viewport"
 }
 
 func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
