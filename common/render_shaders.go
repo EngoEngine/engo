@@ -172,7 +172,6 @@ func (s *basicShader) Pre() {
 	engo.Gl.EnableVertexAttribArray(s.inPosition)
 	engo.Gl.EnableVertexAttribArray(s.inTexCoords)
 	engo.Gl.EnableVertexAttribArray(s.inColor)
-	s.PrepareCulling()
 
 	// The matrixProjView shader uniform is projection * view.
 	// We do the multiplication on the CPU instead of sending each matrix to the shader and letting the GPU do the multiplication,
