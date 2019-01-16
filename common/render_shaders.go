@@ -211,8 +211,6 @@ func (s *basicShader) PrepareCulling() {
 
 func (s *basicShader) ShouldDraw(rc *RenderComponent, sc *SpaceComponent) bool {
 	aabb := sc.AABB()
-	aabb.Min.Multiply(rc.Scale)
-	aabb.Max.Multiply(rc.Scale)
 
 	min := aabb.Min.MultiplyMatrixVector(s.cullingMatrix)
 	max := aabb.Max.MultiplyMatrixVector(s.cullingMatrix)
