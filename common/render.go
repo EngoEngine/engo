@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"sort"
+	"unsafe"
 
 	"sync"
 
@@ -289,6 +290,11 @@ func (rs *RenderSystem) Remove(basic ecs.BasicEntity) {
 	delete(rs.ids, basic.ID())
 }
 
+// Unsafe interface for instance comparison
+type iface struct {
+	Type, Data unsafe.Pointer
+}
+
 // Update draws the entities in the RenderSystem to the OpenGL Surface.
 func (rs *RenderSystem) Update(dt float32) {
 	if engo.Headless() {
@@ -309,7 +315,7 @@ func (rs *RenderSystem) Update(dt float32) {
 
 	preparedCullingShaders := make(map[CullingShader]struct{})
 	var cullingShader CullingShader // current culling shader
-	var prevShader Shader           // shader of the previous entity
+	var prevShader iface            // shader of the previous entity
 
 	// TODO: it's linear for now, but that might very well be a bad idea
 	for _, e := range rs.entities {
@@ -320,9 +326,12 @@ func (rs *RenderSystem) Update(dt float32) {
 		// Retrieve a shader, may be the default one -- then use it if we aren't already using it
 		shader := e.RenderComponent.shader
 
-		if shader != prevShader {
+		// comparing the instances using unsafe pointers seems to be a little faster (about 0.007 ns on a "slow" machine)
+		// so using this unsafe method to compare shader != prevShader gives a nice performance boost when using many invisible entities.
+		shaderIface := *(*iface)(unsafe.Pointer(&shader))
+		if shaderIface.Data != prevShader.Data {
 			// to increase performance avoid the type assertions when possible
-			prevShader = shader
+			prevShader = shaderIface
 			if cs, ok := shader.(CullingShader); ok {
 				cullingShader = cs
 				if _, isPrepared := preparedCullingShaders[cullingShader]; !isPrepared {
