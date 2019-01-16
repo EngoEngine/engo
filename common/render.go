@@ -308,7 +308,8 @@ func (rs *RenderSystem) Update(dt float32) {
 	engo.Gl.Clear(engo.Gl.COLOR_BUFFER_BIT)
 
 	preparedCullingShaders := make(map[CullingShader]struct{})
-	var lastCullingShader CullingShader
+	var cullingShader CullingShader // current culling shader
+	var prevShader Shader           // shader of the previous entity
 
 	// TODO: it's linear for now, but that might very well be a bad idea
 	for _, e := range rs.entities {
@@ -319,16 +320,21 @@ func (rs *RenderSystem) Update(dt float32) {
 		// Retrieve a shader, may be the default one -- then use it if we aren't already using it
 		shader := e.RenderComponent.shader
 
-		cullingShader, isCullingShader := shader.(CullingShader)
-		if isCullingShader && cullingShader != lastCullingShader {
-			lastCullingShader = cullingShader
-			if _, isPrepared := preparedCullingShaders[cullingShader]; !isPrepared {
-				cullingShader.PrepareCulling()
-				preparedCullingShaders[cullingShader] = struct{}{}
+		if shader != prevShader {
+			// to increase performance avoid the type assertions when possible
+			prevShader = shader
+			if cs, ok := shader.(CullingShader); ok {
+				cullingShader = cs
+				if _, isPrepared := preparedCullingShaders[cullingShader]; !isPrepared {
+					cullingShader.PrepareCulling()
+					preparedCullingShaders[cullingShader] = struct{}{}
+				}
+			} else {
+				cullingShader = nil
 			}
 		}
 
-		if isCullingShader && !cullingShader.ShouldDraw(e.RenderComponent, e.SpaceComponent) {
+		if cullingShader != nil && !cullingShader.ShouldDraw(e.RenderComponent, e.SpaceComponent) {
 			continue
 		}
 
