@@ -308,6 +308,7 @@ func (rs *RenderSystem) Update(dt float32) {
 	engo.Gl.Clear(engo.Gl.COLOR_BUFFER_BIT)
 
 	preparedCullingShaders := make(map[CullingShader]struct{})
+	var lastCullingShader CullingShader
 
 	// TODO: it's linear for now, but that might very well be a bad idea
 	for _, e := range rs.entities {
@@ -319,7 +320,8 @@ func (rs *RenderSystem) Update(dt float32) {
 		shader := e.RenderComponent.shader
 
 		cullingShader, isCullingShader := shader.(CullingShader)
-		if isCullingShader && shader != rs.currentShader {
+		if isCullingShader && cullingShader != lastCullingShader {
+			lastCullingShader = cullingShader
 			if _, isPrepared := preparedCullingShaders[cullingShader]; !isPrepared {
 				cullingShader.PrepareCulling()
 				preparedCullingShaders[cullingShader] = struct{}{}
