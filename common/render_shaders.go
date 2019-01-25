@@ -210,15 +210,23 @@ func (s *basicShader) PrepareCulling() {
 }
 
 func (s *basicShader) ShouldDraw(rc *RenderComponent, sc *SpaceComponent) bool {
-	aabb := sc.AABB()
+	tsc := SpaceComponent{
+		Position: sc.Position,
+		Width:    rc.Drawable.Width() * rc.Scale.X,
+		Height:   rc.Drawable.Height() * rc.Scale.Y,
+		Rotation: sc.Rotation,
+	}
 
-	min := aabb.Min.MultiplyMatrixVector(s.cullingMatrix)
-	max := aabb.Max.MultiplyMatrixVector(s.cullingMatrix)
+	c := tsc.Corners()
+	c[0].MultiplyMatrixVector(s.cullingMatrix)
+	c[1].MultiplyMatrixVector(s.cullingMatrix)
+	c[2].MultiplyMatrixVector(s.cullingMatrix)
+	c[3].MultiplyMatrixVector(s.cullingMatrix)
 
-	return !((min.X < -1 && max.X < -1) || // Both points left of the "viewport"
-		(min.X > 1 && max.X > 1) || // Both points right of the "viewport"
-		(min.Y < -1 && max.Y < -1) || // Both points above of the "viewport"
-		(min.Y > 1 && max.Y > 1)) // Both points below of the "viewport"
+	return !((c[0].X < -1 && c[1].X < -1 && c[2].X < -1 && c[3].X < -1) || // All points left of the "viewport"
+		(c[0].X > 1 && c[1].X > 1 && c[2].X > 1 && c[3].X > 1) || // All points right of the "viewport"
+		(c[0].Y < -1 && c[1].Y < -1 && c[2].Y < -1 && c[3].Y < -1) || // All points above of the "viewport"
+		(c[0].Y > 1 && c[1].Y > 1 && c[2].Y > 1 && c[3].Y > 1)) // All points below of the "viewport"
 }
 
 func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
