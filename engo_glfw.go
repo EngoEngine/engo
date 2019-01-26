@@ -38,18 +38,13 @@ func init() {
 	runtime.LockOSThread()
 }
 
-// fatalErr calls log.Fatal with the given error if it is non-nil.
-func fatalErr(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 // CreateWindow sets up the GLFW window and prepares the OpenGL surface for rendering
 func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	CurrentBackEnd = BackEndGLFW
 	err := glfw.Init()
-	fatalErr(err)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	if !opts.HeadlessMode {
 		cursorArrow = glfw.CreateStandardCursor(glfw.ArrowCursor)
@@ -106,7 +101,9 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	}
 
 	Window, err = glfw.CreateWindow(width, height, title, monitor, nil)
-	fatalErr(err)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	Window.MakeContextCurrent()
 

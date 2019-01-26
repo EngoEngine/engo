@@ -183,6 +183,7 @@ func (m *Matrix) Identity() *Matrix {
 }
 
 // Multiply postmultiplies m matrix with m2 and stores the result in m, returning m.
+// Multiplaction is the result of m2 times m.
 func (m *Matrix) Multiply(m2 *Matrix) *Matrix {
 	multiplyMatricies(m.Val[:], m2.Val[:])
 	return m
@@ -207,7 +208,7 @@ func (m *Matrix) Translate(x, y float32) *Matrix {
 }
 
 // TranslatePoint translates m by the point p.
-func (m *Matrix) TranslatePoint(p *Point) *Matrix {
+func (m *Matrix) TranslatePoint(p Point) *Matrix {
 	return m.Translate(p.X, p.Y)
 }
 
@@ -229,21 +230,25 @@ func (m *Matrix) Scale(x, y float32) *Matrix {
 }
 
 // ScaleComponent returns the current scale component of m.
+// This assumes uniform scaling.
 func (m *Matrix) ScaleComponent() (x, y float32) {
 	return m.Val[m00], m.Val[m11]
 }
 
 // TranslationComponent returns the current translation component of m.
+// This assumes uniform scaling.
 func (m *Matrix) TranslationComponent() (x, y float32) {
 	return m.Val[m02], m.Val[m12]
 }
 
-// RotationComponent returns the current rotation component of min degrees.
+// RotationComponent returns the current rotation component of m in degrees.
+// This assumes uniform scaling.
 func (m *Matrix) RotationComponent() float32 {
 	return m.RotationComponentRad() * RadToDeg
 }
 
 // RotationComponentRad returns the current rotation component of m in radians.
+// This assumes uniform scaling.
 func (m *Matrix) RotationComponentRad() float32 {
 	return math.Atan2(m.Val[m10], m.Val[m00])
 }
@@ -522,10 +527,10 @@ func MultiplyMatrixVector(m *Matrix, v []float32) []float32 {
 }
 
 // MultiplyMatrixVector multiplies the matrix m with the point and returns the result.
-func (pt *Point) MultiplyMatrixVector(m *Matrix) *Point {
-	x := m.Val[m00]*pt.X + m.Val[m01]*pt.Y + m.Val[m02]
-	y := m.Val[m10]*pt.X + m.Val[m11]*pt.Y + m.Val[m12]
-	pt.X = x
-	pt.Y = y
-	return pt
+func (p *Point) MultiplyMatrixVector(m *Matrix) *Point {
+	v := []float32{p.X, p.Y}
+	res := MultiplyMatrixVector(m, v)
+	p.X = res[0]
+	p.Y = res[1]
+	return p
 }

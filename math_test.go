@@ -768,3 +768,719 @@ func TestPointMethodChain(t *testing.T) {
 		t.Errorf("Point method chain failed. p1.Y should be 42, not %v", p1.Y)
 	}
 }
+
+func TestMatrixSet(t *testing.T) {
+	m := IdentityMatrix()
+	for i := 0; i < 9; i++ {
+		exp := float32(0)
+		if i == 0 || i == 4 || i == 8 {
+			exp = 1
+		}
+		if !FloatEqual(m.Val[i], exp) {
+			t.Errorf("Identity was not the identity matrix. Index: %v\n Wanted: %v\n Got: %v\n", i, exp, m.Val[i])
+		}
+	}
+	set := []float32{
+		2, 3, 4,
+		3, 4, 5,
+		4, 5, 6,
+	}
+	m.Set(set)
+	for i := 0; i < 9; i++ {
+		if !FloatEqual(set[i], m.Val[i]) {
+			t.Errorf("Set did not set properly. Index: %v\n Wanted: %v\n Got: %v\n", i, set[i], m.Val[i])
+		}
+	}
+}
+
+func TestMatrixMultiply(t *testing.T) {
+	data := []struct {
+		m1, m2, expected []float32
+	}{
+		{
+			m1: []float32{
+				0, 0, 0,
+				0, 0, 0,
+				0, 0, 0,
+			},
+			m2: []float32{
+				0, 0, 0,
+				0, 0, 0,
+				0, 0, 0,
+			},
+			expected: []float32{
+				0, 0, 0,
+				0, 0, 0,
+				0, 0, 0,
+			},
+		},
+		{
+			m1: []float32{
+				1, 2, 3,
+				4, 5, 6,
+				7, 8, 9,
+			},
+			m2: []float32{
+				1, 0, 0,
+				0, 1, 0,
+				0, 0, 1,
+			},
+			expected: []float32{
+				1, 2, 3,
+				4, 5, 6,
+				7, 8, 9,
+			},
+		},
+		{
+			m1: []float32{
+				0, 1, 2,
+				2, 3, 4,
+				3, 4, 2,
+			},
+			m2: []float32{
+				1, 3, 2,
+				2, 3, 2,
+				2, 1, 1,
+			},
+			expected: []float32{
+				12, 18, 18,
+				12, 19, 20,
+				5, 9, 10,
+			},
+		},
+		{
+			m1: []float32{
+				1, 3, 2,
+				2, 3, 2,
+				2, 1, 1,
+			},
+			m2: []float32{
+				0, 1, 2,
+				2, 3, 4,
+				3, 4, 2,
+			},
+			expected: []float32{
+				6, 5, 4,
+				16, 19, 14,
+				15, 23, 16,
+			},
+		},
+	}
+	for _, d := range data {
+		mat1, mat2 := IdentityMatrix(), IdentityMatrix()
+		mat1.Set(d.m1)
+		mat2.Set(d.m2)
+		res := mat1.Multiply(mat2)
+		for i := 0; i < 9; i++ {
+			if !FloatEqual(res.Val[i], d.expected[i]) {
+				t.Errorf("Multiplication was not correct.\n mat1: %v\n mat2: %v\n exp: %v\n res: %v\n index was: %v\ngot: %v\nwanted: %v\n", d.m1, d.m2, d.expected, res, i, res.Val[i], d.expected[i])
+				return
+			}
+		}
+	}
+}
+
+func TestMatrixTranslate(t *testing.T) {
+	data := []struct {
+		matrix, expected []float32
+		transX, transY   float32
+	}{
+		{
+			transX: 0,
+			transY: 0,
+			matrix: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				2, 3, 4,
+			},
+			expected: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				2, 3, 4,
+			},
+		},
+		{
+			transX: 15,
+			transY: 15,
+			matrix: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				2, 3, 4,
+			},
+			expected: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				17, 48, 79,
+			},
+		},
+		{
+			transX: -5,
+			transY: -5,
+			matrix: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				2, 3, 4,
+			},
+			expected: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				-3, -12, -21,
+			},
+		},
+		{
+			transX: 5,
+			transY: -5,
+			matrix: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				2, 3, 4,
+			},
+			expected: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				-3, -2, -1,
+			},
+		},
+		{
+			transX: -5,
+			transY: 5,
+			matrix: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				2, 3, 4,
+			},
+			expected: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				7, 8, 9,
+			},
+		},
+	}
+	for _, d := range data {
+		mat1 := IdentityMatrix()
+		mat1.Set(d.matrix)
+		res := mat1.Translate(d.transX, d.transY)
+		for i := 0; i < 9; i++ {
+			if !FloatEqual(res.Val[i], d.expected[i]) {
+				t.Errorf("Translation was not correct.\n matrix: %v\n exp: %v\n res: %v\n index was: %v\ngot: %v\nwanted: %v\n", d.matrix, d.expected, res, i, res.Val[i], d.expected[i])
+				return
+			}
+		}
+	}
+}
+
+func TestMatrixTranslatePoint(t *testing.T) {
+	data := []struct {
+		matrix, expected []float32
+		point            Point
+	}{
+		{
+			point: Point{
+				X: 0,
+				Y: 0,
+			},
+			matrix: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				2, 3, 4,
+			},
+			expected: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				2, 3, 4,
+			},
+		},
+		{
+			point: Point{
+				X: 15,
+				Y: 15,
+			},
+			matrix: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				2, 3, 4,
+			},
+			expected: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				17, 48, 79,
+			},
+		},
+		{
+			point: Point{
+				X: -5,
+				Y: -5,
+			},
+			matrix: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				2, 3, 4,
+			},
+			expected: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				-3, -12, -21,
+			},
+		},
+		{
+			point: Point{
+				X: 5,
+				Y: -5,
+			},
+			matrix: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				2, 3, 4,
+			},
+			expected: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				-3, -2, -1,
+			},
+		},
+		{
+			point: Point{
+				X: -5,
+				Y: 5,
+			},
+			matrix: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				2, 3, 4,
+			},
+			expected: []float32{
+				0, 1, 2,
+				1, 2, 3,
+				7, 8, 9,
+			},
+		},
+	}
+	for _, d := range data {
+		mat1 := IdentityMatrix()
+		mat1.Set(d.matrix)
+		res := mat1.TranslatePoint(d.point)
+		for i := 0; i < 9; i++ {
+			if !FloatEqual(res.Val[i], d.expected[i]) {
+				t.Errorf("Translation was not correct.\n matrix: %v\n exp: %v\n res: %v\n index was: %v\ngot: %v\nwanted: %v\n", d.matrix, d.expected, res, i, res.Val[i], d.expected[i])
+				return
+			}
+		}
+	}
+}
+
+func TestMatrixScale(t *testing.T) {
+	data := []struct {
+		matrix, expected []float32
+		scaleX, scaleY   float32
+	}{
+		{
+			scaleX: 1,
+			scaleY: 1,
+			matrix: []float32{
+				1, 2, 3,
+				2, 2, 2,
+				1, 3, 2,
+			},
+			expected: []float32{
+				1, 2, 3,
+				2, 2, 2,
+				1, 3, 2,
+			},
+		},
+		{
+			scaleX: 0,
+			scaleY: 0,
+			matrix: []float32{
+				1, 2, 3,
+				2, 2, 2,
+				1, 3, 2,
+			},
+			expected: []float32{
+				0, 0, 0,
+				0, 0, 0,
+				1, 3, 2,
+			},
+		},
+		{
+			scaleX: 0,
+			scaleY: 1,
+			matrix: []float32{
+				1, 2, 3,
+				2, 2, 2,
+				1, 3, 2,
+			},
+			expected: []float32{
+				0, 0, 0,
+				2, 2, 2,
+				1, 3, 2,
+			},
+		},
+		{
+			scaleX: 1,
+			scaleY: 0,
+			matrix: []float32{
+				1, 2, 3,
+				2, 2, 2,
+				1, 3, 2,
+			},
+			expected: []float32{
+				1, 2, 3,
+				0, 0, 0,
+				1, 3, 2,
+			},
+		},
+		{
+			scaleX: 5,
+			scaleY: 5,
+			matrix: []float32{
+				1, 2, 3,
+				2, 2, 2,
+				1, 3, 2,
+			},
+			expected: []float32{
+				5, 10, 15,
+				10, 10, 10,
+				1, 3, 2,
+			},
+		},
+		{
+			scaleX: -5,
+			scaleY: -5,
+			matrix: []float32{
+				1, 2, 3,
+				2, 2, 2,
+				1, 3, 2,
+			},
+			expected: []float32{
+				-5, -10, -15,
+				-10, -10, -10,
+				1, 3, 2,
+			},
+		},
+	}
+	for _, d := range data {
+		mat1 := IdentityMatrix()
+		mat1.Set(d.matrix)
+		res := mat1.Scale(d.scaleX, d.scaleY)
+		for i := 0; i < 9; i++ {
+			if !FloatEqual(res.Val[i], d.expected[i]) {
+				t.Errorf("Scale was not correct.\n matrix: %v\n exp: %v\n res: %v\n index was: %v\ngot: %v\nwanted: %v\n", d.matrix, d.expected, res, i, res.Val[i], d.expected[i])
+				return
+			}
+		}
+	}
+}
+
+func TestMatrixScaleComponent(t *testing.T) {
+	data := []struct {
+		matrix               []float32
+		expectedX, expectedY float32
+	}{
+		{
+			matrix: []float32{
+				0, 0, 0,
+				0, 0, 0,
+				0, 0, 0,
+			},
+			expectedX: 0,
+			expectedY: 0,
+		},
+		{
+			matrix: []float32{
+				1, 2, 3,
+				3, 1, 2,
+				2, 3, 1,
+			},
+			expectedX: 1,
+			expectedY: 1,
+		},
+		{
+			matrix: []float32{
+				5, 2, 3,
+				6, -4, 3,
+				1, 4, 2,
+			},
+			expectedX: 5,
+			expectedY: -4,
+		},
+		{
+			matrix: []float32{
+				-5, 2, 3,
+				6, -4, 3,
+				1, 4, 2,
+			},
+			expectedX: -5,
+			expectedY: -4,
+		},
+	}
+	for _, d := range data {
+		mat1 := IdentityMatrix()
+		mat1.Set(d.matrix)
+		if resX, resY := mat1.ScaleComponent(); !FloatEqual(resX, d.expectedX) || !FloatEqual(resY, d.expectedY) {
+			t.Errorf("Scale Component did not match expected!\n ResX: %v\n expectedX: %v\n ResY: %v\n expectedY: %v\n", resX, d.expectedX, resY, d.expectedY)
+			return
+		}
+	}
+}
+
+func TestMatrixTranslationComponent(t *testing.T) {
+	data := []struct {
+		matrix               []float32
+		expectedX, expectedY float32
+	}{
+		{
+			matrix: []float32{
+				0, 0, 0,
+				0, 0, 0,
+				0, 0, 0,
+			},
+			expectedX: 0,
+			expectedY: 0,
+		},
+		{
+			matrix: []float32{
+				1, 2, 3,
+				4, 5, 6,
+				7, 8, 9,
+			},
+			expectedX: 7,
+			expectedY: 8,
+		},
+		{
+			matrix: []float32{
+				5, 2, 3,
+				6, -4, 3,
+				1, -4, 2,
+			},
+			expectedX: 1,
+			expectedY: -4,
+		},
+		{
+			matrix: []float32{
+				-5, 2, 3,
+				6, -4, 3,
+				-1, 4, 2,
+			},
+			expectedX: -1,
+			expectedY: 4,
+		},
+	}
+	for _, d := range data {
+		mat1 := IdentityMatrix()
+		mat1.Set(d.matrix)
+		if resX, resY := mat1.TranslationComponent(); !FloatEqual(resX, d.expectedX) || !FloatEqual(resY, d.expectedY) {
+			t.Errorf("Translation Component did not match expected!\n Matrix: %v\n ResX: %v\n expectedX: %v\n ResY: %v\n expectedY: %v\n", d.matrix, resX, d.expectedX, resY, d.expectedY)
+			return
+		}
+	}
+}
+
+func TestMatrixRotationComponent(t *testing.T) {
+	data := []struct {
+		matrix   []float32
+		expected float32
+	}{
+		{
+			matrix: []float32{
+				0, 0, 0,
+				0, 0, 0,
+				0, 0, 0,
+			},
+			expected: 0,
+		},
+		{
+			matrix: []float32{
+				1, 2, 3,
+				3, 1, 2,
+				2, 3, 1,
+			},
+			expected: 63.43495,
+		},
+		{
+			matrix: []float32{
+				5, 2, 3,
+				6, -4, 3,
+				1, 4, 2,
+			},
+			expected: 21.801409,
+		},
+		{
+			matrix: []float32{
+				-5, 2, 3,
+				6, -4, 3,
+				1, 4, 2,
+			},
+			expected: 158.1986,
+		},
+	}
+	for _, d := range data {
+		mat1 := IdentityMatrix()
+		mat1.Set(d.matrix)
+		if res := mat1.RotationComponent(); !FloatEqual(res, d.expected) {
+			t.Errorf("Rotation Component did not match expected!\nMatrix: %v\n Res: %v\n expected: %v\n", d.matrix, res, d.expected)
+			return
+		}
+	}
+}
+
+func TestMatrixRotate(t *testing.T) {
+	data := []struct {
+		matrix, expected []float32
+		rotation         float32
+	}{
+		{
+			rotation: 0,
+			matrix: []float32{
+				1, 2, 3,
+				6, 5, 4,
+				7, 8, 9,
+			},
+			expected: []float32{
+				1, 2, 3,
+				6, 5, 4,
+				7, 8, 9,
+			},
+		},
+		{
+			rotation: 35,
+			matrix: []float32{
+				1, 2, 3,
+				6, 5, 4,
+				7, 8, 9,
+			},
+			expected: []float32{
+				4.2606106, 4.5061865, 4.751762,
+				4.341336, 2.9486074, 1.5558789,
+				7, 8, 9,
+			},
+		},
+		{
+			rotation: -35,
+			matrix: []float32{
+				1, 2, 3,
+				6, 5, 4,
+				7, 8, 9,
+			},
+			expected: []float32{
+				-2.6223066, -1.2295781, 0.16315031,
+				5.4884887, 5.2429132, 4.9973373,
+				7, 8, 9,
+			},
+		},
+		{
+			rotation: 90,
+			matrix: []float32{
+				1, 2, 3,
+				6, 5, 4,
+				7, 8, 9,
+			},
+			expected: []float32{
+				6, 5, 4,
+				-1, -2, -3,
+				7, 8, 9,
+			},
+		},
+	}
+	for _, d := range data {
+		mat1 := IdentityMatrix()
+		mat1.Set(d.matrix)
+		res := mat1.Rotate(d.rotation)
+		for i := 0; i < 9; i++ {
+			if !FloatEqual(res.Val[i], d.expected[i]) {
+				t.Errorf("Matrix Rotate did not return correct values.\n Matrix: %v\n Expected: %v\n Got: %v", d.matrix, d.expected, res.Val)
+				return
+			}
+		}
+	}
+}
+
+func TestMultiplyMatrixPoint(t *testing.T) {
+	data := []struct {
+		matrix []float32
+		p, r   Point
+	}{
+		{
+			matrix: []float32{
+				1, 2, 3,
+				4, 5, 6,
+				7, 8, 0,
+			},
+			p: Point{
+				X: 0,
+				Y: 0,
+			},
+			r: Point{
+				X: 7,
+				Y: 8,
+			},
+		},
+		{
+			matrix: []float32{
+				1, 2, 3,
+				4, 5, 6,
+				7, 8, 0,
+			},
+			p: Point{
+				X: 5,
+				Y: 5,
+			},
+			r: Point{
+				X: 32,
+				Y: 43,
+			},
+		},
+		{
+			matrix: []float32{
+				1, 2, 3,
+				4, 5, 6,
+				7, 8, 0,
+			},
+			p: Point{
+				X: -5,
+				Y: -5,
+			},
+			r: Point{
+				X: -18,
+				Y: -27,
+			},
+		},
+		{
+			matrix: []float32{
+				1, 2, 3,
+				4, 5, 6,
+				7, 8, 0,
+			},
+			p: Point{
+				X: -5,
+				Y: 5,
+			},
+			r: Point{
+				X: 22,
+				Y: 23,
+			},
+		},
+		{
+			matrix: []float32{
+				1, 2, 3,
+				4, 5, 6,
+				7, 8, 0,
+			},
+			p: Point{
+				X: 5,
+				Y: -5,
+			},
+			r: Point{
+				X: -8,
+				Y: -7,
+			},
+		},
+	}
+	for _, d := range data {
+		mat1 := IdentityMatrix()
+		mat1.Set(d.matrix)
+		if res := d.p.MultiplyMatrixVector(mat1); !res.Equal(d.r) {
+			t.Errorf("MultiplyMatrixPoint did not return expected value. \nMatrix: %v\nPoint: %v\nWanted: %v\nGot: %v", d.matrix, d.p, d.r, res)
+			return
+		}
+	}
+}
