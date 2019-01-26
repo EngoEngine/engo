@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"sort"
+	"unsafe"
 
 	"sync"
 
@@ -166,7 +167,6 @@ type RenderSystem struct {
 	world    *ecs.World
 
 	sortingNeeded, newCamera bool
-	currentShader            Shader
 }
 
 // Priority implements the ecs.Prioritizer interface.
@@ -289,6 +289,19 @@ func (rs *RenderSystem) Remove(basic ecs.BasicEntity) {
 	delete(rs.ids, basic.ID())
 }
 
+// Unsafe interface for instance comparison
+type iface struct {
+	Type, Data unsafe.Pointer
+}
+
+func compareShaders(a, b Shader) bool {
+	// comparing the instances using unsafe pointers seems to be a little faster (about 0.007 ns on a "slow" machine)
+	// so using this unsafe method to compare shader != prevShader gives a nice performance boost when using many entities.
+	aIface := *(*iface)(unsafe.Pointer(&a))
+	bIface := *(*iface)(unsafe.Pointer(&b))
+	return aIface.Data == bIface.Data
+}
+
 // Update draws the entities in the RenderSystem to the OpenGL Surface.
 func (rs *RenderSystem) Update(dt float32) {
 	if engo.Headless() {
@@ -307,6 +320,11 @@ func (rs *RenderSystem) Update(dt float32) {
 
 	engo.Gl.Clear(engo.Gl.COLOR_BUFFER_BIT)
 
+	preparedCullingShaders := make(map[CullingShader]struct{})
+	var cullingShader CullingShader // current culling shader
+	var prevShader Shader           // shader of the previous entity
+	var currentShader Shader        // currently "active" shader
+
 	// TODO: it's linear for now, but that might very well be a bad idea
 	for _, e := range rs.entities {
 		if e.RenderComponent.Hidden {
@@ -316,13 +334,31 @@ func (rs *RenderSystem) Update(dt float32) {
 		// Retrieve a shader, may be the default one -- then use it if we aren't already using it
 		shader := e.RenderComponent.shader
 
+		if !compareShaders(shader, prevShader) {
+			// to increase performance avoid the type assertions when possible
+			prevShader = shader
+			if cs, ok := shader.(CullingShader); ok {
+				cullingShader = cs
+				if _, isPrepared := preparedCullingShaders[cullingShader]; !isPrepared {
+					cullingShader.PrepareCulling()
+					preparedCullingShaders[cullingShader] = struct{}{}
+				}
+			} else {
+				cullingShader = nil
+			}
+		}
+
+		if cullingShader != nil && !cullingShader.ShouldDraw(e.RenderComponent, e.SpaceComponent) {
+			continue
+		}
+
 		// Change Shader if we have to
-		if shader != rs.currentShader {
-			if rs.currentShader != nil {
-				rs.currentShader.Post()
+		if !compareShaders(shader, currentShader) {
+			if currentShader != nil {
+				currentShader.Post()
 			}
 			shader.Pre()
-			rs.currentShader = shader
+			currentShader = shader
 		}
 
 		// Setting default scale to 1
@@ -335,12 +371,11 @@ func (rs *RenderSystem) Update(dt float32) {
 			e.RenderComponent.Color = color.White
 		}
 
-		rs.currentShader.Draw(e.RenderComponent, e.SpaceComponent)
+		currentShader.Draw(e.RenderComponent, e.SpaceComponent)
 	}
 
-	if rs.currentShader != nil {
-		rs.currentShader.Post()
-		rs.currentShader = nil
+	if currentShader != nil {
+		currentShader.Post()
 	}
 }
 

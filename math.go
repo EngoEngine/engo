@@ -520,3 +520,12 @@ func MultiplyMatrixVector(m *Matrix, v []float32) []float32 {
 	v20 := m.Val[m20]*v[m00] + m.Val[m21]*v[m10] + m.Val[m22]*v[m20]
 	return []float32{v00, v10, v20}
 }
+
+// MultiplyMatrixVector multiplies the matrix m with the point and returns the result.
+func (pt *Point) MultiplyMatrixVector(m *Matrix) *Point {
+	x := m.Val[m00]*pt.X + m.Val[m01]*pt.Y + m.Val[m02]
+	y := m.Val[m10]*pt.X + m.Val[m11]*pt.Y + m.Val[m12]
+	pt.X = x
+	pt.Y = y
+	return pt
+}

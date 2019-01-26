@@ -80,6 +80,14 @@ type Shader interface {
 	SetCamera(*CameraSystem)
 }
 
+// CullingShader when implemented can be used in the RenderSystem to test if an entity should be rendered.
+type CullingShader interface {
+	Shader
+	// PrepareCulling is called once per frame for the shader to initialize culling calculation.
+	PrepareCulling()
+	ShouldDraw(*RenderComponent, *SpaceComponent) bool
+}
+
 type basicShader struct {
 	BatchSize int
 
@@ -102,6 +110,7 @@ type basicShader struct {
 	projectionMatrix *engo.Matrix
 	viewMatrix       *engo.Matrix
 	modelMatrix      *engo.Matrix
+	cullingMatrix    *engo.Matrix
 
 	camera        *CameraSystem
 	cameraEnabled bool
@@ -149,6 +158,8 @@ func (s *basicShader) Setup(w *ecs.World) error {
 	s.projectionMatrix = engo.IdentityMatrix()
 	s.viewMatrix = engo.IdentityMatrix()
 	s.modelMatrix = engo.IdentityMatrix()
+	s.cullingMatrix = engo.IdentityMatrix()
+
 	return nil
 }
 
@@ -161,6 +172,22 @@ func (s *basicShader) Pre() {
 	engo.Gl.EnableVertexAttribArray(s.inPosition)
 	engo.Gl.EnableVertexAttribArray(s.inTexCoords)
 	engo.Gl.EnableVertexAttribArray(s.inColor)
+
+	// The matrixProjView shader uniform is projection * view.
+	// We do the multiplication on the CPU instead of sending each matrix to the shader and letting the GPU do the multiplication,
+	// because it's likely faster to do the multiplication client side and send the result over the shader bus than to send two separate
+	// buffers over the bus and then do the multiplication on the GPU.
+	pv := s.projectionMatrix.Multiply(s.viewMatrix)
+	engo.Gl.UniformMatrix3fv(s.matrixProjView, false, pv.Val[:])
+
+	// Since we are batching client side, we only have one VBO, so we can just bind it now and use it for the entire frame.
+	engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, s.vertexBuffer)
+	engo.Gl.VertexAttribPointer(s.inPosition, 2, engo.Gl.FLOAT, false, 20, 0)
+	engo.Gl.VertexAttribPointer(s.inTexCoords, 2, engo.Gl.FLOAT, false, 20, 8)
+	engo.Gl.VertexAttribPointer(s.inColor, 4, engo.Gl.UNSIGNED_BYTE, true, 20, 16)
+}
+
+func (s *basicShader) PrepareCulling() {
 	// (Re)initialize the projection matrix.
 	s.projectionMatrix.Identity()
 	if engo.ScaleOnResize() {
@@ -177,18 +204,29 @@ func (s *basicShader) Pre() {
 		scaleX, scaleY := s.projectionMatrix.ScaleComponent()
 		s.viewMatrix.Translate(-1/scaleX, 1/scaleY)
 	}
-	// The matrixProjView shader uniform is projection * view.
-	// We do the multiplication on the CPU instead of sending each matrix to the shader and letting the GPU do the multiplication,
-	// because it's likely faster to do the multiplication client side and send the result over the shader bus than to send two separate
-	// buffers over the bus and then do the multiplication on the GPU.
-	pv := s.projectionMatrix.Multiply(s.viewMatrix)
-	engo.Gl.UniformMatrix3fv(s.matrixProjView, false, pv.Val[:])
+	s.cullingMatrix.Identity()
+	s.cullingMatrix.Multiply(s.projectionMatrix).Multiply(s.viewMatrix)
+	s.cullingMatrix.Scale(engo.GetGlobalScale().X, engo.GetGlobalScale().Y)
+}
 
-	// Since we are batching client side, we only have one VBO, so we can just bind it now and use it for the entire frame.
-	engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, s.vertexBuffer)
-	engo.Gl.VertexAttribPointer(s.inPosition, 2, engo.Gl.FLOAT, false, 20, 0)
-	engo.Gl.VertexAttribPointer(s.inTexCoords, 2, engo.Gl.FLOAT, false, 20, 8)
-	engo.Gl.VertexAttribPointer(s.inColor, 4, engo.Gl.UNSIGNED_BYTE, true, 20, 16)
+func (s *basicShader) ShouldDraw(rc *RenderComponent, sc *SpaceComponent) bool {
+	tsc := SpaceComponent{
+		Position: sc.Position,
+		Width:    rc.Drawable.Width() * rc.Scale.X,
+		Height:   rc.Drawable.Height() * rc.Scale.Y,
+		Rotation: sc.Rotation,
+	}
+
+	c := tsc.Corners()
+	c[0].MultiplyMatrixVector(s.cullingMatrix)
+	c[1].MultiplyMatrixVector(s.cullingMatrix)
+	c[2].MultiplyMatrixVector(s.cullingMatrix)
+	c[3].MultiplyMatrixVector(s.cullingMatrix)
+
+	return !((c[0].X < -1 && c[1].X < -1 && c[2].X < -1 && c[3].X < -1) || // All points left of the "viewport"
+		(c[0].X > 1 && c[1].X > 1 && c[2].X > 1 && c[3].X > 1) || // All points right of the "viewport"
+		(c[0].Y < -1 && c[1].Y < -1 && c[2].Y < -1 && c[3].Y < -1) || // All points above of the "viewport"
+		(c[0].Y > 1 && c[1].Y > 1 && c[2].Y > 1 && c[3].Y > 1)) // All points below of the "viewport"
 }
 
 func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
