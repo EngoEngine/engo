@@ -32,6 +32,10 @@ func TestFilesSetRoot(t *testing.T) {
 	if Files.root != "testing" {
 		t.Errorf("Root was not set to %v, it was %v instead", "testing", Files.root)
 	}
+
+	if Files.GetRoot() != "testing" {
+		t.Errorf("Root was set, but GetRoot() did not return proper value. Wanted: %v, got: %v", "testing", Files.GetRoot())
+	}
 }
 
 type testLoader struct{}

@@ -310,3 +310,42 @@ func TestUtils(t *testing.T) {
 		t.Errorf("Did not properly log unsupportedType. got: %v", buf.String())
 	}
 }
+
+func TestSetTitleHeadless(t *testing.T) {
+	exp := "Title set to: test title\n"
+	Run(RunOptions{
+		HeadlessMode: true,
+		NoRun:        true,
+	}, &testScene{})
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	if SetTitle("test title"); !strings.HasSuffix(buf.String(), exp) {
+		t.Errorf("Did not properly log title set. Got: %v, wanted: %v", buf.String(), exp)
+	}
+}
+
+func TestGetTitle(t *testing.T) {
+	Run(RunOptions{
+		HeadlessMode: true,
+		NoRun:        true,
+		Title:        "Title Test",
+	}, &testScene{})
+	if title := GetTitle(); title != "Title Test" {
+		t.Errorf("GetTitle()  did not properly return title. Wanted: %v, got: %v", "Title Test", title)
+	}
+}
+
+func TestGetApplicationVersion(t *testing.T) {
+	Run(RunOptions{
+		HeadlessMode:               true,
+		NoRun:                      true,
+		Title:                      "Title Test",
+		ApplicationMajorVersion:    1,
+		ApplicationMinorVersion:    2,
+		ApplicationRevisionVersion: 3,
+	}, &testScene{})
+	ver := GetApplicationVersion()
+	if ver[0] != 1 || ver[1] != 2 || ver[2] != 3 {
+		t.Errorf("Application version did not match. Wanted: %v.%v.%v \n Got: %v.%v.%v\n", 1, 2, 3, ver[0], ver[1], ver[2])
+	}
+}
