@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"math"
 	"os"
 	"strings"
@@ -156,7 +157,11 @@ func CursorPos() (x, y float32) {
 
 // SetTitle changes the title of the page to the given string
 func SetTitle(title string) {
-	document.Set("title", title)
+	if opts.HeadlessMode {
+		log.Println("Title set to:", title)
+	} else {
+		document.Set("title", title)
+	}
 }
 
 // WindowSize returns the width and height of the current window
