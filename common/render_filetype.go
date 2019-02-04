@@ -12,6 +12,11 @@ import (
 	_ "image/gif"
 	"io"
 
+	// these are for svg support
+
+	"github.com/srwiley/oksvg"
+	"github.com/srwiley/rasterx"
+
 	"engo.io/engo"
 	"engo.io/gl"
 )
@@ -34,16 +39,30 @@ type imageLoader struct {
 }
 
 func (i *imageLoader) Load(url string, data io.Reader) error {
-	img, _, err := image.Decode(data)
-	if err != nil {
-		return err
+	if getExt(url) == ".svg" {
+		icon, err := oksvg.ReadIconStream(data, oksvg.WarnErrorMode)
+		if err != nil {
+			return err
+		}
+		w, h := int(icon.ViewBox.W), int(icon.ViewBox.H)
+		img := image.NewRGBA(image.Rect(0, 0, w, h))
+		gv := rasterx.NewScannerGV(w, h, img, img.Bounds())
+		r := rasterx.NewDasher(w, h, gv)
+		icon.Draw(r, 1.0)
+		b := img.Bounds()
+		newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+		draw.Draw(newm, newm.Bounds(), img, b.Min, draw.Src)
+		i.images[url] = NewTextureResource(&ImageObject{newm})
+	} else {
+		img, _, err := image.Decode(data)
+		if err != nil {
+			return err
+		}
+		b := img.Bounds()
+		newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+		draw.Draw(newm, newm.Bounds(), img, b.Min, draw.Src)
+		i.images[url] = NewTextureResource(&ImageObject{newm})
 	}
-
-	b := img.Bounds()
-	newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
-	draw.Draw(newm, newm.Bounds(), img, b.Min, draw.Src)
-
-	i.images[url] = NewTextureResource(&ImageObject{newm})
 
 	return nil
 }
@@ -192,4 +211,5 @@ func init() {
 	engo.Files.Register(".jpg", &imageLoader{images: make(map[string]TextureResource)})
 	engo.Files.Register(".png", &imageLoader{images: make(map[string]TextureResource)})
 	engo.Files.Register(".gif", &imageLoader{images: make(map[string]TextureResource)})
+	engo.Files.Register(".svg", &imageLoader{images: make(map[string]TextureResource)})
 }
