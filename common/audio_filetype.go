@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"path/filepath"
+	"os"
 
 	"engo.io/engo"
 	"engo.io/engo/common/internal/decode/mp3"
@@ -29,7 +29,7 @@ func (a *audioLoader) Load(url string, data io.Reader) error {
 	audioBuffer := bytes.NewReader(audioBytes)
 
 	var player *Player
-	switch filepath.Ext(url) {
+	switch getExt(url) {
 	case ".wav":
 		d, err := wav.Decode(&readSeekCloserBuffer{audioBuffer}, SampleRate)
 		if err != nil {
@@ -119,4 +119,15 @@ func init() {
 	engo.Files.Register(".wav", &audioLoader{audios: make(map[string]*Player)})
 	engo.Files.Register(".mp3", &audioLoader{audios: make(map[string]*Player)})
 	engo.Files.Register(".ogg", &audioLoader{audios: make(map[string]*Player)})
+}
+
+// getExt returns the extension of the file(including extensions with `.` in them) from the given url.
+func getExt(path string) string {
+	ext := ""
+	for i := len(path) - 1; i >= 0 && !os.IsPathSeparator(path[i]); i-- {
+		if path[i] == '.' {
+			ext = path[i:]
+		}
+	}
+	return ext
 }
