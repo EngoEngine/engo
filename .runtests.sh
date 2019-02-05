@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 
 echo "Using GOPATH=$GOPATH"
-
-echo "Getting engo.io/engo using 'go get'"
-go get -t -v ./... || exit 1
+echo $PWD
 
 # These can fail without us minding it
 blacklist="engo.io/engo/demos/demoutils"
@@ -44,18 +42,18 @@ then
 elif [ "$TEST_TYPE" == "js_test" ]
 then
     echo "Getting and installing node.js"
-    wget https://raw.githubusercontent.com/creationix/nvm/v0.33.11/nvm.sh -O ~/.nvm/nvm.sh
+    wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
     source ~/.nvm/nvm.sh
-    nvm install 5
+    nvm install 10
     npm install -g source-map-support
-    echo "Setting up node.js for gopherjs testing"
-    cd $GOPATH/src/github.com/gopherjs/gopherjs/node-syscall/
-    npm install -g node-gyp
-    node-gyp rebuild
-    mkdir -p ~/.node_libraries/
-    cp build/Release/syscall.node ~/.node_libraries/syscall.node
+    # echo "Setting up node.js for gopherjs testing"
+    # cd $GOPATH/pkg/mod/github.com/gopherjs/gopherjs*/node-syscall
+    # npm install -g node-gyp
+    # node-gyp rebuild
+    # mkdir -p ~/.node_libraries/
+    # cp build/Release/syscall.node ~/.node_libraries/syscall.node
     echo "Testing engo using gopherjs test"
-    cd $GOPATH/src/engo.io/engo
+    cd $HOME/build/EngoEngine/engo
     gopherjs test -v --tags=jstesting --bench=. ./... || exit 1
 elif [ "$TEST_TYPE" == "js_build" ]
 then
