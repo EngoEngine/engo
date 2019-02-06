@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 echo "Using GOPATH=$GOPATH"
-echo $PWD
+echo "Getting engo.io/engo using 'go get'"
+go get -t -v ./... || exit 1
 
 # These can fail without us minding it
 blacklist="engo.io/engo/demos/demoutils"
@@ -46,15 +47,7 @@ then
     source ~/.nvm/nvm.sh
     nvm install 10
     npm install -g source-map-support
-    # echo "Setting up node.js for gopherjs testing"
-    # cd $GOPATH/pkg/mod/github.com/gopherjs/gopherjs*/node-syscall
-    # npm install -g node-gyp
-    # node-gyp rebuild
-    # mkdir -p ~/.node_libraries/
-    # cp build/Release/syscall.node ~/.node_libraries/syscall.node
-    echo "Testing engo using gopherjs test"
-    cd $HOME/build/EngoEngine/engo
-    gopherjs test -v --tags=jstesting --bench=. ./... || exit 1
+    GOOS=js GOARCH=wasm go test -v -exec="$(go env GOROOT)/misc/wasm/go_js_wasm_exec" --bench=. ./... || exit 1
 elif [ "$TEST_TYPE" == "js_build" ]
 then
     for dir in `pwd`/demos/*/
@@ -76,7 +69,7 @@ then
 
         # Creating the output directory, attempting to build and exit 1 if it failed
         mkdir -p "$outdir/gopherjs/"
-        gopherjs build -o "$outdir/gopherjs/${dir}" --tags demo ${dir} || exit 1
+        GOOS=js GOARCH=wasm go build -o "$outdir/gopherjs/${dir}.wasm" --tags demo ${dir} || exit 1
     done
 elif [ "$TEST_TYPE" == "android_test" ]
 then
