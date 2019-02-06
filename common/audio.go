@@ -2,7 +2,6 @@ package common
 
 import (
 	"log"
-	"runtime"
 
 	"engo.io/ecs"
 	"engo.io/engo"
@@ -52,27 +51,16 @@ func (a *AudioSystem) New(w *ecs.World) {
 	if err != nil {
 		log.Printf("audio error. Unable to create new OtoPlayer: %v \n\r", err)
 	}
-	a.audioCloser = make(chan struct{})
-	runtime.SetFinalizer(a.otoPlayer, func(p *oto.Player) {
-		if err := p.Close(); err != nil {
-			log.Printf("audio error. Unable to close OtoPlayer: %v \n\r", err)
-		}
-		close(a.audioCloser)
-	})
 	// run oto on a separate thread so it doesn't slow down updates
 	a.audioReadC = make(chan struct{}, 10)
 	go func() {
 		for {
-			select {
-			case <-a.audioReadC:
-				buf := make([]byte, a.bufsize)
-				a.read(buf)
+			<-a.audioReadC
+			buf := make([]byte, a.bufsize)
+			a.read(buf)
 
-				if _, err := a.otoPlayer.Write(buf); err != nil {
-					log.Printf("error copying to OtoPlayer: %v \r\n", err)
-				}
-			case <-a.audioCloser:
-				return
+			if _, err := a.otoPlayer.Write(buf); err != nil {
+				log.Printf("error copying to OtoPlayer: %v \r\n", err)
 			}
 		}
 	}()

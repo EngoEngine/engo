@@ -404,9 +404,8 @@ func (s *basicShader) multModel(m *engo.Matrix, v []float32) {
 }
 
 func (s *basicShader) SetCamera(c *CameraSystem) {
-	s.camera = c
-	s.cameraEnabled = c != nil
 	if s.cameraEnabled {
+		s.camera = c
 		s.viewMatrix.Identity().Translate(-s.camera.x, -s.camera.y).Rotate(s.camera.angle)
 	} else {
 		scaleX, scaleY := s.projectionMatrix.ScaleComponent()

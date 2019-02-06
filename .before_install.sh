@@ -8,17 +8,12 @@ if [ "$TEST_TYPE" == "js_test" ] || [ "$TEST_TYPE" == "js_build" ]
 then
     go get github.com/gopherjs/gopherjs
     go get github.com/gopherjs/gopherwasm/js
-    gopherjs get "honnef.co/go/js/dom"
-    gopherjs get "honnef.co/go/js/xhr"
 elif [ "$TEST_TYPE" == "android_test" ] || [ "$TEST_TYPE" == "android_build" ]
 then
     git clone https://github.com/golang/mobile.git $GOPATH/src/golang.org/x/mobile
     cd $GOPATH/src/golang.org/x/mobile/cmd/gomobile
     git reset --hard 598bfe4b20d39a660581f014b68e60c5ad425336
     go install
-    go get github.com/hajimehoshi/oto
-    cd $GOPATH/src/github.com/hajimehoshi/oto
-    git reset --hard v0.1.1
     cd ~
     gomobile init
     git clone https://github.com/Noofbiz/android-ndk.git $HOME/android-ndk-root
