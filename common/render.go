@@ -250,20 +250,20 @@ func (rs *RenderSystem) Add(basic *ecs.BasicEntity, render *RenderComponent, spa
 	render.ensureShader()
 
 	// This is to prevent users from using the wrong one
-	if r.shader == HUDShader {
-		switch r.Drawable.(type) {
+	if render.shader == HUDShader {
+		switch render.Drawable.(type) {
 		case Triangle:
-			r.shader = LegacyHUDShader
+			render.shader = LegacyHUDShader
 		case Circle:
-			r.shader = LegacyHUDShader
+			render.shader = LegacyHUDShader
 		case Rectangle:
-			r.shader = LegacyHUDShader
+			render.shader = LegacyHUDShader
 		case ComplexTriangles:
-			r.shader = LegacyHUDShader
+			render.shader = LegacyHUDShader
 		case Text:
-			r.shader = TextHUDShader
+			render.shader = TextHUDShader
 		default:
-			r.shader = HUDShader
+			render.shader = HUDShader
 		}
 	}
 
