@@ -1,5 +1,3 @@
-// +build !jstesting
-
 package engo
 
 import (
