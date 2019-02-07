@@ -94,6 +94,31 @@ func (r *RenderComponent) SetShader(s Shader) {
 	engo.Mailbox.Dispatch(&renderChangeMessage{})
 }
 
+func (r *RenderComponent) ensureShader() {
+	// Setting default shader
+	if r.shader == nil {
+		switch r.Drawable.(type) {
+		case Triangle:
+			r.shader = LegacyShader
+		case Circle:
+			r.shader = LegacyShader
+		case Rectangle:
+			r.shader = LegacyShader
+		case ComplexTriangles:
+			r.shader = LegacyShader
+		case Text:
+			r.shader = TextShader
+		default:
+			r.shader = DefaultShader
+		}
+	}
+}
+
+func (r *RenderComponent) Shader() Shader {
+	r.ensureShader()
+	return r.shader
+}
+
 // SetZIndex sets the order that the RenderComponent is drawn to the screen. Higher z-indices are drawn on top of
 // lower ones if they overlap.
 func (r *RenderComponent) SetZIndex(index float32) {
@@ -222,23 +247,7 @@ func (rs *RenderSystem) Add(basic *ecs.BasicEntity, render *RenderComponent, spa
 
 	rs.ids[basic.ID()] = struct{}{}
 
-	// Setting default shader
-	if render.shader == nil {
-		switch render.Drawable.(type) {
-		case Triangle:
-			render.shader = LegacyShader
-		case Circle:
-			render.shader = LegacyShader
-		case Rectangle:
-			render.shader = LegacyShader
-		case ComplexTriangles:
-			render.shader = LegacyShader
-		case Text:
-			render.shader = TextShader
-		default:
-			render.shader = DefaultShader
-		}
-	}
+	render.ensureShader()
 
 	// This is to prevent users from using the wrong one
 	if render.shader == HUDShader {
