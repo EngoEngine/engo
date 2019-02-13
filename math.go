@@ -528,9 +528,8 @@ func MultiplyMatrixVector(m *Matrix, v []float32) []float32 {
 
 // MultiplyMatrixVector multiplies the matrix m with the point and returns the result.
 func (p *Point) MultiplyMatrixVector(m *Matrix) *Point {
-	v := []float32{p.X, p.Y}
-	res := MultiplyMatrixVector(m, v)
-	p.X = res[0]
-	p.Y = res[1]
+	x := m.Val[m00]*p.X + m.Val[m01]*p.Y + m.Val[m02]
+	y := m.Val[m10]*p.X + m.Val[m11]*p.Y + m.Val[m12]
+	p.X, p.Y = x, y
 	return p
 }
