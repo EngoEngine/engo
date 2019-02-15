@@ -1,7 +1,7 @@
 module engo.io/engo
 
 require (
-	engo.io/ecs v1.0.1
+	engo.io/ecs v1.0.2
 	engo.io/gl v1.0.2
 	github.com/Noofbiz/glfwMojaveFix v0.0.1
 	github.com/Noofbiz/sdlMojaveFix v0.0.1
@@ -25,10 +25,10 @@ require (
 	github.com/veandco/go-sdl2 v0.3.0
 	github.com/vulkan-go/glfw v0.0.0-20180930191036-cac57eedc4a5
 	github.com/vulkan-go/vulkan v0.0.0-20181015060211-df48e8cc1538
-	golang.org/x/exp v0.0.0-20190125153040-c74c464bbbf2 // indirect
-	golang.org/x/image v0.0.0-20190118043309-183bebdce1b2
+	golang.org/x/exp v0.0.0-20190212162250-21964bba6549 // indirect
+	golang.org/x/image v0.0.0-20190209060608-ef4a1470e0dc
 	golang.org/x/mobile v0.0.0-20190127143845-a42111704963
-	golang.org/x/net v0.0.0-20190125091013-d26f9f9a57f3 // indirect
-	golang.org/x/sys v0.0.0-20190204203706-41f3e6584952 // indirect
+	golang.org/x/net v0.0.0-20190213061140-3a22650c66bd // indirect
+	golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a // indirect
 	golang.org/x/text v0.3.0 // indirect
 )
