@@ -70,6 +70,10 @@ func (ac *AnimationComponent) AddAnimations(actions []*Animation) {
 
 // Cell returns the drawable for the current frame.
 func (ac *AnimationComponent) Cell() Drawable {
+	if len(ac.CurrentAnimation.Frames) == 0 {
+		log.Println("No frame data for this animation. Selecting zeroth drawable. If this is incorrect, add an action to the animation.")
+		return ac.Drawables[0]
+	}
 	idx := ac.CurrentAnimation.Frames[ac.index]
 
 	return ac.Drawables[idx]
@@ -78,7 +82,7 @@ func (ac *AnimationComponent) Cell() Drawable {
 // NextFrame advances the current animation by one frame.
 func (ac *AnimationComponent) NextFrame() {
 	if len(ac.CurrentAnimation.Frames) == 0 {
-		log.Println("No data for this animation")
+		log.Println("No frame data for this animation")
 		return
 	}
 
