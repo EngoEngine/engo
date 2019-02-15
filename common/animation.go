@@ -96,7 +96,7 @@ func (ac *AnimationComponent) NextFrame() {
 
 // AnimationSystem tracks AnimationComponents, advancing their current animation.
 type AnimationSystem struct {
-	entities map[ecs.BasicEntity]animationEntity
+	entities map[uint64]animationEntity
 }
 
 type animationEntity struct {
@@ -107,9 +107,9 @@ type animationEntity struct {
 // Add starts tracking the given entity.
 func (a *AnimationSystem) Add(basic *ecs.BasicEntity, anim *AnimationComponent, render *RenderComponent) {
 	if a.entities == nil {
-		a.entities = make(map[ecs.BasicEntity]animationEntity)
+		a.entities = make(map[uint64]animationEntity)
 	}
-	a.entities[*basic] = animationEntity{anim, render}
+	a.entities[basic.ID()] = animationEntity{anim, render}
 }
 
 // AddByInterface Allows an Entity to be added directly using the Animtionable interface. which every entity containing the BasicEntity,AnimationComponent,and RenderComponent anonymously, automatically satisfies.
@@ -121,7 +121,7 @@ func (a *AnimationSystem) AddByInterface(i ecs.Identifier) {
 // Remove stops tracking the given entity.
 func (a *AnimationSystem) Remove(basic ecs.BasicEntity) {
 	if a.entities != nil {
-		delete(a.entities, basic)
+		delete(a.entities, basic.ID())
 	}
 }
 
