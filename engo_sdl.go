@@ -3,6 +3,7 @@
 package engo
 
 import (
+	"bytes"
 	"io"
 	"log"
 	"os"
@@ -202,6 +203,12 @@ func RunIteration() {
 					}
 
 					Mailbox.Dispatch(message)
+				}
+			case *sdl.TextInputEvent:
+				n := bytes.IndexByte(e.Text[:], 0)
+				s := string(e.Text[:n])
+				if len(s) == 1 {
+					Mailbox.Dispatch(TextMessage{[]rune(s)[0]})
 				}
 			}
 		}

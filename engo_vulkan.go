@@ -192,9 +192,7 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	})
 
 	Window.SetCharCallback(func(Window *glfw.Window, char rune) {
-		// TODO: what does this do, when can we use it?
-		// it's like KeyCallback, but for specific characters instead of keys...?
-		// responder.Type(char)
+		Mailbox.Dispatch(TextMessage{char})
 	})
 
 	Window.SetCloseCallback(func(Window *glfw.Window) {

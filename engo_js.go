@@ -98,6 +98,10 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		if k == KeyArrowUp || k == KeyArrowDown || k == KeyArrowLeft || k == KeyArrowRight || k == KeyTab || k == KeyBackspace || k == KeySpace {
 			event.Call("preventDefault")
 		}
+		char := event.Get("key").String()
+		if len(char) == 1 {
+			Mailbox.Dispatch(TextMessage{[]rune(char)[0]})
+		}
 	}))
 
 	canvas.Call("addEventListener", "keyup", js.NewEventCallback(0, func(event js.Value) {

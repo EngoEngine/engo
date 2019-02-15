@@ -126,3 +126,13 @@ type WindowResizeMessage struct {
 
 // Type returns the type of the current object "WindowResizeMessage"
 func (WindowResizeMessage) Type() string { return "WindowResizeMessage" }
+
+// TextMessage is a message that is dispatched whenever a character is typed on the
+// keyboard. This is not the same as a keypress, as it returns the rune of the
+// character typed by the user, which could be a combination of keypresses.
+type TextMessage struct {
+	Char rune
+}
+
+// Type returns the type of the message, "TextMessage"
+func (TextMessage) Type() string { return "TextMessage" }
