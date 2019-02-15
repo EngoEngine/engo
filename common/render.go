@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image/color"
 	"sort"
-	"unsafe"
 
 	"sync"
 
@@ -296,19 +295,6 @@ func (rs *RenderSystem) Remove(basic ecs.BasicEntity) {
 		rs.sortingNeeded = true
 	}
 	delete(rs.ids, basic.ID())
-}
-
-// Unsafe interface for instance comparison
-type iface struct {
-	Type, Data unsafe.Pointer
-}
-
-func compareShaders(a, b Shader) bool {
-	// comparing the instances using unsafe pointers seems to be a little faster (about 0.007 ns on a "slow" machine)
-	// so using this unsafe method to compare shader != prevShader gives a nice performance boost when using many entities.
-	aIface := *(*iface)(unsafe.Pointer(&a))
-	bIface := *(*iface)(unsafe.Pointer(&b))
-	return aIface.Data == bIface.Data
 }
 
 // Update draws the entities in the RenderSystem to the OpenGL Surface.
