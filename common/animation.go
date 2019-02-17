@@ -77,6 +77,10 @@ func (ac *AnimationComponent) Cell() Drawable {
 
 // NextFrame advances the current animation by one frame.
 func (ac *AnimationComponent) NextFrame() {
+	if ac.CurrentAnimation == nil {
+		log.Println("AnimationComponent.NextFrame() called with no CurrentAnimation set. Add an animation to the component.")
+		return
+	}
 	if len(ac.CurrentAnimation.Frames) == 0 {
 		log.Println("No data for this animation")
 		return
@@ -88,7 +92,7 @@ func (ac *AnimationComponent) NextFrame() {
 		ac.index = 0
 
 		if !ac.CurrentAnimation.Loop {
-			ac.CurrentAnimation = nil
+			ac.CurrentAnimation = ac.def
 			return
 		}
 	}
@@ -129,12 +133,8 @@ func (a *AnimationSystem) Remove(basic ecs.BasicEntity) {
 func (a *AnimationSystem) Update(dt float32) {
 	for _, e := range a.entities {
 		if e.AnimationComponent.CurrentAnimation == nil {
-			if e.AnimationComponent.def == nil {
-				return
-			}
-			e.AnimationComponent.SelectAnimationByAction(e.AnimationComponent.def)
+			return
 		}
-
 		e.AnimationComponent.change += dt
 		if e.AnimationComponent.change >= e.AnimationComponent.Rate {
 			e.RenderComponent.Drawable = e.AnimationComponent.Cell()
