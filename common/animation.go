@@ -130,7 +130,7 @@ func (a *AnimationSystem) Update(dt float32) {
 	for _, e := range a.entities {
 		if e.AnimationComponent.CurrentAnimation == nil {
 			if e.AnimationComponent.def == nil {
-				return
+				continue
 			}
 			e.AnimationComponent.SelectAnimationByAction(e.AnimationComponent.def)
 		}
