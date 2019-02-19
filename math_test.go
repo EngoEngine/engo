@@ -1484,3 +1484,106 @@ func TestMultiplyMatrixPoint(t *testing.T) {
 		}
 	}
 }
+
+func TestMultipleMatrixVector(t *testing.T) {
+	data := []struct {
+		matrix []float32
+		p, r   []float32
+	}{
+		{
+			matrix: []float32{
+				1, 2, 3,
+				4, 5, 6,
+				7, 8, 0,
+			},
+			p: []float32{
+				0,
+				0,
+			},
+			r: []float32{
+				7,
+				8,
+				0,
+			},
+		},
+		{
+			matrix: []float32{
+				1, 2, 3,
+				4, 5, 6,
+				7, 8, 0,
+			},
+			p: []float32{
+				5,
+				5,
+				0,
+			},
+			r: []float32{
+				25,
+				35,
+				45,
+			},
+		},
+		{
+			matrix: []float32{
+				1, 2, 3,
+				4, 5, 6,
+				7, 8, 0,
+			},
+			p: []float32{
+				-5,
+				-5,
+				0,
+			},
+			r: []float32{
+				-25,
+				-35,
+				-45,
+			},
+		},
+		{
+			matrix: []float32{
+				1, 2, 3,
+				4, 5, 6,
+				7, 8, 0,
+			},
+			p: []float32{
+				-5,
+				5,
+				0,
+			},
+			r: []float32{
+				15,
+				15,
+				15,
+			},
+		},
+		{
+			matrix: []float32{
+				1, 2, 3,
+				4, 5, 6,
+				7, 8, 0,
+			},
+			p: []float32{
+				5,
+				-5,
+				0,
+			},
+			r: []float32{
+				-15,
+				-15,
+				-15,
+			},
+		},
+	}
+	for _, d := range data {
+		mat1 := IdentityMatrix()
+		mat1.Set(d.matrix)
+		res := MultiplyMatrixVector(mat1, d.p)
+		for i := 0; i < 3; i++ {
+			if !FloatEqual(res[i], d.r[i]) {
+				t.Errorf("MultiplyMatrixVector did not return the correct value. \nMatrix %v\n With vector %v\nFor index %v\nWanted: %v\nGot: %v", mat1, d.p, i, res[i], d.r[i])
+				return
+			}
+		}
+	}
+}
