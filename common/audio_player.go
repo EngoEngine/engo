@@ -86,7 +86,8 @@ func newPlayer(src convert.ReadSeekCloser, url string) (*Player, error) {
 }
 
 // Close removes the player from the audio system's players, which are currently playing players.
-// it then finalizes and frees the data from the player.
+// it then finalizes and frees the data from the player. Do not use a player after it has been
+// closed
 func (p *Player) Close() error {
 	runtime.SetFinalizer(p, nil)
 	p.isPlaying = false
@@ -287,7 +288,7 @@ func (p *Player) GetVolume() float64 {
 // volume can only be set from 0 to 1
 func (p *Player) SetVolume(volume float64) {
 	// The condition must be true when volume is NaN.
-	if !(0 <= volume && volume <= 1) {
+	if volume < 0 || volume > 1 {
 		log.Println("Volume can only be set between zero and one. Volume was not set.")
 		return
 	}
@@ -303,7 +304,7 @@ var masterVolume float64
 // the other volumes to get the volume of each entity played.
 // Value must be between 0 and 1 or else it doesn't set.
 func SetMasterVolume(volume float64) {
-	if volume <= 0 || volume >= 1 {
+	if volume < 0 || volume > 1 {
 		log.Println("Master Volume can only be set between zero and one. Volume was not set.")
 		return
 	}
