@@ -107,6 +107,8 @@ func (r *RenderComponent) ensureShader() {
 			r.shader = LegacyShader
 		case Text:
 			r.shader = TextShader
+		case Blendmap:
+			r.shader = BlendmapShader
 		default:
 			r.shader = DefaultShader
 		}
