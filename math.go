@@ -33,6 +33,12 @@ type AABB struct {
 	Min, Max Point
 }
 
+// AABBer is an interface for everything that provides information about its axis aligned bounding box.
+type AABBer interface {
+	// AABB returns the axis aligned bounding box.
+	AABB() AABB
+}
+
 // A Container is a 2D closed shape which contains a set of points.
 type Container interface {
 	// Contains reports whether the container contains the given point.
