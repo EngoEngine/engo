@@ -67,17 +67,26 @@ const (
 	uniform sampler2D uf_RChannel;
 	uniform sampler2D uf_GChannel;
 	uniform sampler2D uf_BChannel;
+
+	vec4 getChan(sampler2D ch) 
+	{
+		vec2 sChan = textureSize(ch, 0);
+		vec2 sMap = textureSize(uf_BlendMap, 0);
+		float x = float(sMap.x) / float(sChan.x);
+		float y = float(sMap.y) / float(sChan.y);
+
+		return texture2D(ch, vec2(var_TexCoords.x * x, var_TexCoords.y * y));
+	}
 	
 	void main(void){
 		vec4 mapIdx = texture2D(uf_BlendMap,var_TexCoords);
 
-		vec4 fb = texture2D(uf_Fallback, var_TexCoords) * (1.0 - (mapIdx.r + mapIdx.g + mapIdx.b));
-		vec4 r = texture2D(uf_RChannel, var_TexCoords) * mapIdx.r;
-		vec4 g = texture2D(uf_GChannel, var_TexCoords) * mapIdx.g;
-		vec4 b = texture2D(uf_BChannel, var_TexCoords) * mapIdx.b;
+		vec4 fb = getChan(uf_Fallback) * (1.0 - (mapIdx.r + mapIdx.g + mapIdx.b));
+		vec4 r = getChan(uf_RChannel) * mapIdx.r;
+		vec4 g = getChan(uf_GChannel) * mapIdx.g;
+		vec4 b = getChan(uf_BChannel) * mapIdx.b;
 
 		gl_FragColor=var_Color*(fb+r+g+b);
-		
 	}`
 )
 
@@ -256,15 +265,23 @@ func (s *blendmapShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 
 		engo.Gl.ActiveTexture(engo.Gl.TEXTURE1)
 		engo.Gl.BindTexture(engo.Gl.TEXTURE_2D, bm.Fallback.Texture())
+		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_S, engo.Gl.REPEAT)
+		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_T, engo.Gl.REPEAT)
 
 		engo.Gl.ActiveTexture(engo.Gl.TEXTURE2)
 		engo.Gl.BindTexture(engo.Gl.TEXTURE_2D, bm.RChannel.Texture())
+		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_S, engo.Gl.REPEAT)
+		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_T, engo.Gl.REPEAT)
 
 		engo.Gl.ActiveTexture(engo.Gl.TEXTURE3)
 		engo.Gl.BindTexture(engo.Gl.TEXTURE_2D, bm.GChannel.Texture())
+		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_S, engo.Gl.REPEAT)
+		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_T, engo.Gl.REPEAT)
 
 		engo.Gl.ActiveTexture(engo.Gl.TEXTURE4)
 		engo.Gl.BindTexture(engo.Gl.TEXTURE_2D, bm.BChannel.Texture())
+		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_S, engo.Gl.REPEAT)
+		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_T, engo.Gl.REPEAT)
 
 		engo.Gl.ActiveTexture(engo.Gl.TEXTURE0)
 		s.lastTexture = ren.Drawable.Texture()
