@@ -68,23 +68,24 @@ const (
 	uniform sampler2D uf_GChannel;
 	uniform sampler2D uf_BChannel;
 
-	vec4 getChan(sampler2D ch) 
-	{
-		vec2 sChan = textureSize(ch, 0);
-		vec2 sMap = textureSize(uf_BlendMap, 0);
-		float x = float(sMap.x) / float(sChan.x);
-		float y = float(sMap.y) / float(sChan.y);
+	uniform vec2 uf_scaleFB;
+	uniform vec2 uf_scaleR;
+	uniform vec2 uf_scaleG;
+	uniform vec2 uf_scaleB;
 
-		return texture2D(ch, vec2(var_TexCoords.x * x, var_TexCoords.y * y));
+
+	vec4 getChan(sampler2D ch, vec2 scale) 
+	{
+		return texture2D(ch, vec2(var_TexCoords.x * scale.x, var_TexCoords.y * scale.y));
 	}
 	
 	void main(void){
 		vec4 mapIdx = texture2D(uf_BlendMap,var_TexCoords);
 
-		vec4 fb = getChan(uf_Fallback) * (1.0 - (mapIdx.r + mapIdx.g + mapIdx.b));
-		vec4 r = getChan(uf_RChannel) * mapIdx.r;
-		vec4 g = getChan(uf_GChannel) * mapIdx.g;
-		vec4 b = getChan(uf_BChannel) * mapIdx.b;
+		vec4 fb = getChan(uf_Fallback, uf_scaleFB) * (1.0 - (mapIdx.r + mapIdx.g + mapIdx.b));
+		vec4 r = getChan(uf_RChannel, uf_scaleR) * mapIdx.r;
+		vec4 g = getChan(uf_GChannel, uf_scaleG) * mapIdx.g;
+		vec4 b = getChan(uf_BChannel, uf_scaleB) * mapIdx.b;
 
 		gl_FragColor=var_Color*(fb+r+g+b);
 	}`
@@ -100,6 +101,7 @@ type blendmapShader struct {
 	vertices                     []float32
 	vertexBuffer                 *gl.Buffer
 	lastTexture                  *gl.Texture
+	lastTexturePack              *TexturePack
 	lastRepeating                TextureRepeating
 	lastMagFilter, lastMinFilter ZoomFilter
 
@@ -113,6 +115,11 @@ type blendmapShader struct {
 	uf_RChannel    *gl.UniformLocation
 	uf_GChannel    *gl.UniformLocation
 	uf_BChannel    *gl.UniformLocation
+
+	uf_scaleFB *gl.UniformLocation
+	uf_scaleR  *gl.UniformLocation
+	uf_scaleG  *gl.UniformLocation
+	uf_scaleB  *gl.UniformLocation
 
 	projectionMatrix *engo.Matrix
 	viewMatrix       *engo.Matrix
@@ -167,6 +174,11 @@ func (s *blendmapShader) Setup(w *ecs.World) error {
 	s.uf_RChannel = engo.Gl.GetUniformLocation(s.program, "uf_RChannel")
 	s.uf_GChannel = engo.Gl.GetUniformLocation(s.program, "uf_GChannel")
 	s.uf_BChannel = engo.Gl.GetUniformLocation(s.program, "uf_BChannel")
+
+	s.uf_scaleFB = engo.Gl.GetUniformLocation(s.program, "uf_scaleFB")
+	s.uf_scaleR = engo.Gl.GetUniformLocation(s.program, "uf_scaleR")
+	s.uf_scaleG = engo.Gl.GetUniformLocation(s.program, "uf_scaleG")
+	s.uf_scaleB = engo.Gl.GetUniformLocation(s.program, "uf_scaleB")
 
 	s.projectionMatrix = engo.IdentityMatrix()
 	s.viewMatrix = engo.IdentityMatrix()
@@ -248,42 +260,63 @@ func (s *blendmapShader) ShouldDraw(rc *RenderComponent, sc *SpaceComponent) boo
 		(c[0].Y > 1 && c[1].Y > 1 && c[2].Y > 1 && c[3].Y > 1)) // All points below of the "viewport"
 }
 
+func (s *blendmapShader) bindTexturePack(tp *TexturePack) {
+	engo.Gl.ActiveTexture(engo.Gl.TEXTURE1)
+	engo.Gl.BindTexture(engo.Gl.TEXTURE_2D, tp.Fallback.Texture())
+	engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_S, engo.Gl.REPEAT)
+	engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_T, engo.Gl.REPEAT)
+
+	engo.Gl.ActiveTexture(engo.Gl.TEXTURE2)
+	engo.Gl.BindTexture(engo.Gl.TEXTURE_2D, tp.RChannel.Texture())
+	engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_S, engo.Gl.REPEAT)
+	engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_T, engo.Gl.REPEAT)
+
+	engo.Gl.ActiveTexture(engo.Gl.TEXTURE3)
+	engo.Gl.BindTexture(engo.Gl.TEXTURE_2D, tp.GChannel.Texture())
+	engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_S, engo.Gl.REPEAT)
+	engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_T, engo.Gl.REPEAT)
+
+	engo.Gl.ActiveTexture(engo.Gl.TEXTURE4)
+	engo.Gl.BindTexture(engo.Gl.TEXTURE_2D, tp.BChannel.Texture())
+	engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_S, engo.Gl.REPEAT)
+	engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_T, engo.Gl.REPEAT)
+
+	// always go back to texture 0 since all other shaders might rely on it.
+	engo.Gl.ActiveTexture(engo.Gl.TEXTURE0)
+}
+
+func (s *blendmapShader) updateScale(bm Blendmap) {
+	engo.Gl.Uniform2f(s.uf_scaleFB, bm.Width()/bm.Fallback.Width(), bm.Height()/bm.Fallback.Height())
+	engo.Gl.Uniform2f(s.uf_scaleR, bm.Width()/bm.RChannel.Width(), bm.Height()/bm.RChannel.Height())
+	engo.Gl.Uniform2f(s.uf_scaleG, bm.Width()/bm.GChannel.Width(), bm.Height()/bm.GChannel.Height())
+	engo.Gl.Uniform2f(s.uf_scaleB, bm.Width()/bm.BChannel.Width(), bm.Height()/bm.BChannel.Height())
+}
+
 func (s *blendmapShader) Draw(ren *RenderComponent, space *SpaceComponent) {
+	bm, ok := ren.Drawable.(Blendmap)
+	if !ok {
+		panic("only blendmap drawables are supported by blendmap shader.")
+	}
+	if bm.TexturePack == nil || bm.TexturePack.Fallback == nil {
+		panic("No Textures.")
+	}
+
+	if s.lastTexturePack != bm.TexturePack {
+		s.flush()
+		s.bindTexturePack(bm.TexturePack)
+		if s.lastTexture == bm.Texture() {
+			// if its a different texture we will update the scale with the texture.
+			s.updateScale(bm)
+		}
+		s.lastTexturePack = bm.TexturePack
+	}
+
 	if s.lastTexture != ren.Drawable.Texture() {
 		s.flush()
 
-		bm, ok := ren.Drawable.(Blendmap)
-		if !ok {
-			panic("only blendmap drawables are supported by blendmap shader.")
-		}
-
-		if bm.TexturePack == nil || bm.TexturePack.Fallback == nil {
-			panic("No Textures.")
-		}
-
 		engo.Gl.BindTexture(engo.Gl.TEXTURE_2D, ren.Drawable.Texture())
+		s.updateScale(bm)
 
-		engo.Gl.ActiveTexture(engo.Gl.TEXTURE1)
-		engo.Gl.BindTexture(engo.Gl.TEXTURE_2D, bm.Fallback.Texture())
-		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_S, engo.Gl.REPEAT)
-		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_T, engo.Gl.REPEAT)
-
-		engo.Gl.ActiveTexture(engo.Gl.TEXTURE2)
-		engo.Gl.BindTexture(engo.Gl.TEXTURE_2D, bm.RChannel.Texture())
-		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_S, engo.Gl.REPEAT)
-		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_T, engo.Gl.REPEAT)
-
-		engo.Gl.ActiveTexture(engo.Gl.TEXTURE3)
-		engo.Gl.BindTexture(engo.Gl.TEXTURE_2D, bm.GChannel.Texture())
-		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_S, engo.Gl.REPEAT)
-		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_T, engo.Gl.REPEAT)
-
-		engo.Gl.ActiveTexture(engo.Gl.TEXTURE4)
-		engo.Gl.BindTexture(engo.Gl.TEXTURE_2D, bm.BChannel.Texture())
-		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_S, engo.Gl.REPEAT)
-		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_T, engo.Gl.REPEAT)
-
-		engo.Gl.ActiveTexture(engo.Gl.TEXTURE0)
 		s.lastTexture = ren.Drawable.Texture()
 	} else if s.idx == len(s.vertices) {
 		s.flush()
@@ -340,6 +373,7 @@ func (s *blendmapShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 func (s *blendmapShader) Post() {
 	s.flush()
 	s.lastTexture = nil
+	s.lastTexturePack = nil
 
 	// Cleanup
 	engo.Gl.DisableVertexAttribArray(s.inPosition)
