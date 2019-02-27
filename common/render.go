@@ -268,6 +268,14 @@ func (rs *RenderSystem) Add(basic *ecs.BasicEntity, render *RenderComponent, spa
 		}
 	}
 
+	// If the scale is zero, set it to one.
+	if render.Scale.X == 0 {
+		render.Scale.X = 1
+	}
+	if render.Scale.Y == 0 {
+		render.Scale.Y = 1
+	}
+
 	rs.entities = append(rs.entities, renderEntity{basic, render, space})
 	rs.sortingNeeded = true
 }
