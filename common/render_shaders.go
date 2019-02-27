@@ -1231,15 +1231,18 @@ var (
 	TextShader = &textShader{cameraEnabled: true}
 	// TextHUDShader is the shader used to draw fonts from a FontAtlas on the HUD.
 	TextHUDShader = &textShader{cameraEnabled: false}
-	shadersSet    bool
-	atlasCache    = make(map[Font]FontAtlas)
-	shaders       = []Shader{
+
+	BlendmapShader = &blendmapShader{cameraEnabled: true}
+	shadersSet     bool
+	atlasCache     = make(map[Font]FontAtlas)
+	shaders        = []Shader{
 		DefaultShader,
 		HUDShader,
 		LegacyShader,
 		LegacyHUDShader,
 		TextShader,
 		TextHUDShader,
+		BlendmapShader,
 	}
 )
 
