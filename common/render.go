@@ -160,19 +160,51 @@ func (r renderEntityList) Less(i, j int) bool {
 		// Sort by texture if shader is the same
 		// fmt.Println(p1, p2)
 		if p1 == p2 {
-			t1 := fmt.Sprintf("%p", r[i].RenderComponent.Drawable.Texture())
-			t2 := fmt.Sprintf("%p", r[j].RenderComponent.Drawable.Texture())
-			// Sort by magFilter if they're the same texture
-			if t1 == t2 {
+			switch r[i].RenderComponent.Drawable.(type) {
+			// Tiles can either be as a spriteSheet or as separate image
+			// if we sort them by texture and they're saved as separate images,
+			// sorting by texture messes up rendering.
+			case *Tile:
 				mag1 := r[i].RenderComponent.magFilter
 				mag2 := r[j].RenderComponent.magFilter
 				// Sort by minFilter if they're the same magFilter
 				if mag1 == mag2 {
-					return r[i].RenderComponent.minFilter < r[j].RenderComponent.minFilter
+					min1 := r[i].RenderComponent.minFilter
+					min2 := r[j].RenderComponent.minFilter
+					// Sort by position if they're the same minFilter
+					if min1 == min2 {
+						if r[i].Position.Y == r[j].Position.Y {
+							return r[i].Position.X < r[j].Position.X
+						}
+						return r[i].Position.Y < r[j].Position.Y
+					}
+					return min1 < min2
 				}
 				return mag1 < mag2
+			default:
+				t1 := fmt.Sprintf("%p", r[i].RenderComponent.Drawable.Texture())
+				t2 := fmt.Sprintf("%p", r[j].RenderComponent.Drawable.Texture())
+				// Sort by magFilter if they're the same texture
+				if t1 == t2 {
+					mag1 := r[i].RenderComponent.magFilter
+					mag2 := r[j].RenderComponent.magFilter
+					// Sort by minFilter if they're the same magFilter
+					if mag1 == mag2 {
+						min1 := r[i].RenderComponent.minFilter
+						min2 := r[j].RenderComponent.minFilter
+						// Sort by position if they're the same minFilter
+						if min1 == min2 {
+							if r[i].Position.Y == r[j].Position.Y {
+								return r[i].Position.X < r[j].Position.X
+							}
+							return r[i].Position.Y < r[j].Position.Y
+						}
+						return min1 < min2
+					}
+					return mag1 < mag2
+				}
+				return t1 < t2
 			}
-			return t1 < t2
 		}
 		return p1 < p2
 	}
