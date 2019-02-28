@@ -47,7 +47,7 @@ func (game *GameWorld) Setup(u engo.Updater) {
 	// Create render and space components for each of the tiles in all layers
 	tileComponents := make([]*Tile, 0)
 
-	for _, tileLayer := range levelData.TileLayers {
+	for idx, tileLayer := range levelData.TileLayers {
 		for _, tileElement := range tileLayer.Tiles {
 			if tileElement.Image != nil {
 
@@ -56,6 +56,7 @@ func (game *GameWorld) Setup(u engo.Updater) {
 					Drawable: tileElement,
 					Scale:    engo.Point{1, 1},
 				}
+				tile.RenderComponent.SetZIndex(float32(idx))
 				tile.SpaceComponent = common.SpaceComponent{
 					Position: tileElement.Point,
 					Width:    0,
