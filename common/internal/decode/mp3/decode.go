@@ -1,9 +1,3 @@
-// +build !js
-
-// Package mp3 provides MP3 decoder.
-//
-// On desktops and mobiles, a pure Go decoder is used.
-// On browsers, a native decoder on the browser is used.
 package mp3
 
 import (
