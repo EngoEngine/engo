@@ -179,14 +179,11 @@ func (m *MouseSystem) Update(dt float32) {
 	// Translate Mouse.X and Mouse.Y into "game coordinates"
 	switch engo.CurrentBackEnd {
 	case engo.BackEndGLFW, engo.BackEndSDL, engo.BackEndVulkan:
-		m.mouseX = engo.Input.Mouse.X*m.camera.Z() + (m.camera.X()-(engo.GameWidth()/2)*m.camera.Z())/engo.GetGlobalScale().X
-		m.mouseY = engo.Input.Mouse.Y*m.camera.Z() + (m.camera.Y()-(engo.GameHeight()/2)*m.camera.Z())/engo.GetGlobalScale().Y
-	case engo.BackEndMobile:
+		m.mouseX = ((engo.Input.Mouse.X * m.camera.Z() * engo.GameWidth() / engo.WindowWidth()) + (m.camera.X()-(engo.GameWidth()/2)*m.camera.Z())/engo.GetGlobalScale().X)
+		m.mouseY = ((engo.Input.Mouse.Y * m.camera.Z() * engo.GameHeight() / engo.WindowHeight()) + (m.camera.Y()-(engo.GameHeight()/2)*m.camera.Z())/engo.GetGlobalScale().Y)
+	case engo.BackEndMobile, engo.BackEndWeb:
 		m.mouseX = engo.Input.Mouse.X*m.camera.Z() + (m.camera.X()-(engo.GameWidth()/2)*m.camera.Z()+(engo.ResizeXOffset/2))/engo.GetGlobalScale().X
 		m.mouseY = engo.Input.Mouse.Y*m.camera.Z() + (m.camera.Y()-(engo.GameHeight()/2)*m.camera.Z()+(engo.ResizeYOffset/2))/engo.GetGlobalScale().Y
-	case engo.BackEndWeb:
-		m.mouseX = engo.Input.Mouse.X*m.camera.Z() + (m.camera.X()-(engo.GameWidth()/2)*m.camera.Z()+(engo.ResizeXOffset/2))/engo.GetGlobalScale().X
-		m.mouseY = engo.Input.Mouse.Y*m.camera.Z() + (m.camera.Y()-(engo.GameHeight()/2)*m.camera.Z()+(engo.ResizeYOffset/2))/engo.GetGlobalScale().X
 	}
 
 	// Rotate if needed
