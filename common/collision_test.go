@@ -79,7 +79,12 @@ func Test_GroupSolid(t *testing.T) {
 				Group: g,
 			},
 			//All objects in same position
-			SpaceComponent: &SpaceComponent{engo.Point{X: 10, Y: 10}, 50, 50, 0},
+			SpaceComponent: &SpaceComponent{
+				Position: engo.Point{X: 10, Y: 10},
+				Width:    50,
+				Height:   50,
+				Rotation: 0,
+			},
 		}
 	}
 	ents := []collisionEntity{

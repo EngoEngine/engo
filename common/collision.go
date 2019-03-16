@@ -8,12 +8,39 @@ import (
 	"engo.io/engo/math"
 )
 
+// Shape is a shape used for a SpaceComponent's hitboxes. It is composed of
+// Lines that make up the polygon's shape or an ellipse which makes up an ellpitical
+// shape.
+type Shape struct {
+	Ellipse Ellipse
+	Lines   []engo.Line
+}
+
+// Ellipse represnets an ellpitical shape.
+// Cx and Cy are the x and y coordinates of the center of the ellipse.
+// Rx and Ry are the x and y radii of the ellipse.
+type Ellipse struct {
+	Cx, Cy float32
+	Rx, Ry float32
+}
+
 // SpaceComponent keeps track of the position, size, and rotation of entities.
 type SpaceComponent struct {
 	Position engo.Point
 	Width    float32
 	Height   float32
 	Rotation float32 // angle in degrees for the rotation to apply clockwise.
+
+	hitboxes []Shape
+}
+
+// AddShape adds a shape to the SpaceComponent for use as a hitbox. A SpaceComponent
+// can have any number of shapes attached to it. The shapes are made up of a
+// []engo.Line, with each line defining a face of the shape. The coordinates are
+// such that (0,0) is the upper left corner of the SpaceComponent. If no shapes
+// are added, the SpaceComponent is treated as an AABB.
+func (sc *SpaceComponent) AddShape(shape Shape) {
+	sc.hitboxes = append(sc.hitboxes, shape)
 }
 
 // SetCenter positions the space component according to its center instead of its
@@ -110,22 +137,72 @@ func (sc SpaceComponent) Corners() (points [4]engo.Point) {
 	return
 }
 
-// Contains indicates whether or not the given point is within the rectangular plane as defined by this `SpaceComponent`.
+// Contains indicates whether or not the given point is within the shape defined by this `SpaceComponent`.
 // If it's on the border, it is considered "not within".
+// If there is no shape defined, then this uses a rectangular area defined by the
+// Width/Height of the SpaceComponent instead.
 func (sc SpaceComponent) Contains(p engo.Point) bool {
-	points := sc.Corners()
-
-	halfArea := (sc.Width * sc.Height) / 2
-
-	for i := 0; i < 4; i++ {
-		for j := i + 1; j < 4; j++ {
-			if t := triangleArea(points[i], points[j], p); t > halfArea || engo.FloatEqual(t, halfArea) {
-				return false
+	if len(sc.hitboxes) == 0 {
+		points := sc.Corners()
+		halfArea := (sc.Width * sc.Height) / 2
+		for i := 0; i < 4; i++ {
+			for j := i + 1; j < 4; j++ {
+				if t := triangleArea(points[i], points[j], p); t > halfArea || engo.FloatEqual(t, halfArea) {
+					return false
+				}
 			}
 		}
+		return true
 	}
-
-	return true
+	// test line from the point to an arbitrary point far away
+	// hopefully this is big enough
+	// TODO: Make it editable?
+	testline := engo.Line{
+		P1: p,
+		P2: engo.Point{
+			X: 1E10,
+			Y: 1E10,
+		},
+	}
+	sin, cos := math.Sincos(sc.Rotation * math.Pi / 180)
+	// test point for ellipse testing. It is rotated and translated such that the
+	// axis is that of the unrotated / translated AABB
+	testpoint := engo.Point{
+		X: (p.X-sc.Position.X)*cos + (p.Y-sc.Position.Y)*sin,
+		Y: (p.Y-sc.Position.Y)*cos - (p.X-sc.Position.X)*sin,
+	}
+	i := 0
+	for _, hb := range sc.hitboxes {
+		if len(hb.Lines) == 0 {
+			if testpoint.X < hb.Ellipse.Cx+hb.Ellipse.Rx && testpoint.X > hb.Ellipse.Cx-hb.Ellipse.Rx {
+				s := math.Sqrt((1 - ((testpoint.X-hb.Ellipse.Cx)*(testpoint.X-hb.Ellipse.Cx))/((hb.Ellipse.Rx)*(hb.Ellipse.Rx))) * (hb.Ellipse.Ry) * (hb.Ellipse.Ry))
+				if testpoint.Y < hb.Ellipse.Cy+s && testpoint.Y > hb.Ellipse.Cy-s {
+					return true
+				}
+			}
+			continue
+		}
+		for _, line := range hb.Lines {
+			l := engo.Line{
+				P1: engo.Point{
+					X: sc.Position.X + line.P1.X*cos - line.P1.Y*sin,
+					Y: sc.Position.Y + line.P1.Y*cos + line.P1.X*sin,
+				},
+				P2: engo.Point{
+					X: sc.Position.X + line.P2.X*cos - line.P2.Y*sin,
+					Y: sc.Position.Y + line.P2.Y*cos + line.P2.X*sin,
+				},
+			}
+			if _, ok := engo.LineIntersection(l, testline); ok {
+				i++
+			}
+		}
+		if i%2 == 1 {
+			return true
+		}
+		i = 0
+	}
+	return false
 }
 
 // triangleArea computes the area of the triangle given by the three points
