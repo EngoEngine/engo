@@ -3,7 +3,7 @@ package common
 import (
 	"log"
 
-	"engo.io/ecs"
+	"github.com/EngoEngine/ecs"
 )
 
 // Animation represents properties of an animation.

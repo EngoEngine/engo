@@ -1,11 +1,11 @@
-package engo // import "engo.io/engo"
+package engo
 
 import (
 	"fmt"
 	"log"
 	"sync"
 
-	"engo.io/ecs"
+	"github.com/EngoEngine/ecs"
 )
 
 // BackEnd represents the back end used for the window management / GL Surface

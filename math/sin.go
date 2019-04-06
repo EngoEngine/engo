@@ -1,7 +1,7 @@
 package math
 
 import (
-	engomath "github.com/engoengine/math"
+	engomath "github.com/EngoEngine/math"
 )
 
 // Cos returns the cosine of the radian argument x.

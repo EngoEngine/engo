@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"engo.io/ecs"
+	"github.com/EngoEngine/ecs"
 )
 
 type testScene struct{}

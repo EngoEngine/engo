@@ -1,7 +1,7 @@
 package math
 
 import (
-	engomath "github.com/engoengine/math"
+	engomath "github.com/EngoEngine/math"
 )
 
 // Acosh returns the inverse hyperbolic cosine of x.

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"engo.io/engo"
+	"github.com/EngoEngine/engo"
 )
 
 // TMXResource contains a level created from a Tile Map XML

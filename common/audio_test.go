@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"engo.io/ecs"
-	"engo.io/engo"
+	"github.com/EngoEngine/ecs"
+	"github.com/EngoEngine/engo"
 )
 
 type testAudio struct {

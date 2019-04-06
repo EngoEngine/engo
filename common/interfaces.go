@@ -30,7 +30,7 @@
 
 package common
 
-import "engo.io/ecs"
+import "github.com/EngoEngine/ecs"
 
 // Getters
 

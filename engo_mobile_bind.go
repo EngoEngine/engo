@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"time"
 
-	"engo.io/gl"
+	"github.com/EngoEngine/gl"
 	mgl "golang.org/x/mobile/gl"
 )
 

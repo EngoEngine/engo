@@ -1,7 +1,7 @@
 package math
 
 import (
-	engomath "github.com/engoengine/math"
+	engomath "github.com/EngoEngine/math"
 )
 
 // Inf returns positive infinity if sign >= 0, negative infinity if sign < 0.

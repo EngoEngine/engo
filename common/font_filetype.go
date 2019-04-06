@@ -5,7 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	"engo.io/engo"
+	"github.com/EngoEngine/engo"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
 )

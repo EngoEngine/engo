@@ -3,8 +3,8 @@ package common
 import (
 	"testing"
 
-	"engo.io/ecs"
-	"engo.io/engo"
+	"github.com/EngoEngine/ecs"
+	"github.com/EngoEngine/engo"
 )
 
 type EveryComp struct {

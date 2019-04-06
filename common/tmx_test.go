@@ -10,7 +10,7 @@ import (
 	"testing"
 	"text/template"
 
-	"engo.io/engo"
+	"github.com/EngoEngine/engo"
 )
 
 var testTMXtmpl = `

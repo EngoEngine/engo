@@ -5,9 +5,9 @@ import (
 	"sync"
 	"time"
 
-	"engo.io/ecs"
-	"engo.io/engo"
-	"engo.io/engo/math"
+	"github.com/EngoEngine/ecs"
+	"github.com/EngoEngine/engo"
+	"github.com/EngoEngine/engo/math"
 	"github.com/go-gl/mathgl/mgl32"
 )
 
@@ -389,7 +389,7 @@ func (c *EntityScroller) Update(dt float32) {
 	if c.SpaceComponent == nil {
 		return
 	}
-	
+
 	width, height := c.SpaceComponent.Width, c.SpaceComponent.Height
 
 	pos := c.SpaceComponent.Position

@@ -6,8 +6,8 @@ import (
 	"log"
 	"strconv"
 
-	"engo.io/ecs"
-	"engo.io/engo"
+	"github.com/EngoEngine/ecs"
+	"github.com/EngoEngine/engo"
 
 	"golang.org/x/image/font/gofont/gomonobold"
 )
