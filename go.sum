@@ -1,7 +1,9 @@
-engo.io/ecs v1.0.2 h1:6D27qZuZuUpK7Lcj/4GFL2Jx62J8n59wWjuYrX4kufE=
-engo.io/ecs v1.0.2/go.mod h1:G1vhQACcRIkUEqsKuaSyUBa6+cHYstEPUVtZGyZODkk=
-engo.io/gl v1.0.3 h1:+OnEyO5CA+tOEE9/EtEDQja8l45daoFvermgBsvMGTA=
-engo.io/gl v1.0.3/go.mod h1:JPaSAX8E9NlC9jVs7bmJTciSCQHxk144g6N1Rw6xRXE=
+github.com/EngoEngine/ecs v1.0.3 h1:pmXSiY18aQ51PQpKX3i1c6Izg/05qO/2HEbjvapr27o=
+github.com/EngoEngine/ecs v1.0.3/go.mod h1:B/+b8S8xOPXaI05sFRBQ94nWHFxerBuSUPa4EXDNodg=
+github.com/EngoEngine/gl v1.0.4 h1:OqTvLISNMowaupq62YYa877NpToNffavfO+h1wYNu9E=
+github.com/EngoEngine/gl v1.0.4/go.mod h1:dnyz++urxtBU2x5U5NzvOsVzDCDrwAOSsjXi6/9YH6o=
+github.com/EngoEngine/math v1.0.4 h1:ejDfSg48ynB9T6btiu9EHjZmpQgW/zHf3IeC7SqXXv8=
+github.com/EngoEngine/math v1.0.4/go.mod h1:d8SnfwiaImse0lB3JuR91B2CShZmMxaTWaWZ/ZxDxAU=
 github.com/Noofbiz/glfwMojaveFix v0.0.1 h1:uTzyAd0H+l9IMd4s5VimBLedYrAUsNEoqadPSdPOUjs=
 github.com/Noofbiz/glfwMojaveFix v0.0.1/go.mod h1:NTfOoelFiHp38iK4KTLXG5gOcgSqrwi6n24cgHSwZDc=
 github.com/Noofbiz/sdlMojaveFix v0.0.1 h1:Vz4HSG7QQ5gkOWeZsSUFCGJAvMoRUHloTwF80lF0a9M=
@@ -11,8 +13,6 @@ github.com/Noofbiz/tmx v0.2.0/go.mod h1:gL6mQUTp1Vi9pq/gmCgyotzJ35lOQF2C2NKJrQtl
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/engoengine/math v1.0.3 h1:aJS5cRpYZqkwSt6qMumHsR/o4xWw8XWJkdzDMfnE8Z0=
-github.com/engoengine/math v1.0.3/go.mod h1:5Q4qHspv3qnO83hv09Z2dNHaVqo+7YI5WWDIEXY/HE4=
 github.com/go-gl/gl v0.0.0-20181026044259-55b76b7df9d2 h1:78Hza2KHn2PX1jdydQnffaU2A/xM0g3Nx1xmMdep9Gk=
 github.com/go-gl/gl v0.0.0-20181026044259-55b76b7df9d2/go.mod h1:482civXOzJJCPzJ4ZOX/pwvXBWSnzD4OKMdH4ClKGbk=
 github.com/go-gl/glfw v0.0.0-20190217072633-93b30450e032 h1:WUDJN6o1AZlnNR0UZ11zsr0Quh44CV7svcg6VzEsySc=
