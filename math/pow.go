@@ -1,7 +1,7 @@
 package math
 
 import (
-	engomath "github.com/engoengine/math"
+	engomath "github.com/EngoEngine/math"
 )
 
 // Pow returns x**y, the base-x exponential of y.

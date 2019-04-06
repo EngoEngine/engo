@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 
 echo "Using GOPATH=$GOPATH"
-echo "Getting engo.io/engo using 'go get'"
+echo "Getting github.com/EngoEngine/engo using 'go get'"
 go get -t -v ./... || exit 1
 
 # These can fail without us minding it
-blacklist="engo.io/engo/demos/demoutils"
+blacklist="github.com/EngoEngine/engo/demos/demoutils"
 
 if [ "$TEST_TYPE" == "linux_test" ]
 then
-    echo "Testing engo.io/engo using coveralls"
+    echo "Testing github.com/EngoEngine/engo using coveralls"
     $HOME/gopath/bin/goveralls -service=travis-ci
 
-    echo "Testing and benchmarking engo.io/engo"
+    echo "Testing and benchmarking github.com/EngoEngine/engo"
     go test -v -bench=. ./... || exit 1
 
     echo "Checking for unnecessary conversions using unconvert"
-    unconvert -v engo.io/engo
+    unconvert -v github.com/EngoEngine/engo
 elif [ "$TEST_TYPE" == "linux_build" ]
 then
     for dir in `pwd`/demos/*/
@@ -73,7 +73,7 @@ then
     done
 elif [ "$TEST_TYPE" == "android_test" ]
 then
-    echo "Skipping tests for engo.io/engo using 'gomobile' (no tools exist yet)"
+    echo "Skipping tests for github.com/EngoEngine/engo using 'gomobile' (no tools exist yet)"
 elif [ "$TEST_TYPE" == "android_build" ]
 then
     for dir in `pwd`/demos/*/

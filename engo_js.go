@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"engo.io/gl"
+	"github.com/EngoEngine/gl"
 	"github.com/gopherjs/gopherwasm/js"
 )
 

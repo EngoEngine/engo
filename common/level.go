@@ -1,9 +1,9 @@
 package common
 
 import (
-	"engo.io/engo"
-	"engo.io/engo/math"
-	"engo.io/gl"
+	"github.com/EngoEngine/engo"
+	"github.com/EngoEngine/engo/math"
+	"github.com/EngoEngine/gl"
 )
 
 const (

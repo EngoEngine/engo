@@ -8,8 +8,8 @@ import (
 	"io/ioutil"
 	"log"
 
-	"engo.io/engo"
-	"engo.io/gl"
+	"github.com/EngoEngine/engo"
+	"github.com/EngoEngine/gl"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"

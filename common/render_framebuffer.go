@@ -1,8 +1,8 @@
 package common
 
 import (
-	"engo.io/engo"
-	"engo.io/gl"
+	"github.com/EngoEngine/engo"
+	"github.com/EngoEngine/gl"
 )
 
 type RenderBuffer struct {

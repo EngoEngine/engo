@@ -6,10 +6,10 @@ import (
 	"image/color"
 	"time"
 
-	"engo.io/ecs"
-	"engo.io/engo"
-	"engo.io/engo/common"
-	"engo.io/engo/demos/demoutils"
+	"github.com/EngoEngine/ecs"
+	"github.com/EngoEngine/engo"
+	"github.com/EngoEngine/engo/common"
+	"github.com/EngoEngine/engo/demos/demoutils"
 )
 
 type DefaultScene struct{}

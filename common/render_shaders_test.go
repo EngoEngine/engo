@@ -5,8 +5,8 @@ package common
 import (
 	"testing"
 
-	"engo.io/ecs"
-	"engo.io/engo"
+	"github.com/EngoEngine/ecs"
+	"github.com/EngoEngine/engo"
 	"github.com/stretchr/testify/assert"
 )
 

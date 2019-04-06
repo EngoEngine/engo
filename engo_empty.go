@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"engo.io/gl"
+	"github.com/EngoEngine/gl"
 )
 
 var (

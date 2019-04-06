@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"engo.io/gl"
+	"github.com/EngoEngine/gl"
 	"golang.org/x/mobile/app"
 	"golang.org/x/mobile/asset"
 	"golang.org/x/mobile/event/lifecycle"

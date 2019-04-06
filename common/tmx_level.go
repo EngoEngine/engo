@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"engo.io/engo"
+	"github.com/EngoEngine/engo"
 	"github.com/Noofbiz/tmx"
 )
 

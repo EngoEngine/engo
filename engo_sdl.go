@@ -12,7 +12,7 @@ import (
 	"syscall"
 	"time"
 
-	"engo.io/gl"
+	"github.com/EngoEngine/gl"
 
 	"github.com/Noofbiz/sdlMojaveFix"
 	"github.com/veandco/go-sdl2/sdl"

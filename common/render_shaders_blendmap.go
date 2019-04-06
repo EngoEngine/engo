@@ -3,9 +3,9 @@ package common
 import (
 	"fmt"
 
-	"engo.io/ecs"
-	"engo.io/engo"
-	"engo.io/gl"
+	"github.com/EngoEngine/ecs"
+	"github.com/EngoEngine/engo"
+	"github.com/EngoEngine/gl"
 )
 
 type TexturePack struct {
@@ -58,10 +58,10 @@ const (
 	#else
 	#define LOWP
 	#endif
-	
+
 	varying vec4 var_Color;
 	varying vec2 var_TexCoords;
-	
+
 	uniform sampler2D uf_BlendMap;
 	uniform sampler2D uf_Fallback;
 	uniform sampler2D uf_RChannel;
@@ -74,11 +74,11 @@ const (
 	uniform vec2 uf_scaleB;
 
 
-	vec4 getChan(sampler2D ch, vec2 scale) 
+	vec4 getChan(sampler2D ch, vec2 scale)
 	{
 		return texture2D(ch, vec2(var_TexCoords.x * scale.x, var_TexCoords.y * scale.y));
 	}
-	
+
 	void main(void){
 		vec4 mapIdx = texture2D(uf_BlendMap,var_TexCoords);
 

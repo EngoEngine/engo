@@ -1,7 +1,7 @@
 package span
 
 import (
-	engospan "github.com/engoengine/math/span"
+	engospan "github.com/EngoEngine/math/span"
 )
 
 // Span represents an interval.
