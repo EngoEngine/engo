@@ -1,13 +1,13 @@
-module engo.io/engo
+module github.com/EngoEngine/engo
 
 require (
-	engo.io/ecs v1.0.2
-	engo.io/gl v1.0.3
+	github.com/EngoEngine/ecs v1.0.3
+	github.com/EngoEngine/gl v1.0.4
+	github.com/EngoEngine/math v1.0.4
 	github.com/Noofbiz/glfwMojaveFix v0.0.1
 	github.com/Noofbiz/sdlMojaveFix v0.0.1
 	github.com/Noofbiz/tmx v0.2.0
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/engoengine/math v1.0.3
 	github.com/go-gl/gl v0.0.0-20181026044259-55b76b7df9d2 // indirect
 	github.com/go-gl/glfw v0.0.0-20190217072633-93b30450e032
 	github.com/go-gl/mathgl v0.0.0-20180804195959-cdf14b6b8f8a
