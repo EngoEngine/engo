@@ -33,7 +33,7 @@ func (s *Stream) Close() error {
 	if s.resampling != nil {
 		return s.resampling.Close()
 	}
-	return s.orig.Close()
+	return nil
 }
 
 // Length returns the size of decoded stream in bytes.
@@ -60,11 +60,12 @@ func Decode(src convert.ReadSeekCloser, sr int) (*Stream, error) {
 		return nil, err
 	}
 	var r *convert.Resampling
-	if d.SampleRate() != sr {
-		r = convert.NewResampling(d, d.Length(), d.SampleRate(), sr)
-	}
-	return &Stream{
+	stream := &Stream{
 		orig:       d,
 		resampling: r,
-	}, nil
+	}
+	if d.SampleRate() != sr {
+		stream.resampling = convert.NewResampling(stream, stream.orig.Length(), stream.orig.SampleRate(), sr)
+	}
+	return stream, nil
 }
