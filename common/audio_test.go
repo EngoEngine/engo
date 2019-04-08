@@ -68,7 +68,7 @@ func TestAudioSystemIntegrationNormalUse(t *testing.T) {
 		NoRun:        true,
 		AssetsRoot:   "testdata",
 	}, &s)
-	p := s.audioSystem.otoPlayer.(*stepPlayer)
+	p := otoPlayer.(*stepPlayer)
 
 	s.w.Update(1)
 	exp := []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
