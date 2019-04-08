@@ -109,8 +109,11 @@ type basicShader struct {
 
 	projectionMatrix *engo.Matrix
 	viewMatrix       *engo.Matrix
+	projViewMatrix   *engo.Matrix
 	modelMatrix      *engo.Matrix
 	cullingMatrix    *engo.Matrix
+
+	projViewChange bool
 
 	camera        *CameraSystem
 	cameraEnabled bool
@@ -157,6 +160,7 @@ func (s *basicShader) Setup(w *ecs.World) error {
 
 	s.projectionMatrix = engo.IdentityMatrix()
 	s.viewMatrix = engo.IdentityMatrix()
+	s.projViewMatrix = engo.IdentityMatrix()
 	s.modelMatrix = engo.IdentityMatrix()
 	s.cullingMatrix = engo.IdentityMatrix()
 
@@ -177,8 +181,11 @@ func (s *basicShader) Pre() {
 	// We do the multiplication on the CPU instead of sending each matrix to the shader and letting the GPU do the multiplication,
 	// because it's likely faster to do the multiplication client side and send the result over the shader bus than to send two separate
 	// buffers over the bus and then do the multiplication on the GPU.
-	pv := s.projectionMatrix.Multiply(s.viewMatrix)
-	engo.Gl.UniformMatrix3fv(s.matrixProjView, false, pv.Val[:])
+	if s.projViewChange {
+		s.projViewMatrix = s.projectionMatrix.Multiply(s.viewMatrix)
+		s.projViewChange = false
+	}
+	engo.Gl.UniformMatrix3fv(s.matrixProjView, false, s.projViewMatrix.Val[:])
 
 	// Since we are batching client side, we only have one VBO, so we can just bind it now and use it for the entire frame.
 	engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, s.vertexBuffer)
@@ -188,6 +195,7 @@ func (s *basicShader) Pre() {
 }
 
 func (s *basicShader) PrepareCulling() {
+	s.projViewChange = true
 	// (Re)initialize the projection matrix.
 	s.projectionMatrix.Identity()
 	if engo.ScaleOnResize() {
@@ -404,6 +412,7 @@ func (s *basicShader) multModel(m *engo.Matrix, v []float32) {
 }
 
 func (s *basicShader) SetCamera(c *CameraSystem) {
+	s.projViewChange = true
 	if s.cameraEnabled {
 		s.camera = c
 		s.viewMatrix.Identity().Translate(-s.camera.x, -s.camera.y).Rotate(s.camera.angle)
