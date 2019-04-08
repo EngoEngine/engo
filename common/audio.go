@@ -18,6 +18,9 @@ const (
 	mask = ^(channelNum*bytesPerSample - 1)
 )
 
+var otoPlayer io.WriteCloser
+var closeCh, loopClosedCh chan struct{}
+
 // stepPlayer is used for headless mode audio, such as for tests
 // you can control exactly how many steps it takes which allows for verification
 // of the PCM data written to it. This replaces oto.Player when run in headless
@@ -66,10 +69,9 @@ type audioEntity struct {
 type AudioSystem struct {
 	entities []audioEntity
 
-	otoPlayer                   io.WriteCloser
-	bufsize                     int
-	closeCh, pauseCh, restartCh chan struct{}
-	playerCh                    chan []*Player
+	bufsize            int
+	pauseCh, restartCh chan struct{}
+	playerCh           chan []*Player
 }
 
 // New is called when the AudioSystem is added to the world.
@@ -82,27 +84,33 @@ func (a *AudioSystem) New(w *ecs.World) {
 		a.bufsize = 8192
 	}
 	if engo.Headless() {
-		a.otoPlayer = &stepPlayer{
+		otoPlayer = &stepPlayer{
 			stepStart: make(chan []byte),
 			stepDone:  make(chan struct{}, 1),
 		}
 	} else {
-		a.otoPlayer, err = oto.NewPlayer(SampleRate, channelNum, bytesPerSample, a.bufsize)
-		if err != nil {
-			log.Printf("audio error. Unable to create new OtoPlayer: %v \n\r", err)
+		if otoPlayer == nil {
+			otoPlayer, err = oto.NewPlayer(SampleRate, channelNum, bytesPerSample, a.bufsize)
+			if err != nil {
+				log.Printf("audio error. Unable to create new OtoPlayer: %v \n\r", err)
+			}
+		} else {
+			closeCh <- struct{}{}
+			<-loopClosedCh
 		}
 	}
 	// run oto on a separate thread so it doesn't slow down updates
-	a.closeCh = make(chan struct{}, 1)
+	closeCh = make(chan struct{}, 1)
 	a.pauseCh = make(chan struct{}, 1)
 	a.restartCh = make(chan struct{}, 1)
 	a.playerCh = make(chan []*Player, 25)
+	loopClosedCh = make(chan struct{})
 	go func() {
 		players := make([]*Player, 0)
 	loop:
 		for {
 			select {
-			case <-a.closeCh:
+			case <-closeCh:
 				break loop
 			case <-a.pauseCh:
 				<-a.restartCh
@@ -111,11 +119,12 @@ func (a *AudioSystem) New(w *ecs.World) {
 				buf := make([]byte, 2048)
 				a.read(buf, players)
 
-				if _, err := a.otoPlayer.Write(buf); err != nil {
+				if _, err := otoPlayer.Write(buf); err != nil {
 					log.Printf("error copying to OtoPlayer: %v \r\n", err)
 				}
 			}
 		}
+		loopClosedCh <- struct{}{}
 	}()
 	masterVolume = 1
 }
@@ -210,11 +219,13 @@ func (a *AudioSystem) read(b []byte, players []*Player) (int, error) {
 
 // Close closes the AudioSystem's loop. After this is called the AudioSystem
 // can no longer play audio.
+// Blocks until loop actually closes.
 func (a *AudioSystem) Close() {
-	if len(a.closeCh) > 0 { //so it doesn't block
+	if len(closeCh) > 0 { //so it doesn't block
 		return
 	}
-	a.closeCh <- struct{}{}
+	closeCh <- struct{}{}
+	<-loopClosedCh
 }
 
 // Pause pauses the AudioSystem's loop. Call Restart to continue playing audio.
