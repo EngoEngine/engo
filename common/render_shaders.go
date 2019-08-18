@@ -164,6 +164,9 @@ func (s *basicShader) Setup(w *ecs.World) error {
 	s.modelMatrix = engo.IdentityMatrix()
 	s.cullingMatrix = engo.IdentityMatrix()
 
+	s.lastMagFilter = 255
+	s.lastMinFilter = 255
+
 	return nil
 }
 
