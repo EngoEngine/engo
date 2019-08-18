@@ -164,8 +164,7 @@ func (s *basicShader) Setup(w *ecs.World) error {
 	s.modelMatrix = engo.IdentityMatrix()
 	s.cullingMatrix = engo.IdentityMatrix()
 
-	s.lastMagFilter = 255
-	s.lastMinFilter = 255
+	s.setTexture(nil)
 
 	return nil
 }
@@ -245,7 +244,7 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 	if s.lastTexture != ren.Drawable.Texture() {
 		s.flush()
 		engo.Gl.BindTexture(engo.Gl.TEXTURE_2D, ren.Drawable.Texture())
-		s.lastTexture = ren.Drawable.Texture()
+		s.setTexture(ren.Drawable.Texture())
 	} else if s.idx == len(s.vertices) {
 		s.flush()
 	}
@@ -267,6 +266,8 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		}
 		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_S, val)
 		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_WRAP_T, val)
+
+		s.lastRepeating = ren.Repeat
 	}
 
 	if s.lastMagFilter != ren.magFilter {
@@ -279,6 +280,8 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 			val = engo.Gl.LINEAR
 		}
 		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_MAG_FILTER, val)
+
+		s.lastMagFilter = ren.magFilter
 	}
 
 	if s.lastMinFilter != ren.minFilter {
@@ -291,6 +294,8 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 			val = engo.Gl.LINEAR
 		}
 		engo.Gl.TexParameteri(engo.Gl.TEXTURE_2D, engo.Gl.TEXTURE_MIN_FILTER, val)
+
+		s.lastMinFilter = ren.minFilter
 	}
 
 	// Update the vertex buffer data.
@@ -300,7 +305,7 @@ func (s *basicShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 
 func (s *basicShader) Post() {
 	s.flush()
-	s.lastTexture = nil
+	s.setTexture(nil)
 
 	// Cleanup
 	engo.Gl.DisableVertexAttribArray(s.inPosition)
@@ -312,6 +317,14 @@ func (s *basicShader) Post() {
 	engo.Gl.BindBuffer(engo.Gl.ELEMENT_ARRAY_BUFFER, nil)
 
 	engo.Gl.Disable(engo.Gl.BLEND)
+}
+
+// setTexture resets all last* values from basicShader to a new default value (255)
+func (s *basicShader) setTexture(texture *gl.Texture) {
+	s.lastTexture = texture
+	s.lastMinFilter = 255
+	s.lastMagFilter = 255
+	s.lastRepeating = 255
 }
 
 func (s *basicShader) flush() {
