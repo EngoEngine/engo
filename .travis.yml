@@ -9,7 +9,7 @@ branches:
 language: go
 go_import_path: github.com/EngoEngine/engo
 go:
-- "1.11"
+- "1.13"
 services:
 - xvfb
 before_install: ./.before_install.sh
