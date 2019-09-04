@@ -10,12 +10,13 @@ language: go
 go_import_path: github.com/EngoEngine/engo
 go:
 - "1.11"
+services:
+- xvfb
 before_install: ./.before_install.sh
 install:
 -
 before_script:
 - export DISPLAY=:99.0
-- sh -e /etc/init.d/xvfb start
 - sleep 3
 script: ./.runtests.sh
 matrix:
