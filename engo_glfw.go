@@ -72,9 +72,6 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		}
 	}
 
-	gameWidth = float32(width)
-	gameHeight = float32(height)
-
 	if fullscreen {
 		width = mode.Width
 		height = mode.Height
@@ -82,6 +79,9 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	} else {
 		monitor = nil
 	}
+
+	gameWidth = float32(width)
+	gameHeight = float32(height)
 
 	if opts.HeadlessMode {
 		glfw.WindowHint(glfw.Visible, glfw.False)
