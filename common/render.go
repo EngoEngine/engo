@@ -80,11 +80,13 @@ type RenderComponent struct {
 	// BufferContent contains the buffer data
 	// Avoid using it unless your are writing a custom shader
 	BufferContent []float32
+	// ZIndex defines the order which the content is drawn to the screen. Higher z-indices are drawn on top of
+	// lower ones if men overlap.
+	ZIndex float32
 
 	magFilter, minFilter ZoomFilter
 
 	shader Shader
-	zIndex float32
 }
 
 // SetShader sets the shader used by the RenderComponent.
@@ -123,7 +125,7 @@ func (r *RenderComponent) Shader() Shader {
 // SetZIndex sets the order that the RenderComponent is drawn to the screen. Higher z-indices are drawn on top of
 // lower ones if they overlap.
 func (r *RenderComponent) SetZIndex(index float32) {
-	r.zIndex = index
+	r.ZIndex = index
 	engo.Mailbox.Dispatch(&renderChangeMessage{})
 }
 
@@ -153,7 +155,7 @@ func (r renderEntityList) Len() int {
 
 func (r renderEntityList) Less(i, j int) bool {
 	// Sort by shader-pointer if they have the same zIndex
-	if r[i].RenderComponent.zIndex == r[j].RenderComponent.zIndex {
+	if r[i].RenderComponent.ZIndex == r[j].RenderComponent.ZIndex {
 		// // TODO: optimize this for performance
 		p1 := fmt.Sprintf("%p", r[i].RenderComponent.shader)
 		p2 := fmt.Sprintf("%p", r[j].RenderComponent.shader)
@@ -209,7 +211,7 @@ func (r renderEntityList) Less(i, j int) bool {
 		return p1 < p2
 	}
 
-	return r[i].RenderComponent.zIndex < r[j].RenderComponent.zIndex
+	return r[i].RenderComponent.ZIndex < r[j].RenderComponent.ZIndex
 }
 
 func (r renderEntityList) Swap(i, j int) {
