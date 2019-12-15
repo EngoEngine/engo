@@ -5,7 +5,6 @@ import (
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/gl"
 	"image/color"
-	"reflect"
 	"sort"
 	"sync"
 	"unsafe"
@@ -160,8 +159,8 @@ func (r renderEntityList) Less(i, j int) bool {
 		return r[i].RenderComponent.zIndex < r[j].RenderComponent.zIndex
 	}
 
-	// // TODO: optimize this for performance
-	p1, p2 := reflect.ValueOf(r[i].RenderComponent.shader).Pointer(), reflect.ValueOf(r[j].RenderComponent.shader).Pointer()
+	// TODO: optimize this for performance (is it enough? maybe "cache" shader uintptr (i.e: r.shaderPtr)?)
+	p1, p2 := (*[2]uintptr)(unsafe.Pointer(&r[i].RenderComponent.shader))[1], (*[2]uintptr)(unsafe.Pointer(&r[j].RenderComponent.shader))[1]
 	if p1 != p2 {
 		return p1 < p2
 	}
