@@ -5,6 +5,7 @@ import (
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/gl"
 	"image/color"
+	"reflect"
 	"sort"
 	"sync"
 	"unsafe"
@@ -159,8 +160,8 @@ func (r renderEntityList) Less(i, j int) bool {
 		return r[i].RenderComponent.zIndex < r[j].RenderComponent.zIndex
 	}
 
-	// TODO: optimize this for performance
-	p1, p2 := uintptr((*emptyInterface)(unsafe.Pointer(&r[i].RenderComponent.shader)).word), uintptr((*emptyInterface)(unsafe.Pointer(&r[j].RenderComponent.shader)).word)
+	// // TODO: optimize this for performance
+	p1, p2 := reflect.ValueOf(r[i].RenderComponent.shader).Pointer(), reflect.ValueOf(r[j].RenderComponent.shader).Pointer()
 	if p1 != p2 {
 		return p1 < p2
 	}
@@ -199,10 +200,6 @@ func (r renderEntityList) Less(i, j int) bool {
 
 func (r renderEntityList) Swap(i, j int) {
 	r[i], r[j] = r[j], r[i]
-}
-
-type emptyInterface struct {
-	word unsafe.Pointer
 }
 
 // RenderSystem is the system that draws entities on the OpenGL surface. It requires
