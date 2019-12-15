@@ -1,15 +1,13 @@
 package common
 
 import (
-	"fmt"
-	"image/color"
-	"sort"
-
-	"sync"
-
 	"github.com/EngoEngine/ecs"
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/gl"
+	"image/color"
+	"sort"
+	"sync"
+	"unsafe"
 )
 
 const (
@@ -80,6 +78,10 @@ type RenderComponent struct {
 	// BufferContent contains the buffer data
 	// Avoid using it unless your are writing a custom shader
 	BufferContent []float32
+	// StartZIndex defines the initial Z-Index. Z-Index defines the order which the content is drawn to the
+	// screen. Higher z-indices are drawn on top of lower ones. Beware that you must use `SetZIndex` function to change
+	// the Z-Index.
+	StartZIndex float32
 
 	magFilter, minFilter ZoomFilter
 
@@ -153,63 +155,45 @@ func (r renderEntityList) Len() int {
 
 func (r renderEntityList) Less(i, j int) bool {
 	// Sort by shader-pointer if they have the same zIndex
-	if r[i].RenderComponent.zIndex == r[j].RenderComponent.zIndex {
-		// // TODO: optimize this for performance
-		p1 := fmt.Sprintf("%p", r[i].RenderComponent.shader)
-		p2 := fmt.Sprintf("%p", r[j].RenderComponent.shader)
-		// Sort by texture if shader is the same
-		// fmt.Println(p1, p2)
-		if p1 == p2 {
-			switch r[i].RenderComponent.Drawable.(type) {
-			// Tiles can either be as a spriteSheet or as separate image
-			// if we sort them by texture and they're saved as separate images,
-			// sorting by texture messes up rendering.
-			case *Tile:
-				mag1 := r[i].RenderComponent.magFilter
-				mag2 := r[j].RenderComponent.magFilter
-				// Sort by minFilter if they're the same magFilter
-				if mag1 == mag2 {
-					min1 := r[i].RenderComponent.minFilter
-					min2 := r[j].RenderComponent.minFilter
-					// Sort by position if they're the same minFilter
-					if min1 == min2 {
-						if r[i].Position.Y == r[j].Position.Y {
-							return r[i].Position.X < r[j].Position.X
-						}
-						return r[i].Position.Y < r[j].Position.Y
-					}
-					return min1 < min2
-				}
-				return mag1 < mag2
-			default:
-				t1 := fmt.Sprintf("%p", r[i].RenderComponent.Drawable.Texture())
-				t2 := fmt.Sprintf("%p", r[j].RenderComponent.Drawable.Texture())
-				// Sort by magFilter if they're the same texture
-				if t1 == t2 {
-					mag1 := r[i].RenderComponent.magFilter
-					mag2 := r[j].RenderComponent.magFilter
-					// Sort by minFilter if they're the same magFilter
-					if mag1 == mag2 {
-						min1 := r[i].RenderComponent.minFilter
-						min2 := r[j].RenderComponent.minFilter
-						// Sort by position if they're the same minFilter
-						if min1 == min2 {
-							if r[i].Position.Y == r[j].Position.Y {
-								return r[i].Position.X < r[j].Position.X
-							}
-							return r[i].Position.Y < r[j].Position.Y
-						}
-						return min1 < min2
-					}
-					return mag1 < mag2
-				}
-				return t1 < t2
-			}
-		}
+	if r[i].RenderComponent.zIndex != r[j].RenderComponent.zIndex {
+		return r[i].RenderComponent.zIndex < r[j].RenderComponent.zIndex
+	}
+
+	p1, p2 := getShadersPtr(r[i].RenderComponent.shader, r[j].RenderComponent.shader)
+	if p1 != p2 {
 		return p1 < p2
 	}
 
-	return r[i].RenderComponent.zIndex < r[j].RenderComponent.zIndex
+	switch r[i].RenderComponent.Drawable.(type) {
+	// Tiles can either be as a spriteSheet or as separate image
+	// if we sort them by texture and they're saved as separate images,
+	// sorting by texture messes up rendering.
+	case *Tile:
+		// NO-OP
+	default:
+		t1, t2 := uintptr(unsafe.Pointer(r[i].RenderComponent.Drawable.Texture())), uintptr(unsafe.Pointer(r[j].RenderComponent.Drawable.Texture()))
+		if t1 != t2 {
+			return t1 < t2
+		}
+	}
+
+	// Sort by minFilter if they're the same magFilter
+	mag1, mag2 := r[i].RenderComponent.magFilter, r[j].RenderComponent.magFilter
+	if mag1 != mag2 {
+		return mag1 < mag2
+	}
+
+	// Sort by position if they're the same minFilter
+	min1, min2 := r[i].RenderComponent.minFilter, r[j].RenderComponent.minFilter
+	if min1 != min2 {
+		return min1 < min2
+	}
+
+	if r[i].Position.Y != r[j].Position.Y {
+		return r[i].Position.Y < r[j].Position.Y
+	}
+
+	return r[i].Position.X < r[j].Position.X
 }
 
 func (r renderEntityList) Swap(i, j int) {
@@ -306,6 +290,10 @@ func (rs *RenderSystem) Add(basic *ecs.BasicEntity, render *RenderComponent, spa
 	}
 	if render.Scale.Y == 0 {
 		render.Scale.Y = 1
+	}
+
+	if render.zIndex == 0 {
+		render.zIndex = render.StartZIndex
 	}
 
 	rs.entities = append(rs.entities, renderEntity{basic, render, space})
