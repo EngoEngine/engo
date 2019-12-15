@@ -292,7 +292,9 @@ func (rs *RenderSystem) Add(basic *ecs.BasicEntity, render *RenderComponent, spa
 		render.Scale.Y = 1
 	}
 
-	render.zIndex = render.StartZIndex
+	if render.zIndex == 0 {
+		render.zIndex = render.StartZIndex
+	}
 
 	rs.entities = append(rs.entities, renderEntity{basic, render, space})
 	rs.sortingNeeded = true
