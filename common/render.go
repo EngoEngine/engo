@@ -159,8 +159,7 @@ func (r renderEntityList) Less(i, j int) bool {
 		return r[i].RenderComponent.zIndex < r[j].RenderComponent.zIndex
 	}
 
-	// TODO: optimize this for performance (is it enough? maybe "cache" shader uintptr (i.e: r.shaderPtr)?)
-	p1, p2 := (*[2]uintptr)(unsafe.Pointer(&r[i].RenderComponent.shader))[1], (*[2]uintptr)(unsafe.Pointer(&r[j].RenderComponent.shader))[1]
+	p1, p2 := getShadersPtr(r[i].RenderComponent.shader, r[j].RenderComponent.shader)
 	if p1 != p2 {
 		return p1 < p2
 	}
