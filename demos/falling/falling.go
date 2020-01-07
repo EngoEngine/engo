@@ -1,5 +1,3 @@
-//+build demo
-
 package main
 
 import (
@@ -120,6 +118,10 @@ func (c *ControlSystem) Update(dt float32) {
 
 		vert := engo.Input.Axis(engo.DefaultVerticalAxis)
 		e.SpaceComponent.Position.Y += speed * vert.Value()
+
+		if e.SpaceComponent.Position.Y > engo.GameHeight() {
+			c.Remove(*e.BasicEntity)
+		}
 	}
 }
 
@@ -183,6 +185,7 @@ type fallingEntity struct {
 
 type FallingSystem struct {
 	entities []fallingEntity
+	world *ecs.World
 }
 
 func (f *FallingSystem) Add(basic *ecs.BasicEntity, space *common.SpaceComponent) {
@@ -190,15 +193,18 @@ func (f *FallingSystem) Add(basic *ecs.BasicEntity, space *common.SpaceComponent
 }
 
 func (f *FallingSystem) Remove(basic ecs.BasicEntity) {
-	delete := -1
-	for index, e := range f.entities {
+	for i, e := range f.entities {
 		if e.BasicEntity.ID() == basic.ID() {
-			delete = index
+			for _, system := range f.world.Systems() {
+				switch system.(type) {
+				case *FallingSystem:
+				default:
+					system.Remove(*e.BasicEntity)
+				}
+			}
+			f.entities = append(f.entities[:i], f.entities[i+1:]...)
 			break
 		}
-	}
-	if delete >= 0 {
-		f.entities = append(f.entities[:delete], f.entities[delete+1:]...)
 	}
 }
 
@@ -207,7 +213,15 @@ func (f *FallingSystem) Update(dt float32) {
 
 	for _, e := range f.entities {
 		e.SpaceComponent.Position.Y += speed
+
+		if e.SpaceComponent.Position.Y > engo.GameHeight() {
+			f.Remove(*e.BasicEntity)
+		}
 	}
+}
+
+func (f *FallingSystem) New(world *ecs.World) {
+	f.world = world
 }
 
 type DeathSystem struct{}
