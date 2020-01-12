@@ -384,3 +384,12 @@ func IsAndroidChrome() bool {
 	}
 	return true
 }
+
+// GetKeyName returns the string returned from the given Key. So you can write "Press W to move forward"
+// and get a W for QWERTY and Z for AZERTY
+func GetKeyName(k Key) string {
+	if 96 <= k && k <= 105 {
+		k = k - 48
+	}
+	return js.Global().Get("String").Call("fromCharCode", k).String()
+}
