@@ -63,6 +63,7 @@ type CameraSystem struct {
 }
 
 // New initializes the CameraSystem.
+// New initializes the CameraSystem.
 func (cam *CameraSystem) New(w *ecs.World) {
 	num := 0
 	for _, sys := range w.Systems() {
@@ -102,27 +103,9 @@ func (cam *CameraSystem) New(w *ecs.World) {
 		}
 
 		if cammsg.Incremental {
-			switch cammsg.Axis {
-			case XAxis:
-				cam.moveX(cammsg.Value)
-			case YAxis:
-				cam.moveY(cammsg.Value)
-			case ZAxis:
-				cam.zoom(cammsg.Value)
-			case Angle:
-				cam.rotate(cammsg.Value)
-			}
+			cam.moveAxis(cammsg.Axis, cammsg.Value)
 		} else {
-			switch cammsg.Axis {
-			case XAxis:
-				cam.moveToX(cammsg.Value)
-			case YAxis:
-				cam.moveToY(cammsg.Value)
-			case ZAxis:
-				cam.zoomTo(cammsg.Value)
-			case Angle:
-				cam.rotateTo(cammsg.Value)
-			}
+			cam.moveAxisTo(cammsg.Axis, cammsg.Value)
 		}
 	})
 
@@ -138,6 +121,7 @@ func (cam *CameraSystem) Update(dt float32) {
 	for axis, longTask := range cam.longTasks {
 		if !longTask.Incremental {
 			longTask.Incremental = true
+			longTask.value = longTask.Value
 
 			switch axis {
 			case XAxis:
@@ -156,20 +140,16 @@ func (cam *CameraSystem) Update(dt float32) {
 			longTask.speed = longTask.Value / float32(longTask.Duration.Seconds())
 		}
 
-		dAxis := longTask.speed * dt
-		switch axis {
-		case XAxis:
-			cam.moveX(dAxis)
-		case YAxis:
-			cam.moveY(dAxis)
-		case ZAxis:
-			cam.zoom(dAxis)
-		case Angle:
-			cam.rotate(dAxis)
-		}
+		cam.moveAxis(axis, longTask.speed*dt)
 
-		longTask.Duration -= time.Duration(dt)
+		longTask.Duration -= time.Duration(dt * float32(time.Second))
 		if longTask.Duration <= time.Duration(0) {
+
+			// it enforces that the last call will have the exactly position set by `Value` when `incremental = false`.
+			if longTask.value != 0 {
+				cam.moveAxisTo(axis, longTask.value)
+			}
+
 			delete(cam.longTasks, axis)
 		}
 	}
@@ -218,6 +198,32 @@ func (cam *CameraSystem) Z() float32 {
 // Angle returns the angle (in degrees) at which the Camera is rotated.
 func (cam *CameraSystem) Angle() float32 {
 	return cam.angle
+}
+
+func (cam *CameraSystem) moveAxis(axis CameraAxis, value float32) {
+	switch axis {
+	case XAxis:
+		cam.moveX(value)
+	case YAxis:
+		cam.moveY(value)
+	case ZAxis:
+		cam.zoom(value)
+	case Angle:
+		cam.rotate(value)
+	}
+}
+
+func (cam *CameraSystem) moveAxisTo(axis CameraAxis, value float32) {
+	switch axis {
+	case XAxis:
+		cam.moveToX(value)
+	case YAxis:
+		cam.moveToY(value)
+	case ZAxis:
+		cam.zoomTo(value)
+	case Angle:
+		cam.rotateTo(value)
+	}
 }
 
 func (cam *CameraSystem) moveX(value float32) {
@@ -287,11 +293,11 @@ const (
 // CameraMessage is a message that can be sent to the Camera (and other Systemers),
 // to indicate movement.
 type CameraMessage struct {
-	Axis        CameraAxis
-	Value       float32
-	Incremental bool
-	Duration    time.Duration
-	speed       float32
+	Axis         CameraAxis
+	Value        float32
+	Incremental  bool
+	Duration     time.Duration
+	value, speed float32
 }
 
 // Type implements the engo.Message interface.
