@@ -212,3 +212,10 @@ func openFile(url string) (io.ReadCloser, error) {
 func IsAndroidChrome() bool {
 	return false
 }
+
+// GetKeyName returns the string returned from the given Key. So you can write "Press W to move forward"
+// and get a W for QWERTY and Z for AZERTY
+// Always returns the empty string on mobile since keyboard access is rare and takes a lot of effort
+func GetKeyName(k Key) string {
+	return ""
+}
