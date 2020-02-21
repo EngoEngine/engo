@@ -26,6 +26,7 @@ github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1 h1:QbL/5oDUmRBzO9/Z7Seo
 github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1/go.mod h1:vR7hzQXu2zJy9AVAgeJqvqgH9Q5CA+iKCZ2gyEVpxRU=
 github.com/go-gl/glfw v0.0.0-20200221102942-eb749776b5d7 h1:uyLPeqcUL3PEnrv7h5Z+eCoKgx+rIWlgP1SWLwb5J00=
 github.com/go-gl/glfw v0.0.0-20200221102942-eb749776b5d7/go.mod h1:vR7hzQXu2zJy9AVAgeJqvqgH9Q5CA+iKCZ2gyEVpxRU=
+github.com/go-gl/glfw/v3.3/glfw v0.0.0-20191125211704-12ad95a8df72 h1:b+9H1GAsx5RsjvDFLoS5zkNBzIQMuVKUYQDmxU3N5XE=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20191125211704-12ad95a8df72/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-gl/mathgl v0.0.0-20180804195959-cdf14b6b8f8a h1:2n5w2v3knlspzjJWyQPC0j88Mwvq0SZV0Jdws34GJwc=
 github.com/go-gl/mathgl v0.0.0-20180804195959-cdf14b6b8f8a/go.mod h1:dvrdneKbyWbK2skTda0nM4B9zSlS2GZSnjX7itr/skQ=
