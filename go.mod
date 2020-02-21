@@ -9,25 +9,30 @@ require (
 	github.com/Noofbiz/tmx v0.2.0
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7 // indirect
-	github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1
-	github.com/go-gl/mathgl v0.0.0-20180804195959-cdf14b6b8f8a
+	github.com/go-gl/glfw v0.0.0-20200221102942-eb749776b5d7
+	github.com/go-gl/mathgl v0.0.0-20190713194549-592312d8590a
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
-	github.com/gopherjs/gopherjs v0.0.0-20190812055157-5d271430af9f // indirect
+	github.com/gopherjs/gopherjs v0.0.0-20200217142428-fce0ec30dd00 // indirect
 	github.com/gopherjs/gopherwasm v1.1.0
-	github.com/hajimehoshi/go-mp3 v0.1.1
-	github.com/hajimehoshi/oto v0.3.0
-	github.com/jfreymuth/oggvorbis v1.0.0
-	github.com/jfreymuth/vorbis v1.0.0 // indirect
-	github.com/srwiley/oksvg v0.0.0-20190105194046-ccbc7673cdf3
-	github.com/srwiley/rasterx v0.0.0-20181219215540-696f7edb7a7e
-	github.com/stretchr/testify v1.3.0
-	github.com/veandco/go-sdl2 v0.3.3
+	github.com/hajimehoshi/go-mp3 v0.2.1
+	github.com/hajimehoshi/oto v0.5.4
+	github.com/jfreymuth/oggvorbis v1.0.1
+	github.com/kr/pretty v0.2.0 // indirect
+	github.com/kr/text v0.2.0 // indirect
+	github.com/srwiley/oksvg v0.0.0-20190829233741-58e08c8fe40e
+	github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
+	github.com/stretchr/testify v1.5.1
+	github.com/veandco/go-sdl2 v0.4.1
 	github.com/vulkan-go/glfw v0.0.0-20190520160600-32f33e359ff2
-	github.com/vulkan-go/vulkan v0.0.0-20181015060211-df48e8cc1538
-	golang.org/x/exp v0.0.0-20190829153037-c13cbed26979 // indirect
-	golang.org/x/image v0.0.0-20190902063713-cb417be4ba39
-	golang.org/x/mobile v0.0.0-20190830201351-c6da95954960
-	golang.org/x/sys v0.0.0-20190904005037-43c01164e931 // indirect
+	github.com/vulkan-go/vulkan v0.0.0-20200123094538-aa511c71e200
+	golang.org/x/exp v0.0.0-20200221183520-7c80518d1cc7 // indirect
+	golang.org/x/image v0.0.0-20200119044424-58c23975cae1
+	golang.org/x/mobile v0.0.0-20200212152714-2b26a4705d24
+	golang.org/x/net v0.0.0-20200219183655-46282727080f // indirect
+	golang.org/x/sys v0.0.0-20200219091948-cb0a6d8edb6c // indirect
+	golang.org/x/text v0.3.2 // indirect
+	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
+	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
 
 go 1.13
