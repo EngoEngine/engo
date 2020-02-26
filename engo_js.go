@@ -12,10 +12,10 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"syscall/js"
 	"time"
 
 	"github.com/EngoEngine/gl"
-	"github.com/gopherjs/gopherwasm/js"
 )
 
 var (
@@ -68,13 +68,15 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	ResizeXOffset = gameWidth - CanvasWidth()
 	ResizeYOffset = gameHeight - CanvasHeight()
 
-	canvas.Call("addEventListener", "keypress", js.NewEventCallback(0, func(event js.Value) {
+	canvas.Call("addEventListener", "keypress", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		// TODO: Not sure what to do here, come back
 		//ke := ev.(*dom.KeyboardEvent)
 		//responser.Type(rune(keyStates[Key(ke.KeyCode)]))
+		return nil
 	}))
 
-	canvas.Call("addEventListener", "keydown", js.NewEventCallback(0, func(event js.Value) {
+	canvas.Call("addEventListener", "keydown", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		event := args[0]
 		ke := event.Get("code") // TODO: preventdefault if it's a special key so it doesn't scroll when you press it!
 		if ke.Type() == js.TypeUndefined {
 			kc := event.Get("keyCode").Int()
@@ -87,7 +89,7 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 			if k == KeyArrowUp || k == KeyArrowDown || k == KeyArrowLeft || k == KeyArrowRight || k == KeyTab || k == KeyBackspace || k == KeySpace {
 				event.Call("preventDefault")
 			}
-			return
+			return nil
 		}
 		k := jsStrToKey[ke.String()]
 		go func(i int) {
@@ -102,9 +104,11 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		if len(char) == 1 {
 			Mailbox.Dispatch(TextMessage{[]rune(char)[0]})
 		}
+		return nil
 	}))
 
-	canvas.Call("addEventListener", "keyup", js.NewEventCallback(0, func(event js.Value) {
+	canvas.Call("addEventListener", "keyup", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		event := args[0]
 		ke := event.Get("code")
 		if ke.Type() == js.TypeUndefined {
 			kc := event.Get("keyCode").Int()
@@ -117,7 +121,7 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 			if k == KeyArrowUp || k == KeyArrowDown || k == KeyArrowLeft || k == KeyArrowRight || k == KeyTab || k == KeyBackspace || k == KeySpace {
 				event.Call("preventDefault")
 			}
-			return
+			return nil
 		}
 		k := jsStrToKey[ke.String()]
 		go func(i int) {
@@ -128,26 +132,33 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		if k == KeyArrowUp || k == KeyArrowDown || k == KeyArrowLeft || k == KeyArrowRight || k == KeyTab || k == KeyBackspace || k == KeySpace {
 			event.Call("preventDefault")
 		}
+		return nil
 	}))
 
-	canvas.Call("addEventListener", "mousemove", js.NewEventCallback(0, func(event js.Value) {
+	canvas.Call("addEventListener", "mousemove", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		event := args[0]
 		mmX, mmY := event.Get("clientX").Int(), event.Get("clientY").Int()
 		Input.Mouse.X = float32(mmX) / opts.GlobalScale.X
 		Input.Mouse.Y = float32(mmY) / opts.GlobalScale.Y
+		return nil
 	}))
 
-	canvas.Call("addEventListener", "mousedown", js.NewEventCallback(0, func(event js.Value) {
+	canvas.Call("addEventListener", "mousedown", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		event := args[0]
 		mmX, mmY := event.Get("clientX").Int(), event.Get("clientY").Int()
 		Input.Mouse.X = float32(mmX) / opts.GlobalScale.X
 		Input.Mouse.Y = float32(mmY) / opts.GlobalScale.Y
 		Input.Mouse.Action = Press
+		return nil
 	}))
 
-	canvas.Call("addEventListener", "mouseup", js.NewEventCallback(0, func(event js.Value) {
+	canvas.Call("addEventListener", "mouseup", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		event := args[0]
 		mmX, mmY := event.Get("clientX").Int(), event.Get("clientY").Int()
 		Input.Mouse.X = float32(mmX) / opts.GlobalScale.X
 		Input.Mouse.Y = float32(mmY) / opts.GlobalScale.Y
 		Input.Mouse.Action = Release
+		return nil
 	}))
 }
 
@@ -214,19 +225,22 @@ func rafPolyfill() {
 
 	lastTime := 0.0
 	if window.Get("requestAnimationFrame").Type() == js.TypeUndefined {
-		window.Set("requestAnimationFrame", js.NewCallback(func(arg1 []js.Value) {
+		window.Set("requestAnimationFrame", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 			currTime := js.Global().Get("Date").New().Call("getTime").Float()
 			timeToCall := math.Max(0, 16-(currTime-lastTime))
-			window.Call("setTimeout", js.NewCallback(func(arg2 []js.Value) {
-				arg1[0].Invoke(currTime + timeToCall)
+			window.Call("setTimeout", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+				args[0].Invoke(currTime + timeToCall)
+				return nil
 			}), timeToCall)
 			lastTime = currTime + timeToCall
+			return nil
 		}))
 	}
 
 	if window.Get("cancelAnimationFrame").Type() == js.TypeUndefined {
-		window.Set("cancelAnimationFrame", js.NewCallback(func(arg1 []js.Value) {
-			js.Global().Get("clearTimeout").Invoke(arg1[0])
+		window.Set("cancelAnimationFrame", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+			js.Global().Get("clearTimeout").Invoke(args[0])
+			return nil
 		}))
 	}
 }
@@ -279,8 +293,9 @@ func RunPreparation() {
 	Time = NewClock()
 
 	if !opts.HeadlessMode {
-		window.Call("addEventListener", "onbeforeunload", js.NewEventCallback(js.PreventDefault, func(event js.Value) {
+		window.Call("addEventListener", "onbeforeunload", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 			window.Call("alert", "You're closing")
+			return nil
 		}))
 	}
 }
@@ -312,35 +327,44 @@ func openFile(url string) (io.ReadCloser, error) {
 	if Headless() { // Headless would be node.js
 		return os.Open(url)
 	}
-	var resp js.Value
 	var err error
-	loadC := make(chan struct{})
+	var resp js.Value
+	ch := make(chan struct{})
 	req := js.Global().Get("XMLHttpRequest").New()
 	req.Call("open", "GET", url, true)
 	req.Set("responseType", "arraybuffer")
-	req.Call("addEventListener", "load", js.NewCallback(func([]js.Value) {
+	loadf := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		defer close(ch)
 		status := req.Get("status").Int()
 		if 200 <= status && status < 400 {
 			resp = req.Get("response")
-			loadC <- struct{}{}
-			return
+			return nil
 		}
 		err = errors.New(fmt.Sprintf("http error: %d", status))
-	}))
+		return nil
+	})
+	defer loadf.Release()
+	req.Call("addEventListener", "load", loadf)
+	errorf := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		defer close(ch)
+		err = errors.New(fmt.Sprintf("XMLHttpRequest error: %s", req.Get("statusText").String()))
+		return nil
+	})
+	req.Call("addEventListener", "error", errorf)
+	defer errorf.Release()
 	req.Call("send")
+	t := time.NewTicker(time.Duration(int(time.Second) * 10))
 	select {
-	case <-loadC:
+	case <-ch:
 		if err != nil {
 			return nil, err
 		}
-		uint8contentWrapper := js.Global().Get("Uint8Array").New(resp)
-		data := make([]byte, uint8contentWrapper.Get("byteLength").Int())
-		arr := js.TypedArrayOf(data)
-		arr.Call("set", uint8contentWrapper)
-		arr.Release()
-		return noCloseReadCloser{bytes.NewReader(data)}, nil
-	case <-time.After(5 * time.Second):
-		return nil, errors.New("timeout while trying to fetch resource: " + url)
+		buf := make([]byte, resp.Get("byteLength").Int())
+		js.CopyBytesToGo(buf, js.Global().Get("Uint8Array").New(resp))
+		f := &noCloseReadCloser{bytes.NewReader(buf)}
+		return f, nil
+	case <-t.C:
+		return nil, errors.New("Did not recieve a response in 10 seconds.")
 	}
 }
 
