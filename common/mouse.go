@@ -271,6 +271,13 @@ func (m *MouseSystem) Update(dt float32) {
 				if m.mouseDown && e.MouseComponent.rightStartedDragging {
 					e.MouseComponent.RightDragged = true
 				}
+			default:
+				if m.mouseDown && e.MouseComponent.startedDragging {
+					e.MouseComponent.Dragged = true
+				}
+				if m.mouseDown && e.MouseComponent.rightStartedDragging {
+					e.MouseComponent.RightDragged = true
+				}
 			}
 		} else {
 			if e.MouseComponent.Hovered {
