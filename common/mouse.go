@@ -101,8 +101,14 @@ type MouseComponent struct {
 
 	// startedDragging is used internally to see if *this* is the object that is being dragged
 	startedDragging bool
+	// startedMoving is used internally to see whether the mouse was 1) pressed
+	// (it has startedDragging) and 2) has seen a move action. This is to make
+	// sure the Dragging flag is set correctly.
+	startedMoving bool
 	// startedRightDragging is used internally to see if *this* is the object that is being right-dragged
 	rightStartedDragging bool
+	// rightStartedMoving see startedMoving, but for the right mouse button
+	rightStartedMoving bool
 }
 
 type mouseEntity struct {
@@ -198,7 +204,9 @@ func (m *MouseSystem) Update(dt float32) {
 			Track:                e.MouseComponent.Track,
 			Hovered:              e.MouseComponent.Hovered,
 			startedDragging:      e.MouseComponent.startedDragging,
+			startedMoving:        e.MouseComponent.startedMoving,
 			rightStartedDragging: e.MouseComponent.rightStartedDragging,
+			rightStartedMoving:   e.MouseComponent.rightStartedMoving,
 		}
 
 		if e.MouseComponent.Track {
@@ -266,16 +274,18 @@ func (m *MouseSystem) Update(dt float32) {
 				}
 			case engo.Move:
 				if m.mouseDown && e.MouseComponent.startedDragging {
+					e.MouseComponent.startedMoving = true
 					e.MouseComponent.Dragged = true
 				}
 				if m.mouseDown && e.MouseComponent.rightStartedDragging {
+					e.MouseComponent.rightStartedMoving = true
 					e.MouseComponent.RightDragged = true
 				}
 			default:
-				if m.mouseDown && e.MouseComponent.startedDragging {
+				if m.mouseDown && e.MouseComponent.startedDragging && e.MouseComponent.startedMoving {
 					e.MouseComponent.Dragged = true
 				}
-				if m.mouseDown && e.MouseComponent.rightStartedDragging {
+				if m.mouseDown && e.MouseComponent.rightStartedDragging && e.MouseComponent.rightStartedMoving {
 					e.MouseComponent.RightDragged = true
 				}
 			}
@@ -292,8 +302,10 @@ func (m *MouseSystem) Update(dt float32) {
 			// is released
 			e.MouseComponent.Dragged = false
 			e.MouseComponent.startedDragging = false
+			e.MouseComponent.startedMoving = false
 			// TODO maybe separate out the release into left-button release and right-button release
 			e.MouseComponent.rightStartedDragging = false
+			e.MouseComponent.rightStartedMoving = false
 			// mouseDown goes false as soon as one of the pressed buttons is
 			// released. Effectively ending any dragging
 			m.mouseDown = false
