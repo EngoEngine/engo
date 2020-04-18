@@ -1,0 +1,136 @@
+{
+  "SubTexture": [
+    {
+      "frameX": -2,
+      "frameHeight": 52,
+      "y": 398,
+      "frameY": -1,
+      "frameWidth": 82,
+      "width": 77,
+      "height": 47,
+      "name": "foot_back_toe_rt",
+      "x": 76
+    },
+    {
+      "width": 120,
+      "y": 370,
+      "height": 148,
+      "name": "leg_back_rt",
+      "x": 894
+    },
+    {
+      "frameX": -9,
+      "frameHeight": 62,
+      "y": 183,
+      "frameY": -5,
+      "frameWidth": 112,
+      "width": 96,
+      "height": 51,
+      "name": "foot_front_toe_rt",
+      "x": 888
+    },
+    {
+      "frameX": -3,
+      "frameHeight": 70,
+      "y": 183,
+      "frameY": -2,
+      "frameWidth": 88,
+      "width": 80,
+      "height": 64,
+      "name": "foot_back_toe_lt",
+      "x": 806
+    },
+    {
+      "width": 148,
+      "y": 370,
+      "height": 202,
+      "name": "leg_back_lt",
+      "x": 478
+    },
+    {
+      "width": 140,
+      "y": 370,
+      "height": 174,
+      "name": "leg_front_rt",
+      "x": 752
+    },
+    {
+      "width": 122,
+      "y": 370,
+      "height": 203,
+      "name": "leg_front_lt",
+      "x": 628
+    },
+    {
+      "frameX": -4,
+      "frameHeight": 74,
+      "y": 183,
+      "frameY": -3,
+      "frameWidth": 102,
+      "width": 95,
+      "height": 67,
+      "name": "foot_front_toe_lt",
+      "x": 709
+    },
+    {
+      "width": 475,
+      "y": 1,
+      "height": 395,
+      "name": "Sheep_01_Body",
+      "x": 1
+    },
+    {
+      "width": 73,
+      "y": 398,
+      "height": 110,
+      "name": "ear_lt",
+      "x": 1
+    },
+    {
+      "width": 36,
+      "y": 1,
+      "height": 79,
+      "name": "ear_rt",
+      "x": 959
+    },
+    {
+      "width": 229,
+      "y": 1,
+      "height": 272,
+      "name": "Sheep_01_Head",
+      "x": 478
+    },
+    {
+      "width": 27,
+      "y": 82,
+      "height": 34,
+      "name": "eye_lt",
+      "x": 959
+    },
+    {
+      "width": 20,
+      "y": 1,
+      "height": 31,
+      "name": "eye_rt",
+      "x": 997
+    },
+    {
+      "width": 248,
+      "y": 1,
+      "height": 180,
+      "name": "Sheep_01_Hair",
+      "x": 709
+    },
+    {
+      "width": 485,
+      "y": 275,
+      "height": 93,
+      "name": "copyrights",
+      "x": 478
+    }
+  ],
+  "width": 1024,
+  "height": 1024,
+  "name": "sheep_DBJ_5_5",
+  "imagePath": "sheep_DBJ_5_5_tex.png"
+}
