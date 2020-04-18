@@ -1,0 +1,1773 @@
+{
+  "file": "sheep_multiple_texture_tex.png",
+  "mc": {
+    "Sheep_Ani": {
+      "labels": [
+        {
+          "end": 45,
+          "frame": 1,
+          "name": "goat_sleep_idle_anim"
+        },
+        {
+          "end": 61,
+          "frame": 46,
+          "name": "goat_trot_anim"
+        },
+        {
+          "end": 105,
+          "frame": 62,
+          "name": "goat_idle_anim"
+        },
+        {
+          "end": 137,
+          "frame": 106,
+          "name": "goat_walk_anim"
+        },
+        {
+          "end": 289,
+          "frame": 138,
+          "name": "goat_eat_anim"
+        }
+      ],
+      "frameRate": 30,
+      "frames": [
+        {
+          "res": "goat_sleep_idle_anim_0",
+          "y": -507,
+          "duration": 1,
+          "x": -365
+        },
+        {
+          "res": "goat_sleep_idle_anim_1",
+          "y": -507,
+          "duration": 1,
+          "x": -364
+        },
+        {
+          "res": "goat_sleep_idle_anim_2",
+          "y": -507,
+          "duration": 1,
+          "x": -363
+        },
+        {
+          "res": "goat_sleep_idle_anim_3",
+          "y": -507,
+          "duration": 1,
+          "x": -362
+        },
+        {
+          "res": "goat_sleep_idle_anim_4",
+          "y": -507,
+          "duration": 1,
+          "x": -361
+        },
+        {
+          "res": "goat_sleep_idle_anim_5",
+          "y": -507,
+          "duration": 1,
+          "x": -360
+        },
+        {
+          "res": "goat_sleep_idle_anim_6",
+          "y": -507,
+          "duration": 1,
+          "x": -360
+        },
+        {
+          "res": "goat_sleep_idle_anim_7",
+          "y": -507,
+          "duration": 1,
+          "x": -359
+        },
+        {
+          "res": "goat_sleep_idle_anim_8",
+          "y": -507,
+          "duration": 1,
+          "x": -358
+        },
+        {
+          "res": "goat_sleep_idle_anim_9",
+          "y": -506,
+          "duration": 1,
+          "x": -357
+        },
+        {
+          "res": "goat_sleep_idle_anim_10",
+          "y": -506,
+          "duration": 1,
+          "x": -356
+        },
+        {
+          "res": "goat_sleep_idle_anim_11",
+          "y": -506,
+          "duration": 1,
+          "x": -355
+        },
+        {
+          "res": "goat_sleep_idle_anim_12",
+          "y": -505,
+          "duration": 1,
+          "x": -356
+        },
+        {
+          "res": "goat_sleep_idle_anim_13",
+          "y": -505,
+          "duration": 1,
+          "x": -357
+        },
+        {
+          "res": "goat_sleep_idle_anim_14",
+          "y": -504,
+          "duration": 1,
+          "x": -358
+        },
+        {
+          "res": "goat_sleep_idle_anim_15",
+          "y": -504,
+          "duration": 1,
+          "x": -359
+        },
+        {
+          "res": "goat_sleep_idle_anim_16",
+          "y": -503,
+          "duration": 1,
+          "x": -360
+        },
+        {
+          "res": "goat_sleep_idle_anim_17",
+          "y": -503,
+          "duration": 1,
+          "x": -360
+        },
+        {
+          "res": "goat_sleep_idle_anim_18",
+          "y": -503,
+          "duration": 1,
+          "x": -361
+        },
+        {
+          "res": "goat_sleep_idle_anim_19",
+          "y": -502,
+          "duration": 1,
+          "x": -362
+        },
+        {
+          "res": "goat_sleep_idle_anim_20",
+          "y": -502,
+          "duration": 1,
+          "x": -363
+        },
+        {
+          "res": "goat_sleep_idle_anim_21",
+          "y": -502,
+          "duration": 1,
+          "x": -364
+        },
+        {
+          "res": "goat_sleep_idle_anim_22",
+          "y": -502,
+          "duration": 1,
+          "x": -365
+        },
+        {
+          "res": "goat_sleep_idle_anim_23",
+          "y": -502,
+          "duration": 1,
+          "x": -366
+        },
+        {
+          "res": "goat_sleep_idle_anim_24",
+          "y": -501,
+          "duration": 1,
+          "x": -367
+        },
+        {
+          "res": "goat_sleep_idle_anim_25",
+          "y": -501,
+          "duration": 1,
+          "x": -367
+        },
+        {
+          "res": "goat_sleep_idle_anim_26",
+          "y": -501,
+          "duration": 1,
+          "x": -368
+        },
+        {
+          "res": "goat_sleep_idle_anim_27",
+          "y": -501,
+          "duration": 1,
+          "x": -369
+        },
+        {
+          "res": "goat_sleep_idle_anim_28",
+          "y": -501,
+          "duration": 1,
+          "x": -370
+        },
+        {
+          "res": "goat_sleep_idle_anim_29",
+          "y": -501,
+          "duration": 1,
+          "x": -371
+        },
+        {
+          "res": "goat_sleep_idle_anim_30",
+          "y": -501,
+          "duration": 1,
+          "x": -372
+        },
+        {
+          "res": "goat_sleep_idle_anim_31",
+          "y": -502,
+          "duration": 1,
+          "x": -372
+        },
+        {
+          "res": "goat_sleep_idle_anim_32",
+          "y": -502,
+          "duration": 1,
+          "x": -373
+        },
+        {
+          "res": "goat_sleep_idle_anim_33",
+          "y": -502,
+          "duration": 1,
+          "x": -374
+        },
+        {
+          "res": "goat_sleep_idle_anim_34",
+          "y": -503,
+          "duration": 1,
+          "x": -373
+        },
+        {
+          "res": "goat_sleep_idle_anim_35",
+          "y": -503,
+          "duration": 1,
+          "x": -373
+        },
+        {
+          "res": "goat_sleep_idle_anim_36",
+          "y": -504,
+          "duration": 1,
+          "x": -372
+        },
+        {
+          "res": "goat_sleep_idle_anim_37",
+          "y": -504,
+          "duration": 1,
+          "x": -371
+        },
+        {
+          "res": "goat_sleep_idle_anim_38",
+          "y": -505,
+          "duration": 1,
+          "x": -370
+        },
+        {
+          "res": "goat_sleep_idle_anim_39",
+          "y": -505,
+          "duration": 1,
+          "x": -369
+        },
+        {
+          "res": "goat_sleep_idle_anim_40",
+          "y": -506,
+          "duration": 1,
+          "x": -369
+        },
+        {
+          "res": "goat_sleep_idle_anim_41",
+          "y": -506,
+          "duration": 1,
+          "x": -368
+        },
+        {
+          "res": "goat_sleep_idle_anim_42",
+          "y": -506,
+          "duration": 1,
+          "x": -367
+        },
+        {
+          "res": "goat_sleep_idle_anim_43",
+          "y": -506,
+          "duration": 1,
+          "x": -366
+        },
+        {
+          "res": "goat_sleep_idle_anim_44",
+          "y": -507,
+          "duration": 1,
+          "x": -366
+        },
+        {
+          "res": "goat_trot_anim_0",
+          "y": -571,
+          "duration": 1,
+          "x": -358
+        },
+        {
+          "res": "goat_trot_anim_1",
+          "y": -572,
+          "duration": 1,
+          "x": -361
+        },
+        {
+          "res": "goat_trot_anim_2",
+          "y": -572,
+          "duration": 1,
+          "x": -365
+        },
+        {
+          "res": "goat_trot_anim_3",
+          "y": -579,
+          "duration": 1,
+          "x": -361
+        },
+        {
+          "res": "goat_trot_anim_4",
+          "y": -578,
+          "duration": 1,
+          "x": -358
+        },
+        {
+          "res": "goat_trot_anim_5",
+          "y": -577,
+          "duration": 1,
+          "x": -354
+        },
+        {
+          "res": "goat_trot_anim_6",
+          "y": -576,
+          "duration": 1,
+          "x": -350
+        },
+        {
+          "res": "goat_trot_anim_7",
+          "y": -570,
+          "duration": 1,
+          "x": -354
+        },
+        {
+          "res": "goat_trot_anim_8",
+          "y": -571,
+          "duration": 1,
+          "x": -358
+        },
+        {
+          "res": "goat_trot_anim_9",
+          "y": -572,
+          "duration": 1,
+          "x": -361
+        },
+        {
+          "res": "goat_trot_anim_10",
+          "y": -572,
+          "duration": 1,
+          "x": -365
+        },
+        {
+          "res": "goat_trot_anim_11",
+          "y": -579,
+          "duration": 1,
+          "x": -361
+        },
+        {
+          "res": "goat_trot_anim_12",
+          "y": -578,
+          "duration": 1,
+          "x": -358
+        },
+        {
+          "res": "goat_trot_anim_13",
+          "y": -577,
+          "duration": 1,
+          "x": -354
+        },
+        {
+          "res": "goat_trot_anim_14",
+          "y": -576,
+          "duration": 1,
+          "x": -350
+        },
+        {
+          "res": "goat_trot_anim_15",
+          "y": -570,
+          "duration": 1,
+          "x": -354
+        },
+        {
+          "res": "goat_idle_anim_0",
+          "y": -572,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_idle_anim_1",
+          "y": -574,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_idle_anim_2",
+          "y": -575,
+          "duration": 1,
+          "x": -346
+        },
+        {
+          "res": "goat_idle_anim_3",
+          "y": -576,
+          "duration": 1,
+          "x": -347
+        },
+        {
+          "res": "goat_idle_anim_4",
+          "y": -577,
+          "duration": 1,
+          "x": -347
+        },
+        {
+          "res": "goat_idle_anim_5",
+          "y": -578,
+          "duration": 1,
+          "x": -348
+        },
+        {
+          "res": "goat_idle_anim_6",
+          "y": -579,
+          "duration": 1,
+          "x": -349
+        },
+        {
+          "res": "goat_idle_anim_7",
+          "y": -580,
+          "duration": 1,
+          "x": -349
+        },
+        {
+          "res": "goat_idle_anim_8",
+          "y": -581,
+          "duration": 1,
+          "x": -350
+        },
+        {
+          "res": "goat_idle_anim_9",
+          "y": -582,
+          "duration": 1,
+          "x": -350
+        },
+        {
+          "res": "goat_idle_anim_10",
+          "y": -582,
+          "duration": 1,
+          "x": -351
+        },
+        {
+          "res": "goat_idle_anim_11",
+          "y": -583,
+          "duration": 1,
+          "x": -352
+        },
+        {
+          "res": "goat_idle_anim_12",
+          "y": -582,
+          "duration": 1,
+          "x": -351
+        },
+        {
+          "res": "goat_idle_anim_13",
+          "y": -581,
+          "duration": 1,
+          "x": -350
+        },
+        {
+          "res": "goat_idle_anim_14",
+          "y": -581,
+          "duration": 1,
+          "x": -350
+        },
+        {
+          "res": "goat_idle_anim_15",
+          "y": -580,
+          "duration": 1,
+          "x": -349
+        },
+        {
+          "res": "goat_idle_anim_16",
+          "y": -579,
+          "duration": 1,
+          "x": -349
+        },
+        {
+          "res": "goat_idle_anim_17",
+          "y": -578,
+          "duration": 1,
+          "x": -348
+        },
+        {
+          "res": "goat_idle_anim_18",
+          "y": -576,
+          "duration": 1,
+          "x": -347
+        },
+        {
+          "res": "goat_idle_anim_19",
+          "y": -574,
+          "duration": 1,
+          "x": -347
+        },
+        {
+          "res": "goat_idle_anim_20",
+          "y": -573,
+          "duration": 1,
+          "x": -346
+        },
+        {
+          "res": "goat_idle_anim_21",
+          "y": -571,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_idle_anim_22",
+          "y": -569,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_idle_anim_23",
+          "y": -569,
+          "duration": 1,
+          "x": -344
+        },
+        {
+          "res": "goat_idle_anim_24",
+          "y": -569,
+          "duration": 1,
+          "x": -344
+        },
+        {
+          "res": "goat_idle_anim_25",
+          "y": -569,
+          "duration": 1,
+          "x": -344
+        },
+        {
+          "res": "goat_idle_anim_26",
+          "y": -569,
+          "duration": 1,
+          "x": -343
+        },
+        {
+          "res": "goat_idle_anim_27",
+          "y": -569,
+          "duration": 1,
+          "x": -343
+        },
+        {
+          "res": "goat_idle_anim_28",
+          "y": -569,
+          "duration": 1,
+          "x": -342
+        },
+        {
+          "res": "goat_idle_anim_29",
+          "y": -569,
+          "duration": 1,
+          "x": -342
+        },
+        {
+          "res": "goat_idle_anim_30",
+          "y": -570,
+          "duration": 1,
+          "x": -342
+        },
+        {
+          "res": "goat_idle_anim_31",
+          "y": -570,
+          "duration": 1,
+          "x": -342
+        },
+        {
+          "res": "goat_idle_anim_32",
+          "y": -570,
+          "duration": 1,
+          "x": -343
+        },
+        {
+          "res": "goat_idle_anim_33",
+          "y": -571,
+          "duration": 1,
+          "x": -344
+        },
+        {
+          "res": "goat_idle_anim_34",
+          "y": -571,
+          "duration": 1,
+          "x": -343
+        },
+        {
+          "res": "goat_idle_anim_35",
+          "y": -570,
+          "duration": 1,
+          "x": -342
+        },
+        {
+          "res": "goat_idle_anim_36",
+          "y": -570,
+          "duration": 1,
+          "x": -342
+        },
+        {
+          "res": "goat_idle_anim_37",
+          "y": -569,
+          "duration": 1,
+          "x": -342
+        },
+        {
+          "res": "goat_idle_anim_38",
+          "y": -569,
+          "duration": 1,
+          "x": -342
+        },
+        {
+          "res": "goat_idle_anim_39",
+          "y": -570,
+          "duration": 1,
+          "x": -343
+        },
+        {
+          "res": "goat_idle_anim_40",
+          "y": -570,
+          "duration": 1,
+          "x": -343
+        },
+        {
+          "res": "goat_idle_anim_41",
+          "y": -571,
+          "duration": 1,
+          "x": -344
+        },
+        {
+          "res": "goat_idle_anim_42",
+          "y": -571,
+          "duration": 1,
+          "x": -344
+        },
+        {
+          "res": "goat_idle_anim_43",
+          "y": -572,
+          "duration": 1,
+          "x": -344
+        },
+        {
+          "res": "goat_walk_anim_0",
+          "y": -571,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_walk_anim_1",
+          "y": -572,
+          "duration": 1,
+          "x": -346
+        },
+        {
+          "res": "goat_walk_anim_2",
+          "y": -574,
+          "duration": 1,
+          "x": -347
+        },
+        {
+          "res": "goat_walk_anim_3",
+          "y": -576,
+          "duration": 1,
+          "x": -348
+        },
+        {
+          "res": "goat_walk_anim_4",
+          "y": -578,
+          "duration": 1,
+          "x": -349
+        },
+        {
+          "res": "goat_walk_anim_5",
+          "y": -582,
+          "duration": 1,
+          "x": -348
+        },
+        {
+          "res": "goat_walk_anim_6",
+          "y": -586,
+          "duration": 1,
+          "x": -347
+        },
+        {
+          "res": "goat_walk_anim_7",
+          "y": -584,
+          "duration": 1,
+          "x": -346
+        },
+        {
+          "res": "goat_walk_anim_8",
+          "y": -582,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_walk_anim_9",
+          "y": -582,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_walk_anim_10",
+          "y": -586,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_walk_anim_11",
+          "y": -590,
+          "duration": 1,
+          "x": -350
+        },
+        {
+          "res": "goat_walk_anim_12",
+          "y": -593,
+          "duration": 1,
+          "x": -356
+        },
+        {
+          "res": "goat_walk_anim_13",
+          "y": -587,
+          "duration": 1,
+          "x": -352
+        },
+        {
+          "res": "goat_walk_anim_14",
+          "y": -582,
+          "duration": 1,
+          "x": -348
+        },
+        {
+          "res": "goat_walk_anim_15",
+          "y": -578,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_walk_anim_16",
+          "y": -574,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_walk_anim_17",
+          "y": -572,
+          "duration": 1,
+          "x": -346
+        },
+        {
+          "res": "goat_walk_anim_18",
+          "y": -574,
+          "duration": 1,
+          "x": -347
+        },
+        {
+          "res": "goat_walk_anim_19",
+          "y": -576,
+          "duration": 1,
+          "x": -348
+        },
+        {
+          "res": "goat_walk_anim_20",
+          "y": -578,
+          "duration": 1,
+          "x": -349
+        },
+        {
+          "res": "goat_walk_anim_21",
+          "y": -582,
+          "duration": 1,
+          "x": -348
+        },
+        {
+          "res": "goat_walk_anim_22",
+          "y": -586,
+          "duration": 1,
+          "x": -347
+        },
+        {
+          "res": "goat_walk_anim_23",
+          "y": -584,
+          "duration": 1,
+          "x": -346
+        },
+        {
+          "res": "goat_walk_anim_24",
+          "y": -582,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_walk_anim_25",
+          "y": -582,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_walk_anim_26",
+          "y": -586,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_walk_anim_27",
+          "y": -590,
+          "duration": 1,
+          "x": -350
+        },
+        {
+          "res": "goat_walk_anim_28",
+          "y": -593,
+          "duration": 1,
+          "x": -356
+        },
+        {
+          "res": "goat_walk_anim_29",
+          "y": -587,
+          "duration": 1,
+          "x": -352
+        },
+        {
+          "res": "goat_walk_anim_30",
+          "y": -582,
+          "duration": 1,
+          "x": -348
+        },
+        {
+          "res": "goat_walk_anim_31",
+          "y": -578,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_eat_anim_0",
+          "y": -576,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_eat_anim_1",
+          "y": -572,
+          "duration": 1,
+          "x": -341
+        },
+        {
+          "res": "goat_eat_anim_2",
+          "y": -568,
+          "duration": 1,
+          "x": -339
+        },
+        {
+          "res": "goat_eat_anim_3",
+          "y": -565,
+          "duration": 1,
+          "x": -342
+        },
+        {
+          "res": "goat_eat_anim_4",
+          "y": -561,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_eat_anim_5",
+          "y": -557,
+          "duration": 1,
+          "x": -347
+        },
+        {
+          "res": "goat_eat_anim_6",
+          "y": -553,
+          "duration": 1,
+          "x": -350
+        },
+        {
+          "res": "goat_eat_anim_7",
+          "y": -548,
+          "duration": 1,
+          "x": -352
+        },
+        {
+          "res": "goat_eat_anim_8",
+          "y": -544,
+          "duration": 1,
+          "x": -355
+        },
+        {
+          "res": "goat_eat_anim_9",
+          "y": -537,
+          "duration": 1,
+          "x": -352
+        },
+        {
+          "res": "goat_eat_anim_10",
+          "y": -529,
+          "duration": 1,
+          "x": -350
+        },
+        {
+          "res": "goat_eat_anim_11",
+          "y": -521,
+          "duration": 1,
+          "x": -347
+        },
+        {
+          "res": "goat_eat_anim_12",
+          "y": -513,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_eat_anim_13",
+          "y": -505,
+          "duration": 1,
+          "x": -342
+        },
+        {
+          "res": "goat_eat_anim_14",
+          "y": -497,
+          "duration": 1,
+          "x": -339
+        },
+        {
+          "res": "goat_eat_anim_15",
+          "y": -489,
+          "duration": 1,
+          "x": -341
+        },
+        {
+          "res": "goat_eat_anim_16",
+          "y": -481,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_eat_anim_17",
+          "y": -494,
+          "duration": 1,
+          "x": -349
+        },
+        {
+          "res": "goat_eat_anim_18",
+          "y": -507,
+          "duration": 1,
+          "x": -354
+        },
+        {
+          "res": "goat_eat_anim_19",
+          "y": -519,
+          "duration": 1,
+          "x": -358
+        },
+        {
+          "res": "goat_eat_anim_20",
+          "y": -532,
+          "duration": 1,
+          "x": -363
+        },
+        {
+          "res": "goat_eat_anim_21",
+          "y": -545,
+          "duration": 1,
+          "x": -367
+        },
+        {
+          "res": "goat_eat_anim_22",
+          "y": -557,
+          "duration": 1,
+          "x": -371
+        },
+        {
+          "res": "goat_eat_anim_23",
+          "y": -570,
+          "duration": 1,
+          "x": -375
+        },
+        {
+          "res": "goat_eat_anim_24",
+          "y": -582,
+          "duration": 1,
+          "x": -380
+        },
+        {
+          "res": "goat_eat_anim_25",
+          "y": -586,
+          "duration": 1,
+          "x": -374
+        },
+        {
+          "res": "goat_eat_anim_26",
+          "y": -591,
+          "duration": 1,
+          "x": -368
+        },
+        {
+          "res": "goat_eat_anim_27",
+          "y": -595,
+          "duration": 1,
+          "x": -363
+        },
+        {
+          "res": "goat_eat_anim_28",
+          "y": -598,
+          "duration": 1,
+          "x": -357
+        },
+        {
+          "res": "goat_eat_anim_29",
+          "y": -602,
+          "duration": 1,
+          "x": -351
+        },
+        {
+          "res": "goat_eat_anim_30",
+          "y": -606,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_eat_anim_31",
+          "y": -605,
+          "duration": 1,
+          "x": -342
+        },
+        {
+          "res": "goat_eat_anim_32",
+          "y": -604,
+          "duration": 1,
+          "x": -343
+        },
+        {
+          "res": "goat_eat_anim_33",
+          "y": -603,
+          "duration": 1,
+          "x": -347
+        },
+        {
+          "res": "goat_eat_anim_34",
+          "y": -601,
+          "duration": 1,
+          "x": -352
+        },
+        {
+          "res": "goat_eat_anim_35",
+          "y": -600,
+          "duration": 1,
+          "x": -356
+        },
+        {
+          "res": "goat_eat_anim_36",
+          "y": -598,
+          "duration": 1,
+          "x": -361
+        },
+        {
+          "res": "goat_eat_anim_37",
+          "y": -597,
+          "duration": 1,
+          "x": -365
+        },
+        {
+          "res": "goat_eat_anim_38",
+          "y": -591,
+          "duration": 1,
+          "x": -361
+        },
+        {
+          "res": "goat_eat_anim_39",
+          "y": -586,
+          "duration": 1,
+          "x": -356
+        },
+        {
+          "res": "goat_eat_anim_40",
+          "y": -580,
+          "duration": 1,
+          "x": -352
+        },
+        {
+          "res": "goat_eat_anim_41",
+          "y": -574,
+          "duration": 1,
+          "x": -347
+        },
+        {
+          "res": "goat_eat_anim_42",
+          "y": -568,
+          "duration": 1,
+          "x": -343
+        },
+        {
+          "res": "goat_eat_anim_43",
+          "y": -562,
+          "duration": 1,
+          "x": -342
+        },
+        {
+          "res": "goat_eat_anim_44",
+          "y": -556,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_eat_anim_45",
+          "y": -561,
+          "duration": 1,
+          "x": -350
+        },
+        {
+          "res": "goat_eat_anim_46",
+          "y": -567,
+          "duration": 1,
+          "x": -355
+        },
+        {
+          "res": "goat_eat_anim_47",
+          "y": -572,
+          "duration": 1,
+          "x": -360
+        },
+        {
+          "res": "goat_eat_anim_48",
+          "y": -577,
+          "duration": 1,
+          "x": -365
+        },
+        {
+          "res": "goat_eat_anim_49",
+          "y": -582,
+          "duration": 1,
+          "x": -370
+        },
+        {
+          "res": "goat_eat_anim_50",
+          "y": -587,
+          "duration": 1,
+          "x": -375
+        },
+        {
+          "res": "goat_eat_anim_51",
+          "y": -592,
+          "duration": 1,
+          "x": -380
+        },
+        {
+          "res": "goat_eat_anim_52",
+          "y": -593,
+          "duration": 1,
+          "x": -375
+        },
+        {
+          "res": "goat_eat_anim_53",
+          "y": -594,
+          "duration": 1,
+          "x": -370
+        },
+        {
+          "res": "goat_eat_anim_54",
+          "y": -594,
+          "duration": 1,
+          "x": -365
+        },
+        {
+          "res": "goat_eat_anim_55",
+          "y": -595,
+          "duration": 1,
+          "x": -360
+        },
+        {
+          "res": "goat_eat_anim_56",
+          "y": -595,
+          "duration": 1,
+          "x": -355
+        },
+        {
+          "res": "goat_eat_anim_57",
+          "y": -596,
+          "duration": 1,
+          "x": -350
+        },
+        {
+          "res": "goat_eat_anim_58",
+          "y": -596,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_eat_anim_59",
+          "y": -596,
+          "duration": 1,
+          "x": -341
+        },
+        {
+          "res": "goat_eat_anim_60",
+          "y": -597,
+          "duration": 1,
+          "x": -340
+        },
+        {
+          "res": "goat_eat_anim_61",
+          "y": -597,
+          "duration": 1,
+          "x": -343
+        },
+        {
+          "res": "goat_eat_anim_62",
+          "y": -597,
+          "duration": 1,
+          "x": -346
+        },
+        {
+          "res": "goat_eat_anim_63",
+          "y": -597,
+          "duration": 1,
+          "x": -349
+        },
+        {
+          "res": "goat_eat_anim_64",
+          "y": -597,
+          "duration": 1,
+          "x": -352
+        },
+        {
+          "res": "goat_eat_anim_65",
+          "y": -597,
+          "duration": 1,
+          "x": -355
+        },
+        {
+          "res": "goat_eat_anim_66",
+          "y": -591,
+          "duration": 1,
+          "x": -352
+        },
+        {
+          "res": "goat_eat_anim_67",
+          "y": -586,
+          "duration": 1,
+          "x": -349
+        },
+        {
+          "res": "goat_eat_anim_68",
+          "y": -580,
+          "duration": 1,
+          "x": -346
+        },
+        {
+          "res": "goat_eat_anim_69",
+          "y": -574,
+          "duration": 1,
+          "x": -343
+        },
+        {
+          "res": "goat_eat_anim_70",
+          "y": -568,
+          "duration": 1,
+          "x": -340
+        },
+        {
+          "res": "goat_eat_anim_71",
+          "y": -562,
+          "duration": 1,
+          "x": -341
+        },
+        {
+          "res": "goat_eat_anim_72",
+          "y": -556,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_eat_anim_73",
+          "y": -563,
+          "duration": 1,
+          "x": -350
+        },
+        {
+          "res": "goat_eat_anim_74",
+          "y": -570,
+          "duration": 1,
+          "x": -355
+        },
+        {
+          "res": "goat_eat_anim_75",
+          "y": -576,
+          "duration": 1,
+          "x": -360
+        },
+        {
+          "res": "goat_eat_anim_76",
+          "y": -583,
+          "duration": 1,
+          "x": -365
+        },
+        {
+          "res": "goat_eat_anim_77",
+          "y": -589,
+          "duration": 1,
+          "x": -370
+        },
+        {
+          "res": "goat_eat_anim_78",
+          "y": -596,
+          "duration": 1,
+          "x": -375
+        },
+        {
+          "res": "goat_eat_anim_79",
+          "y": -602,
+          "duration": 1,
+          "x": -380
+        },
+        {
+          "res": "goat_eat_anim_80",
+          "y": -603,
+          "duration": 1,
+          "x": -375
+        },
+        {
+          "res": "goat_eat_anim_81",
+          "y": -604,
+          "duration": 1,
+          "x": -370
+        },
+        {
+          "res": "goat_eat_anim_82",
+          "y": -604,
+          "duration": 1,
+          "x": -365
+        },
+        {
+          "res": "goat_eat_anim_83",
+          "y": -605,
+          "duration": 1,
+          "x": -360
+        },
+        {
+          "res": "goat_eat_anim_84",
+          "y": -605,
+          "duration": 1,
+          "x": -355
+        },
+        {
+          "res": "goat_eat_anim_85",
+          "y": -606,
+          "duration": 1,
+          "x": -350
+        },
+        {
+          "res": "goat_eat_anim_86",
+          "y": -606,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_eat_anim_87",
+          "y": -607,
+          "duration": 1,
+          "x": -341
+        },
+        {
+          "res": "goat_eat_anim_88",
+          "y": -608,
+          "duration": 1,
+          "x": -340
+        },
+        {
+          "res": "goat_eat_anim_89",
+          "y": -609,
+          "duration": 1,
+          "x": -343
+        },
+        {
+          "res": "goat_eat_anim_90",
+          "y": -610,
+          "duration": 1,
+          "x": -346
+        },
+        {
+          "res": "goat_eat_anim_91",
+          "y": -611,
+          "duration": 1,
+          "x": -349
+        },
+        {
+          "res": "goat_eat_anim_92",
+          "y": -611,
+          "duration": 1,
+          "x": -352
+        },
+        {
+          "res": "goat_eat_anim_93",
+          "y": -612,
+          "duration": 1,
+          "x": -355
+        },
+        {
+          "res": "goat_eat_anim_94",
+          "y": -607,
+          "duration": 1,
+          "x": -352
+        },
+        {
+          "res": "goat_eat_anim_95",
+          "y": -602,
+          "duration": 1,
+          "x": -349
+        },
+        {
+          "res": "goat_eat_anim_96",
+          "y": -597,
+          "duration": 1,
+          "x": -346
+        },
+        {
+          "res": "goat_eat_anim_97",
+          "y": -592,
+          "duration": 1,
+          "x": -343
+        },
+        {
+          "res": "goat_eat_anim_98",
+          "y": -587,
+          "duration": 1,
+          "x": -340
+        },
+        {
+          "res": "goat_eat_anim_99",
+          "y": -581,
+          "duration": 1,
+          "x": -341
+        },
+        {
+          "res": "goat_eat_anim_100",
+          "y": -576,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_eat_anim_101",
+          "y": -572,
+          "duration": 1,
+          "x": -351
+        },
+        {
+          "res": "goat_eat_anim_102",
+          "y": -567,
+          "duration": 1,
+          "x": -358
+        },
+        {
+          "res": "goat_eat_anim_103",
+          "y": -562,
+          "duration": 1,
+          "x": -364
+        },
+        {
+          "res": "goat_eat_anim_104",
+          "y": -557,
+          "duration": 1,
+          "x": -370
+        },
+        {
+          "res": "goat_eat_anim_105",
+          "y": -551,
+          "duration": 1,
+          "x": -375
+        },
+        {
+          "res": "goat_eat_anim_106",
+          "y": -545,
+          "duration": 1,
+          "x": -381
+        },
+        {
+          "res": "goat_eat_anim_107",
+          "y": -539,
+          "duration": 1,
+          "x": -386
+        },
+        {
+          "res": "goat_eat_anim_108",
+          "y": -532,
+          "duration": 1,
+          "x": -392
+        },
+        {
+          "res": "goat_eat_anim_109",
+          "y": -545,
+          "duration": 1,
+          "x": -381
+        },
+        {
+          "res": "goat_eat_anim_110",
+          "y": -557,
+          "duration": 1,
+          "x": -370
+        },
+        {
+          "res": "goat_eat_anim_111",
+          "y": -567,
+          "duration": 1,
+          "x": -358
+        },
+        {
+          "res": "goat_eat_anim_112",
+          "y": -576,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_eat_anim_113",
+          "y": -577,
+          "duration": 1,
+          "x": -352
+        },
+        {
+          "res": "goat_eat_anim_114",
+          "y": -579,
+          "duration": 1,
+          "x": -359
+        },
+        {
+          "res": "goat_eat_anim_115",
+          "y": -581,
+          "duration": 1,
+          "x": -366
+        },
+        {
+          "res": "goat_eat_anim_116",
+          "y": -582,
+          "duration": 1,
+          "x": -374
+        },
+        {
+          "res": "goat_eat_anim_117",
+          "y": -583,
+          "duration": 1,
+          "x": -381
+        },
+        {
+          "res": "goat_eat_anim_118",
+          "y": -585,
+          "duration": 1,
+          "x": -388
+        },
+        {
+          "res": "goat_eat_anim_119",
+          "y": -586,
+          "duration": 1,
+          "x": -395
+        },
+        {
+          "res": "goat_eat_anim_120",
+          "y": -593,
+          "duration": 1,
+          "x": -402
+        },
+        {
+          "res": "goat_eat_anim_121",
+          "y": -589,
+          "duration": 1,
+          "x": -423
+        },
+        {
+          "res": "goat_eat_anim_122",
+          "y": -590,
+          "duration": 1,
+          "x": -443
+        },
+        {
+          "res": "goat_eat_anim_123",
+          "y": -596,
+          "duration": 1,
+          "x": -469
+        },
+        {
+          "res": "goat_eat_anim_124",
+          "y": -600,
+          "duration": 1,
+          "x": -493
+        },
+        {
+          "res": "goat_eat_anim_125",
+          "y": -600,
+          "duration": 1,
+          "x": -493
+        },
+        {
+          "res": "goat_eat_anim_126",
+          "y": -600,
+          "duration": 1,
+          "x": -493
+        },
+        {
+          "res": "goat_eat_anim_127",
+          "y": -600,
+          "duration": 1,
+          "x": -492
+        },
+        {
+          "res": "goat_eat_anim_128",
+          "y": -600,
+          "duration": 1,
+          "x": -486
+        },
+        {
+          "res": "goat_eat_anim_129",
+          "y": -600,
+          "duration": 1,
+          "x": -479
+        },
+        {
+          "res": "goat_eat_anim_130",
+          "y": -600,
+          "duration": 1,
+          "x": -472
+        },
+        {
+          "res": "goat_eat_anim_131",
+          "y": -601,
+          "duration": 1,
+          "x": -460
+        },
+        {
+          "res": "goat_eat_anim_132",
+          "y": -601,
+          "duration": 1,
+          "x": -447
+        },
+        {
+          "res": "goat_eat_anim_133",
+          "y": -600,
+          "duration": 1,
+          "x": -434
+        },
+        {
+          "res": "goat_eat_anim_134",
+          "y": -599,
+          "duration": 1,
+          "x": -420
+        },
+        {
+          "res": "goat_eat_anim_135",
+          "y": -598,
+          "duration": 1,
+          "x": -407
+        },
+        {
+          "res": "goat_eat_anim_136",
+          "y": -597,
+          "duration": 1,
+          "x": -395
+        },
+        {
+          "res": "goat_eat_anim_137",
+          "y": -594,
+          "duration": 1,
+          "x": -382
+        },
+        {
+          "res": "goat_eat_anim_138",
+          "y": -592,
+          "duration": 1,
+          "x": -370
+        },
+        {
+          "res": "goat_eat_anim_139",
+          "y": -576,
+          "duration": 1,
+          "x": -364
+        },
+        {
+          "res": "goat_eat_anim_140",
+          "y": -560,
+          "duration": 1,
+          "x": -358
+        },
+        {
+          "res": "goat_eat_anim_141",
+          "y": -543,
+          "duration": 1,
+          "x": -351
+        },
+        {
+          "res": "goat_eat_anim_142",
+          "y": -526,
+          "duration": 1,
+          "x": -345
+        },
+        {
+          "res": "goat_eat_anim_143",
+          "y": -533,
+          "duration": 1,
+          "x": -343
+        },
+        {
+          "res": "goat_eat_anim_144",
+          "y": -540,
+          "duration": 1,
+          "x": -341
+        },
+        {
+          "res": "goat_eat_anim_145",
+          "y": -548,
+          "duration": 1,
+          "x": -343
+        },
+        {
+          "res": "goat_eat_anim_146",
+          "y": -555,
+          "duration": 1,
+          "x": -346
+        },
+        {
+          "res": "goat_eat_anim_147",
+          "y": -562,
+          "duration": 1,
+          "x": -350
+        },
+        {
+          "res": "goat_eat_anim_148",
+          "y": -565,
+          "duration": 1,
+          "x": -346
+        },
+        {
+          "res": "goat_eat_anim_149",
+          "y": -568,
+          "duration": 1,
+          "x": -343
+        },
+        {
+          "res": "goat_eat_anim_150",
+          "y": -570,
+          "duration": 1,
+          "x": -341
+        },
+        {
+          "res": "goat_eat_anim_151",
+          "y": -573,
+          "duration": 1,
+          "x": -343
+        }
+      ],
+      "events": []
+    }
+  },
+  "res": {}
+}
