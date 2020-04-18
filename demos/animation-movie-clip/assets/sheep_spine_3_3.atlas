@@ -1,0 +1,118 @@
+
+sheep_spine_3_3.png
+size: 1024,1024
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+foot_back_toe_rt
+  rotate: false
+  xy: 76, 398
+  size: 77, 47
+  orig: 82, 52
+  offset: 2, 4
+  index: -1
+leg_back_rt
+  rotate: false
+  xy: 894, 370
+  size: 120, 148
+  orig: 120, 148
+  offset: 0, 0
+  index: -1
+foot_front_toe_rt
+  rotate: false
+  xy: 888, 183
+  size: 96, 51
+  orig: 112, 62
+  offset: 9, 6
+  index: -1
+foot_back_toe_lt
+  rotate: false
+  xy: 806, 183
+  size: 80, 64
+  orig: 88, 70
+  offset: 3, 4
+  index: -1
+leg_back_lt
+  rotate: false
+  xy: 478, 370
+  size: 148, 202
+  orig: 148, 202
+  offset: 0, 0
+  index: -1
+leg_front_rt
+  rotate: false
+  xy: 752, 370
+  size: 140, 174
+  orig: 140, 174
+  offset: 0, 0
+  index: -1
+leg_front_lt
+  rotate: false
+  xy: 628, 370
+  size: 122, 203
+  orig: 122, 203
+  offset: 0, 0
+  index: -1
+foot_front_toe_lt
+  rotate: false
+  xy: 709, 183
+  size: 95, 67
+  orig: 102, 74
+  offset: 4, 4
+  index: -1
+Sheep_01_Body
+  rotate: false
+  xy: 1, 1
+  size: 475, 395
+  orig: 475, 395
+  offset: 0, 0
+  index: -1
+ear_lt
+  rotate: false
+  xy: 1, 398
+  size: 73, 110
+  orig: 73, 110
+  offset: 0, 0
+  index: -1
+ear_rt
+  rotate: false
+  xy: 959, 1
+  size: 36, 79
+  orig: 36, 79
+  offset: 0, 0
+  index: -1
+Sheep_01_Head
+  rotate: false
+  xy: 478, 1
+  size: 229, 272
+  orig: 229, 272
+  offset: 0, 0
+  index: -1
+eye_lt
+  rotate: false
+  xy: 959, 82
+  size: 27, 34
+  orig: 27, 34
+  offset: 0, 0
+  index: -1
+eye_rt
+  rotate: false
+  xy: 997, 1
+  size: 20, 31
+  orig: 20, 31
+  offset: 0, 0
+  index: -1
+Sheep_01_Hair
+  rotate: false
+  xy: 709, 1
+  size: 248, 180
+  orig: 248, 180
+  offset: 0, 0
+  index: -1
+copyrights
+  rotate: false
+  xy: 478, 275
+  size: 485, 93
+  orig: 485, 93
+  offset: 0, 0
+  index: -1
