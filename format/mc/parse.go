@@ -17,7 +17,7 @@ func parseMC(url string, r io.Reader) (*MovieClipResource, error) {
 		return nil, err
 	}
 
-	dataEgret, err := UnmarshalEgret(content)
+	dataEgret, err := Unmarshal(content)
 	if err != nil {
 		return nil, err
 	}
@@ -89,6 +89,8 @@ func newSpritesheetFromFile(textureName string, mc MovieClip) (*common.Spriteshe
 			continue
 		}
 
+		x, y := mc.MaxXY(frame)
+		region = region.Centered(x+frame.X, y+frame.Y)
 		spriteRegions = append(spriteRegions, common.SpriteRegion{
 			Position: engo.Point{float32(region.X), float32(region.Y)},
 			Width:    region.W,

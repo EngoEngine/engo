@@ -2,6 +2,7 @@ package mc
 
 import (
 	"encoding/json"
+	"strings"
 )
 
 // https://github.com/egret-labs/egret-docs-en/tree/master/extension/game/movieClip
@@ -9,7 +10,7 @@ import (
 // https://github.com/egret-labs/egret-docs-en/blob/master/tools/TextureMerger/manual/README.md
 // http://developer.egret.com/en/github/egret-docs/tools/TextureMerger/manual/index.html
 
-func UnmarshalEgret(data []byte) (MovieClip, error) {
+func Unmarshal(data []byte) (MovieClip, error) {
 	r := MovieClip{}
 	err := json.Unmarshal(data, &r)
 
@@ -21,8 +22,24 @@ type MovieClip struct {
 	Mc map[string]Action `json:"mc"`
 	// The texture file path corresponding to the data file  (used to help the tool to match the corresponding problem,
 	// and the engine will not parse this attribute)
-	File    string              `json:"file"`
+	File string `json:"file"`
+	// Texture set data
 	Regions map[string]Resource `json:"res"`
+}
+
+func (m *MovieClip) MaxXY(needle Frame) (int, int) {
+	return maxXY(m.filterByActionNameFrames(needle))
+}
+
+func (m *MovieClip) filterByActionNameFrames(needle Frame) []Frame {
+	frames := make([]Frame, 0)
+	for _, frame := range m.AllFrames() {
+		if frame.ActionName() == needle.ActionName() {
+			frames = append(frames, frame)
+		}
+	}
+
+	return frames
 }
 
 func (m *MovieClip) AllFrames() []Frame {
@@ -77,6 +94,15 @@ type Frame struct {
 	ResourceName string `json:"res,omitempty"`
 }
 
+func (f *Frame) ActionName() string {
+	part := strings.Split(f.ResourceName, "_")
+	if len(part) < 2 {
+		return ""
+	}
+
+	return part[0]
+}
+
 type Label struct {
 	// Tag name
 	Name string `json:"name"`
@@ -95,4 +121,28 @@ type Resource struct {
 	W int `json:"w"`
 	// Resource height
 	H int `json:"h"`
+}
+
+func (r Resource) Centered(x, y int) Resource {
+	r.X -= x
+	r.Y -= y
+	r.W += x
+	r.H += y
+
+	return r
+}
+
+func maxXY(list []Frame) (int, int) {
+	var x, y int
+	for _, frame := range list {
+		if x < (-frame.X) {
+			x = -frame.X
+		}
+
+		if y < (-frame.Y) {
+			y = -frame.Y
+		}
+	}
+
+	return x, y
 }

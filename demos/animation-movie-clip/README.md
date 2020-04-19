@@ -5,7 +5,10 @@
 It demonstrates how one can use animations from `MovieClip` format.
   
 For doing so, it exported an animation in `MovieClip` format form Editor eg DragonBones (probably not only this editor supports this format):
-`File > Export` and fore `Data config > Type` select: `Egret MC`.
+`File > Export` and for param:
+ 
+ * `Data config > Type` select: `Egret MC`
+ * `Texture Config > Image Type` select: `Texture Atlas` and in `Settings` select: Region Padding X: 50, Y:50
 
 > **note** support only `scale textures` and not support `multiple textures` yet.
 
@@ -32,4 +35,4 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 
 ## What can I do in this demo?
 
-* You can random changes animation (Right Arrow)
+* You can random changes animation (press `Enter`)

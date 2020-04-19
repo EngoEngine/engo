@@ -24,8 +24,9 @@ func main() {
 	opts := engo.RunOptions{
 		Title: "Animation Demo",
 
-		Width:  Width,
-		Height: Height,
+		FPSLimit: 30,
+		Width:    Width,
+		Height:   Height,
 
 		GlobalScale: engo.Point{X: 1.5, Y: 1.5},
 
@@ -63,7 +64,10 @@ type HeroEntity struct {
 type DefaultScene struct{}
 
 func (*DefaultScene) Preload() {
-	err := engo.Files.Load("sheep.mc.json")
+	err := engo.Files.Load(
+		"black.png",
+		"sheep.mc.json",
+	)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -77,6 +81,16 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 	w.AddSystemInterface(&common.RenderSystem{}, new(common.Renderable), nil)
 	w.AddSystemInterface(&common.AnimationSystem{}, new(common.Animationable), nil)
 	w.AddSystemInterface(&ControlSystem{}, new(Controllable), nil)
+
+	texture, err := common.LoadedSprite("black.png")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	w.AddEntity(NewFieldEntity(
+		engo.Point{200, 250},
+		400,
+		texture,
+	))
 
 	mcr, err := mc.LoadResource("sheep.mc.json")
 	if err != nil {
@@ -135,4 +149,24 @@ func (c *ControlSystem) randAction(anim *common.AnimationComponent) {
 		list = append(list, name)
 	}
 	anim.SelectAnimationByName(list[rand.Intn(animCount)])
+}
+
+type FieldEntity struct {
+	ecs.BasicEntity
+	common.RenderComponent
+	common.SpaceComponent
+}
+
+func NewFieldEntity(position engo.Point, size float32, texture *common.Texture) *FieldEntity {
+	entity := &FieldEntity{BasicEntity: ecs.NewBasic()}
+
+	entity.RenderComponent = common.RenderComponent{Drawable: texture}
+	entity.RenderComponent.Repeat = common.Repeat
+	entity.RenderComponent.Scale = engo.GetGlobalScale()
+
+	entity.SpaceComponent = common.SpaceComponent{Position: position}
+	entity.SpaceComponent.Width = size
+	entity.SpaceComponent.Height = size
+
+	return entity
 }

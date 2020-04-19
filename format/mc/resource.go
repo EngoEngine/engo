@@ -10,7 +10,7 @@ import (
 func LoadResource(url string) (*MovieClipResource, error) {
 	resource, err := engo.Files.Resource(url)
 	if err != nil {
-		return nil, fmt.Errorf("[MovieClip] [LoadPuppet] load Resource %q: %s", url, err.Error())
+		return nil, fmt.Errorf("[MovieClip] [LoadResource] load Resource %q: %s", url, err.Error())
 	}
 
 	mcr, ok := resource.(*MovieClipResource)
