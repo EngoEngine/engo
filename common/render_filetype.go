@@ -39,6 +39,7 @@ type imageLoader struct {
 }
 
 func (i *imageLoader) Load(url string, data io.Reader) error {
+	var res TextureResource
 	if getExt(url) == ".svg" {
 		icon, err := oksvg.ReadIconStream(data, oksvg.WarnErrorMode)
 		if err != nil {
@@ -52,7 +53,7 @@ func (i *imageLoader) Load(url string, data io.Reader) error {
 		b := img.Bounds()
 		newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
 		draw.Draw(newm, newm.Bounds(), img, b.Min, draw.Src)
-		i.images[url] = NewTextureResource(&ImageObject{newm})
+		res = NewTextureResource(&ImageObject{newm})
 	} else {
 		img, _, err := image.Decode(data)
 		if err != nil {
@@ -61,8 +62,10 @@ func (i *imageLoader) Load(url string, data io.Reader) error {
 		b := img.Bounds()
 		newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
 		draw.Draw(newm, newm.Bounds(), img, b.Min, draw.Src)
-		i.images[url] = NewTextureResource(&ImageObject{newm})
+		res = NewTextureResource(&ImageObject{newm})
 	}
+	res.url = url
+	i.images[url] = res
 
 	return nil
 }
