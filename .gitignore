@@ -170,6 +170,9 @@ pip-log.txt
 .DS_Store
 
 # demo build artifacts
+new.bench.txt
+*.cov
+tmp
 demos/audio/audio
 demos/animation/animation
 demos/edgescroller/edgescroller
