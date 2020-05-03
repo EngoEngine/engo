@@ -73,6 +73,17 @@ func (*DefaultScene) Setup(u engo.Updater) {
 		}
 	}
 
+	arc1 := MyShape{BasicEntity: ecs.NewBasic()}
+	arc1.SpaceComponent = common.SpaceComponent{Position: engo.Point{350, 200}, Width: 100, Height: 100}
+	arc1.RenderComponent = common.RenderComponent{Drawable: common.Circle{Arc: 45}, Color: color.RGBA{0, 0, 255, 255}}
+
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *common.RenderSystem:
+			sys.Add(&arc1.BasicEntity, &arc1.RenderComponent, &arc1.SpaceComponent)
+		}
+	}
+
 	triangle2 := MyShape{BasicEntity: ecs.NewBasic()}
 	triangle2.SpaceComponent = common.SpaceComponent{Position: engo.Point{300, 300}, Width: 100, Height: 100}
 	triangle2.RenderComponent = common.RenderComponent{Drawable: common.Triangle{TriangleType: common.TriangleRight}, Color: color.RGBA{255, 255, 0, 255}}
@@ -141,6 +152,17 @@ func (*DefaultScene) Setup(u engo.Updater) {
 		switch sys := system.(type) {
 		case *common.RenderSystem:
 			sys.Add(&circle2.BasicEntity, &circle2.RenderComponent, &circle2.SpaceComponent)
+		}
+	}
+
+	arc2 := MyShape{BasicEntity: ecs.NewBasic()}
+	arc2.SpaceComponent = common.SpaceComponent{Position: engo.Point{473, 323}, Width: 50, Height: 50}
+	arc2.RenderComponent = common.RenderComponent{Drawable: common.Circle{Arc: 45, BorderWidth: 1, BorderColor: color.White}, Color: color.RGBA{0, 0, 255, 255}}
+
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *common.RenderSystem:
+			sys.Add(&arc2.BasicEntity, &arc2.RenderComponent, &arc2.SpaceComponent)
 		}
 	}
 

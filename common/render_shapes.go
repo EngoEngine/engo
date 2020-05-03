@@ -67,6 +67,7 @@ func (Rectangle) Close() {}
 type Circle struct {
 	BorderWidth float32
 	BorderColor color.Color
+	Arc         float32
 }
 
 // Texture always returns nil. Circle is drawable without a Texture. This implements the Drawable interface.
