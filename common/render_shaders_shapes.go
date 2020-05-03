@@ -538,7 +538,11 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		engo.Gl.DrawArrays(engo.Gl.TRIANGLES, 0, num)
 	case Circle:
 		if shape.BorderWidth > 0 {
-			engo.Gl.DrawArrays(engo.Gl.TRIANGLE_FAN, 299, 300)
+			if engo.FloatEqual(shape.Arc, 360) || engo.FloatEqual(shape.Arc, 0) {
+				engo.Gl.DrawArrays(engo.Gl.TRIANGLE_FAN, 300, 300)
+			} else {
+				engo.Gl.DrawArrays(engo.Gl.TRIANGLE_FAN, 300, 290)
+			}
 		}
 		engo.Gl.DrawArrays(engo.Gl.TRIANGLE_FAN, 0, 300)
 	case ComplexTriangles:
