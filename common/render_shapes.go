@@ -84,6 +84,31 @@ func (Circle) View() (float32, float32, float32, float32) { return 0, 0, 1, 1 }
 // Close does nothing, because there's no Texture on the GPU. This implements the Drawable interface.
 func (Circle) Close() {}
 
+// Curve is a beizer curve defined by the points provided. These points are relative
+// to the SpaceComponent provided, so moving that will move the Curve without
+// adjusting the Points for the beizer curve. The first control point is the
+// top-left corner of the space component, and the last control point is the
+// bottom-right corner. To do third and fourth order, add points to Points.
+type Curve struct {
+	LineWidth float32
+	Points    []engo.Point
+}
+
+// Texture always returns nil. Curve is drawable without a Texture. This implements the Drawable interface.
+func (Curve) Texture() *gl.Texture { return nil }
+
+// Width always returns 0. This implements the Drawable interface.
+func (Curve) Width() float32 { return 0 }
+
+// Height always returns 0. This implements the Drawable interface.
+func (Curve) Height() float32 { return 0 }
+
+// View always returns 0, 0, 1, 1. This implements the Drawable interface.
+func (Curve) View() (float32, float32, float32, float32) { return 0, 0, 1, 1 }
+
+// Close does nothing, because there's no Texture on the GPU. This implements the Drawable interface.
+func (Curve) Close() {}
+
 // ComplexTriangles is a complex form, made out of triangles.
 type ComplexTriangles struct {
 	// Points are the points the form is made of. They should be defined on a scale from 0 to 1, where (0, 0) starts
