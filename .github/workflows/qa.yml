@@ -1,0 +1,60 @@
+name: qa
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ${{ matrix.platform.on }}
+    name: ${{ matrix.go }} ${{ matrix.platform.name }} ${{ matrix.platform.type }}
+    strategy:
+      fail-fast: false
+      matrix:
+        go:
+          - 1.13.x
+        platform:
+          - { on: ubuntu-18.04, name: linux, type: desktop }
+          - { on: ubuntu-18.04, name: linux, type: browser }
+#SKIP     - { on: ubuntu-18.04, name: linux, type: mobile }
+          - { on: macos-10.15, name: macos, type: desktop }
+          - { on: macos-10.15, name: macos, type: browser }
+#SKIP     - { on: macos-10.15, name: macos, type: mobile }
+          - { on: windows-2019, name: windows, type: desktop }
+#SKIP     - { on: windows-2019, name: windows, type: browser }
+#SKIP     - { on: windows-2019, name: windows, type: mobile }
+
+    env:
+      OS_FAMILY: ${{ matrix.platform.name }}
+      ENV_TYPE: ${{ matrix.platform.type }}
+
+    steps:
+
+      - name: Install Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: ${{ matrix.go }}
+
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Setup toolchain
+        run: bash script/toolchain.sh -s
+
+      - name: Run qa
+        run: make qa
+
+      - name: Run coveralls
+        env:
+          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: make coveralls
+
+      - name: Run bench
+        run: make bench
+
+      - name: Run verify
+        run: make verify

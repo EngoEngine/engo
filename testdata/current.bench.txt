@@ -1,0 +1,27 @@
+goos: linux
+goarch: amd64
+pkg: github.com/EngoEngine/engo
+BenchmarkInputMgr_AxisCleanState-4      	 3464913	       684 ns/op	       0 B/op	       0 allocs/op
+BenchmarkInputMgr_AxisFilledState-4     	 2862438	       846 ns/op	       0 B/op	       0 allocs/op
+BenchmarkInputMgr_ButtonCleanState-4    	 2665803	       909 ns/op	       0 B/op	       0 allocs/op
+BenchmarkInputMgr_ButtonFilledState-4   	 2079781	      1383 ns/op	       0 B/op	       0 allocs/op
+BenchmarkKeyMgr_CleanState-4            	 9648092	       255 ns/op	       0 B/op	       0 allocs/op
+BenchmarkKeyMgr_FilledState-4           	 7483861	       317 ns/op	       0 B/op	       0 allocs/op
+BenchmarkKeyMgr_CleanUpdate-4           	 8163118	       292 ns/op	       0 B/op	       0 allocs/op
+BenchmarkKeyMgr_FilledUpdate-4          	 6657576	       366 ns/op	       0 B/op	       0 allocs/op
+BenchmarkKeyMgr_CleanSubOptimal-4       	 2596460	       903 ns/op	       0 B/op	       0 allocs/op
+BenchmarkKeyMgr_FilledSubOptimal-4      	 1982916	      1225 ns/op	       0 B/op	       0 allocs/op
+PASS
+ok  	github.com/EngoEngine/engo	31.584s
+PASS
+ok  	github.com/EngoEngine/engo/common	0.016s
+?   	github.com/EngoEngine/engo/common/internal/decode/convert	[no test files]
+?   	github.com/EngoEngine/engo/common/internal/decode/mp3	[no test files]
+?   	github.com/EngoEngine/engo/common/internal/decode/vorbis	[no test files]
+?   	github.com/EngoEngine/engo/common/internal/decode/wav	[no test files]
+?   	github.com/EngoEngine/engo/demos/blendmap	[no test files]
+?   	github.com/EngoEngine/engo/demos/falling	[no test files]
+?   	github.com/EngoEngine/engo/math	[no test files]
+PASS
+ok  	github.com/EngoEngine/engo/math/imath	0.003s
+?   	github.com/EngoEngine/engo/math/span	[no test files]
