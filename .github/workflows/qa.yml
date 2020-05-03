@@ -50,7 +50,7 @@ jobs:
 
       - name: Run coveralls
         env:
-          COVERALLS_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
+          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           GO111MODULE=off go get github.com/mattn/goveralls
           make coveralls
