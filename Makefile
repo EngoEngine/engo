@@ -56,6 +56,7 @@ lint-shell:
 
 # Send cover report to coveralls.io
 coveralls: profile-$(ENV_TYPE).cov
+	GO111MODULE=off go get -v github.com/mattn/goveralls
 	@echo "Sending cover report to coveralls.io"
 	$(shell go env GOPATH)/bin/goveralls -coverprofile=profile-$(ENV_TYPE).cov -service=github
 
