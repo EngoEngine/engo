@@ -106,7 +106,7 @@ func (r *RenderComponent) ensureShader() {
 			r.shader = LegacyShader
 		case Rectangle:
 			r.shader = LegacyShader
-		case ComplexTriangles:
+		case ComplexTriangles, Curve:
 			r.shader = LegacyShader
 		case Text:
 			r.shader = TextShader

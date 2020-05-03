@@ -171,6 +171,23 @@ func (*DefaultScene) Setup(u engo.Updater) {
 			sys.Add(&complexTriangle2.BasicEntity, &complexTriangle2.RenderComponent, &complexTriangle2.SpaceComponent)
 		}
 	}
+
+	curve := MyShape{BasicEntity: ecs.NewBasic()}
+	curve.SpaceComponent = common.SpaceComponent{Position: engo.Point{405, 400}, Width: 100, Height: 100}
+	curve.RenderComponent = common.RenderComponent{
+		Drawable: common.Curve{
+			LineWidth: 1,
+			Points:    []engo.Point{engo.Point{X: 0, Y: 25}, engo.Point{X: 100, Y: 70}},
+		},
+		Color: color.RGBA{255, 255, 255, 255},
+	}
+
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *common.RenderSystem:
+			sys.Add(&curve.BasicEntity, &curve.RenderComponent, &curve.SpaceComponent)
+		}
+	}
 }
 
 func (*DefaultScene) Type() string { return "Game" }
