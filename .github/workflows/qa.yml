@@ -52,8 +52,8 @@ jobs:
         env:
           COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          GO111MODULE=off go get github.com/mattn/goveralls
-          $(go env GOPATH)/bin/goveralls -coverprofile=profile-${{ matrix.platform.type }}.cov -service=github
+          GO111MODULE=off go get -v github.com/mattn/goveralls
+          make coveralls
 
       - name: Run bench
         run: make bench
