@@ -295,6 +295,11 @@ func (l *Line) PointSide(point Point) bool {
 	return math.Signbit(one - two)
 }
 
+// Magnitude returns the length of the line
+func (l *Line) Magnitude() float32 {
+	return l.P1.PointDistance(l.P2)
+}
+
 // Angle returns the euclidean angle of l in radians relative to a vertical line, going
 // positive as you head towards the positive x-axis (clockwise) and negative
 // as you head towards the negative x-axis. Values returned are [-pi, pi].
