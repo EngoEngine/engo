@@ -2,9 +2,9 @@ package common
 
 import (
 	"bytes"
+	"fmt"
 	"image/color"
 	"log"
-	"strconv"
 
 	"github.com/EngoEngine/ecs"
 	"github.com/EngoEngine/engo"
@@ -21,28 +21,33 @@ type FPSSystem struct {
 		*RenderComponent
 		*SpaceComponent
 	}
-	elapsed, frames float32
-	fnt             *Font
+	elapsed float32
+	Font    *Font // Font used to display the FPS to the screen, defaults to gomonobold
 }
 
 // New is called when FPSSystem is added to the world
 func (f *FPSSystem) New(w *ecs.World) {
 	if f.Display {
-		if err := engo.Files.LoadReaderData("gomonobold_fps.ttf", bytes.NewReader(gomonobold.TTF)); err != nil {
-			panic("unable to load gomonobold.ttf for the fps system! Error was: " + err.Error())
+		if f.Font == nil {
+			if err := engo.Files.LoadReaderData("gomonobold_fps.ttf", bytes.NewReader(gomonobold.TTF)); err != nil {
+				panic("unable to load gomonobold.ttf for the fps system! Error was: " + err.Error())
+			}
+
+			f.Font = &Font{
+				URL:  "gomonobold_fps.ttf",
+				FG:   color.White,
+				BG:   color.Black,
+				Size: 32,
+			}
+
+			if err := f.Font.CreatePreloaded(); err != nil {
+				panic("unable to create gomonobold.ttf for the fps system! Error was: " + err.Error())
+			}
 		}
-		f.fnt = &Font{
-			URL:  "gomonobold_fps.ttf",
-			FG:   color.White,
-			BG:   color.Black,
-			Size: 32,
-		}
-		if err := f.fnt.CreatePreloaded(); err != nil {
-			panic("unable to create gomonobold.ttf for the fps system! Error was: " + err.Error())
-		}
+
 		txt := Text{
-			Font: f.fnt,
-			Text: "Hello world!",
+			Font: f.Font,
+			Text: f.DisplayString(),
 		}
 		b := ecs.NewBasic()
 		f.entity.BasicEntity = &b
@@ -71,19 +76,22 @@ func (*FPSSystem) Remove(b ecs.BasicEntity) {}
 // to report the FPS
 func (f *FPSSystem) Update(dt float32) {
 	f.elapsed += dt
-	f.frames += 1
-	text := "FPS: " + strconv.FormatFloat(float64(f.frames/f.elapsed), 'G', 5, 32)
+	text := f.DisplayString()
 	if f.elapsed >= 1 {
 		if f.Display {
 			f.entity.Drawable = Text{
-				Font: f.fnt,
+				Font: f.Font,
 				Text: text,
 			}
 		}
 		if f.Terminal {
 			log.Println(text)
 		}
-		f.frames = 0
-		f.elapsed -= 1
+		f.elapsed--
 	}
+}
+
+// DisplayString returns the display string in the format FPS: 60
+func (f *FPSSystem) DisplayString() string {
+	return fmt.Sprintf("FPS: %g", engo.Time.FPS())
 }
