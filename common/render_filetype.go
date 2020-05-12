@@ -22,6 +22,7 @@ import (
 	"github.com/EngoEngine/gl"
 )
 
+// imgLoader is the shared imageLoader for all image file formats
 var imgLoader *imageLoader
 
 // TextureResource is the resource used by the RenderSystem. It uses .jpg, .gif, and .png images
