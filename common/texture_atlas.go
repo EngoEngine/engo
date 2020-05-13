@@ -4,7 +4,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"path"
 
 	"github.com/EngoEngine/engo"
@@ -102,11 +101,7 @@ func (t *textureAtlasLoader) Resource(url string) (engo.Resource, error) {
 // it also adds the main image and subtextures to the imageLoader
 func createAtlasFromXML(r io.Reader, url string) (*TextureAtlasResource, error) {
 	var atlas *TextureAtlas
-	data, err := ioutil.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
-	err = xml.Unmarshal(data, &atlas)
+	err := xml.NewDecoder(r).Decode(&atlas)
 	if err != nil {
 		return nil, err
 	}
