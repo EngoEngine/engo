@@ -56,9 +56,10 @@ type textureAtlasLoader struct {
 }
 
 // Load will load the xml file and the main image as well as add references
-// for sub textures/images in engo.Files
+// for sub textures/images in engo.Files, subtextures keep their path url (with appended extension from main image path if it does not exist),
+// the main image is loaded in reference to the directory of the xml file
 // For example this sub texture:
-//  <SubTexture name="subimg.png" x="10" y="10" width="50" height="50"/>
+//  <SubTexture name="subimg" x="10" y="10" width="50" height="50"/>
 // can be retrieved with this go code
 //  texture, err := common.LoadedSprite("subimg.png")
 func (t *textureAtlasLoader) Load(url string, data io.Reader) error {
@@ -74,7 +75,8 @@ func (t *textureAtlasLoader) Load(url string, data io.Reader) error {
 // Unload removes the preloaded atlass from the cache and clears
 // references to all SubTextures from the image loader
 func (t *textureAtlasLoader) Unload(url string) error {
-	if err := imgLoader.Unload(t.atlases[url].Atlas.ImagePath); err != nil {
+	imgURL := path.Join(path.Dir(url), t.atlases[url].Atlas.ImagePath)
+	if err := imgLoader.Unload(imgURL); err != nil {
 		return err
 	}
 	for _, subTexture := range t.atlases[url].Atlas.SubTextures {
@@ -99,6 +101,8 @@ func (t *textureAtlasLoader) Resource(url string) (engo.Resource, error) {
 
 // createAtlasFromXML unmarshals and unpacks the xml data into a TextureAtlas
 // it also adds the main image and subtextures to the imageLoader
+// if the subtexture doesn't have an extension in it's Name field,
+// it will append the main image's extension to it
 func createAtlasFromXML(r io.Reader, url string) (*TextureAtlasResource, error) {
 	var atlas *TextureAtlas
 	err := xml.NewDecoder(r).Decode(&atlas)
@@ -121,7 +125,8 @@ func createAtlasFromXML(r io.Reader, url string) (*TextureAtlasResource, error) 
 		return nil, fmt.Errorf("resource not of type `TextureResource`: %v", url)
 	}
 
-	for _, subTexture := range atlas.SubTextures {
+	ext := path.Ext(atlas.ImagePath)
+	for i, subTexture := range atlas.SubTextures {
 		texture := &Texture{
 			id:     img.Texture,
 			width:  subTexture.Width,
@@ -139,7 +144,13 @@ func createAtlasFromXML(r io.Reader, url string) (*TextureAtlasResource, error) 
 			},
 		}
 
-		imgLoader.images[subTexture.Name] = TextureResource{Texture: texture.id, Width: texture.width, Height: texture.height, Viewport: &viewport}
+		subtextureURL := subTexture.Name
+		if path.Ext(subTexture.Name) == "" {
+			subtextureURL += ext
+			atlas.SubTextures[i].Name = subtextureURL
+		}
+
+		imgLoader.images[subtextureURL] = TextureResource{Texture: texture.id, Width: texture.width, Height: texture.height, Viewport: &viewport}
 	}
 
 	return &TextureAtlasResource{
@@ -147,6 +158,7 @@ func createAtlasFromXML(r io.Reader, url string) (*TextureAtlasResource, error) 
 		url:     url,
 		texture: img.Texture,
 	}, nil
+
 }
 
 func init() {
