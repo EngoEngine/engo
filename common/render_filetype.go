@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
+
 	// imported to decode jpegs and upload them to the GPU.
 	_ "image/jpeg"
 	// imported to decode .pngs and upload them to the GPU.
@@ -21,12 +22,16 @@ import (
 	"github.com/EngoEngine/gl"
 )
 
+// imgLoader is the shared imageLoader for all image file formats
+var imgLoader *imageLoader
+
 // TextureResource is the resource used by the RenderSystem. It uses .jpg, .gif, and .png images
 type TextureResource struct {
-	Texture *gl.Texture
-	Width   float32
-	Height  float32
-	url     string
+	Texture  *gl.Texture
+	Width    float32
+	Height   float32
+	Viewport *engo.AABB
+	url      string
 }
 
 // URL is the file path of the TextureResource
@@ -172,7 +177,11 @@ func LoadedSprite(url string) (*Texture, error) {
 		return nil, fmt.Errorf("resource not of type `TextureResource`: %s", url)
 	}
 
-	return &Texture{img.Texture, img.Width, img.Height, engo.AABB{Max: engo.Point{X: 1.0, Y: 1.0}}}, nil
+	viewport := engo.AABB{Max: engo.Point{X: 1.0, Y: 1.0}}
+	if img.Viewport != nil {
+		viewport = *img.Viewport
+	}
+	return &Texture{img.Texture, img.Width, img.Height, viewport}, nil
 }
 
 // Texture represents a texture loaded in the GPU RAM (by using OpenGL), which defined dimensions and viewport
@@ -211,8 +220,9 @@ func (t Texture) Close() {
 }
 
 func init() {
-	engo.Files.Register(".jpg", &imageLoader{images: make(map[string]TextureResource)})
-	engo.Files.Register(".png", &imageLoader{images: make(map[string]TextureResource)})
-	engo.Files.Register(".gif", &imageLoader{images: make(map[string]TextureResource)})
-	engo.Files.Register(".svg", &imageLoader{images: make(map[string]TextureResource)})
+	imgLoader = &imageLoader{images: make(map[string]TextureResource)}
+	engo.Files.Register(".jpg", imgLoader)
+	engo.Files.Register(".png", imgLoader)
+	engo.Files.Register(".gif", imgLoader)
+	engo.Files.Register(".svg", imgLoader)
 }
