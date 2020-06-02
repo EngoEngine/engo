@@ -76,7 +76,6 @@ type AudioSystem struct {
 
 // New is called when the AudioSystem is added to the world.
 func (a *AudioSystem) New(w *ecs.World) {
-	var err error
 	switch engo.CurrentBackEnd {
 	case engo.BackEndMobile:
 		a.bufsize = 12288
@@ -90,10 +89,12 @@ func (a *AudioSystem) New(w *ecs.World) {
 		}
 	} else {
 		if otoPlayer == nil {
-			otoPlayer, err = oto.NewPlayer(SampleRate, channelNum, bytesPerSample, a.bufsize)
+			c, err := oto.NewContext(SampleRate, channelNum, bytesPerSample, a.bufsize)
 			if err != nil {
-				log.Printf("audio error. Unable to create new OtoPlayer: %v \n\r", err)
+				log.Printf("audio error. Unable to create new OtoContext: %v \n\r", err)
 			}
+
+			otoPlayer = c.NewPlayer()
 		} else {
 			closeCh <- struct{}{}
 			<-loopClosedCh

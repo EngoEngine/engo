@@ -99,7 +99,7 @@ type RunOptions struct {
 	// VSync indicates whether or not OpenGL should wait for the monitor to swp the buffers
 	VSync bool
 
-	// Resizable indicates whether or not the Window should be resizable.  Defaults to `true`.
+	// Resizable indicates whether or not the Window should be resizable.  Defaults to `false`.
 	NotResizable bool
 
 	// ScaleOnResize indicates whether or not engo should make things larger/smaller whenever the screen resizes
