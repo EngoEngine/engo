@@ -5,7 +5,6 @@ package engo
 import (
 	"errors"
 
-	"github.com/EngoEngine/engo"
 	vk "github.com/vulkan-go/vulkan"
 )
 
@@ -37,6 +36,7 @@ func (d *VkDevice) init() error {
 	if err := d.createImageViews(); err != nil {
 		return err
 	}
+	return nil
 }
 
 func (d *VkDevice) initVulkan() error {
@@ -55,7 +55,7 @@ func (d *VkDevice) initVulkan() error {
 	createInfo := vk.InstanceCreateInfo{}
 	createInfo.SType = vk.StructureTypeInstanceCreateInfo
 	createInfo.PApplicationInfo = &appInfo
-	exts := engo.Window.GetRequiredInstanceExtensions()
+	exts := Window.GetRequiredInstanceExtensions()
 	createInfo.EnabledExtensionCount = uint32(len(exts))
 	createInfo.PpEnabledExtensionNames = exts
 	if res := vk.CreateInstance(&createInfo, nil, &d.instance); res != vk.Success {
@@ -268,8 +268,8 @@ func (d *VkDevice) chooseSwapExtent() vk.Extent2D {
 	if details.capabilities.CurrentExtent.Width != vk.MaxUint32 {
 		return details.capabilities.CurrentExtent
 	}
-	w := uint32(engo.CanvasWidth())
-	h := uint32(engo.CanvasHeight())
+	w := uint32(CanvasWidth())
+	h := uint32(CanvasHeight())
 	actualExtent := vk.Extent2D{
 		Width:  w,
 		Height: h,
