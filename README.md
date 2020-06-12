@@ -51,6 +51,10 @@ us a DM or [create an issue](https://github.com/EngoEngine/engo/issues/new).
 Engo is always undergoing a lot of optimizations and constantly gets new features. However, this sometimes means things break. In order to make transitioning easier for you,
 we have a list of those changes, with the most recent being at the top. If you run into any problems, please contact us at [gitter](https://gitter.im/EngoEngine/engo).
 
+* common.RenderSystem's BufferContent and Buffer that allow access to the render buffer for custom shaders has been
+wrapped into BufferData. This allows access to OpenGL and Vulkan specific buffers for custom shaders.
+* common.Drawable has been changed so that it does not contain any references to the specific renderiing backend.
+The interface now uses `Texture() TextureID` rather than `*gl.Texture`.
 * TMXObject Width and Height is in pixels, and can be fractional. This has changed from an int to a float64.
 * TMXTileset now uses a Spritesheet instead of a Texture. This helps keep track of the guid better and allows the gid to not start at zero and have skips in it, as well as for borders and spacing in the tile sheet.
 * TMX Level's objects have all been rolled into Object rather than have separate things like "PolyLineObject". This is to be
