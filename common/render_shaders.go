@@ -75,6 +75,13 @@ type CullingShader interface {
 	ShouldDraw(*RenderComponent, *SpaceComponent) bool
 }
 
+// TextureShader when implemented stores the textures in the shader. This is because
+// vulkan ties the textures to the graphics pipeline, so one texture may be
+// implemented several times depending on how many shaders use textures.
+type TextureShader interface {
+	AddTexture(d Drawable)
+}
+
 func setBufferValue(buffer []float32, index int, value float32, changed *bool) {
 	if buffer[index] != value {
 		buffer[index] = value

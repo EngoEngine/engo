@@ -88,6 +88,9 @@ type RenderComponent struct {
 
 // SetShader sets the shader used by the RenderComponent.
 func (r *RenderComponent) SetShader(s Shader) {
+	if t, ok := s.(TextureShader); ok {
+		t.AddTexture(r.Drawable)
+	}
 	r.shader = s
 	engo.Mailbox.Dispatch(&renderChangeMessage{})
 }
@@ -97,19 +100,19 @@ func (r *RenderComponent) ensureShader() {
 	if r.shader == nil {
 		switch r.Drawable.(type) {
 		case Triangle:
-			r.shader = LegacyShader
+			r.SetShader(LegacyShader)
 		case Circle:
-			r.shader = LegacyShader
+			r.SetShader(LegacyShader)
 		case Rectangle:
-			r.shader = LegacyShader
+			r.SetShader(LegacyShader)
 		case ComplexTriangles, Curve:
-			r.shader = LegacyShader
+			r.SetShader(LegacyShader)
 		case Text:
-			r.shader = TextShader
+			r.SetShader(TextShader)
 		case Blendmap:
-			r.shader = BlendmapShader
+			r.SetShader(BlendmapShader)
 		default:
-			r.shader = DefaultShader
+			r.SetShader(DefaultShader)
 		}
 	}
 }

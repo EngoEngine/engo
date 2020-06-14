@@ -26,6 +26,16 @@ type VkDevice struct {
 	swapChainImageViews  []vk.ImageView
 }
 
+// Device returns the vulkan virtual device
+func (d *VkDevice) Device() vk.Device {
+	return d.device
+}
+
+// GPU returns the vulkan physical device
+func (d *VkDevice) GPU() vk.PhysicalDevice {
+	return d.gpu
+}
+
 func (d *VkDevice) init() error {
 	if err := d.initVulkan(); err != nil {
 		return err
