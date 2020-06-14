@@ -54,7 +54,7 @@ the Window Systems. Currently, the tags are as follows
 | tag | what it does | requirements |
 |:---:|---|---|
 | -mobilebind | Builds the file as an .aar library to link to an apk. For building mobile apps that require functionality not provided by gomobile, such as 3rd party O-Auth. | The ability to build apk files, either through Android Studio, maven, or some other way. |
-| -sdl | Uses SDL rather than glfw to build the window system. | SDL installed. A good walkthrough can be found [here]() |
+| -sdl | Uses SDL rather than glfw to build the window system. | SDL installed. A good walkthrough can be found [here](https://github.com/veandco/go-sdl2#installation) |
 | -vulkan | Uses Vulkan as the renderer rather than OpenGL. Does not work on mobile (yet!). | Vulkan installed. How to install on [MacOS](https://github.com/KhronosGroup/MoltenVK#building-from-the-command-line), [Windows](https://vulkan.lunarg.com/doc/view/1.1.121.2/windows/getting_started.html), and [Linux](https://vulkan.lunarg.com/doc/view/1.1.114.0/linux/getting_started.html) |
 | -headless | Does not build the OpenGL context at all. For use on servers or other places where a framebuffer isn't accessible. Use in CONJUNCTION with the Headless Run Option! | No requirements |
 
