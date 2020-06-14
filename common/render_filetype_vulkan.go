@@ -8,13 +8,15 @@ type TextureID *VkTextureID
 
 type VkTextureID uint64
 
-var texMap = make(map[*VkTextureID]Image)
+// TexMap is a map of the texture IDs to the Image data. This is used for making
+// custom shaders that use textures in Vulkan.
+var TexMap = make(map[*VkTextureID]Image)
 
 var idInc uint64
 
 func createTextureID(img Image) TextureID {
 	id := VkTextureID(atomic.AddUint64(&idInc, 1))
-	texMap[&id] = img
+	TexMap[&id] = img
 	return &id
 }
 
