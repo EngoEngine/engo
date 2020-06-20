@@ -9,7 +9,7 @@
 A cross-platform game engine written in Go following an interpretation of the Entity Component System paradigm. Engo is
 currently compilable for Mac OSX, Linux and Windows. With the release of Go 1.4, supporting Android and the inception of
 iOS compatibility, mobile has been be added as a release target. Web support
-([gopherjs](https://github.com/gopherjs/gopherjs)) is also available.
+([wasm](https://github.com/golang/go/wiki/WebAssembly)) is also available.
 
 v1.0 is now available! To celebrate, there will be a game jam coming soon to celebrate the release, start actually
 building things and hopefully find any issues. Updates for this will come soon.
