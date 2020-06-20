@@ -42,7 +42,7 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 	canvas.Set("width", int(float64(width)+0.5))   // Nearest non-negative int.
 	canvas.Set("height", int(float64(height)+0.5)) // Nearest non-negative int.
 
-	if document.Get("body") == js.Null() {
+	if document.Get("body").IsNull() {
 		document.Set("body", document.Call("createElement", "body"))
 	}
 	body := document.Get("body")

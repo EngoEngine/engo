@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         go:
-          - 1.13.x
+          - 1.14.x
         platform:
           - { on: ubuntu-18.04, name: linux, type: desktop }
           - { on: ubuntu-18.04, name: linux, type: browser }
