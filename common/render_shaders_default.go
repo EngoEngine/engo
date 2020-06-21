@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"runtime"
 
 	"github.com/EngoEngine/ecs"
 	"github.com/EngoEngine/engo"
@@ -84,7 +85,15 @@ func (s *basicShader) Setup(w *ecs.World) error {
 	if s.BatchSize > MaxSprites {
 		return fmt.Errorf("%d is greater than the maximum batch size of %d", s.BatchSize, MaxSprites)
 	}
-	s.setupBatchSizeDefaults()
+
+	if s.BatchSize <= 0 {
+		if runtime.GOOS == "js" {
+			s.BatchSize = 2048 // js can't seem to handle the whole buffer size
+		} else {
+			s.BatchSize = MaxSprites
+		}
+	}
+
 	// Create the vertex buffer for batching.
 	s.vertices = make([]float32, s.BatchSize*spriteSize)
 	s.vertexBuffer = engo.Gl.CreateBuffer()
