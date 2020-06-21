@@ -1,5 +1,7 @@
 module github.com/EngoEngine/engo
 
+replace github.com/EngoEngine/gl => /Users/noofapple/go/src/github.com/EngoEngine/gl
+
 require (
 	github.com/EngoEngine/ecs v1.0.4
 	github.com/EngoEngine/gl v1.0.10

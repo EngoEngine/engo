@@ -84,9 +84,7 @@ func (s *basicShader) Setup(w *ecs.World) error {
 	if s.BatchSize > MaxSprites {
 		return fmt.Errorf("%d is greater than the maximum batch size of %d", s.BatchSize, MaxSprites)
 	}
-	if s.BatchSize <= 0 {
-		s.BatchSize = MaxSprites
-	}
+	s.setupBatchSizeDefaults()
 	// Create the vertex buffer for batching.
 	s.vertices = make([]float32, s.BatchSize*spriteSize)
 	s.vertexBuffer = engo.Gl.CreateBuffer()
