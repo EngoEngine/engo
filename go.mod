@@ -2,7 +2,7 @@ module github.com/EngoEngine/engo
 
 require (
 	github.com/EngoEngine/ecs v1.0.4
-	github.com/EngoEngine/gl v1.0.10
+	github.com/EngoEngine/gl v1.0.11
 	github.com/EngoEngine/math v1.0.4
 	github.com/Noofbiz/sdlMojaveFix v0.0.1
 	github.com/Noofbiz/tmx v0.2.0
@@ -30,4 +30,4 @@ require (
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
 
-go 1.13
+go 1.14
