@@ -93,5 +93,8 @@ func (f *FPSSystem) Update(dt float32) {
 
 // DisplayString returns the display string in the format FPS: 60
 func (f *FPSSystem) DisplayString() string {
+	if engo.Time == nil {
+		return ""
+	}
 	return fmt.Sprintf("FPS: %g", engo.Time.FPS())
 }
