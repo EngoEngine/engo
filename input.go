@@ -24,6 +24,8 @@ type InputManager struct {
 	// Mouse is InputManager's reference to the mouse. It is recommended to use the
 	// Axis and Button system if at all possible.
 	Mouse Mouse
+	// Modifier represents a special key pressed along with another key
+	Modifier Modifier
 
 	// Touches is the touches on the screen. There can be up to 5 recorded in Android,
 	// and up to 4 on iOS. GLFW can also keep track of the touches. The latest touch is also

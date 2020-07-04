@@ -26,6 +26,7 @@ var (
 
 	poll     = make(map[int]bool)
 	pollLock sync.Mutex
+	mod      = Modifier(0)
 
 	document = js.Global().Get("document")
 	window   = js.Global().Get("window")
@@ -104,6 +105,8 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		if len(char) == 1 {
 			Mailbox.Dispatch(TextMessage{[]rune(char)[0]})
 		}
+
+		checkModifiers(event)
 		return nil
 	}))
 
@@ -132,6 +135,8 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		if k == KeyArrowUp || k == KeyArrowDown || k == KeyArrowLeft || k == KeyArrowRight || k == KeyTab || k == KeyBackspace || k == KeySpace {
 			event.Call("preventDefault")
 		}
+
+		checkModifiers(event)
 		return nil
 	}))
 
@@ -273,12 +278,27 @@ func jsPollKeys() {
 	pollLock.Lock()
 	defer pollLock.Unlock()
 
+	Input.Modifier = mod
 	for key, state := range poll {
 		Input.keys.Set(Key(key), state)
 		delete(poll, key)
 	}
+
 }
 
+func checkModifiers(event js.Value) {
+	mod = 0
+	for str, modifier := range jsStrToMod {
+		if event.Get(str).Bool() {
+			go func(m Modifier) {
+				pollLock.Lock()
+				mod = m
+				pollLock.Unlock()
+			}(modifier)
+			break
+		}
+	}
+}
 func requestAnimationFrame(callback func(float32)) int {
 	//return dom.GetWindow().RequestAnimationFrame(callback)
 	return js.Global().Call("requestAnimationFrame", callback).Int()
