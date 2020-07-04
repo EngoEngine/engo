@@ -214,6 +214,13 @@ const (
 	KeyNumEnter Key = 13
 )
 
+var jsStrToMod = map[string]Modifier{
+	"shiftKey": Shift,
+	"ctrlKey":  Control,
+	"altKey":   Alt,
+	"metaKey":  Super,
+}
+
 var jsStrToKey = map[string]Key{
 	"Escape":         KeyEscape,
 	"Digit0":         KeyZero,

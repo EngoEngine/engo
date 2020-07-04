@@ -175,6 +175,8 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		} else if a == glfw.Release {
 			Input.keys.Set(key, false)
 		}
+
+		Input.Modifier = Modifier(m)
 	})
 
 	Window.SetSizeCallback(func(w *glfw.Window, widthInt int, heightInt int) {

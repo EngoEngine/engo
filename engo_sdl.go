@@ -139,6 +139,20 @@ func RunIteration() {
 				} else if e.GetType() == sdl.KEYDOWN {
 					Input.keys.Set(key, true)
 				}
+				Input.Modifier = Modifier(sdl.GetModState())
+
+				// SDL supports codes for both left/right mods, to keep the API similar
+				// with the GLFW implementation, either will trigger the mod for that key
+				if Input.Modifier&sdl.KMOD_SHIFT != 0 {
+					Input.Modifier = Shift
+				} else if Input.Modifier&sdl.KMOD_CTRL != 0 {
+					Input.Modifier = Control
+				} else if Input.Modifier&sdl.KMOD_ALT != 0 {
+					Input.Modifier = Alt
+				} else if Input.Modifier&sdl.KMOD_GUI != 0 {
+					Input.Modifier = Super
+				}
+
 			case *sdl.MouseWheelEvent:
 				Input.Mouse.ScrollX = float32(e.X)
 				Input.Mouse.ScrollY = float32(e.Y)
@@ -158,8 +172,7 @@ func RunIteration() {
 					Input.Mouse.Button = MouseButton5
 				}
 
-				// Is this possible in SDL?
-				// Input.Mouse.Modifer = Modifier(m)
+				Input.Mouse.Modifer = Input.Modifier
 
 				if e.State == sdl.PRESSED {
 					Input.Mouse.Action = Press
