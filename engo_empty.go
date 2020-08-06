@@ -75,8 +75,6 @@ func runLoop(defaultScene Scene, headless bool) {
 		case <-resetLoopTicker:
 			ticker.Stop()
 			ticker = time.NewTicker(time.Duration(int(time.Second) / opts.FPSLimit))
-		case <-c:
-			fallthrough
 		case <-closeGame:
 			ticker.Stop()
 			closeEvent()
