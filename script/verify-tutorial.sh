@@ -32,8 +32,8 @@ verify () {
       fi
       "${projectDir}/script/go-build.sh"
       go clean
-      git stash
-      git stash drop
+      git stash || true
+      git stash drop || true
   done
 }
 
