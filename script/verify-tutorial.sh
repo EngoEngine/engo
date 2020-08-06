@@ -17,7 +17,6 @@ verify () {
   if [ ! -d "${tutorialPath}" ]; then
     git clone "https://github.com/EngoEngine/${tutorial}.git" "${tutorialPath}"
     cd "${tutorialPath}"
-    go mod init github.com/EngoEngine/TrafficManager
     else
     cd "${tutorialPath}"
   fi
