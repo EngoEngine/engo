@@ -24,8 +24,6 @@ verify () {
   for branch in $branches
   do
       println "VERIFYING ${branch}..."
-      git stash
-      git stash drop
       git checkout "${branch}"
       if [ "${OS_FAMILY}" == "windows" ]; then	
         go mod edit -replace="github.com/EngoEngine/engo=D:$(printf "%s" "${projectDir:2}" | tr / \\)"	
@@ -34,6 +32,8 @@ verify () {
       fi
       "${projectDir}/script/go-build.sh"
       go clean
+      git stash
+      git stash drop
   done
 }
 
