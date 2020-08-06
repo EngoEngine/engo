@@ -21,13 +21,6 @@ verify () {
     cd "${tutorialPath}"
   fi
 
-  rm -f go.mod
-  if [ "${OS_FAMILY}" == "windows" ]; then
-    go mod edit -replace="github.com/EngoEngine/engo=D:$(printf "%s" "${projectDir:2}" | tr / \\)"
-  else
-    go mod edit -replace="github.com/EngoEngine/engo=${projectDir}"
-  fi
-
   for branch in $branches
   do
       println "VERIFYING ${branch}..."
