@@ -27,7 +27,7 @@ type basicShader struct {
 	inTexCoords int
 	inColor     int
 
-	matrixProjView *gl.UniformLocation
+	//matrixProjView *gl.UniformLocation
 
 	projectionMatrix *engo.Matrix
 	viewMatrix       *engo.Matrix
