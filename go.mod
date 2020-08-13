@@ -6,14 +6,12 @@ require (
 	github.com/EngoEngine/math v1.0.4
 	github.com/Noofbiz/sdlMojaveFix v0.0.1
 	github.com/Noofbiz/tmx v0.2.0
-	github.com/client9/misspell v0.3.4 // indirect
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200420212212-258d9bec320e
 	github.com/go-gl/mathgl v0.0.0-20190713194549-592312d8590a
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/hajimehoshi/go-mp3 v0.2.1
 	github.com/hajimehoshi/oto v0.5.4
 	github.com/jfreymuth/oggvorbis v1.0.1
-	github.com/kisielk/errcheck v1.4.0 // indirect
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/srwiley/oksvg v0.0.0-20200311192757-870daf9aa564
