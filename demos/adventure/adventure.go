@@ -27,6 +27,7 @@ var (
 	downButton  = "down"
 	leftButton  = "left"
 	rightButton = "right"
+	pauseButton = "pause"
 	model       = "motw.png"
 	width       = 52
 	height      = 73
@@ -131,6 +132,7 @@ func (*DefaultScene) Preload() {
 	engo.Input.RegisterButton(leftButton, engo.KeyA, engo.KeyArrowLeft)
 	engo.Input.RegisterButton(rightButton, engo.KeyD, engo.KeyArrowRight)
 	engo.Input.RegisterButton(downButton, engo.KeyS, engo.KeyArrowDown)
+	engo.Input.RegisterButton(pauseButton, engo.KeySpace)
 }
 
 func (scene *DefaultScene) Setup(u engo.Updater) {
@@ -142,6 +144,7 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 	w.AddSystem(&common.AnimationSystem{})
 	w.AddSystem(&SpeedSystem{})
 	w.AddSystem(&ControlSystem{})
+	w.AddSystem(&PauseSystem{})
 
 	// Setup TileMap
 	resource, err := engo.Files.Resource("example.tmx")
@@ -200,6 +203,16 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 				&hero.BasicEntity,
 				&hero.SpeedComponent,
 				&hero.SpaceComponent,
+			)
+
+		case *PauseSystem:
+			sys.Add(
+				&hero.BasicEntity,
+				&hero.AnimationComponent,
+				&hero.SpaceComponent,
+				&hero.RenderComponent,
+				&hero.ControlComponent,
+				&hero.SpeedComponent,
 			)
 		}
 	}
@@ -266,7 +279,17 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 			for _, v := range tileComponents {
 				sys.Add(&v.BasicEntity, &v.RenderComponent, &v.SpaceComponent)
 			}
-
+		case *PauseSystem:
+			for _, v := range tileComponents {
+				sys.Add(
+					&v.BasicEntity,
+					nil,
+					&v.SpaceComponent,
+					&v.RenderComponent,
+					nil,
+					nil,
+				)
+			}
 		}
 	}
 
@@ -544,6 +567,102 @@ func (c *ControlSystem) Update(dt float32) {
 			vector.MultiplyScalar(speed)
 			engo.Mailbox.Dispatch(SpeedMessage{e.BasicEntity, vector})
 		}
+	}
+}
+
+type pauseEntity struct {
+	*ecs.BasicEntity
+	*common.AnimationComponent
+	*common.SpaceComponent
+	*common.RenderComponent
+	*ControlComponent
+	*SpeedComponent
+}
+
+type PauseSystem struct {
+	entities []pauseEntity
+	world    *ecs.World
+	paused   bool
+}
+
+func (p *PauseSystem) New(w *ecs.World) {
+	p.world = w
+}
+
+func (p *PauseSystem) Add(basic *ecs.BasicEntity, animation *common.AnimationComponent, space *common.SpaceComponent, render *common.RenderComponent, control *ControlComponent, speed *SpeedComponent) {
+	p.entities = append(p.entities, pauseEntity{basic, animation, space, render, control, speed})
+}
+
+func (p *PauseSystem) Remove(basic ecs.BasicEntity) {
+	delete := -1
+	for index, e := range p.entities {
+		if e.BasicEntity.ID() == basic.ID() {
+			delete = index
+			break
+		}
+	}
+	if delete >= 0 {
+		p.entities = append(p.entities[:delete], p.entities[delete+1:]...)
+	}
+}
+
+func (p *PauseSystem) Update(dt float32) {
+	if engo.Input.Button(pauseButton).JustPressed() {
+		if !p.paused {
+			for _, system := range p.world.Systems() {
+				switch sys := system.(type) {
+				case *common.AnimationSystem:
+					for _, ent := range p.entities {
+						sys.Remove(*ent.BasicEntity)
+					}
+				case *SpeedSystem:
+					for _, ent := range p.entities {
+						sys.Remove(*ent.BasicEntity)
+					}
+				case *ControlSystem:
+					for _, ent := range p.entities {
+						sys.Remove(*ent.BasicEntity)
+					}
+				}
+			}
+		} else {
+			for _, system := range p.world.Systems() {
+				switch sys := system.(type) {
+				case *common.AnimationSystem:
+					for _, ent := range p.entities {
+						if ent.AnimationComponent != nil {
+							sys.Add(
+								ent.BasicEntity,
+								ent.AnimationComponent,
+								ent.RenderComponent,
+							)
+						}
+					}
+				case *SpeedSystem:
+					for _, ent := range p.entities {
+						if ent.SpeedComponent != nil {
+							sys.Add(
+								ent.BasicEntity,
+								ent.SpeedComponent,
+								ent.SpaceComponent,
+							)
+						}
+					}
+				case *ControlSystem:
+					for _, ent := range p.entities {
+						if ent.ControlComponent != nil {
+							sys.Add(
+								ent.BasicEntity,
+								ent.AnimationComponent,
+								ent.ControlComponent,
+								ent.SpaceComponent,
+							)
+						}
+					}
+				}
+			}
+		}
+		p.paused = !p.paused
 	}
 }
 

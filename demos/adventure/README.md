@@ -95,3 +95,101 @@ for _, objectLayer := range levelData.ObjectLayers {
     }
 }
 ```
+
+# A Pause Menu
+
+A pause system handles pausing
+
+```go
+type pauseEntity struct {
+	*ecs.BasicEntity
+	*common.AnimationComponent
+	*common.SpaceComponent
+	*common.RenderComponent
+	*ControlComponent
+	*SpeedComponent
+}
+```
+
+Notice the pauseEntity contains a lot of components! This is likely going to be the case!
+Luckily, they're poointers so we can use nil!
+
+```go
+type PauseSystem struct {
+	entities []pauseEntity
+	world    *ecs.World
+	paused   bool
+}
+
+func (p *PauseSystem) New(w *ecs.World) {
+	p.world = w
+}
+```
+
+It'll also need a New function so it can get access to the world.
+
+```go
+func (p *PauseSystem) Update(dt float32) {
+	if engo.Input.Button(pauseButton).JustPressed() {
+		if !p.paused {
+			for _, system := range p.world.Systems() {
+				switch sys := system.(type) {
+				case *common.AnimationSystem:
+					for _, ent := range p.entities {
+						sys.Remove(*ent.BasicEntity)
+					}
+				case *SpeedSystem:
+					for _, ent := range p.entities {
+						sys.Remove(*ent.BasicEntity)
+					}
+				case *ControlSystem:
+					for _, ent := range p.entities {
+						sys.Remove(*ent.BasicEntity)
+					}
+				}
+			}
+		} else {
+			for _, system := range p.world.Systems() {
+				switch sys := system.(type) {
+				case *common.AnimationSystem:
+					for _, ent := range p.entities {
+						if ent.AnimationComponent != nil {
+							sys.Add(
+								ent.BasicEntity,
+								ent.AnimationComponent,
+								ent.RenderComponent,
+							)
+						}
+					}
+				case *SpeedSystem:
+					for _, ent := range p.entities {
+						if ent.SpeedComponent != nil {
+							sys.Add(
+								ent.BasicEntity,
+								ent.SpeedComponent,
+								ent.SpaceComponent,
+							)
+						}
+					}
+				case *ControlSystem:
+					for _, ent := range p.entities {
+						if ent.ControlComponent != nil {
+							sys.Add(
+								ent.BasicEntity,
+								ent.AnimationComponent,
+								ent.ControlComponent,
+								ent.SpaceComponent,
+							)
+						}
+					}
+				}
+			}
+		}
+		p.paused = !p.paused
+	}
+}
+```
+
+Then in the update you can handle removing the entities from the systems that make
+them move. This just removes those from the system. If you wanted to do something
+like show a menu or a grey overlay, here's the place to do it.
