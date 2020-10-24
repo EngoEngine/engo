@@ -107,3 +107,25 @@ func TestTheTimerNow(t *testing.T) {
 		t.Error("theTimer when it's a realTime did not produce time.Now().UnixNano()")
 	}
 }
+
+func TestClockPause(t *testing.T) {
+	clock := NewClock()
+	wait := time.NewTicker(time.Second / 100)
+	clock.Tick()
+	<-wait.C
+	clock.Tick()
+	if clock.Delta() <= 0 {
+		t.Error("Clock did not increase delta after wait")
+	}
+	clock.Pause()
+	if clock.Delta() != 0 {
+		t.Error("Clock did not pause!")
+	}
+	clock.Unpause()
+	clock.Tick()
+	<-wait.C
+	clock.Tick()
+	if clock.Delta() <= 0 {
+		t.Error("Clock did not increase delta after unpausing")
+	}
+}

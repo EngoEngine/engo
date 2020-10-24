@@ -32,6 +32,8 @@ type Clock struct {
 	elapsStamp int64
 	frameStamp int64
 	startStamp int64
+
+	paused bool
 }
 
 // NewClock creates a new timer which allows you to measure ticks per seconds. Be sure to call `Tick()` whenever you
@@ -64,7 +66,20 @@ func (c *Clock) Tick() {
 
 // Delta is the amount of seconds between the last tick and the one before that
 func (c *Clock) Delta() float32 {
+	if c.paused {
+		return 0
+	}
 	return float32(float64(c.deltaStamp) / float64(secondsInNano))
+}
+
+// Pause pauses the clock
+func (c *Clock) Pause() {
+	c.paused = true
+}
+
+// Unpause unpauses the clock
+func (c *Clock) Unpause() {
+	c.paused = false
 }
 
 // FPS is the amount of frames per second, computed every time a tick occurs at least a second after the previous update

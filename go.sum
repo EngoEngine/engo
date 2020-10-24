@@ -8,8 +8,6 @@ github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802 h1:1BDTz0u9nC3//pOC
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/EngoEngine/ecs v1.0.4 h1:XjR8fjvNo2HfzMdxdva3rmU27T8qcZlM7eOALbo6wqo=
 github.com/EngoEngine/ecs v1.0.4/go.mod h1:B/+b8S8xOPXaI05sFRBQ94nWHFxerBuSUPa4EXDNodg=
-github.com/EngoEngine/gl v1.0.10 h1:Np2JJRsGSxI2R8lPKqk+fPV5eBb/mJA5Iq2gGSbKEng=
-github.com/EngoEngine/gl v1.0.10/go.mod h1:8f1reqqWMIXn6FSdcjwo6ayoZfrEqiv/0ulVHb4LGf4=
 github.com/EngoEngine/gl v1.0.11 h1:e0WdnP19ElyMjFVm2eXQ9rVIdxEl9v1u99T7by/xTPM=
 github.com/EngoEngine/gl v1.0.11/go.mod h1:8f1reqqWMIXn6FSdcjwo6ayoZfrEqiv/0ulVHb4LGf4=
 github.com/EngoEngine/math v1.0.4 h1:ejDfSg48ynB9T6btiu9EHjZmpQgW/zHf3IeC7SqXXv8=
