@@ -3,31 +3,26 @@
 package common
 
 import (
+	"errors"
 	"fmt"
+	"sync"
+	"time"
 
 	"github.com/EngoEngine/ecs"
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/gl"
+	vk "github.com/vulkan-go/vulkan"
 )
 
 type basicShader struct {
 	BatchSize int
 
-	indices []uint16
-	//indexBuffer *gl.Buffer
-	//program     *gl.Program
-
+	indices  []uint16
 	vertices []float32
-	//vertexBuffer                 *gl.Buffer
-	//lastTexture                  *gl.Texture
-	//lastRepeating                TextureRepeating
-	//lastMagFilter, lastMinFilter ZoomFilter
 
 	inPosition  int
 	inTexCoords int
 	inColor     int
-
-	//matrixProjView *gl.UniformLocation
 
 	projectionMatrix *engo.Matrix
 	viewMatrix       *engo.Matrix
@@ -40,7 +35,29 @@ type basicShader struct {
 	camera        *CameraSystem
 	cameraEnabled bool
 
-	idx int
+	idx                      int
+	renderPass               vk.RenderPass
+	pipelineLayout           vk.PipelineLayout
+	graphicsPipelines        []vk.Pipeline
+	swapChainFramebuffers    []vk.Framebuffer
+	commandPool              vk.CommandPool
+	commandBuffers           []vk.CommandBuffer
+	imageAvailableSemaphores []vk.Semaphore
+	renderFinishedSemaphores []vk.Semaphore
+	inFlightFences           []vk.Fence
+	currentFrame             int
+	framebufferResized       bool
+	lock                     sync.Mutex
+	vertexBuffer             vk.Buffer
+	vertexBufferMemory       vk.DeviceMemory
+	indexBuffer              vk.Buffer
+	indexBufferMemory        vk.DeviceMemory
+	descriptorSetLayouts     []vk.DescriptorSetLayout
+	uniformBuffers           []vk.Buffer
+	uniformBuffersMemory     []vk.DeviceMemory
+	startTime                time.Time
+	descriptorPool           vk.DescriptorPool
+	descriptorSets           []vk.DescriptorSet
 }
 
 func (s *basicShader) Setup(w *ecs.World) error {
@@ -52,7 +69,6 @@ func (s *basicShader) Setup(w *ecs.World) error {
 	}
 	// Create the vertex buffer for batching.
 	s.vertices = make([]float32, s.BatchSize*spriteSize)
-	s.vertexBuffer = engo.Gl.CreateBuffer()
 	// Create and populate indices buffer. The size of the buffer depends on the batch size.
 	// These should never change, so we can just initialize them once here and be done with it.
 	numIndicies := s.BatchSize * 6
@@ -65,20 +81,62 @@ func (s *basicShader) Setup(w *ecs.World) error {
 		s.indices[i+4] = uint16(j + 2)
 		s.indices[i+5] = uint16(j + 3)
 	}
-	var err error
-	s.program, err = LoadShader(defaultVertexShader, defaultFragmentShader)
-	if err != nil {
+
+	engo.Mailbox.Listen("WindowResizeMessage", func(m engo.Message) {
+		_, ok := m.(engo.WindowResizeMessage)
+		if !ok {
+			return
+		}
+		s.lock.Lock()
+		s.framebufferResized = true
+		s.lock.Unlock()
+	})
+
+	if err := s.createRenderPass(); err != nil {
 		return err
 	}
-	s.indexBuffer = engo.Gl.CreateBuffer()
-	engo.Gl.BindBuffer(engo.Gl.ELEMENT_ARRAY_BUFFER, s.indexBuffer)
-	engo.Gl.BufferData(engo.Gl.ELEMENT_ARRAY_BUFFER, s.indices, engo.Gl.STATIC_DRAW)
-
-	s.inPosition = engo.Gl.GetAttribLocation(s.program, "in_Position")
-	s.inTexCoords = engo.Gl.GetAttribLocation(s.program, "in_TexCoords")
-	s.inColor = engo.Gl.GetAttribLocation(s.program, "in_Color")
-
-	s.matrixProjView = engo.Gl.GetUniformLocation(s.program, "matrixProjView")
+	if err := s.createDescriptorSetLayout(); err != nil {
+		return err
+	}
+	if err := s.createGraphicsPipeline(); err != nil {
+		return err
+	}
+	if err := s.createFrameBuffers(); err != nil {
+		return err
+	}
+	if err := s.createCommandPool(); err != nil {
+		return err
+	}
+	if err := r.createTextureImage(); err != nil {
+		return err
+	}
+	if err := r.createTextureImageView(); err != nil {
+		return err
+	}
+	if err := r.createTextureSampler(); err != nil {
+		return err
+	}
+	if err := r.createVertexBuffer(); err != nil {
+		return err
+	}
+	if err := r.createIndexBuffer(); err != nil {
+		return err
+	}
+	if err := r.createUniformBuffers(); err != nil {
+		return err
+	}
+	if err := r.createDescriptorPool(); err != nil {
+		return err
+	}
+	if err := r.createDescriptorSets(); err != nil {
+		return err
+	}
+	if err := r.createCommandBuffers(); err != nil {
+		return err
+	}
+	if err := r.createSyncObjects(); err != nil {
+		return err
+	}
 
 	s.projectionMatrix = engo.IdentityMatrix()
 	s.viewMatrix = engo.IdentityMatrix()
@@ -87,6 +145,302 @@ func (s *basicShader) Setup(w *ecs.World) error {
 	s.cullingMatrix = engo.IdentityMatrix()
 
 	s.setTexture(nil)
+
+	return nil
+}
+
+func (s *basicShader) createRenderPass() error {
+	colorAttachment := vk.AttachmentDescription{
+		Format:         s.swapChainImageFormat,
+		Samples:        vk.SampleCount1Bit,
+		LoadOp:         vk.AttachmentLoadOpClear,
+		StoreOp:        vk.AttachmentStoreOpStore,
+		StencilLoadOp:  vk.AttachmentLoadOpDontCare,
+		StencilStoreOp: vk.AttachmentStoreOpDontCare,
+		InitialLayout:  vk.ImageLayoutUndefined,
+		FinalLayout:    vk.ImageLayoutPresentSrc,
+	}
+
+	colorAttachmentRef := vk.AttachmentReference{
+		Attachment: 0,
+		Layout:     vk.ImageLayoutColorAttachmentOptimal,
+	}
+
+	subpass := vk.SubpassDescription{
+		PipelineBindPoint:    vk.PipelineBindPointGraphics,
+		ColorAttachmentCount: 1,
+		PColorAttachments:    []vk.AttachmentReference{colorAttachmentRef},
+	}
+
+	dependency := vk.SubpassDependency{
+		SrcSubpass:    vk.SubpassExternal,
+		DstSubpass:    0,
+		SrcStageMask:  vk.PipelineStageFlags(vk.PipelineStageColorAttachmentOutputBit),
+		SrcAccessMask: 0,
+		DstStageMask:  vk.PipelineStageFlags(vk.AccessColorAttachmentReadBit | vk.AccessColorAttachmentWriteBit),
+	}
+
+	renderPassInfo := vk.RenderPassCreateInfo{
+		SType:           vk.StructureTypeRenderPassCreateInfo,
+		AttachmentCount: 1,
+		PAttachments:    []vk.AttachmentDescription{colorAttachment},
+		SubpassCount:    1,
+		PSubpasses:      []vk.SubpassDescription{subpass},
+		DependencyCount: 1,
+		PDependencies:   []vk.SubpassDependency{dependency},
+	}
+
+	var renderPass vk.RenderPass
+	if res := vk.CreateRenderPass(engo.Device.Device(), &renderPassInfo, nil, &renderPass); res != vk.Success {
+		return errors.New("failed to create render pass")
+	}
+	s.renderPass = renderPass
+
+	return nil
+}
+
+func (s *basicShader) createDescriptorSetLayout() error {
+	uboLayoutBinding := vk.DescriptorSetLayoutBinding{
+		Binding:            0,
+		DescriptorType:     vk.DescriptorTypeUniformBuffer,
+		DescriptorCount:    1,
+		StageFlags:         vk.ShaderStageFlags(vk.ShaderStageVertexBit),
+		PImmutableSamplers: []vk.Sampler{vk.NullSampler},
+	}
+	samplerLayoutBinding := vk.DescriptorSetLayoutBinding{
+		Binding:         1,
+		DescriptorCount: 1,
+		DescriptorType:  vk.DescriptorTypeCombinedImageSampler,
+		StageFlags:      vk.ShaderStageFlags(vk.ShaderStageFragmentBit),
+	}
+	bindings := []vk.DescriptorSetLayoutBinding{uboLayoutBinding, samplerLayoutBinding}
+
+	layoutInfo := vk.DescriptorSetLayoutCreateInfo{
+		SType:        vk.StructureTypeDescriptorSetLayoutCreateInfo,
+		BindingCount: uint32(len(bindings)),
+		PBindings:    bindings,
+	}
+
+	var descriptorSetLayout vk.DescriptorSetLayout
+	if res := vk.CreateDescriptorSetLayout(engo.Device.Device(), &layoutInfo, nil, &descriptorSetLayout); res != vk.Success {
+		return errors.New("unable to create descriptor set layout")
+	}
+	s.descriptorSetLayouts = append(s.descriptorSetLayouts, descriptorSetLayout)
+
+	return nil
+}
+
+func (s *basicShader) createGraphicsPipeline() error {
+	vertShaderData, err := shaders.Asset("default/vert.spv")
+	if err != nil {
+		return err
+	}
+	fragShaderData, err := shaders.Asset("default/frag.spv")
+	if err != nil {
+		return err
+	}
+	vertShaderModule, err := LoadShaderModule(vertShaderData)
+	if err != nil {
+		return err
+	}
+	fragShaderModule, err := LoadShaderModule(fragShaderData)
+	if err != nil {
+		return err
+	}
+
+	vertShaderStageInfo := vk.PipelineShaderStageCreateInfo{
+		SType:  vk.StructureTypePipelineShaderStageCreateInfo,
+		Stage:  vk.ShaderStageVertexBit,
+		Module: vertShaderModule,
+		PName:  SafeString("main"),
+	}
+
+	fragShaderStageInfo := vk.PipelineShaderStageCreateInfo{
+		SType:  vk.StructureTypePipelineShaderStageCreateInfo,
+		Stage:  vk.ShaderStageFragmentBit,
+		Module: fragShaderModule,
+		PName:  SafeString("main"),
+	}
+
+	shaderStages := []vk.PipelineShaderStageCreateInfo{
+		vertShaderStageInfo,
+		fragShaderStageInfo,
+	}
+
+	var a []vk.VertexInputAttributeDescription
+	a = append(a, vk.VertexInputAttributeDescription{
+		Binding:  0,
+		Location: 0,
+		Format:   vk.FormatR32g32Sfloat,
+		Offset:   0,
+	})
+	a = append(a, vk.VertexInputAttributeDescription{
+		Binding:  0,
+		Location: 1,
+		Format:   vk.FormatR32g32b32Sfloat,
+		Offset:   2 * 4,
+	})
+	a = append(a, vk.VertexInputAttributeDescription{
+		Binding:  0,
+		Location: 2,
+		Format:   vk.FormatR32g32Sfloat,
+		Offset:   5 * 4,
+	})
+	b := vk.VertexInputBindingDescription{
+		Binding:   0,
+		Stride:    7 * 4,
+		InputRate: vk.VertexInputRateVertex,
+	}
+
+	vertexInputInfo := vk.PipelineVertexInputStateCreateInfo{
+		SType:                           vk.StructureTypePipelineVertexInputStateCreateInfo,
+		VertexBindingDescriptionCount:   1,
+		VertexAttributeDescriptionCount: uint32(len(a)),
+		PVertexBindingDescriptions:      []vk.VertexInputBindingDescription{b},
+		PVertexAttributeDescriptions:    a,
+	}
+
+	inputAssembly := vk.PipelineInputAssemblyStateCreateInfo{
+		SType:                  vk.StructureTypePipelineInputAssemblyStateCreateInfo,
+		Topology:               vk.PrimitiveTopologyTriangleList,
+		PrimitiveRestartEnable: vk.False,
+	}
+
+	viewport := vk.Viewport{
+		X:        0,
+		Y:        0,
+		Width:    float32(engo.Device.SwapChainExtent().Width),
+		Height:   float32(engo.Device.SwapChainExtent().Height),
+		MinDepth: 0,
+		MaxDepth: 1,
+	}
+
+	scissor := vk.Rect2D{
+		Offset: vk.Offset2D{
+			X: 0,
+			Y: 0,
+		},
+		Extent: engo.Device.SwapChainExtent(),
+	}
+
+	viewportState := vk.PipelineViewportStateCreateInfo{
+		SType:         vk.StructureTypePipelineViewportStateCreateInfo,
+		ViewportCount: 1,
+		PViewports:    []vk.Viewport{viewport},
+		ScissorCount:  1,
+		PScissors:     []vk.Rect2D{scissor},
+	}
+
+	rasterizer := vk.PipelineRasterizationStateCreateInfo{
+		SType:                   vk.StructureTypePipelineRasterizationStateCreateInfo,
+		DepthClampEnable:        vk.False,
+		RasterizerDiscardEnable: vk.False,
+		PolygonMode:             vk.PolygonModeFill,
+		LineWidth:               1,
+		CullMode:                vk.CullModeFlags(vk.CullModeBackBit),
+		FrontFace:               vk.FrontFaceCounterClockwise,
+		DepthBiasEnable:         vk.False,
+	}
+
+	multisampling := vk.PipelineMultisampleStateCreateInfo{
+		SType:                 vk.StructureTypePipelineMultisampleStateCreateInfo,
+		SampleShadingEnable:   vk.False,
+		RasterizationSamples:  vk.SampleCount1Bit,
+		MinSampleShading:      1,
+		AlphaToCoverageEnable: vk.False,
+		AlphaToOneEnable:      vk.False,
+	}
+
+	colorBlendAttachment := vk.PipelineColorBlendAttachmentState{
+		ColorWriteMask:      vk.ColorComponentFlags(vk.ColorComponentRBit | vk.ColorComponentGBit | vk.ColorComponentBBit | vk.ColorComponentABit),
+		BlendEnable:         vk.False,
+		SrcColorBlendFactor: vk.BlendFactorOne,
+		DstColorBlendFactor: vk.BlendFactorZero,
+		ColorBlendOp:        vk.BlendOpAdd,
+		SrcAlphaBlendFactor: vk.BlendFactorOne,
+		DstAlphaBlendFactor: vk.BlendFactorZero,
+		AlphaBlendOp:        vk.BlendOpAdd,
+	}
+
+	colorBlending := vk.PipelineColorBlendStateCreateInfo{
+		SType:           vk.StructureTypePipelineColorBlendStateCreateInfo,
+		LogicOpEnable:   vk.False,
+		AttachmentCount: 1,
+		PAttachments:    []vk.PipelineColorBlendAttachmentState{colorBlendAttachment},
+	}
+
+	pipelineLayoutInfo := vk.PipelineLayoutCreateInfo{
+		SType:          vk.StructureTypePipelineLayoutCreateInfo,
+		SetLayoutCount: 1,
+		PSetLayouts:    s.descriptorSetLayouts,
+	}
+	var pipelineLayout vk.PipelineLayout
+	if res := vk.CreatePipelineLayout(engo.Device.Device(), &pipelineLayoutInfo, nil, &pipelineLayout); res != vk.Success {
+		return errors.New("failed to create pipeline layout")
+	}
+	r.pipelineLayout = pipelineLayout
+
+	pipelineInfo := vk.GraphicsPipelineCreateInfo{
+		SType:               vk.StructureTypeGraphicsPipelineCreateInfo,
+		StageCount:          2,
+		PStages:             shaderStages,
+		PVertexInputState:   &vertexInputInfo,
+		PInputAssemblyState: &inputAssembly,
+		PViewportState:      &viewportState,
+		PRasterizationState: &rasterizer,
+		PMultisampleState:   &multisampling,
+		PColorBlendState:    &colorBlending,
+		Layout:              s.pipelineLayout,
+		RenderPass:          s.renderPass,
+		Subpass:             0,
+	}
+
+	s.graphicsPipelines = make([]vk.Pipeline, 1)
+	if res := vk.CreateGraphicsPipelines(engo.Device.Device(), nil, 1, []vk.GraphicsPipelineCreateInfo{pipelineInfo}, nil, s.graphicsPipelines); res != vk.Success {
+		errors.New("failed to create graphics pipeline")
+	}
+
+	vk.DestroyShaderModule(engo.Device.Device(), vertShaderModule, nil)
+	vk.DestroyShaderModule(engo.Device.Device(), fragShaderModule, nil)
+
+	return nil
+}
+
+func (s *basicShader) createFrameBuffers() error {
+	s.swapChainFramebuffers = make([]vk.Framebuffer, len(s.swapChainImageViews))
+
+	for idx, view := range r.swapChainImageViews {
+		attachments := []vk.ImageView{view}
+
+		framebufferInfo := vk.FramebufferCreateInfo{
+			SType:           vk.StructureTypeFramebufferCreateInfo,
+			RenderPass:      s.renderPass,
+			AttachmentCount: 1,
+			PAttachments:    attachments,
+			Width:           engo.Device.SwapChainExtent().Width,
+			Height:          engo.Device.SwapChainExtent().Height,
+			Layers:          1,
+		}
+
+		if res := vk.CreateFramebuffer(engo.Device.Device(), &framebufferInfo, nil, &s.swapChainFramebuffers[idx]); res != vk.Success {
+			return errors.New("failed to create framebuffer")
+		}
+	}
+
+	return nil
+}
+
+func (s *basicShader) createCommandPool() error {
+	poolInfo := vk.CommandPoolCreateInfo{
+		SType:            vk.StructureTypeCommandPoolCreateInfo,
+		QueueFamilyIndex: engo.Device.GraphicsQueueIndex(),
+	}
+
+	var commandPool vk.CommandPool
+	if res := vk.CreateCommandPool(engo.Device.Device(), &poolInfo, nil, &commandPool); res != vk.Success {
+		return errors.New("failed to create command pool")
+	}
+	s.commandPool = commandPool
 
 	return nil
 }

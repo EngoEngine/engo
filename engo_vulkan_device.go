@@ -36,6 +36,30 @@ func (d *VkDevice) GPU() vk.PhysicalDevice {
 	return d.gpu
 }
 
+func (d *VkDevice) SwapChainImageFormat() vk.Format {
+	return d.swapChainImageFormat
+}
+
+func (d *VkDevice) SwapChainExtent() vk.Extent2D {
+	return d.swapChainExtent
+}
+
+func (d *VkDevice) GraphicsQueueIndex() uint32 {
+	return d.graphicsIdx
+}
+
+func (d *VkDevice) GraphicsQueue() vk.Queue {
+	return d.graphicsQueue
+}
+
+func (d *VkDevice) PresentQueueIndex() uint32 {
+	return d.presentIdx
+}
+
+func (d *VkDevice) PresentQueue() vk.Queue {
+	return d.presentQueue
+}
+
 func (d *VkDevice) init() error {
 	if err := d.initVulkan(); err != nil {
 		return err
