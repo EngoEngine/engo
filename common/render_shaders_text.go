@@ -161,7 +161,7 @@ func (l *textShader) updateBuffer(ren *RenderComponent, space *SpaceComponent) {
 	if len(ren.BufferContent) < 20*len(txt.Text) {
 		ren.BufferContent = make([]float32, 20*len(txt.Text)) // TODO: update this to actual value?
 	}
-	// Reset buffer so artifacts don't occur when tex.Text changes
+	// Reset buffer so artifacts don't occur when txt.Text changes
 	for i := 0; i < len(ren.BufferContent); i++ {
 		ren.BufferContent[i] = 0
 	}
