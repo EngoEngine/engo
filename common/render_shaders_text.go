@@ -30,8 +30,6 @@ type textShader struct {
 
 	lastBuffer  *gl.Buffer
 	lastTexture *gl.Texture
-
-	lastText string
 }
 
 func (l *textShader) Setup(w *ecs.World) error {
@@ -257,7 +255,7 @@ func (l *textShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		unsupportedType(ren.Drawable)
 	}
 
-	if l.lastBuffer != ren.Buffer || ren.Buffer == nil || l.lastText != txt.Text {
+	if l.lastBuffer != ren.Buffer || ren.Buffer == nil {
 		l.updateBuffer(ren, space)
 
 		engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.Buffer)
@@ -266,7 +264,6 @@ func (l *textShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		engo.Gl.VertexAttribPointer(l.inColor, 4, engo.Gl.UNSIGNED_BYTE, true, 20, 16)
 
 		l.lastBuffer = ren.Buffer
-		l.lastText = txt.Text
 	}
 
 	atlas, ok := atlasCache[*txt.Font]
