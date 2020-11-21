@@ -161,6 +161,10 @@ func (l *textShader) updateBuffer(ren *RenderComponent, space *SpaceComponent) {
 	if len(ren.BufferContent) < 20*len(txt.Text) {
 		ren.BufferContent = make([]float32, 20*len(txt.Text)) // TODO: update this to actual value?
 	}
+	// Reset buffer so artifacts don't occur when tex.Text changes
+	for i := 0; i < len(ren.BufferContent); i++ {
+		ren.BufferContent[i] = 0
+	}
 	if changed := l.generateBufferContent(ren, space, ren.BufferContent); !changed {
 		return
 	}
@@ -300,10 +304,6 @@ func (l *textShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 	engo.Gl.UniformMatrix3fv(l.matrixModel, false, l.modelMatrix)
 
 	engo.Gl.DrawElements(engo.Gl.TRIANGLES, 6*len(txt.Text), engo.Gl.UNSIGNED_SHORT, 0)
-
-	for i := 0; i < len(ren.BufferContent); i++ {
-		ren.BufferContent[i] = 0
-	}
 }
 
 func (l *textShader) Post() {
