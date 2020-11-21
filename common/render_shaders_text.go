@@ -159,6 +159,10 @@ func (l *textShader) updateBuffer(ren *RenderComponent, space *SpaceComponent) {
 	if len(ren.BufferContent) < 20*len(txt.Text) {
 		ren.BufferContent = make([]float32, 20*len(txt.Text)) // TODO: update this to actual value?
 	}
+	// Reset buffer so artifacts don't occur when txt.Text changes
+	for i := 0; i < len(ren.BufferContent); i++ {
+		ren.BufferContent[i] = 0
+	}
 	if changed := l.generateBufferContent(ren, space, ren.BufferContent); !changed {
 		return
 	}
@@ -246,6 +250,11 @@ func (l *textShader) generateBufferContent(ren *RenderComponent, space *SpaceCom
 }
 
 func (l *textShader) Draw(ren *RenderComponent, space *SpaceComponent) {
+	txt, ok := ren.Drawable.(Text)
+	if !ok {
+		unsupportedType(ren.Drawable)
+	}
+
 	if l.lastBuffer != ren.Buffer || ren.Buffer == nil {
 		l.updateBuffer(ren, space)
 
@@ -255,11 +264,6 @@ func (l *textShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		engo.Gl.VertexAttribPointer(l.inColor, 4, engo.Gl.UNSIGNED_BYTE, true, 20, 16)
 
 		l.lastBuffer = ren.Buffer
-	}
-
-	txt, ok := ren.Drawable.(Text)
-	if !ok {
-		unsupportedType(ren.Drawable)
 	}
 
 	atlas, ok := atlasCache[*txt.Font]
