@@ -30,6 +30,8 @@ type textShader struct {
 
 	lastBuffer  *gl.Buffer
 	lastTexture *gl.Texture
+
+	lastText string
 }
 
 func (l *textShader) Setup(w *ecs.World) error {
@@ -246,7 +248,12 @@ func (l *textShader) generateBufferContent(ren *RenderComponent, space *SpaceCom
 }
 
 func (l *textShader) Draw(ren *RenderComponent, space *SpaceComponent) {
-	if l.lastBuffer != ren.Buffer || ren.Buffer == nil {
+	txt, ok := ren.Drawable.(Text)
+	if !ok {
+		unsupportedType(ren.Drawable)
+	}
+
+	if l.lastBuffer != ren.Buffer || ren.Buffer == nil || l.lastText != txt.Text {
 		l.updateBuffer(ren, space)
 
 		engo.Gl.BindBuffer(engo.Gl.ARRAY_BUFFER, ren.Buffer)
@@ -255,11 +262,7 @@ func (l *textShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		engo.Gl.VertexAttribPointer(l.inColor, 4, engo.Gl.UNSIGNED_BYTE, true, 20, 16)
 
 		l.lastBuffer = ren.Buffer
-	}
-
-	txt, ok := ren.Drawable.(Text)
-	if !ok {
-		unsupportedType(ren.Drawable)
+		l.lastText = txt.Text
 	}
 
 	atlas, ok := atlasCache[*txt.Font]
@@ -297,6 +300,10 @@ func (l *textShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 	engo.Gl.UniformMatrix3fv(l.matrixModel, false, l.modelMatrix)
 
 	engo.Gl.DrawElements(engo.Gl.TRIANGLES, 6*len(txt.Text), engo.Gl.UNSIGNED_SHORT, 0)
+
+	for i := 0; i < len(ren.BufferContent); i++ {
+		ren.BufferContent[i] = 0
+	}
 }
 
 func (l *textShader) Post() {
