@@ -1,8 +1,6 @@
 package common
 
 import (
-	"log"
-
 	"github.com/EngoEngine/ecs"
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/engo/math"
@@ -10,15 +8,82 @@ import (
 
 // Shape is a shape used for a SpaceComponent's hitboxes. It is composed of
 // Lines that make up the polygon's shape or an ellipse which makes up an ellpitical
-// shape.
+// shape. N is the number of lines used to approximate the ellpse; N defaults to
+// 25.
 type Shape struct {
 	Ellipse Ellipse
 	Lines   []engo.Line
+	N       int
+}
+
+// Project projects the shape onto the given vector.
+func (s Shape) Project(p engo.Point, sc SpaceComponent) (min, max float32) {
+	sin, cos := math.Sincos(sc.Rotation * math.Pi / 180)
+	l := engo.Line{
+		P1: engo.Point{
+			X: sc.Position.X + s.Lines[0].P1.X*cos - s.Lines[0].P1.Y*sin,
+			Y: sc.Position.Y + s.Lines[0].P1.Y*cos + s.Lines[0].P1.X*sin,
+		},
+		P2: engo.Point{
+			X: sc.Position.X + s.Lines[0].P2.X*cos - s.Lines[0].P2.Y*sin,
+			Y: sc.Position.Y + s.Lines[0].P2.Y*cos + s.Lines[0].P2.X*sin,
+		},
+	}
+	min = l.P1.X*p.X + l.P1.Y*p.Y
+	max = min
+	for _, line := range s.Lines {
+		l = engo.Line{
+			P1: engo.Point{
+				X: sc.Position.X + line.P1.X*cos - line.P1.Y*sin,
+				Y: sc.Position.Y + line.P1.Y*cos + line.P1.X*sin,
+			},
+			P2: engo.Point{
+				X: sc.Position.X + line.P2.X*cos - line.P2.Y*sin,
+				Y: sc.Position.Y + line.P2.Y*cos + line.P2.X*sin,
+			},
+		}
+		dot := l.P2.X*p.X + l.P2.Y*p.Y
+		if dot < min {
+			min = dot
+		}
+		if dot > max {
+			max = dot
+		}
+	}
+	return
+}
+
+// PolygonEllipse approximates the Ellipse as an N-sided polygon, determined by
+// the shape's N value. If N is 0, it defaults to 25.
+func (s *Shape) PolygonEllipse() {
+	if s.N == 0 {
+		s.N = 25
+	}
+	if len(s.Lines) != s.N {
+		s.Lines = make([]engo.Line, s.N)
+		theta := float32(2.0 * math.Pi / float32(s.N))
+		sin, cos := math.Sincos(0.0)
+		for i := 0; i < s.N; i++ {
+			line := engo.Line{}
+			line.P1 = engo.Point{
+				X: s.Ellipse.Cx + s.Ellipse.Rx*sin,
+				Y: s.Ellipse.Cy + s.Ellipse.Ry*cos,
+			}
+			sin, cos = math.Sincos(float32(i+1) * theta)
+			line.P2 = engo.Point{
+				X: s.Ellipse.Cx + s.Ellipse.Rx*sin,
+				Y: s.Ellipse.Cy + s.Ellipse.Ry*cos,
+			}
+			s.Lines[i] = line
+		}
+	}
 }
 
 // Ellipse represnets an ellpitical shape.
 // Cx and Cy are the x and y coordinates of the center of the ellipse.
 // Rx and Ry are the x and y radii of the ellipse.
+// N is the number of faces used for a polymeric representation of the ellipse
+// for collision detection.
 type Ellipse struct {
 	Cx, Cy float32
 	Rx, Ry float32
@@ -173,7 +238,7 @@ func (sc SpaceComponent) Contains(p engo.Point) bool {
 	}
 	i := 0
 	for _, hb := range sc.hitboxes {
-		if len(hb.Lines) == 0 {
+		if !engo.FloatEqual(hb.Ellipse.Rx, 0) || !engo.FloatEqual(hb.Ellipse.Ry, 0) {
 			if testpoint.X < hb.Ellipse.Cx+hb.Ellipse.Rx && testpoint.X > hb.Ellipse.Cx-hb.Ellipse.Rx {
 				s := math.Sqrt((1 - ((testpoint.X-hb.Ellipse.Cx)*(testpoint.X-hb.Ellipse.Cx))/((hb.Ellipse.Rx)*(hb.Ellipse.Rx))) * (hb.Ellipse.Ry) * (hb.Ellipse.Ry))
 				if testpoint.Y < hb.Ellipse.Cy+s && testpoint.Y > hb.Ellipse.Cy-s {
@@ -203,6 +268,198 @@ func (sc SpaceComponent) Contains(p engo.Point) bool {
 		i = 0
 	}
 	return false
+}
+
+// Overlaps tells whether the two given space components overlap with the given
+// tolerance. Uses hitboxes if available, then tries AABB.
+// Algorithm used is the [Separation of Axis](http://www.dyn4j.org/2010/01/sat)
+func (sc SpaceComponent) Overlaps(other SpaceComponent, thisTolerance, otherTolerance engo.Point) (bool, engo.Point) {
+	if len(sc.hitboxes) == 0 && len(other.hitboxes) == 0 {
+		thisAABB := sc.AABB()
+		thisAABB.Min.X -= thisTolerance.X
+		thisAABB.Min.Y -= thisTolerance.Y
+		thisAABB.Max.X += thisTolerance.X
+		thisAABB.Max.Y += thisTolerance.Y
+
+		otherAABB := other.AABB()
+		otherAABB.Min.X -= otherTolerance.X
+		otherAABB.Min.Y -= otherTolerance.Y
+		otherAABB.Max.X += otherTolerance.X
+		otherAABB.Max.Y += otherTolerance.Y
+
+		if IsIntersecting(thisAABB, otherAABB) {
+			return true, MinimumTranslation(thisAABB, otherAABB)
+		}
+
+		return false, engo.Point{}
+	}
+	if len(sc.hitboxes) == 0 {
+		sc.hitboxes = []Shape{
+			Shape{
+				Lines: []engo.Line{
+					engo.Line{
+						P1: engo.Point{X: 0, Y: 0},
+						P2: engo.Point{X: sc.Width, Y: 0},
+					},
+					engo.Line{
+						P1: engo.Point{X: sc.Width, Y: 0},
+						P2: engo.Point{X: sc.Width, Y: sc.Height},
+					},
+					engo.Line{
+						P1: engo.Point{X: sc.Width, Y: sc.Height},
+						P2: engo.Point{X: 0, Y: sc.Height},
+					},
+					engo.Line{
+						P1: engo.Point{X: 0, Y: sc.Height},
+						P2: engo.Point{X: 0, Y: 0},
+					},
+				},
+			},
+		}
+	}
+	if len(other.hitboxes) == 0 {
+		other.hitboxes = []Shape{
+			Shape{
+				Lines: []engo.Line{
+					engo.Line{
+						P1: engo.Point{X: 0, Y: 0},
+						P2: engo.Point{X: other.Width, Y: 0},
+					},
+					engo.Line{
+						P1: engo.Point{X: other.Width, Y: 0},
+						P2: engo.Point{X: other.Width, Y: other.Height},
+					},
+					engo.Line{
+						P1: engo.Point{X: other.Width, Y: other.Height},
+						P2: engo.Point{X: 0, Y: other.Height},
+					},
+					engo.Line{
+						P1: engo.Point{X: 0, Y: other.Height},
+						P2: engo.Point{X: 0, Y: 0},
+					},
+				},
+			},
+		}
+	}
+	for _, hb := range sc.hitboxes {
+		if !engo.FloatEqual(hb.Ellipse.Rx, 0) || !engo.FloatEqual(hb.Ellipse.Ry, 0) {
+			for _, otherHB := range other.hitboxes {
+				if !engo.FloatEqual(otherHB.Ellipse.Rx, 0) || !engo.FloatEqual(otherHB.Ellipse.Ry, 0) {
+					hb.PolygonEllipse()
+					otherHB.PolygonEllipse()
+					if ok, pt := separationOfAxes(sc, other, hb, otherHB); ok {
+						return true, pt
+					}
+					continue
+				}
+				hb.PolygonEllipse()
+				if ok, pt := separationOfAxes(sc, other, hb, otherHB); ok {
+					return true, pt
+				}
+				continue
+			}
+		}
+		//one polygon
+		for _, otherHB := range other.hitboxes {
+			if !engo.FloatEqual(otherHB.Ellipse.Rx, 0) || !engo.FloatEqual(otherHB.Ellipse.Ry, 0) {
+				otherHB.PolygonEllipse()
+				if ok, pt := separationOfAxes(sc, other, hb, otherHB); ok {
+					return true, pt
+				}
+				continue
+			}
+			if ok, pt := separationOfAxes(sc, other, hb, otherHB); ok {
+				return true, pt
+			}
+			continue
+		}
+	}
+
+	return false, engo.Point{}
+}
+
+func separationOfAxes(sc, other SpaceComponent, hb, otherHB Shape) (bool, engo.Point) {
+	sin, cos := math.Sincos(sc.Rotation * math.Pi / 180)
+	othersin, othercos := math.Sincos(other.Rotation * math.Pi / 180)
+	overlap := float32(math.MaxFloat32)
+	smallestAxis := engo.Point{}
+	axes := []engo.Point{}
+	for _, axis := range hb.Lines {
+		pt := engo.Point{
+			X: axis.P2.X*cos - axis.P2.Y*sin - axis.P1.X*cos + axis.P1.Y*sin,
+			Y: axis.P2.Y*cos + axis.P2.X*sin - axis.P1.Y*cos - axis.P1.X*sin,
+		}
+		norm, _ := pt.Normalize()
+		axes = append(axes, engo.Point{
+			X: norm.Y * -1,
+			Y: norm.X,
+		})
+	}
+	otherAxes := []engo.Point{}
+	for _, axis := range otherHB.Lines {
+		pt := engo.Point{
+			X: axis.P2.X*othercos - axis.P2.Y*othersin - axis.P1.X*othercos + axis.P1.Y*othersin,
+			Y: axis.P2.Y*othercos + axis.P2.X*othersin - axis.P1.Y*othercos - axis.P1.X*othersin,
+		}
+		norm, _ := pt.Normalize()
+		otherAxes = append(otherAxes, engo.Point{
+			X: norm.Y * -1,
+			Y: norm.X,
+		})
+	}
+	for _, axis := range axes {
+		p1min, p1max := hb.Project(axis, sc)
+		p2min, p2max := otherHB.Project(axis, other)
+		if p2min > p1max {
+			return false, engo.Point{}
+		} else {
+			var o float32
+			if p1min < p2min {
+				if p1max < p2max {
+					o = p1max - p2min
+				} else {
+					o = p1max - p1min
+				}
+			} else {
+				if p1max < p2max {
+					o = p2max - p1min
+				} else {
+					o = p1max - p1min
+				}
+			}
+			if o < overlap {
+				overlap = o
+				smallestAxis = axis
+			}
+		}
+	}
+	for _, axis := range otherAxes {
+		p1min, p1max := hb.Project(axis, sc)
+		p2min, p2max := otherHB.Project(axis, other)
+		if p2min > p1max {
+			return false, engo.Point{}
+		} else {
+			var o float32
+			if p1min < p2min {
+				if p1max < p2max {
+					o = p1max - p2min
+				} else {
+					o = p1max - p1min
+				}
+			} else {
+				if p1max < p2max {
+					o = p2max - p1min
+				} else {
+					o = p1max - p1min
+				}
+			}
+			if o < overlap {
+				overlap = o
+				smallestAxis = axis
+			}
+		}
+	}
+	return true, engo.Point{X: -1 * smallestAxis.X * overlap, Y: -1 * smallestAxis.Y * overlap}
 }
 
 // triangleArea computes the area of the triangle given by the three points
@@ -303,13 +560,6 @@ func (c *CollisionSystem) Update(dt float32) {
 			continue // with other entities
 		}
 
-		entityAABB := e1.SpaceComponent.AABB()
-		offset := engo.Point{X: e1.CollisionComponent.Extra.X / 2, Y: e1.CollisionComponent.Extra.Y / 2}
-		entityAABB.Min.X -= offset.X
-		entityAABB.Min.Y -= offset.Y
-		entityAABB.Max.X += offset.X
-		entityAABB.Max.Y += offset.Y
-
 		var collided CollisionGroup
 
 		for i2, e2 := range c.entities {
@@ -321,16 +571,10 @@ func (c *CollisionSystem) Update(dt float32) {
 				continue //Items are not in a comparible group dont bother
 			}
 
-			otherAABB := e2.SpaceComponent.AABB()
-			offset = engo.Point{X: e2.CollisionComponent.Extra.X / 2, Y: e2.CollisionComponent.Extra.Y / 2}
-			otherAABB.Min.X -= offset.X
-			otherAABB.Min.Y -= offset.Y
-			otherAABB.Max.X += offset.X
-			otherAABB.Max.Y += offset.Y
-
-			if IsIntersecting(entityAABB, otherAABB) {
+			offsetA := engo.Point{X: e1.CollisionComponent.Extra.X / 2, Y: e1.CollisionComponent.Extra.Y / 2}
+			offsetB := engo.Point{X: e2.CollisionComponent.Extra.X / 2, Y: e2.CollisionComponent.Extra.Y / 2}
+			if overlaps, mtd := e1.Overlaps(*e2.SpaceComponent, offsetA, offsetB); overlaps {
 				if cgroup&c.Solids > 0 {
-					mtd := MinimumTranslation(entityAABB, otherAABB)
 					if e2.CollisionComponent.Main&e1.CollisionComponent.Group&c.Solids != 0 {
 						//collision of equals (both main)
 						e1.SpaceComponent.Position.X += mtd.X / 2
@@ -352,7 +596,7 @@ func (c *CollisionSystem) Update(dt float32) {
 				engo.Mailbox.Dispatch(CollisionMessage{Entity: e1, To: e2, Groups: cgroup})
 
 				//update the position tracker of e1
-				entityAABB = e1.SpaceComponent.AABB()
+				entityAABB := e1.SpaceComponent.AABB()
 				offset := engo.Point{X: e1.CollisionComponent.Extra.X / 2, Y: e1.CollisionComponent.Extra.Y / 2}
 				entityAABB.Min.X -= offset.X
 				entityAABB.Min.Y -= offset.Y
@@ -384,13 +628,11 @@ func MinimumTranslation(rect1 engo.AABB, rect2 engo.AABB) engo.Point {
 	bottom := rect2.Max.Y - rect1.Min.Y
 
 	if left > 0 || right < 0 {
-		log.Println("Box aint intercepting")
 		return mtd
 		//box doesn't intercept
 	}
 
 	if top > 0 || bottom < 0 {
-		log.Println("Box aint intercepting")
 		return mtd
 		//box doesn't intercept
 	}
