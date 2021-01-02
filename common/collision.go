@@ -18,6 +18,7 @@ type Shape struct {
 
 // Project projects the shape onto the given vector.
 func (s Shape) Project(p engo.Point, sc SpaceComponent) (min, max float32) {
+	s.PolygonEllipse()
 	sin, cos := math.Sincos(sc.Rotation * math.Pi / 180)
 	l := engo.Line{
 		P1: engo.Point{
@@ -56,6 +57,9 @@ func (s Shape) Project(p engo.Point, sc SpaceComponent) (min, max float32) {
 // PolygonEllipse approximates the Ellipse as an N-sided polygon, determined by
 // the shape's N value. If N is 0, it defaults to 25.
 func (s *Shape) PolygonEllipse() {
+	if engo.FloatEqual(s.Ellipse.Rx, 0) || engo.FloatEqual(s.Ellipse.Ry, 0) {
+		return // not an ellipse
+	}
 	if s.N == 0 {
 		s.N = 25
 	}
