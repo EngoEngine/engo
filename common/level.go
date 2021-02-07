@@ -35,6 +35,7 @@ type Level struct {
 	Properties  []Property
 	resourceMap map[uint32]Texture
 	pointMap    map[mapPoint]*Tile
+	framesMap   map[uint32][]uint32
 }
 
 // Property is any custom property. The Type corresponds to the type (int,
@@ -277,5 +278,7 @@ func (t *Tile) View() (float32, float32, float32, float32) {
 // Tile represents a tile in the TMX map.
 type Tile struct {
 	engo.Point
-	Image *Texture
+	Image     *Texture
+	Drawables []Drawable
+	Animation *Animation
 }
