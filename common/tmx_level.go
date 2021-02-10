@@ -21,6 +21,7 @@ func createLevelFromTmx(r io.Reader, tmxURL string) (*Level, error) {
 	level.Orientation = orth
 	level.resourceMap = make(map[uint32]Texture)
 	level.pointMap = make(map[mapPoint]*Tile)
+	level.framesMap = make(map[uint32][]uint32)
 
 	// get a map of the gids to textures from the tilesets
 	for _, ts := range tmxLevel.Tilesets {
@@ -45,6 +46,11 @@ func createLevelFromTmx(r io.Reader, tmxURL string) (*Level, error) {
 					level.resourceMap[ts.FirstGID+t.ID] = *tex
 				}
 			}
+			frames := []uint32{}
+			for _, f := range t.AnimationFrames {
+				frames = append(frames, ts.FirstGID+f.TileID)
+			}
+			level.framesMap[ts.FirstGID+t.ID] = frames
 		}
 		for _, i := range ts.Image {
 			if i.Source != "" {
@@ -361,6 +367,15 @@ func (l *Level) tileFromGID(gid uint32, pt engo.Point) *Tile {
 	tex := l.resourceMap[gid]
 	ret.Image = &tex
 	ret.Point = pt
+
+	drawables, frames := []Drawable{}, []int{}
+	for i, id := range l.framesMap[gid] {
+		drawables = append(drawables, l.resourceMap[id])
+		frames = append(frames, i)
+	}
+	ret.Drawables = drawables
+	ret.Animation = &Animation{Name: "Tile", Frames: frames, Loop: true}
+
 	return ret
 }
 
