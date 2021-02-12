@@ -10,7 +10,11 @@ Run `engo` without a graphical display. Useful for servers and testing.
 
 ### [Exit](exit)
 
-Run some code, just before the window is actually closed (whenever the user presses the close button, for example). 
+Run some code, just before the window is actually closed (whenever the user presses the close button, for example).
+
+### [Asset Bundling](assetbundling)
+
+Bundle assets into final binary for easier distribution.
 
 ## Graphics
 
@@ -38,7 +42,7 @@ A simple sample game
 
 Add HUD elements to your games. Learn about priorities.
 
-### [Shapes](shapes) 
+### [Shapes](shapes)
 
 It demonstrates how one can efficiently draw various shapes in solid colors (with/without border).
 
@@ -84,7 +88,7 @@ Scroll using the keyboard.
 
 ### [Zoom](zoom)
 
-Use the mouse to scroll in and out. (zooming) 
+Use the mouse to scroll in and out. (zooming)
 
 ### [MouseRotation](mouserotation)
 
@@ -95,7 +99,6 @@ It demonstrates how one can rotate the camera, using the middle mouse button.
 ### [Pong](pong)
 
 Engo implementation of the original pong game
-
 
 ## Input
 
@@ -120,4 +123,3 @@ Move a sprite using the mouse
 ### [Tilemap](tilemap)
 
 It demonstrates how one can load and render a TMX file created from the TileMap Editor
-
