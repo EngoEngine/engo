@@ -15,6 +15,7 @@ type GameWorld struct{}
 
 type Tile struct {
 	ecs.BasicEntity
+	common.AnimationComponent
 	common.RenderComponent
 	common.SpaceComponent
 }
@@ -36,6 +37,7 @@ func (game *GameWorld) Setup(u engo.Updater) {
 	common.SetBackground(color.White)
 
 	w.AddSystem(&common.RenderSystem{})
+	w.AddSystem(&common.AnimationSystem{})
 
 	resource, err := engo.Files.Resource("example.tmx")
 	if err != nil {
@@ -52,11 +54,17 @@ func (game *GameWorld) Setup(u engo.Updater) {
 			if tileElement.Image != nil {
 
 				tile := &Tile{BasicEntity: ecs.NewBasic()}
-				tile.RenderComponent = common.RenderComponent{
-					Drawable: tileElement,
-					Scale:    engo.Point{1, 1},
+				if len(tileElement.Drawables) > 0 {
+					tile.AnimationComponent = common.NewAnimationComponent(
+						tileElement.Drawables, 0.5,
+					)
+					tile.AnimationComponent.AddDefaultAnimation(tileElement.Animation)
 				}
-				tile.RenderComponent.SetZIndex(float32(idx))
+				tile.RenderComponent = common.RenderComponent{
+					Drawable:    tileElement.Image,
+					Scale:       engo.Point{X: 1, Y: 1},
+					StartZIndex: float32(idx),
+				}
 				tile.SpaceComponent = common.SpaceComponent{
 					Position: tileElement.Point,
 					Width:    0,
@@ -75,7 +83,7 @@ func (game *GameWorld) Setup(u engo.Updater) {
 				tile := &Tile{BasicEntity: ecs.NewBasic()}
 				tile.RenderComponent = common.RenderComponent{
 					Drawable: imageElement,
-					Scale:    engo.Point{1, 1},
+					Scale:    engo.Point{X: 1, Y: 1},
 				}
 				tile.SpaceComponent = common.SpaceComponent{
 					Position: imageElement.Point,
@@ -95,7 +103,10 @@ func (game *GameWorld) Setup(u engo.Updater) {
 			for _, v := range tileComponents {
 				sys.Add(&v.BasicEntity, &v.RenderComponent, &v.SpaceComponent)
 			}
-
+		case *common.AnimationSystem:
+			for _, v := range tileComponents {
+				sys.Add(&v.BasicEntity, &v.AnimationComponent, &v.RenderComponent)
+			}
 		}
 	}
 
