@@ -118,6 +118,7 @@ func (r *RenderComponent) ensureShader() {
 	}
 }
 
+// Shader gets the shader used by the RenderComponent.
 func (r *RenderComponent) Shader() Shader {
 	r.ensureShader()
 	return r.shader

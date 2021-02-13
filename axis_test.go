@@ -13,138 +13,138 @@ type axKeyCfg struct {
 
 // Axis configuretion used when testing.
 var axSimpleCfg = [6]axKeyCfg{
-	axKeyCfg{
+	{
 		Name: "Axis 1",
 		Pairs: []AxisKeyPair{
-			AxisKeyPair{Min: KeyA, Max: KeyB},
-			AxisKeyPair{Min: KeyC, Max: KeyD},
+			{Min: KeyA, Max: KeyB},
+			{Min: KeyC, Max: KeyD},
 		},
 	},
-	axKeyCfg{
+	{
 		Name: "Axis 2",
 		Pairs: []AxisKeyPair{
-			AxisKeyPair{Min: KeyE, Max: KeyF},
-			AxisKeyPair{Min: KeyG, Max: KeyH},
+			{Min: KeyE, Max: KeyF},
+			{Min: KeyG, Max: KeyH},
 		},
 	},
-	axKeyCfg{
+	{
 		Name: "Axis 3",
 		Pairs: []AxisKeyPair{
-			AxisKeyPair{Min: KeyF1, Max: KeyF2},
-			AxisKeyPair{Min: KeyF3, Max: KeyF4},
+			{Min: KeyF1, Max: KeyF2},
+			{Min: KeyF3, Max: KeyF4},
 		},
 	},
-	axKeyCfg{
+	{
 		Name: "Axis 4",
 		Pairs: []AxisKeyPair{
-			AxisKeyPair{Min: KeyF5, Max: KeyF6},
-			AxisKeyPair{Min: KeyF7, Max: KeyF8},
+			{Min: KeyF5, Max: KeyF6},
+			{Min: KeyF7, Max: KeyF8},
 		},
 	},
-	axKeyCfg{
+	{
 		Name: "Axis 5",
 		Pairs: []AxisKeyPair{
-			AxisKeyPair{Min: KeyOne, Max: KeyTwo},
-			AxisKeyPair{Min: KeyThree, Max: KeyFour},
+			{Min: KeyOne, Max: KeyTwo},
+			{Min: KeyThree, Max: KeyFour},
 		},
 	},
-	axKeyCfg{
+	{
 		Name: "Axis 6",
 		Pairs: []AxisKeyPair{
-			AxisKeyPair{Min: KeyArrowUp, Max: KeyArrowDown},
-			AxisKeyPair{Min: KeyArrowLeft, Max: KeyArrowRight},
+			{Min: KeyArrowUp, Max: KeyArrowDown},
+			{Min: KeyArrowLeft, Max: KeyArrowRight},
 		},
 	},
 }
 
 // Expected axes values @ pass 0
 var axPass0 = [6]axState{
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
 }
 
 // Expected axes values @ pass 1
 var axPass1 = [6]axState{
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
 }
 
 // Expected axes values @ pass 2
 var axPass2 = [6]axState{
-	axState{value: 0.0},
-	axState{value: 1.0},
-	axState{value: 0.0},
-	axState{value: 1.0},
-	axState{value: 0.0},
-	axState{value: 1.0},
+	{value: 0.0},
+	{value: 1.0},
+	{value: 0.0},
+	{value: 1.0},
+	{value: 0.0},
+	{value: 1.0},
 }
 
 // Expected axes values @ pass 3
 var axPass3 = [6]axState{
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
 }
 
 // Expected axes values @ pass 4
 var axPass4 = [6]axState{
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
 }
 
 // Expected axes values @ pass 5
 var axPass5 = [6]axState{
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
 }
 
 // Expected axes values @ pass 6
 var axPass6 = [6]axState{
-	axState{value: 0.0},
-	axState{value: -1.0},
-	axState{value: 0.0},
-	axState{value: -1.0},
-	axState{value: 0.0},
-	axState{value: -1.0},
+	{value: 0.0},
+	{value: -1.0},
+	{value: 0.0},
+	{value: -1.0},
+	{value: 0.0},
+	{value: -1.0},
 }
 
 // Expected axes values @ pass 7
 var axPass7 = [6]axState{
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
 }
 
 // Expected axes values @ pass 8
 var axPass8 = [6]axState{
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
-	axState{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
+	{value: 0.0},
 }
 
 // Checks the value of all configured axis against the expected values.

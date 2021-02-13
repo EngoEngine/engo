@@ -229,8 +229,8 @@ func (sc SpaceComponent) Contains(p engo.Point) bool {
 	testline := engo.Line{
 		P1: p,
 		P2: engo.Point{
-			X: 1E10,
-			Y: 1E10,
+			X: 1e10,
+			Y: 1e10,
 		},
 	}
 	sin, cos := math.Sincos(sc.Rotation * math.Pi / 180)
@@ -299,21 +299,21 @@ func (sc SpaceComponent) Overlaps(other SpaceComponent, thisTolerance, otherTole
 	}
 	if len(sc.hitboxes) == 0 {
 		sc.hitboxes = []Shape{
-			Shape{
+			{
 				Lines: []engo.Line{
-					engo.Line{
+					{
 						P1: engo.Point{X: 0, Y: 0},
 						P2: engo.Point{X: sc.Width, Y: 0},
 					},
-					engo.Line{
+					{
 						P1: engo.Point{X: sc.Width, Y: 0},
 						P2: engo.Point{X: sc.Width, Y: sc.Height},
 					},
-					engo.Line{
+					{
 						P1: engo.Point{X: sc.Width, Y: sc.Height},
 						P2: engo.Point{X: 0, Y: sc.Height},
 					},
-					engo.Line{
+					{
 						P1: engo.Point{X: 0, Y: sc.Height},
 						P2: engo.Point{X: 0, Y: 0},
 					},
@@ -323,21 +323,21 @@ func (sc SpaceComponent) Overlaps(other SpaceComponent, thisTolerance, otherTole
 	}
 	if len(other.hitboxes) == 0 {
 		other.hitboxes = []Shape{
-			Shape{
+			{
 				Lines: []engo.Line{
-					engo.Line{
+					{
 						P1: engo.Point{X: 0, Y: 0},
 						P2: engo.Point{X: other.Width, Y: 0},
 					},
-					engo.Line{
+					{
 						P1: engo.Point{X: other.Width, Y: 0},
 						P2: engo.Point{X: other.Width, Y: other.Height},
 					},
-					engo.Line{
+					{
 						P1: engo.Point{X: other.Width, Y: other.Height},
 						P2: engo.Point{X: 0, Y: other.Height},
 					},
-					engo.Line{
+					{
 						P1: engo.Point{X: 0, Y: other.Height},
 						P2: engo.Point{X: 0, Y: 0},
 					},
@@ -416,25 +416,24 @@ func separationOfAxes(sc, other SpaceComponent, hb, otherHB Shape) (bool, engo.P
 		p2min, p2max := otherHB.Project(axis, other)
 		if p2min > p1max {
 			return false, engo.Point{}
-		} else {
-			var o float32
-			if p1min < p2min {
-				if p1max < p2max {
-					o = p1max - p2min
-				} else {
-					o = p1max - p1min
-				}
+		}
+		var o float32
+		if p1min < p2min {
+			if p1max < p2max {
+				o = p1max - p2min
 			} else {
-				if p1max < p2max {
-					o = p2max - p1min
-				} else {
-					o = p1max - p1min
-				}
+				o = p1max - p1min
 			}
-			if o < overlap {
-				overlap = o
-				smallestAxis = axis
+		} else {
+			if p1max < p2max {
+				o = p2max - p1min
+			} else {
+				o = p1max - p1min
 			}
+		}
+		if o < overlap {
+			overlap = o
+			smallestAxis = axis
 		}
 	}
 	for _, axis := range otherAxes {
@@ -442,25 +441,24 @@ func separationOfAxes(sc, other SpaceComponent, hb, otherHB Shape) (bool, engo.P
 		p2min, p2max := otherHB.Project(axis, other)
 		if p2min > p1max {
 			return false, engo.Point{}
-		} else {
-			var o float32
-			if p1min < p2min {
-				if p1max < p2max {
-					o = p1max - p2min
-				} else {
-					o = p1max - p1min
-				}
+		}
+		var o float32
+		if p1min < p2min {
+			if p1max < p2max {
+				o = p1max - p2min
 			} else {
-				if p1max < p2max {
-					o = p2max - p1min
-				} else {
-					o = p1max - p1min
-				}
+				o = p1max - p1min
 			}
-			if o < overlap {
-				overlap = o
-				smallestAxis = axis
+		} else {
+			if p1max < p2max {
+				o = p2max - p1min
+			} else {
+				o = p1max - p1min
 			}
+		}
+		if o < overlap {
+			overlap = o
+			smallestAxis = axis
 		}
 	}
 	return true, engo.Point{X: -1 * smallestAxis.X * overlap, Y: -1 * smallestAxis.Y * overlap}

@@ -102,38 +102,14 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 	w.AddSystem(&OnClickSystem{})
 
 	rects := []engo.Point{
-		engo.Point{
-			X: 225,
-			Y: 15,
-		},
-		engo.Point{
-			X: 25,
-			Y: 135,
-		},
-		engo.Point{
-			X: 225,
-			Y: 135,
-		},
-		engo.Point{
-			X: 425,
-			Y: 135,
-		},
-		engo.Point{
-			X: 25,
-			Y: 255,
-		},
-		engo.Point{
-			X: 120,
-			Y: 255,
-		},
-		engo.Point{
-			X: 225,
-			Y: 255,
-		},
-		engo.Point{
-			X: 425,
-			Y: 255,
-		},
+		{X: 225, Y: 15},
+		{X: 25, Y: 135},
+		{X: 225, Y: 135},
+		{X: 425, Y: 135},
+		{X: 25, Y: 255},
+		{X: 120, Y: 255},
+		{X: 225, Y: 255},
+		{X: 425, Y: 255},
 	}
 	rectBasics := make([]*ecs.BasicEntity, len(rects))
 
@@ -157,47 +133,47 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 	}
 
 	lines := []engo.Line{
-		engo.Line{
+		{
 			P1: engo.Point{X: 250, Y: 65},
 			P2: engo.Point{X: 250, Y: 100},
 		},
-		engo.Line{
+		{
 			P1: engo.Point{X: 50, Y: 100},
 			P2: engo.Point{X: 450, Y: 100},
 		},
-		engo.Line{
+		{
 			P1: engo.Point{X: 50, Y: 100},
 			P2: engo.Point{X: 50, Y: 135},
 		},
-		engo.Line{
+		{
 			P1: engo.Point{X: 250, Y: 100},
 			P2: engo.Point{X: 250, Y: 135},
 		},
-		engo.Line{
+		{
 			P1: engo.Point{X: 448, Y: 100},
 			P2: engo.Point{X: 448, Y: 135},
 		},
-		engo.Line{
+		{
 			P1: engo.Point{X: 50, Y: 185},
 			P2: engo.Point{X: 50, Y: 220},
 		},
-		engo.Line{
+		{
 			P1: engo.Point{X: 50, Y: 220},
 			P2: engo.Point{X: 150, Y: 220},
 		},
-		engo.Line{
+		{
 			P1: engo.Point{X: 50, Y: 220},
 			P2: engo.Point{X: 50, Y: 255},
 		},
-		engo.Line{
+		{
 			P1: engo.Point{X: 148, Y: 220},
 			P2: engo.Point{X: 148, Y: 255},
 		},
-		engo.Line{
+		{
 			P1: engo.Point{X: 250, Y: 185},
 			P2: engo.Point{X: 250, Y: 255},
 		},
-		engo.Line{
+		{
 			P1: engo.Point{X: 450, Y: 185},
 			P2: engo.Point{X: 450, Y: 255},
 		},
