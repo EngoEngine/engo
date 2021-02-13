@@ -66,11 +66,11 @@ func CreateFramebuffer() *Framebuffer {
 	}
 }
 
-func (rb *RenderTexture) Bind() {
-	if rb.depth {
-		engo.Gl.FrameBufferTexture2D(engo.Gl.FRAMEBUFFER, engo.Gl.DEPTH_ATTACHMENT, engo.Gl.TEXTURE_2D, rb.tex, 0)
+func (t *RenderTexture) Bind() {
+	if t.depth {
+		engo.Gl.FrameBufferTexture2D(engo.Gl.FRAMEBUFFER, engo.Gl.DEPTH_ATTACHMENT, engo.Gl.TEXTURE_2D, t.tex, 0)
 	} else {
-		engo.Gl.FrameBufferTexture2D(engo.Gl.FRAMEBUFFER, engo.Gl.COLOR_ATTACHMENT0, engo.Gl.TEXTURE_2D, rb.tex, 0)
+		engo.Gl.FrameBufferTexture2D(engo.Gl.FRAMEBUFFER, engo.Gl.COLOR_ATTACHMENT0, engo.Gl.TEXTURE_2D, t.tex, 0)
 	}
 }
 

@@ -46,7 +46,7 @@ type Exiter interface {
 }
 
 // Updater is an interface for what handles your game's Update during each frame.
-// typically, this will be an *ecs.World, but you can implement your own Upodater
+// typically, this will be an *ecs.World, but you can implement your own Updater
 // and use engo without using engo's ecs
 type Updater interface {
 	Update(float32)

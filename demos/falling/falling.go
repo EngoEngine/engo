@@ -27,7 +27,7 @@ type Rock struct {
 type DefaultScene struct{}
 
 func (*DefaultScene) Preload() {
-	err := engo.Files.Load("icon.png", "rock.png")
+	err := engo.Files.Load("icon.png", "rock.png", "rock2.png")
 	if err != nil {
 		log.Println(err)
 	}
@@ -149,20 +149,68 @@ func (rock *RockSpawnSystem) Update(dt float32) {
 }
 
 func NewRock(world *ecs.World, position engo.Point) {
-	texture, err := common.LoadedSprite("rock.png")
-	if err != nil {
-		log.Println(err)
-	}
-
 	rock := Rock{BasicEntity: ecs.NewBasic()}
-	rock.RenderComponent = common.RenderComponent{
-		Drawable: texture,
-		Scale:    engo.Point{4, 4},
-	}
-	rock.SpaceComponent = common.SpaceComponent{
-		Position: position,
-		Width:    texture.Width() * rock.RenderComponent.Scale.X,
-		Height:   texture.Height() * rock.RenderComponent.Scale.Y,
+	switch rand.Intn(3) {
+	case 0:
+		yscale := 1.0 + rand.Float32()
+		rock.RenderComponent = common.RenderComponent{
+			Drawable: common.Circle{},
+			Color:    color.RGBA{0, 0, 0, 255},
+		}
+		rock.SpaceComponent = common.SpaceComponent{
+			Position: position,
+			Width:    16 * 4,
+			Height:   16 * 4 * yscale,
+			Rotation: 45 * rand.Float32(),
+		}
+		rock.AddShape(common.Shape{
+			Ellipse: common.Ellipse{
+				Rx: 32,
+				Ry: 32 * yscale,
+				Cx: 32,
+				Cy: 32 * yscale,
+			},
+		})
+	case 1:
+		texture, _ := common.LoadedSprite("rock2.png")
+		rock.RenderComponent = common.RenderComponent{
+			Drawable: texture,
+			Scale:    engo.Point{X: 4, Y: 4},
+		}
+		rock.SpaceComponent = common.SpaceComponent{
+			Position: position,
+			Width:    texture.Width() * rock.RenderComponent.Scale.X,
+			Height:   texture.Height() * rock.RenderComponent.Scale.Y,
+			Rotation: 45 * rand.Float32(),
+		}
+		pts := []float32{4, 0, 12, 0, 16, 4, 16, 13, 13, 13, 13, 16, 3, 16, 3, 13, 0, 13, 0, 4, 4, 0}
+		lines := []engo.Line{}
+		for i := 0; i < len(pts)-3; i += 2 {
+			line := engo.Line{
+				P1: engo.Point{
+					X: pts[i] * 4,
+					Y: pts[i+1] * 4,
+				},
+				P2: engo.Point{
+					X: pts[i+2] * 4,
+					Y: pts[i+3] * 4,
+				},
+			}
+			lines = append(lines, line)
+		}
+		rock.AddShape(common.Shape{Lines: lines})
+	default:
+		texture, _ := common.LoadedSprite("rock.png")
+		rock.RenderComponent = common.RenderComponent{
+			Drawable: texture,
+			Scale:    engo.Point{X: 4, Y: 4},
+		}
+		rock.SpaceComponent = common.SpaceComponent{
+			Position: position,
+			Width:    texture.Width() * rock.RenderComponent.Scale.X,
+			Height:   texture.Height() * rock.RenderComponent.Scale.Y,
+			Rotation: 45 * rand.Float32(),
+		}
 	}
 	rock.CollisionComponent = common.CollisionComponent{Group: 1}
 
@@ -185,7 +233,7 @@ type fallingEntity struct {
 
 type FallingSystem struct {
 	entities []fallingEntity
-	world *ecs.World
+	world    *ecs.World
 }
 
 func (f *FallingSystem) Add(basic *ecs.BasicEntity, space *common.SpaceComponent) {

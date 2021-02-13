@@ -277,11 +277,8 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 			shape.Arc = 360
 		}
 		theta := float32(2.0*math.Pi/298.0) * shape.Arc / 360
-		s, c := math.Sincos(theta)
-		x := w / 2
 		cx := w / 2
 		bx := shape.BorderWidth
-		y := float32(0.0)
 		cy := h / 2
 		by := shape.BorderWidth
 		var borderTint float32
@@ -289,29 +286,24 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 		if hasBorder {
 			borderTint = colorToFloat32(shape.BorderColor)
 		}
-		setBufferValue(buffer, 0, cx, &changed)
-		setBufferValue(buffer, 1, cy, &changed)
+		setBufferValue(buffer, 0, w/2, &changed)
+		setBufferValue(buffer, 1, h/2, &changed)
 		setBufferValue(buffer, 2, tint, &changed)
 		if hasBorder {
-			setBufferValue(buffer, 900, cx, &changed)
-			setBufferValue(buffer, 901, cy, &changed)
+			setBufferValue(buffer, 900, w/2, &changed)
+			setBufferValue(buffer, 901, h/2, &changed)
 			setBufferValue(buffer, 902, borderTint, &changed)
 		}
 		for i := 1; i < 300; i++ {
-			setBufferValue(buffer, i*3, x+cx-bx/2, &changed)
-			setBufferValue(buffer, i*3+1, y+cy-by/2, &changed)
+			s, c := math.Sincos(float32(i) * theta)
+			setBufferValue(buffer, i*3, cx+cx*c-bx, &changed)
+			setBufferValue(buffer, i*3+1, cy+cy*s-by, &changed)
 			setBufferValue(buffer, i*3+2, tint, &changed)
 			if hasBorder {
-				setBufferValue(buffer, i*3+900, x+cx, &changed)
-				setBufferValue(buffer, i*3+901, y+cy, &changed)
+				setBufferValue(buffer, i*3+900, cx+cx*c, &changed)
+				setBufferValue(buffer, i*3+901, cy+cy*s, &changed)
 				setBufferValue(buffer, i*3+902, borderTint, &changed)
 			}
-			t := x
-			bt := bx
-			x = c*x - s*y
-			bx = c*bx - s*by
-			y = s*t + c*y
-			by = s*bt + c*by
 		}
 
 	case Rectangle:

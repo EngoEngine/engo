@@ -55,11 +55,11 @@ func TestAnimationComponentSelectAnimationByName(t *testing.T) {
 	firstFrames := []int{0, 1, 2}
 	secondFrames := []int{1, 2, 1, 0}
 	actions := []*Animation{
-		&Animation{
+		{
 			Name:   "ZeroOneTwo",
 			Frames: firstFrames,
 		},
-		&Animation{
+		{
 			Name:   "OneTwoOneZero",
 			Frames: secondFrames,
 		},
@@ -89,11 +89,11 @@ func TestAnimationComponentSelectAnimationByAction(t *testing.T) {
 	firstFrames := []int{0, 1, 2}
 	secondFrames := []int{1, 2, 1, 0}
 	actions := []*Animation{
-		&Animation{
+		{
 			Name:   "ZeroOneTwo",
 			Frames: firstFrames,
 		},
-		&Animation{
+		{
 			Name:   "OneTwoOneZero",
 			Frames: secondFrames,
 		},
@@ -140,11 +140,11 @@ func TestAnimationComponentIntegration(t *testing.T) {
 	firstFrames := []int{0, 1, 2}
 	secondFrames := []int{1, 2, 1, 0}
 	actions := []*Animation{
-		&Animation{
+		{
 			Name:   "ZeroOneTwo",
 			Frames: firstFrames,
 		},
-		&Animation{
+		{
 			Name:   "OneTwoOneZero",
 			Frames: secondFrames,
 		},
@@ -286,11 +286,11 @@ func (t *TestAnimationScene) Setup(u engo.Updater) {
 		&TestDrawable{2},
 	}
 	anim0Actions := []*Animation{
-		&Animation{
+		{
 			Name:   "ZeroOneTwo",
 			Frames: []int{0, 1, 2},
 		},
-		&Animation{
+		{
 			Name:   "OneTwoOneTwo",
 			Frames: []int{1, 2, 1, 2},
 		},
@@ -320,11 +320,11 @@ func (t *TestAnimationScene) Setup(u engo.Updater) {
 		&TestDrawable{6},
 	}
 	anim1Actions := []*Animation{
-		&Animation{
+		{
 			Name:   "ZeroOneTwoThree",
 			Frames: []int{0, 1, 2, 3},
 		},
-		&Animation{
+		{
 			Name:   "Nothing",
 			Frames: []int{},
 		},
@@ -352,7 +352,7 @@ func (t *TestAnimationScene) Setup(u engo.Updater) {
 		&TestDrawable{8},
 	}
 	anim2Actions := []*Animation{
-		&Animation{
+		{
 			Name:   "OneZero",
 			Frames: []int{1, 0},
 		},

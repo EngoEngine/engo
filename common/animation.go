@@ -19,6 +19,7 @@ type AnimationComponent struct {
 	Drawables        []Drawable            // Renderables
 	Animations       map[string]*Animation // All possible animations
 	CurrentAnimation *Animation            // The current animation
+	CurrentFrame     int                   // The current animation frame number
 	Rate             float32               // How often frames should increment, in seconds.
 	index            int                   // What frame in the is being used
 	change           float32               // The time since the last incrementation
@@ -75,7 +76,7 @@ func (ac *AnimationComponent) Cell() Drawable {
 		return ac.Drawables[0]
 	}
 	idx := ac.CurrentAnimation.Frames[ac.index]
-
+	ac.CurrentFrame = idx
 	return ac.Drawables[idx]
 }
 

@@ -10,62 +10,62 @@ type btnState struct {
 
 // Button configuretion used when testing.
 var btnSimpleCfg = [6]Button{
-	Button{Triggers: []Key{KeyA, KeyC}, Name: "Button 1"},
-	Button{Triggers: []Key{KeyB, KeyD}, Name: "Button 2"},
-	Button{Triggers: []Key{KeyF2, KeyF5}, Name: "Button 3"},
-	Button{Triggers: []Key{KeyF4, KeyF6}, Name: "Button 4"},
-	Button{Triggers: []Key{KeyOne, KeyFour}, Name: "Button 5"},
-	Button{Triggers: []Key{KeyTwo, KeyFive}, Name: "Button 6"},
+	{Triggers: []Key{KeyA, KeyC}, Name: "Button 1"},
+	{Triggers: []Key{KeyB, KeyD}, Name: "Button 2"},
+	{Triggers: []Key{KeyF2, KeyF5}, Name: "Button 3"},
+	{Triggers: []Key{KeyF4, KeyF6}, Name: "Button 4"},
+	{Triggers: []Key{KeyOne, KeyFour}, Name: "Button 5"},
+	{Triggers: []Key{KeyTwo, KeyFive}, Name: "Button 6"},
 }
 
 // Expected button state @ pass 0
 var btnPass0 = [6]btnState{
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
+	{down: false, justUp: false, justDown: false},
+	{down: false, justUp: false, justDown: false},
+	{down: false, justUp: false, justDown: false},
+	{down: false, justUp: false, justDown: false},
+	{down: false, justUp: false, justDown: false},
+	{down: false, justUp: false, justDown: false},
 }
 
 // Expected button state @ pass 1
 var btnPass1 = [6]btnState{
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: true},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: true},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: true},
+	{down: false, justUp: false, justDown: false},
+	{down: false, justUp: false, justDown: true},
+	{down: false, justUp: false, justDown: false},
+	{down: false, justUp: false, justDown: true},
+	{down: false, justUp: false, justDown: false},
+	{down: false, justUp: false, justDown: true},
 }
 
 // Expected button state @ pass 2
 var btnPass2 = [6]btnState{
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: true, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: true, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: true, justUp: false, justDown: false},
+	{down: false, justUp: false, justDown: false},
+	{down: true, justUp: false, justDown: false},
+	{down: false, justUp: false, justDown: false},
+	{down: true, justUp: false, justDown: false},
+	{down: false, justUp: false, justDown: false},
+	{down: true, justUp: false, justDown: false},
 }
 
 // Expected button state @ pass 3
 var btnPass3 = [6]btnState{
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: true, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: true, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: true, justDown: false},
+	{down: false, justUp: false, justDown: false},
+	{down: false, justUp: true, justDown: false},
+	{down: false, justUp: false, justDown: false},
+	{down: false, justUp: true, justDown: false},
+	{down: false, justUp: false, justDown: false},
+	{down: false, justUp: true, justDown: false},
 }
 
 // Expected button state @ pass 4
 var btnPass4 = [6]btnState{
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
-	btnState{down: false, justUp: false, justDown: false},
+	{down: false, justUp: false, justDown: false},
+	{down: false, justUp: false, justDown: false},
+	{down: false, justUp: false, justDown: false},
+	{down: false, justUp: false, justDown: false},
+	{down: false, justUp: false, justDown: false},
+	{down: false, justUp: false, justDown: false},
 }
 
 // Checks the state of all configured buttons against the expected state.
