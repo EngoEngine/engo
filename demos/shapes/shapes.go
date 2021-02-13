@@ -199,7 +199,7 @@ func (*DefaultScene) Setup(u engo.Updater) {
 	curve.RenderComponent = common.RenderComponent{
 		Drawable: common.Curve{
 			LineWidth: 1,
-			Points:    []engo.Point{engo.Point{X: 0, Y: 25}, engo.Point{X: 100, Y: 70}},
+			Points:    []engo.Point{{X: 0, Y: 25}, {X: 100, Y: 70}},
 		},
 		Color: color.RGBA{255, 255, 255, 255},
 	}

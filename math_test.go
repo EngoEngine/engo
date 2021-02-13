@@ -664,19 +664,19 @@ func TestLineTrace(t *testing.T) {
 				P2: Point{X: 5, Y: 0},
 			},
 			boundaries: []Line{
-				Line{
+				{
 					P1: Point{X: 5, Y: 0},
 					P2: Point{X: 5, Y: 5},
 				},
-				Line{
+				{
 					P1: Point{X: 5, Y: 5},
 					P2: Point{X: 0, Y: 5},
 				},
-				Line{
+				{
 					P1: Point{X: 0, Y: 5},
 					P2: Point{X: 0, Y: 0},
 				},
-				Line{
+				{
 					P1: Point{X: -3, Y: -3},
 					P2: Point{X: 3, Y: -3},
 				},
@@ -696,11 +696,11 @@ func TestLineTrace(t *testing.T) {
 				P2: Point{X: 5, Y: 0},
 			},
 			boundaries: []Line{
-				Line{
+				{
 					P1: Point{X: 5, Y: 5},
 					P2: Point{X: 0, Y: 5},
 				},
-				Line{
+				{
 					P1: Point{X: -3, Y: -3},
 					P2: Point{X: 3, Y: -3},
 				},
@@ -720,19 +720,19 @@ func TestLineTrace(t *testing.T) {
 				P2: Point{X: 2, Y: 2},
 			},
 			boundaries: []Line{
-				Line{
+				{
 					P1: Point{X: 5, Y: 0},
 					P2: Point{X: 5, Y: 5},
 				},
-				Line{
+				{
 					P1: Point{X: 5, Y: 5},
 					P2: Point{X: 0, Y: 5},
 				},
-				Line{
+				{
 					P1: Point{X: 0, Y: 5},
 					P2: Point{X: 0, Y: 0},
 				},
-				Line{
+				{
 					P1: Point{X: -3, Y: -3},
 					P2: Point{X: 3, Y: -3},
 				},

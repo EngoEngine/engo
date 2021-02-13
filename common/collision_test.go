@@ -12,29 +12,29 @@ import (
 func TestSpaceComponent_Contains(t *testing.T) {
 	space := SpaceComponent{Width: 100, Height: 100}
 	pass := []engo.Point{
-		engo.Point{X: 10, Y: 10},
-		engo.Point{X: 50, Y: 50},
-		engo.Point{X: 10, Y: 50},
-		engo.Point{X: 99, Y: 99},
+		{X: 10, Y: 10},
+		{X: 50, Y: 50},
+		{X: 10, Y: 50},
+		{X: 99, Y: 99},
 	}
 	fail := []engo.Point{
 		// Totally not within:
-		engo.Point{X: -10, Y: -10},
-		engo.Point{X: 120, Y: 120},
+		{X: -10, Y: -10},
+		{X: 120, Y: 120},
 
 		// Only one axis within:
-		engo.Point{X: 50, Y: 120},
-		engo.Point{X: 120, Y: 50},
+		{X: 50, Y: 120},
+		{X: 120, Y: 50},
 
 		// On the edge:
-		engo.Point{X: 0, Y: 0},
-		engo.Point{X: 0, Y: 50},
-		engo.Point{X: 0, Y: 100},
-		engo.Point{X: 50, Y: 0},
-		engo.Point{X: 50, Y: 100},
-		engo.Point{X: 100, Y: 0},
-		engo.Point{X: 100, Y: 50},
-		engo.Point{X: 100, Y: 100},
+		{X: 0, Y: 0},
+		{X: 0, Y: 50},
+		{X: 0, Y: 100},
+		{X: 50, Y: 0},
+		{X: 50, Y: 100},
+		{X: 100, Y: 0},
+		{X: 100, Y: 50},
+		{X: 100, Y: 100},
 	}
 
 	for _, p := range pass {
@@ -51,35 +51,35 @@ func TestSpaceComponent_Contains_Hitboxes(t *testing.T) {
 	space0 := SpaceComponent{Width: 5, Height: 5, Position: engo.Point{X: 0, Y: 0}}  //AABB
 	space1 := SpaceComponent{Width: 5, Height: 5, Position: engo.Point{X: 10, Y: 0}} //Triangle
 	space1.AddShape(Shape{Lines: []engo.Line{
-		engo.Line{P1: engo.Point{X: 0, Y: 0}, P2: engo.Point{X: 0, Y: 5}},
-		engo.Line{P1: engo.Point{X: 0, Y: 5}, P2: engo.Point{X: 5, Y: 5}},
-		engo.Line{P1: engo.Point{X: 5, Y: 5}, P2: engo.Point{X: 0, Y: 0}},
+		{P1: engo.Point{X: 0, Y: 0}, P2: engo.Point{X: 0, Y: 5}},
+		{P1: engo.Point{X: 0, Y: 5}, P2: engo.Point{X: 5, Y: 5}},
+		{P1: engo.Point{X: 5, Y: 5}, P2: engo.Point{X: 0, Y: 0}},
 	}})
 	space2 := SpaceComponent{Width: 5, Height: 5, Position: engo.Point{X: 0, Y: 10}} //Multi-Shape
 	space2.AddShape(Shape{Lines: []engo.Line{
-		engo.Line{P1: engo.Point{X: 2.5, Y: 0}, P2: engo.Point{X: 2.5 + 0.57735026919, Y: 1}},
-		engo.Line{P1: engo.Point{X: 2.5 + 0.57735026919, Y: 1}, P2: engo.Point{X: 2.5 - 0.57735026919, Y: 1}},
-		engo.Line{P1: engo.Point{X: 2.5 - 0.57735026919, Y: 1}, P2: engo.Point{X: 2.5, Y: 0}},
+		{P1: engo.Point{X: 2.5, Y: 0}, P2: engo.Point{X: 2.5 + 0.57735026919, Y: 1}},
+		{P1: engo.Point{X: 2.5 + 0.57735026919, Y: 1}, P2: engo.Point{X: 2.5 - 0.57735026919, Y: 1}},
+		{P1: engo.Point{X: 2.5 - 0.57735026919, Y: 1}, P2: engo.Point{X: 2.5, Y: 0}},
 	}})
 	space2.AddShape(Shape{Lines: []engo.Line{
-		engo.Line{P1: engo.Point{X: 0, Y: 2.5}, P2: engo.Point{X: 1, Y: 2.5 + 0.57735026919}},
-		engo.Line{P1: engo.Point{X: 1, Y: 2.5 + 0.57735026919}, P2: engo.Point{X: 1, Y: 2.5 - 0.57735026919}},
-		engo.Line{P1: engo.Point{X: 1, Y: 2.5 - 0.57735026919}, P2: engo.Point{X: 0, Y: 2.5}},
+		{P1: engo.Point{X: 0, Y: 2.5}, P2: engo.Point{X: 1, Y: 2.5 + 0.57735026919}},
+		{P1: engo.Point{X: 1, Y: 2.5 + 0.57735026919}, P2: engo.Point{X: 1, Y: 2.5 - 0.57735026919}},
+		{P1: engo.Point{X: 1, Y: 2.5 - 0.57735026919}, P2: engo.Point{X: 0, Y: 2.5}},
 	}})
 	space2.AddShape(Shape{Lines: []engo.Line{
-		engo.Line{P1: engo.Point{X: 5, Y: 2.5}, P2: engo.Point{X: 4, Y: 2.5 + 0.57735026919}},
-		engo.Line{P1: engo.Point{X: 4, Y: 2.5 + 0.57735026919}, P2: engo.Point{X: 4, Y: 2.5 - 0.57735026919}},
-		engo.Line{P1: engo.Point{X: 4, Y: 2.5 - 0.57735026919}, P2: engo.Point{X: 5, Y: 2.5}},
+		{P1: engo.Point{X: 5, Y: 2.5}, P2: engo.Point{X: 4, Y: 2.5 + 0.57735026919}},
+		{P1: engo.Point{X: 4, Y: 2.5 + 0.57735026919}, P2: engo.Point{X: 4, Y: 2.5 - 0.57735026919}},
+		{P1: engo.Point{X: 4, Y: 2.5 - 0.57735026919}, P2: engo.Point{X: 5, Y: 2.5}},
 	}})
 	space2.AddShape(Shape{Lines: []engo.Line{
-		engo.Line{P1: engo.Point{X: 0, Y: 5}, P2: engo.Point{X: 1.15470053838, Y: 5}},
-		engo.Line{P1: engo.Point{X: 1.15470053838, Y: 5}, P2: engo.Point{X: 0.57735026919, Y: 4}},
-		engo.Line{P1: engo.Point{X: 0.57735026919, Y: 4}, P2: engo.Point{X: 0, Y: 5}},
+		{P1: engo.Point{X: 0, Y: 5}, P2: engo.Point{X: 1.15470053838, Y: 5}},
+		{P1: engo.Point{X: 1.15470053838, Y: 5}, P2: engo.Point{X: 0.57735026919, Y: 4}},
+		{P1: engo.Point{X: 0.57735026919, Y: 4}, P2: engo.Point{X: 0, Y: 5}},
 	}})
 	space2.AddShape(Shape{Lines: []engo.Line{
-		engo.Line{P1: engo.Point{X: 5, Y: 5}, P2: engo.Point{X: 5 - 1.15470053838, Y: 5}},
-		engo.Line{P1: engo.Point{X: 5 - 1.15470053838, Y: 5}, P2: engo.Point{X: 5 - 0.57735026919, Y: 5}},
-		engo.Line{P1: engo.Point{X: 5 - 0.57735026919, Y: 5}, P2: engo.Point{X: 5, Y: 5}},
+		{P1: engo.Point{X: 5, Y: 5}, P2: engo.Point{X: 5 - 1.15470053838, Y: 5}},
+		{P1: engo.Point{X: 5 - 1.15470053838, Y: 5}, P2: engo.Point{X: 5 - 0.57735026919, Y: 5}},
+		{P1: engo.Point{X: 5 - 0.57735026919, Y: 5}, P2: engo.Point{X: 5, Y: 5}},
 	}})
 	space3 := SpaceComponent{Width: 5, Height: 5, Position: engo.Point{X: 10, Y: 10}} //Circle
 	space3.AddShape(Shape{Ellipse: Ellipse{Rx: 2.5, Cx: 2.5, Ry: 2.5, Cy: 2.5}})
@@ -89,12 +89,12 @@ func TestSpaceComponent_Contains_Hitboxes(t *testing.T) {
 	space5.AddShape(Shape{Ellipse: Ellipse{Rx: 2.5, Cx: 2.5, Ry: 5, Cy: 2.5}})
 	scs = append(scs, space0, space1, space2, space3, space4, space5)
 	pts := []engo.Point{
-		engo.Point{X: 2.5, Y: 2.5},
-		engo.Point{X: 12.5, Y: 2.5},
-		engo.Point{X: 0.5, Y: 12.5},
-		engo.Point{X: 12.5, Y: 12.5},
-		engo.Point{X: 22.5, Y: 2.5},
-		engo.Point{X: 2.5, Y: 22.5},
+		{X: 2.5, Y: 2.5},
+		{X: 12.5, Y: 2.5},
+		{X: 0.5, Y: 12.5},
+		{X: 12.5, Y: 12.5},
+		{X: 22.5, Y: 2.5},
+		{X: 2.5, Y: 22.5},
 	}
 	for i := 0; i < len(scs); i++ {
 		for j := 0; j < len(pts); j++ {
@@ -118,35 +118,35 @@ func TestSpaceComponent_Overlaps(t *testing.T) {
 	space0 := SpaceComponent{Width: 5, Height: 5, Position: engo.Point{X: 0, Y: 0}}  //AABB
 	space1 := SpaceComponent{Width: 5, Height: 5, Position: engo.Point{X: 10, Y: 0}} //Triangle
 	space1.AddShape(Shape{Lines: []engo.Line{
-		engo.Line{P1: engo.Point{X: 0, Y: 0}, P2: engo.Point{X: 0, Y: 5}},
-		engo.Line{P1: engo.Point{X: 0, Y: 5}, P2: engo.Point{X: 5, Y: 5}},
-		engo.Line{P1: engo.Point{X: 5, Y: 5}, P2: engo.Point{X: 0, Y: 0}},
+		{P1: engo.Point{X: 0, Y: 0}, P2: engo.Point{X: 0, Y: 5}},
+		{P1: engo.Point{X: 0, Y: 5}, P2: engo.Point{X: 5, Y: 5}},
+		{P1: engo.Point{X: 5, Y: 5}, P2: engo.Point{X: 0, Y: 0}},
 	}})
 	space2 := SpaceComponent{Width: 5, Height: 5, Position: engo.Point{X: 0, Y: 10}} //Multi-Shape
 	space2.AddShape(Shape{Lines: []engo.Line{
-		engo.Line{P1: engo.Point{X: 2.5, Y: 0}, P2: engo.Point{X: 2.5 + 0.57735026919, Y: 1}},
-		engo.Line{P1: engo.Point{X: 2.5 + 0.57735026919, Y: 1}, P2: engo.Point{X: 2.5 - 0.57735026919, Y: 1}},
-		engo.Line{P1: engo.Point{X: 2.5 - 0.57735026919, Y: 1}, P2: engo.Point{X: 2.5, Y: 0}},
+		{P1: engo.Point{X: 2.5, Y: 0}, P2: engo.Point{X: 2.5 + 0.57735026919, Y: 1}},
+		{P1: engo.Point{X: 2.5 + 0.57735026919, Y: 1}, P2: engo.Point{X: 2.5 - 0.57735026919, Y: 1}},
+		{P1: engo.Point{X: 2.5 - 0.57735026919, Y: 1}, P2: engo.Point{X: 2.5, Y: 0}},
 	}})
 	space2.AddShape(Shape{Lines: []engo.Line{
-		engo.Line{P1: engo.Point{X: 0, Y: 2.5}, P2: engo.Point{X: 1, Y: 2.5 + 0.57735026919}},
-		engo.Line{P1: engo.Point{X: 1, Y: 2.5 + 0.57735026919}, P2: engo.Point{X: 1, Y: 2.5 - 0.57735026919}},
-		engo.Line{P1: engo.Point{X: 1, Y: 2.5 - 0.57735026919}, P2: engo.Point{X: 0, Y: 2.5}},
+		{P1: engo.Point{X: 0, Y: 2.5}, P2: engo.Point{X: 1, Y: 2.5 + 0.57735026919}},
+		{P1: engo.Point{X: 1, Y: 2.5 + 0.57735026919}, P2: engo.Point{X: 1, Y: 2.5 - 0.57735026919}},
+		{P1: engo.Point{X: 1, Y: 2.5 - 0.57735026919}, P2: engo.Point{X: 0, Y: 2.5}},
 	}})
 	space2.AddShape(Shape{Lines: []engo.Line{
-		engo.Line{P1: engo.Point{X: 5, Y: 2.5}, P2: engo.Point{X: 4, Y: 2.5 + 0.57735026919}},
-		engo.Line{P1: engo.Point{X: 4, Y: 2.5 + 0.57735026919}, P2: engo.Point{X: 4, Y: 2.5 - 0.57735026919}},
-		engo.Line{P1: engo.Point{X: 4, Y: 2.5 - 0.57735026919}, P2: engo.Point{X: 5, Y: 2.5}},
+		{P1: engo.Point{X: 5, Y: 2.5}, P2: engo.Point{X: 4, Y: 2.5 + 0.57735026919}},
+		{P1: engo.Point{X: 4, Y: 2.5 + 0.57735026919}, P2: engo.Point{X: 4, Y: 2.5 - 0.57735026919}},
+		{P1: engo.Point{X: 4, Y: 2.5 - 0.57735026919}, P2: engo.Point{X: 5, Y: 2.5}},
 	}})
 	space2.AddShape(Shape{Lines: []engo.Line{
-		engo.Line{P1: engo.Point{X: 0, Y: 5}, P2: engo.Point{X: 1.15470053838, Y: 5}},
-		engo.Line{P1: engo.Point{X: 1.15470053838, Y: 5}, P2: engo.Point{X: 0.57735026919, Y: 4}},
-		engo.Line{P1: engo.Point{X: 0.57735026919, Y: 4}, P2: engo.Point{X: 0, Y: 5}},
+		{P1: engo.Point{X: 0, Y: 5}, P2: engo.Point{X: 1.15470053838, Y: 5}},
+		{P1: engo.Point{X: 1.15470053838, Y: 5}, P2: engo.Point{X: 0.57735026919, Y: 4}},
+		{P1: engo.Point{X: 0.57735026919, Y: 4}, P2: engo.Point{X: 0, Y: 5}},
 	}})
 	space2.AddShape(Shape{Lines: []engo.Line{
-		engo.Line{P1: engo.Point{X: 5, Y: 5}, P2: engo.Point{X: 5 - 1.15470053838, Y: 5}},
-		engo.Line{P1: engo.Point{X: 5 - 1.15470053838, Y: 5}, P2: engo.Point{X: 5 - 0.57735026919, Y: 5}},
-		engo.Line{P1: engo.Point{X: 5 - 0.57735026919, Y: 5}, P2: engo.Point{X: 5, Y: 5}},
+		{P1: engo.Point{X: 5, Y: 5}, P2: engo.Point{X: 5 - 1.15470053838, Y: 5}},
+		{P1: engo.Point{X: 5 - 1.15470053838, Y: 5}, P2: engo.Point{X: 5 - 0.57735026919, Y: 5}},
+		{P1: engo.Point{X: 5 - 0.57735026919, Y: 5}, P2: engo.Point{X: 5, Y: 5}},
 	}})
 	space3 := SpaceComponent{Width: 5, Height: 5, Position: engo.Point{X: 10, Y: 10}} //Circle
 	space3.AddShape(Shape{Ellipse: Ellipse{Rx: 2.5, Cx: 2.5, Ry: 2.5, Cy: 2.5}})
@@ -192,14 +192,14 @@ func TestSpaceComponent_Overlaps(t *testing.T) {
 
 func TestSpaceComponent_Corners(t *testing.T) {
 	space1 := SpaceComponent{Width: 1, Height: 1}
-	exp1 := [4]engo.Point{engo.Point{X: 0, Y: 0}, engo.Point{X: 1, Y: 0}, engo.Point{X: 0, Y: 1}, engo.Point{X: 1, Y: 1}}
+	exp1 := [4]engo.Point{{X: 0, Y: 0}, {X: 1, Y: 0}, {X: 0, Y: 1}, {X: 1, Y: 1}}
 	act1 := space1.Corners()
 	for i := 0; i < 4; i++ {
 		assert.True(t, exp1[i].Equal(act1[i]), fmt.Sprintf("corner %d did not match for rotation %f (got %v expected %v)", i, space1.Rotation, act1[i], exp1[i]))
 	}
 
 	space2 := SpaceComponent{Width: 1, Height: 1, Rotation: 90}
-	exp2 := [4]engo.Point{engo.Point{X: 0, Y: 0}, engo.Point{X: 0, Y: 1}, engo.Point{X: -1, Y: 0}, engo.Point{X: -1, Y: 1}}
+	exp2 := [4]engo.Point{{X: 0, Y: 0}, {X: 0, Y: 1}, {X: -1, Y: 0}, {X: -1, Y: 1}}
 	act2 := space2.Corners()
 	for i := 0; i < 4; i++ {
 		assert.True(t, exp2[i].Equal(act2[i]), fmt.Sprintf("corner %d did not match for rotation %f (got %v expected %v)", i, space2.Rotation, act2[i], exp2[i]))
@@ -278,16 +278,16 @@ func Test_GroupSolid(t *testing.T) {
 
 func TestSpaceComponent_Center(t *testing.T) {
 	components := []SpaceComponent{
-		SpaceComponent{Width: 0, Height: 0},
-		SpaceComponent{Width: 100, Height: 100},
-		SpaceComponent{Width: 100, Height: 200},
-		SpaceComponent{Width: 100, Height: 200, Rotation: 45},
+		{Width: 0, Height: 0},
+		{Width: 100, Height: 100},
+		{Width: 100, Height: 200},
+		{Width: 100, Height: 200, Rotation: 45},
 	}
 	points := []engo.Point{
-		engo.Point{X: 10, Y: 10},
-		engo.Point{X: 50, Y: 50},
-		engo.Point{X: 10, Y: 50},
-		engo.Point{X: 99, Y: 99},
+		{X: 10, Y: 10},
+		{X: 50, Y: 50},
+		{X: 10, Y: 50},
+		{X: 99, Y: 99},
 	}
 
 	for _, sc := range components {
@@ -301,115 +301,115 @@ func TestSpaceComponent_Center(t *testing.T) {
 
 func TestShape_Project(t *testing.T) {
 	shapes := []Shape{
-		Shape{
+		{
 			Lines: []engo.Line{
-				engo.Line{
+				{
 					P1: engo.Point{X: 0, Y: 0},
 					P2: engo.Point{X: 10, Y: 0},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 10, Y: 0},
 					P2: engo.Point{X: 10, Y: 10},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 10, Y: 10},
 					P2: engo.Point{X: 0, Y: 0},
 				},
 			},
 		}, //triangle
-		Shape{
+		{
 			Lines: []engo.Line{
-				engo.Line{
+				{
 					P1: engo.Point{X: 0, Y: 0},
 					P2: engo.Point{X: 10, Y: 0},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 10, Y: 0},
 					P2: engo.Point{X: 10, Y: 10},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 10, Y: 10},
 					P2: engo.Point{X: 0, Y: 10},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 0, Y: 10},
 					P2: engo.Point{X: 0, Y: 0},
 				},
 			},
 		}, //square
-		Shape{
+		{
 			Lines: []engo.Line{
-				engo.Line{
+				{
 					P1: engo.Point{X: 0, Y: 0},
 					P2: engo.Point{X: 10, Y: 0},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 10, Y: 0},
 					P2: engo.Point{X: 10, Y: 5},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 10, Y: 5},
 					P2: engo.Point{X: 0, Y: 5},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 0, Y: 5},
 					P2: engo.Point{X: 0, Y: 0},
 				},
 			},
 		}, //rectangle
-		Shape{
+		{
 			Lines: []engo.Line{
-				engo.Line{
+				{
 					P1: engo.Point{X: 0, Y: 3},
 					P2: engo.Point{X: 3, Y: 0},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 3, Y: 0},
 					P2: engo.Point{X: 6, Y: 3},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 6, Y: 3},
 					P2: engo.Point{X: 6, Y: 6},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 6, Y: 6},
 					P2: engo.Point{X: 0, Y: 6},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 0, Y: 6},
 					P2: engo.Point{X: 0, Y: 3},
 				},
 			},
 		}, //pentagon
-		Shape{
+		{
 			Lines: []engo.Line{
-				engo.Line{
+				{
 					P1: engo.Point{X: 1, Y: 0},
 					P2: engo.Point{X: 3, Y: 0},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 3, Y: 0},
 					P2: engo.Point{X: 4, Y: 2},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 4, Y: 2},
 					P2: engo.Point{X: 3, Y: 4},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 3, Y: 4},
 					P2: engo.Point{X: 1, Y: 4},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 1, Y: 4},
 					P2: engo.Point{X: 0, Y: 2},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 0, Y: 2},
 					P2: engo.Point{X: 1, Y: 0},
 				},
 			},
 		}, //hexagon
-		Shape{
+		{
 			Ellipse: Ellipse{
 				Rx: 4,
 				Ry: 4,
@@ -417,7 +417,7 @@ func TestShape_Project(t *testing.T) {
 				Cy: 4,
 			},
 		}, //circle
-		Shape{
+		{
 			Ellipse: Ellipse{
 				Rx: 4,
 				Ry: 8,
@@ -427,44 +427,44 @@ func TestShape_Project(t *testing.T) {
 		}, //ellipse
 	}
 	pts := []engo.Point{
-		engo.Point{X: 1, Y: 0},  //quad1
-		engo.Point{X: 0, Y: 1},  //quad2
-		engo.Point{X: -1, Y: 0}, //quad3
-		engo.Point{X: 0, Y: -1}, //quad4
+		{X: 1, Y: 0},  //quad1
+		{X: 0, Y: 1},  //quad2
+		{X: -1, Y: 0}, //quad3
+		{X: 0, Y: -1}, //quad4
 	}
 	exp := [][]float32{
-		[]float32{0, 10},                    //0 0
-		[]float32{0, 10},                    //0 1
-		[]float32{-10, 0},                   //0 2
-		[]float32{-10, 0},                   //0 3
-		[]float32{0, 10},                    //1 0
-		[]float32{0, 10},                    //1 1
-		[]float32{-10, 0},                   //1 2
-		[]float32{-10, 0},                   //1 3
-		[]float32{0, 10},                    //2 0
-		[]float32{0, 5},                     //2 1
-		[]float32{-10, 0},                   //2 2
-		[]float32{-5, 0},                    //2 3
-		[]float32{0, 6},                     //3 0
-		[]float32{0, 6},                     //3 1
-		[]float32{-6, 0},                    //3 2
-		[]float32{-6, 0},                    //3 3
-		[]float32{0, 4},                     //4 0
-		[]float32{0, 4},                     //4 1
-		[]float32{-4, 0},                    //4 2
-		[]float32{-4, 0},                    //4 3
-		[]float32{0.0078930855, 7.992107},   //5 0
-		[]float32{0.03154111, 8},            //5 1
-		[]float32{-7.992107, -0.0078930855}, //5 2
-		[]float32{-8, -0.03154111},          //5 3
-		[]float32{0.0078930855, 7.992107},   //6 0
-		[]float32{-3.9369178, 12},           //6 1
-		[]float32{-7.992107, -0.0078930855}, //6 2
-		[]float32{-12, 3.9369178},           //6 3
-		[]float32{0.0078930855, 7.992107},   //7 0
-		[]float32{0.0078930855, 7.992107},   //7 1
-		[]float32{0.0078930855, 7.992107},   //7 2
-		[]float32{0.0078930855, 7.992107},   //7 3
+		{0, 10},                    //0 0
+		{0, 10},                    //0 1
+		{-10, 0},                   //0 2
+		{-10, 0},                   //0 3
+		{0, 10},                    //1 0
+		{0, 10},                    //1 1
+		{-10, 0},                   //1 2
+		{-10, 0},                   //1 3
+		{0, 10},                    //2 0
+		{0, 5},                     //2 1
+		{-10, 0},                   //2 2
+		{-5, 0},                    //2 3
+		{0, 6},                     //3 0
+		{0, 6},                     //3 1
+		{-6, 0},                    //3 2
+		{-6, 0},                    //3 3
+		{0, 4},                     //4 0
+		{0, 4},                     //4 1
+		{-4, 0},                    //4 2
+		{-4, 0},                    //4 3
+		{0.0078930855, 7.992107},   //5 0
+		{0.03154111, 8},            //5 1
+		{-7.992107, -0.0078930855}, //5 2
+		{-8, -0.03154111},          //5 3
+		{0.0078930855, 7.992107},   //6 0
+		{-3.9369178, 12},           //6 1
+		{-7.992107, -0.0078930855}, //6 2
+		{-12, 3.9369178},           //6 3
+		{0.0078930855, 7.992107},   //7 0
+		{0.0078930855, 7.992107},   //7 1
+		{0.0078930855, 7.992107},   //7 2
+		{0.0078930855, 7.992107},   //7 3
 	}
 	for i, shape := range shapes {
 		for j, pt := range pts {
@@ -478,115 +478,115 @@ func TestShape_Project(t *testing.T) {
 
 func TestSpaceComponentAddShape(t *testing.T) {
 	shapes := []Shape{
-		Shape{
+		{
 			Lines: []engo.Line{
-				engo.Line{
+				{
 					P1: engo.Point{X: 0, Y: 0},
 					P2: engo.Point{X: 10, Y: 0},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 10, Y: 0},
 					P2: engo.Point{X: 10, Y: 10},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 10, Y: 10},
 					P2: engo.Point{X: 0, Y: 0},
 				},
 			},
 		}, //triangle
-		Shape{
+		{
 			Lines: []engo.Line{
-				engo.Line{
+				{
 					P1: engo.Point{X: 0, Y: 0},
 					P2: engo.Point{X: 10, Y: 0},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 10, Y: 0},
 					P2: engo.Point{X: 10, Y: 10},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 10, Y: 10},
 					P2: engo.Point{X: 0, Y: 10},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 0, Y: 10},
 					P2: engo.Point{X: 0, Y: 0},
 				},
 			},
 		}, //square
-		Shape{
+		{
 			Lines: []engo.Line{
-				engo.Line{
+				{
 					P1: engo.Point{X: 0, Y: 0},
 					P2: engo.Point{X: 10, Y: 0},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 10, Y: 0},
 					P2: engo.Point{X: 10, Y: 5},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 10, Y: 5},
 					P2: engo.Point{X: 0, Y: 5},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 0, Y: 5},
 					P2: engo.Point{X: 0, Y: 0},
 				},
 			},
 		}, //rectangle
-		Shape{
+		{
 			Lines: []engo.Line{
-				engo.Line{
+				{
 					P1: engo.Point{X: 0, Y: 3},
 					P2: engo.Point{X: 3, Y: 0},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 3, Y: 0},
 					P2: engo.Point{X: 6, Y: 3},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 6, Y: 3},
 					P2: engo.Point{X: 6, Y: 6},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 6, Y: 6},
 					P2: engo.Point{X: 0, Y: 6},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 0, Y: 6},
 					P2: engo.Point{X: 0, Y: 3},
 				},
 			},
 		}, //pentagon
-		Shape{
+		{
 			Lines: []engo.Line{
-				engo.Line{
+				{
 					P1: engo.Point{X: 1, Y: 0},
 					P2: engo.Point{X: 3, Y: 0},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 3, Y: 0},
 					P2: engo.Point{X: 4, Y: 2},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 4, Y: 2},
 					P2: engo.Point{X: 3, Y: 4},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 3, Y: 4},
 					P2: engo.Point{X: 1, Y: 4},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 1, Y: 4},
 					P2: engo.Point{X: 0, Y: 2},
 				},
-				engo.Line{
+				{
 					P1: engo.Point{X: 0, Y: 2},
 					P2: engo.Point{X: 1, Y: 0},
 				},
 			},
 		}, //hexagon
-		Shape{
+		{
 			Ellipse: Ellipse{
 				Rx: 4,
 				Ry: 4,
@@ -594,7 +594,7 @@ func TestSpaceComponentAddShape(t *testing.T) {
 				Cy: 4,
 			},
 		}, //circle
-		Shape{
+		{
 			Ellipse: Ellipse{
 				Rx: 4,
 				Ry: 8,
