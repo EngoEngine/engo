@@ -8,8 +8,7 @@ require (
 	github.com/EngoEngine/math v1.0.4
 	github.com/Noofbiz/sdlMojaveFix v0.0.1
 	github.com/Noofbiz/tmx v0.2.0
-	github.com/alecthomas/gocyclo v0.0.0-20150208221726-aa8f8b160214 // indirect
-	github.com/client9/misspell v0.3.4 // indirect
+	github.com/go-bindata/go-bindata v3.1.2+incompatible
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200420212212-258d9bec320e
 	github.com/go-gl/mathgl v0.0.0-20190713194549-592312d8590a
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
