@@ -8,9 +8,9 @@ It demonstrates how one can bundle assets into their binary to reduce distributi
 
 These lines are key in this demo:
 
-- `import _ "github.com/go-bindata/go-bindata"` to track go-bindata in go.mod
-- `//go:generate go-bindata -pkg=assets ./...` to setup the go generate tool
-- `data, err := assets.Asset(file)` to retrieve a bundled asset
+- `//go:embed *.png *.tmx` to embed the files
+- `var fs embed.FS` to store the embedded filesystem
+- `data, err := assets.ReadFile(file)` to retrieve a bundled asset
 - `err = engo.Files.LoadReaderData(file, bytes.NewReader(data))` to load it into engo.Files
 
 ## Load each file in a list
@@ -22,7 +22,7 @@ func (s *GameScene) Preload() {
 		"sprites.png,
 	}
 	for _, file := range files {
-		data, err := assets.Asset(file)
+		data, err := assets.ReadFile(file)
 		if err != nil {
 			log.Fatalf("Unable to locate asset with URL: %v\n", file)
 		}
@@ -39,15 +39,17 @@ func (s *GameScene) Preload() {
 assets/assets.go
 
 ```go
-//!build
+//+build demo
 
 package assets
 
-import (
-	// go-bindata required for code generation
-	_ "github.com/go-bindata/go-bindata"
-)
+import "embed"
 
-//go:generate go-bindata -pkg=assets ./...
-//go:generate gofmt -s -w .
+//go:embed *.png *.tmx
+var fs embed.FS
+
+// ReadFile wrapper for embedded assets filesystem.
+func ReadFile(name string) ([]byte, error) {
+	return fs.ReadFile(name)
+}
 ```
