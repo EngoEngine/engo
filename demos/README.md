@@ -16,6 +16,10 @@ Run some code, just before the window is actually closed (whenever the user pres
 
 Bundle assets into final binary for easier distribution.
 
+### [Embed](embed)
+
+Bundle assets into final binary for easier distribution using go embed.
+
 ## Graphics
 
 ### [Hello World](hello-world)
