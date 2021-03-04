@@ -152,7 +152,7 @@ func (l *legacyShader) computeBufferSize(draw Drawable) int {
 	case Rectangle:
 		return 90
 	case Circle:
-		return 1800
+		return 2160
 	case ComplexTriangles:
 		return len(shape.Points) * 6
 	case Curve:
@@ -274,7 +274,7 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 		if shape.Arc == 0 {
 			shape.Arc = 360
 		}
-		theta := float32(2.0*math.Pi/298.0) * shape.Arc / 360
+		theta := float32(2.0*math.Pi/355.0) * shape.Arc / 360
 		cx := w / 2
 		bx := shape.BorderWidth
 		cy := h / 2
@@ -288,19 +288,19 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 		setBufferValue(buffer, 1, h/2, &changed)
 		setBufferValue(buffer, 2, tint, &changed)
 		if hasBorder {
-			setBufferValue(buffer, 900, w/2, &changed)
-			setBufferValue(buffer, 901, h/2, &changed)
-			setBufferValue(buffer, 902, borderTint, &changed)
+			setBufferValue(buffer, 1080, w/2, &changed)
+			setBufferValue(buffer, 1081, h/2, &changed)
+			setBufferValue(buffer, 1082, borderTint, &changed)
 		}
-		for i := 1; i < 300; i++ {
+		for i := 1; i < 360; i++ {
 			s, c := math.Sincos(float32(i) * theta)
 			setBufferValue(buffer, i*3, cx+(cx-bx)*c, &changed)
 			setBufferValue(buffer, i*3+1, cy+(cy-by)*s, &changed)
 			setBufferValue(buffer, i*3+2, tint, &changed)
 			if hasBorder {
-				setBufferValue(buffer, i*3+900, cx+cx*c, &changed)
-				setBufferValue(buffer, i*3+901, cy+cy*s, &changed)
-				setBufferValue(buffer, i*3+902, borderTint, &changed)
+				setBufferValue(buffer, i*3+1080, cx+cx*c, &changed)
+				setBufferValue(buffer, i*3+1081, cy+cy*s, &changed)
+				setBufferValue(buffer, i*3+1082, borderTint, &changed)
 			}
 		}
 
@@ -531,12 +531,12 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 	case Circle:
 		if shape.BorderWidth > 0 {
 			if engo.FloatEqual(shape.Arc, 360) || engo.FloatEqual(shape.Arc, 0) {
-				engo.Gl.DrawArrays(engo.Gl.TRIANGLE_FAN, 300, 300)
+				engo.Gl.DrawArrays(engo.Gl.TRIANGLE_FAN, 360, 360)
 			} else {
-				engo.Gl.DrawArrays(engo.Gl.TRIANGLE_FAN, 300, 290)
+				engo.Gl.DrawArrays(engo.Gl.TRIANGLE_FAN, 360, 355)
 			}
 		}
-		engo.Gl.DrawArrays(engo.Gl.TRIANGLE_FAN, 0, 300)
+		engo.Gl.DrawArrays(engo.Gl.TRIANGLE_FAN, 0, 360)
 	case ComplexTriangles:
 		engo.Gl.DrawArrays(engo.Gl.TRIANGLES, 0, len(shape.Points))
 
