@@ -75,7 +75,7 @@ func (*DefaultScene) Setup(u engo.Updater) {
 
 	arc1 := MyShape{BasicEntity: ecs.NewBasic()}
 	arc1.SpaceComponent = common.SpaceComponent{Position: engo.Point{350, 200}, Width: 100, Height: 100}
-	arc1.RenderComponent = common.RenderComponent{Drawable: common.Circle{Arc: 45}, Color: color.RGBA{0, 0, 255, 255}}
+	arc1.RenderComponent = common.RenderComponent{Drawable: common.Circle{Arc: 180}, Color: color.RGBA{0, 0, 255, 255}}
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
