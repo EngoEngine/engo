@@ -294,8 +294,8 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 		}
 		for i := 1; i < 300; i++ {
 			s, c := math.Sincos(float32(i) * theta)
-			setBufferValue(buffer, i*3, cx+cx*c-bx, &changed)
-			setBufferValue(buffer, i*3+1, cy+cy*s-by, &changed)
+			setBufferValue(buffer, i*3, cx+cx*c-bx*c, &changed)
+			setBufferValue(buffer, i*3+1, cy+cy*s-by*s, &changed)
 			setBufferValue(buffer, i*3+2, tint, &changed)
 			if hasBorder {
 				setBufferValue(buffer, i*3+900, cx+cx*c, &changed)
