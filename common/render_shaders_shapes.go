@@ -152,7 +152,7 @@ func (l *legacyShader) computeBufferSize(draw Drawable) int {
 	case Rectangle:
 		return 90
 	case Circle:
-		return 2160
+		return 3240
 	case ComplexTriangles:
 		return len(shape.Points) * 6
 	case Curve:
@@ -288,7 +288,7 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 		setBufferValue(buffer, 1, h/2, &changed)
 		setBufferValue(buffer, 2, tint, &changed)
 		if hasBorder {
-			setBufferValue(buffer, 1080, w/2, &changed)
+			setBufferValue(buffer, 1080, w-bx, &changed)
 			setBufferValue(buffer, 1081, h/2, &changed)
 			setBufferValue(buffer, 1082, borderTint, &changed)
 		}
@@ -298,9 +298,12 @@ func (l *legacyShader) generateBufferContent(ren *RenderComponent, space *SpaceC
 			setBufferValue(buffer, i*3+1, cy+(cy-by)*s, &changed)
 			setBufferValue(buffer, i*3+2, tint, &changed)
 			if hasBorder {
-				setBufferValue(buffer, i*3+1080, cx+cx*c, &changed)
-				setBufferValue(buffer, i*3+1081, cy+cy*s, &changed)
-				setBufferValue(buffer, i*3+1082, borderTint, &changed)
+				setBufferValue(buffer, i*6+1080, cx+cx*c, &changed)
+				setBufferValue(buffer, i*6+1081, cy+cy*s, &changed)
+				setBufferValue(buffer, i*6+1082, borderTint, &changed)
+				setBufferValue(buffer, i*6+1083, cx+(cx-bx)*c, &changed)
+				setBufferValue(buffer, i*6+1084, cy+(cy-by)*s, &changed)
+				setBufferValue(buffer, i*6+1085, borderTint, &changed)
 			}
 		}
 
@@ -530,11 +533,7 @@ func (l *legacyShader) Draw(ren *RenderComponent, space *SpaceComponent) {
 		engo.Gl.DrawArrays(engo.Gl.TRIANGLES, 0, num)
 	case Circle:
 		if shape.BorderWidth > 0 {
-			if engo.FloatEqual(shape.Arc, 360) || engo.FloatEqual(shape.Arc, 0) {
-				engo.Gl.DrawArrays(engo.Gl.TRIANGLE_FAN, 360, 360)
-			} else {
-				engo.Gl.DrawArrays(engo.Gl.TRIANGLE_FAN, 360, 355)
-			}
+			engo.Gl.DrawArrays(engo.Gl.TRIANGLE_STRIP, 362, 718)
 		}
 		engo.Gl.DrawArrays(engo.Gl.TRIANGLE_FAN, 0, 360)
 	case ComplexTriangles:
