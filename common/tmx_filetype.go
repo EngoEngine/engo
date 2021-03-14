@@ -23,11 +23,16 @@ func (r TMXResource) URL() string {
 // You can generate a TMX file with the Tiled map editor.
 type tmxLoader struct {
 	levels map[string]TMXResource
+	root string
+}
+
+func (t *tmxLoader) SetRoot(root string) {
+	t.root = root	
 }
 
 // Load will load the tmx file and any other image resources that are needed
 func (t *tmxLoader) Load(url string, data io.Reader) error {
-	lvl, err := createLevelFromTmx(data, url)
+	lvl, err := createLevelFromTmx(data, url, t.root)
 	if err != nil {
 		return err
 	}

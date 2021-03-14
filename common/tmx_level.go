@@ -1,8 +1,10 @@
 package common
 
 import (
+	"errors"
 	"io"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -11,8 +13,11 @@ import (
 )
 
 // createLevelFromTmx unmarshalls and unpacks tmx data into a Level
-func createLevelFromTmx(r io.Reader, tmxURL string) (*Level, error) {
-	tmx.TMXURL = tmxURL
+func createLevelFromTmx(r io.Reader, tmxURL string, root string) (*Level, error) {
+	if root == "" {
+		return nil, errors.New("createLevelFromTmx should be called with a real root")
+	}
+	tmx.TMXURL = filepath.Join(root, tmxURL)
 	tmxLevel, err := tmx.Parse(r)
 	if err != nil {
 		return nil, err
