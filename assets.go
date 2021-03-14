@@ -19,6 +19,19 @@ type FileLoader interface {
 	Resource(url string) (Resource, error)
 }
 
+// FileLoaderRooter must be implemented by file loaders that need to known the
+// root for their own functionning. This is generaly because they need to
+// load other files that are referenced inside the first one and are relative
+// to the first one, so their own call to open() need to be aware of the root
+// dir or the load will fail.
+// This is typically the case of a tmx loader that needs to load .tsx files that
+// are given as urls inside the tmx
+type FileLoaderRooter interface {
+	// SetRoot gives the root to the file loader. Generally before calling
+	// the Load method
+	SetRoot(root string)
+}
+
 // Resource represents a game resource, such as an image or a sound.
 type Resource interface {
 	// URL returns the uniform resource locator of the given resource.
@@ -80,6 +93,12 @@ func (formats *Formats) load(url string) error {
 		}
 		defer f.Close()
 
+		// This specific loader needs to be given the root
+		rl, ok := loader.(FileLoaderRooter)
+		if ok {
+			rl.SetRoot(formats.GetRoot())
+		}
+
 		return loader.Load(url, f)
 	}
 	return fmt.Errorf("no `FileLoader` associated with this extension: %q in url %q", ext, url)
@@ -100,6 +119,11 @@ func (formats *Formats) Load(urls ...string) error {
 func (formats *Formats) LoadReaderData(url string, f io.Reader) error {
 	ext := getExt(url)
 	if loader, ok := Files.formats[ext]; ok {
+		// This specific loader needs to be given the root
+		rl, ok := loader.(FileLoaderRooter)
+		if ok {
+			rl.SetRoot(formats.GetRoot())
+		}
 		return loader.Load(url, f)
 	}
 	return fmt.Errorf("no `FileLoader` associated with this extension: %q in url %q", ext, url)
