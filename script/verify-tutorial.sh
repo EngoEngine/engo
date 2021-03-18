@@ -25,11 +25,12 @@ verify () {
   do
       println "VERIFYING ${branch}..."
       git checkout "${branch}"
-      if [ "${OS_FAMILY}" == "windows" ]; then	
-        go mod edit -replace="github.com/EngoEngine/engo=D:$(printf "%s" "${projectDir:2}" | tr / \\)"	
-      else	
-        go mod edit -replace="github.com/EngoEngine/engo=${projectDir}"	
+      if [ "${OS_FAMILY}" == "windows" ]; then
+        go mod edit -replace="github.com/EngoEngine/engo=D:$(printf "%s" "${projectDir:2}" | tr / \\)"
+      else
+        go mod edit -replace="github.com/EngoEngine/engo=${projectDir}"
       fi
+      go get -u
       "${projectDir}/script/go-build.sh"
       go clean
       git stash || true
