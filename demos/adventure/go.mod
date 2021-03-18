@@ -1,6 +1,6 @@
 module github.com/EngoEngine/engo/demos/adventure
 
-go 1.16
+go 1.14
 
 replace github.com/EngoEngine/engo => ./../..
 
