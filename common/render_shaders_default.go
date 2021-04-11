@@ -324,7 +324,17 @@ func (s *basicShader) makeModelMatrix(ren *RenderComponent, space *SpaceComponen
 	// Instead of creating a new model matrix every time, we instead store a global one as a struct member
 	// and just reset it for every sprite. This prevents us from allocating a bunch of new Matrix instances in memory
 	// ultimately saving on GC activity.
-	s.modelMatrix.Identity().Scale(engo.GetGlobalScale().X, engo.GetGlobalScale().Y).Translate(space.Position.X, space.Position.Y)
+	// When a negative scale is used, we just want to flip the sprite, so this
+	// makes up for the translation that happens on the openGL side.
+	transX := space.Position.X
+	transY := space.Position.Y
+	if ren.Scale.X < 0 {
+		transX -= ren.Drawable.Width() * ren.Scale.X
+	}
+	if ren.Scale.Y < 0 {
+		transY -= ren.Drawable.Height() * ren.Scale.Y
+	}
+	s.modelMatrix.Identity().Scale(engo.GetGlobalScale().X, engo.GetGlobalScale().Y).Translate(transX, transY)
 	if space.Rotation != 0 {
 		s.modelMatrix.Rotate(space.Rotation)
 	}
