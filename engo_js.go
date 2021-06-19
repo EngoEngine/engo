@@ -165,6 +165,50 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		Input.Mouse.Action = Release
 		return nil
 	}))
+
+	window.Call("addEventListener", "gamepaddisconnected", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		println("gamepad disconnected")
+		joy := args[0].Get("gamepad")
+		if joy.IsNull() {
+			return nil
+		}
+		Input.gamepads.mutex.Lock()
+		defer Input.gamepads.mutex.Unlock()
+		for _, gamepad := range Input.gamepads.gamepads {
+			if gamepad.id == joy.Get("id").String() {
+				gamepad.connected = false
+			}
+		}
+		return nil
+	}))
+
+	window.Call("addEventListener", "gamepadconnected", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		println("gamepad connected")
+		joy := args[0].Get("gamepad")
+		if joy.IsNull() {
+			return nil
+		}
+		Input.gamepads.mutex.Lock()
+		defer Input.gamepads.mutex.Unlock()
+		found := false
+		for _, gamepad := range Input.gamepads.gamepads {
+			if gamepad.id == joy.Get("id").String() {
+				gamepad.connected = true
+				found = true
+			}
+		}
+		if !found {
+			for name, gamepad := range Input.gamepads.gamepads {
+				if !gamepad.connected && gamepad.id == "" { //gamepad was connected after registered
+					Input.gamepads.gamepads[name] = &Gamepad{
+						id:        joy.Get("id").String(),
+						connected: true,
+					}
+				}
+			}
+		}
+		return nil
+	}))
 }
 
 // DestroyWindow handles destroying the window when done

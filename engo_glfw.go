@@ -205,6 +205,37 @@ func CreateWindow(title string, width, height int, fullscreen bool, msaa int) {
 		Mailbox.Dispatch(TextMessage{char})
 	})
 
+	glfw.SetJoystickCallback(func(joy glfw.Joystick, event glfw.PeripheralEvent) {
+		Input.gamepads.mutex.Lock()
+		defer Input.gamepads.mutex.Unlock()
+		if event == glfw.Connected {
+			found := false
+			for _, gamepad := range Input.gamepads.gamepads {
+				if gamepad.id == joy.GetGUID() {
+					gamepad.connected = true
+					found = true
+				}
+			}
+			if !found {
+				for name, gamepad := range Input.gamepads.gamepads {
+					if !gamepad.connected && gamepad.id == "" { //gamepad was connected after registered
+						Input.gamepads.gamepads[name] = &Gamepad{
+							joystick:  joy,
+							id:        joy.GetGUID(),
+							connected: true,
+						}
+					}
+				}
+			}
+		} else if event == glfw.Disconnected {
+			for _, gamepad := range Input.gamepads.gamepads {
+				if gamepad.id == joy.GetGUID() {
+					gamepad.connected = false
+				}
+			}
+		}
+	})
+
 	Window.SetCloseCallback(func(Window *glfw.Window) {
 		Exit()
 	})

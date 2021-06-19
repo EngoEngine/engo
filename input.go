@@ -12,10 +12,11 @@ const (
 // NewInputManager holds onto anything input related for engo
 func NewInputManager() *InputManager {
 	return &InputManager{
-		Touches: make(map[int]Point),
-		axes:    make(map[string]Axis),
-		buttons: make(map[string]Button),
-		keys:    NewKeyManager(),
+		Touches:  make(map[int]Point),
+		axes:     make(map[string]Axis),
+		buttons:  make(map[string]Button),
+		keys:     NewKeyManager(),
+		gamepads: NewGamepadManager(),
 	}
 }
 
@@ -32,13 +33,15 @@ type InputManager struct {
 	// recorded in the Mouse so that touches readily work with the common.MouseSystem
 	Touches map[int]Point
 
-	axes    map[string]Axis
-	buttons map[string]Button
-	keys    *KeyManager
+	axes     map[string]Axis
+	buttons  map[string]Button
+	keys     *KeyManager
+	gamepads *GamepadManager
 }
 
 func (im *InputManager) update() {
 	im.keys.update()
+	im.gamepads.update()
 }
 
 // RegisterAxis registers a new axis which can be used to retrieve inputs which are spectrums.
@@ -57,6 +60,13 @@ func (im *InputManager) RegisterButton(name string, keys ...Key) {
 	}
 }
 
+// RegisterGamepad registers a new gamepad for use. It starts with joystick0
+// and continues until it finds one that can be used. If it does not find a
+// suitable gamepad, an error will be returned.
+func (im *InputManager) RegisterGamepad(name string) error {
+	return im.gamepads.Register(name)
+}
+
 // Axis retrieves an Axis with a specified name.
 func (im *InputManager) Axis(name string) Axis {
 	return im.axes[name]
@@ -65,6 +75,11 @@ func (im *InputManager) Axis(name string) Axis {
 // Button retrieves a Button with a specified name.
 func (im *InputManager) Button(name string) Button {
 	return im.buttons[name]
+}
+
+// Gamepad retrieves a Gamepad with a specified name.
+func (im *InputManager) Gamepad(name string) *Gamepad {
+	return im.gamepads.GetGamepad(name)
 }
 
 // Mouse represents the mouse

@@ -89,3 +89,17 @@ func (am *AxisMouse) Value() float32 {
 
 	return diff
 }
+
+type AxisGamepad struct {
+	value float32
+}
+
+func (ag *AxisGamepad) set(v float32) {
+	ag.value = v
+}
+
+// Value returns the amount and direction the axis is "tilted" from -1 to 1
+// 0 being Neutral.
+func (ag *AxisGamepad) Value() float32 {
+	return ag.value
+}
