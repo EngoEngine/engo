@@ -51,7 +51,7 @@ func (gm *GamepadManager) registerGamepadImpl(name string) error {
 }
 
 func (gm *GamepadManager) updateImpl() {
-	if window.IsNull() || window.Get("navigator").IsNull() {
+	if window.IsUndefined() || window.Get("navigator").IsUndefined() {
                return // node for testing
         }
 	gpds := window.Get("navigator").Call("getGamepads")
