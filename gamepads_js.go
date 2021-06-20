@@ -51,6 +51,9 @@ func (gm *GamepadManager) registerGamepadImpl(name string) error {
 }
 
 func (gm *GamepadManager) updateImpl() {
+	if window.IsNull() {
+               return // node for testing
+        }
 	gpds := window.Get("navigator").Call("getGamepads")
 	gm.mutex.Lock()
 	defer gm.mutex.Unlock()
