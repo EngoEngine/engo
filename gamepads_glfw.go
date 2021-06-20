@@ -60,7 +60,7 @@ joyLoop:
 	}
 	if !found {
 		warning("Unable to locate any usable gamepads.")
-		gm.gamepads[name] = &Gamepad{}
+		gm.gamepads[name] = &Gamepad{id: "", connected: false}
 		return errors.New("unable to locate any usable gamepads \ngamepad will be added when a new one is plugged in")
 	}
 	return nil

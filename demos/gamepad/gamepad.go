@@ -225,6 +225,21 @@ func (s *InputSystem) Update(float32) {
 				Font: font,
 				Text: strconv.FormatFloat(float64(gamepad.LeftX.Value()), 'f', 2, 32),
 			}
+		case GamepadInputLeftAxisY:
+			entity.Drawable = common.Text{
+				Font: font,
+				Text: strconv.FormatFloat(float64(gamepad.LeftY.Value()), 'f', 2, 32),
+			}
+		case GamepadInputRightAxisX:
+			entity.Drawable = common.Text{
+				Font: font,
+				Text: strconv.FormatFloat(float64(gamepad.RightX.Value()), 'f', 2, 32),
+			}
+		case GamepadInputRightAxisY:
+			entity.Drawable = common.Text{
+				Font: font,
+				Text: strconv.FormatFloat(float64(gamepad.RightY.Value()), 'f', 2, 32),
+			}
 		}
 	}
 }
@@ -655,7 +670,7 @@ func (d *DefaultScene) Setup(u engo.Updater) {
 		Font: font,
 		Text: "0.00",
 	}
-	nLeftX.Position = engo.Point{X: 45, Y: 525}
+	nLeftX.Position = engo.Point{X: 75, Y: 525}
 	nLeftX.Trigger = GamepadInputLeftAxisX
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
@@ -680,6 +695,21 @@ func (d *DefaultScene) Setup(u engo.Updater) {
 		}
 	}
 	//    AxisNumber
+	nLeftY := panel{BasicEntity: ecs.NewBasic()}
+	nLeftY.Drawable = common.Text{
+		Font: font,
+		Text: "0.00",
+	}
+	nLeftY.Position = engo.Point{X: 75, Y: 575}
+	nLeftY.Trigger = GamepadInputLeftAxisY
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *common.RenderSystem:
+			sys.Add(&nLeftY.BasicEntity, &nLeftY.RenderComponent, &nLeftY.SpaceComponent)
+		case *InputSystem:
+			sys.Add(&nLeftY.BasicEntity, &nLeftY.RenderComponent, &nLeftY.InputComponent)
+		}
+	}
 	//  RightX
 	//    Label
 	lRightX := label{BasicEntity: ecs.NewBasic()}
@@ -695,6 +725,21 @@ func (d *DefaultScene) Setup(u engo.Updater) {
 		}
 	}
 	//    AxisNumber
+	nRightX := panel{BasicEntity: ecs.NewBasic()}
+	nRightX.Drawable = common.Text{
+		Font: font,
+		Text: "0.00",
+	}
+	nRightX.Position = engo.Point{X: 775, Y: 525}
+	nRightX.Trigger = GamepadInputRightAxisX
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *common.RenderSystem:
+			sys.Add(&nRightX.BasicEntity, &nRightX.RenderComponent, &nRightX.SpaceComponent)
+		case *InputSystem:
+			sys.Add(&nRightX.BasicEntity, &nRightX.RenderComponent, &nRightX.InputComponent)
+		}
+	}
 	//  RightY
 	//    Label
 	lRightY := label{BasicEntity: ecs.NewBasic()}
@@ -710,6 +755,21 @@ func (d *DefaultScene) Setup(u engo.Updater) {
 		}
 	}
 	//    AxisNumber
+	nRightY := panel{BasicEntity: ecs.NewBasic()}
+	nRightY.Drawable = common.Text{
+		Font: font,
+		Text: "0.00",
+	}
+	nRightY.Position = engo.Point{X: 775, Y: 575}
+	nRightY.Trigger = GamepadInputRightAxisY
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *common.RenderSystem:
+			sys.Add(&nRightY.BasicEntity, &nRightY.RenderComponent, &nRightY.SpaceComponent)
+		case *InputSystem:
+			sys.Add(&nRightY.BasicEntity, &nRightY.RenderComponent, &nRightY.InputComponent)
+		}
+	}
 	//  LeftTrigger
 	//  RightTrigger
 }

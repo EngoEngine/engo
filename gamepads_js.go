@@ -29,10 +29,10 @@ func (gm *GamepadManager) registerGamepadImpl(name string) error {
 	gm.mutex.Lock()
 	defer gm.mutex.Unlock()
 	for i := 0; i < gpds.Length(); i++ {
-		if gpds.Index(i).Get("mapping").String() != "standard" {
+		if gpds.Index(i).IsNull() {
 			continue
 		}
-		if gpds.Index(i).IsNull() {
+		if gpds.Index(i).Get("mapping").String() != "standard" {
 			continue
 		}
 		gpid := gpds.Index(i).Get("id").String()
