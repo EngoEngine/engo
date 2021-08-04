@@ -281,4 +281,6 @@ type Tile struct {
 	Image     *Texture
 	Drawables []Drawable
 	Animation *Animation
+	// Rotation of the Tile in degrees
+	Rotation float32
 }
