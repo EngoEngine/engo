@@ -214,36 +214,38 @@ func (l *textShader) generateBufferContent(ren *RenderComponent, space *SpaceCom
 		}
 
 		offset := 20 * index
+		xoff := atlas.OffsetX[char]
+		yoff := atlas.OffsetY[char]
 
 		// These five are at 0, 0:
-		setBufferValue(buffer, 0+offset, currentX, &changed)
-		setBufferValue(buffer, 1+offset, currentY, &changed)
+		setBufferValue(buffer, 0+offset, currentX+xoff, &changed)
+		setBufferValue(buffer, 1+offset, currentY+yoff, &changed)
 		setBufferValue(buffer, 2+offset, atlas.XLocation[char]/atlas.TotalWidth, &changed)
 		setBufferValue(buffer, 3+offset, atlas.YLocation[char]/atlas.TotalHeight, &changed)
 		setBufferValue(buffer, 4+offset, tint, &changed)
 
 		// These five are at 1, 0:
-		setBufferValue(buffer, 5+offset, currentX+atlas.Width[char]+letterSpace, &changed)
-		setBufferValue(buffer, 6+offset, currentY, &changed)
+		setBufferValue(buffer, 5+offset, currentX+xoff+atlas.Width[char]+letterSpace, &changed)
+		setBufferValue(buffer, 6+offset, currentY+yoff, &changed)
 		setBufferValue(buffer, 7+offset, (atlas.XLocation[char]+atlas.Width[char])/atlas.TotalWidth, &changed)
 		setBufferValue(buffer, 8+offset, atlas.YLocation[char]/atlas.TotalHeight, &changed)
 		setBufferValue(buffer, 9+offset, tint, &changed)
 
 		// These five are at 1, 1:
-		setBufferValue(buffer, 10+offset, currentX+atlas.Width[char]+letterSpace, &changed)
-		setBufferValue(buffer, 11+offset, currentY+atlas.Height[char]+lineSpace, &changed)
+		setBufferValue(buffer, 10+offset, currentX+xoff+atlas.Width[char]+letterSpace, &changed)
+		setBufferValue(buffer, 11+offset, currentY+yoff+atlas.Height[char]+lineSpace, &changed)
 		setBufferValue(buffer, 12+offset, (atlas.XLocation[char]+atlas.Width[char])/atlas.TotalWidth, &changed)
 		setBufferValue(buffer, 13+offset, (atlas.YLocation[char]+atlas.Height[char])/atlas.TotalHeight, &changed)
 		setBufferValue(buffer, 14+offset, tint, &changed)
 
 		// These five are at 0, 1:
-		setBufferValue(buffer, 15+offset, currentX, &changed)
-		setBufferValue(buffer, 16+offset, currentY+atlas.Height[char]+lineSpace, &changed)
+		setBufferValue(buffer, 15+offset, currentX+xoff, &changed)
+		setBufferValue(buffer, 16+offset, currentY+yoff+atlas.Height[char]+lineSpace, &changed)
 		setBufferValue(buffer, 17+offset, atlas.XLocation[char]/atlas.TotalWidth, &changed)
 		setBufferValue(buffer, 18+offset, (atlas.YLocation[char]+atlas.Height[char])/atlas.TotalHeight, &changed)
 		setBufferValue(buffer, 19+offset, tint, &changed)
 
-		currentX += modifier * (atlas.Width[char] + letterSpace)
+		currentX += modifier * (atlas.Width[char] + letterSpace + xoff + atlas.RightSide[char])
 	}
 
 	return changed
