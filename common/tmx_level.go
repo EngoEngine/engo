@@ -257,6 +257,7 @@ func (l *Level) unpackTiles(x, y, w, h int, d []tmx.Data) []*Tile {
 				X: float32(x),
 				Y: float32(y),
 			}))
+			tile.Rotation = convertFlipToRotation(t.Flipping)
 			ret = append(ret, tile)
 			l.pointMap[mapPoint{X: x, Y: y}] = tile
 			switch l.RenderOrder {
@@ -303,6 +304,7 @@ func (l *Level) unpackTiles(x, y, w, h int, d []tmx.Data) []*Tile {
 					X: float32(x),
 					Y: float32(y),
 				}))
+				tile.Rotation = convertFlipToRotation(t.Flipping)
 				ret = append(ret, tile)
 				l.pointMap[mapPoint{X: x, Y: y}] = tile
 				switch l.RenderOrder {
@@ -382,6 +384,21 @@ func (l *Level) tileFromGID(gid uint32, pt engo.Point) *Tile {
 	ret.Animation = &Animation{Name: "Tile", Frames: frames, Loop: true}
 
 	return ret
+}
+
+func convertFlipToRotation(flipping uint32) float32 {
+	flip_h := (flipping % tmx.HorizontalFlipFlag) != 0
+	flip_v := (flipping & tmx.VerticalFlipFlag) != 0
+	flip_d := (flipping & tmx.DiagonalFlipFlag) != 0
+	rotation := float32(0.0)
+	if flip_d {
+		rotation = 90
+	}
+	if flip_h && flip_v {
+		rotation += 180
+	}
+
+	return rotation
 }
 
 func getProperties(props []tmx.Property) []Property {

@@ -64,7 +64,6 @@ type Tile struct {
 }
 
 func (*DefaultScene) Preload() {
-
 	// Load character model
 	engo.Files.Load(model)
 
@@ -222,7 +221,6 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 
 	for _, tileLayer := range levelData.TileLayers {
 		for _, tileElement := range tileLayer.Tiles {
-
 			if tileElement.Image != nil {
 				tile := &Tile{BasicEntity: ecs.NewBasic()}
 				tile.RenderComponent = common.RenderComponent{
@@ -231,9 +229,13 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 				}
 				tile.SpaceComponent = common.SpaceComponent{
 					Position: tileElement.Point,
-					Width:    0,
-					Height:   0,
+					Width:    tileElement.Width(),
+					Height:   tileElement.Height(),
 				}
+				// Rotation of tile around the center
+				center := tile.Center()
+				tile.Rotation = tileElement.Rotation
+				tile.SetCenter(center)
 
 				if tileLayer.Name == "grass" {
 					tile.RenderComponent.SetZIndex(0)
@@ -250,7 +252,6 @@ func (scene *DefaultScene) Setup(u engo.Updater) {
 
 	for _, imageLayer := range levelData.ImageLayers {
 		for _, imageElement := range imageLayer.Images {
-
 			if imageElement.Image != nil {
 				tile := &Tile{BasicEntity: ecs.NewBasic()}
 				tile.RenderComponent = common.RenderComponent{
@@ -401,7 +402,6 @@ func (s *SpeedSystem) Remove(basic ecs.BasicEntity) {
 }
 
 func (s *SpeedSystem) Update(dt float32) {
-
 	for _, e := range s.entities {
 		speed := engo.GameWidth() * dt
 		e.SpaceComponent.Position.X = e.SpaceComponent.Position.X + speed*e.SpeedComponent.Point.X
@@ -422,7 +422,6 @@ func (s *SpeedSystem) Update(dt float32) {
 			e.SpaceComponent.Position.X = widthLimit
 		}
 	}
-
 }
 
 type controlEntity struct {

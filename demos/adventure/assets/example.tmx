@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="25" height="25" tilewidth="32" tileheight="32" nextobjectid="7">
+<map version="1.5" tiledversion="1.7.1" orientation="orthogonal" renderorder="right-down" width="25" height="25" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="7">
  <tileset firstgid="1" name="ts1" tilewidth="32" tileheight="32" tilecount="72" columns="12">
   <image source="grass-tiles-2-small.png" width="384" height="192"/>
  </tileset>
  <tileset firstgid="73" name="ts3" tilewidth="32" tileheight="32" tilecount="64" columns="8">
   <image source="tree2-final.png" width="256" height="256"/>
  </tileset>
- <layer name="grass" width="25" height="25">
+ <layer id="1" name="grass" width="25" height="25">
   <data encoding="base64" compression="zlib">
-   eJztVcsOwzAIS3OH39nu+/9/Wic1kuXYJNp63AHRIoIxj+RorfVTDpBOenyzfVfHKXlp/kd7p/9hU/7ufJUv2wNifGzPBQ/MZ5zLy654VHV1vIZv0NkDsDpgj3Mh4jk+6FthBMXnWmCuiofD4Hpmm3k/IH83ly4+96OK0QGr6ofijTmjKB/sedUPjoUxcVbVjOM8VPu1mu8UeMOOfXHnMTeeI8c725zbas8dZ7WnYXxVPVTfsAaMkcLu7j+15ylE7Zea2YqHwlG+7l59bfJw9w/vdba5Prs8nCT5/MKjesf4rXB+iLUzB99qN88rHnfoO3nsvOd/HrV+A9pgE7E=
+   eJztVUkOgzAMDLmi+MpT2ns/wtN4Sp/WVMLSdDR2opZjD5bB2J6Ml7CUUmqXBaSS9me2z+rWxU7N72iv9O425R/FZ+dle4Mcb9t9wAPP43F22hWPrK4RL/dtFLsAVgVsj2siX8QHfTMMzLeV8uRa4FkVjwiD6+k+a8fw2BucP5rLKD/3I8tRASvrh+KN/FGUD/Y86wfncun1P3p9DqP4btv7tx1nYrRfo/n2muJuuB37EsUjX54j5r2Wz1nG+NGeR5x5Tzf4ruqjeHDfsAaMYcIe3X9qz02I2i81sxkPhaN8o3v1Mckjun9M4Ee7N+IRiZHPLzyy/xj/KyI/xJqZg291NM8jHlfoK3nM/M//PHL9AvxTF38=
   </data>
  </layer>
- <layer name="trees" width="25" height="25">
+ <layer id="2" name="trees" width="25" height="25">
   <data encoding="base64" compression="zlib">
    eJzt1VUOAkEURNFhebi7u7u7y7K5O+jX0xNCCJWcP5JXH12DZX0mbnjghQ9+BBBEyKEbYUQQRQxxJJBEyqF+aWSQRQ55FFBEyaF+ZVRQRQ11NNBES3FD2q+NDrrooY8Bhhgpbkj7jTHBFDPMscASK8UNab81Nthihz0OOOKkuCHtd8YFV9xwxwNPvBQ3TPpJY9JPGpfGb79969KYbF0ak61LY7J1aexuXeet2N2Szluxu6X/W5HH5H9Bml/57kryBi05aII=
   </data>
  </layer>
- <imagelayer name="clouds">
+ <imagelayer id="3" name="clouds">
   <image source="cloud.png" width="400" height="218"/>
  </imagelayer>
 </map>
