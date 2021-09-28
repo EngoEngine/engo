@@ -151,8 +151,6 @@ browserEnvironmentSetup() {
   # for build wasm
   info "install tools for build wasm"
   installNodeJsLTS
-  GO111MODULE=off go get github.com/gopherjs/gopherjs
-  GO111MODULE=off go get github.com/gopherjs/gopherwasm/js
 }
 
 developerEnvironmentSetup() {
