@@ -178,6 +178,9 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 		YLocation: make([]float32, c),
 		Width:     make([]float32, c),
 		Height:    make([]float32, c),
+		OffsetX:   make([]float32, c),
+		RightSide: make([]float32, c),
+		OffsetY:   make([]float32, c),
 	}
 
 	currentX := float32(0)
@@ -200,32 +203,55 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 	})
 
 	lineHeight := d.Face.Metrics().Height
-	lineBuffer := float32(lineHeight.Ceil()) / 2
-	xBuffer := float32(10)
+	ascent := d.Face.Metrics().Ascent
+	prev := 0
 
 	for i := 0; i < c; i++ {
-		_, adv, ok := d.Face.GlyphBounds(rune(i))
+		bounds, adv, ok := d.Face.GlyphBounds(rune(i))
 		if !ok {
 			continue
 		}
-		currentX += xBuffer
+		advance := float32(adv.Ceil())
 
-		atlas.Width[i] = float32(adv.Ceil())
-		atlas.Height[i] = float32(lineHeight.Ceil()) + lineBuffer
+		atlas.Width[i] = float32((bounds.Max.X - bounds.Min.X).Ceil())
+		atlas.Height[i] = float32((bounds.Max.Y - bounds.Min.Y).Ceil())
+		atlas.OffsetX[i] = float32(bounds.Min.X.Ceil())
+		atlas.OffsetY[i] = float32((ascent + bounds.Min.Y).Ceil())
+		atlas.RightSide[i] = advance - float32(bounds.Max.X.Ceil())
+
+		if prev > 0 {
+			currentX += float32(f.face.Kern(rune(prev), rune(i)).Ceil())
+		}
+
+		//overlapping characters
+		if atlas.Width[i] > advance {
+			if atlas.OffsetX[i] < 0 {
+				advance -= atlas.OffsetX[i]
+			} else if advance < float32(bounds.Max.X.Ceil()) {
+				advance = float32(bounds.Max.X.Ceil())
+			}
+		}
+
+		// position correction of overlapped characters
+		if atlas.OffsetX[i] < 0 {
+			currentX -= atlas.OffsetX[i]
+		}
+
+		if currentX+advance > 1024 {
+			currentX = 0
+			currentY += float32(lineHeight.Ceil())
+			atlas.TotalHeight += float32(lineHeight.Ceil())
+			prev = 0
+		}
+
+		if currentX+advance > atlas.TotalWidth {
+			atlas.TotalWidth = currentX + advance
+		}
+
 		atlas.XLocation[i] = currentX
 		atlas.YLocation[i] = currentY
-
-		currentX += float32(adv.Ceil()) + xBuffer
-
-		if currentX > atlas.TotalWidth {
-			atlas.TotalWidth = currentX
-		}
-
-		if currentX > 1024 || i >= c-1 {
-			currentX = 0
-			currentY += float32(lineHeight.Ceil()) + lineBuffer
-			atlas.TotalHeight += float32(lineHeight.Ceil()) + lineBuffer
-		}
+		currentX += advance
+		prev = i
 	}
 
 	// Create texture
@@ -238,8 +264,11 @@ func (f *Font) generateFontAtlas(c int) FontAtlas {
 		if !ok {
 			continue
 		}
-		d.Dot = fixed.P(int(atlas.XLocation[i]), int(atlas.YLocation[i]+float32(lineHeight.Ceil())))
+		d.Dot = fixed.P(int(atlas.XLocation[i]), int(atlas.YLocation[i]+float32(ascent.Ceil())))
 		d.DrawBytes([]byte{byte(i)})
+		// position correction
+		atlas.XLocation[i] += atlas.OffsetX[i]
+		atlas.YLocation[i] += atlas.OffsetY[i]
 	}
 
 	imObj := NewImageObject(actual)
@@ -265,6 +294,12 @@ type FontAtlas struct {
 	Width []float32
 	// Height contains the height in pixels of all the characters
 	Height []float32
+	// OffsetX is the offset of the glyph and the x-coordinate
+	OffsetX []float32
+	// RightSide is the space left to the right of the glyph
+	RightSide []float32
+	// OffsetY is the offset of the glyph and the y-coordinate
+	OffsetY []float32
 	// TotalWidth is the total amount of pixels the `FontAtlas` is wide; useful for determining the `Viewport`,
 	// which is relative to this value.
 	TotalWidth float32
