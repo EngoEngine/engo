@@ -1,11 +1,12 @@
 # Audio Demo
 
 ## What does it do?
-It demonstrates how one can play audio. 
+It demonstrates how one can play audio.
 
-For doing so, it created bird noises as a background sound, and some weird man's voice as a sound effect, when pressing SPACE.   
+For doing so, it created bird noises as a background sound, and some weird man's voice as a sound effect, when pressing SPACE.
+You can also pause/unpause the sounds at any point by pressing P.   
 
-One can zoom in/out, and hear the sound effect increase/decrease in volume. This is because every non-background sound, is rendered in 3d. 
+One can zoom in/out, and hear the sound effect increase/decrease in volume. This is because every non-background sound, is rendered in 3d.
 
 ## What are important aspects of the code?
 These things are key in this demo:
