@@ -29,6 +29,7 @@ func (s *DefaultScene) Preload() {
 	}
 
 	engo.Input.RegisterButton("whoop", engo.KeySpace)
+	engo.Input.RegisterButton("pause", engo.KeyP)
 }
 
 func (s *DefaultScene) Setup(u engo.Updater) {
@@ -79,7 +80,18 @@ func (*DefaultScene) Type() string { return "Game" }
 
 type WhoopSystem struct {
 	goingUp bool
+	paused  bool
 	player  *common.Player
+	aSys    *common.AudioSystem
+}
+
+func (w *WhoopSystem) New(world *ecs.World) {
+	for _, system := range world.Systems() {
+		switch sys := system.(type) {
+		case *common.AudioSystem:
+			w.aSys = sys
+		}
+	}
 }
 
 func (w *WhoopSystem) Add(audio *common.AudioComponent) {
@@ -89,6 +101,18 @@ func (w *WhoopSystem) Add(audio *common.AudioComponent) {
 func (w *WhoopSystem) Remove(basic ecs.BasicEntity) {}
 
 func (w *WhoopSystem) Update(dt float32) {
+	if btn := engo.Input.Button("pause"); btn.JustPressed() {
+		if w.paused {
+			w.aSys.Restart()
+			w.paused = false
+		} else {
+			w.aSys.Pause()
+			w.paused = true
+		}
+	}
+	if w.paused {
+		return
+	}
 	if btn := engo.Input.Button("whoop"); btn.JustPressed() {
 		if !w.player.IsPlaying() {
 			w.player.Rewind()
