@@ -1,4 +1,5 @@
-//+build js android ios darwin,arm darwin,arm64 headless
+//go:build js || android || ios || headless
+// +build js android ios headless
 
 package engo
 
