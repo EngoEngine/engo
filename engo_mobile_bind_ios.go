@@ -1,4 +1,4 @@
-//+build ios darwin,arm darwin,arm64
+//+build ios
 //+build mobilebind
 
 package engo

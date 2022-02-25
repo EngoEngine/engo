@@ -1,5 +1,11 @@
-// +build darwin,!arm,!arm64 linux windows
-// +build !ios,!android,!js,!sdl,!headless,!vulkan
+//go:build (darwin || linux || windows) && !ios && !android && !js && !sdl && !headless && !vulkan
+// +build darwin linux windows
+// +build !ios
+// +build !android
+// +build !js
+// +build !sdl
+// +build !headless
+// +build !vulkan
 
 package engo
 
