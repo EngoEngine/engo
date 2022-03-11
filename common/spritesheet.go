@@ -1,12 +1,15 @@
 package common
 
 import (
+	"errors"
 	"log"
 
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/engo/math"
 	"github.com/EngoEngine/gl"
 )
+
+var spritesheetCache = make(map[string]*Spritesheet)
 
 // Spritesheet is a class that stores a set of tiles from a file, used by tilemaps and animations
 type Spritesheet struct {
@@ -22,16 +25,27 @@ type SpriteRegion struct {
 	Width, Height int
 }
 
+// LoadedSpritesheet returns a Spritesheet that has already been created by New*
+func LoadedSpritesheet(url string) (*Spritesheet, error) {
+	sheet, ok := spritesheetCache[url]
+	if !ok {
+		return nil, errors.New("Unable to find Spritesheet at URL " + url)
+	}
+	return sheet, nil
+}
+
 // NewAsymmetricSpritesheetFromTexture creates a new AsymmetricSpriteSheet from a
 // TextureResource. The data provided is the location and size of the sprites
 func NewAsymmetricSpritesheetFromTexture(tr *TextureResource, spriteRegions []SpriteRegion) *Spritesheet {
-	return &Spritesheet{
+	sheet := &Spritesheet{
 		texture: tr.Texture,
 		width:   tr.Width,
 		height:  tr.Height,
 		cells:   spriteRegions,
 		cache:   make(map[int]Texture),
 	}
+	spritesheetCache[tr.URL()] = sheet
+	return sheet
 }
 
 // NewAsymmetricSpritesheetFromFile creates a new AsymmetricSpriteSheet from a
