@@ -1,6 +1,7 @@
 package common
 
 import (
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
@@ -20,6 +21,8 @@ var (
 	dpi = float64(72)
 )
 
+var fontCache []*Font
+
 // Font keeps track of a specific Font. Fonts are explicit instances of a font file,
 // including the Size and Color. A separate font will have to be generated to get
 // different sizes and colors of the same font file.
@@ -30,6 +33,20 @@ type Font struct {
 	FG   color.Color
 	TTF  *truetype.Font
 	face font.Face
+}
+
+// LoadedFont returns a Font that was previously loaded via CreatePreloaded
+func LoadedFont(url string, size float64, bg, fg color.Color) (*Font, error) {
+	idx := -1
+	for i, fnt := range fontCache {
+		if fnt.URL == url && fnt.Size == size && fnt.BG == bg && fnt.FG == fg {
+			idx = i
+		}
+	}
+	if idx < 0 {
+		return nil, errors.New("No font matching that description was found.")
+	}
+	return fontCache[idx], nil
 }
 
 // Create is for loading fonts from the disk, given a location
@@ -72,6 +89,7 @@ func (f *Font) CreatePreloaded() error {
 		DPI:     dpi,
 		Hinting: font.HintingFull,
 	})
+	fontCache = append(fontCache, f)
 	return nil
 }
 
