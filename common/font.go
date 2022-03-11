@@ -39,7 +39,11 @@ type Font struct {
 func LoadedFont(url string, size float64, bg, fg color.Color) (*Font, error) {
 	idx := -1
 	for i, fnt := range fontCache {
-		if fnt.URL == url && fnt.Size == size && fnt.BG == bg && fnt.FG == fg {
+		r, g, b, a := bg.RGBA()
+		r2, g2, b2, a2 := fnt.BG.RGBA()
+		r3, g3, b3, a3 := fg.RGBA()
+		r4, g4, b4, a4 := fnt.FG.RGBA()
+		if fnt.URL == url && fnt.Size == size && r == r2 && g == g2 && b == b2 && a == a2 && r3 == r4 && g3 == g4 && b3 == b4 && a3 == a4 {
 			idx = i
 		}
 	}
