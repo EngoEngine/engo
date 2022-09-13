@@ -8,7 +8,6 @@ import (
 	"github.com/EngoEngine/ecs"
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/engo/math"
-	"github.com/go-gl/mathgl/mgl32"
 )
 
 const (
@@ -228,21 +227,21 @@ func (cam *CameraSystem) moveAxisTo(axis CameraAxis, value float32) {
 
 func (cam *CameraSystem) moveX(value float32) {
 	if cam.x+(value*engo.GetGlobalScale().X) > CameraBounds.Max.X*engo.GetGlobalScale().X {
-		cam.x = CameraBounds.Max.X * engo.GetGlobalScale().X
+		cam.x = math.Floor(CameraBounds.Max.X * engo.GetGlobalScale().X)
 	} else if cam.x+(value*engo.GetGlobalScale().X) < CameraBounds.Min.X*engo.GetGlobalScale().X {
-		cam.x = CameraBounds.Min.X * engo.GetGlobalScale().X
+		cam.x = math.Floor(CameraBounds.Min.X * engo.GetGlobalScale().X)
 	} else {
-		cam.x += value * engo.GetGlobalScale().X
+		cam.x += math.Floor(value * engo.GetGlobalScale().X)
 	}
 }
 
 func (cam *CameraSystem) moveY(value float32) {
 	if cam.y+(value*engo.GetGlobalScale().Y) > CameraBounds.Max.Y*engo.GetGlobalScale().Y {
-		cam.y = CameraBounds.Max.Y * engo.GetGlobalScale().Y
+		cam.y = math.Floor(CameraBounds.Max.Y * engo.GetGlobalScale().Y)
 	} else if cam.y+(value*engo.GetGlobalScale().Y) < CameraBounds.Min.Y*engo.GetGlobalScale().Y {
-		cam.y = CameraBounds.Min.Y * engo.GetGlobalScale().Y
+		cam.y = math.Floor(CameraBounds.Min.Y * engo.GetGlobalScale().Y)
 	} else {
-		cam.y += value * engo.GetGlobalScale().Y
+		cam.y += math.Floor(value * engo.GetGlobalScale().Y)
 	}
 }
 
@@ -255,15 +254,15 @@ func (cam *CameraSystem) rotate(value float32) {
 }
 
 func (cam *CameraSystem) moveToX(location float32) {
-	cam.x = mgl32.Clamp(location*engo.GetGlobalScale().X, CameraBounds.Min.X*engo.GetGlobalScale().X, CameraBounds.Max.X*engo.GetGlobalScale().X)
+	cam.x = math.Floor(math.Clamp(location*engo.GetGlobalScale().X, CameraBounds.Min.X*engo.GetGlobalScale().X, CameraBounds.Max.X*engo.GetGlobalScale().X))
 }
 
 func (cam *CameraSystem) moveToY(location float32) {
-	cam.y = mgl32.Clamp(location*engo.GetGlobalScale().Y, CameraBounds.Min.Y*engo.GetGlobalScale().Y, CameraBounds.Max.Y*engo.GetGlobalScale().Y)
+	cam.y = math.Floor(math.Clamp(location*engo.GetGlobalScale().Y, CameraBounds.Min.Y*engo.GetGlobalScale().Y, CameraBounds.Max.Y*engo.GetGlobalScale().Y))
 }
 
 func (cam *CameraSystem) zoomTo(zoomLevel float32) {
-	cam.z = mgl32.Clamp(zoomLevel, MinZoom, MaxZoom)
+	cam.z = math.Floor(math.Clamp(zoomLevel, MinZoom, MaxZoom))
 }
 
 func (cam *CameraSystem) rotateTo(rotation float32) {
