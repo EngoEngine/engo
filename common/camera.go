@@ -262,7 +262,7 @@ func (cam *CameraSystem) moveToY(location float32) {
 }
 
 func (cam *CameraSystem) zoomTo(zoomLevel float32) {
-	cam.z = math.Floor(math.Clamp(zoomLevel, MinZoom, MaxZoom))
+	cam.z = math.Clamp(zoomLevel, MinZoom, MaxZoom)
 }
 
 func (cam *CameraSystem) rotateTo(rotation float32) {
