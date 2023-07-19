@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"image"
 	"image/png"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -186,7 +185,7 @@ func TestTMXTileNotLoadedTempFile(t *testing.T) {
 		t.Errorf("Unable to encode png from image")
 	}
 
-	dir, err := ioutil.TempDir(".", "testing")
+	dir, err := os.MkdirTemp(".", "testing")
 	if err != nil {
 		t.Errorf("failed to create temp directory for testing, error: %v", err)
 	}
@@ -195,7 +194,7 @@ func TestTMXTileNotLoadedTempFile(t *testing.T) {
 	engo.Files.SetRoot(dir)
 
 	tmpfn := filepath.Join(dir, "test.png")
-	if err = ioutil.WriteFile(tmpfn, imgbuf.Bytes(), 0666); err != nil {
+	if err = os.WriteFile(tmpfn, imgbuf.Bytes(), 0666); err != nil {
 		t.Errorf("failed to create temp file for testing, file: %v, error: %v", tmpfn, err)
 	}
 
@@ -228,7 +227,7 @@ func TestTMXTileNotLoadedTempFileBadExtensions(t *testing.T) {
 		t.Errorf("Unable to encode png from image")
 	}
 
-	dir, err := ioutil.TempDir(".", "testing")
+	dir, err := os.MkdirTemp(".", "testing")
 	if err != nil {
 		t.Errorf("failed to create temp directory for testing, error: %v", err)
 	}
@@ -237,7 +236,7 @@ func TestTMXTileNotLoadedTempFileBadExtensions(t *testing.T) {
 	engo.Files.SetRoot(dir)
 
 	tmpfn := filepath.Join(dir, "test.test")
-	if err = ioutil.WriteFile(tmpfn, imgbuf.Bytes(), 0666); err != nil {
+	if err = os.WriteFile(tmpfn, imgbuf.Bytes(), 0666); err != nil {
 		t.Errorf("failed to create temp file for testing, file: %v, error: %v", tmpfn, err)
 	}
 
@@ -370,7 +369,7 @@ func TestTMXTileImagesNotLoadedTempFile(t *testing.T) {
 		t.Errorf("Unable to encode png from image")
 	}
 
-	dir, err := ioutil.TempDir(".", "testing")
+	dir, err := os.MkdirTemp(".", "testing")
 	if err != nil {
 		t.Errorf("failed to create temp directory for testing, error: %v", err)
 	}
@@ -379,7 +378,7 @@ func TestTMXTileImagesNotLoadedTempFile(t *testing.T) {
 	engo.Files.SetRoot(dir)
 
 	tmpfn := filepath.Join(dir, "test.png")
-	if err = ioutil.WriteFile(tmpfn, imgbuf.Bytes(), 0666); err != nil {
+	if err = os.WriteFile(tmpfn, imgbuf.Bytes(), 0666); err != nil {
 		t.Errorf("failed to create temp file for testing, file: %v, error: %v", tmpfn, err)
 	}
 
@@ -479,7 +478,7 @@ func TestObjectImageNotExistTempFile(t *testing.T) {
 		t.Errorf("Unable to encode png from image")
 	}
 
-	dir, err := ioutil.TempDir(".", "testing")
+	dir, err := os.MkdirTemp(".", "testing")
 	if err != nil {
 		t.Errorf("failed to create temp directory for testing, error: %v", err)
 	}
@@ -488,7 +487,7 @@ func TestObjectImageNotExistTempFile(t *testing.T) {
 	engo.Files.SetRoot(dir)
 
 	tmpfn := filepath.Join(dir, "objimgtest.png")
-	if err = ioutil.WriteFile(tmpfn, imgbuf.Bytes(), 0666); err != nil {
+	if err = os.WriteFile(tmpfn, imgbuf.Bytes(), 0666); err != nil {
 		t.Errorf("failed to create temp file for testing, file: %v, error: %v", tmpfn, err)
 	}
 
