@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 
 	"github.com/EngoEngine/engo"
@@ -21,7 +20,7 @@ type audioLoader struct {
 // Load processes the data stream and parses it as an audio file
 func (a *audioLoader) Load(url string, data io.Reader) error {
 	var err error
-	audioBytes, err := ioutil.ReadAll(data)
+	audioBytes, err := io.ReadAll(data)
 	if err != nil {
 		return err
 	}

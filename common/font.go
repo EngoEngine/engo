@@ -6,8 +6,8 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/gl"
@@ -56,7 +56,7 @@ func LoadedFont(url string, size float64, bg, fg color.Color) (*Font, error) {
 // Create is for loading fonts from the disk, given a location
 func (f *Font) Create() error {
 	// Read and parse the font
-	ttfBytes, err := ioutil.ReadFile(f.URL)
+	ttfBytes, err := os.ReadFile(f.URL)
 	if err != nil {
 		return err
 	}

@@ -3,7 +3,6 @@ package engo
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -70,7 +69,7 @@ func TestFilesLoad(t *testing.T) {
 	Files.Register(".test", &testLoader{})
 
 	content := []byte("testing")
-	dir, err := ioutil.TempDir(".", "testing")
+	dir, err := os.MkdirTemp(".", "testing")
 	if err != nil {
 		t.Errorf("failed to create temp directory for testing, error: %v", err)
 	}
@@ -80,7 +79,7 @@ func TestFilesLoad(t *testing.T) {
 
 	tmpfn := filepath.Join(dir, "test1.test")
 
-	if err = ioutil.WriteFile(tmpfn, content, 0666); err != nil {
+	if err = os.WriteFile(tmpfn, content, 0666); err != nil {
 		t.Errorf("failed to create temp file for testing, file: %v, error: %v", tmpfn, err)
 	}
 
@@ -93,7 +92,7 @@ func TestFilesMultipleLoad(t *testing.T) {
 	Files.Register(".test", &testLoader{})
 
 	content := []byte("testing")
-	dir, err := ioutil.TempDir(".", "testing")
+	dir, err := os.MkdirTemp(".", "testing")
 	if err != nil {
 		t.Errorf("failed to create temp directory for testing, error: %v", err)
 	}
@@ -103,19 +102,19 @@ func TestFilesMultipleLoad(t *testing.T) {
 
 	tmpfn := filepath.Join(dir, "test1.test")
 
-	if err = ioutil.WriteFile(tmpfn, content, 0666); err != nil {
+	if err = os.WriteFile(tmpfn, content, 0666); err != nil {
 		t.Errorf("failed to create temp file for testing, file: %v, error: %v", tmpfn, err)
 	}
 
 	tmpfn = filepath.Join(dir, "test2.test")
 
-	if err = ioutil.WriteFile(tmpfn, content, 0666); err != nil {
+	if err = os.WriteFile(tmpfn, content, 0666); err != nil {
 		t.Errorf("failed to create temp file for testing, file: %v, error: %v", tmpfn, err)
 	}
 
 	tmpfn = filepath.Join(dir, "test3.test")
 
-	if err = ioutil.WriteFile(tmpfn, content, 0666); err != nil {
+	if err = os.WriteFile(tmpfn, content, 0666); err != nil {
 		t.Errorf("failed to create temp file for testing, file: %v, error: %v", tmpfn, err)
 	}
 

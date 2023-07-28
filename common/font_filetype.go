@@ -3,7 +3,6 @@ package common
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	"github.com/EngoEngine/engo"
 	"github.com/golang/freetype"
@@ -29,7 +28,7 @@ type fontLoader struct {
 
 // Load processes the data stream and parses it as a freetype font
 func (i *fontLoader) Load(url string, data io.Reader) error {
-	ttfBytes, err := ioutil.ReadAll(data)
+	ttfBytes, err := io.ReadAll(data)
 	if err != nil {
 		return err
 	}
