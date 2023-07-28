@@ -60,13 +60,14 @@ installAndroidNDK() {
 commonSetup() {
   # for compares benchmarking
   info "install tools for compares benchmarking"
-  GO111MODULE=off go get golang.org/x/perf/cmd/...
+  go install golang.org/x/perf/cmd/...@latest
   # for test coverage report
-  info "install tools for test coverage report"
-  GO111MODULE=off go get golang.org/x/tools/cmd/cover
+  # No longer necessary, included in go tool as of go20
+  # info "install tools for test coverage report"
+  # go get golang.org/x/tools/cmd/cover
   # for analyzes to identify unnecessary type conversions
   info "install tools for analyzes to identify unnecessary type conversions"
-  GO111MODULE=off go get github.com/mdempsky/unconvert
+  go install github.com/mdempsky/unconvert@latest
 }
 
 debianSetup() {
@@ -142,7 +143,7 @@ mobileEnvironmentSetup() {
   fi
   # for build mobile
   info "install tools for build mobile"
-  GO111MODULE=off go get golang.org/x/mobile/cmd/gomobile
+  go get golang.org/x/mobile/cmd/gomobile
   "$(go env GOPATH)/bin/gomobile" init
 }
 

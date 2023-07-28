@@ -90,7 +90,7 @@ func TestSpaceComponent_Contains_Hitboxes(t *testing.T) {
 	scs = append(scs, space0, space1, space2, space3, space4, space5)
 	pts := []engo.Point{
 		{X: 2.5, Y: 2.5},
-		{X: 12.5, Y: 2.5},
+		{X: 12.4, Y: 2.4},
 		{X: 0.5, Y: 12.5},
 		{X: 12.5, Y: 12.5},
 		{X: 22.5, Y: 2.5},
@@ -227,7 +227,7 @@ const (
 	Bat
 )
 
-//Test GroupSolid working
+// Test GroupSolid working
 func Test_GroupSolid(t *testing.T) {
 	//All items in same place, have to collide
 	CE := func(m, g CollisionGroup) collisionEntity {
