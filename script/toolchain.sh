@@ -60,14 +60,14 @@ installAndroidNDK() {
 commonSetup() {
   # for compares benchmarking
   info "install tools for compares benchmarking"
-  go get golang.org/x/perf/cmd/...
+  go install golang.org/x/perf/cmd/...@latest
   # for test coverage report
   # No longer necessary, included in go tool as of go20
   # info "install tools for test coverage report"
   # go get golang.org/x/tools/cmd/cover
   # for analyzes to identify unnecessary type conversions
   info "install tools for analyzes to identify unnecessary type conversions"
-  go get github.com/mdempsky/unconvert
+  go install github.com/mdempsky/unconvert@latest
 }
 
 debianSetup() {
@@ -107,7 +107,7 @@ debianSetup() {
 #  [ "$(ldconfig -p | grep libXcursor)" != "" ] || sudo apt-get install -qq -y --no-install-recommends libxcursor-dev
 #  [ "$(ldconfig -p | grep libXrandr)" != "" ] || sudo apt-get install -qq -y --no-install-recommends libxrandr-dev
 #  [ "$(ldconfig -p | grep libXinerama)" != "" ] || sudo apt-get install -qq -y --no-install-recommends libxinerama-dev
-#  [a "$(ldconfig -p | grep 'libXi\.')" != "" ] || sudo apt-get install -qq -y --no-install-recommends libxi-dev
+#  [ "$(ldconfig -p | grep 'libXi\.')" != "" ] || sudo apt-get install -qq -y --no-install-recommends libxi-dev
 #  [ "$(ldconfig -p | grep libasound)" != "" ] || sudo apt-get install -qq -y --no-install-recommends libasound2-dev
 #  [ "$(ldconfig -p | grep libglut)" != "" ] || sudo apt-get install -qq -y --no-install-recommends freeglut3-dev
 
