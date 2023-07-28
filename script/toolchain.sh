@@ -60,13 +60,14 @@ installAndroidNDK() {
 commonSetup() {
   # for compares benchmarking
   info "install tools for compares benchmarking"
-  GO111MODULE=off go get golang.org/x/perf/cmd/...
+  go get golang.org/x/perf/cmd/...
   # for test coverage report
-  info "install tools for test coverage report"
-  GO111MODULE=off go get golang.org/x/tools/cmd/cover
+  # No longer necessary, included in go tool as of go20
+  # info "install tools for test coverage report"
+  # go get golang.org/x/tools/cmd/cover
   # for analyzes to identify unnecessary type conversions
   info "install tools for analyzes to identify unnecessary type conversions"
-  GO111MODULE=off go get github.com/mdempsky/unconvert
+  go get github.com/mdempsky/unconvert
 }
 
 debianSetup() {
@@ -106,7 +107,7 @@ debianSetup() {
 #  [ "$(ldconfig -p | grep libXcursor)" != "" ] || sudo apt-get install -qq -y --no-install-recommends libxcursor-dev
 #  [ "$(ldconfig -p | grep libXrandr)" != "" ] || sudo apt-get install -qq -y --no-install-recommends libxrandr-dev
 #  [ "$(ldconfig -p | grep libXinerama)" != "" ] || sudo apt-get install -qq -y --no-install-recommends libxinerama-dev
-#  [ "$(ldconfig -p | grep 'libXi\.')" != "" ] || sudo apt-get install -qq -y --no-install-recommends libxi-dev
+#  [a "$(ldconfig -p | grep 'libXi\.')" != "" ] || sudo apt-get install -qq -y --no-install-recommends libxi-dev
 #  [ "$(ldconfig -p | grep libasound)" != "" ] || sudo apt-get install -qq -y --no-install-recommends libasound2-dev
 #  [ "$(ldconfig -p | grep libglut)" != "" ] || sudo apt-get install -qq -y --no-install-recommends freeglut3-dev
 
@@ -142,7 +143,7 @@ mobileEnvironmentSetup() {
   fi
   # for build mobile
   info "install tools for build mobile"
-  GO111MODULE=off go get golang.org/x/mobile/cmd/gomobile
+  go get golang.org/x/mobile/cmd/gomobile
   "$(go env GOPATH)/bin/gomobile" init
 }
 
