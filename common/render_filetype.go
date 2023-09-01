@@ -10,7 +10,7 @@ import (
 	// imported to decode .pngs and upload them to the GPU.
 	_ "image/png"
 	// imported to decode .gifs and uppload them to the GPU.
-	_ "image/gif"
+	"image/gif"
 	"io"
 
 	// these are for svg support
@@ -19,6 +19,7 @@ import (
 	"github.com/srwiley/rasterx"
 
 	"github.com/EngoEngine/engo"
+	"github.com/EngoEngine/engo/math"
 	"github.com/EngoEngine/gl"
 )
 
@@ -59,6 +60,25 @@ func (i *imageLoader) Load(url string, data io.Reader) error {
 		newm := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
 		draw.Draw(newm, newm.Bounds(), img, b.Min, draw.Src)
 		res = NewTextureResource(&ImageObject{newm})
+	} else if getExt(url) == ".gif" {
+		img, err := gif.DecodeAll(data)
+		if err != nil {
+			return err
+		}
+		l := int(math.Ceil(math.Sqrt(float32(len(img.Image)))))
+		w, h := img.Config.Width, img.Config.Height
+		newm := image.NewNRGBA(image.Rect(0, 0, w*l, h*l))
+		for i := 0; i < l; i++ {
+			for j := 0; j < l; j++ {
+				if i*l+j >= len(img.Image) {
+					break
+				}
+				draw.Draw(newm, image.Rect(i*w, j*h, (i+1)*w, (j+1)*h), img.Image[i*l+j], image.Pt(0, 0), draw.Src)
+			}
+		}
+		res = NewTextureResource(&ImageObject{newm})
+		res.url = url
+		NewSpritesheetFromTexture(&res, w, h)
 	} else {
 		img, _, err := image.Decode(data)
 		if err != nil {
@@ -221,6 +241,7 @@ func (t Texture) Close() {
 
 func init() {
 	imgLoader = &imageLoader{images: make(map[string]TextureResource)}
+	engo.Files.Register(".jpeg", imgLoader)
 	engo.Files.Register(".jpg", imgLoader)
 	engo.Files.Register(".png", imgLoader)
 	engo.Files.Register(".gif", imgLoader)
