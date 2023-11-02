@@ -18,7 +18,7 @@ require (
 	github.com/veandco/go-sdl2 v0.4.35
 	github.com/vulkan-go/glfw v0.0.0-20210402172934-58379a80228d
 	github.com/vulkan-go/vulkan v0.0.0-20221209234627-c0a353ae26c8
-	golang.org/x/image v0.9.0
+	golang.org/x/image v0.10.0
 	golang.org/x/mobile v0.0.0-20230531173138-3c911d8e3eda
 )
 
