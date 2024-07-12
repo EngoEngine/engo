@@ -1,3 +1,4 @@
+//go:build headless || ios || android || vulkan || sdl
 // +build headless,ios,android,vulkan,sdl
 
 package engo
