@@ -1,4 +1,5 @@
-//+build demo
+//go:build demo
+// +build demo
 
 package main
 
@@ -21,7 +22,7 @@ type Guy struct {
 }
 
 func (*DefaultScene) Preload() {
-	err := engo.Files.Load("icon.png", "rock.png")
+	err := engo.Files.Load("guy.png", "rock.png")
 	if err != nil {
 		log.Println(err)
 	}
@@ -36,7 +37,7 @@ func (*DefaultScene) Setup(u engo.Updater) {
 	w.AddSystem(&ScaleSystem{})
 
 	// Retrieve a texture
-	texture, err := common.LoadedSprite("icon.png")
+	texture, err := common.LoadedSprite("guy.png")
 	if err != nil {
 		log.Println(err)
 	}

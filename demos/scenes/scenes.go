@@ -1,4 +1,5 @@
-//+build demo
+//go:build demo
+// +build demo
 
 package main
 
@@ -34,7 +35,7 @@ type Rock struct {
 type IconScene struct{}
 
 func (*IconScene) Preload() {
-	err := engo.Files.Load("icon.png")
+	err := engo.Files.Load("guy.png")
 	if err != nil {
 		log.Println(err)
 	}
@@ -50,7 +51,7 @@ func (*IconScene) Setup(u engo.Updater) {
 	w.AddSystem(&SceneSwitcherSystem{NextScene: "RockScene", WaitTime: time.Second * 3})
 
 	// Retrieve a texture
-	texture, err := common.LoadedSprite("icon.png")
+	texture, err := common.LoadedSprite("guy.png")
 	if err != nil {
 		log.Println(err)
 	}

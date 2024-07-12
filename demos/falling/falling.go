@@ -27,7 +27,7 @@ type Rock struct {
 type DefaultScene struct{}
 
 func (*DefaultScene) Preload() {
-	err := engo.Files.Load("icon.png", "rock.png", "rock2.png")
+	err := engo.Files.Load("guy.png", "rock.png", "rock2.png")
 	if err != nil {
 		log.Println(err)
 	}
@@ -46,7 +46,7 @@ func (*DefaultScene) Setup(u engo.Updater) {
 	w.AddSystem(&ControlSystem{})
 	w.AddSystem(&RockSpawnSystem{})
 
-	texture, err := common.LoadedSprite("icon.png")
+	texture, err := common.LoadedSprite("guy.png")
 	if err != nil {
 		log.Println(err)
 	}
