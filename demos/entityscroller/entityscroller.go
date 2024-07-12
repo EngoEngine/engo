@@ -1,4 +1,5 @@
-//+build demo
+//go:build demo
+// +build demo
 
 package main
 
@@ -59,7 +60,7 @@ func (game *GameWorld) Preload() {
 	// When you add tilesets to the Tiled Editor, the location where you added them from is where the engo loader will look for them
 	// Tileset from : http://opengameart.org
 
-	if err := engo.Files.Load("example.tmx", "icon.png"); err != nil {
+	if err := engo.Files.Load("example.tmx", "guy.png"); err != nil {
 		panic(err)
 	}
 }
@@ -133,7 +134,7 @@ func (game *GameWorld) Setup(u engo.Updater) {
 	}
 
 	character := Character{BasicEntity: ecs.NewBasic()}
-	characterTexture, err := common.LoadedSprite("icon.png")
+	characterTexture, err := common.LoadedSprite("guy.png")
 	if err != nil {
 		panic(err)
 	}

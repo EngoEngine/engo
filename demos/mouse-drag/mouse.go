@@ -1,4 +1,5 @@
-//+build demo
+//go:build demo
+// +build demo
 
 package main
 
@@ -25,7 +26,7 @@ func (*DefaultScene) Type() string {
 }
 
 func (*DefaultScene) Preload() {
-	engo.Files.Load("icon.png")
+	engo.Files.Load("guy.png")
 	engo.Files.Load("banana.png")
 	engo.Files.Load("red-cherry.png")
 	engo.Files.Load("watermelon.png")
@@ -40,7 +41,7 @@ func (*DefaultScene) Setup(u engo.Updater) {
 	w.AddSystem(&common.MouseSystem{})
 	w.AddSystem(&DragSystem{})
 
-	guyTexture, _ := common.LoadedSprite("icon.png")
+	guyTexture, _ := common.LoadedSprite("guy.png")
 	guy := Guy{BasicEntity: ecs.NewBasic()}
 	guy.RenderComponent = common.RenderComponent{
 		Drawable: guyTexture,
