@@ -428,7 +428,7 @@ func openFile(url string) (io.ReadCloser, error) {
 		f := &noCloseReadCloser{bytes.NewReader(buf)}
 		return f, nil
 	case <-t.C:
-		return nil, errors.New("Did not recieve a response in 10 seconds.")
+		return nil, errors.New("Did not receive a response in 10 seconds.")
 	}
 }
 
